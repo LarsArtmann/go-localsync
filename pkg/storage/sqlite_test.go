@@ -21,6 +21,22 @@ func testEvent() *Event {
 	}
 }
 
+// assertEventCount verifies the event count matches expected value.
+func assertEventCount(t *testing.T, store Storage, ctx context.Context, expected int64, msgAndArgs ...interface{}) {
+	t.Helper()
+	count, err := store.CountEvents(ctx)
+	if err != nil {
+		t.Fatalf("CountEvents failed: %v", err)
+	}
+	if count != expected {
+		if len(msgAndArgs) > 0 {
+			t.Errorf("%v (expected %d events, got %d)", msgAndArgs[0], expected, count)
+		} else {
+			t.Errorf("Expected %d events, got %d", expected, count)
+		}
+	}
+}
+
 func TestSQLiteStorage(t *testing.T) {
 	db, err := database.Open(":memory:")
 	if err != nil {
@@ -55,28 +71,14 @@ func TestSQLiteStorage(t *testing.T) {
 		if err := store.UpsertEvent(ctx, testEvent()); err != nil {
 			t.Fatalf("UpsertEvent failed: %v", err)
 		}
-
-		count, err := store.CountEvents(ctx)
-		if err != nil {
-			t.Fatalf("CountEvents failed: %v", err)
-		}
-		if count != 1 {
-			t.Errorf("Expected 1 event, got %d", count)
-		}
+		assertEventCount(t, store, ctx, 1)
 	})
 
 	t.Run("UpsertEvent is idempotent", func(t *testing.T) {
 		if err := store.UpsertEvent(ctx, testEvent()); err != nil {
 			t.Fatalf("UpsertEvent failed: %v", err)
 		}
-
-		count, err := store.CountEvents(ctx)
-		if err != nil {
-			t.Fatalf("CountEvents failed: %v", err)
-		}
-		if count != 1 {
-			t.Errorf("Expected 1 event (idempotent), got %d", count)
-		}
+		assertEventCount(t, store, ctx, 1, "idempotent")
 	})
 
 	t.Run("GetLatestEvent returns the latest event", func(t *testing.T) {
