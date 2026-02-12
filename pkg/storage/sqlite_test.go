@@ -9,6 +9,18 @@ import (
 	"github.com/larsartmann/go-localsync/internal/database"
 )
 
+// testEvent creates a consistent test event for use across multiple tests.
+func testEvent() *Event {
+	return &Event{
+		GithubID:   "12345",
+		Type:       "PushEvent",
+		ActorLogin: "testuser",
+		RepoName:   "test/repo",
+		CreatedAt:  time.Now(),
+		RawJSON:    json.RawMessage(`{"id":"12345","type":"PushEvent"}`),
+	}
+}
+
 func TestSQLiteStorage(t *testing.T) {
 	db, err := database.Open(":memory:")
 	if err != nil {
@@ -40,16 +52,7 @@ func TestSQLiteStorage(t *testing.T) {
 	})
 
 	t.Run("UpsertEvent inserts new event", func(t *testing.T) {
-		event := &Event{
-			GithubID:   "12345",
-			Type:       "PushEvent",
-			ActorLogin: "testuser",
-			RepoName:   "test/repo",
-			CreatedAt:  time.Now(),
-			RawJSON:    json.RawMessage(`{"id":"12345","type":"PushEvent"}`),
-		}
-
-		if err := store.UpsertEvent(ctx, event); err != nil {
+		if err := store.UpsertEvent(ctx, testEvent()); err != nil {
 			t.Fatalf("UpsertEvent failed: %v", err)
 		}
 
@@ -63,16 +66,7 @@ func TestSQLiteStorage(t *testing.T) {
 	})
 
 	t.Run("UpsertEvent is idempotent", func(t *testing.T) {
-		event := &Event{
-			GithubID:   "12345",
-			Type:       "PushEvent",
-			ActorLogin: "testuser",
-			RepoName:   "test/repo",
-			CreatedAt:  time.Now(),
-			RawJSON:    json.RawMessage(`{"id":"12345","type":"PushEvent"}`),
-		}
-
-		if err := store.UpsertEvent(ctx, event); err != nil {
+		if err := store.UpsertEvent(ctx, testEvent()); err != nil {
 			t.Fatalf("UpsertEvent failed: %v", err)
 		}
 
