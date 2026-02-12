@@ -136,37 +136,52 @@ func (q *Queries) Close() error {
 	return err
 }
 
-func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {
+// queryable provides the common interface for executing queries with or without prepared statements
+type queryable interface {
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
+	QueryRowContext(ctx context.Context, query string, args ...interface{}) *sql.Row
+}
+
+// stmtQueryable wraps a prepared statement to implement queryable (query string is ignored)
+type stmtQueryable struct {
+	stmt *sql.Stmt
+}
+
+func (s stmtQueryable) ExecContext(ctx context.Context, _ string, args ...interface{}) (sql.Result, error) {
+	return s.stmt.ExecContext(ctx, args...)
+}
+
+func (s stmtQueryable) QueryContext(ctx context.Context, _ string, args ...interface{}) (*sql.Rows, error) {
+	return s.stmt.QueryContext(ctx, args...)
+}
+
+func (s stmtQueryable) QueryRowContext(ctx context.Context, _ string, args ...interface{}) *sql.Row {
+	return s.stmt.QueryRowContext(ctx, args...)
+}
+
+// getQueryable returns the appropriate queryable based on transaction and prepared statement state
+func (q *Queries) getQueryable(ctx context.Context, stmt *sql.Stmt) queryable {
 	switch {
 	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).ExecContext(ctx, args...)
+		return stmtQueryable{stmt: q.tx.StmtContext(ctx, stmt)}
 	case stmt != nil:
-		return stmt.ExecContext(ctx, args...)
+		return stmtQueryable{stmt: stmt}
 	default:
-		return q.db.ExecContext(ctx, query, args...)
+		return q.db
 	}
+}
+
+func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {
+	return q.getQueryable(ctx, stmt).ExecContext(ctx, query, args...)
 }
 
 func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (*sql.Rows, error) {
-	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).QueryContext(ctx, args...)
-	case stmt != nil:
-		return stmt.QueryContext(ctx, args...)
-	default:
-		return q.db.QueryContext(ctx, query, args...)
-	}
+	return q.getQueryable(ctx, stmt).QueryContext(ctx, query, args...)
 }
 
 func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) *sql.Row {
-	switch {
-	case stmt != nil && q.tx != nil:
-		return q.tx.StmtContext(ctx, stmt).QueryRowContext(ctx, args...)
-	case stmt != nil:
-		return stmt.QueryRowContext(ctx, args...)
-	default:
-		return q.db.QueryRowContext(ctx, query, args...)
-	}
+	return q.getQueryable(ctx, stmt).QueryRowContext(ctx, query, args...)
 }
 
 type Queries struct {
