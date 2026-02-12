@@ -48,46 +48,37 @@ func convertEvents(events []*db.Events) []*Event {
 }
 
 func (s *SQLiteStorage) GetEvents(ctx context.Context, limit, offset int) ([]*Event, error) {
-	events, err := s.querier.GetEvents(ctx, &db.GetEventsParams{
+	return withConvertedEvents(s.querier.GetEvents(ctx, &db.GetEventsParams{
 		Limit:  int64(limit),
 		Offset: int64(offset),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return convertEvents(events), nil
+	}))
 }
 
 func (s *SQLiteStorage) GetEventsByType(ctx context.Context, eventType string, limit, offset int) ([]*Event, error) {
-	events, err := s.querier.GetEventsByType(ctx, &db.GetEventsByTypeParams{
+	return withConvertedEvents(s.querier.GetEventsByType(ctx, &db.GetEventsByTypeParams{
 		Type:   eventType,
 		Limit:  int64(limit),
 		Offset: int64(offset),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return convertEvents(events), nil
+	}))
 }
 
 func (s *SQLiteStorage) GetEventsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*Event, error) {
-	events, err := s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
+	return withConvertedEvents(s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
 		ActorLogin: toNullString(actorLogin),
 		Limit:      int64(limit),
 		Offset:     int64(offset),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return convertEvents(events), nil
+	}))
 }
 
 func (s *SQLiteStorage) GetEventsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*Event, error) {
-	events, err := s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
+	return withConvertedEvents(s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
 		RepoName: toNullString(repoName),
 		Limit:    int64(limit),
 		Offset:   int64(offset),
-	})
+	}))
+}
+
+func withConvertedEvents(events []*db.Events, err error) ([]*Event, error) {
 	if err != nil {
 		return nil, err
 	}
