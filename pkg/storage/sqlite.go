@@ -39,6 +39,14 @@ func (s *SQLiteStorage) GetLatestEvent(ctx context.Context) (*Event, error) {
 	return fromDBEvent(e), nil
 }
 
+func convertEvents(events []*db.Events) []*Event {
+	result := make([]*Event, len(events))
+	for i, e := range events {
+		result[i] = fromDBEvent(e)
+	}
+	return result
+}
+
 func (s *SQLiteStorage) GetEvents(ctx context.Context, limit, offset int) ([]*Event, error) {
 	events, err := s.querier.GetEvents(ctx, &db.GetEventsParams{
 		Limit:  int64(limit),
@@ -47,11 +55,7 @@ func (s *SQLiteStorage) GetEvents(ctx context.Context, limit, offset int) ([]*Ev
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*Event, len(events))
-	for i, e := range events {
-		result[i] = fromDBEvent(e)
-	}
-	return result, nil
+	return convertEvents(events), nil
 }
 
 func (s *SQLiteStorage) GetEventsByType(ctx context.Context, eventType string, limit, offset int) ([]*Event, error) {
@@ -63,11 +67,7 @@ func (s *SQLiteStorage) GetEventsByType(ctx context.Context, eventType string, l
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*Event, len(events))
-	for i, e := range events {
-		result[i] = fromDBEvent(e)
-	}
-	return result, nil
+	return convertEvents(events), nil
 }
 
 func (s *SQLiteStorage) GetEventsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*Event, error) {
@@ -79,11 +79,7 @@ func (s *SQLiteStorage) GetEventsByActor(ctx context.Context, actorLogin string,
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*Event, len(events))
-	for i, e := range events {
-		result[i] = fromDBEvent(e)
-	}
-	return result, nil
+	return convertEvents(events), nil
 }
 
 func (s *SQLiteStorage) GetEventsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*Event, error) {
@@ -95,11 +91,7 @@ func (s *SQLiteStorage) GetEventsByRepo(ctx context.Context, repoName string, li
 	if err != nil {
 		return nil, err
 	}
-	result := make([]*Event, len(events))
-	for i, e := range events {
-		result[i] = fromDBEvent(e)
-	}
-	return result, nil
+	return convertEvents(events), nil
 }
 
 func (s *SQLiteStorage) CountEvents(ctx context.Context) (int64, error) {
