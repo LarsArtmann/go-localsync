@@ -54,7 +54,7 @@ func main() {
 		*dbPath = filepath.Join(homeDir, ".local", "share", "go-localsync", "events.db")
 	}
 
-	if err := os.MkdirAll(filepath.Dir(*dbPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(*dbPath), 0o755); err != nil {
 		logger.Error("Failed to create database directory", "error", err)
 		os.Exit(1)
 	}

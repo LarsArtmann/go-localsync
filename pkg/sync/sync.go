@@ -16,9 +16,9 @@ type Syncer struct {
 }
 
 type Config struct {
-	GitHubToken string
+	GitHubToken  string
 	DatabasePath string
-	Logger      *log.Logger
+	Logger       *log.Logger
 }
 
 func NewSyncer(githubClient *github.Client, store storage.Storage, logger *log.Logger) *Syncer {

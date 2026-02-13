@@ -9,7 +9,7 @@ import (
 )
 
 type SQLiteStorage struct {
-	dbc    *sql.DB
+	dbc     *sql.DB
 	querier db.Querier
 }
 

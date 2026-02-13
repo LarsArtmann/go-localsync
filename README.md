@@ -37,16 +37,16 @@ gh-sync -user octocat -incremental=false
 
 ## CLI Flags
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `-token` | `$GITHUB_TOKEN` | GitHub personal access token |
-| `-user` | (required) | GitHub username to sync events for |
-| `-db` | `~/.local/share/go-localsync/events.db` | Path to SQLite database |
-| `-pages` | 10 | Maximum number of pages to fetch |
-| `-incremental` | true | Only sync new events |
-| `-stats` | false | Show database statistics and exit |
-| `-version` | false | Show version information |
-| `-verbose` | false | Enable verbose logging |
+| Flag           | Default                                 | Description                        |
+| -------------- | --------------------------------------- | ---------------------------------- |
+| `-token`       | `$GITHUB_TOKEN`                         | GitHub personal access token       |
+| `-user`        | (required)                              | GitHub username to sync events for |
+| `-db`          | `~/.local/share/go-localsync/events.db` | Path to SQLite database            |
+| `-pages`       | 10                                      | Maximum number of pages to fetch   |
+| `-incremental` | true                                    | Only sync new events               |
+| `-stats`       | false                                   | Show database statistics and exit  |
+| `-version`     | false                                   | Show version information           |
+| `-verbose`     | false                                   | Enable verbose logging             |
 
 ## Development
 
