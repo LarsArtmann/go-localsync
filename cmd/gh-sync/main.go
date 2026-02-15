@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -11,9 +12,21 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/larsartmann/go-localsync/internal/database"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/github"
 	"github.com/larsartmann/go-localsync/pkg/storage"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
+)
+
+// Semantic exit codes (sysexits.h conventions)
+const (
+	exitOK           = 0
+	exitUsage        = 64 // EX_USAGE - command line usage error
+	exitDataErr      = 65 // EX_DATAERR - data format error
+	exitNoInput      = 66 // EX_NOINPUT - cannot open input
+	exitUnavailable  = 69 // EX_UNAVAILABLE - service unavailable
+	exitSoftware     = 70 // EX_SOFTWARE - internal software error
+	exitTempFail     = 75 // EX_TEMPFAIL - temporary failure
 )
 
 var (
@@ -49,20 +62,20 @@ func main() {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			logger.Error("Failed to get home directory", "error", err)
-			os.Exit(1)
+			os.Exit(exitNoInput)
 		}
 		*dbPath = filepath.Join(homeDir, ".local", "share", "go-localsync", "events.db")
 	}
 
 	if err := os.MkdirAll(filepath.Dir(*dbPath), 0o755); err != nil {
 		logger.Error("Failed to create database directory", "error", err)
-		os.Exit(1)
+		os.Exit(exitNoInput)
 	}
 
 	dbc, err := database.Open(*dbPath)
 	if err != nil {
 		logger.Error("Failed to open database", "error", err)
-		os.Exit(1)
+		os.Exit(exitNoInput)
 	}
 	defer func() {
 		if err := dbc.Close(); err != nil {
@@ -76,7 +89,7 @@ func main() {
 		stats, err := store.CountEvents(context.Background())
 		if err != nil {
 			logger.Error("Failed to get stats", "error", err)
-			os.Exit(1)
+			os.Exit(exitSoftware)
 		}
 		types, _ := store.GetEventTypes(context.Background())
 		fmt.Printf("Total events: %d\n", stats)
@@ -86,12 +99,12 @@ func main() {
 
 	if *token == "" {
 		logger.Error("GitHub token is required. Use -token flag or set GITHUB_TOKEN environment variable")
-		os.Exit(1)
+		os.Exit(exitUsage)
 	}
 
 	if *username == "" {
 		logger.Error("Username is required. Use -user flag")
-		os.Exit(1)
+		os.Exit(exitUsage)
 	}
 
 	ghClient := github.NewClient(*token)
@@ -122,8 +135,26 @@ func main() {
 
 	if err != nil {
 		logger.Error("Sync failed", "error", err)
-		os.Exit(1)
+		os.Exit(exitCodeForError(err))
 	}
 
 	fmt.Printf("Sync completed: fetched=%d, skipped=%d, errors=%d\n", result.Fetched, result.Skipped, result.Errors)
+}
+
+// exitCodeForError maps errors to semantic exit codes.
+func exitCodeForError(err error) int {
+	switch {
+	case errors.Is(err, pkgerrors.ErrRateLimited):
+		return exitTempFail
+	case errors.Is(err, pkgerrors.ErrInvalidToken):
+		return exitUsage
+	case errors.Is(err, pkgerrors.ErrUserNotFound):
+		return exitDataErr
+	case errors.Is(err, pkgerrors.ErrStorage):
+		return exitNoInput
+	case errors.Is(err, pkgerrors.ErrSyncFailed):
+		return exitSoftware
+	default:
+		return exitUnavailable
+	}
 }
