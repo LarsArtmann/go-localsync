@@ -1,9 +1,13 @@
 set shell := ["bash", "-c"]
 
+version := `git describe --tags --always --dirty 2>/dev/null || echo "dev"`
+commit := `git rev-parse --short HEAD 2>/dev/null || echo "unknown"`
+date := `date -u +"%Y-%m-%dT%H:%M:%SZ"`
+
 default: build
 
 build:
-    go build -o bin/gh-sync ./cmd/gh-sync
+    go build -ldflags "-X main.version={{version}} -X main.commit={{commit}} -X main.date={{date}}" -o bin/gh-sync ./cmd/gh-sync
 
 run *args: build
     ./bin/gh-sync {{args}}
