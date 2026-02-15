@@ -7,11 +7,12 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/internal/database"
+	"github.com/larsartmann/go-localsync/pkg/event"
 )
 
 // testEvent creates a consistent test event for use across multiple tests.
-func testEvent() *Event {
-	return &Event{
+func testEvent() *event.Event {
+	return &event.Event{
 		GithubID:   "12345",
 		Type:       "PushEvent",
 		ActorLogin: "testuser",

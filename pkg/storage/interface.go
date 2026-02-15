@@ -3,30 +3,18 @@ package storage
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-	"time"
 
 	"github.com/larsartmann/go-localsync/internal/db"
+	"github.com/larsartmann/go-localsync/pkg/event"
 )
 
-type Event struct {
-	GithubID       string          `json:"githubId"`
-	Type           string          `json:"type"`
-	ActorLogin     string          `json:"actorLogin,omitempty"`
-	ActorAvatarURL string          `json:"actorAvatarUrl,omitempty"`
-	RepoName       string          `json:"repoName,omitempty"`
-	RepoURL        string          `json:"repoUrl,omitempty"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	RawJSON        json.RawMessage `json:"rawJson"`
-}
-
 type Storage interface {
-	UpsertEvent(ctx context.Context, event *Event) error
-	GetLatestEvent(ctx context.Context) (*Event, error)
-	GetEvents(ctx context.Context, limit, offset int) ([]*Event, error)
-	GetEventsByType(ctx context.Context, eventType string, limit, offset int) ([]*Event, error)
-	GetEventsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*Event, error)
-	GetEventsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*Event, error)
+	UpsertEvent(ctx context.Context, event *event.Event) error
+	GetLatestEvent(ctx context.Context) (*event.Event, error)
+	GetEvents(ctx context.Context, limit, offset int) ([]*event.Event, error)
+	GetEventsByType(ctx context.Context, eventType string, limit, offset int) ([]*event.Event, error)
+	GetEventsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*event.Event, error)
+	GetEventsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*event.Event, error)
 	CountEvents(ctx context.Context) (int64, error)
 	CountEventsByType(ctx context.Context, eventType string) (int64, error)
 	GetEventTypes(ctx context.Context) ([]string, error)
@@ -47,7 +35,7 @@ func fromNullString(ns sql.NullString) string {
 	return ns.String
 }
 
-func toDBEvent(e *Event) *db.UpsertEventParams {
+func toDBEvent(e *event.Event) *db.UpsertEventParams {
 	return &db.UpsertEventParams{
 		GithubID:       e.GithubID,
 		Type:           e.Type,
@@ -60,8 +48,8 @@ func toDBEvent(e *Event) *db.UpsertEventParams {
 	}
 }
 
-func fromDBEvent(e *db.Events) *Event {
-	return &Event{
+func fromDBEvent(e *db.Events) *event.Event {
+	return &event.Event{
 		GithubID:       e.GithubID,
 		Type:           e.Type,
 		ActorLogin:     fromNullString(e.ActorLogin),
