@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,6 +12,23 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/event"
 	"golang.org/x/oauth2"
 )
+
+// RateLimitConfig configures rate limit handling behavior.
+type RateLimitConfig struct {
+	// Enabled controls whether rate limit checking is performed.
+	Enabled bool
+	// MinRemaining is the minimum remaining calls before waiting.
+	MinRemaining int
+	// MaxWait is the maximum time to wait for rate limit reset.
+	MaxWait time.Duration
+}
+
+// DefaultRateLimitConfig provides sensible defaults for rate limit handling.
+var DefaultRateLimitConfig = RateLimitConfig{
+	Enabled:      true,
+	MinRemaining: 10,
+	MaxWait:      15 * time.Minute,
+}
 
 // Fetcher defines the interface for fetching GitHub events.
 // This interface enables testing with mocks and decouples the sync logic from the concrete client.
@@ -21,7 +39,8 @@ type Fetcher interface {
 }
 
 type Client struct {
-	client *gh.Client
+	client         *gh.Client
+	rateLimitConfig RateLimitConfig
 }
 
 func NewClient(token string) *Client {
@@ -30,13 +49,23 @@ func NewClient(token string) *Client {
 	)
 	tc := oauth2.NewClient(context.Background(), ts)
 	return &Client{
-		client: gh.NewClient(tc),
+		client:          gh.NewClient(tc),
+		rateLimitConfig: DefaultRateLimitConfig,
 	}
 }
 
 func NewClientWithHTTP(client *http.Client) *Client {
 	return &Client{
-		client: gh.NewClient(client),
+		client:          gh.NewClient(client),
+		rateLimitConfig: DefaultRateLimitConfig,
+	}
+}
+
+// WithRateLimitConfig returns a copy of the client with custom rate limit config.
+func (c *Client) WithRateLimitConfig(cfg RateLimitConfig) *Client {
+	return &Client{
+		client:          c.client,
+		rateLimitConfig: cfg,
 	}
 }
 
@@ -51,6 +80,10 @@ func (c *Client) FetchEvents(ctx context.Context, username string, opts *FetchOp
 	}
 	if opts.PerPage == 0 {
 		opts.PerPage = 100
+	}
+
+	if err := c.waitForRateLimit(ctx); err != nil {
+		return nil, err
 	}
 
 	activity, _, err := c.client.Activity.ListEventsPerformedByUser(ctx, username, false, &gh.ListOptions{
@@ -135,6 +168,47 @@ func convertEvent(e *gh.Event) (*event.Event, error) {
 
 func (c *Client) GetRateLimit(ctx context.Context) (*gh.RateLimits, *gh.Response, error) {
 	return c.client.RateLimit.Get(ctx)
+}
+
+// waitForRateLimit checks the rate limit and waits if necessary.
+// Returns an error if the context is cancelled or max wait time is exceeded.
+func (c *Client) waitForRateLimit(ctx context.Context) error {
+	if !c.rateLimitConfig.Enabled {
+		return nil
+	}
+
+	limits, _, err := c.client.RateLimit.Get(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to check rate limit: %w", err)
+	}
+
+	core := limits.GetCore()
+	if core == nil {
+		return nil
+	}
+
+	if core.Remaining > c.rateLimitConfig.MinRemaining {
+		return nil
+	}
+
+	resetTime := core.Reset.Time
+	waitDuration := time.Until(resetTime)
+
+	if waitDuration <= 0 {
+		return nil
+	}
+
+	if waitDuration > c.rateLimitConfig.MaxWait {
+		return fmt.Errorf("%w: reset in %v (exceeds max wait %v)",
+			errors.ErrRateLimited, waitDuration, c.rateLimitConfig.MaxWait)
+	}
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(waitDuration):
+		return nil
+	}
 }
 
 // wrapGitHubError converts GitHub API errors into typed errors.

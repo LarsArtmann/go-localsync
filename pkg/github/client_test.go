@@ -26,6 +26,15 @@ func TestNewClientWithHTTP(t *testing.T) {
 	require.NotNil(t, client)
 }
 
+// newTestClient creates a client with rate limiting disabled for unit tests.
+func newTestClient(server *httptest.Server) *Client {
+	httpClient := &http.Client{}
+	client := NewClientWithHTTP(httpClient)
+	client.client.BaseURL = mustParseURL(server.URL)
+	client.rateLimitConfig.Enabled = false
+	return client
+}
+
 func TestFetchEvents_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/users/testuser/events")
@@ -52,10 +61,7 @@ func TestFetchEvents_DefaultOptions(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
-
+	client := newTestClient(server)
 	events, err := client.FetchEvents(context.Background(), "testuser", nil)
 	require.NoError(t, err)
 	require.Len(t, events, 1)
@@ -74,10 +80,7 @@ func TestFetchEvents_CustomOptions(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
-
+	client := newTestClient(server)
 	events, err := client.FetchEvents(context.Background(), "testuser", &FetchOptions{PerPage: 50, Page: 2})
 	require.NoError(t, err)
 	assert.Empty(t, events)
@@ -91,10 +94,7 @@ func TestFetchEvents_ZeroPerPage_DefaultsTo100(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
-
+	client := newTestClient(server)
 	events, err := client.FetchEvents(context.Background(), "testuser", &FetchOptions{PerPage: 0, Page: 1})
 	require.NoError(t, err)
 	assert.Empty(t, events)
@@ -108,10 +108,7 @@ func TestFetchEvents_APIError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
-
+	client := newTestClient(server)
 	events, err := client.FetchEvents(context.Background(), "nonexistent", nil)
 	require.Error(t, err)
 	assert.Nil(t, events)
@@ -138,10 +135,7 @@ func TestFetchAllEvents_MultiplePages(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
-
+	client := newTestClient(server)
 	events, err := client.FetchAllEvents(context.Background(), "testuser", 3)
 	require.NoError(t, err)
 	assert.Len(t, events, 2)
@@ -157,10 +151,7 @@ func TestFetchAllEvents_DefaultMaxPages(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
-
+	client := newTestClient(server)
 	_, err := client.FetchAllEvents(context.Background(), "testuser", 0)
 	require.NoError(t, err)
 	assert.Equal(t, 1, callCount) // Stops at first empty page
@@ -183,10 +174,7 @@ func TestFetchAllEvents_StopsOnEmptyPage(t *testing.T) {
 	}))
 	defer server.Close()
 
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
-
+	client := newTestClient(server)
 	events, err := client.FetchAllEvents(context.Background(), "testuser", 10)
 	require.NoError(t, err)
 	assert.Len(t, events, 1)
