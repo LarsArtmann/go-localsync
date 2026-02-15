@@ -9,26 +9,23 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/storage"
 )
 
+// Fetcher is an alias to the github.Fetcher interface for clear dependencies.
+type Fetcher = github.Fetcher
+
 type Syncer struct {
-	githubClient *github.Client
-	storage      storage.Storage
-	logger       *log.Logger
+	fetcher Fetcher
+	storage storage.Storage
+	logger  *log.Logger
 }
 
-type Config struct {
-	GitHubToken  string
-	DatabasePath string
-	Logger       *log.Logger
-}
-
-func NewSyncer(githubClient *github.Client, store storage.Storage, logger *log.Logger) *Syncer {
+func NewSyncer(fetcher Fetcher, store storage.Storage, logger *log.Logger) *Syncer {
 	if logger == nil {
 		logger = log.Default()
 	}
 	return &Syncer{
-		githubClient: githubClient,
-		storage:      store,
-		logger:       logger,
+		fetcher: fetcher,
+		storage: store,
+		logger:  logger,
 	}
 }
 
@@ -50,7 +47,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 
 	s.logger.Info("Starting sync", "username", opts.Username)
 
-	events, err := s.githubClient.FetchAllEvents(ctx, opts.Username, opts.MaxPages)
+	events, err := s.fetcher.FetchAllEvents(ctx, opts.Username, opts.MaxPages)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +78,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 	s.logger.Info("Starting incremental sync", "username", opts.Username)
 
-	events, err := s.githubClient.FetchAllEvents(ctx, opts.Username, opts.MaxPages)
+	events, err := s.fetcher.FetchAllEvents(ctx, opts.Username, opts.MaxPages)
 	if err != nil {
 		return nil, err
 	}
