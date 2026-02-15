@@ -3,14 +3,22 @@ package github
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
 	gh "github.com/google/go-github/v69/github"
-	"github.com/larsartmann/go-localsync/pkg/storage"
+	"github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/event"
 	"golang.org/x/oauth2"
 )
+
+// Fetcher defines the interface for fetching GitHub events.
+// This interface enables testing with mocks and decouples the sync logic from the concrete client.
+type Fetcher interface {
+	FetchEvents(ctx context.Context, username string, opts *FetchOptions) ([]*event.Event, error)
+	FetchAllEvents(ctx context.Context, username string, maxPages int) ([]*event.Event, error)
+	GetRateLimit(ctx context.Context) (*gh.RateLimits, *gh.Response, error)
+}
 
 type Client struct {
 	client *gh.Client
@@ -37,7 +45,7 @@ type FetchOptions struct {
 	Page    int
 }
 
-func (c *Client) FetchEvents(ctx context.Context, username string, opts *FetchOptions) ([]*storage.Event, error) {
+func (c *Client) FetchEvents(ctx context.Context, username string, opts *FetchOptions) ([]*event.Event, error) {
 	if opts == nil {
 		opts = &FetchOptions{PerPage: 100, Page: 1}
 	}
@@ -50,10 +58,10 @@ func (c *Client) FetchEvents(ctx context.Context, username string, opts *FetchOp
 		PerPage: opts.PerPage,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fetching events for user %s: %w", username, err)
+		return nil, wrapGitHubError(err, username)
 	}
 
-	events := make([]*storage.Event, 0, len(activity))
+	events := make([]*event.Event, 0, len(activity))
 	for _, e := range activity {
 		event, err := convertEvent(e)
 		if err != nil {
@@ -65,12 +73,12 @@ func (c *Client) FetchEvents(ctx context.Context, username string, opts *FetchOp
 	return events, nil
 }
 
-func (c *Client) FetchAllEvents(ctx context.Context, username string, maxPages int) ([]*storage.Event, error) {
+func (c *Client) FetchAllEvents(ctx context.Context, username string, maxPages int) ([]*event.Event, error) {
 	if maxPages == 0 {
 		maxPages = 10
 	}
 
-	var allEvents []*storage.Event
+	var allEvents []*event.Event
 	for page := 1; page <= maxPages; page++ {
 		events, err := c.FetchEvents(ctx, username, &FetchOptions{
 			PerPage: 100,
@@ -87,7 +95,7 @@ func (c *Client) FetchAllEvents(ctx context.Context, username string, maxPages i
 	return allEvents, nil
 }
 
-func convertEvent(e *gh.Event) (*storage.Event, error) {
+func convertEvent(e *gh.Event) (*event.Event, error) {
 	rawJSON, err := json.Marshal(e)
 	if err != nil {
 		return nil, err
@@ -113,7 +121,7 @@ func convertEvent(e *gh.Event) (*storage.Event, error) {
 		createdAt = e.CreatedAt.Time
 	}
 
-	return &storage.Event{
+	return &event.Event{
 		GithubID:       e.GetID(),
 		Type:           e.GetType(),
 		ActorLogin:     actorLogin,
@@ -126,5 +134,20 @@ func convertEvent(e *gh.Event) (*storage.Event, error) {
 }
 
 func (c *Client) GetRateLimit(ctx context.Context) (*gh.RateLimits, *gh.Response, error) {
-	return c.client.RateLimits(ctx)
+	return c.client.RateLimit.Get(ctx)
+}
+
+// wrapGitHubError converts GitHub API errors into typed errors.
+func wrapGitHubError(err error, username string) error {
+	if ghErr, ok := err.(*gh.ErrorResponse); ok {
+		switch ghErr.Response.StatusCode {
+		case 401:
+			return errors.WithUserDetail(errors.ErrInvalidToken, username)
+		case 403:
+			return errors.WithUserDetail(errors.ErrRateLimited, username)
+		case 404:
+			return errors.WithUserDetail(errors.ErrUserNotFound, username)
+		}
+	}
+	return errors.WithUserDetail(errors.ErrSyncFailed, username)
 }
