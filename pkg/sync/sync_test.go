@@ -130,6 +130,67 @@ func TestSyncer_Sync(t *testing.T) {
 		require.NoError(t, err)
 		assert.Nil(t, result)
 	})
+	
+	t.Run("syncs events successfully", func(t *testing.T) {
+		mockFetcher := &mockGitHubClient{
+			events: []*event.Event{
+				{GithubID: "1", Type: "PushEvent"},
+				{GithubID: "2", Type: "IssuesEvent"},
+			},
+		}
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(mockFetcher, mockStore, nil)
+		
+		result, err := syncer.Sync(context.Background(), &SyncOptions{
+			Username: "testuser",
+			MaxPages: 1,
+		})
+		
+		require.NoError(t, err)
+		require.NotNil(t, result)
+		assert.Equal(t, 2, result.Fetched)
+		assert.Equal(t, 0, result.Skipped)
+		assert.Len(t, mockStore.events, 2)
+	})
+	
+	t.Run("returns error when fetch fails", func(t *testing.T) {
+		mockFetcher := &mockGitHubClient{
+			err: errors.New("fetch error"),
+		}
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(mockFetcher, mockStore, nil)
+		
+		result, err := syncer.Sync(context.Background(), &SyncOptions{
+			Username: "testuser",
+			MaxPages: 1,
+		})
+		
+		require.Error(t, err)
+		assert.Nil(t, result)
+	})
+	
+	t.Run("counts errors when upsert fails", func(t *testing.T) {
+		mockFetcher := &mockGitHubClient{
+			events: []*event.Event{
+				{GithubID: "1", Type: "PushEvent"},
+				{GithubID: "2", Type: "IssuesEvent"},
+			},
+		}
+		mockStore := &mockStorage{
+			upsertErr: errors.New("upsert error"),
+		}
+		syncer := NewSyncer(mockFetcher, mockStore, nil)
+		
+		result, err := syncer.Sync(context.Background(), &SyncOptions{
+			Username: "testuser",
+			MaxPages: 1,
+		})
+		
+		require.NoError(t, err)
+		require.NotNil(t, result)
+		assert.Equal(t, 2, result.Fetched)
+		assert.Equal(t, 2, result.Errors)
+	})
 }
 
 func TestSyncer_SyncIncremental(t *testing.T) {
