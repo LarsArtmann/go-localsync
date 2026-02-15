@@ -278,3 +278,50 @@ func mustParseURL(rawURL string) *url.URL {
 	u.Path = u.Path + "/"
 	return u
 }
+
+func TestFetchEvents_RetryOnServerError(t *testing.T) {
+	callCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		if callCount < 3 {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode([]*gh.Event{})
+	}))
+	defer server.Close()
+
+	client := newTestClient(server)
+	client.retryConfig = RetryConfig{
+		Enabled:        true,
+		MaxRetries:     3,
+		InitialBackoff: 1 * time.Millisecond,
+		MaxBackoff:     10 * time.Millisecond,
+	}
+
+	_, err := client.FetchEvents(context.Background(), "testuser", nil)
+	require.NoError(t, err)
+	assert.Equal(t, 3, callCount)
+}
+
+func TestFetchEvents_NoRetryOnClientError(t *testing.T) {
+	callCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		w.WriteHeader(http.StatusBadRequest)
+	}))
+	defer server.Close()
+
+	client := newTestClient(server)
+	client.retryConfig = RetryConfig{
+		Enabled:        true,
+		MaxRetries:     3,
+		InitialBackoff: 1 * time.Millisecond,
+		MaxBackoff:     10 * time.Millisecond,
+	}
+
+	_, err := client.FetchEvents(context.Background(), "testuser", nil)
+	require.Error(t, err)
+	assert.Equal(t, 1, callCount)
+}

@@ -30,6 +30,26 @@ var DefaultRateLimitConfig = RateLimitConfig{
 	MaxWait:      15 * time.Minute,
 }
 
+// RetryConfig configures retry behavior for transient errors.
+type RetryConfig struct {
+	// Enabled controls whether retry is performed.
+	Enabled bool
+	// MaxRetries is the maximum number of retry attempts.
+	MaxRetries int
+	// InitialBackoff is the initial backoff duration.
+	InitialBackoff time.Duration
+	// MaxBackoff is the maximum backoff duration.
+	MaxBackoff time.Duration
+}
+
+// DefaultRetryConfig provides sensible defaults for retry behavior.
+var DefaultRetryConfig = RetryConfig{
+	Enabled:        true,
+	MaxRetries:     3,
+	InitialBackoff: 1 * time.Second,
+	MaxBackoff:     30 * time.Second,
+}
+
 // Fetcher defines the interface for fetching GitHub events.
 // This interface enables testing with mocks and decouples the sync logic from the concrete client.
 type Fetcher interface {
@@ -41,6 +61,7 @@ type Fetcher interface {
 type Client struct {
 	client         *gh.Client
 	rateLimitConfig RateLimitConfig
+	retryConfig    RetryConfig
 }
 
 func NewClient(token string) *Client {
@@ -51,6 +72,7 @@ func NewClient(token string) *Client {
 	return &Client{
 		client:          gh.NewClient(tc),
 		rateLimitConfig: DefaultRateLimitConfig,
+		retryConfig:     DefaultRetryConfig,
 	}
 }
 
@@ -58,6 +80,7 @@ func NewClientWithHTTP(client *http.Client) *Client {
 	return &Client{
 		client:          gh.NewClient(client),
 		rateLimitConfig: DefaultRateLimitConfig,
+		retryConfig:     DefaultRetryConfig,
 	}
 }
 
@@ -66,6 +89,16 @@ func (c *Client) WithRateLimitConfig(cfg RateLimitConfig) *Client {
 	return &Client{
 		client:          c.client,
 		rateLimitConfig: cfg,
+		retryConfig:     c.retryConfig,
+	}
+}
+
+// WithRetryConfig returns a copy of the client with custom retry config.
+func (c *Client) WithRetryConfig(cfg RetryConfig) *Client {
+	return &Client{
+		client:          c.client,
+		rateLimitConfig: c.rateLimitConfig,
+		retryConfig:     cfg,
 	}
 }
 
@@ -86,9 +119,14 @@ func (c *Client) FetchEvents(ctx context.Context, username string, opts *FetchOp
 		return nil, err
 	}
 
-	activity, _, err := c.client.Activity.ListEventsPerformedByUser(ctx, username, false, &gh.ListOptions{
-		Page:    opts.Page,
-		PerPage: opts.PerPage,
+	var activity []*gh.Event
+	var err error
+	err = c.withRetry(ctx, func() error {
+		activity, _, err = c.client.Activity.ListEventsPerformedByUser(ctx, username, false, &gh.ListOptions{
+			Page:    opts.Page,
+			PerPage: opts.PerPage,
+		})
+		return err
 	})
 	if err != nil {
 		return nil, wrapGitHubError(err, username)
@@ -209,6 +247,55 @@ func (c *Client) waitForRateLimit(ctx context.Context) error {
 	case <-time.After(waitDuration):
 		return nil
 	}
+}
+
+// withRetry executes fn with exponential backoff retry for transient errors.
+func (c *Client) withRetry(ctx context.Context, fn func() error) error {
+	if !c.retryConfig.Enabled {
+		return fn()
+	}
+
+	var lastErr error
+	backoff := c.retryConfig.InitialBackoff
+
+	for attempt := 0; attempt <= c.retryConfig.MaxRetries; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		err := fn()
+		if err == nil {
+			return nil
+		}
+
+		lastErr = err
+		if !isRetryableError(err) {
+			return err
+		}
+
+		if attempt < c.retryConfig.MaxRetries {
+			if backoff > c.retryConfig.MaxBackoff {
+				backoff = c.retryConfig.MaxBackoff
+			}
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-time.After(backoff):
+				backoff *= 2
+			}
+		}
+	}
+
+	return lastErr
+}
+
+// isRetryableError determines if an error is transient and should be retried.
+func isRetryableError(err error) bool {
+	if ghErr, ok := err.(*gh.ErrorResponse); ok {
+		statusCode := ghErr.Response.StatusCode
+		return statusCode >= 500 || statusCode == 429
+	}
+	return false
 }
 
 // wrapGitHubError converts GitHub API errors into typed errors.
