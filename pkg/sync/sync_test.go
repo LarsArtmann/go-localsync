@@ -157,8 +157,8 @@ func TestSyncer_GetStats(t *testing.T) {
 		
 		require.NoError(t, err)
 		require.NotNil(t, stats)
-		assert.Equal(t, int64(100), stats["total_events"])
-		assert.Equal(t, []string{"PushEvent", "IssuesEvent"}, stats["event_types"])
+		assert.Equal(t, int64(100), stats.TotalEvents)
+		assert.Equal(t, []string{"PushEvent", "IssuesEvent"}, stats.EventTypes)
 	})
 	
 	t.Run("returns error when count fails", func(t *testing.T) {

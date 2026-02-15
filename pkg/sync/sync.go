@@ -40,6 +40,13 @@ type SyncResult struct {
 	Errors  int
 }
 
+// Stats contains database statistics.
+type Stats struct {
+	TotalEvents int64
+	EventTypes  []string
+	TypeCounts  map[string]int64
+}
+
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, nil
@@ -108,7 +115,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	return result, nil
 }
 
-func (s *Syncer) GetStats(ctx context.Context) (map[string]interface{}, error) {
+func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	count, err := s.storage.CountEvents(ctx)
 	if err != nil {
 		return nil, err
@@ -128,10 +135,10 @@ func (s *Syncer) GetStats(ctx context.Context) (map[string]interface{}, error) {
 		typeCounts[t] = c
 	}
 
-	return map[string]interface{}{
-		"total_events": count,
-		"event_types":  types,
-		"type_counts":  typeCounts,
+	return &Stats{
+		TotalEvents: count,
+		EventTypes:  types,
+		TypeCounts:  typeCounts,
 	}, nil
 }
 
