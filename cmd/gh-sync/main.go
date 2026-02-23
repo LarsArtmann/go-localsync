@@ -20,13 +20,13 @@ import (
 
 // Semantic exit codes (sysexits.h conventions)
 const (
-	exitOK           = 0
-	exitUsage        = 64 // EX_USAGE - command line usage error
-	exitDataErr      = 65 // EX_DATAERR - data format error
-	exitNoInput      = 66 // EX_NOINPUT - cannot open input
-	exitUnavailable  = 69 // EX_UNAVAILABLE - service unavailable
-	exitSoftware     = 70 // EX_SOFTWARE - internal software error
-	exitTempFail     = 75 // EX_TEMPFAIL - temporary failure
+	exitOK          = 0
+	exitUsage       = 64 // EX_USAGE - command line usage error
+	exitDataErr     = 65 // EX_DATAERR - data format error
+	exitNoInput     = 66 // EX_NOINPUT - cannot open input
+	exitUnavailable = 69 // EX_UNAVAILABLE - service unavailable
+	exitSoftware    = 70 // EX_SOFTWARE - internal software error
+	exitTempFail    = 75 // EX_TEMPFAIL - temporary failure
 )
 
 var (

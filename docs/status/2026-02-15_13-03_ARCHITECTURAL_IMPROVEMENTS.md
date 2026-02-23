@@ -18,14 +18,15 @@ This session focused on implementing architectural improvements to make go-local
 
 ### 1. Type System Decoupling
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                                             |
+| --------- | ------------------------------------------------------- |
 | `801e4e9` | Extracted `Event` type to dedicated `pkg/event` package |
 
 **Before:** `pkg/github` directly imported `pkg/storage.Event` (layer violation)
 **After:** `pkg/event.Event` is the domain type, both packages depend on it
 
 **Files Changed:**
+
 - `pkg/event/event.go` - New domain type
 - `pkg/github/client.go` - Now returns `*event.Event`
 - `pkg/storage/interface.go` - Storage accepts `*event.Event`
@@ -33,13 +34,14 @@ This session focused on implementing architectural improvements to make go-local
 
 ### 2. Fetcher Interface for Testability
 
-| Commit | Description |
-|--------|-------------|
-| `fbc8819` | Added `Fetcher` interface in pkg/github |
-| `243aa8c` | Syncer uses Fetcher interface |
+| Commit    | Description                                |
+| --------- | ------------------------------------------ |
+| `fbc8819` | Added `Fetcher` interface in pkg/github    |
+| `243aa8c` | Syncer uses Fetcher interface              |
 | `81879f4` | Comprehensive sync tests with mock Fetcher |
 
 **Pattern:**
+
 ```go
 type Fetcher interface {
     FetchEvents(ctx context.Context, username string, opts *FetchOptions) ([]*event.Event, error)
@@ -52,11 +54,12 @@ type Fetcher interface {
 
 ### 3. Typed Errors
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                          |
+| --------- | ------------------------------------ |
 | `fbc8819` | Added typed errors with user context |
 
 **Pattern:**
+
 ```go
 var (
     ErrInvalidToken  = errors.New("invalid GitHub token")
@@ -72,16 +75,18 @@ func WithUserDetail(err error, username string) error
 
 ### 4. Typed Stats Struct
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                                                 |
+| --------- | ----------------------------------------------------------- |
 | `e7d6418` | Replaced `map[string]interface{}` with typed `Stats` struct |
 
 **Before:**
+
 ```go
 map[string]interface{}{"total_events": count, "oldest": time, ...}
 ```
 
 **After:**
+
 ```go
 type Stats struct {
     TotalEvents    int64
@@ -97,9 +102,9 @@ type Stats struct {
 
 ### 5. Comprehensive Test Coverage
 
-| Commit | Description |
-|--------|-------------|
-| `81879f4` | Sync tests with mock Fetcher |
+| Commit                                | Description                  |
+| ------------------------------------- | ---------------------------- |
+| `81879f4`                             | Sync tests with mock Fetcher |
 | Tests now exist for all core packages |
 
 **Coverage:**
@@ -111,35 +116,37 @@ type Stats struct {
 
 ### 6. CI/CD Pipeline
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                |
+| --------- | -------------------------- |
 | `de8b159` | GitHub Actions CI workflow |
 
 **Workflow:**
+
 - Triggers: push to main/master, pull requests
 - Jobs: build (Go 1.21+), test, lint (golangci-lint)
 
 ### 7. Semantic Exit Codes
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                    |
+| --------- | ------------------------------ |
 | `700324d` | Exit codes based on error type |
 
-| Code | Constant | Error Type |
-|------|----------|------------|
-| 0 | `ExitSuccess` | No error |
-| 1 | `ExitError` | General error |
-| 2 | `ExitInvalidToken` | `ErrInvalidToken` |
-| 3 | `ExitUserNotFound` | `ErrUserNotFound` |
-| 4 | `ExitRateLimited` | `ErrRateLimited` |
+| Code | Constant           | Error Type        |
+| ---- | ------------------ | ----------------- |
+| 0    | `ExitSuccess`      | No error          |
+| 1    | `ExitError`        | General error     |
+| 2    | `ExitInvalidToken` | `ErrInvalidToken` |
+| 3    | `ExitUserNotFound` | `ErrUserNotFound` |
+| 4    | `ExitRateLimited`  | `ErrRateLimited`  |
 
 ### 8. Rate Limit Handling
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                  |
+| --------- | ---------------------------- |
 | `0aa3cc0` | Configurable rate limit wait |
 
 **Configuration:**
+
 ```go
 type RateLimitConfig struct {
     Enabled      bool          // Auto-check rate limits
@@ -152,11 +159,12 @@ type RateLimitConfig struct {
 
 ### 9. Retry with Exponential Backoff
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                |
+| --------- | -------------------------- |
 | `ff7b84f` | Retry for transient errors |
 
 **Configuration:**
+
 ```go
 type RetryConfig struct {
     Enabled        bool          // Enable retry
@@ -167,16 +175,18 @@ type RetryConfig struct {
 ```
 
 **Retryable Errors:**
+
 - HTTP 5xx (server errors)
 - HTTP 429 (rate limit - though primary handling is via rate limit wait)
 
 **Non-retryable:**
+
 - HTTP 4xx (client errors except 429)
 
 ### 10. Build Versioning
 
-| Commit | Description |
-|--------|-------------|
+| Commit    | Description                          |
+| --------- | ------------------------------------ |
 | `cfc7049` | Proper version injection via ldflags |
 
 ```bash
@@ -221,15 +231,15 @@ CLI Flags → Syncer.Sync()
 
 ## Metrics Comparison
 
-| Metric | Before | After |
-|--------|--------|-------|
-| Test Files | 1 | 4 |
-| Test Count | 7 | 27 |
-| Test Coverage | ~20% | ~80% |
-| Typed Errors | 0 | 4 |
-| Interfaces | 1 | 2 |
-| Package Coupling | Violated | Clean |
-| CI/CD | None | GitHub Actions |
+| Metric           | Before   | After          |
+| ---------------- | -------- | -------------- |
+| Test Files       | 1        | 4              |
+| Test Count       | 7        | 27             |
+| Test Coverage    | ~20%     | ~80%           |
+| Typed Errors     | 0        | 4              |
+| Interfaces       | 1        | 2              |
+| Package Coupling | Violated | Clean          |
+| CI/CD            | None     | GitHub Actions |
 
 ---
 
@@ -237,26 +247,26 @@ CLI Flags → Syncer.Sync()
 
 ### High Priority
 
-| Task | Effort | Status |
-|------|--------|--------|
-| Real API integration test | 15min | Requires GitHub PAT |
-| Add progress display | 20min | Nice to have |
+| Task                      | Effort | Status              |
+| ------------------------- | ------ | ------------------- |
+| Real API integration test | 15min  | Requires GitHub PAT |
+| Add progress display      | 20min  | Nice to have        |
 
 ### Medium Priority
 
-| Task | Effort | Status |
-|------|--------|--------|
-| Config file support | 30min | Deferred |
-| JSON output flag | 10min | Deferred |
-| Multiple user sync | 1h | Future |
+| Task                | Effort | Status   |
+| ------------------- | ------ | -------- |
+| Config file support | 30min  | Deferred |
+| JSON output flag    | 10min  | Deferred |
+| Multiple user sync  | 1h     | Future   |
 
 ### Low Priority
 
-| Task | Effort | Status |
-|------|--------|--------|
-| TUI with Bubble Tea | 2h | Future |
-| Turso/LibSQL support | 2h | Future |
-| HTTP API endpoint | 2h | Future |
+| Task                 | Effort | Status |
+| -------------------- | ------ | ------ |
+| TUI with Bubble Tea  | 2h     | Future |
+| Turso/LibSQL support | 2h     | Future |
+| HTTP API endpoint    | 2h     | Future |
 
 ---
 
@@ -276,18 +286,18 @@ CLI Flags → Syncer.Sync()
 
 ## Commits This Session
 
-| Hash | Type | Description |
-|------|------|-------------|
-| `ff7b84f` | feat | Retry with exponential backoff |
-| `0aa3cc0` | feat | Rate limit handling |
-| `700324d` | feat | Semantic exit codes |
-| `de8b159` | ci | GitHub Actions workflow |
-| `cfc7049` | chore | Build versioning |
-| `81879f4` | test | Sync tests with mock Fetcher |
-| `801e4e9` | refactor | Extract Event to pkg/event |
-| `e7d6418` | refactor | Typed Stats struct |
-| `243aa8c` | refactor | Syncer uses Fetcher interface |
-| `fbc8819` | feat | Fetcher interface and typed errors |
+| Hash      | Type     | Description                        |
+| --------- | -------- | ---------------------------------- |
+| `ff7b84f` | feat     | Retry with exponential backoff     |
+| `0aa3cc0` | feat     | Rate limit handling                |
+| `700324d` | feat     | Semantic exit codes                |
+| `de8b159` | ci       | GitHub Actions workflow            |
+| `cfc7049` | chore    | Build versioning                   |
+| `81879f4` | test     | Sync tests with mock Fetcher       |
+| `801e4e9` | refactor | Extract Event to pkg/event         |
+| `e7d6418` | refactor | Typed Stats struct                 |
+| `243aa8c` | refactor | Syncer uses Fetcher interface      |
+| `fbc8819` | feat     | Fetcher interface and typed errors |
 
 ---
 

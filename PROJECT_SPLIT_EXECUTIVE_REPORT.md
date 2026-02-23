@@ -1,9 +1,11 @@
 # Project Split Analysis: go-localsync
 
 ## Executive Summary
+
 go-localsync is a focused Go library and CLI for syncing GitHub user events to a SQLite database. **Splitting is NOT recommended.** The project is well-structured with clear package boundaries, has a single coherent purpose, and is appropriately sized as a single repository (~500 LOC).
 
 ## Current Architecture
+
 ```
 pkg/
 ├── github/     # GitHub API client (rate limiting, retry, event fetching)
@@ -28,14 +30,14 @@ sql/
 
 ### Reasons Against Splitting
 
-| Factor | Assessment |
-|--------|------------|
-| Project size | Small (~500 LOC across 12 source files) |
-| Purpose coherence | Single, clear purpose (GitHub event sync) |
-| Package coupling | Tightly integrated; splitting creates artificial boundaries |
-| Reuse potential | Low - storage/event models are domain-specific |
-| Maintenance overhead | Splitting adds complexity without benefit |
-| Consumer count | Single CLI tool, no external consumers |
+| Factor               | Assessment                                                  |
+| -------------------- | ----------------------------------------------------------- |
+| Project size         | Small (~500 LOC across 12 source files)                     |
+| Purpose coherence    | Single, clear purpose (GitHub event sync)                   |
+| Package coupling     | Tightly integrated; splitting creates artificial boundaries |
+| Reuse potential      | Low - storage/event models are domain-specific              |
+| Maintenance overhead | Splitting adds complexity without benefit                   |
+| Consumer count       | Single CLI tool, no external consumers                      |
 
 ### Why No Sub-Projects Make Sense
 
@@ -45,6 +47,7 @@ sql/
 4. **CLI** - Single entrypoint with no variant needs
 
 ### Benefits of Keeping Monolithic
+
 - Simple dependency management (single go.mod)
 - Easier versioning and releases
 - Simpler CI/CD (single workflow)
@@ -52,6 +55,7 @@ sql/
 - Lower cognitive overhead for contributors
 
 ### Risks of Splitting
+
 - Circular dependency risk between packages
 - Version compatibility matrix complexity
 - Increased repository maintenance overhead
@@ -59,9 +63,11 @@ sql/
 - Slower development iteration (multi-repo PRs)
 
 ## Implementation Path
+
 N/A - No split recommended.
 
 ## Conclusion
+
 **Confidence: HIGH (95%)**
 
 go-localsync exemplifies a well-structured, appropriately-sized Go project. The current architecture follows Go best practices with clean package boundaries and clear separation of concerns. The project is too small and too coherent to benefit from splitting. Any future expansion (e.g., supporting other data sources or storage backends) would be better served by internal refactoring rather than repository splitting. Keep as a single repository.

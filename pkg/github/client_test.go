@@ -122,11 +122,12 @@ func TestFetchAllEvents_MultiplePages(t *testing.T) {
 		page := r.URL.Query().Get("page")
 
 		var events []*gh.Event
-		if page == "1" {
+		switch page {
+		case "1":
 			events = []*gh.Event{{ID: gh.Ptr("1"), Type: gh.Ptr("PushEvent")}}
-		} else if page == "2" {
+		case "2":
 			events = []*gh.Event{{ID: gh.Ptr("2"), Type: gh.Ptr("PullRequestEvent")}}
-		} else {
+		default:
 			events = []*gh.Event{}
 		}
 

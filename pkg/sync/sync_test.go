@@ -15,17 +15,17 @@ import (
 
 // mockStorage implements storage.Storage for testing
 type mockStorage struct {
-	events       []*event.Event
-	latestEvent  *event.Event
-	upsertErr    error
-	latestErr    error
-	countResult  int64
-	countErr     error
-	typesResult  []string
-	typesErr     error
-	countByType  int64
+	events         []*event.Event
+	latestEvent    *event.Event
+	upsertErr      error
+	latestErr      error
+	countResult    int64
+	countErr       error
+	typesResult    []string
+	typesErr       error
+	countByType    int64
 	countByTypeErr error
-	closeErr     error
+	closeErr       error
 }
 
 func (m *mockStorage) UpsertEvent(ctx context.Context, e *event.Event) error {
@@ -103,18 +103,18 @@ func TestNewSyncer(t *testing.T) {
 	t.Run("creates syncer with provided logger", func(t *testing.T) {
 		mockStore := &mockStorage{}
 		logger := log.New(nil)
-		
+
 		// Create a simple wrapper since we can't directly instantiate github.Client
 		syncer := NewSyncer(nil, mockStore, logger)
-		
+
 		require.NotNil(t, syncer)
 	})
-	
+
 	t.Run("uses default logger when nil", func(t *testing.T) {
 		mockStore := &mockStorage{}
-		
+
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		require.NotNil(t, syncer)
 		require.NotNil(t, syncer.logger)
 	})
@@ -124,13 +124,13 @@ func TestSyncer_Sync(t *testing.T) {
 	t.Run("returns nil for nil options", func(t *testing.T) {
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		result, err := syncer.Sync(context.Background(), nil)
-		
+
 		require.NoError(t, err)
 		assert.Nil(t, result)
 	})
-	
+
 	t.Run("syncs events successfully", func(t *testing.T) {
 		mockFetcher := &mockGitHubClient{
 			events: []*event.Event{
@@ -140,35 +140,35 @@ func TestSyncer_Sync(t *testing.T) {
 		}
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(mockFetcher, mockStore, nil)
-		
+
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
 			Username: "testuser",
 			MaxPages: 1,
 		})
-		
+
 		require.NoError(t, err)
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 0, result.Skipped)
 		assert.Len(t, mockStore.events, 2)
 	})
-	
+
 	t.Run("returns error when fetch fails", func(t *testing.T) {
 		mockFetcher := &mockGitHubClient{
 			err: errors.New("fetch error"),
 		}
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(mockFetcher, mockStore, nil)
-		
+
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
 			Username: "testuser",
 			MaxPages: 1,
 		})
-		
+
 		require.Error(t, err)
 		assert.Nil(t, result)
 	})
-	
+
 	t.Run("counts errors when upsert fails", func(t *testing.T) {
 		mockFetcher := &mockGitHubClient{
 			events: []*event.Event{
@@ -180,12 +180,12 @@ func TestSyncer_Sync(t *testing.T) {
 			upsertErr: errors.New("upsert error"),
 		}
 		syncer := NewSyncer(mockFetcher, mockStore, nil)
-		
+
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
 			Username: "testuser",
 			MaxPages: 1,
 		})
-		
+
 		require.NoError(t, err)
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
@@ -197,9 +197,9 @@ func TestSyncer_SyncIncremental(t *testing.T) {
 	t.Run("returns nil for nil options", func(t *testing.T) {
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		result, err := syncer.SyncIncremental(context.Background(), nil)
-		
+
 		require.NoError(t, err)
 		assert.Nil(t, result)
 	})
@@ -213,37 +213,37 @@ func TestSyncer_GetStats(t *testing.T) {
 			countByType: 50,
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		stats, err := syncer.GetStats(context.Background())
-		
+
 		require.NoError(t, err)
 		require.NotNil(t, stats)
 		assert.Equal(t, int64(100), stats.TotalEvents)
 		assert.Equal(t, []string{"PushEvent", "IssuesEvent"}, stats.EventTypes)
 	})
-	
+
 	t.Run("returns error when count fails", func(t *testing.T) {
 		mockStore := &mockStorage{
 			countErr: errors.New("count error"),
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		stats, err := syncer.GetStats(context.Background())
-		
+
 		require.Error(t, err)
 		assert.Nil(t, stats)
 		assert.Contains(t, err.Error(), "count error")
 	})
-	
+
 	t.Run("returns error when get types fails", func(t *testing.T) {
 		mockStore := &mockStorage{
 			countResult: 100,
 			typesErr:    errors.New("types error"),
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		stats, err := syncer.GetStats(context.Background())
-		
+
 		require.Error(t, err)
 		assert.Nil(t, stats)
 		assert.Contains(t, err.Error(), "types error")
@@ -254,20 +254,20 @@ func TestSyncer_Close(t *testing.T) {
 	t.Run("closes successfully", func(t *testing.T) {
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		err := syncer.Close()
-		
+
 		require.NoError(t, err)
 	})
-	
+
 	t.Run("returns error on close failure", func(t *testing.T) {
 		mockStore := &mockStorage{
 			closeErr: errors.New("close error"),
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
-		
+
 		err := syncer.Close()
-		
+
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "close error")
 	})
@@ -283,7 +283,7 @@ func TestSyncResult(t *testing.T) {
 		Skipped: 20,
 		Errors:  2,
 	}
-	
+
 	assert.Equal(t, 100, result.Fetched)
 	assert.Equal(t, 20, result.Skipped)
 	assert.Equal(t, 2, result.Errors)

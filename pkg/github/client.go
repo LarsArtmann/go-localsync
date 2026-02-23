@@ -59,9 +59,9 @@ type Fetcher interface {
 }
 
 type Client struct {
-	client         *gh.Client
+	client          *gh.Client
 	rateLimitConfig RateLimitConfig
-	retryConfig    RetryConfig
+	retryConfig     RetryConfig
 }
 
 func NewClient(token string) *Client {
