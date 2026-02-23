@@ -16,26 +16,26 @@ go-localsync is a Go library and CLI for syncing GitHub user events to a SQLite 
 
 ### Test Coverage
 
-| Package | Coverage | Status |
-|---------|----------|--------|
-| `pkg/github` | 69.9% | ✅ Good |
-| `pkg/storage` | 83.9% | ✅ Excellent |
-| `pkg/sync` | 58.2% | ⚠️ Adequate |
-| `cmd/gh-sync` | 0.0% | ❌ Missing |
-| `pkg/errors` | 0.0% | ⚠️ Low priority |
-| `pkg/event` | N/A | No test files |
+| Package       | Coverage | Status          |
+| ------------- | -------- | --------------- |
+| `pkg/github`  | 69.9%    | ✅ Good         |
+| `pkg/storage` | 83.9%    | ✅ Excellent    |
+| `pkg/sync`    | 58.2%    | ⚠️ Adequate     |
+| `cmd/gh-sync` | 0.0%     | ❌ Missing      |
+| `pkg/errors`  | 0.0%     | ⚠️ Low priority |
+| `pkg/event`   | N/A      | No test files   |
 
 **Overall weighted coverage:** ~60-65%
 
 ### Code Quality Indicators
 
-| Indicator | Status |
-|-----------|--------|
-| CI/CD Pipeline | ✅ GitHub Actions configured |
-| Linting | ✅ golangci-lint in CI |
-| Build automation | ✅ justfile with build/test/lint |
-| Version injection | ✅ ldflags for version/commit/date |
-| Typed errors | ✅ Sentinel errors with cockroachdb/errors |
+| Indicator         | Status                                     |
+| ----------------- | ------------------------------------------ |
+| CI/CD Pipeline    | ✅ GitHub Actions configured               |
+| Linting           | ✅ golangci-lint in CI                     |
+| Build automation  | ✅ justfile with build/test/lint           |
+| Version injection | ✅ ldflags for version/commit/date         |
+| Typed errors      | ✅ Sentinel errors with cockroachdb/errors |
 
 ---
 
@@ -43,38 +43,38 @@ go-localsync is a Go library and CLI for syncing GitHub user events to a SQLite 
 
 ### Core Features ✅
 
-| Feature | Status | Notes |
-|---------|--------|-------|
-| GitHub event fetching | ✅ Complete | Uses google/go-github |
-| SQLite storage | ✅ Complete | Pure Go, no CGO |
-| Incremental sync | ✅ Complete | Only fetches new events |
-| Full JSON payload | ✅ Complete | 100% data fidelity |
-| Rate limit handling | ✅ Complete | Configurable auto-wait |
-| Retry with backoff | ✅ Complete | Exponential backoff for transient errors |
-| Semantic exit codes | ✅ Complete | Error-type specific codes |
+| Feature               | Status      | Notes                                    |
+| --------------------- | ----------- | ---------------------------------------- |
+| GitHub event fetching | ✅ Complete | Uses google/go-github                    |
+| SQLite storage        | ✅ Complete | Pure Go, no CGO                          |
+| Incremental sync      | ✅ Complete | Only fetches new events                  |
+| Full JSON payload     | ✅ Complete | 100% data fidelity                       |
+| Rate limit handling   | ✅ Complete | Configurable auto-wait                   |
+| Retry with backoff    | ✅ Complete | Exponential backoff for transient errors |
+| Semantic exit codes   | ✅ Complete | Error-type specific codes                |
 
 ### CLI Features ✅
 
-| Flag | Status | Default |
-|------|--------|---------|
-| `-token` | ✅ | `$GITHUB_TOKEN` |
-| `-user` | ✅ | (required) |
-| `-db` | ✅ | `~/.local/share/go-localsync/events.db` |
-| `-pages` | ✅ | 10 |
-| `-incremental` | ✅ | true |
-| `-stats` | ✅ | false |
-| `-verbose` | ✅ | false |
-| `-version` | ✅ | false |
+| Flag           | Status | Default                                 |
+| -------------- | ------ | --------------------------------------- |
+| `-token`       | ✅     | `$GITHUB_TOKEN`                         |
+| `-user`        | ✅     | (required)                              |
+| `-db`          | ✅     | `~/.local/share/go-localsync/events.db` |
+| `-pages`       | ✅     | 10                                      |
+| `-incremental` | ✅     | true                                    |
+| `-stats`       | ✅     | false                                   |
+| `-verbose`     | ✅     | false                                   |
+| `-version`     | ✅     | false                                   |
 
 ### Missing Features
 
-| Feature | Priority | Effort | Impact |
-|---------|----------|--------|--------|
-| CLI integration tests | HIGH | 30min | Critical for reliability |
-| Real GitHub API verification | HIGH | 15min | Requires PAT |
-| Progress display | MEDIUM | 20min | UX improvement |
-| JSON output flag | MEDIUM | 10min | Script integration |
-| Config file support | MEDIUM | 30min | User convenience |
+| Feature                      | Priority | Effort | Impact                   |
+| ---------------------------- | -------- | ------ | ------------------------ |
+| CLI integration tests        | HIGH     | 30min  | Critical for reliability |
+| Real GitHub API verification | HIGH     | 15min  | Requires PAT             |
+| Progress display             | MEDIUM   | 20min  | UX improvement           |
+| JSON output flag             | MEDIUM   | 10min  | Script integration       |
+| Config file support          | MEDIUM   | 30min  | User convenience         |
 
 ---
 
@@ -112,18 +112,18 @@ go-localsync is a Go library and CLI for syncing GitHub user events to a SQLite 
 
 ## Recent Commits (Last 10)
 
-| Commit | Type | Description |
-|--------|------|-------------|
-| `f6f876f` | style | Consistent formatting across codebase |
-| `f691647` | docs | Project split executive report |
-| `46a121e` | docs | Architectural improvements report |
-| `ff7b84f` | feat | Retry with exponential backoff |
-| `0aa3cc0` | feat | Rate limit handling |
-| `700324d` | feat | Semantic exit codes |
-| `de8b159` | ci | GitHub Actions workflow |
-| `cfc7049` | chore | Build versioning |
-| `81879f4` | test | Sync tests with mock Fetcher |
-| `801e4e9` | refactor | Extract Event to pkg/event |
+| Commit    | Type     | Description                           |
+| --------- | -------- | ------------------------------------- |
+| `f6f876f` | style    | Consistent formatting across codebase |
+| `f691647` | docs     | Project split executive report        |
+| `46a121e` | docs     | Architectural improvements report     |
+| `ff7b84f` | feat     | Retry with exponential backoff        |
+| `0aa3cc0` | feat     | Rate limit handling                   |
+| `700324d` | feat     | Semantic exit codes                   |
+| `de8b159` | ci       | GitHub Actions workflow               |
+| `cfc7049` | chore    | Build versioning                      |
+| `81879f4` | test     | Sync tests with mock Fetcher          |
+| `801e4e9` | refactor | Extract Event to pkg/event            |
 
 ---
 
