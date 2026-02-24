@@ -1,0 +1,111 @@
+// Package provider defines the core interfaces for local-sync providers.
+// Providers are data sources that can fetch items to be synced locally.
+package provider
+
+import (
+	"context"
+	"time"
+)
+
+// Item represents a single syncable item from any provider.
+type Item struct {
+	// ID is the unique identifier from the source system.
+	ID string `json:"id"`
+	// Source identifies which provider this item came from (e.g., "github", "gitlab").
+	Source string `json:"source"`
+	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
+	Type string `json:"type"`
+	// ActorLogin is the username of the entity that triggered the item.
+	ActorLogin string `json:"actorLogin,omitempty"`
+	// ActorAvatarURL is the avatar URL of the actor.
+	ActorAvatarURL string `json:"actorAvatarUrl,omitempty"`
+	// RepoName is the repository name (e.g., "owner/repo").
+	RepoName string `json:"repoName,omitempty"`
+	// RepoURL is the repository URL.
+	RepoURL string `json:"repoUrl,omitempty"`
+	// CreatedAt is when the item was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// RawJSON contains the complete original payload for full fidelity.
+	RawJSON []byte `json:"rawJson"`
+}
+
+// FetchOptions controls how items are fetched from a provider.
+type FetchOptions struct {
+	// Source identifies what to fetch (e.g., username for GitHub, project ID for GitLab).
+	Source string
+	// PerPage is the number of items per page.
+	PerPage int
+	// Page is the page number to fetch (1-indexed).
+	Page int
+}
+
+// FetchResult contains the result of a fetch operation.
+type FetchResult struct {
+	// Items is the list of fetched items.
+	Items []*Item
+	// HasMore indicates if more pages are available.
+	HasMore bool
+}
+
+// RateLimitInfo contains rate limiting information.
+type RateLimitInfo struct {
+	// Limit is the total requests allowed per window.
+	Limit int
+	// Remaining is the requests left in current window.
+	Remaining int
+	// ResetAt is when the rate limit resets.
+	ResetAt time.Time
+}
+
+// Provider defines the interface for a data source that can be synced.
+type Provider interface {
+	// Name returns the provider identifier (e.g., "github", "gitlab").
+	Name() string
+
+	// Fetch retrieves a single page of items.
+	Fetch(ctx context.Context, opts *FetchOptions) (*FetchResult, error)
+
+	// FetchAll retrieves all available items up to maxPages.
+	FetchAll(ctx context.Context, source string, maxPages int) (*FetchResult, error)
+
+	// GetRateLimit returns current rate limit information.
+	// Returns nil if the provider doesn't have rate limiting.
+	GetRateLimit(ctx context.Context) (*RateLimitInfo, error)
+}
+
+// RateLimitConfig configures rate limit handling behavior.
+type RateLimitConfig struct {
+	// Enabled controls whether rate limit checking is performed.
+	Enabled bool
+	// MinRemaining is the minimum remaining calls before waiting.
+	MinRemaining int
+	// MaxWait is the maximum time to wait for rate limit reset.
+	MaxWait time.Duration
+}
+
+// DefaultRateLimitConfig provides sensible defaults for rate limit handling.
+var DefaultRateLimitConfig = RateLimitConfig{
+	Enabled:      true,
+	MinRemaining: 10,
+	MaxWait:      15 * time.Minute,
+}
+
+// RetryConfig configures retry behavior for transient errors.
+type RetryConfig struct {
+	// Enabled controls whether retry is performed.
+	Enabled bool
+	// MaxRetries is the maximum number of retry attempts.
+	MaxRetries int
+	// InitialBackoff is the initial backoff duration.
+	InitialBackoff time.Duration
+	// MaxBackoff is the maximum backoff duration.
+	MaxBackoff time.Duration
+}
+
+// DefaultRetryConfig provides sensible defaults for retry behavior.
+var DefaultRetryConfig = RetryConfig{
+	Enabled:        true,
+	MaxRetries:     3,
+	InitialBackoff: 1 * time.Second,
+	MaxBackoff:     30 * time.Second,
+}

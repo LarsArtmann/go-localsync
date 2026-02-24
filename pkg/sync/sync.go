@@ -5,130 +5,136 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/larsartmann/go-localsync/pkg/github"
+	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/storage"
 )
 
-// Fetcher is an alias to the github.Fetcher interface for clear dependencies.
-type Fetcher = github.Fetcher
-
+// Syncer orchestrates syncing items from a provider to storage.
 type Syncer struct {
-	fetcher Fetcher
-	storage storage.Storage
-	logger  *log.Logger
+	provider provider.Provider
+	storage  storage.Storage
+	logger   *log.Logger
 }
 
-func NewSyncer(fetcher Fetcher, store storage.Storage, logger *log.Logger) *Syncer {
+// NewSyncer creates a new Syncer with the given provider and storage.
+func NewSyncer(p provider.Provider, store storage.Storage, logger *log.Logger) *Syncer {
 	if logger == nil {
 		logger = log.Default()
 	}
 	return &Syncer{
-		fetcher: fetcher,
-		storage: store,
-		logger:  logger,
+		provider: p,
+		storage:  store,
+		logger:   logger,
 	}
 }
 
+// SyncOptions configures a sync operation.
 type SyncOptions struct {
-	Username string
+	// Source identifies what to sync (e.g., username for GitHub).
+	Source string
+	// MaxPages is the maximum number of pages to fetch.
 	MaxPages int
 }
 
+// SyncResult contains the results of a sync operation.
 type SyncResult struct {
 	Fetched int
 	Skipped int
 	Errors  int
 }
 
-// Stats contains database statistics.
+// Stats contains storage statistics.
 type Stats struct {
-	TotalEvents int64
-	EventTypes  []string
-	TypeCounts  map[string]int64
+	TotalItems int64
+	ItemTypes  []string
+	TypeCounts map[string]int64
 }
 
+// Sync performs a full sync from the provider to storage.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, nil
 	}
 
-	s.logger.Info("Starting sync", "username", opts.Username)
+	s.logger.Info("Starting sync", "provider", s.provider.Name(), "source", opts.Source)
 
-	events, err := s.fetcher.FetchAllEvents(ctx, opts.Username, opts.MaxPages)
+	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
 		return nil, err
 	}
 
-	result := &SyncResult{Fetched: len(events)}
+	syncResult := &SyncResult{Fetched: len(result.Items)}
 
-	for _, event := range events {
-		if err := s.storage.UpsertEvent(ctx, event); err != nil {
-			s.logger.Warn("Failed to upsert event", "github_id", event.GithubID, "error", err)
-			result.Errors++
+	for _, item := range result.Items {
+		if err := s.storage.Upsert(ctx, item); err != nil {
+			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
+			syncResult.Errors++
 			continue
 		}
 	}
 
-	s.logger.Info("Sync completed", "fetched", result.Fetched, "errors", result.Errors)
-	return result, nil
+	s.logger.Info("Sync completed", "fetched", syncResult.Fetched, "errors", syncResult.Errors)
+	return syncResult, nil
 }
 
+// SyncIncremental performs an incremental sync, only fetching items newer than the latest stored.
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, nil
 	}
 
-	latestEvent, err := s.storage.GetLatestEvent(ctx)
+	latestItem, err := s.storage.GetLatest(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	s.logger.Info("Starting incremental sync", "username", opts.Username)
+	s.logger.Info("Starting incremental sync", "provider", s.provider.Name(), "source", opts.Source)
 
-	events, err := s.fetcher.FetchAllEvents(ctx, opts.Username, opts.MaxPages)
+	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
 		return nil, err
 	}
 
-	result := &SyncResult{Fetched: len(events)}
+	syncResult := &SyncResult{Fetched: len(result.Items)}
 
 	var cutoff time.Time
-	if latestEvent != nil {
-		cutoff = latestEvent.CreatedAt
+	if latestItem != nil {
+		cutoff = latestItem.CreatedAt
 		s.logger.Debug("Using cutoff time", "cutoff", cutoff)
 	}
 
-	for _, event := range events {
-		if !cutoff.IsZero() && event.CreatedAt.Before(cutoff) {
-			result.Skipped++
+	for _, item := range result.Items {
+		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
+			syncResult.Skipped++
 			continue
 		}
 
-		if err := s.storage.UpsertEvent(ctx, event); err != nil {
-			s.logger.Warn("Failed to upsert event", "github_id", event.GithubID, "error", err)
-			result.Errors++
+		if err := s.storage.Upsert(ctx, item); err != nil {
+			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
+			syncResult.Errors++
 			continue
 		}
 	}
 
-	s.logger.Info("Incremental sync completed", "fetched", result.Fetched, "skipped", result.Skipped, "errors", result.Errors)
-	return result, nil
+	s.logger.Info("Incremental sync completed", "fetched", syncResult.Fetched, "skipped", syncResult.Skipped, "errors", syncResult.Errors)
+	return syncResult, nil
 }
 
+// GetStats returns statistics about stored items.
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
-	count, err := s.storage.CountEvents(ctx)
+	count, err := s.storage.Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	types, err := s.storage.GetEventTypes(ctx)
+	types, err := s.storage.GetTypes(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	typeCounts := make(map[string]int64)
 	for _, t := range types {
-		c, err := s.storage.CountEventsByType(ctx, t)
+		c, err := s.storage.CountByType(ctx, t)
 		if err != nil {
 			continue
 		}
@@ -136,12 +142,13 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	}
 
 	return &Stats{
-		TotalEvents: count,
-		EventTypes:  types,
-		TypeCounts:  typeCounts,
+		TotalItems: count,
+		ItemTypes:  types,
+		TypeCounts: typeCounts,
 	}, nil
 }
 
+// Close releases resources.
 func (s *Syncer) Close() error {
 	return s.storage.Close()
 }

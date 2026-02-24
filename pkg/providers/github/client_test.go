@@ -10,7 +10,8 @@ import (
 	"time"
 
 	gh "github.com/google/go-github/v69/github"
-	"github.com/larsartmann/go-localsync/pkg/errors"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,12 +19,14 @@ import (
 func TestNewClient(t *testing.T) {
 	client := NewClient("test-token")
 	require.NotNil(t, client)
+	assert.Equal(t, "github", client.Name())
 }
 
 func TestNewClientWithHTTP(t *testing.T) {
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
 	require.NotNil(t, client)
+	assert.Equal(t, "github", client.Name())
 }
 
 // newTestClient creates a client with rate limiting disabled for unit tests.
@@ -31,11 +34,11 @@ func newTestClient(server *httptest.Server) *Client {
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
 	client.client.BaseURL = mustParseURL(server.URL)
-	client.rateLimitConfig.Enabled = false
+	client = client.WithRateLimitConfig(provider.RateLimitConfig{Enabled: false})
 	return client
 }
 
-func TestFetchEvents_DefaultOptions(t *testing.T) {
+func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/users/testuser/events")
 		assert.Equal(t, "100", r.URL.Query().Get("per_page"))
@@ -62,16 +65,16 @@ func TestFetchEvents_DefaultOptions(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	events, err := client.FetchEvents(context.Background(), "testuser", nil)
+	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
 	require.NoError(t, err)
-	require.Len(t, events, 1)
-	assert.Equal(t, "123", events[0].GithubID)
-	assert.Equal(t, "PushEvent", events[0].Type)
-	assert.Equal(t, "testuser", events[0].ActorLogin)
-	assert.Equal(t, "test/repo", events[0].RepoName)
+	require.Len(t, result.Items, 1)
+	assert.Equal(t, "123", result.Items[0].ID)
+	assert.Equal(t, "PushEvent", result.Items[0].Type)
+	assert.Equal(t, "testuser", result.Items[0].ActorLogin)
+	assert.Equal(t, "test/repo", result.Items[0].RepoName)
 }
 
-func TestFetchEvents_CustomOptions(t *testing.T) {
+func TestFetch_CustomOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "50", r.URL.Query().Get("per_page"))
 		assert.Equal(t, "2", r.URL.Query().Get("page"))
@@ -81,12 +84,12 @@ func TestFetchEvents_CustomOptions(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	events, err := client.FetchEvents(context.Background(), "testuser", &FetchOptions{PerPage: 50, Page: 2})
+	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser", PerPage: 50, Page: 2})
 	require.NoError(t, err)
-	assert.Empty(t, events)
+	assert.Empty(t, result.Items)
 }
 
-func TestFetchEvents_ZeroPerPage_DefaultsTo100(t *testing.T) {
+func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "100", r.URL.Query().Get("per_page"))
 		w.Header().Set("Content-Type", "application/json")
@@ -95,12 +98,12 @@ func TestFetchEvents_ZeroPerPage_DefaultsTo100(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	events, err := client.FetchEvents(context.Background(), "testuser", &FetchOptions{PerPage: 0, Page: 1})
+	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser", PerPage: 0, Page: 1})
 	require.NoError(t, err)
-	assert.Empty(t, events)
+	assert.Empty(t, result.Items)
 }
 
-func TestFetchEvents_APIError(t *testing.T) {
+func TestFetch_APIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Header().Set("Content-Type", "application/json")
@@ -109,26 +112,32 @@ func TestFetchEvents_APIError(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	events, err := client.FetchEvents(context.Background(), "nonexistent", nil)
+	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "nonexistent"})
 	require.Error(t, err)
-	assert.Nil(t, events)
-	assert.ErrorIs(t, err, errors.ErrUserNotFound)
+	assert.Nil(t, result)
+	assert.ErrorIs(t, err, pkgerrors.ErrUserNotFound)
 }
 
-func TestFetchAllEvents_MultiplePages(t *testing.T) {
+func TestFetchAll_MultiplePages(t *testing.T) {
 	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
 		page := r.URL.Query().Get("page")
+		perPage := r.URL.Query().Get("per_page")
 
 		var events []*gh.Event
 		switch page {
-		case "1":
-			events = []*gh.Event{{ID: gh.Ptr("1"), Type: gh.Ptr("PushEvent")}}
-		case "2":
-			events = []*gh.Event{{ID: gh.Ptr("2"), Type: gh.Ptr("PullRequestEvent")}}
+		case "1", "2":
+			// Return perPage items so HasMore=true, simulating full pages
+			for i := 0; i < 100; i++ {
+				events = append(events, &gh.Event{ID: gh.Ptr(page + "-" + string(rune('0'+i))), Type: gh.Ptr("PushEvent")})
+			}
 		default:
 			events = []*gh.Event{}
+		}
+
+		if perPage != "100" {
+			t.Errorf("expected per_page=100, got %s", perPage)
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -137,13 +146,13 @@ func TestFetchAllEvents_MultiplePages(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	events, err := client.FetchAllEvents(context.Background(), "testuser", 3)
+	result, err := client.FetchAll(context.Background(), "testuser", 3)
 	require.NoError(t, err)
-	assert.Len(t, events, 2)
-	assert.Equal(t, 3, callCount) // Should call until empty page
+	assert.Len(t, result.Items, 200) // 100 from page 1 + 100 from page 2
+	assert.Equal(t, 3, callCount)    // Page 1, 2 (full), 3 (empty, stops)
 }
 
-func TestFetchAllEvents_DefaultMaxPages(t *testing.T) {
+func TestFetchAll_DefaultMaxPages(t *testing.T) {
 	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
@@ -153,12 +162,12 @@ func TestFetchAllEvents_DefaultMaxPages(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	_, err := client.FetchAllEvents(context.Background(), "testuser", 0)
+	_, err := client.FetchAll(context.Background(), "testuser", 0)
 	require.NoError(t, err)
-	assert.Equal(t, 1, callCount) // Stops at first empty page
+	assert.Equal(t, 1, callCount)
 }
 
-func TestFetchAllEvents_StopsOnEmptyPage(t *testing.T) {
+func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
@@ -176,10 +185,10 @@ func TestFetchAllEvents_StopsOnEmptyPage(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	events, err := client.FetchAllEvents(context.Background(), "testuser", 10)
+	result, err := client.FetchAll(context.Background(), "testuser", 10)
 	require.NoError(t, err)
-	assert.Len(t, events, 1)
-	assert.LessOrEqual(t, callCount, 2) // Should stop at empty page, not iterate all 10
+	assert.Len(t, result.Items, 1)
+	assert.LessOrEqual(t, callCount, 2)
 }
 
 func TestConvertEvent_FullEvent(t *testing.T) {
@@ -197,34 +206,35 @@ func TestConvertEvent_FullEvent(t *testing.T) {
 		CreatedAt: &gh.Timestamp{Time: time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)},
 	}
 
-	evt, err := convertEvent(ghEvent)
+	item, err := convertEvent(ghEvent)
 	require.NoError(t, err)
-	assert.Equal(t, "12345", evt.GithubID)
-	assert.Equal(t, "PushEvent", evt.Type)
-	assert.Equal(t, "actor", evt.ActorLogin)
-	assert.Equal(t, "https://avatar.url", evt.ActorAvatarURL)
-	assert.Equal(t, "owner/repo", evt.RepoName)
-	assert.Equal(t, "https://api.github.com/repos/owner/repo", evt.RepoURL)
-	assert.Equal(t, time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC), evt.CreatedAt)
-	assert.NotEmpty(t, evt.RawJSON)
+	assert.Equal(t, "12345", item.ID)
+	assert.Equal(t, "github", item.Source)
+	assert.Equal(t, "PushEvent", item.Type)
+	assert.Equal(t, "actor", item.ActorLogin)
+	assert.Equal(t, "https://avatar.url", item.ActorAvatarURL)
+	assert.Equal(t, "owner/repo", item.RepoName)
+	assert.Equal(t, "https://api.github.com/repos/owner/repo", item.RepoURL)
+	assert.Equal(t, time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC), item.CreatedAt)
+	assert.NotEmpty(t, item.RawJSON)
 }
 
 func TestConvertEvent_MinimalEvent(t *testing.T) {
 	ghEvent := &gh.Event{
 		ID:        gh.Ptr("999"),
 		Type:      gh.Ptr("WatchEvent"),
-		CreatedAt: nil, // Will use time.Now()
+		CreatedAt: nil,
 	}
 
-	evt, err := convertEvent(ghEvent)
+	item, err := convertEvent(ghEvent)
 	require.NoError(t, err)
-	assert.Equal(t, "999", evt.GithubID)
-	assert.Equal(t, "WatchEvent", evt.Type)
-	assert.Empty(t, evt.ActorLogin)
-	assert.Empty(t, evt.ActorAvatarURL)
-	assert.Empty(t, evt.RepoName)
-	assert.Empty(t, evt.RepoURL)
-	assert.False(t, evt.CreatedAt.IsZero())
+	assert.Equal(t, "999", item.ID)
+	assert.Equal(t, "WatchEvent", item.Type)
+	assert.Empty(t, item.ActorLogin)
+	assert.Empty(t, item.ActorAvatarURL)
+	assert.Empty(t, item.RepoName)
+	assert.Empty(t, item.RepoURL)
+	assert.False(t, item.CreatedAt.IsZero())
 }
 
 func TestConvertEvent_NilActorAndRepo(t *testing.T) {
@@ -236,17 +246,16 @@ func TestConvertEvent_NilActorAndRepo(t *testing.T) {
 		CreatedAt: &gh.Timestamp{Time: time.Now()},
 	}
 
-	evt, err := convertEvent(ghEvent)
+	item, err := convertEvent(ghEvent)
 	require.NoError(t, err)
-	assert.Empty(t, evt.ActorLogin)
-	assert.Empty(t, evt.RepoName)
+	assert.Empty(t, item.ActorLogin)
+	assert.Empty(t, item.RepoName)
 }
 
 func TestGetRateLimit(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/rate_limit")
 		w.Header().Set("Content-Type", "application/json")
-		// GitHub API returns rate limits wrapped in "resources"
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"resources": gh.RateLimits{
 				Core: &gh.Rate{
@@ -263,12 +272,11 @@ func TestGetRateLimit(t *testing.T) {
 	client := NewClientWithHTTP(httpClient)
 	client.client.BaseURL = mustParseURL(server.URL)
 
-	limits, resp, err := client.GetRateLimit(context.Background())
+	limits, err := client.GetRateLimit(context.Background())
 	require.NoError(t, err)
 	require.NotNil(t, limits)
-	require.NotNil(t, resp)
-	assert.Equal(t, 5000, limits.Core.Limit)
-	assert.Equal(t, 4999, limits.Core.Remaining)
+	assert.Equal(t, 5000, limits.Limit)
+	assert.Equal(t, 4999, limits.Remaining)
 }
 
 func mustParseURL(rawURL string) *url.URL {
@@ -280,7 +288,7 @@ func mustParseURL(rawURL string) *url.URL {
 	return u
 }
 
-func TestFetchEvents_RetryOnServerError(t *testing.T) {
+func TestFetch_RetryOnServerError(t *testing.T) {
 	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
@@ -294,19 +302,19 @@ func TestFetchEvents_RetryOnServerError(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	client.retryConfig = RetryConfig{
+	client = client.WithRetryConfig(provider.RetryConfig{
 		Enabled:        true,
 		MaxRetries:     3,
 		InitialBackoff: 1 * time.Millisecond,
 		MaxBackoff:     10 * time.Millisecond,
-	}
+	})
 
-	_, err := client.FetchEvents(context.Background(), "testuser", nil)
+	_, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
 	require.NoError(t, err)
 	assert.Equal(t, 3, callCount)
 }
 
-func TestFetchEvents_NoRetryOnClientError(t *testing.T) {
+func TestFetch_NoRetryOnClientError(t *testing.T) {
 	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
@@ -315,14 +323,30 @@ func TestFetchEvents_NoRetryOnClientError(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	client.retryConfig = RetryConfig{
+	client = client.WithRetryConfig(provider.RetryConfig{
 		Enabled:        true,
 		MaxRetries:     3,
 		InitialBackoff: 1 * time.Millisecond,
 		MaxBackoff:     10 * time.Millisecond,
-	}
+	})
 
-	_, err := client.FetchEvents(context.Background(), "testuser", nil)
+	_, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
 	require.Error(t, err)
 	assert.Equal(t, 1, callCount)
+}
+
+func TestWithRateLimitConfig(t *testing.T) {
+	client := NewClient("test-token")
+	cfg := provider.RateLimitConfig{Enabled: true, MinRemaining: 100}
+	newClient := client.WithRateLimitConfig(cfg)
+	assert.Equal(t, cfg, newClient.rateLimitConfig)
+	assert.Equal(t, client.client, newClient.client)
+}
+
+func TestWithRetryConfig(t *testing.T) {
+	client := NewClient("test-token")
+	cfg := provider.RetryConfig{Enabled: true, MaxRetries: 5}
+	newClient := client.WithRetryConfig(cfg)
+	assert.Equal(t, cfg, newClient.retryConfig)
+	assert.Equal(t, client.client, newClient.client)
 }

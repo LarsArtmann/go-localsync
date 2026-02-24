@@ -1,83 +1,150 @@
 # go-localsync
 
-A Go library and CLI for syncing GitHub User Events to a SQLite database.
+A Go SDK for building local sync applications. Fetch data from any provider, store it locally in SQLite.
 
-## Features
+## Overview
 
-- Sync GitHub user events to local SQLite database
-- Incremental sync support (only fetch new events)
-- Full JSON payload storage for 100% data fidelity
-- Type-safe SQL queries with sqlc
-- Pure Go SQLite driver (no CGO required)
+**go-localsync is an SDK, not a CLI application.** It provides:
+
+- **Provider Interface** - Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)
+- **Storage Abstraction** - SQLite storage with full JSON fidelity
+- **Sync Logic** - Incremental sync, pagination, rate limiting, retry with backoff
 
 ## Installation
 
 ```bash
-go install github.com/larsartmann/go-localsync/cmd/gh-sync@latest
+go get github.com/larsartmann/go-localsync
 ```
 
-## Usage
+## Quick Start
+
+```go
+package main
+
+import (
+    "context"
+    "github.com/larsartmann/go-localsync/pkg/providers/github"
+    "github.com/larsartmann/go-localsync/pkg/storage"
+    "github.com/larsartmann/go-localsync/pkg/sync"
+)
+
+func main() {
+    // Create a provider (GitHub built-in)
+    ghProvider := github.NewClient("your-github-token")
+
+    // Create storage
+    store, _ := storage.NewSQLiteStorage(db)
+
+    // Sync
+    syncer := sync.NewSyncer(ghProvider, store, logger)
+    result, _ := syncer.SyncIncremental(ctx, &sync.SyncOptions{
+        Source:   "username",
+        MaxPages: 10,
+    })
+}
+```
+
+## Core Interfaces
+
+### Provider
+
+Implement `provider.Provider` to add support for any data source:
+
+```go
+type Provider interface {
+    Name() string
+    Fetch(ctx context.Context, opts *FetchOptions) (*FetchResult, error)
+    FetchAll(ctx context.Context, source string, maxPages int) (*FetchResult, error)
+    GetRateLimit(ctx context.Context) (*RateLimitInfo, error)
+}
+```
+
+### Item
+
+All providers return `provider.Item` objects:
+
+```go
+type Item struct {
+    ID             string    // Unique ID from source
+    Source         string    // Provider name (e.g., "github")
+    Type           string    // Item type (e.g., "PushEvent")
+    ActorLogin     string    // Who triggered it
+    ActorAvatarURL string
+    RepoName       string    // Repository (e.g., "owner/repo")
+    RepoURL        string
+    CreatedAt      time.Time
+    RawJSON        []byte    // Full original payload
+}
+```
+
+### Storage
+
+The `storage.Storage` interface for custom backends:
+
+```go
+type Storage interface {
+    Upsert(ctx context.Context, item *provider.Item) error
+    GetLatest(ctx context.Context) (*provider.Item, error)
+    GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error)
+    Count(ctx context.Context) (int64, error)
+    GetTypes(ctx context.Context) ([]string, error)
+    // ... more methods
+}
+```
+
+## Built-in Providers
+
+| Provider | Package                | Description             |
+| -------- | ---------------------- | ----------------------- |
+| GitHub   | `pkg/providers/github` | Sync GitHub user events |
+
+## Example CLI
+
+See `cmd/examples/github-sync/` for a complete CLI implementation:
 
 ```bash
-# Set your GitHub token
-export GITHUB_TOKEN=your_token_here
+# Build the example
+go build -o gh-sync ./cmd/examples/github-sync
 
-# Sync events for a user
+# Use it
+export GITHUB_TOKEN=your_token
 gh-sync -user octocat
-
-# Sync with verbose output
-gh-sync -user octocat -verbose
-
-# Show database statistics
-gh-sync -stats
-
-# Full sync (not incremental)
-gh-sync -user octocat -incremental=false
 ```
 
-## CLI Flags
+## Features
 
-| Flag           | Default                                 | Description                        |
-| -------------- | --------------------------------------- | ---------------------------------- |
-| `-token`       | `$GITHUB_TOKEN`                         | GitHub personal access token       |
-| `-user`        | (required)                              | GitHub username to sync events for |
-| `-db`          | `~/.local/share/go-localsync/events.db` | Path to SQLite database            |
-| `-pages`       | 10                                      | Maximum number of pages to fetch   |
-| `-incremental` | true                                    | Only sync new events               |
-| `-stats`       | false                                   | Show database statistics and exit  |
-| `-version`     | false                                   | Show version information           |
-| `-verbose`     | false                                   | Enable verbose logging             |
+- **Incremental Sync** - Only fetch new items since last sync
+- **Rate Limiting** - Automatic rate limit handling with configurable wait
+- **Retry Logic** - Exponential backoff for transient errors
+- **Full Fidelity** - Raw JSON stored for 100% data preservation
+- **Type-Safe** - sqlc-generated queries for SQLite
+- **No CGO** - Pure Go SQLite driver
 
 ## Development
 
 ```bash
-# Build
-just build
-
-# Run tests
-just test
-
-# Generate sqlc code
-just sqlc
-
-# Run linter
-just lint
+just build    # Build
+just test     # Run tests
+just sqlc     # Generate sqlc code
+just lint     # Run linter
 ```
 
 ## Architecture
 
 ```
 pkg/
-├── github/     # GitHub API client
-├── storage/    # Storage interface and SQLite implementation
-└── sync/       # Sync logic (fetch → transform → store)
+├── provider/         # Core interfaces (Provider, Item, Storage)
+├── providers/        # Built-in providers
+│   └── github/       # GitHub provider implementation
+├── storage/          # Storage interface and SQLite implementation
+├── sync/             # Sync logic (fetch → store)
+└── errors/           # Typed errors
 
 internal/
-├── database/   # Database connection management
-└── db/         # sqlc generated code
+├── database/         # Database connection management
+└── db/               # sqlc generated code
 
-cmd/
-└── gh-sync/    # CLI entrypoint
+cmd/examples/         # Example CLI applications
 ```
 
 ## License

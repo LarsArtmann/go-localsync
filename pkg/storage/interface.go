@@ -5,21 +5,35 @@ import (
 	"database/sql"
 
 	"github.com/larsartmann/go-localsync/internal/db"
-	"github.com/larsartmann/go-localsync/pkg/event"
+	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
+// Storage defines the interface for storing and retrieving sync items.
 type Storage interface {
-	UpsertEvent(ctx context.Context, event *event.Event) error
-	GetLatestEvent(ctx context.Context) (*event.Event, error)
-	GetEvents(ctx context.Context, limit, offset int) ([]*event.Event, error)
-	GetEventsByType(ctx context.Context, eventType string, limit, offset int) ([]*event.Event, error)
-	GetEventsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*event.Event, error)
-	GetEventsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*event.Event, error)
-	CountEvents(ctx context.Context) (int64, error)
-	CountEventsByType(ctx context.Context, eventType string) (int64, error)
-	GetEventTypes(ctx context.Context) ([]string, error)
+	// Upsert inserts or updates an item. ID is used as the unique key.
+	Upsert(ctx context.Context, item *provider.Item) error
+	// GetLatest returns the most recently created item, or nil if empty.
+	GetLatest(ctx context.Context) (*provider.Item, error)
+	// GetItems retrieves items with pagination.
+	GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error)
+	// GetItemsByType retrieves items filtered by type.
+	GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error)
+	// GetItemsByActor retrieves items filtered by actor login.
+	GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error)
+	// GetItemsByRepo retrieves items filtered by repository name.
+	GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error)
+	// Count returns the total number of items.
+	Count(ctx context.Context) (int64, error)
+	// CountByType returns the number of items of a specific type.
+	CountByType(ctx context.Context, itemType string) (int64, error)
+	// GetTypes returns all unique item types.
+	GetTypes(ctx context.Context) ([]string, error)
+	// Close releases resources.
 	Close() error
 }
+
+// Legacy Storage interface names (deprecated, use new methods)
+// These are kept for backward compatibility during migration.
 
 func toNullString(s string) sql.NullString {
 	if s == "" {
@@ -35,22 +49,13 @@ func fromNullString(ns sql.NullString) string {
 	return ns.String
 }
 
-func toDBEvent(e *event.Event) *db.UpsertEventParams {
-	return &db.UpsertEventParams{
-		GithubID:       e.GithubID,
-		Type:           e.Type,
-		ActorLogin:     toNullString(e.ActorLogin),
-		ActorAvatarUrl: toNullString(e.ActorAvatarURL),
-		RepoName:       toNullString(e.RepoName),
-		RepoUrl:        toNullString(e.RepoURL),
-		CreatedAt:      e.CreatedAt,
-		RawJson:        e.RawJSON,
-	}
-}
-
-func fromDBEvent(e *db.Events) *event.Event {
-	return &event.Event{
-		GithubID:       e.GithubID,
+// toItem converts a database row to provider.Item.
+// Note: The database column is named "github_id" for backward compatibility,
+// but we treat it as a generic source ID.
+func toItem(e *db.Events) *provider.Item {
+	return &provider.Item{
+		ID:             e.GithubID, // Map github_id column to generic ID
+		Source:         "github",   // Default to github for existing data
 		Type:           e.Type,
 		ActorLogin:     fromNullString(e.ActorLogin),
 		ActorAvatarURL: fromNullString(e.ActorAvatarUrl),
@@ -58,5 +63,20 @@ func fromDBEvent(e *db.Events) *event.Event {
 		RepoURL:        fromNullString(e.RepoUrl),
 		CreatedAt:      e.CreatedAt,
 		RawJSON:        e.RawJson,
+	}
+}
+
+// toDBParams converts provider.Item to database parameters.
+// Note: Item.ID is stored in the "github_id" column for backward compatibility.
+func toDBParams(item *provider.Item) *db.UpsertEventParams {
+	return &db.UpsertEventParams{
+		GithubID:       item.ID, // Store generic ID in github_id column
+		Type:           item.Type,
+		ActorLogin:     toNullString(item.ActorLogin),
+		ActorAvatarUrl: toNullString(item.ActorAvatarURL),
+		RepoName:       toNullString(item.RepoName),
+		RepoUrl:        toNullString(item.RepoURL),
+		CreatedAt:      item.CreatedAt,
+		RawJson:        item.RawJSON,
 	}
 }

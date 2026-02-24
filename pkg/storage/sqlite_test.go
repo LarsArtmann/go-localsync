@@ -7,13 +7,14 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/internal/database"
-	"github.com/larsartmann/go-localsync/pkg/event"
+	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-// testEvent creates a consistent test event for use across multiple tests.
-func testEvent() *event.Event {
-	return &event.Event{
-		GithubID:   "12345",
+// testItem creates a consistent test item for use across multiple tests.
+func testItem() *provider.Item {
+	return &provider.Item{
+		ID:         "12345",
+		Source:     "github",
 		Type:       "PushEvent",
 		ActorLogin: "testuser",
 		RepoName:   "test/repo",
@@ -22,18 +23,18 @@ func testEvent() *event.Event {
 	}
 }
 
-// assertEventCount verifies the event count matches expected value.
-func assertEventCount(t *testing.T, store Storage, ctx context.Context, expected int64, msgAndArgs ...interface{}) {
+// assertItemCount verifies the item count matches expected value.
+func assertItemCount(t *testing.T, store Storage, ctx context.Context, expected int64, msgAndArgs ...interface{}) {
 	t.Helper()
-	count, err := store.CountEvents(ctx)
+	count, err := store.Count(ctx)
 	if err != nil {
-		t.Fatalf("CountEvents failed: %v", err)
+		t.Fatalf("Count failed: %v", err)
 	}
 	if count != expected {
 		if len(msgAndArgs) > 0 {
-			t.Errorf("%v (expected %d events, got %d)", msgAndArgs[0], expected, count)
+			t.Errorf("%v (expected %d items, got %d)", msgAndArgs[0], expected, count)
 		} else {
-			t.Errorf("Expected %d events, got %d", expected, count)
+			t.Errorf("Expected %d items, got %d", expected, count)
 		}
 	}
 }
@@ -48,95 +49,95 @@ func TestSQLiteStorage(t *testing.T) {
 	store := NewSQLiteStorage(db)
 	ctx := context.Background()
 
-	t.Run("CountEvents initially returns 0", func(t *testing.T) {
-		count, err := store.CountEvents(ctx)
+	t.Run("Count initially returns 0", func(t *testing.T) {
+		count, err := store.Count(ctx)
 		if err != nil {
-			t.Fatalf("CountEvents failed: %v", err)
+			t.Fatalf("Count failed: %v", err)
 		}
 		if count != 0 {
-			t.Errorf("Expected 0 events, got %d", count)
+			t.Errorf("Expected 0 items, got %d", count)
 		}
 	})
 
-	t.Run("GetLatestEvent returns nil for empty database", func(t *testing.T) {
-		event, err := store.GetLatestEvent(ctx)
+	t.Run("GetLatest returns nil for empty database", func(t *testing.T) {
+		item, err := store.GetLatest(ctx)
 		if err != nil {
-			t.Fatalf("GetLatestEvent failed: %v", err)
+			t.Fatalf("GetLatest failed: %v", err)
 		}
-		if event != nil {
-			t.Errorf("Expected nil event, got %+v", event)
+		if item != nil {
+			t.Errorf("Expected nil item, got %+v", item)
 		}
 	})
 
-	t.Run("UpsertEvent inserts new event", func(t *testing.T) {
-		if err := store.UpsertEvent(ctx, testEvent()); err != nil {
-			t.Fatalf("UpsertEvent failed: %v", err)
+	t.Run("Upsert inserts new item", func(t *testing.T) {
+		if err := store.Upsert(ctx, testItem()); err != nil {
+			t.Fatalf("Upsert failed: %v", err)
 		}
-		assertEventCount(t, store, ctx, 1)
+		assertItemCount(t, store, ctx, 1)
 	})
 
-	t.Run("UpsertEvent is idempotent", func(t *testing.T) {
-		if err := store.UpsertEvent(ctx, testEvent()); err != nil {
-			t.Fatalf("UpsertEvent failed: %v", err)
+	t.Run("Upsert is idempotent", func(t *testing.T) {
+		if err := store.Upsert(ctx, testItem()); err != nil {
+			t.Fatalf("Upsert failed: %v", err)
 		}
-		assertEventCount(t, store, ctx, 1, "idempotent")
+		assertItemCount(t, store, ctx, 1, "idempotent")
 	})
 
-	t.Run("GetLatestEvent returns the latest event", func(t *testing.T) {
-		event, err := store.GetLatestEvent(ctx)
+	t.Run("GetLatest returns the latest item", func(t *testing.T) {
+		item, err := store.GetLatest(ctx)
 		if err != nil {
-			t.Fatalf("GetLatestEvent failed: %v", err)
+			t.Fatalf("GetLatest failed: %v", err)
 		}
-		if event == nil {
-			t.Fatal("Expected event, got nil")
+		if item == nil {
+			t.Fatal("Expected item, got nil")
 		}
-		if event.GithubID != "12345" {
-			t.Errorf("Expected GithubID 12345, got %s", event.GithubID)
-		}
-	})
-
-	t.Run("GetEvents returns events", func(t *testing.T) {
-		events, err := store.GetEvents(ctx, 10, 0)
-		if err != nil {
-			t.Fatalf("GetEvents failed: %v", err)
-		}
-		if len(events) != 1 {
-			t.Errorf("Expected 1 event, got %d", len(events))
+		if item.ID != "12345" {
+			t.Errorf("Expected ID 12345, got %s", item.ID)
 		}
 	})
 
-	t.Run("GetEventsByType filters by type", func(t *testing.T) {
-		events, err := store.GetEventsByType(ctx, "PushEvent", 10, 0)
+	t.Run("GetItems returns items", func(t *testing.T) {
+		items, err := store.GetItems(ctx, 10, 0)
 		if err != nil {
-			t.Fatalf("GetEventsByType failed: %v", err)
+			t.Fatalf("GetItems failed: %v", err)
 		}
-		if len(events) != 1 {
-			t.Errorf("Expected 1 PushEvent, got %d", len(events))
-		}
-
-		events, err = store.GetEventsByType(ctx, "PullRequestEvent", 10, 0)
-		if err != nil {
-			t.Fatalf("GetEventsByType failed: %v", err)
-		}
-		if len(events) != 0 {
-			t.Errorf("Expected 0 PullRequestEvent, got %d", len(events))
+		if len(items) != 1 {
+			t.Errorf("Expected 1 item, got %d", len(items))
 		}
 	})
 
-	t.Run("GetEventTypes returns distinct types", func(t *testing.T) {
-		types, err := store.GetEventTypes(ctx)
+	t.Run("GetItemsByType filters by type", func(t *testing.T) {
+		items, err := store.GetItemsByType(ctx, "PushEvent", 10, 0)
 		if err != nil {
-			t.Fatalf("GetEventTypes failed: %v", err)
+			t.Fatalf("GetItemsByType failed: %v", err)
+		}
+		if len(items) != 1 {
+			t.Errorf("Expected 1 PushEvent, got %d", len(items))
+		}
+
+		items, err = store.GetItemsByType(ctx, "PullRequestEvent", 10, 0)
+		if err != nil {
+			t.Fatalf("GetItemsByType failed: %v", err)
+		}
+		if len(items) != 0 {
+			t.Errorf("Expected 0 PullRequestEvent, got %d", len(items))
+		}
+	})
+
+	t.Run("GetTypes returns distinct types", func(t *testing.T) {
+		types, err := store.GetTypes(ctx)
+		if err != nil {
+			t.Fatalf("GetTypes failed: %v", err)
 		}
 		if len(types) != 1 || types[0] != "PushEvent" {
 			t.Errorf("Expected [PushEvent], got %v", types)
 		}
 	})
 
-	t.Run("CountEventsByType counts by type", func(t *testing.T) {
-		count, err := store.CountEventsByType(ctx, "PushEvent")
+	t.Run("CountByType counts by type", func(t *testing.T) {
+		count, err := store.CountByType(ctx, "PushEvent")
 		if err != nil {
-			t.Fatalf("CountEventsByType failed: %v", err)
+			t.Fatalf("CountByType failed: %v", err)
 		}
 		if count != 1 {
 			t.Errorf("Expected 1 PushEvent, got %d", count)

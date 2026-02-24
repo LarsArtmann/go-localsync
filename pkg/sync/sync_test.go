@@ -6,17 +6,15 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/log"
-	gh "github.com/google/go-github/v69/github"
-	"github.com/larsartmann/go-localsync/pkg/event"
-	"github.com/larsartmann/go-localsync/pkg/github"
+	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 // mockStorage implements storage.Storage for testing
 type mockStorage struct {
-	events         []*event.Event
-	latestEvent    *event.Event
+	items          []*provider.Item
+	latestItem     *provider.Item
 	upsertErr      error
 	latestErr      error
 	countResult    int64
@@ -28,46 +26,46 @@ type mockStorage struct {
 	closeErr       error
 }
 
-func (m *mockStorage) UpsertEvent(ctx context.Context, e *event.Event) error {
+func (m *mockStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	if m.upsertErr != nil {
 		return m.upsertErr
 	}
-	m.events = append(m.events, e)
+	m.items = append(m.items, item)
 	return nil
 }
 
-func (m *mockStorage) GetLatestEvent(ctx context.Context) (*event.Event, error) {
+func (m *mockStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 	if m.latestErr != nil {
 		return nil, m.latestErr
 	}
-	return m.latestEvent, nil
+	return m.latestItem, nil
 }
 
-func (m *mockStorage) GetEvents(ctx context.Context, limit, offset int) ([]*event.Event, error) {
-	return m.events, nil
+func (m *mockStorage) GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error) {
+	return m.items, nil
 }
 
-func (m *mockStorage) GetEventsByType(ctx context.Context, eventType string, limit, offset int) ([]*event.Event, error) {
-	return m.events, nil
+func (m *mockStorage) GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error) {
+	return m.items, nil
 }
 
-func (m *mockStorage) GetEventsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*event.Event, error) {
-	return m.events, nil
+func (m *mockStorage) GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error) {
+	return m.items, nil
 }
 
-func (m *mockStorage) GetEventsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*event.Event, error) {
-	return m.events, nil
+func (m *mockStorage) GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error) {
+	return m.items, nil
 }
 
-func (m *mockStorage) CountEvents(ctx context.Context) (int64, error) {
+func (m *mockStorage) Count(ctx context.Context) (int64, error) {
 	return m.countResult, m.countErr
 }
 
-func (m *mockStorage) CountEventsByType(ctx context.Context, eventType string) (int64, error) {
+func (m *mockStorage) CountByType(ctx context.Context, itemType string) (int64, error) {
 	return m.countByType, m.countByTypeErr
 }
 
-func (m *mockStorage) GetEventTypes(ctx context.Context) ([]string, error) {
+func (m *mockStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return m.typesResult, m.typesErr
 }
 
@@ -75,28 +73,37 @@ func (m *mockStorage) Close() error {
 	return m.closeErr
 }
 
-// mockGitHubClient implements github.Fetcher interface
-type mockGitHubClient struct {
-	events []*event.Event
-	err    error
+// mockProvider implements provider.Provider for testing
+type mockProvider struct {
+	name      string
+	result    *provider.FetchResult
+	rateLimit *provider.RateLimitInfo
+	err       error
 }
 
-func (m *mockGitHubClient) FetchEvents(ctx context.Context, username string, opts *github.FetchOptions) ([]*event.Event, error) {
+func (m *mockProvider) Name() string {
+	if m.name == "" {
+		return "mock"
+	}
+	return m.name
+}
+
+func (m *mockProvider) Fetch(ctx context.Context, opts *provider.FetchOptions) (*provider.FetchResult, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
-	return m.events, nil
+	return m.result, nil
 }
 
-func (m *mockGitHubClient) FetchAllEvents(ctx context.Context, username string, maxPages int) ([]*event.Event, error) {
+func (m *mockProvider) FetchAll(ctx context.Context, source string, maxPages int) (*provider.FetchResult, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
-	return m.events, nil
+	return m.result, nil
 }
 
-func (m *mockGitHubClient) GetRateLimit(ctx context.Context) (*gh.RateLimits, *gh.Response, error) {
-	return nil, nil, m.err
+func (m *mockProvider) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, error) {
+	return m.rateLimit, m.err
 }
 
 func TestNewSyncer(t *testing.T) {
@@ -104,7 +111,6 @@ func TestNewSyncer(t *testing.T) {
 		mockStore := &mockStorage{}
 		logger := log.New(nil)
 
-		// Create a simple wrapper since we can't directly instantiate github.Client
 		syncer := NewSyncer(nil, mockStore, logger)
 
 		require.NotNil(t, syncer)
@@ -131,18 +137,20 @@ func TestSyncer_Sync(t *testing.T) {
 		assert.Nil(t, result)
 	})
 
-	t.Run("syncs events successfully", func(t *testing.T) {
-		mockFetcher := &mockGitHubClient{
-			events: []*event.Event{
-				{GithubID: "1", Type: "PushEvent"},
-				{GithubID: "2", Type: "IssuesEvent"},
+	t.Run("syncs items successfully", func(t *testing.T) {
+		mockProv := &mockProvider{
+			result: &provider.FetchResult{
+				Items: []*provider.Item{
+					{ID: "1", Type: "PushEvent"},
+					{ID: "2", Type: "IssuesEvent"},
+				},
 			},
 		}
 		mockStore := &mockStorage{}
-		syncer := NewSyncer(mockFetcher, mockStore, nil)
+		syncer := NewSyncer(mockProv, mockStore, nil)
 
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
-			Username: "testuser",
+			Source:   "testuser",
 			MaxPages: 1,
 		})
 
@@ -150,18 +158,18 @@ func TestSyncer_Sync(t *testing.T) {
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 0, result.Skipped)
-		assert.Len(t, mockStore.events, 2)
+		assert.Len(t, mockStore.items, 2)
 	})
 
 	t.Run("returns error when fetch fails", func(t *testing.T) {
-		mockFetcher := &mockGitHubClient{
+		mockProv := &mockProvider{
 			err: errors.New("fetch error"),
 		}
 		mockStore := &mockStorage{}
-		syncer := NewSyncer(mockFetcher, mockStore, nil)
+		syncer := NewSyncer(mockProv, mockStore, nil)
 
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
-			Username: "testuser",
+			Source:   "testuser",
 			MaxPages: 1,
 		})
 
@@ -170,19 +178,21 @@ func TestSyncer_Sync(t *testing.T) {
 	})
 
 	t.Run("counts errors when upsert fails", func(t *testing.T) {
-		mockFetcher := &mockGitHubClient{
-			events: []*event.Event{
-				{GithubID: "1", Type: "PushEvent"},
-				{GithubID: "2", Type: "IssuesEvent"},
+		mockProv := &mockProvider{
+			result: &provider.FetchResult{
+				Items: []*provider.Item{
+					{ID: "1", Type: "PushEvent"},
+					{ID: "2", Type: "IssuesEvent"},
+				},
 			},
 		}
 		mockStore := &mockStorage{
 			upsertErr: errors.New("upsert error"),
 		}
-		syncer := NewSyncer(mockFetcher, mockStore, nil)
+		syncer := NewSyncer(mockProv, mockStore, nil)
 
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
-			Username: "testuser",
+			Source:   "testuser",
 			MaxPages: 1,
 		})
 
@@ -218,8 +228,8 @@ func TestSyncer_GetStats(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, stats)
-		assert.Equal(t, int64(100), stats.TotalEvents)
-		assert.Equal(t, []string{"PushEvent", "IssuesEvent"}, stats.EventTypes)
+		assert.Equal(t, int64(100), stats.TotalItems)
+		assert.Equal(t, []string{"PushEvent", "IssuesEvent"}, stats.ItemTypes)
 	})
 
 	t.Run("returns error when count fails", func(t *testing.T) {
@@ -273,10 +283,6 @@ func TestSyncer_Close(t *testing.T) {
 	})
 }
 
-// Note: Full integration test would require a mock github client
-// that implements the FetchAllEvents method. Since we can't easily
-// inject a mock without interface extraction, we test the storage
-// directly in the sqlite_test.go file.
 func TestSyncResult(t *testing.T) {
 	result := &SyncResult{
 		Fetched: 100,

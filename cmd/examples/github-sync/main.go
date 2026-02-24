@@ -1,3 +1,5 @@
+// Package main provides a GitHub sync example using the go-localsync SDK.
+// This demonstrates how to use the SDK to build a local sync application.
 package main
 
 import (
@@ -13,7 +15,7 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/larsartmann/go-localsync/internal/database"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
-	"github.com/larsartmann/go-localsync/pkg/github"
+	"github.com/larsartmann/go-localsync/pkg/providers/github"
 	"github.com/larsartmann/go-localsync/pkg/storage"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
@@ -49,7 +51,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("go-localsync %s (commit: %s, built: %s)\n", version, commit, date)
+		fmt.Printf("gh-sync %s (commit: %s, built: %s)\n", version, commit, date)
 		os.Exit(0)
 	}
 
@@ -86,14 +88,14 @@ func main() {
 	store := storage.NewSQLiteStorage(dbc)
 
 	if *showStats {
-		stats, err := store.CountEvents(context.Background())
+		stats, err := store.Count(context.Background())
 		if err != nil {
 			logger.Error("Failed to get stats", "error", err)
 			os.Exit(exitSoftware)
 		}
-		types, _ := store.GetEventTypes(context.Background())
-		fmt.Printf("Total events: %d\n", stats)
-		fmt.Printf("Event types: %v\n", types)
+		types, _ := store.GetTypes(context.Background())
+		fmt.Printf("Total items: %d\n", stats)
+		fmt.Printf("Item types: %v\n", types)
 		os.Exit(0)
 	}
 
@@ -107,8 +109,9 @@ func main() {
 		os.Exit(exitUsage)
 	}
 
-	ghClient := github.NewClient(*token)
-	syncer := synclib.NewSyncer(ghClient, store, logger)
+	// Create GitHub provider
+	ghProvider := github.NewClient(*token)
+	syncer := synclib.NewSyncer(ghProvider, store, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -122,7 +125,7 @@ func main() {
 	}()
 
 	opts := &synclib.SyncOptions{
-		Username: *username,
+		Source:   *username,
 		MaxPages: *maxPages,
 	}
 
