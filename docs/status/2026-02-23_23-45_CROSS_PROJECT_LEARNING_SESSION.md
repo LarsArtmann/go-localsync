@@ -19,6 +19,7 @@ This session analyzed go-composable-business-types (cbt) to identify patterns ap
 Created comprehensive assessment report at `docs/status/2026-02-23_23-25_PRODUCTION_READINESS_ASSESSMENT.md`.
 
 **Key findings:**
+
 - Overall readiness: 85%
 - Test coverage: pkg/github 69.9%, pkg/storage 83.9%, pkg/sync 58.2%
 - Missing: CLI integration tests (0%), real API verification
@@ -27,6 +28,7 @@ Created comprehensive assessment report at `docs/status/2026-02-23_23-25_PRODUCT
 ### 2. Codebase Formatting
 
 Committed style improvements across 8 files:
+
 - Table formatting in markdown docs
 - Struct field alignment in Go files
 - Consistent YAML quote style
@@ -42,20 +44,21 @@ Analyzed `/Users/larsartmann/projects/go-composable-business-types` for applicab
 
 ### Applicable Patterns
 
-| Pattern | Description | Application to go-localsync |
-|---------|-------------|----------------------------|
-| **Branded IDs** | `ID[B, V]` phantom types prevent ID mixing | Event IDs, User IDs type-safe |
-| **NanoId** | URL-safe 21-char IDs | Internal sync tracking IDs |
-| **Bitemporal** | `validFrom`, `validUntil`, `recorded` | Track event occurrence vs sync time |
-| **Actor tracking** | `ActorChain[T]` for audit trails | Who initiated sync (user/cron/webhook) |
-| **With* builders** | Immutable functional updates | `WithTrigger()`, `WithContext()` |
-| **Parse/Must constructors** | Validation at construction | `ParseEventType()`, `MustParseGitHubID()` |
-| **SQL Scanner/Valuer** | Full database/sql support | Better NULL handling in storage layer |
-| **Sentinel errors** | Granular validation errors | Per-field error types |
+| Pattern                     | Description                                | Application to go-localsync               |
+| --------------------------- | ------------------------------------------ | ----------------------------------------- |
+| **Branded IDs**             | `ID[B, V]` phantom types prevent ID mixing | Event IDs, User IDs type-safe             |
+| **NanoId**                  | URL-safe 21-char IDs                       | Internal sync tracking IDs                |
+| **Bitemporal**              | `validFrom`, `validUntil`, `recorded`      | Track event occurrence vs sync time       |
+| **Actor tracking**          | `ActorChain[T]` for audit trails           | Who initiated sync (user/cron/webhook)    |
+| **With\* builders**         | Immutable functional updates               | `WithTrigger()`, `WithContext()`          |
+| **Parse/Must constructors** | Validation at construction                 | `ParseEventType()`, `MustParseGitHubID()` |
+| **SQL Scanner/Valuer**      | Full database/sql support                  | Better NULL handling in storage layer     |
+| **Sentinel errors**         | Granular validation errors                 | Per-field error types                     |
 
 ### Code Comparison
 
 **Current go-localsync Event:**
+
 ```go
 type Event struct {
     ID        int64
@@ -67,6 +70,7 @@ type Event struct {
 ```
 
 **Proposed enhancement (cbt patterns):**
+
 ```go
 type EventBrand struct{}
 type EventID = cbt.ID[EventBrand, int64]
@@ -110,20 +114,20 @@ func NewEvent(githubID int64, eventType string, raw json.RawMessage) (*Event, er
 
 ### High Value, Low Effort
 
-| Enhancement | Effort | Impact | Priority |
-|-------------|--------|--------|----------|
-| Add `synced_at` timestamp | 15min | Medium | HIGH |
-| Branded `GitHubEventID` type | 30min | High | HIGH |
-| `ParseEventType()` validation | 20min | Medium | MEDIUM |
-| Sync context (actor, trigger) | 1h | High | MEDIUM |
+| Enhancement                   | Effort | Impact | Priority |
+| ----------------------------- | ------ | ------ | -------- |
+| Add `synced_at` timestamp     | 15min  | Medium | HIGH     |
+| Branded `GitHubEventID` type  | 30min  | High   | HIGH     |
+| `ParseEventType()` validation | 20min  | Medium | MEDIUM   |
+| Sync context (actor, trigger) | 1h     | High   | MEDIUM   |
 
 ### Medium Value, Medium Effort
 
-| Enhancement | Effort | Impact | Priority |
-|-------------|--------|--------|----------|
-| Bitemporal tracking | 2h | High | MEDIUM |
-| Actor chain for sync | 1.5h | Medium | LOW |
-| Full SQL Scanner/Valuer | 1h | Medium | LOW |
+| Enhancement             | Effort | Impact | Priority |
+| ----------------------- | ------ | ------ | -------- |
+| Bitemporal tracking     | 2h     | High   | MEDIUM   |
+| Actor chain for sync    | 1.5h   | Medium | LOW      |
+| Full SQL Scanner/Valuer | 1h     | Medium | LOW      |
 
 ### Consider for Future
 
@@ -192,12 +196,12 @@ func NewEvent(githubID int64, eventType string, raw json.RawMessage) (*Event, er
 
 ### Current Test Coverage
 
-| Package | Coverage | Target |
-|---------|----------|--------|
-| pkg/github | 69.9% | 80% |
-| pkg/storage | 83.9% | 85% |
-| pkg/sync | 58.2% | 75% |
-| cmd/gh-sync | 0.0% | 60% |
+| Package     | Coverage | Target |
+| ----------- | -------- | ------ |
+| pkg/github  | 69.9%    | 80%    |
+| pkg/storage | 83.9%    | 85%    |
+| pkg/sync    | 58.2%    | 75%    |
+| cmd/gh-sync | 0.0%     | 60%    |
 
 ### Codebase Health
 
@@ -239,11 +243,13 @@ Lint Status:     ✅ Clean
 ### 1. Use cbt as dependency?
 
 **Pros:**
+
 - Immediate access to all patterns
 - Maintained separately
 - Type interoperability
 
 **Cons:**
+
 - External dependency
 - May pull in unused types
 - Version coupling
@@ -274,7 +280,7 @@ go-composable-business-types demonstrates mature Go patterns that would improve 
 1. **Branded IDs** - Prevent ID confusion at compile time
 2. **Parse constructors** - Validate at boundary
 3. **Bitemporal tracking** - Better audit trail
-4. **With* builders** - Clean immutable updates
+4. **With\* builders** - Clean immutable updates
 
 Implementing these incrementally would move go-localsync from "good" to "excellent" architecture without requiring a full rewrite.
 
@@ -283,6 +289,7 @@ Implementing these incrementally would move go-localsync from "good" to "excelle
 ---
 
 **References:**
+
 - `/Users/larsartmann/projects/go-composable-business-types/` - Source of patterns
 - `docs/status/2026-02-23_23-25_PRODUCTION_READINESS_ASSESSMENT.md` - Current state
 - `TODO_LIST.md` - Outstanding tasks
