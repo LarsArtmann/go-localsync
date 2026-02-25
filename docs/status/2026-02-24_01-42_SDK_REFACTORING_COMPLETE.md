@@ -16,12 +16,12 @@ Successfully transformed go-localsync from a GitHub-specific CLI application int
 
 ### Architecture Transformation
 
-| Before | After |
-|--------|-------|
-| Monolithic GitHub CLI | Generic SDK with provider plugins |
-| `pkg/github/` - GitHub-specific | `pkg/providers/github/` - One of many possible |
-| `pkg/event/` - GitHub Event type | `pkg/provider/` - Generic Item interface |
-| `cmd/gh-sync/` - Main product | `cmd/examples/` - Reference implementations |
+| Before                           | After                                          |
+| -------------------------------- | ---------------------------------------------- |
+| Monolithic GitHub CLI            | Generic SDK with provider plugins              |
+| `pkg/github/` - GitHub-specific  | `pkg/providers/github/` - One of many possible |
+| `pkg/event/` - GitHub Event type | `pkg/provider/` - Generic Item interface       |
+| `cmd/gh-sync/` - Main product    | `cmd/examples/` - Reference implementations    |
 
 ### Package Structure
 
@@ -37,20 +37,20 @@ pkg/
 
 ### Files Changed (11 files, +658/-440 lines)
 
-| File | Action | Description |
-|------|--------|-------------|
-| `pkg/provider/provider.go` | Created | Core SDK interfaces |
-| `pkg/providers/github/client.go` | Moved/Updated | Implements Provider interface |
-| `pkg/providers/github/client_test.go` | Moved/Updated | Tests for GitHub provider |
-| `pkg/storage/interface.go` | Updated | Uses `*provider.Item` instead of `*event.Event` |
-| `pkg/storage/sqlite.go` | Updated | Implements new Storage interface |
-| `pkg/storage/sqlite_test.go` | Updated | Tests with provider.Item |
-| `pkg/sync/sync.go` | Updated | Uses `provider.Provider` interface |
-| `pkg/sync/sync_test.go` | Updated | Tests with mock Provider |
-| `cmd/examples/github-sync/main.go` | Moved | From `cmd/gh-sync/` |
-| `pkg/event/event.go` | Deleted | Replaced by provider.Item |
-| `pkg/github/client.go` | Deleted | Moved to providers/github |
-| `README.md` | Updated | SDK documentation with examples |
+| File                                  | Action        | Description                                     |
+| ------------------------------------- | ------------- | ----------------------------------------------- |
+| `pkg/provider/provider.go`            | Created       | Core SDK interfaces                             |
+| `pkg/providers/github/client.go`      | Moved/Updated | Implements Provider interface                   |
+| `pkg/providers/github/client_test.go` | Moved/Updated | Tests for GitHub provider                       |
+| `pkg/storage/interface.go`            | Updated       | Uses `*provider.Item` instead of `*event.Event` |
+| `pkg/storage/sqlite.go`               | Updated       | Implements new Storage interface                |
+| `pkg/storage/sqlite_test.go`          | Updated       | Tests with provider.Item                        |
+| `pkg/sync/sync.go`                    | Updated       | Uses `provider.Provider` interface              |
+| `pkg/sync/sync_test.go`               | Updated       | Tests with mock Provider                        |
+| `cmd/examples/github-sync/main.go`    | Moved         | From `cmd/gh-sync/`                             |
+| `pkg/event/event.go`                  | Deleted       | Replaced by provider.Item                       |
+| `pkg/github/client.go`                | Deleted       | Moved to providers/github                       |
+| `README.md`                           | Updated       | SDK documentation with examples                 |
 
 ---
 
@@ -178,16 +178,19 @@ func main() {
 ## Next Steps (Recommendations)
 
 ### Short-term
+
 - [ ] Add provider documentation with examples
 - [ ] Consider adding a GitLab provider as proof of extensibility
 - [ ] Add integration tests
 
 ### Medium-term
+
 - [ ] Schema migration: rename `github_id` to `source_id`
 - [ ] Add `Source` column to database for multi-provider queries
 - [ ] Consider adding webhook support for real-time sync
 
 ### Long-term
+
 - [ ] Provider registry for discovery
 - [ ] Configuration-based provider loading
 - [ ] Metrics and observability hooks
