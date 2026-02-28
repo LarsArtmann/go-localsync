@@ -21,7 +21,7 @@ func WithDetail(err error, detail string) error {
 
 // WithUserDetail is a convenience function to add username context.
 func WithUserDetail(err error, username string) error {
-	return errors.WithDetail(err, fmt.Sprintf("username=%s", username))
+	return errors.WithDetail(err, "username="+username)
 }
 
 // Wrap wraps an error with additional context.

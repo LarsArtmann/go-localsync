@@ -35,8 +35,10 @@ func (s *SQLiteStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, err
 	}
+
 	return toItem(e), nil
 }
 
@@ -48,10 +50,15 @@ func (s *SQLiteStorage) GetItems(ctx context.Context, limit, offset int) ([]*pro
 	if err != nil {
 		return nil, err
 	}
+
 	return convertItems(events), nil
 }
 
-func (s *SQLiteStorage) GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error) {
+func (s *SQLiteStorage) GetItemsByType(
+	ctx context.Context,
+	itemType string,
+	limit, offset int,
+) ([]*provider.Item, error) {
 	events, err := s.querier.GetEventsByType(ctx, &db.GetEventsByTypeParams{
 		Type:   itemType,
 		Limit:  int64(limit),
@@ -60,10 +67,15 @@ func (s *SQLiteStorage) GetItemsByType(ctx context.Context, itemType string, lim
 	if err != nil {
 		return nil, err
 	}
+
 	return convertItems(events), nil
 }
 
-func (s *SQLiteStorage) GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error) {
+func (s *SQLiteStorage) GetItemsByActor(
+	ctx context.Context,
+	actorLogin string,
+	limit, offset int,
+) ([]*provider.Item, error) {
 	events, err := s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
 		ActorLogin: toNullString(actorLogin),
 		Limit:      int64(limit),
@@ -72,10 +84,15 @@ func (s *SQLiteStorage) GetItemsByActor(ctx context.Context, actorLogin string, 
 	if err != nil {
 		return nil, err
 	}
+
 	return convertItems(events), nil
 }
 
-func (s *SQLiteStorage) GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error) {
+func (s *SQLiteStorage) GetItemsByRepo(
+	ctx context.Context,
+	repoName string,
+	limit, offset int,
+) ([]*provider.Item, error) {
 	events, err := s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
 		RepoName: toNullString(repoName),
 		Limit:    int64(limit),
@@ -84,6 +101,7 @@ func (s *SQLiteStorage) GetItemsByRepo(ctx context.Context, repoName string, lim
 	if err != nil {
 		return nil, err
 	}
+
 	return convertItems(events), nil
 }
 
@@ -104,5 +122,6 @@ func convertItems(events []*db.Events) []*provider.Item {
 	for i, e := range events {
 		result[i] = toItem(e)
 	}
+
 	return result
 }

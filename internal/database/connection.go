@@ -35,6 +35,7 @@ func Open(path string) (*sql.DB, error) {
 
 	if _, err := db.Exec(schema); err != nil {
 		db.Close()
+
 		return nil, err
 	}
 

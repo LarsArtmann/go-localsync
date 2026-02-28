@@ -28,6 +28,7 @@ func NewClient(token string) *Client {
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(context.Background(), ts)
+
 	return &Client{
 		client:          gh.NewClient(tc),
 		rateLimitConfig: provider.DefaultRateLimitConfig,
@@ -68,13 +69,18 @@ func (c *Client) Name() string {
 }
 
 // Fetch retrieves a single page of GitHub events.
-func (c *Client) Fetch(ctx context.Context, opts *provider.FetchOptions) (*provider.FetchResult, error) {
+func (c *Client) Fetch(
+	ctx context.Context,
+	opts *provider.FetchOptions,
+) (*provider.FetchResult, error) {
 	if opts == nil {
 		opts = &provider.FetchOptions{PerPage: 100, Page: 1}
 	}
+
 	if opts.PerPage == 0 {
 		opts.PerPage = 100
 	}
+
 	if opts.Page == 0 {
 		opts.Page = 1
 	}
@@ -83,13 +89,22 @@ func (c *Client) Fetch(ctx context.Context, opts *provider.FetchOptions) (*provi
 		return nil, err
 	}
 
-	var activity []*gh.Event
-	var err error
+	var (
+		activity []*gh.Event
+		err      error
+	)
+
 	err = c.withRetry(ctx, func() error {
-		activity, _, err = c.client.Activity.ListEventsPerformedByUser(ctx, opts.Source, false, &gh.ListOptions{
-			Page:    opts.Page,
-			PerPage: opts.PerPage,
-		})
+		activity, _, err = c.client.Activity.ListEventsPerformedByUser(
+			ctx,
+			opts.Source,
+			false,
+			&gh.ListOptions{
+				Page:    opts.Page,
+				PerPage: opts.PerPage,
+			},
+		)
+
 		return err
 	})
 	if err != nil {
@@ -102,6 +117,7 @@ func (c *Client) Fetch(ctx context.Context, opts *provider.FetchOptions) (*provi
 		if err != nil {
 			continue
 		}
+
 		items = append(items, item)
 	}
 
@@ -112,12 +128,17 @@ func (c *Client) Fetch(ctx context.Context, opts *provider.FetchOptions) (*provi
 }
 
 // FetchAll retrieves all available GitHub events up to maxPages.
-func (c *Client) FetchAll(ctx context.Context, source string, maxPages int) (*provider.FetchResult, error) {
+func (c *Client) FetchAll(
+	ctx context.Context,
+	source string,
+	maxPages int,
+) (*provider.FetchResult, error) {
 	if maxPages == 0 {
 		maxPages = 10
 	}
 
 	var allItems []*provider.Item
+
 	for page := 1; page <= maxPages; page++ {
 		result, err := c.Fetch(ctx, &provider.FetchOptions{
 			Source:  source,
@@ -127,14 +148,17 @@ func (c *Client) FetchAll(ctx context.Context, source string, maxPages int) (*pr
 		if err != nil {
 			return nil, err
 		}
+
 		if len(result.Items) == 0 {
 			break
 		}
+
 		allItems = append(allItems, result.Items...)
 		if !result.HasMore {
 			break
 		}
 	}
+
 	return &provider.FetchResult{Items: allItems}, nil
 }
 
@@ -163,8 +187,10 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 		return nil, err
 	}
 
-	var actorLogin, actorAvatarURL string
-	var repoName, repoURL string
+	var (
+		actorLogin, actorAvatarURL string
+		repoName, repoURL          string
+	)
 
 	if e.Actor != nil {
 		actorLogin = e.Actor.GetLogin()
@@ -243,6 +269,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 	}
 
 	var lastErr error
+
 	backoff := c.retryConfig.InitialBackoff
 
 	for attempt := 0; attempt <= c.retryConfig.MaxRetries; attempt++ {
@@ -264,6 +291,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 			if backoff > c.retryConfig.MaxBackoff {
 				backoff = c.retryConfig.MaxBackoff
 			}
+
 			select {
 			case <-ctx.Done():
 				return ctx.Err()
@@ -278,24 +306,29 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 // isRetryableError determines if an error is transient and should be retried.
 func isRetryableError(err error) bool {
-	if ghErr, ok := err.(*gh.ErrorResponse); ok {
+	ghErr := &gh.ErrorResponse{}
+	if errors.As(err, &ghErr) {
 		statusCode := ghErr.Response.StatusCode
+
 		return statusCode >= 500 || statusCode == 429
 	}
+
 	return false
 }
 
 // wrapGitHubError converts GitHub API errors into typed errors.
 func wrapGitHubError(err error, username string) error {
-	if ghErr, ok := err.(*gh.ErrorResponse); ok {
+	ghErr := &gh.ErrorResponse{}
+	if errors.As(err, &ghErr) {
 		switch ghErr.Response.StatusCode {
-		case 401:
+		case http.StatusUnauthorized:
 			return pkgerrors.WithUserDetail(pkgerrors.ErrInvalidToken, username)
-		case 403:
+		case http.StatusForbidden:
 			return pkgerrors.WithUserDetail(pkgerrors.ErrRateLimited, username)
-		case 404:
+		case http.StatusNotFound:
 			return pkgerrors.WithUserDetail(pkgerrors.ErrUserNotFound, username)
 		}
 	}
+
 	return pkgerrors.WithUserDetail(pkgerrors.ErrSyncFailed, username)
 }

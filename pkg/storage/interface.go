@@ -17,11 +17,23 @@ type Storage interface {
 	// GetItems retrieves items with pagination.
 	GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error)
 	// GetItemsByType retrieves items filtered by type.
-	GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error)
+	GetItemsByType(
+		ctx context.Context,
+		itemType string,
+		limit, offset int,
+	) ([]*provider.Item, error)
 	// GetItemsByActor retrieves items filtered by actor login.
-	GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error)
+	GetItemsByActor(
+		ctx context.Context,
+		actorLogin string,
+		limit, offset int,
+	) ([]*provider.Item, error)
 	// GetItemsByRepo retrieves items filtered by repository name.
-	GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error)
+	GetItemsByRepo(
+		ctx context.Context,
+		repoName string,
+		limit, offset int,
+	) ([]*provider.Item, error)
 	// Count returns the total number of items.
 	Count(ctx context.Context) (int64, error)
 	// CountByType returns the number of items of a specific type.
@@ -39,6 +51,7 @@ func toNullString(s string) sql.NullString {
 	if s == "" {
 		return sql.NullString{Valid: false}
 	}
+
 	return sql.NullString{String: s, Valid: true}
 }
 
@@ -46,6 +59,7 @@ func fromNullString(ns sql.NullString) string {
 	if !ns.Valid {
 		return ""
 	}
+
 	return ns.String
 }
 

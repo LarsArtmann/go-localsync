@@ -20,7 +20,7 @@ import (
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
-// Semantic exit codes (sysexits.h conventions)
+// Semantic exit codes (sysexits.h conventions).
 const (
 	exitOK          = 0
 	exitUsage       = 64 // EX_USAGE - command line usage error
@@ -39,15 +39,24 @@ var (
 
 func main() {
 	var (
-		token       = flag.String("token", os.Getenv("GITHUB_TOKEN"), "GitHub personal access token (or set GITHUB_TOKEN env)")
-		username    = flag.String("user", "", "GitHub username to sync events for")
-		dbPath      = flag.String("db", "", "Path to SQLite database (default: ~/.local/share/go-localsync/events.db)")
+		token = flag.String(
+			"token",
+			os.Getenv("GITHUB_TOKEN"),
+			"GitHub personal access token (or set GITHUB_TOKEN env)",
+		)
+		username = flag.String("user", "", "GitHub username to sync events for")
+		dbPath   = flag.String(
+			"db",
+			"",
+			"Path to SQLite database (default: ~/.local/share/go-localsync/events.db)",
+		)
 		maxPages    = flag.Int("pages", 10, "Maximum number of pages to fetch")
 		incremental = flag.Bool("incremental", true, "Only sync new events")
 		showStats   = flag.Bool("stats", false, "Show database statistics and exit")
 		showVersion = flag.Bool("version", false, "Show version information and exit")
 		verbose     = flag.Bool("verbose", false, "Enable verbose logging")
 	)
+
 	flag.Parse()
 
 	if *showVersion {
@@ -66,6 +75,7 @@ func main() {
 			logger.Error("Failed to get home directory", "error", err)
 			os.Exit(exitNoInput)
 		}
+
 		*dbPath = filepath.Join(homeDir, ".local", "share", "go-localsync", "events.db")
 	}
 
@@ -79,8 +89,10 @@ func main() {
 		logger.Error("Failed to open database", "error", err)
 		os.Exit(exitNoInput)
 	}
+
 	defer func() {
-		if err := dbc.Close(); err != nil {
+		err := dbc.Close()
+		if err != nil {
 			logger.Error("Failed to close database", "error", err)
 		}
 	}()
@@ -93,14 +105,18 @@ func main() {
 			logger.Error("Failed to get stats", "error", err)
 			os.Exit(exitSoftware)
 		}
+
 		types, _ := store.GetTypes(context.Background())
+
 		fmt.Printf("Total items: %d\n", stats)
 		fmt.Printf("Item types: %v\n", types)
 		os.Exit(0)
 	}
 
 	if *token == "" {
-		logger.Error("GitHub token is required. Use -token flag or set GITHUB_TOKEN environment variable")
+		logger.Error(
+			"GitHub token is required. Use -token flag or set GITHUB_TOKEN environment variable",
+		)
 		os.Exit(exitUsage)
 	}
 
@@ -118,6 +134,7 @@ func main() {
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
 		<-sigChan
 		logger.Info("Received interrupt signal, shutting down...")
@@ -141,7 +158,12 @@ func main() {
 		os.Exit(exitCodeForError(err))
 	}
 
-	fmt.Printf("Sync completed: fetched=%d, skipped=%d, errors=%d\n", result.Fetched, result.Skipped, result.Errors)
+	fmt.Printf(
+		"Sync completed: fetched=%d, skipped=%d, errors=%d\n",
+		result.Fetched,
+		result.Skipped,
+		result.Errors,
+	)
 }
 
 // exitCodeForError maps errors to semantic exit codes.

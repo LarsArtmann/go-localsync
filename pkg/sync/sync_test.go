@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// mockStorage implements storage.Storage for testing
+// mockStorage implements storage.Storage for testing.
 type mockStorage struct {
 	items          []*provider.Item
 	latestItem     *provider.Item
@@ -30,7 +30,9 @@ func (m *mockStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	if m.upsertErr != nil {
 		return m.upsertErr
 	}
+
 	m.items = append(m.items, item)
+
 	return nil
 }
 
@@ -38,6 +40,7 @@ func (m *mockStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 	if m.latestErr != nil {
 		return nil, m.latestErr
 	}
+
 	return m.latestItem, nil
 }
 
@@ -45,15 +48,27 @@ func (m *mockStorage) GetItems(ctx context.Context, limit, offset int) ([]*provi
 	return m.items, nil
 }
 
-func (m *mockStorage) GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error) {
+func (m *mockStorage) GetItemsByType(
+	ctx context.Context,
+	itemType string,
+	limit, offset int,
+) ([]*provider.Item, error) {
 	return m.items, nil
 }
 
-func (m *mockStorage) GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error) {
+func (m *mockStorage) GetItemsByActor(
+	ctx context.Context,
+	actorLogin string,
+	limit, offset int,
+) ([]*provider.Item, error) {
 	return m.items, nil
 }
 
-func (m *mockStorage) GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error) {
+func (m *mockStorage) GetItemsByRepo(
+	ctx context.Context,
+	repoName string,
+	limit, offset int,
+) ([]*provider.Item, error) {
 	return m.items, nil
 }
 
@@ -73,7 +88,7 @@ func (m *mockStorage) Close() error {
 	return m.closeErr
 }
 
-// mockProvider implements provider.Provider for testing
+// mockProvider implements provider.Provider for testing.
 type mockProvider struct {
 	name      string
 	result    *provider.FetchResult
@@ -85,20 +100,30 @@ func (m *mockProvider) Name() string {
 	if m.name == "" {
 		return "mock"
 	}
+
 	return m.name
 }
 
-func (m *mockProvider) Fetch(ctx context.Context, opts *provider.FetchOptions) (*provider.FetchResult, error) {
+func (m *mockProvider) Fetch(
+	ctx context.Context,
+	opts *provider.FetchOptions,
+) (*provider.FetchResult, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+
 	return m.result, nil
 }
 
-func (m *mockProvider) FetchAll(ctx context.Context, source string, maxPages int) (*provider.FetchResult, error) {
+func (m *mockProvider) FetchAll(
+	ctx context.Context,
+	source string,
+	maxPages int,
+) (*provider.FetchResult, error) {
 	if m.err != nil {
 		return nil, m.err
 	}
+
 	return m.result, nil
 }
 

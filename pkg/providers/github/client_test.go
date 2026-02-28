@@ -35,6 +35,7 @@ func newTestClient(server *httptest.Server) *Client {
 	client := NewClientWithHTTP(httpClient)
 	client.client.BaseURL = mustParseURL(server.URL)
 	client = client.WithRateLimitConfig(provider.RateLimitConfig{Enabled: false})
+
 	return client
 }
 
@@ -46,19 +47,20 @@ func TestFetch_DefaultOptions(t *testing.T) {
 
 		events := []*gh.Event{
 			{
-				ID:   gh.Ptr("123"),
-				Type: gh.Ptr("PushEvent"),
+				ID:   new("123"),
+				Type: new("PushEvent"),
 				Actor: &gh.User{
-					Login:     gh.Ptr("testuser"),
-					AvatarURL: gh.Ptr("https://avatar.url"),
+					Login:     new("testuser"),
+					AvatarURL: new("https://avatar.url"),
 				},
 				Repo: &gh.Repository{
-					Name: gh.Ptr("test/repo"),
-					URL:  gh.Ptr("https://api.github.com/repos/test/repo"),
+					Name: new("test/repo"),
+					URL:  new("https://api.github.com/repos/test/repo"),
 				},
 				CreatedAt: &gh.Timestamp{Time: time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)},
 			},
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(events)
 	}))
@@ -84,7 +86,10 @@ func TestFetch_CustomOptions(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser", PerPage: 50, Page: 2})
+	result, err := client.Fetch(
+		context.Background(),
+		&provider.FetchOptions{Source: "testuser", PerPage: 50, Page: 2},
+	)
 	require.NoError(t, err)
 	assert.Empty(t, result.Items)
 }
@@ -98,7 +103,10 @@ func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser", PerPage: 0, Page: 1})
+	result, err := client.Fetch(
+		context.Background(),
+		&provider.FetchOptions{Source: "testuser", PerPage: 0, Page: 1},
+	)
 	require.NoError(t, err)
 	assert.Empty(t, result.Items)
 }
@@ -120,17 +128,22 @@ func TestFetch_APIError(t *testing.T) {
 
 func TestFetchAll_MultiplePages(t *testing.T) {
 	callCount := 0
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
 		page := r.URL.Query().Get("page")
 		perPage := r.URL.Query().Get("per_page")
 
 		var events []*gh.Event
+
 		switch page {
 		case "1", "2":
 			// Return perPage items so HasMore=true, simulating full pages
-			for i := 0; i < 100; i++ {
-				events = append(events, &gh.Event{ID: gh.Ptr(page + "-" + string(rune('0'+i))), Type: gh.Ptr("PushEvent")})
+			for i := range 100 {
+				events = append(
+					events,
+					&gh.Event{ID: new(page + "-" + string(rune('0'+i))), Type: new("PushEvent")},
+				)
 			}
 		default:
 			events = []*gh.Event{}
@@ -154,8 +167,10 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 
 func TestFetchAll_DefaultMaxPages(t *testing.T) {
 	callCount := 0
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
@@ -169,13 +184,15 @@ func TestFetchAll_DefaultMaxPages(t *testing.T) {
 
 func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 	callCount := 0
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
 		page := r.URL.Query().Get("page")
 
 		if page == "1" {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode([]*gh.Event{{ID: gh.Ptr("1"), Type: gh.Ptr("PushEvent")}})
+			json.NewEncoder(w).Encode([]*gh.Event{{ID: new("1"), Type: new("PushEvent")}})
+
 			return
 		}
 
@@ -193,15 +210,15 @@ func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 
 func TestConvertEvent_FullEvent(t *testing.T) {
 	ghEvent := &gh.Event{
-		ID:   gh.Ptr("12345"),
-		Type: gh.Ptr("PushEvent"),
+		ID:   new("12345"),
+		Type: new("PushEvent"),
 		Actor: &gh.User{
-			Login:     gh.Ptr("actor"),
-			AvatarURL: gh.Ptr("https://avatar.url"),
+			Login:     new("actor"),
+			AvatarURL: new("https://avatar.url"),
 		},
 		Repo: &gh.Repository{
-			Name: gh.Ptr("owner/repo"),
-			URL:  gh.Ptr("https://api.github.com/repos/owner/repo"),
+			Name: new("owner/repo"),
+			URL:  new("https://api.github.com/repos/owner/repo"),
 		},
 		CreatedAt: &gh.Timestamp{Time: time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)},
 	}
@@ -221,8 +238,8 @@ func TestConvertEvent_FullEvent(t *testing.T) {
 
 func TestConvertEvent_MinimalEvent(t *testing.T) {
 	ghEvent := &gh.Event{
-		ID:        gh.Ptr("999"),
-		Type:      gh.Ptr("WatchEvent"),
+		ID:        new("999"),
+		Type:      new("WatchEvent"),
 		CreatedAt: nil,
 	}
 
@@ -239,8 +256,8 @@ func TestConvertEvent_MinimalEvent(t *testing.T) {
 
 func TestConvertEvent_NilActorAndRepo(t *testing.T) {
 	ghEvent := &gh.Event{
-		ID:        gh.Ptr("1"),
-		Type:      gh.Ptr("CreateEvent"),
+		ID:        new("1"),
+		Type:      new("CreateEvent"),
 		Actor:     nil,
 		Repo:      nil,
 		CreatedAt: &gh.Timestamp{Time: time.Now()},
@@ -256,7 +273,7 @@ func TestGetRateLimit(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/rate_limit")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]interface{}{
+		json.NewEncoder(w).Encode(map[string]any{
 			"resources": gh.RateLimits{
 				Core: &gh.Rate{
 					Limit:     5000,
@@ -284,18 +301,23 @@ func mustParseURL(rawURL string) *url.URL {
 	if err != nil {
 		panic(err)
 	}
+
 	u.Path = u.Path + "/"
+
 	return u
 }
 
 func TestFetch_RetryOnServerError(t *testing.T) {
 	callCount := 0
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
 		if callCount < 3 {
 			w.WriteHeader(http.StatusInternalServerError)
+
 			return
 		}
+
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
@@ -316,8 +338,10 @@ func TestFetch_RetryOnServerError(t *testing.T) {
 
 func TestFetch_NoRetryOnClientError(t *testing.T) {
 	callCount := 0
+
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
+
 		w.WriteHeader(http.StatusBadRequest)
 	}))
 	defer server.Close()

@@ -21,6 +21,7 @@ func NewSyncer(p provider.Provider, store storage.Storage, logger *log.Logger) *
 	if logger == nil {
 		logger = log.Default()
 	}
+
 	return &Syncer{
 		provider: p,
 		storage:  store,
@@ -66,14 +67,18 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	syncResult := &SyncResult{Fetched: len(result.Items)}
 
 	for _, item := range result.Items {
-		if err := s.storage.Upsert(ctx, item); err != nil {
+		err := s.storage.Upsert(ctx, item)
+		if err != nil {
 			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
+
 			syncResult.Errors++
+
 			continue
 		}
 	}
 
 	s.logger.Info("Sync completed", "fetched", syncResult.Fetched, "errors", syncResult.Errors)
+
 	return syncResult, nil
 }
 
@@ -106,17 +111,30 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	for _, item := range result.Items {
 		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
 			syncResult.Skipped++
+
 			continue
 		}
 
-		if err := s.storage.Upsert(ctx, item); err != nil {
+		err := s.storage.Upsert(ctx, item)
+		if err != nil {
 			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
+
 			syncResult.Errors++
+
 			continue
 		}
 	}
 
-	s.logger.Info("Incremental sync completed", "fetched", syncResult.Fetched, "skipped", syncResult.Skipped, "errors", syncResult.Errors)
+	s.logger.Info(
+		"Incremental sync completed",
+		"fetched",
+		syncResult.Fetched,
+		"skipped",
+		syncResult.Skipped,
+		"errors",
+		syncResult.Errors,
+	)
+
 	return syncResult, nil
 }
 
@@ -133,11 +151,13 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	}
 
 	typeCounts := make(map[string]int64)
+
 	for _, t := range types {
 		c, err := s.storage.CountByType(ctx, t)
 		if err != nil {
 			continue
 		}
+
 		typeCounts[t] = c
 	}
 
