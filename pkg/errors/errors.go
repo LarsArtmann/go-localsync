@@ -1,8 +1,6 @@
 package errors
 
 import (
-	"fmt"
-
 	"github.com/cockroachdb/errors"
 )
 
