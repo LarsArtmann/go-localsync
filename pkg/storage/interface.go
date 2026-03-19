@@ -1,3 +1,4 @@
+// Package storage defines the interface for storing and retrieving sync items.
 package storage
 
 import (
@@ -6,6 +7,7 @@ import (
 
 	"github.com/larsartmann/go-localsync/internal/db"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // Storage defines the interface for storing and retrieving sync items.
@@ -68,12 +70,12 @@ func fromNullString(ns sql.NullString) string {
 // but we treat it as a generic source ID.
 func toItem(e *db.Events) *provider.Item {
 	return &provider.Item{
-		ID:             e.GithubID, // Map github_id column to generic ID
-		Source:         "github",   // Default to github for existing data
-		Type:           e.Type,
-		ActorLogin:     fromNullString(e.ActorLogin),
+		ID:             types.NewItemID(e.GithubID),   // Map github_id column to generic ID
+		Source:         types.NewProviderID("github"), // Default to github for existing data
+		Type:           types.NewEventTypeID(e.Type),  // Convert type string to branded ID
+		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
 		ActorAvatarURL: fromNullString(e.ActorAvatarUrl),
-		RepoName:       fromNullString(e.RepoName),
+		RepoName:       types.NewRepoID(fromNullString(e.RepoName)),
 		RepoURL:        fromNullString(e.RepoUrl),
 		CreatedAt:      e.CreatedAt,
 		RawJSON:        e.RawJson,
@@ -84,11 +86,11 @@ func toItem(e *db.Events) *provider.Item {
 // Note: Item.ID is stored in the "github_id" column for backward compatibility.
 func toDBParams(item *provider.Item) *db.UpsertEventParams {
 	return &db.UpsertEventParams{
-		GithubID:       item.ID, // Store generic ID in github_id column
-		Type:           item.Type,
-		ActorLogin:     toNullString(item.ActorLogin),
+		GithubID:       item.ID.Get(), // Store generic ID in github_id column
+		Type:           item.Type.Get(),
+		ActorLogin:     toNullString(item.ActorLogin.Get()),
 		ActorAvatarUrl: toNullString(item.ActorAvatarURL),
-		RepoName:       toNullString(item.RepoName),
+		RepoName:       toNullString(item.RepoName.Get()),
 		RepoUrl:        toNullString(item.RepoURL),
 		CreatedAt:      item.CreatedAt,
 		RawJson:        item.RawJSON,

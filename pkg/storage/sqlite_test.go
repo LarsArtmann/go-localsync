@@ -8,16 +8,17 @@ import (
 
 	"github.com/larsartmann/go-localsync/internal/database"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // testItem creates a consistent test item for use across multiple tests.
 func testItem() *provider.Item {
 	return &provider.Item{
-		ID:         "12345",
-		Source:     "github",
-		Type:       "PushEvent",
-		ActorLogin: "testuser",
-		RepoName:   "test/repo",
+		ID:         types.NewItemID("12345"),
+		Source:     types.NewProviderID("github"),
+		Type:       types.NewEventTypeID("PushEvent"),
+		ActorLogin: types.NewActorID("testuser"),
+		RepoName:   types.NewRepoID("test/repo"),
 		CreatedAt:  time.Now(),
 		RawJSON:    json.RawMessage(`{"id":"12345","type":"PushEvent"}`),
 	}
@@ -107,8 +108,8 @@ func TestSQLiteStorage(t *testing.T) {
 			t.Fatal("Expected item, got nil")
 		}
 
-		if item.ID != "12345" {
-			t.Errorf("Expected ID 12345, got %s", item.ID)
+		if item.ID.Get() != "12345" {
+			t.Errorf("Expected ID 12345, got %s", item.ID.Get())
 		}
 	})
 

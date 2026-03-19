@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/log"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -166,8 +167,8 @@ func TestSyncer_Sync(t *testing.T) {
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{
 				Items: []*provider.Item{
-					{ID: "1", Type: "PushEvent"},
-					{ID: "2", Type: "IssuesEvent"},
+					{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent")},
+					{ID: types.NewItemID("2"), Type: types.NewEventTypeID("IssuesEvent")},
 				},
 			},
 		}
@@ -206,8 +207,8 @@ func TestSyncer_Sync(t *testing.T) {
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{
 				Items: []*provider.Item{
-					{ID: "1", Type: "PushEvent"},
-					{ID: "2", Type: "IssuesEvent"},
+					{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent")},
+					{ID: types.NewItemID("2"), Type: types.NewEventTypeID("IssuesEvent")},
 				},
 			},
 		}

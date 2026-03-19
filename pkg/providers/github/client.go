@@ -13,6 +13,7 @@ import (
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 	"golang.org/x/oauth2"
 )
 
@@ -211,12 +212,12 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 	}
 
 	return &provider.Item{
-		ID:             e.GetID(),
-		Source:         "github",
-		Type:           e.GetType(),
-		ActorLogin:     actorLogin,
+		ID:             types.NewItemID(e.GetID()),
+		Source:         types.NewProviderID("github"),
+		Type:           types.NewEventTypeID(e.GetType()),
+		ActorLogin:     types.NewActorID(actorLogin),
 		ActorAvatarURL: actorAvatarURL,
-		RepoName:       repoName,
+		RepoName:       types.NewRepoID(repoName),
 		RepoURL:        repoURL,
 		CreatedAt:      createdAt,
 		RawJSON:        rawJSON,

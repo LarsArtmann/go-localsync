@@ -5,22 +5,24 @@ package provider
 import (
 	"context"
 	"time"
+
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // Item represents a single syncable item from any provider.
 type Item struct {
 	// ID is the unique identifier from the source system.
-	ID string `json:"id"`
+	ID types.ItemID `json:"id"`
 	// Source identifies which provider this item came from (e.g., "github", "gitlab").
-	Source string `json:"source"`
+	Source types.ProviderID `json:"source"`
 	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
-	Type string `json:"type"`
+	Type types.EventTypeID `json:"type"`
 	// ActorLogin is the username of the entity that triggered the item.
-	ActorLogin string `json:"actorLogin,omitempty"`
+	ActorLogin types.ActorID `json:"actorLogin,omitempty"`
 	// ActorAvatarURL is the avatar URL of the actor.
 	ActorAvatarURL string `json:"actorAvatarUrl,omitempty"`
 	// RepoName is the repository name (e.g., "owner/repo").
-	RepoName string `json:"repoName,omitempty"`
+	RepoName types.RepoID `json:"repoName,omitempty"`
 	// RepoURL is the repository URL.
 	RepoURL string `json:"repoUrl,omitempty"`
 	// CreatedAt is when the item was created.
@@ -38,6 +40,11 @@ type FetchOptions struct {
 	// Page is the page number to fetch (1-indexed).
 	Page int
 }
+
+// FetchSource represents a source identifier for fetching items.
+// This is separate from typed IDs to maintain flexibility for provider-specific
+// source identifiers (usernames, project IDs, etc.).
+type FetchSource = string
 
 // FetchResult contains the result of a fetch operation.
 type FetchResult struct {
