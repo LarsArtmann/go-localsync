@@ -34,19 +34,19 @@ type (
 // All use string as the underlying value type for flexibility and JSON compatibility.
 type (
 	// ItemID is a unique identifier for sync items.
-	// Example: "1234567890" (GitHub event ID)
+	// Example: "1234567890" (GitHub event ID).
 	ItemID = id.ID[ItemBrand, string]
 	// ProviderID identifies the source provider.
-	// Example: "github", "gitlab"
+	// Example: "github", "gitlab".
 	ProviderID = id.ID[ProviderBrand, string]
 	// ActorID identifies the user/actor who triggered an event.
-	// Example: "larsartmann"
+	// Example: "larsartmann".
 	ActorID = id.ID[ActorBrand, string]
 	// RepoID identifies a repository.
-	// Example: "larsartmann/go-localsync"
+	// Example: "larsartmann/go-localsync".
 	RepoID = id.ID[RepoBrand, string]
 	// EventTypeID identifies the type of event.
-	// Example: "PushEvent", "CreateEvent"
+	// Example: "PushEvent", "CreateEvent".
 	EventTypeID = id.ID[EventTypeBrand, string]
 )
 

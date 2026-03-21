@@ -152,6 +152,18 @@ func TestNewSyncer(t *testing.T) {
 	})
 }
 
+// newMockProviderWithItems creates a mock provider with standard test items.
+func newMockProviderWithItems() *mockProvider {
+	return &mockProvider{
+		result: &provider.FetchResult{
+			Items: []*provider.Item{
+				{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent")},
+				{ID: types.NewItemID("2"), Type: types.NewEventTypeID("IssuesEvent")},
+			},
+		},
+	}
+}
+
 func TestSyncer_Sync(t *testing.T) {
 	t.Run("returns nil for nil options", func(t *testing.T) {
 		mockStore := &mockStorage{}
@@ -164,14 +176,7 @@ func TestSyncer_Sync(t *testing.T) {
 	})
 
 	t.Run("syncs items successfully", func(t *testing.T) {
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{
-					{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent")},
-					{ID: types.NewItemID("2"), Type: types.NewEventTypeID("IssuesEvent")},
-				},
-			},
-		}
+		mockProv := newMockProviderWithItems()
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(mockProv, mockStore, nil)
 
@@ -204,14 +209,7 @@ func TestSyncer_Sync(t *testing.T) {
 	})
 
 	t.Run("counts errors when upsert fails", func(t *testing.T) {
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{
-					{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent")},
-					{ID: types.NewItemID("2"), Type: types.NewEventTypeID("IssuesEvent")},
-				},
-			},
-		}
+		mockProv := newMockProviderWithItems()
 		mockStore := &mockStorage{
 			upsertErr: errors.New("upsert error"),
 		}

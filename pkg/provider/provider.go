@@ -18,11 +18,11 @@ type Item struct {
 	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
 	Type types.EventTypeID `json:"type"`
 	// ActorLogin is the username of the entity that triggered the item.
-	ActorLogin types.ActorID `json:"actorLogin,omitempty"`
+	ActorLogin types.ActorID `json:"actorLogin"`
 	// ActorAvatarURL is the avatar URL of the actor.
 	ActorAvatarURL string `json:"actorAvatarUrl,omitempty"`
 	// RepoName is the repository name (e.g., "owner/repo").
-	RepoName types.RepoID `json:"repoName,omitempty"`
+	RepoName types.RepoID `json:"repoName"`
 	// RepoURL is the repository URL.
 	RepoURL string `json:"repoUrl,omitempty"`
 	// CreatedAt is when the item was created.

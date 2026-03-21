@@ -3,3 +3,5 @@ bin/
 *.db-journal
 coverage.out
 coverage.html
+# Dependencies
+node_modules/
