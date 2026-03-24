@@ -70,9 +70,9 @@ func fromNullString(ns sql.NullString) string {
 // but we treat it as a generic source ID.
 func toItem(e *db.Events) *provider.Item {
 	return &provider.Item{
-		ID:             types.NewItemID(e.GithubID),   // Map github_id column to generic ID
-		Source:         types.NewProviderID("github"), // Default to github for existing data
-		Type:           types.NewEventTypeID(e.Type),  // Convert type string to branded ID
+		ID:             types.NewItemID(e.GithubID.Get()), // Map github_id column to generic ID
+		Source:         types.NewProviderID("github"),     // Default to github for existing data
+		Type:           types.NewEventTypeID(e.Type),      // Convert type string to branded ID
 		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
 		ActorAvatarURL: fromNullString(e.ActorAvatarUrl),
 		RepoName:       types.NewRepoID(fromNullString(e.RepoName)),
@@ -86,7 +86,7 @@ func toItem(e *db.Events) *provider.Item {
 // Note: Item.ID is stored in the "github_id" column for backward compatibility.
 func toDBParams(item *provider.Item) *db.UpsertEventParams {
 	return &db.UpsertEventParams{
-		GithubID:       item.ID.Get(), // Store generic ID in github_id column
+		GithubID:       types.NewGithubEventID(item.ID.Get()), // Store generic ID in github_id column
 		Type:           item.Type.Get(),
 		ActorLogin:     toNullString(item.ActorLogin.Get()),
 		ActorAvatarUrl: toNullString(item.ActorAvatarURL),

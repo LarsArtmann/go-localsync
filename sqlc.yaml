@@ -40,6 +40,16 @@ sql:
             go_type: "int64"
           - db_type: "JSON"
             go_type: "encoding/json.RawMessage"
+          - column: "events.id"
+            go_type:
+              import: "github.com/larsartmann/go-localsync/pkg/types"
+              package: "types"
+              type: "EventID"
+          - column: "events.github_id"
+            go_type:
+              import: "github.com/larsartmann/go-localsync/pkg/types"
+              package: "types"
+              type: "GithubEventID"
         rename:
           id: "ID"
           github_id: "GithubID"

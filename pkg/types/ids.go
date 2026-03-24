@@ -18,6 +18,10 @@ import (
 // Brand types (phantom types for type safety).
 // These are empty structs used only as type parameters.
 type (
+	// EventBrand distinguishes EventID from other identifier types.
+	EventBrand struct{}
+	// GithubEventBrand distinguishes GithubEventID from other identifier types.
+	GithubEventBrand struct{}
 	// ItemBrand distinguishes ItemID from other identifier types.
 	ItemBrand struct{}
 	// ProviderBrand distinguishes ProviderID from other identifier types.
@@ -33,6 +37,12 @@ type (
 // ID type aliases for domain-specific identifiers.
 // All use string as the underlying value type for flexibility and JSON compatibility.
 type (
+	// EventID is the internal database identifier for events.
+	// Example: 12345 (auto-incremented primary key).
+	EventID = id.ID[EventBrand, int64]
+	// GithubEventID is the GitHub event identifier used for upsert operations.
+	// Example: "1234567890" (GitHub event ID as string for compatibility).
+	GithubEventID = id.ID[GithubEventBrand, string]
 	// ItemID is a unique identifier for sync items.
 	// Example: "1234567890" (GitHub event ID).
 	ItemID = id.ID[ItemBrand, string]
@@ -49,6 +59,12 @@ type (
 	// Example: "PushEvent", "CreateEvent".
 	EventTypeID = id.ID[EventTypeBrand, string]
 )
+
+// NewEventID creates a new EventID from an int64 value.
+func NewEventID(v int64) EventID { return id.NewID[EventBrand](v) }
+
+// NewGithubEventID creates a new GithubEventID from a string value.
+func NewGithubEventID(v string) GithubEventID { return id.NewID[GithubEventBrand](v) }
 
 // NewItemID creates a new ItemID from a string value.
 func NewItemID(v string) ItemID { return id.NewID[ItemBrand](v) }

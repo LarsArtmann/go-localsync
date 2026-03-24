@@ -1,14 +1,30 @@
 # go-localsync
 
-A Go SDK for building local sync applications. Fetch data from any provider, store it locally in SQLite.
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+**A pluggable SDK for syncing data from any provider to local SQLite storage.** Build local-first applications that work offline with full data fidelity, automatic rate limiting, and incremental sync.
+
+_go-localsync is an SDK, not a CLI application._ Use it as a library to add data synchronization to your Go applications.
 
 ## Overview
 
-**go-localsync is an SDK, not a CLI application.** It provides:
+go-localsync provides everything you need to build local-first applications:
 
-- **Provider Interface** - Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)
-- **Storage Abstraction** - SQLite storage with full JSON fidelity
-- **Sync Logic** - Incremental sync, pagination, rate limiting, retry with backoff
+| Component               | Description                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)                      |
+| **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload                                 |
+| **Sync Engine**         | Incremental sync, pagination, automatic rate limiting with configurable wait, retry with exponential backoff |
+
+## Who is this for?
+
+This SDK is for Go developers building applications that need:
+
+- **Offline-first** functionality with local data access
+- **Offline dashboards** that aggregate data from multiple services
+- **Custom sync logic** tailored to specific use cases
+- **Data portability** with SQLite as a simple, embedded database
 
 ## Installation
 
@@ -113,12 +129,14 @@ gh-sync -user octocat
 
 ## Features
 
-- **Incremental Sync** - Only fetch new items since last sync
-- **Rate Limiting** - Automatic rate limit handling with configurable wait
-- **Retry Logic** - Exponential backoff for transient errors
-- **Full Fidelity** - Raw JSON stored for 100% data preservation
-- **Type-Safe** - sqlc-generated queries for SQLite
-- **No CGO** - Pure Go SQLite driver
+| Feature                 | Description                                              |
+| ----------------------- | -------------------------------------------------------- |
+| 🔄 **Incremental Sync** | Only fetch new items since last sync — no duplicate data |
+| ⚡ **Rate Limiting**    | Automatic handling with configurable wait thresholds     |
+| 🔁 **Retry Logic**      | Exponential backoff for transient errors                 |
+| 📦 **Full Fidelity**    | Raw JSON stored for 100% data preservation               |
+| 🔒 **Type-Safe**        | Branded IDs and sqlc-generated queries                   |
+| 🚀 **No CGO**           | Pure Go SQLite driver (modernc.org/sqlite)               |
 
 ## Development
 

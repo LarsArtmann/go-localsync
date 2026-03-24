@@ -8,17 +8,19 @@ import (
 	"database/sql"
 	"encoding/json"
 	"time"
+
+	types "github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type Events struct {
-	ID             int64           `db:"id" json:"id"`
-	GithubID       string          `db:"github_id" json:"githubId"`
-	Type           string          `db:"type" json:"type"`
-	ActorLogin     sql.NullString  `db:"actor_login" json:"actorLogin"`
-	ActorAvatarUrl sql.NullString  `db:"actor_avatar_url" json:"actorAvatarUrl"`
-	RepoName       sql.NullString  `db:"repo_name" json:"repoName"`
-	RepoUrl        sql.NullString  `db:"repo_url" json:"repoUrl"`
-	CreatedAt      time.Time       `db:"created_at" json:"createdAt"`
-	RawJson        json.RawMessage `db:"raw_json" json:"rawJson"`
-	SyncedAt       time.Time       `db:"synced_at" json:"syncedAt"`
+	ID             types.EventID       `db:"id" json:"id"`
+	GithubID       types.GithubEventID `db:"github_id" json:"githubId"`
+	Type           string              `db:"type" json:"type"`
+	ActorLogin     sql.NullString      `db:"actor_login" json:"actorLogin"`
+	ActorAvatarUrl sql.NullString      `db:"actor_avatar_url" json:"actorAvatarUrl"`
+	RepoName       sql.NullString      `db:"repo_name" json:"repoName"`
+	RepoUrl        sql.NullString      `db:"repo_url" json:"repoUrl"`
+	CreatedAt      time.Time           `db:"created_at" json:"createdAt"`
+	RawJson        json.RawMessage     `db:"raw_json" json:"rawJson"`
+	SyncedAt       time.Time           `db:"synced_at" json:"syncedAt"`
 }

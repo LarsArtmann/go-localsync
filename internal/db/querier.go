@@ -7,6 +7,8 @@ package db
 import (
 	"context"
 	"time"
+
+	types "github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type Querier interface {
@@ -26,12 +28,12 @@ type Querier interface {
 	// Delete an event by its GitHub ID
 	//
 	//  DELETE FROM events WHERE github_id = ?
-	DeleteEventByGithubID(ctx context.Context, githubID string) error
+	DeleteEventByGithubID(ctx context.Context, githubID types.GithubEventID) error
 	// Get a single event by its GitHub ID
 	//
 	//  SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
 	//  WHERE github_id = ?
-	GetEventByGithubID(ctx context.Context, githubID string) (*Events, error)
+	GetEventByGithubID(ctx context.Context, githubID types.GithubEventID) (*Events, error)
 	// Get distinct event types in the database
 	//
 	//  SELECT DISTINCT type FROM events
