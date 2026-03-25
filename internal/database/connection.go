@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 
 	_ "modernc.org/sqlite"
@@ -33,8 +34,8 @@ func Open(path string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	if _, err := db.Exec(schema); err != nil {
-		db.Close()
+	if _, err := db.ExecContext(context.Background(), schema); err != nil {
+		_ = db.Close()
 
 		return nil, err
 	}

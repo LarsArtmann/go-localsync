@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-localsync
 
-go 1.26
+go 1.26.1
 
 replace github.com/larsartmann/go-composable-business-types => /Users/larsartmann/projects/go-composable-business-types
 

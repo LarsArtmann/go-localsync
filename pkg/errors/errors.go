@@ -5,6 +5,7 @@ import (
 )
 
 var (
+	ErrNotFound     = errors.New("not found")
 	ErrRateLimited  = errors.New("rate limited")
 	ErrInvalidToken = errors.New("invalid token")
 	ErrUserNotFound = errors.New("user not found")

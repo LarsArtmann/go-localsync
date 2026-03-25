@@ -76,7 +76,7 @@ func (c *Client) Fetch(
 	opts *provider.FetchOptions,
 ) (*provider.FetchResult, error) {
 	if opts == nil {
-		opts = &provider.FetchOptions{PerPage: 100, Page: 1}
+		opts = &provider.FetchOptions{Source: "", PerPage: 100, Page: 1}
 	}
 
 	if opts.PerPage == 0 {
@@ -161,7 +161,7 @@ func (c *Client) FetchAll(
 		}
 	}
 
-	return &provider.FetchResult{Items: allItems}, nil
+	return &provider.FetchResult{Items: allItems, HasMore: false}, nil
 }
 
 // GetRateLimit returns current GitHub rate limit information.
@@ -173,7 +173,7 @@ func (c *Client) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, err
 
 	core := limits.GetCore()
 	if core == nil {
-		return nil, nil
+		return &provider.RateLimitInfo{Limit: 0, Remaining: 0, ResetAt: time.Time{}}, nil
 	}
 
 	return &provider.RateLimitInfo{
@@ -308,7 +308,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 // isRetryableError determines if an error is transient and should be retried.
 func isRetryableError(err error) bool {
-	ghErr := &gh.ErrorResponse{}
+	ghErr := &gh.ErrorResponse{} //nolint:exhaustruct // Intentionally empty for errors.As type assertion
 	if errors.As(err, &ghErr) {
 		statusCode := ghErr.Response.StatusCode
 
@@ -320,7 +320,7 @@ func isRetryableError(err error) bool {
 
 // wrapGitHubError converts GitHub API errors into typed errors.
 func wrapGitHubError(err error, username string) error {
-	ghErr := &gh.ErrorResponse{}
+	ghErr := &gh.ErrorResponse{} //nolint:exhaustruct // Intentionally empty for errors.As type assertion
 	if errors.As(err, &ghErr) {
 		switch ghErr.Response.StatusCode {
 		case http.StatusUnauthorized:

@@ -62,7 +62,7 @@ func TestFetch_DefaultOptions(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(events)
+		_ = json.NewEncoder(w).Encode(events)
 	}))
 	defer server.Close()
 
@@ -81,7 +81,7 @@ func TestFetch_CustomOptions(t *testing.T) {
 		assert.Equal(t, "50", r.URL.Query().Get("per_page"))
 		assert.Equal(t, "2", r.URL.Query().Get("page"))
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]*gh.Event{})
+		_ = json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
 	defer server.Close()
 
@@ -98,7 +98,7 @@ func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "100", r.URL.Query().Get("per_page"))
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]*gh.Event{})
+		_ = json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
 	defer server.Close()
 
@@ -115,7 +115,7 @@ func TestFetch_APIError(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(gh.ErrorResponse{Message: "Not Found"})
+		_ = json.NewEncoder(w).Encode(gh.ErrorResponse{Message: "Not Found"})
 	}))
 	defer server.Close()
 
@@ -154,7 +154,7 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(events)
+		_ = json.NewEncoder(w).Encode(events)
 	}))
 	defer server.Close()
 
@@ -172,7 +172,7 @@ func TestFetchAll_DefaultMaxPages(t *testing.T) {
 		callCount++
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]*gh.Event{})
+		_ = json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
 	defer server.Close()
 
@@ -191,13 +191,13 @@ func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 
 		if page == "1" {
 			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode([]*gh.Event{{ID: new("1"), Type: new("PushEvent")}})
+			_ = json.NewEncoder(w).Encode([]*gh.Event{{ID: new("1"), Type: new("PushEvent")}})
 
 			return
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]*gh.Event{})
+		_ = json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
 	defer server.Close()
 
@@ -273,7 +273,7 @@ func TestGetRateLimit(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/rate_limit")
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]any{
+		_ = json.NewEncoder(w).Encode(map[string]any{
 			"resources": gh.RateLimits{
 				Core: &gh.Rate{
 					Limit:     5000,
@@ -319,7 +319,7 @@ func TestFetch_RetryOnServerError(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode([]*gh.Event{})
+		_ = json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
 	defer server.Close()
 

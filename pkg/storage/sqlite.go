@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/larsartmann/go-localsync/internal/db"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
@@ -33,7 +34,7 @@ func (s *SQLiteStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 	e, err := s.querier.GetLatestEvent(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+			return nil, pkgerrors.ErrNotFound
 		}
 
 		return nil, err

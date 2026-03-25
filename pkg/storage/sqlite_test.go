@@ -53,7 +53,7 @@ func TestSQLiteStorage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open database: %v", err)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	store := NewSQLiteStorage(db)
 	ctx := context.Background()

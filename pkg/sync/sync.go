@@ -2,9 +2,11 @@ package sync
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/charmbracelet/log"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/storage"
 )
@@ -54,7 +56,7 @@ type Stats struct {
 // Sync performs a full sync from the provider to storage.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
-		return nil, nil
+		return nil, pkgerrors.ErrSyncFailed
 	}
 
 	s.logger.Info("Starting sync", "provider", s.provider.Name(), "source", opts.Source)
@@ -64,7 +66,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		return nil, err
 	}
 
-	syncResult := &SyncResult{Fetched: len(result.Items)}
+	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}
 
 	for _, item := range result.Items {
 		err := s.storage.Upsert(ctx, item)
@@ -85,11 +87,15 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 // SyncIncremental performs an incremental sync, only fetching items newer than the latest stored.
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
-		return nil, nil
+		return nil, pkgerrors.ErrSyncFailed
 	}
 
 	latestItem, err := s.storage.GetLatest(ctx)
 	if err != nil {
+		if errors.Is(err, pkgerrors.ErrNotFound) {
+			return s.Sync(ctx, opts)
+		}
+
 		return nil, err
 	}
 
@@ -100,7 +106,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 		return nil, err
 	}
 
-	syncResult := &SyncResult{Fetched: len(result.Items)}
+	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}
 
 	var cutoff time.Time
 	if latestItem != nil {
