@@ -86,7 +86,9 @@ func toItem(e *db.Events) *provider.Item {
 // Note: Item.ID is stored in the "github_id" column for backward compatibility.
 func toDBParams(item *provider.Item) *db.UpsertEventParams {
 	return &db.UpsertEventParams{
-		GithubID:       types.NewGithubEventID(item.ID.Get()), // Store generic ID in github_id column
+		GithubID: types.NewGithubEventID(
+			item.ID.Get(),
+		), // Store generic ID in github_id column
 		Type:           item.Type.Get(),
 		ActorLogin:     toNullString(item.ActorLogin.Get()),
 		ActorAvatarUrl: toNullString(item.ActorAvatarURL),

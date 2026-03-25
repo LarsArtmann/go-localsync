@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-localsync
 
-go 1.26.1
+go 1.26
 
 replace github.com/larsartmann/go-composable-business-types => /Users/larsartmann/projects/go-composable-business-types
 
@@ -27,7 +27,7 @@ require (
 	github.com/cockroachdb/redact v1.1.8 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/getsentry/sentry-go v0.43.0 // indirect
+	github.com/getsentry/sentry-go v0.44.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect

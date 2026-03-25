@@ -127,3 +127,26 @@ formatters:
 issues:
   max-issues-per-linter: 50
   max-same-issues: 10
+depguard:
+  include-go-generated: true
+  rules:
+    Main:
+      allow:
+        - $STDLIB
+        - github.com/charmbracelet/log
+        - github.com/larsartmann/go-localsync/internal/database
+        - github.com/larsartmann/go-localsync/internal/db
+        - github.com/larsartmann/go-localsync/pkg/errors
+        - github.com/larsartmann/go-localsync/pkg/providers/github
+        - github.com/larsartmann/go-localsync/pkg/provider
+        - github.com/larsartmann/go-localsync/pkg/storage
+        - github.com/larsartmann/go-localsync/pkg/sync
+        - github.com/larsartmann/go-localsync/pkg/types
+        - github.com/larsartmann/go-localsync/cmd/examples/github-sync
+        - github.com/google/go-github/v69/github
+        - github.com/cockroachdb/errors
+        - github.com/larsartmann/go-composable-business-types/id
+        - github.com/stretchr/testify/assert
+        - github.com/stretchr/testify/require
+        - golang.org/x/oauth2
+        - modernc.org/sqlite
