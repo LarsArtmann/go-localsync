@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/charmbracelet/log"
+	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"

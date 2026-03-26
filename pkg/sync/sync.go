@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/charmbracelet/log"
+	"charm.land/log/v2"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/storage"
