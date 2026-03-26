@@ -3,10 +3,12 @@ package storage
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/larsartmann/go-localsync/internal/database"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
@@ -69,10 +71,14 @@ func TestSQLiteStorage(t *testing.T) {
 		}
 	})
 
-	t.Run("GetLatest returns nil for empty database", func(t *testing.T) {
+	t.Run("GetLatest returns ErrNotFound for empty database", func(t *testing.T) {
 		item, err := store.GetLatest(ctx)
-		if err != nil {
-			t.Fatalf("GetLatest failed: %v", err)
+		if err == nil {
+			t.Fatal("Expected error, got nil")
+		}
+
+		if !errors.Is(err, pkgerrors.ErrNotFound) {
+			t.Errorf("Expected ErrNotFound, got %v", err)
 		}
 
 		if item != nil {

@@ -88,7 +88,7 @@ func (c *Client) Fetch(
 	}
 
 	if err := c.waitForRateLimit(ctx); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("rate limit check failed for %s: %w", opts.Source, err)
 	}
 
 	var (
@@ -110,7 +110,7 @@ func (c *Client) Fetch(
 		return err
 	})
 	if err != nil {
-		return nil, wrapGitHubError(err, opts.Source)
+		return nil, fmt.Errorf("fetching events for %s failed (page %d): %w", opts.Source, opts.Page, wrapGitHubError(err, opts.Source))
 	}
 
 	items := make([]*provider.Item, 0, len(activity))
@@ -148,7 +148,7 @@ func (c *Client) FetchAll(
 			Page:    page,
 		})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("fetch page %d/%d for %s failed (fetched %d items): %w", page, maxPages, source, len(allItems), err)
 		}
 
 		if len(result.Items) == 0 {
@@ -276,7 +276,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 	for attempt := 0; attempt <= c.retryConfig.MaxRetries; attempt++ {
 		if err := ctx.Err(); err != nil {
-			return err
+			return fmt.Errorf("retry loop interrupted (attempt %d): %w", attempt, err)
 		}
 
 		err := fn()
@@ -286,7 +286,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 		lastErr = err
 		if !isRetryableError(err) {
-			return err
+			return fmt.Errorf("non-retryable error during retry (attempt %d): %w", attempt, err)
 		}
 
 		if attempt < c.retryConfig.MaxRetries {
@@ -296,14 +296,14 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 			select {
 			case <-ctx.Done():
-				return ctx.Err()
+				return fmt.Errorf("retry loop cancelled after %d attempts (last error: %v): %w", attempt, lastErr, ctx.Err())
 			case <-time.After(backoff):
 				backoff *= 2
 			}
 		}
 	}
 
-	return lastErr
+	return fmt.Errorf("retry exhausted after %d attempts: %w", c.retryConfig.MaxRetries+1, lastErr)
 }
 
 // isRetryableError determines if an error is transient and should be retried.

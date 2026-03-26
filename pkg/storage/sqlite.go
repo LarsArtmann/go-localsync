@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/larsartmann/go-localsync/internal/db"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -49,7 +50,7 @@ func (s *SQLiteStorage) GetItems(ctx context.Context, limit, offset int) ([]*pro
 		Offset: int64(offset),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get events (limit=%d, offset=%d): %w", limit, offset, err)
 	}
 
 	return convertItems(events), nil
@@ -66,7 +67,7 @@ func (s *SQLiteStorage) GetItemsByType(
 		Offset: int64(offset),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get events by type %q (limit=%d, offset=%d): %w", itemType, limit, offset, err)
 	}
 
 	return convertItems(events), nil
@@ -83,7 +84,7 @@ func (s *SQLiteStorage) GetItemsByActor(
 		Offset:     int64(offset),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get events by actor %q (limit=%d, offset=%d): %w", actorLogin, limit, offset, err)
 	}
 
 	return convertItems(events), nil
@@ -100,7 +101,7 @@ func (s *SQLiteStorage) GetItemsByRepo(
 		Offset:   int64(offset),
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get events by repo %q (limit=%d, offset=%d): %w", repoName, limit, offset, err)
 	}
 
 	return convertItems(events), nil

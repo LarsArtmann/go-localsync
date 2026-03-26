@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	_ "modernc.org/sqlite"
 )
@@ -31,13 +32,13 @@ CREATE INDEX IF NOT EXISTS idx_events_repo_name ON events(repo_name);
 func Open(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open database at %s: %w", path, err)
 	}
 
 	if _, err := db.ExecContext(context.Background(), schema); err != nil {
 		_ = db.Close()
 
-		return nil, err
+		return nil, fmt.Errorf("failed to initialize schema at %s: %w", path, err)
 	}
 
 	return db, nil
