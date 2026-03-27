@@ -11,6 +11,7 @@ var (
 	ErrUserNotFound = errors.New("user not found")
 	ErrSyncFailed   = errors.New("sync failed")
 	ErrStorage      = errors.New("storage error")
+	ErrInvalidInput = errors.New("invalid input")
 )
 
 // WithDetail wraps err with a detail string for debugging context.

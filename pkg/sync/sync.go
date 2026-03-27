@@ -57,7 +57,7 @@ type Stats struct {
 // Sync performs a full sync from the provider to storage.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
-		return nil, nil
+		return nil, pkgerrors.ErrInvalidInput
 	}
 
 	s.logger.Info("Starting sync", "provider", s.provider.Name(), "source", opts.Source)
@@ -88,7 +88,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 // SyncIncremental performs an incremental sync, only fetching items newer than the latest stored.
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
-		return nil, nil
+		return nil, pkgerrors.ErrInvalidInput
 	}
 
 	latestItem, err := s.storage.GetLatest(ctx)

@@ -7,7 +7,7 @@ date := `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 default: build
 
 build:
-    go build -ldflags "-X main.version={{version}} -X main.commit={{commit}} -X main.date={{date}}" -o bin/gh-sync ./cmd/gh-sync
+    go build -ldflags "-X main.version={{version}} -X main.commit={{commit}} -X main.date={{date}}" -o bin/gh-sync ./cmd/examples/github-sync
 
 run *args: build
     ./bin/gh-sync {{args}}

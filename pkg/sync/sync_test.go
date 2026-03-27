@@ -165,13 +165,13 @@ func newMockProviderWithItems() *mockProvider {
 }
 
 func TestSyncer_Sync(t *testing.T) {
-	t.Run("returns nil for nil options", func(t *testing.T) {
+	t.Run("returns error for nil options", func(t *testing.T) {
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		result, err := syncer.Sync(context.Background(), nil)
 
-		require.NoError(t, err)
+		require.Error(t, err)
 		assert.Nil(t, result)
 	})
 
@@ -228,13 +228,13 @@ func TestSyncer_Sync(t *testing.T) {
 }
 
 func TestSyncer_SyncIncremental(t *testing.T) {
-	t.Run("returns nil for nil options", func(t *testing.T) {
+	t.Run("returns error for nil options", func(t *testing.T) {
 		mockStore := &mockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		result, err := syncer.SyncIncremental(context.Background(), nil)
 
-		require.NoError(t, err)
+		require.Error(t, err)
 		assert.Nil(t, result)
 	})
 }
