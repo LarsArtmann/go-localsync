@@ -57,14 +57,19 @@ type Stats struct {
 // Sync performs a full sync from the provider to storage.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
-		return nil, pkgerrors.ErrInvalidInput
+		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
 	}
 
 	s.logger.Info("Starting sync", "provider", s.provider.Name(), "source", opts.Source)
 
 	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
-		return nil, fmt.Errorf("sync failed for source %q (maxPages=%d): %w", opts.Source, opts.MaxPages, err)
+		return nil, fmt.Errorf(
+			"sync failed for source %q (maxPages=%d): %w",
+			opts.Source,
+			opts.MaxPages,
+			err,
+		)
 	}
 
 	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}
@@ -88,7 +93,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 // SyncIncremental performs an incremental sync, only fetching items newer than the latest stored.
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
-		return nil, pkgerrors.ErrInvalidInput
+		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
 	}
 
 	latestItem, err := s.storage.GetLatest(ctx)
@@ -97,14 +102,23 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 			return s.Sync(ctx, opts)
 		}
 
-		return nil, fmt.Errorf("failed to get latest item for incremental sync (source=%q): %w", opts.Source, err)
+		return nil, fmt.Errorf(
+			"failed to get latest item for incremental sync (source=%q): %w",
+			opts.Source,
+			err,
+		)
 	}
 
 	s.logger.Info("Starting incremental sync", "provider", s.provider.Name(), "source", opts.Source)
 
 	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
-		return nil, fmt.Errorf("incremental sync failed for source %q (maxPages=%d): %w", opts.Source, opts.MaxPages, err)
+		return nil, fmt.Errorf(
+			"incremental sync failed for source %q (maxPages=%d): %w",
+			opts.Source,
+			opts.MaxPages,
+			err,
+		)
 	}
 
 	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}

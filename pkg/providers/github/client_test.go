@@ -39,6 +39,16 @@ func newTestClient(server *httptest.Server) *Client {
 	return client
 }
 
+// testRetryConfig returns a retry config suitable for unit tests with fast backoff.
+func testRetryConfig() provider.RetryConfig {
+	return provider.RetryConfig{
+		Enabled:        true,
+		MaxRetries:     3,
+		InitialBackoff: 1 * time.Millisecond,
+		MaxBackoff:     10 * time.Millisecond,
+	}
+}
+
 func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/users/testuser/events")
@@ -324,12 +334,7 @@ func TestFetch_RetryOnServerError(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	client = client.WithRetryConfig(provider.RetryConfig{
-		Enabled:        true,
-		MaxRetries:     3,
-		InitialBackoff: 1 * time.Millisecond,
-		MaxBackoff:     10 * time.Millisecond,
-	})
+	client = client.WithRetryConfig(testRetryConfig())
 
 	_, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
 	require.NoError(t, err)
@@ -347,12 +352,7 @@ func TestFetch_NoRetryOnClientError(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	client = client.WithRetryConfig(provider.RetryConfig{
-		Enabled:        true,
-		MaxRetries:     3,
-		InitialBackoff: 1 * time.Millisecond,
-		MaxBackoff:     10 * time.Millisecond,
-	})
+	client = client.WithRetryConfig(testRetryConfig())
 
 	_, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
 	require.Error(t, err)

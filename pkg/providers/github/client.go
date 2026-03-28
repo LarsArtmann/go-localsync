@@ -110,7 +110,12 @@ func (c *Client) Fetch(
 		return err
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fetching events for %s failed (page %d): %w", opts.Source, opts.Page, wrapGitHubError(err, opts.Source))
+		return nil, fmt.Errorf(
+			"fetching events for %s failed (page %d): %w",
+			opts.Source,
+			opts.Page,
+			wrapGitHubError(err, opts.Source),
+		)
 	}
 
 	items := make([]*provider.Item, 0, len(activity))
@@ -148,7 +153,14 @@ func (c *Client) FetchAll(
 			Page:    page,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fetch page %d/%d for %s failed (fetched %d items): %w", page, maxPages, source, len(allItems), err)
+			return nil, fmt.Errorf(
+				"fetch page %d/%d for %s failed (fetched %d items): %w",
+				page,
+				maxPages,
+				source,
+				len(allItems),
+				err,
+			)
 		}
 
 		if len(result.Items) == 0 {
@@ -296,7 +308,12 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 			select {
 			case <-ctx.Done():
-				return fmt.Errorf("retry loop cancelled after %d attempts (last error: %v): %w", attempt, lastErr, ctx.Err())
+				return fmt.Errorf(
+					"retry loop cancelled after %d attempts (last error: %v): %w",
+					attempt,
+					lastErr,
+					ctx.Err(),
+				)
 			case <-time.After(backoff):
 				backoff *= 2
 			}
