@@ -121,30 +121,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 		)
 	}
 
-	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}
-
-	var cutoff time.Time
-	if latestItem != nil {
-		cutoff = latestItem.CreatedAt
-		s.logger.Debug("Using cutoff time", "cutoff", cutoff)
-	}
-
-	for _, item := range result.Items {
-		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
-			syncResult.Skipped++
-
-			continue
-		}
-
-		err := s.storage.Upsert(ctx, item)
-		if err != nil {
-			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
-
-			syncResult.Errors++
-
-			continue
-		}
-	}
+	syncResult := s.processIncrementalItems(ctx, latestItem, result.Items)
 
 	s.logger.Info(
 		"Incremental sync completed",
@@ -192,4 +169,38 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 // Close releases resources.
 func (s *Syncer) Close() error {
 	return s.storage.Close()
+}
+
+// processIncrementalItems processes items from FetchAll, skipping those older than cutoff.
+func (s *Syncer) processIncrementalItems(
+	ctx context.Context,
+	latestItem *provider.Item,
+	items []*provider.Item,
+) *SyncResult {
+	syncResult := &SyncResult{Fetched: len(items), Skipped: 0, Errors: 0}
+
+	cutoff := time.Time{}
+	if latestItem != nil {
+		cutoff = latestItem.CreatedAt
+		s.logger.Debug("Using cutoff time", "cutoff", cutoff)
+	}
+
+	for _, item := range items {
+		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
+			syncResult.Skipped++
+
+			continue
+		}
+
+		err := s.storage.Upsert(ctx, item)
+		if err != nil {
+			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
+
+			syncResult.Errors++
+
+			continue
+		}
+	}
+
+	return syncResult
 }

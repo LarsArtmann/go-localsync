@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -317,4 +318,113 @@ func TestSyncResult(t *testing.T) {
 	assert.Equal(t, 100, result.Fetched)
 	assert.Equal(t, 20, result.Skipped)
 	assert.Equal(t, 2, result.Errors)
+}
+
+func TestProcessIncrementalItems(t *testing.T) {
+	t.Run("skips items older than cutoff", func(t *testing.T) {
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(nil, mockStore, nil)
+
+		cutoff := time.Date(2024, 1, 15, 12, 0, 0, 0, time.UTC)
+		latestItem := &provider.Item{
+			ID:        types.NewItemID("1"),
+			CreatedAt: cutoff,
+		}
+
+		items := []*provider.Item{
+			{ID: types.NewItemID("2"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC)},
+			{ID: types.NewItemID("3"), Type: types.NewEventTypeID("IssuesEvent"), CreatedAt: time.Date(2024, 1, 15, 13, 0, 0, 0, time.UTC)},
+		}
+
+		result := syncer.processIncrementalItems(context.Background(), latestItem, items)
+
+		require.NotNil(t, result)
+		assert.Equal(t, 2, result.Fetched)
+		assert.Equal(t, 1, result.Skipped)
+		assert.Equal(t, 1, len(mockStore.items))
+		assert.Equal(t, "3", mockStore.items[0].ID.Get())
+	})
+
+	t.Run("handles nil latest item", func(t *testing.T) {
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(nil, mockStore, nil)
+
+		items := []*provider.Item{
+			{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: time.Now()},
+		}
+
+		result := syncer.processIncrementalItems(context.Background(), nil, items)
+
+		require.NotNil(t, result)
+		assert.Equal(t, 1, result.Fetched)
+		assert.Equal(t, 0, result.Skipped)
+		assert.Equal(t, 1, len(mockStore.items))
+	})
+
+	t.Run("handles identical timestamps at cutoff boundary", func(t *testing.T) {
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(nil, mockStore, nil)
+
+		sameTime := time.Date(2024, 1, 15, 12, 0, 0, 0, time.UTC)
+		cutoffItem := &provider.Item{
+			ID:        types.NewItemID("1"),
+			CreatedAt: sameTime,
+		}
+
+		items := []*provider.Item{
+			{ID: types.NewItemID("2"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: sameTime},
+			{ID: types.NewItemID("3"), Type: types.NewEventTypeID("IssuesEvent"), CreatedAt: sameTime.Add(1)},
+		}
+
+		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
+
+		require.NotNil(t, result)
+		assert.Equal(t, 2, result.Fetched)
+		assert.Equal(t, 0, result.Skipped)
+		assert.Equal(t, 2, len(mockStore.items))
+	})
+
+	t.Run("handles empty items slice", func(t *testing.T) {
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(nil, mockStore, nil)
+
+		cutoffItem := &provider.Item{
+			ID:        types.NewItemID("1"),
+			CreatedAt: time.Now(),
+		}
+
+		result := syncer.processIncrementalItems(context.Background(), cutoffItem, []*provider.Item{})
+
+		require.NotNil(t, result)
+		assert.Equal(t, 0, result.Fetched)
+		assert.Equal(t, 0, result.Skipped)
+		assert.Equal(t, 0, result.Errors)
+	})
+
+	t.Run("handles clock skew with future items", func(t *testing.T) {
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(nil, mockStore, nil)
+
+		now := time.Now()
+		futureTime := now.Add(24 * time.Hour)
+		pastTime := now.Add(-24 * time.Hour)
+
+		cutoffItem := &provider.Item{
+			ID:        types.NewItemID("1"),
+			CreatedAt: now,
+		}
+
+		items := []*provider.Item{
+			{ID: types.NewItemID("2"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: pastTime},
+			{ID: types.NewItemID("3"), Type: types.NewEventTypeID("IssuesEvent"), CreatedAt: futureTime},
+		}
+
+		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
+
+		require.NotNil(t, result)
+		assert.Equal(t, 2, result.Fetched)
+		assert.Equal(t, 1, result.Skipped)
+		assert.Equal(t, 1, len(mockStore.items))
+		assert.Equal(t, "3", mockStore.items[0].ID.Get())
+	})
 }

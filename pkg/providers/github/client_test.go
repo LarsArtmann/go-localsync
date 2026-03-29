@@ -374,3 +374,72 @@ func TestWithRetryConfig(t *testing.T) {
 	assert.Equal(t, cfg, newClient.retryConfig)
 	assert.Equal(t, client.client, newClient.client)
 }
+
+func TestGetRateLimit_NilCore(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"resources": gh.RateLimits{
+				Core: nil,
+			},
+		})
+	}))
+	defer server.Close()
+
+	httpClient := &http.Client{}
+	client := NewClientWithHTTP(httpClient)
+	client.client.BaseURL = mustParseURL(server.URL)
+
+	limits, err := client.GetRateLimit(context.Background())
+	require.NoError(t, err)
+	require.NotNil(t, limits)
+	assert.Equal(t, 0, limits.Limit)
+	assert.Equal(t, 0, limits.Remaining)
+	assert.True(t, limits.ResetAt.IsZero())
+}
+
+func TestIsRetryableError(t *testing.T) {
+	tests := []struct {
+		name       string
+		statusCode int
+		want       bool
+	}{
+		{"5xx server error", http.StatusInternalServerError, true},
+		{"429 rate limited", http.StatusTooManyRequests, true},
+		{"400 bad request", http.StatusBadRequest, false},
+		{"401 unauthorized", http.StatusUnauthorized, false},
+		{"403 forbidden", http.StatusForbidden, false},
+		{"404 not found", http.StatusNotFound, false},
+		{"200 OK", http.StatusOK, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := &gh.ErrorResponse{Response: &http.Response{StatusCode: tt.statusCode}}
+			got := isRetryableError(err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestWrapGitHubError(t *testing.T) {
+	tests := []struct {
+		name       string
+		statusCode int
+		wantErr    error
+	}{
+		{"unauthorized", http.StatusUnauthorized, pkgerrors.ErrInvalidToken},
+		{"forbidden", http.StatusForbidden, pkgerrors.ErrRateLimited},
+		{"not found", http.StatusNotFound, pkgerrors.ErrUserNotFound},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ghErr := &gh.ErrorResponse{
+				Response: &http.Response{StatusCode: tt.statusCode},
+			}
+			wrapped := wrapGitHubError(ghErr, "testuser")
+			assert.ErrorIs(t, wrapped, tt.wantErr)
+		})
+	}
+}

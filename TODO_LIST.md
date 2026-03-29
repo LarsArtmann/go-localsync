@@ -1,7 +1,8 @@
 # TODO_LIST.md
 
-**Project:** go-localsync  
-**Generated:** 2026-02-12  
+**Project:** go-localsync
+**Generated:** 2026-02-12
+**Last Updated:** 2026-03-29
 **Status:** Phase 1 Complete → Phase 2 Development
 
 ## Overview
@@ -15,57 +16,78 @@ This document tracks all TODOs, FIXMEs, and action items identified from code an
 ### Testing & Quality
 
 - [x] **Add GitHub client tests**  
-       **Source:** `pkg/github/client_test.go`  
-       **Description:** Created 13 comprehensive test functions with mock HTTP server.  
-       **Context:** Tests cover NewClient, FetchEvents, FetchAllEvents, ConvertEvent, and GetRateLimit.
+      **Source:** `pkg/github/client_test.go`  
+      **Description:** Created 13 comprehensive test functions with mock HTTP server.  
+      **Context:** Tests cover NewClient, FetchEvents, FetchAllEvents, ConvertEvent, and GetRateLimit.
 
 - [x] **Add sync package tests**  
-       **Source:** `pkg/sync/sync_test.go`  
-       **Description:** Created tests for NewSyncer, Sync, SyncIncremental, GetStats, and Close.  
-       **Context:** Uses mock storage implementation for isolated unit testing.
+      **Source:** `pkg/sync/sync_test.go`  
+      **Description:** Created tests for NewSyncer, Sync, SyncIncremental, GetStats, and Close.  
+      **Context:** Uses mock storage implementation for isolated unit testing.
 
 ### Critical Issues
 
 - [x] **Fix go.mod indirect dependencies**  
-       **Source:** `go.mod`  
-       **Description:** Ran `go mod tidy` to properly categorize dependencies.  
-       **Context:** Dependencies now correctly marked as direct vs indirect.
+      **Source:** `go.mod`  
+      **Description:** Ran `go mod tidy` to properly categorize dependencies.  
+      **Context:** Dependencies now correctly marked as direct vs indirect.
 
 - [x] **Implement typed/sentinel errors**  
-       **Source:** `pkg/errors/errors.go`  
-       **Description:** Created typed sentinel errors using cockroachdb/errors.  
-       **Context:** Includes ErrNotFound, ErrInvalidInput, ErrDatabase, ErrGitHubAPI, ErrRateLimited, ErrUnauthorized, ErrConfiguration.
+      **Source:** `pkg/errors/errors.go`  
+      **Description:** Created typed sentinel errors using cockroachdb/errors.  
+      **Context:** Includes ErrNotFound, ErrInvalidInput, ErrDatabase, ErrGitHubAPI, ErrRateLimited, ErrUnauthorized, ErrConfiguration.
 
 - [x] **Remove unused Config struct**  
-       **Source:** `pkg/sync/sync.go`  
-       **Description:** Deleted the unused `Config` struct.  
-       **Context:** Struct was defined but never used.
+      **Source:** `pkg/sync/sync.go`  
+      **Description:** Deleted the unused `Config` struct.  
+      **Context:** Struct was defined but never used.
 
 ### Infrastructure
 
 - [x] **Set up CI/CD Pipeline**  
-       **Source:** `.github/workflows/ci.yml`  
-       **Description:** Created GitHub Actions workflow with test, lint, build, and release jobs.  
-       **Context:** Runs on push/PR to master/main, uses golangci-lint, builds for linux/darwin on amd64/arm64.
+      **Source:** `.github/workflows/ci.yml`  
+      **Description:** Created GitHub Actions workflow with test, lint, build, and release jobs.  
+      **Context:** Runs on push/PR to master/main, uses golangci-lint, builds for linux/darwin on amd64/arm64.
 
 ### Architecture Improvements
 
 - [x] **Decouple domain types from storage**  
-       **Source:** `pkg/event/event.go`  
-       **Description:** Created domain Event type in `pkg/event/` package.  
-       **Context:** GitHub client now returns domain events, storage layer handles conversion.
+      **Source:** `pkg/event/event.go`  
+      **Description:** Created domain Event type in `pkg/event/` package.  
+      **Context:** GitHub client now returns domain events, storage layer handles conversion.
 
 - [x] **Fix version build injection**  
-       **Source:** `justfile`  
-       **Description:** Added ldflags for version, commit, and date in build command.  
-       **Context:** Build now properly injects version information.
+      **Source:** `justfile`  
+      **Description:** Added ldflags for version, commit, and date in build command.  
+      **Context:** Build now properly injects version information.
 
 ### Code Quality
 
 - [x] **Add error handling for DB close operations**  
-       **Source:** `cmd/gh-sync/main.go`  
-       **Description:** Added error logging for `dbc.Close()` in defer.  
-       **Context:** Close errors are now logged instead of silently ignored.
+      **Source:** `cmd/gh-sync/main.go`  
+      **Description:** Added error logging for `dbc.Close()` in defer.  
+      **Context:** Close errors are now logged instead of silently ignored.
+
+---
+
+## ✅ COMPLETED (2026-03-29)
+
+### Code Quality
+
+- [x] **Fix golangci-lint warnings**  
+      **Source:** `.golangci.yml`, `pkg/sync/sync.go`  
+      **Description:** Fixed containedctx (excluded in tests), duplicate code (excluded in tests), funlen for SyncIncremental (extracted method).  
+      **Context:** All lint issues resolved, added exclusions for test files.
+
+- [x] **Remove unused exitOK constant**  
+      **Source:** `cmd/examples/github-sync/main.go`  
+      **Description:** Removed unused `exitOK` constant from semantic exit codes.  
+      **Context:** Clean code, no warnings.
+
+- [x] **Refactor SyncIncremental for better maintainability**  
+      **Source:** `pkg/sync/sync.go`  
+      **Description:** Extracted `processIncrementalItems` helper function to reduce function length.  
+      **Context:** Function now under 60 lines, passes funlen linter.
 
 ---
 

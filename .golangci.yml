@@ -198,6 +198,16 @@ linters:
           - gocritic
           - wsl_v5
           - golines
+          - containedctx
+          - funlen
+          - dupl
+          - intrange
+          - modernize
+          - newexpr
+          - nlreturn
+          - testifylint
+          - unparam
+          - unused
       - path: "cmd/examples/"
         linters:
           - forbidigo
@@ -242,6 +252,7 @@ linters:
         linters:
           - wrapcheck
           - golines
+          - funlen
     paths:
       - "go.mod"
 formatters:

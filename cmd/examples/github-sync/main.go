@@ -22,7 +22,6 @@ import (
 
 // Semantic exit codes (sysexits.h conventions).
 const (
-	exitOK          = 0
 	exitUsage       = 64 // EX_USAGE - command line usage error
 	exitDataErr     = 65 // EX_DATAERR - data format error
 	exitNoInput     = 66 // EX_NOINPUT - cannot open input
