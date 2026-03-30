@@ -84,22 +84,13 @@ func (s *SQLiteStorage) GetItemsByActor(
 	actorLogin string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	events, err := s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
-		ActorLogin: toNullString(actorLogin),
-		Limit:      int64(limit),
-		Offset:     int64(offset),
+	return s.queryWithFilter(ctx, "actor", actorLogin, limit, offset, func(ctx context.Context) ([]*db.Events, error) {
+		return s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
+			ActorLogin: toNullString(actorLogin),
+			Limit:      int64(limit),
+			Offset:     int64(offset),
+		})
 	})
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get events by actor %q (limit=%d, offset=%d): %w",
-			actorLogin,
-			limit,
-			offset,
-			err,
-		)
-	}
-
-	return convertItems(events), nil
 }
 
 func (s *SQLiteStorage) GetItemsByRepo(
@@ -107,22 +98,13 @@ func (s *SQLiteStorage) GetItemsByRepo(
 	repoName string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	events, err := s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
-		RepoName: toNullString(repoName),
-		Limit:    int64(limit),
-		Offset:   int64(offset),
+	return s.queryWithFilter(ctx, "repo", repoName, limit, offset, func(ctx context.Context) ([]*db.Events, error) {
+		return s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
+			RepoName: toNullString(repoName),
+			Limit:    int64(limit),
+			Offset:   int64(offset),
+		})
 	})
-	if err != nil {
-		return nil, fmt.Errorf(
-			"failed to get events by repo %q (limit=%d, offset=%d): %w",
-			repoName,
-			limit,
-			offset,
-			err,
-		)
-	}
-
-	return convertItems(events), nil
 }
 
 func (s *SQLiteStorage) Count(ctx context.Context) (int64, error) {
@@ -144,4 +126,27 @@ func convertItems(events []*db.Events) []*provider.Item {
 	}
 
 	return result
+}
+
+type queryFunc func(ctx context.Context) ([]*db.Events, error)
+
+func (s *SQLiteStorage) queryWithFilter(
+	ctx context.Context,
+	filterName, filterValue string,
+	limit, offset int,
+	f queryFunc,
+) ([]*provider.Item, error) {
+	items, err := f(ctx)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"failed to get events by %s %q (limit=%d, offset=%d): %w",
+			filterName,
+			filterValue,
+			limit,
+			offset,
+			err,
+		)
+	}
+
+	return convertItems(items), nil
 }

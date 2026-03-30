@@ -28,6 +28,14 @@ type storageTestWorld struct {
 	types []string
 }
 
+// getCountsAndTypes retrieves count and types from the store for test assertions.
+func (w *storageTestWorld) getCountsAndTypes() {
+	w.count, w.err = w.store.Count(w.ctx)
+	Expect(w.err).ToNot(HaveOccurred())
+
+	w.types, w.err = w.store.GetTypes(w.ctx)
+}
+
 // newStorageItem creates a test item with sensible defaults.
 func newStorageItem(id, eventType, actor, repo string, createdAt time.Time) *provider.Item {
 	return &provider.Item{
@@ -244,11 +252,7 @@ var _ = Describe("SQLite Storage", func() {
 			})
 
 			JustBeforeEach(func() {
-				// When: I get counts and types
-				world.count, world.err = world.store.Count(world.ctx)
-				Expect(world.err).ToNot(HaveOccurred())
-
-				world.types, world.err = world.store.GetTypes(world.ctx)
+				world.getCountsAndTypes()
 			})
 
 			It("should return the total count", func() {

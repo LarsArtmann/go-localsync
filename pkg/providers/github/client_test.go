@@ -16,6 +16,23 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// newTestEvent creates a test GitHub event with the specified parameters.
+func newTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
+	return &gh.Event{
+		ID:   new(id),
+		Type: new(eventType),
+		Actor: &gh.User{
+			Login:     new("testuser"),
+			AvatarURL: new("https://avatar.url"),
+		},
+		Repo: &gh.Repository{
+			Name: new("test/repo"),
+			URL:  new("https://api.github.com/repos/test/repo"),
+		},
+		CreatedAt: &gh.Timestamp{Time: createdAt},
+	}
+}
+
 func TestNewClient(t *testing.T) {
 	client := NewClient("test-token")
 	require.NotNil(t, client)
@@ -39,6 +56,15 @@ func newTestClient(server *httptest.Server) *Client {
 	return client
 }
 
+// newErrorTestServer creates an httptest.Server that returns a JSON error response.
+func newErrorTestServer(statusCode int, message string) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(statusCode)
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(gh.ErrorResponse{Message: message})
+	}))
+}
+
 // testRetryConfig returns a retry config suitable for unit tests with fast backoff.
 func testRetryConfig() provider.RetryConfig {
 	return provider.RetryConfig{
@@ -49,6 +75,23 @@ func testRetryConfig() provider.RetryConfig {
 	}
 }
 
+// newFailingThenSucceedingTestServer creates a test server that fails with
+// http.StatusInternalServerError for the first (attempts-1) requests and succeeds
+// on the final attempt by returning an empty event list.
+func newFailingThenSucceedingTestServer(attempts int) (*httptest.Server, *int) {
+	callCount := 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		callCount++
+		if callCount < attempts {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode([]*gh.Event{})
+	}))
+	return server, &callCount
+}
+
 func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/users/testuser/events")
@@ -56,19 +99,7 @@ func TestFetch_DefaultOptions(t *testing.T) {
 		assert.Equal(t, "1", r.URL.Query().Get("page"))
 
 		events := []*gh.Event{
-			{
-				ID:   new("123"),
-				Type: new("PushEvent"),
-				Actor: &gh.User{
-					Login:     new("testuser"),
-					AvatarURL: new("https://avatar.url"),
-				},
-				Repo: &gh.Repository{
-					Name: new("test/repo"),
-					URL:  new("https://api.github.com/repos/test/repo"),
-				},
-				CreatedAt: &gh.Timestamp{Time: time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)},
-			},
+			newTestEvent("123", "PushEvent", time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)),
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -122,11 +153,7 @@ func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 }
 
 func TestFetch_APIError(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(gh.ErrorResponse{Message: "Not Found"})
-	}))
+	server := newErrorTestServer(http.StatusNotFound, "Not Found")
 	defer server.Close()
 
 	client := newTestClient(server)
@@ -318,19 +345,7 @@ func mustParseURL(rawURL string) *url.URL {
 }
 
 func TestFetch_RetryOnServerError(t *testing.T) {
-	callCount := 0
-
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount++
-		if callCount < 3 {
-			w.WriteHeader(http.StatusInternalServerError)
-
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode([]*gh.Event{})
-	}))
+	server, callCount := newFailingThenSucceedingTestServer(3)
 	defer server.Close()
 
 	client := newTestClient(server)
@@ -338,7 +353,7 @@ func TestFetch_RetryOnServerError(t *testing.T) {
 
 	_, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
 	require.NoError(t, err)
-	assert.Equal(t, 3, callCount)
+	assert.Equal(t, 3, *callCount)
 }
 
 func TestFetch_NoRetryOnClientError(t *testing.T) {
@@ -359,20 +374,38 @@ func TestFetch_NoRetryOnClientError(t *testing.T) {
 	assert.Equal(t, 1, callCount)
 }
 
-func TestWithRateLimitConfig(t *testing.T) {
-	client := NewClient("test-token")
-	cfg := provider.RateLimitConfig{Enabled: true, MinRemaining: 100}
-	newClient := client.WithRateLimitConfig(cfg)
-	assert.Equal(t, cfg, newClient.rateLimitConfig)
-	assert.Equal(t, client.client, newClient.client)
-}
+func TestWithConfig(t *testing.T) {
+	tests := []struct {
+		name        string
+		config      any
+		getConfig   func(*Client) any
+		withConfig  func(*Client, any) *Client
+		assertField string
+	}{
+		{
+			name:        "RateLimitConfig",
+			config:      provider.RateLimitConfig{Enabled: true, MinRemaining: 100},
+			getConfig:   func(c *Client) any { return c.rateLimitConfig },
+			withConfig:  func(c *Client, cfg any) *Client { return c.WithRateLimitConfig(cfg.(provider.RateLimitConfig)) },
+			assertField: "rateLimitConfig",
+		},
+		{
+			name:        "RetryConfig",
+			config:      provider.RetryConfig{Enabled: true, MaxRetries: 5},
+			getConfig:   func(c *Client) any { return c.retryConfig },
+			withConfig:  func(c *Client, cfg any) *Client { return c.WithRetryConfig(cfg.(provider.RetryConfig)) },
+			assertField: "retryConfig",
+		},
+	}
 
-func TestWithRetryConfig(t *testing.T) {
-	client := NewClient("test-token")
-	cfg := provider.RetryConfig{Enabled: true, MaxRetries: 5}
-	newClient := client.WithRetryConfig(cfg)
-	assert.Equal(t, cfg, newClient.retryConfig)
-	assert.Equal(t, client.client, newClient.client)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := NewClient("test-token")
+			newClient := tt.withConfig(client, tt.config)
+			assert.Equal(t, tt.config, tt.getConfig(newClient))
+			assert.Equal(t, client.client, newClient.client)
+		})
+	}
 }
 
 func TestGetRateLimit_NilCore(t *testing.T) {

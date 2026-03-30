@@ -13,6 +13,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func testNilOptionsError(t *testing.T, syncFunc func(context.Context, *SyncOptions) (*SyncResult, error)) {
+	t.Helper()
+
+	result, err := syncFunc(context.Background(), nil)
+
+	require.Error(t, err)
+	assert.Nil(t, result)
+}
+
 // mockStorage implements storage.Storage for testing.
 type mockStorage struct {
 	items          []*provider.Item
@@ -167,13 +176,10 @@ func newMockProviderWithItems() *mockProvider {
 
 func TestSyncer_Sync(t *testing.T) {
 	t.Run("returns error for nil options", func(t *testing.T) {
-		mockStore := &mockStorage{}
-		syncer := NewSyncer(nil, mockStore, nil)
-
-		result, err := syncer.Sync(context.Background(), nil)
-
-		require.Error(t, err)
-		assert.Nil(t, result)
+		testNilOptionsError(t, func(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
+			syncer := NewSyncer(nil, &mockStorage{}, nil)
+			return syncer.Sync(ctx, opts)
+		})
 	})
 
 	t.Run("syncs items successfully", func(t *testing.T) {
@@ -230,13 +236,10 @@ func TestSyncer_Sync(t *testing.T) {
 
 func TestSyncer_SyncIncremental(t *testing.T) {
 	t.Run("returns error for nil options", func(t *testing.T) {
-		mockStore := &mockStorage{}
-		syncer := NewSyncer(nil, mockStore, nil)
-
-		result, err := syncer.SyncIncremental(context.Background(), nil)
-
-		require.Error(t, err)
-		assert.Nil(t, result)
+		testNilOptionsError(t, func(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
+			syncer := NewSyncer(nil, &mockStorage{}, nil)
+			return syncer.SyncIncremental(ctx, opts)
+		})
 	})
 }
 
