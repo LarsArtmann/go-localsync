@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"time"
 
 	gh "github.com/google/go-github/v69/github"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/providers/github"
+	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -39,61 +39,6 @@ func newGitHubTestClientWithoutRateLimit(server *httptest.Server) *github.Client
 	return newGitHubTestClient(server).WithRateLimitConfig(provider.RateLimitConfig{Enabled: false})
 }
 
-// ptr returns a pointer to the given string.
-
-// mustParseURL parses a URL and adds trailing slash (required by go-github).
-func mustParseURL(rawURL string) *url.URL {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		panic(err)
-	}
-	u.Path = u.Path + "/"
-	return u
-}
-
-// newTestEvent creates a test GitHub event with the specified parameters.
-func newTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
-	return &gh.Event{
-		ID:   ptr(id),
-		Type: ptr(eventType),
-		Actor: &gh.User{
-			Login:     ptr("octocat"),
-			AvatarURL: ptr("https://avatars.githubusercontent.com/u/583231"),
-		},
-		Repo: &gh.Repository{
-			Name: ptr("octocat/Hello-World"),
-			URL:  ptr("https://api.github.com/repos/octocat/Hello-World"),
-		},
-		CreatedAt: &gh.Timestamp{Time: createdAt},
-	}
-}
-
-// newErrorTestServer creates an httptest.Server that returns a JSON error response.
-func newErrorTestServer(statusCode int, message string) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(statusCode)
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(gh.ErrorResponse{Message: message})
-	}))
-}
-
-// newFailingThenSucceedingTestServer creates a test server that fails with
-// http.StatusInternalServerError for the first (attempts-1) requests and succeeds
-// on the final attempt by returning an empty event list.
-func newFailingThenSucceedingTestServer(attempts int) (*httptest.Server, *int) {
-	callCount := 0
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount++
-		if callCount < attempts {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode([]*gh.Event{})
-	}))
-	return server, &callCount
-}
-
 var _ = Describe("GitHub Provider", func() {
 	var world githubTestWorld
 
@@ -118,8 +63,8 @@ var _ = Describe("GitHub Provider", func() {
 					Expect(r.URL.Path).To(ContainSubstring("/users/octocat/events"))
 
 					events := []*gh.Event{
-						newTestEvent("event-123", "PushEvent", time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)),
-						newTestEvent("event-456", "IssuesEvent", time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC)),
+						testhelpers.NewTestEvent("event-123", "PushEvent", time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)),
+						testhelpers.NewTestEvent("event-456", "IssuesEvent", time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC)),
 					}
 
 					w.Header().Set("Content-Type", "application/json")
@@ -194,16 +139,16 @@ var _ = Describe("GitHub Provider", func() {
 						// First page: 100 items (full page, indicates more available)
 						for i := 0; i < 100; i++ {
 							events = append(events, &gh.Event{
-								ID:   ptr("page1-" + string(rune('A'+i%26)) + string(rune('0'+i%10))),
-								Type: ptr("PushEvent"),
+								ID:   testhelpers.Ptr("page1-" + string(rune('A'+i%26)) + string(rune('0'+i%10))),
+								Type: testhelpers.Ptr("PushEvent"),
 							})
 						}
 					case "2":
 						// Second page: 50 items (partial, indicates no more)
 						for i := 0; i < 50; i++ {
 							events = append(events, &gh.Event{
-								ID:   ptr("page2-" + string(rune('A'+i%26))),
-								Type: ptr("IssuesEvent"),
+								ID:   testhelpers.Ptr("page2-" + string(rune('A'+i%26))),
+								Type: testhelpers.Ptr("IssuesEvent"),
 							})
 						}
 					default:
@@ -239,7 +184,7 @@ var _ = Describe("GitHub Provider", func() {
 		Context("when the user does not exist", func() {
 			BeforeEach(func() {
 				// Given: A server that returns 404 for unknown users
-				world.server = newErrorTestServer(http.StatusNotFound, "Not Found")
+				world.server = testhelpers.NewErrorTestServer(http.StatusNotFound, "Not Found")
 
 				world.client = newGitHubTestClient(world.server)
 			})
@@ -309,7 +254,7 @@ var _ = Describe("GitHub Provider", func() {
 			BeforeEach(func() {
 				// Given: A server that fails initially then succeeds
 				var retryCountPtr *int
-				world.server, retryCountPtr = newFailingThenSucceedingTestServer(3)
+				world.server, retryCountPtr = testhelpers.NewFailingThenSucceedingTestServer(3)
 				world.callCount = *retryCountPtr
 
 				world.client = newGitHubTestClient(world.server)
@@ -340,7 +285,7 @@ var _ = Describe("GitHub Provider", func() {
 		Context("when GitHub returns a client error (4xx)", func() {
 			BeforeEach(func() {
 				// Given: A server that returns 400 Bad Request
-				world.server = newErrorTestServer(http.StatusBadRequest, "Bad Request")
+				world.server = testhelpers.NewErrorTestServer(http.StatusBadRequest, "Bad Request")
 
 				world.client = newGitHubTestClient(world.server)
 				world.client = world.client.WithRetryConfig(provider.RetryConfig{
@@ -406,8 +351,3 @@ var _ = Describe("GitHub Provider", func() {
 		})
 	})
 })
-
-// ptr returns a pointer to the given string.
-func ptr(s string) *string {
-	return &s
-}

@@ -2,7 +2,6 @@ package sync_test
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
@@ -11,7 +10,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/storage"
 	"github.com/larsartmann/go-localsync/pkg/sync"
-	"github.com/larsartmann/go-localsync/pkg/types"
+	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -20,60 +19,12 @@ import (
 // syncTestWorld holds shared test state for BDD scenarios.
 type syncTestWorld struct {
 	ctx      context.Context
-	provider *fakeProvider
+	provider *testhelpers.MockProvider
 	storage  storage.Storage
 	syncer   *sync.Syncer
 	result   *sync.SyncResult
 	err      error
 	db       interface{ Close() error }
-}
-
-// fakeProvider simulates a provider for BDD testing.
-type fakeProvider struct {
-	name       string
-	items      []*provider.Item
-	fetchErr   error
-	fetchCalls int
-}
-
-func (f *fakeProvider) Name() string {
-	if f.name == "" {
-		return "fake"
-	}
-	return f.name
-}
-
-func (f *fakeProvider) Fetch(ctx context.Context, opts *provider.FetchOptions) (*provider.FetchResult, error) {
-	f.fetchCalls++
-	if f.fetchErr != nil {
-		return nil, f.fetchErr
-	}
-	return &provider.FetchResult{Items: f.items, HasMore: false}, nil
-}
-
-func (f *fakeProvider) FetchAll(ctx context.Context, source string, maxPages int) (*provider.FetchResult, error) {
-	f.fetchCalls++
-	if f.fetchErr != nil {
-		return nil, f.fetchErr
-	}
-	return &provider.FetchResult{Items: f.items, HasMore: false}, nil
-}
-
-func (f *fakeProvider) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, error) {
-	return &provider.RateLimitInfo{Limit: 5000, Remaining: 4999}, nil
-}
-
-// newTestItem creates a test item with sensible defaults.
-func newTestItem(id, eventType string, createdAt time.Time) *provider.Item {
-	return &provider.Item{
-		ID:         types.NewItemID(id),
-		Source:     types.NewProviderID("fake"),
-		Type:       types.NewEventTypeID(eventType),
-		ActorLogin: types.NewActorID("testuser"),
-		RepoName:   types.NewRepoID("test/repo"),
-		CreatedAt:  createdAt,
-		RawJSON:    json.RawMessage(`{"id":"` + id + `"}`),
-	}
 }
 
 var _ = Describe("Sync Engine", func() {
@@ -82,7 +33,7 @@ var _ = Describe("Sync Engine", func() {
 	BeforeEach(func() {
 		world = syncTestWorld{
 			ctx:      context.Background(),
-			provider: &fakeProvider{},
+			provider: &testhelpers.MockProvider{},
 		}
 
 		// Create in-memory SQLite storage
@@ -104,10 +55,10 @@ var _ = Describe("Sync Engine", func() {
 			BeforeEach(func() {
 				// Given: A provider with 3 events
 				now := time.Now()
-				world.provider.items = []*provider.Item{
-					newTestItem("1", "PushEvent", now.Add(-2*time.Hour)),
-					newTestItem("2", "IssuesEvent", now.Add(-1*time.Hour)),
-					newTestItem("3", "PullRequestEvent", now),
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("1", "PushEvent", now.Add(-2*time.Hour)),
+					testhelpers.NewTestItem("2", "IssuesEvent", now.Add(-1*time.Hour)),
+					testhelpers.NewTestItem("3", "PullRequestEvent", now),
 				}
 			})
 
@@ -144,8 +95,8 @@ var _ = Describe("Sync Engine", func() {
 			BeforeEach(func() {
 				// Given: A provider with events
 				now := time.Now()
-				world.provider.items = []*provider.Item{
-					newTestItem("1", "PushEvent", now),
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("1", "PushEvent", now),
 				}
 			})
 
@@ -177,15 +128,15 @@ var _ = Describe("Sync Engine", func() {
 			BeforeEach(func() {
 				// Given: Storage already has one old item
 				firstSyncTime = time.Now().Add(-2 * time.Hour)
-				oldItem := newTestItem("old", "PushEvent", firstSyncTime)
+				oldItem := testhelpers.NewTestItem("old", "PushEvent", firstSyncTime)
 				err := world.storage.Upsert(world.ctx, oldItem)
 				Expect(err).ToNot(HaveOccurred())
 
 				// And: Provider returns both old and new items
-				world.provider.items = []*provider.Item{
-					newTestItem("old", "PushEvent", firstSyncTime),
-					newTestItem("new1", "IssuesEvent", time.Now().Add(-1*time.Hour)),
-					newTestItem("new2", "PullRequestEvent", time.Now()),
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("old", "PushEvent", firstSyncTime),
+					testhelpers.NewTestItem("new1", "IssuesEvent", time.Now().Add(-1*time.Hour)),
+					testhelpers.NewTestItem("new2", "PullRequestEvent", time.Now()),
 				}
 			})
 
@@ -215,7 +166,7 @@ var _ = Describe("Sync Engine", func() {
 		Context("when the provider fails during sync", func() {
 			BeforeEach(func() {
 				// Given: A provider that fails
-				world.provider.fetchErr = errors.New("network timeout")
+				world.provider.FetchErr = errors.New("network timeout")
 			})
 
 			JustBeforeEach(func() {
@@ -243,11 +194,11 @@ var _ = Describe("Sync Engine", func() {
 				// Given: Storage has mixed event types
 				now := time.Now()
 				items := []*provider.Item{
-					newTestItem("1", "PushEvent", now.Add(-3*time.Hour)),
-					newTestItem("2", "PushEvent", now.Add(-2*time.Hour)),
-					newTestItem("3", "IssuesEvent", now.Add(-1*time.Hour)),
+					testhelpers.NewTestItem("1", "PushEvent", now.Add(-3*time.Hour)),
+					testhelpers.NewTestItem("2", "PushEvent", now.Add(-2*time.Hour)),
+					testhelpers.NewTestItem("3", "IssuesEvent", now.Add(-1*time.Hour)),
 				}
-				world.provider.items = items
+				world.provider.ItemsVal = items
 
 				_, err := world.syncer.Sync(world.ctx, &sync.SyncOptions{
 					Source:   "testuser",
@@ -278,13 +229,13 @@ var _ = Describe("Sync Engine", func() {
 		Context("when storage fails during sync", func() {
 			BeforeEach(func() {
 				// Given: Provider returns items but we'll use a failing storage
-				world.provider.items = []*provider.Item{
-					newTestItem("1", "PushEvent", time.Now()),
-					newTestItem("2", "IssuesEvent", time.Now()),
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("1", "PushEvent", time.Now()),
+					testhelpers.NewTestItem("2", "IssuesEvent", time.Now()),
 				}
 
 				// Use a storage that fails on upsert
-				world.storage = &failingStorage{}
+				world.storage = &testhelpers.FailingStorage{}
 				world.syncer = sync.NewSyncer(world.provider, world.storage, log.New(nil))
 			})
 
@@ -314,46 +265,3 @@ var _ = Describe("Sync Engine", func() {
 		})
 	})
 })
-
-// failingStorage simulates a storage that always fails.
-type failingStorage struct{}
-
-func (f *failingStorage) Upsert(ctx context.Context, item *provider.Item) error {
-	return errors.New("disk full")
-}
-
-func (f *failingStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
-	return nil, errors.New("not found")
-}
-
-func (f *failingStorage) GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error) {
-	return nil, nil
-}
-
-func (f *failingStorage) GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error) {
-	return nil, nil
-}
-
-func (f *failingStorage) GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error) {
-	return nil, nil
-}
-
-func (f *failingStorage) GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error) {
-	return nil, nil
-}
-
-func (f *failingStorage) Count(ctx context.Context) (int64, error) {
-	return 0, nil
-}
-
-func (f *failingStorage) CountByType(ctx context.Context, itemType string) (int64, error) {
-	return 0, nil
-}
-
-func (f *failingStorage) GetTypes(ctx context.Context) ([]string, error) {
-	return nil, nil
-}
-
-func (f *failingStorage) Close() error {
-	return nil
-}

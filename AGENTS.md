@@ -37,3 +37,25 @@ When adding new providers:
 ## Database Schema
 
 Current schema uses GitHub-specific column names (`github_id`) but should be generalized in future iterations to support multiple providers.
+
+## SQLC Code Generation
+
+The `internal/db/` directory contains sqlc-generated code:
+
+- `events.sql.go` - Query functions and parameter structs (AUTO-GENERATED)
+- `models.go` - Data model structs (AUTO-GENERATED)
+- `mixins.go` - **Manual** mixin types for code reuse
+
+### ⚠️ Regeneration Warning
+
+The `events.sql.go` file has **manual mixin embedding** applied. After running `sqlc generate`, these changes will be **lost**. To reapply:
+
+1. Edit `internal/db/events.sql.go` and replace the struct definitions with embedded mixins
+2. Update callers in `pkg/storage/sqlite.go` to use `PaginationMixin: db.PaginationMixin{...}` syntax
+
+### Mixin Types
+
+| Mixin             | Purpose                    | Used By                                                                                       |
+| ----------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
+| `PaginationMixin` | Shared Limit/Offset fields | `GetEventsParams`, `GetEventsByActorParams`, `GetEventsByRepoParams`, `GetEventsByTypeParams` |
+| `EventCoreMixin`  | Shared event fields        | (Available for future use with `UpsertEventParams` ↔ `Events`)                                |

@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 	"time"
 
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,15 +19,15 @@ import (
 // newTestEvent creates a test GitHub event with the specified parameters.
 func newTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
 	return &gh.Event{
-		ID:   new(id),
-		Type: new(eventType),
+		ID:   testhelpers.Ptr(id),
+		Type: testhelpers.Ptr(eventType),
 		Actor: &gh.User{
-			Login:     new("testuser"),
-			AvatarURL: new("https://avatar.url"),
+			Login:     testhelpers.Ptr("testuser"),
+			AvatarURL: testhelpers.Ptr("https://avatar.url"),
 		},
 		Repo: &gh.Repository{
-			Name: new("test/repo"),
-			URL:  new("https://api.github.com/repos/test/repo"),
+			Name: testhelpers.Ptr("test/repo"),
+			URL:  testhelpers.Ptr("https://api.github.com/repos/test/repo"),
 		},
 		CreatedAt: &gh.Timestamp{Time: createdAt},
 	}
@@ -50,47 +50,22 @@ func TestNewClientWithHTTP(t *testing.T) {
 func newTestClient(server *httptest.Server) *Client {
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
+	client.client.BaseURL = testhelpers.MustParseURL(server.URL)
 	client = client.WithRateLimitConfig(provider.RateLimitConfig{Enabled: false})
 
 	return client
 }
 
 // newErrorTestServer creates an httptest.Server that returns a JSON error response.
-func newErrorTestServer(statusCode int, message string) *httptest.Server {
-	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(statusCode)
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(gh.ErrorResponse{Message: message})
-	}))
-}
+var newErrorTestServer = testhelpers.NewErrorTestServer
 
 // testRetryConfig returns a retry config suitable for unit tests with fast backoff.
-func testRetryConfig() provider.RetryConfig {
-	return provider.RetryConfig{
-		Enabled:        true,
-		MaxRetries:     3,
-		InitialBackoff: 1 * time.Millisecond,
-		MaxBackoff:     10 * time.Millisecond,
-	}
-}
+var testRetryConfig = testhelpers.TestRetryConfig
 
 // newFailingThenSucceedingTestServer creates a test server that fails with
 // http.StatusInternalServerError for the first (attempts-1) requests and succeeds
 // on the final attempt by returning an empty event list.
-func newFailingThenSucceedingTestServer(attempts int) (*httptest.Server, *int) {
-	callCount := 0
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount++
-		if callCount < attempts {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode([]*gh.Event{})
-	}))
-	return server, &callCount
-}
+var newFailingThenSucceedingTestServer = testhelpers.NewFailingThenSucceedingTestServer
 
 func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -324,24 +299,13 @@ func TestGetRateLimit(t *testing.T) {
 
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
+	client.client.BaseURL = testhelpers.MustParseURL(server.URL)
 
 	limits, err := client.GetRateLimit(context.Background())
 	require.NoError(t, err)
 	require.NotNil(t, limits)
 	assert.Equal(t, 5000, limits.Limit)
 	assert.Equal(t, 4999, limits.Remaining)
-}
-
-func mustParseURL(rawURL string) *url.URL {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		panic(err)
-	}
-
-	u.Path = u.Path + "/"
-
-	return u
 }
 
 func TestFetch_RetryOnServerError(t *testing.T) {
@@ -421,7 +385,7 @@ func TestGetRateLimit_NilCore(t *testing.T) {
 
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = mustParseURL(server.URL)
+	client.client.BaseURL = testhelpers.MustParseURL(server.URL)
 
 	limits, err := client.GetRateLimit(context.Background())
 	require.NoError(t, err)

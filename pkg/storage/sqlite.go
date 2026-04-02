@@ -46,8 +46,10 @@ func (s *SQLiteStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 
 func (s *SQLiteStorage) GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error) {
 	events, err := s.querier.GetEvents(ctx, &db.GetEventsParams{
-		Limit:  int64(limit),
-		Offset: int64(offset),
+		PaginationMixin: db.PaginationMixin{
+			Limit:  int64(limit),
+			Offset: int64(offset),
+		},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events (limit=%d, offset=%d): %w", limit, offset, err)
@@ -62,9 +64,11 @@ func (s *SQLiteStorage) GetItemsByType(
 	limit, offset int,
 ) ([]*provider.Item, error) {
 	events, err := s.querier.GetEventsByType(ctx, &db.GetEventsByTypeParams{
-		Type:   itemType,
-		Limit:  int64(limit),
-		Offset: int64(offset),
+		Type: itemType,
+		PaginationMixin: db.PaginationMixin{
+			Limit:  int64(limit),
+			Offset: int64(offset),
+		},
 	})
 	if err != nil {
 		return nil, fmt.Errorf(
@@ -86,9 +90,11 @@ func (s *SQLiteStorage) GetItemsByActor(
 ) ([]*provider.Item, error) {
 	return s.queryWithFilter(ctx, "actor", actorLogin, limit, offset, func(ctx context.Context) ([]*db.Events, error) {
 		return s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
-			ActorLogin: toNullString(actorLogin),
-			Limit:      int64(limit),
-			Offset:     int64(offset),
+			ActorLogin: actorLogin,
+			PaginationMixin: db.PaginationMixin{
+				Limit:  int64(limit),
+				Offset: int64(offset),
+			},
 		})
 	})
 }
@@ -100,9 +106,11 @@ func (s *SQLiteStorage) GetItemsByRepo(
 ) ([]*provider.Item, error) {
 	return s.queryWithFilter(ctx, "repo", repoName, limit, offset, func(ctx context.Context) ([]*db.Events, error) {
 		return s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
-			RepoName: toNullString(repoName),
-			Limit:    int64(limit),
-			Offset:   int64(offset),
+			RepoName: repoName,
+			PaginationMixin: db.PaginationMixin{
+				Limit:  int64(limit),
+				Offset: int64(offset),
+			},
 		})
 	})
 }
