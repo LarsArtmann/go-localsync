@@ -19,15 +19,15 @@ import (
 // newTestEvent creates a test GitHub event with the specified parameters.
 func newTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
 	return &gh.Event{
-		ID:   testhelpers.Ptr(id),
-		Type: testhelpers.Ptr(eventType),
+		ID:   new(id),
+		Type: new(eventType),
 		Actor: &gh.User{
-			Login:     testhelpers.Ptr("testuser"),
-			AvatarURL: testhelpers.Ptr("https://avatar.url"),
+			Login:     new("testuser"),
+			AvatarURL: new("https://avatar.url"),
 		},
 		Repo: &gh.Repository{
-			Name: testhelpers.Ptr("test/repo"),
-			URL:  testhelpers.Ptr("https://api.github.com/repos/test/repo"),
+			Name: new("test/repo"),
+			URL:  new("https://api.github.com/repos/test/repo"),
 		},
 		CreatedAt: &gh.Timestamp{Time: createdAt},
 	}

@@ -11,7 +11,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/providers/github"
 	"github.com/larsartmann/go-localsync/pkg/testhelpers"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -58,18 +57,28 @@ var _ = Describe("GitHub Provider", func() {
 		Context("when I fetch events for a valid user", func() {
 			BeforeEach(func() {
 				// Given: A GitHub API server returning user events
-				world.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					world.callCount++
-					Expect(r.URL.Path).To(ContainSubstring("/users/octocat/events"))
+				world.server = httptest.NewServer(
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						world.callCount++
+						Expect(r.URL.Path).To(ContainSubstring("/users/octocat/events"))
 
-					events := []*gh.Event{
-						testhelpers.NewTestEvent("event-123", "PushEvent", time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)),
-						testhelpers.NewTestEvent("event-456", "IssuesEvent", time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC)),
-					}
+						events := []*gh.Event{
+							testhelpers.NewTestEvent(
+								"event-123",
+								"PushEvent",
+								time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC),
+							),
+							testhelpers.NewTestEvent(
+								"event-456",
+								"IssuesEvent",
+								time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC),
+							),
+						}
 
-					w.Header().Set("Content-Type", "application/json")
-					_ = json.NewEncoder(w).Encode(events)
-				}))
+						w.Header().Set("Content-Type", "application/json")
+						_ = json.NewEncoder(w).Encode(events)
+					}),
+				)
 
 				world.client = newGitHubTestClientWithoutRateLimit(world.server)
 			})
@@ -102,7 +111,9 @@ var _ = Describe("GitHub Provider", func() {
 			It("should include actor information", func() {
 				for _, item := range world.result.Items {
 					Expect(item.ActorLogin.Get()).To(Equal("octocat"))
-					Expect(item.ActorAvatarURL).To(ContainSubstring("avatars.githubusercontent.com"))
+					Expect(
+						item.ActorAvatarURL,
+					).To(ContainSubstring("avatars.githubusercontent.com"))
 				}
 			})
 
@@ -114,7 +125,9 @@ var _ = Describe("GitHub Provider", func() {
 			})
 
 			It("should preserve timestamps", func() {
-				Expect(world.result.Items[0].CreatedAt).To(Equal(time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)))
+				Expect(
+					world.result.Items[0].CreatedAt,
+				).To(Equal(time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)))
 			})
 
 			It("should preserve raw JSON for full fidelity", func() {
@@ -129,36 +142,38 @@ var _ = Describe("GitHub Provider", func() {
 			BeforeEach(func() {
 				// Given: A server with paginated results
 				world.callCount = 0
-				world.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					world.callCount++
-					page := r.URL.Query().Get("page")
+				world.server = httptest.NewServer(
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						world.callCount++
+						page := r.URL.Query().Get("page")
 
-					var events []*gh.Event
-					switch page {
-					case "1", "":
-						// First page: 100 items (full page, indicates more available)
-						for i := 0; i < 100; i++ {
-							events = append(events, &gh.Event{
-								ID:   testhelpers.Ptr("page1-" + string(rune('A'+i%26)) + string(rune('0'+i%10))),
-								Type: testhelpers.Ptr("PushEvent"),
-							})
+						var events []*gh.Event
+						switch page {
+						case "1", "":
+							// First page: 100 items (full page, indicates more available)
+							for i := range 100 {
+								events = append(events, &gh.Event{
+									ID:   new("page1-" + string(rune('A'+i%26)) + string(rune('0'+i%10))),
+									Type: new("PushEvent"),
+								})
+							}
+						case "2":
+							// Second page: 50 items (partial, indicates no more)
+							for i := range 50 {
+								events = append(events, &gh.Event{
+									ID:   new("page2-" + string(rune('A'+i%26))),
+									Type: new("IssuesEvent"),
+								})
+							}
+						default:
+							// No more pages
+							events = []*gh.Event{}
 						}
-					case "2":
-						// Second page: 50 items (partial, indicates no more)
-						for i := 0; i < 50; i++ {
-							events = append(events, &gh.Event{
-								ID:   testhelpers.Ptr("page2-" + string(rune('A'+i%26))),
-								Type: testhelpers.Ptr("IssuesEvent"),
-							})
-						}
-					default:
-						// No more pages
-						events = []*gh.Event{}
-					}
 
-					w.Header().Set("Content-Type", "application/json")
-					_ = json.NewEncoder(w).Encode(events)
-				}))
+						w.Header().Set("Content-Type", "application/json")
+						_ = json.NewEncoder(w).Encode(events)
+					}),
+				)
 
 				world.client = newGitHubTestClientWithoutRateLimit(world.server)
 			})
@@ -208,21 +223,25 @@ var _ = Describe("GitHub Provider", func() {
 		Context("when GitHub rate limits my requests", func() {
 			BeforeEach(func() {
 				// Given: A server that returns rate limit info
-				world.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					if r.URL.Path == "/rate_limit/" {
-						w.Header().Set("Content-Type", "application/json")
-						_ = json.NewEncoder(w).Encode(map[string]interface{}{
-							"resources": gh.RateLimits{
-								Core: &gh.Rate{
-									Limit:     5000,
-									Remaining: 5, // Low remaining
-									Reset:     gh.Timestamp{Time: time.Now().Add(1 * time.Hour)},
+				world.server = httptest.NewServer(
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						if r.URL.Path == "/rate_limit/" {
+							w.Header().Set("Content-Type", "application/json")
+							_ = json.NewEncoder(w).Encode(map[string]any{
+								"resources": gh.RateLimits{
+									Core: &gh.Rate{
+										Limit:     5000,
+										Remaining: 5, // Low remaining
+										Reset: gh.Timestamp{
+											Time: time.Now().Add(1 * time.Hour),
+										},
+									},
 								},
-							},
-						})
-						return
-					}
-				}))
+							})
+							return
+						}
+					}),
+				)
 
 				world.client = newGitHubTestClient(world.server)
 			})

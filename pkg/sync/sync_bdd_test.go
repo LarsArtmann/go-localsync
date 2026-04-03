@@ -11,7 +11,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/storage"
 	"github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/testhelpers"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

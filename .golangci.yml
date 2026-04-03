@@ -1,146 +1,170 @@
 version: "2"
 run:
   timeout: 5m
-  go: ""
-  build-tags: []
-  allow-parallel-runners: false
-  allow-serial-runners: false
+  go: 1.26.1
+  build-tags:
+    - goexperiment.goroutineleakprofile
+    - goexperiment.jsonv2
+    - goexperiment.simd
+  allow-parallel-runners: true
+  allow-serial-runners: true
   issues-exit-code: 1
   tests: true
 output:
   formats: {}
 linters:
   enable:
-    - gosec
-    - nakedret
-    - errorlint
-    - gochecksumtype
-    - err113
-    - goheader
-    - noctx
-    - bodyclose
-    - nonamedreturns
-    - nestif
-    - tagalign
-    - unparam
-    - intrange
-    - forbidigo
-    - importas
-    - dogsled
-    - inamedparam
-    - goprintffuncname
-    - whitespace
     - arangolint
-    - perfsprint
-    - nlreturn
-    - nilnil
-    - errname
-    - exhaustruct
-    - misspell
-    - tagliatelle
-    - wrapcheck
-    - errcheck
-    - contextcheck
-    - nolintlint
-    - gocritic
-    - predeclared
-    - usestdlibvars
-    - wsl_v5
-    - loggercheck
-    - prealloc
-    - spancheck
-    - revive
-    - ineffassign
-    - mnd
-    - mirror
-    - wastedassign
-    - noinlineerr
-    - zerologlint
-    - containedctx
-    - interfacebloat
-    - durationcheck
-    - funcorder
-    - exptostd
-    - musttag
-    - ireturn
-    - godox
-    - unused
-    - testpackage
-    - staticcheck
-    - unconvert
-    - gomodguard
-    - copyloopvar
-    - recvcheck
-    - bidichk
-    - rowserrcheck
-    - testableexamples
-    - sqlclosecheck
-    - canonicalheader
-    - varnamelen
-    - gocognit
-    - gochecknoglobals
-    - gocyclo
-    - reassign
-    - exhaustive
-    - iface
-    - gomoddirectives
-    - errchkjson
     - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - contextcheck
+    - copyloopvar
     - cyclop
-    - protogetter
-    - nilnesserr
-    - gocheckcompilerdirectives
+    - decorder
+    - depguard
+    - dogsled
     - dupl
     - dupword
-    - decorder
-    - ginkgolinter
-    - fatcontext
-    - usetesting
-    - nilerr
+    - durationcheck
     - embeddedstructfieldcheck
-    - tparallel
-    - paralleltest
-    - maintidx
-    - goconst
-    - asciicheck
-    - sloglint
-    - godot
-    - grouper
-    - iotamixing
-    - testifylint
-    - modernize
-    - promlinter
-    - nosprintfhostport
-    - unqueryvet
-    - gosmopolitan
-    - godoclint
-    - gochecknoinits
+    - err113
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - exptostd
+    - fatcontext
+    - forbidigo
     - forcetypeassert
-    - thelper
-    - depguard
-    - govet
-    - makezero
     - funlen
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecknoglobals
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godoclint
+    - godot
+    - godox
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosmopolitan
+    - govet
+    - grouper
+    - iface
+    - importas
+    - inamedparam
+    - ineffassign
+    - interfacebloat
+    - intrange
+    - iotamixing
+    - ireturn
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - mnd
+    - modernize
+    - musttag
+    - nakedret
+    - nestif
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - nlreturn
+    - noctx
+    - noinlineerr
+    - nolintlint
+    - nonamedreturns
+    - nosprintfhostport
+    - paralleltest
+    - perfsprint
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - recvcheck
+    - revive
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    - tagalign
+    - tagliatelle
+    - testableexamples
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unqueryvet
+    - unused
+    - usestdlibvars
+    - usetesting
+    - varnamelen
+    - wastedassign
+    - whitespace
+    - wrapcheck
+    - wsl_v5
+    - zerologlint
+  disable:
+    - funcorder
   settings:
+    cyclop:
+      max-complexity: 15
     depguard:
       rules:
         Main:
-          list-mode: lax
           deny:
-            - pkg: "log"
-              desc: "use github.com/charmbracelet/log"
+            - desc: use github.com/charmbracelet/log
+              pkg: log
+          list-mode: lax
     exhaustruct:
       exclude:
-        - 'net/http\.Client'
-        - 'net/http\.Transport'
-        - 'github\.com/google/go-github/v69/github\.'
-        - 'github\.com/larsartmann/go-localsync/pkg/provider\.'
-        - 'github\.com/larsartmann/go-localsync/pkg/sync\.'
-        - 'github\.com/larsartmann/go-localsync/internal/db\.'
-        - 'database/sql\.Null'
-        - 'golang\.org/x/oauth2\.Token'
+        - net/http\.Client
+        - net/http\.Transport
+        - github\.com/google/go-github/v69/github\.
+        - github\.com/larsartmann/go-localsync/pkg/provider\.
+        - github\.com/larsartmann/go-localsync/pkg/sync\.
+        - github\.com/larsartmann/go-localsync/internal/db\.
+        - database/sql\.Null
+        - golang\.org/x/oauth2\.Token
+    gocognit:
+      min-complexity: 35
+    mnd:
+      ignored-numbers:
+        - "100"
+        - "10"
+        - "15"
+        - "3"
+        - "30"
+    revive:
+      rules:
+        - disabled: true
+          name: unused-parameter
+        - disabled: true
+          name: var-naming
+        - disabled: true
+          name: package-comments
+        - disabled: true
+          name: blank-imports
     varnamelen:
-      min-name-length: 2
       ignore-names:
         - id
         - db
@@ -152,40 +176,20 @@ linters:
         - u
         - t
         - p
-    cyclop:
-      max-complexity: 15
-    gocognit:
-      min-complexity: 35
+      min-name-length: 2
     wrapcheck:
-      ignore-sig-regexps:
-        - 'github\.com/larsartmann/go-localsync'
-        - '\.Err\(\) error$'
-        - 'encoding/json\.Marshal'
-        - 'database/sql\.'
-        - '\.Close\(\) error$'
       ignore-package-globs:
         - github.com/larsartmann/go-localsync/pkg/errors
         - github.com/cockroachdb/errors
-    mnd:
-      ignored-numbers:
-        - "100"
-        - "10"
-        - "15"
-        - "3"
-        - "30"
-    revive:
-      rules:
-        - name: unused-parameter
-          disabled: true
-        - name: var-naming
-          disabled: true
-        - name: package-comments
-          disabled: true
-        - name: blank-imports
-          disabled: true
+      ignore-sig-regexps:
+        - github\.com/larsartmann/go-localsync
+        - \.Err\(\) error$
+        - encoding/json\.Marshal
+        - database/sql\.
+        - \.Close\(\) error$
   exclusions:
     rules:
-      - path: '_test\.go'
+      - path: _test\.go
         linters:
           - exhaustruct
           - paralleltest
@@ -208,7 +212,7 @@ linters:
           - testifylint
           - unparam
           - unused
-      - path: "cmd/examples/"
+      - path: cmd/examples/
         linters:
           - forbidigo
           - cyclop
@@ -219,45 +223,46 @@ linters:
           - gocritic
           - noinlineerr
           - wrapcheck
-      - path: 'internal/database/connection\.go'
+      - path: internal/database/connection\.go
         linters:
           - gochecknoglobals
           - wrapcheck
           - noinlineerr
-      - path: 'pkg/errors/errors\.go'
+      - path: pkg/errors/errors\.go
         linters:
           - wrapcheck
-      - path: 'pkg/provider/provider\.go'
+      - path: pkg/provider/provider\.go
         linters:
           - gochecknoglobals
           - mnd
-      - path: 'pkg/types/ids\.go'
+      - path: pkg/types/ids\.go
         linters:
           - revive
-      - path: 'pkg/providers/github/client\.go'
+      - path: pkg/providers/github/client\.go
         linters:
           - wrapcheck
           - noinlineerr
           - mnd
           - golines
           - errorlint
-      - path: 'pkg/storage/sqlite\.go'
+      - path: pkg/storage/sqlite\.go
         linters:
           - wrapcheck
           - golines
-      - path: 'pkg/storage/sqlite_test\.go'
+      - path: pkg/storage/sqlite_test\.go
         linters:
           - funlen
-      - path: 'pkg/sync/sync\.go'
+      - path: pkg/sync/sync\.go
         linters:
           - wrapcheck
           - golines
           - funlen
     paths:
-      - "go.mod"
+      - go.mod
 formatters:
   enable:
+    - gci
+    - goimports
+    - gofumpt
     - golines
-issues:
-  max-issues-per-linter: 0
-  max-same-issues: 0
+issues: {}

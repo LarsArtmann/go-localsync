@@ -88,15 +88,22 @@ func (s *SQLiteStorage) GetItemsByActor(
 	actorLogin string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return s.queryWithFilter(ctx, "actor", actorLogin, limit, offset, func(ctx context.Context) ([]*db.Events, error) {
-		return s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
-			ActorLogin: actorLogin,
-			PaginationMixin: db.PaginationMixin{
-				Limit:  int64(limit),
-				Offset: int64(offset),
-			},
-		})
-	})
+	return s.queryWithFilter(
+		ctx,
+		"actor",
+		actorLogin,
+		limit,
+		offset,
+		func(ctx context.Context) ([]*db.Events, error) {
+			return s.querier.GetEventsByActor(ctx, &db.GetEventsByActorParams{
+				ActorLogin: actorLogin,
+				PaginationMixin: db.PaginationMixin{
+					Limit:  int64(limit),
+					Offset: int64(offset),
+				},
+			})
+		},
+	)
 }
 
 func (s *SQLiteStorage) GetItemsByRepo(
@@ -104,15 +111,22 @@ func (s *SQLiteStorage) GetItemsByRepo(
 	repoName string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return s.queryWithFilter(ctx, "repo", repoName, limit, offset, func(ctx context.Context) ([]*db.Events, error) {
-		return s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
-			RepoName: repoName,
-			PaginationMixin: db.PaginationMixin{
-				Limit:  int64(limit),
-				Offset: int64(offset),
-			},
-		})
-	})
+	return s.queryWithFilter(
+		ctx,
+		"repo",
+		repoName,
+		limit,
+		offset,
+		func(ctx context.Context) ([]*db.Events, error) {
+			return s.querier.GetEventsByRepo(ctx, &db.GetEventsByRepoParams{
+				RepoName: repoName,
+				PaginationMixin: db.PaginationMixin{
+					Limit:  int64(limit),
+					Offset: int64(offset),
+				},
+			})
+		},
+	)
 }
 
 func (s *SQLiteStorage) Count(ctx context.Context) (int64, error) {

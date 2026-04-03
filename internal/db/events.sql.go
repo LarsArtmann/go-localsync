@@ -2,10 +2,6 @@
 // versions:
 //   sqlc v1.30.0
 // source: events.sql
-//
-// IMPORTANT: Manual mixin embedding added below for PaginationMixin.
-// These changes will be LOST on `sqlc generate`. Reapply manually after
-// regeneration, or update sqlc.yaml to support embedded types natively.
 
 package db
 
@@ -138,7 +134,8 @@ LIMIT ? OFFSET ?
 `
 
 type GetEventsParams struct {
-	PaginationMixin
+	Limit  int64 `db:"limit" json:"limit"`
+	Offset int64 `db:"offset" json:"offset"`
 }
 
 // Get all events, ordered by creation date (newest first)
@@ -188,8 +185,9 @@ LIMIT ? OFFSET ?
 `
 
 type GetEventsByActorParams struct {
-	ActorLogin string `db:"actor_login" json:"actorLogin"`
-	PaginationMixin
+	ActorLogin sql.NullString `db:"actor_login" json:"actorLogin"`
+	Limit      int64          `db:"limit" json:"limit"`
+	Offset     int64          `db:"offset" json:"offset"`
 }
 
 // Get events filtered by actor login
@@ -240,8 +238,9 @@ LIMIT ? OFFSET ?
 `
 
 type GetEventsByRepoParams struct {
-	RepoName string `db:"repo_name" json:"repoName"`
-	PaginationMixin
+	RepoName sql.NullString `db:"repo_name" json:"repoName"`
+	Limit    int64          `db:"limit" json:"limit"`
+	Offset   int64          `db:"offset" json:"offset"`
 }
 
 // Get events filtered by repository name
@@ -292,8 +291,9 @@ LIMIT ? OFFSET ?
 `
 
 type GetEventsByTypeParams struct {
-	Type string `db:"type" json:"type"`
-	PaginationMixin
+	Type   string `db:"type" json:"type"`
+	Limit  int64  `db:"limit" json:"limit"`
+	Offset int64  `db:"offset" json:"offset"`
 }
 
 // Get events filtered by type

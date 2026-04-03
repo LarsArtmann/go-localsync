@@ -13,7 +13,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testNilOptionsError(t *testing.T, syncFunc func(context.Context, *SyncOptions) (*SyncResult, error)) {
+func testNilOptionsError(
+	t *testing.T,
+	syncFunc func(context.Context, *SyncOptions) (*SyncResult, error),
+) {
 	t.Helper()
 
 	result, err := syncFunc(context.Background(), nil)
@@ -335,8 +338,16 @@ func TestProcessIncrementalItems(t *testing.T) {
 		}
 
 		items := []*provider.Item{
-			{ID: types.NewItemID("2"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC)},
-			{ID: types.NewItemID("3"), Type: types.NewEventTypeID("IssuesEvent"), CreatedAt: time.Date(2024, 1, 15, 13, 0, 0, 0, time.UTC)},
+			{
+				ID:        types.NewItemID("2"),
+				Type:      types.NewEventTypeID("PushEvent"),
+				CreatedAt: time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC),
+			},
+			{
+				ID:        types.NewItemID("3"),
+				Type:      types.NewEventTypeID("IssuesEvent"),
+				CreatedAt: time.Date(2024, 1, 15, 13, 0, 0, 0, time.UTC),
+			},
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), latestItem, items)
@@ -353,7 +364,11 @@ func TestProcessIncrementalItems(t *testing.T) {
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		items := []*provider.Item{
-			{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: time.Now()},
+			{
+				ID:        types.NewItemID("1"),
+				Type:      types.NewEventTypeID("PushEvent"),
+				CreatedAt: time.Now(),
+			},
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), nil, items)
@@ -375,8 +390,16 @@ func TestProcessIncrementalItems(t *testing.T) {
 		}
 
 		items := []*provider.Item{
-			{ID: types.NewItemID("2"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: sameTime},
-			{ID: types.NewItemID("3"), Type: types.NewEventTypeID("IssuesEvent"), CreatedAt: sameTime.Add(1)},
+			{
+				ID:        types.NewItemID("2"),
+				Type:      types.NewEventTypeID("PushEvent"),
+				CreatedAt: sameTime,
+			},
+			{
+				ID:        types.NewItemID("3"),
+				Type:      types.NewEventTypeID("IssuesEvent"),
+				CreatedAt: sameTime.Add(1),
+			},
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
@@ -396,7 +419,11 @@ func TestProcessIncrementalItems(t *testing.T) {
 			CreatedAt: time.Now(),
 		}
 
-		result := syncer.processIncrementalItems(context.Background(), cutoffItem, []*provider.Item{})
+		result := syncer.processIncrementalItems(
+			context.Background(),
+			cutoffItem,
+			[]*provider.Item{},
+		)
 
 		require.NotNil(t, result)
 		assert.Equal(t, 0, result.Fetched)
@@ -418,8 +445,16 @@ func TestProcessIncrementalItems(t *testing.T) {
 		}
 
 		items := []*provider.Item{
-			{ID: types.NewItemID("2"), Type: types.NewEventTypeID("PushEvent"), CreatedAt: pastTime},
-			{ID: types.NewItemID("3"), Type: types.NewEventTypeID("IssuesEvent"), CreatedAt: futureTime},
+			{
+				ID:        types.NewItemID("2"),
+				Type:      types.NewEventTypeID("PushEvent"),
+				CreatedAt: pastTime,
+			},
+			{
+				ID:        types.NewItemID("3"),
+				Type:      types.NewEventTypeID("IssuesEvent"),
+				CreatedAt: futureTime,
+			},
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
