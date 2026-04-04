@@ -212,6 +212,8 @@ linters:
           - testifylint
           - unparam
           - unused
+          - forcetypeassert
+          - gochecknoglobals
       - path: cmd/examples/
         linters:
           - forbidigo
@@ -257,6 +259,16 @@ linters:
           - wrapcheck
           - golines
           - funlen
+      - path: pkg/testhelpers/
+        linters:
+          - exhaustruct
+          - err113
+          - godoclint
+          - gocritic
+          - gochecknoglobals
+          - gocheckcompilerdirectives
+          - forcetypeassert
+          - inamedparam
     paths:
       - go.mod
 formatters:

@@ -153,7 +153,9 @@ var _ = Describe("GitHub Provider", func() {
 							// First page: 100 items (full page, indicates more available)
 							for i := range 100 {
 								events = append(events, &gh.Event{
-									ID:   new("page1-" + string(rune('A'+i%26)) + string(rune('0'+i%10))),
+									ID: new(
+										"page1-" + string(rune('A'+i%26)) + string(rune('0'+i%10)),
+									),
 									Type: new("PushEvent"),
 								})
 							}
