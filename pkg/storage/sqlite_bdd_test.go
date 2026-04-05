@@ -357,7 +357,7 @@ var _ = Describe("SQLite Storage", func() {
 			BeforeEach(func() {
 				// Given: I have many events
 				now := time.Now()
-				for i := 0; i < 25; i++ {
+				for i := range 25 {
 					item := testhelpers.NewStorageItem(
 						string(rune('A'+i)),
 						"PushEvent",
