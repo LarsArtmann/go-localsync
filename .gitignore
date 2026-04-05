@@ -5,3 +5,7 @@ coverage.out
 coverage.html
 # Dependencies
 node_modules/
+# Test coverage
+/coverage
+# Build artifacts
+/go-localsync
