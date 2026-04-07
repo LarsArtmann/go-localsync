@@ -232,6 +232,7 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 		RepoName:       types.NewRepoID(repoName),
 		RepoURL:        repoURL,
 		CreatedAt:      createdAt,
+		UpdatedAt:      createdAt,
 		RawJSON:        rawJSON,
 	}, nil
 }

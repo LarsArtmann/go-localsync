@@ -15,13 +15,16 @@ import (
 
 // testItem creates a consistent test item for use across multiple tests.
 func testItem() *provider.Item {
+	now := time.Now()
+
 	return &provider.Item{
 		ID:         types.NewItemID("12345"),
 		Source:     types.NewProviderID("github"),
 		Type:       types.NewEventTypeID("PushEvent"),
 		ActorLogin: types.NewActorID("testuser"),
 		RepoName:   types.NewRepoID("test/repo"),
-		CreatedAt:  time.Now(),
+		CreatedAt:  now,
+		UpdatedAt:  now,
 		RawJSON:    json.RawMessage(`{"id":"12345","type":"PushEvent"}`),
 	}
 }

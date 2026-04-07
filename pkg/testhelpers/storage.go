@@ -18,6 +18,7 @@ func NewStorageItem(id, eventType, actor, repo string, createdAt time.Time) *pro
 		ActorLogin: types.NewActorID(actor),
 		RepoName:   types.NewRepoID(repo),
 		CreatedAt:  createdAt,
+		UpdatedAt:  createdAt,
 		RawJSON:    json.RawMessage(`{"id":"` + id + `","type":"` + eventType + `"}`),
 	}
 }

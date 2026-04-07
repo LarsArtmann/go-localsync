@@ -19,6 +19,7 @@ func NewTestItem(id, eventType string, createdAt time.Time) *provider.Item {
 		ActorLogin: types.NewActorID("testuser"),
 		RepoName:   types.NewRepoID("test/repo"),
 		CreatedAt:  createdAt,
+		UpdatedAt:  createdAt,
 		RawJSON:    json.RawMessage(`{"id":"` + id + `"}`),
 	}
 }
