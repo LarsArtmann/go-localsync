@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+
 	localsync "github.com/larsartmann/go-localfirst/pkg/sync"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -27,7 +28,7 @@ type ConflictAwareSyncer struct {
 type ConflictAwareSyncerOption func(*ConflictAwareSyncer)
 
 // WithConflictResolver sets a custom conflict resolver.
-// Defaults to LWW using provider.Item.CreatedAt.
+// Defaults to LWW using provider.Item.UpdatedAt.
 func WithConflictResolver(
 	resolver localsync.ConflictResolver[*provider.Item],
 ) ConflictAwareSyncerOption {
@@ -58,6 +59,7 @@ func NewConflictAwareSyncer(
 	s := &ConflictAwareSyncer{
 		provider: p,
 		storage:  store,
+		resolver: nil,
 		clock:    localsync.NewVectorClock(),
 		nodeID:   p.Name(),
 		logger:   logger,
@@ -68,8 +70,8 @@ func NewConflictAwareSyncer(
 	}
 
 	if s.resolver == nil {
-		s.resolver = localsync.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
-			return item.CreatedAt
+		s.resolver = localsync.NewLWWResolver(func(item *provider.Item) time.Time {
+			return item.UpdatedAt
 		})
 	}
 
@@ -112,66 +114,18 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		)
 	}
 
-	cr := &ConflictResult{Fetched: len(result.Items)}
+	cr := &ConflictResult{
+		Fetched:   len(result.Items),
+		Upserted:  0,
+		Skipped:   0,
+		Conflicts: 0,
+		Errors:    0,
+	}
 
 	for _, item := range result.Items {
 		s.clock.Increment(s.nodeID)
 
-		existing, err := s.findExistingItem(ctx, item)
-		if err != nil {
-			s.logger.Warn("Failed to check existing item", "id", item.ID, "error", err)
-
-			cr.Errors++
-
-			continue
-		}
-
-		if existing == nil {
-			err := s.storage.Upsert(ctx, item)
-			if err != nil {
-				s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
-
-				cr.Errors++
-
-				continue
-			}
-
-			cr.Upserted++
-
-			continue
-		}
-
-		if s.isConflict(existing, item) {
-			resolved, err := s.resolver.Resolve(&localsync.Conflict[*provider.Item]{
-				Local:     existing,
-				Remote:    item,
-				LocalVC:   s.buildClockForItem(existing),
-				RemoteVC:  s.buildClockForItem(item),
-				Timestamp: time.Now(),
-			})
-			if err != nil {
-				s.logger.Warn("Conflict resolution failed", "id", item.ID, "error", err)
-
-				cr.Errors++
-
-				continue
-			}
-
-			if err := s.storage.Upsert(ctx, resolved); err != nil {
-				s.logger.Warn("Failed to upsert resolved item", "id", resolved.ID, "error", err)
-
-				cr.Errors++
-
-				continue
-			}
-
-			cr.Conflicts++
-			cr.Upserted++
-
-			s.logger.Debug("Resolved conflict", "id", item.ID, "winner_source", resolved.Source)
-		} else {
-			cr.Skipped++
-		}
+		s.processItem(ctx, item, cr)
 	}
 
 	s.logger.Info("Conflict-aware sync completed",
@@ -183,6 +137,88 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	)
 
 	return cr, nil
+}
+
+// processItem handles a single item during conflict-aware sync.
+func (s *ConflictAwareSyncer) processItem(
+	ctx context.Context,
+	item *provider.Item,
+	cr *ConflictResult,
+) {
+	existing, err := s.findExistingItem(ctx, item)
+	if err != nil {
+		s.logger.Warn("Failed to check existing item", "id", item.ID, "error", err)
+
+		cr.Errors++
+
+		return
+	}
+
+	if existing == nil {
+		s.upsertNewItem(ctx, item, cr)
+
+		return
+	}
+
+	if s.isConflict(existing, item) {
+		s.resolveConflict(ctx, existing, item, cr)
+	} else {
+		cr.Skipped++
+	}
+}
+
+// upsertNewItem inserts a new item into storage.
+func (s *ConflictAwareSyncer) upsertNewItem(
+	ctx context.Context,
+	item *provider.Item,
+	cr *ConflictResult,
+) {
+	err := s.storage.Upsert(ctx, item)
+	if err != nil {
+		s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
+
+		cr.Errors++
+
+		return
+	}
+
+	cr.Upserted++
+}
+
+// resolveConflict resolves a conflict between local and remote items.
+func (s *ConflictAwareSyncer) resolveConflict(
+	ctx context.Context,
+	local, remote *provider.Item,
+	cr *ConflictResult,
+) {
+	resolved, err := s.resolver.Resolve(&localsync.Conflict[*provider.Item]{
+		Local:     local,
+		Remote:    remote,
+		LocalVC:   s.buildClockForItem(local),
+		RemoteVC:  s.buildClockForItem(remote),
+		Timestamp: time.Now(),
+	})
+	if err != nil {
+		s.logger.Warn("Conflict resolution failed", "id", remote.ID, "error", err)
+
+		cr.Errors++
+
+		return
+	}
+
+	err = s.storage.Upsert(ctx, resolved)
+	if err != nil {
+		s.logger.Warn("Failed to upsert resolved item", "id", resolved.ID, "error", err)
+
+		cr.Errors++
+
+		return
+	}
+
+	cr.Conflicts++
+	cr.Upserted++
+
+	s.logger.Debug("Resolved conflict", "id", remote.ID, "winner_source", resolved.Source)
 }
 
 // GetVectorClock returns a clone of the current vector clock state.
@@ -206,9 +242,15 @@ func (s *ConflictAwareSyncer) SyncOperations(
 	}
 
 	operations := make([]*localsync.Operation[*provider.Item], 0, len(result.Items))
-	cr := &ConflictResult{Fetched: len(result.Items)}
+	cr := &ConflictResult{
+		Fetched:   len(result.Items),
+		Upserted:  0,
+		Skipped:   0,
+		Conflicts: 0,
+		Errors:    0,
+	}
 
-	for i, item := range result.Items {
+	for idx, item := range result.Items {
 		s.clock.Increment(s.nodeID)
 
 		opType := localsync.OpCreate
@@ -225,7 +267,7 @@ func (s *ConflictAwareSyncer) SyncOperations(
 		}
 
 		op := localsync.NewOperation(
-			fmt.Sprintf("%s-%d", s.nodeID, i),
+			fmt.Sprintf("%s-%d", s.nodeID, idx),
 			opType,
 			s.nodeID,
 			item,
@@ -234,7 +276,8 @@ func (s *ConflictAwareSyncer) SyncOperations(
 
 		operations = append(operations, op)
 
-		if err := s.storage.Upsert(ctx, item); err != nil {
+		err = s.storage.Upsert(ctx, item)
+		if err != nil {
 			cr.Errors++
 
 			continue
@@ -251,23 +294,17 @@ func (s *ConflictAwareSyncer) findExistingItem(
 	ctx context.Context,
 	item *provider.Item,
 ) (*provider.Item, error) {
-	items, err := s.storage.GetItems(ctx, 1, 0)
+	existing, err := s.storage.GetByID(ctx, item.ID.Get())
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to find existing item %q: %w", item.ID.Get(), err)
 	}
 
-	for _, stored := range items {
-		if stored.ID == item.ID {
-			return stored, nil
-		}
-	}
-
-	return nil, nil
+	return existing, nil //nolint:nilnil // nil item means "not found", which is not an error
 }
 
 // isConflict determines if the remote item conflicts with the existing local item.
 func (s *ConflictAwareSyncer) isConflict(local, remote *provider.Item) bool {
-	return local.CreatedAt != remote.CreatedAt ||
+	return local.UpdatedAt != remote.UpdatedAt ||
 		local.Type != remote.Type ||
 		local.ActorLogin != remote.ActorLogin ||
 		local.RepoName != remote.RepoName
@@ -276,6 +313,7 @@ func (s *ConflictAwareSyncer) isConflict(local, remote *provider.Item) bool {
 // buildClockForItem creates a vector clock snapshot for an item.
 func (s *ConflictAwareSyncer) buildClockForItem(item *provider.Item) localsync.VectorClock {
 	vc := s.clock.Clone()
+
 	vc.Increment(item.Source.Get())
 
 	return vc
