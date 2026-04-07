@@ -99,6 +99,16 @@ func (m *MockStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return nil
 }
 
+func (m *MockStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
+	for _, item := range m.ItemsVal {
+		if item.ID.Get() == id {
+			return item, nil
+		}
+	}
+
+	return nil, nil
+}
+
 func (m *MockStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 	if m.LatestErrVal != nil {
 		return nil, m.LatestErrVal
@@ -156,6 +166,10 @@ type FailingStorage struct{}
 
 func (f *FailingStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return errors.New("disk full")
+}
+
+func (f *FailingStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
+	return nil, errors.New("not found")
 }
 
 func (f *FailingStorage) GetLatest(ctx context.Context) (*provider.Item, error) {

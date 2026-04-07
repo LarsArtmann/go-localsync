@@ -50,6 +50,16 @@ func (m *mockStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return nil
 }
 
+func (m *mockStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
+	for _, item := range m.items {
+		if item.ID.Get() == id {
+			return item, nil
+		}
+	}
+
+	return nil, nil
+}
+
 func (m *mockStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 	if m.latestErr != nil {
 		return nil, m.latestErr

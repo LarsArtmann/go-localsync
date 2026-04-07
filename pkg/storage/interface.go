@@ -14,6 +14,8 @@ import (
 type Storage interface {
 	// Upsert inserts or updates an item. ID is used as the unique key.
 	Upsert(ctx context.Context, item *provider.Item) error
+	// GetByID retrieves a single item by its source ID. Returns nil if not found.
+	GetByID(ctx context.Context, id string) (*provider.Item, error)
 	// GetLatest returns the most recently created item, or nil if empty.
 	GetLatest(ctx context.Context) (*provider.Item, error)
 	// GetItems retrieves items with pagination.
@@ -71,13 +73,14 @@ func fromNullString(ns sql.NullString) string {
 func toItem(e *db.Events) *provider.Item {
 	return &provider.Item{
 		ID:             types.NewItemID(e.GithubID.Get()), // Map github_id column to generic ID
-		Source:         types.NewProviderID("github"),     // Default to github for existing data
-		Type:           types.NewEventTypeID(e.Type),      // Convert type string to branded ID
+		Source:         types.NewProviderID(e.Source),    // Read from DB source column
+		Type:           types.NewEventTypeID(e.Type),    // Convert type string to branded ID
 		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
 		ActorAvatarURL: fromNullString(e.ActorAvatarUrl),
 		RepoName:       types.NewRepoID(fromNullString(e.RepoName)),
 		RepoURL:        fromNullString(e.RepoUrl),
 		CreatedAt:      e.CreatedAt,
+		UpdatedAt:      e.UpdatedAt,
 		RawJSON:        e.RawJson,
 	}
 }
@@ -89,6 +92,7 @@ func toDBParams(item *provider.Item) *db.UpsertEventParams {
 		GithubID: types.NewGithubEventID(
 			item.ID.Get(),
 		), // Store generic ID in github_id column
+		Source:         item.Source.Get(),
 		Type:           item.Type.Get(),
 		ActorLogin:     toNullString(item.ActorLogin.Get()),
 		ActorAvatarUrl: toNullString(item.ActorAvatarURL),

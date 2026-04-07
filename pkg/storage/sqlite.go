@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/larsartmann/go-localsync/internal/database"
 	"github.com/larsartmann/go-localsync/internal/db"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type SQLiteStorage struct {
@@ -23,12 +25,34 @@ func NewSQLiteStorage(dbc *sql.DB) *SQLiteStorage {
 	}
 }
 
+func Open(path string) (*SQLiteStorage, error) {
+	dbc, err := database.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open storage at %s: %w", path, err)
+	}
+
+	return NewSQLiteStorage(dbc), nil
+}
+
 func (s *SQLiteStorage) Close() error {
 	return s.dbc.Close()
 }
 
 func (s *SQLiteStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return s.querier.UpsertEvent(ctx, toDBParams(item))
+}
+
+func (s *SQLiteStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
+	e, err := s.querier.GetEventByGithubID(ctx, types.NewGithubEventID(id))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+
+		return nil, fmt.Errorf("failed to get item by ID %q: %w", id, err)
+	}
+
+	return toItem(e), nil
 }
 
 func (s *SQLiteStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
