@@ -11,6 +11,8 @@ import (
 )
 
 // Storage defines the interface for storing and retrieving sync items.
+//
+//nolint:interfacebloat // storage interfaces naturally have many CRUD methods
 type Storage interface {
 	// Upsert inserts or updates an item. ID is used as the unique key.
 	Upsert(ctx context.Context, item *provider.Item) error
@@ -73,8 +75,8 @@ func fromNullString(ns sql.NullString) string {
 func toItem(e *db.Events) *provider.Item {
 	return &provider.Item{
 		ID:             types.NewItemID(e.GithubID.Get()), // Map github_id column to generic ID
-		Source:         types.NewProviderID(e.Source),    // Read from DB source column
-		Type:           types.NewEventTypeID(e.Type),    // Convert type string to branded ID
+		Source:         types.NewProviderID(e.Source),     // Read from DB source column
+		Type:           types.NewEventTypeID(e.Type),      // Convert type string to branded ID
 		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
 		ActorAvatarURL: fromNullString(e.ActorAvatarUrl),
 		RepoName:       types.NewRepoID(fromNullString(e.RepoName)),

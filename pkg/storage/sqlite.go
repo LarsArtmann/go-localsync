@@ -46,7 +46,7 @@ func (s *SQLiteStorage) GetByID(ctx context.Context, id string) (*provider.Item,
 	e, err := s.querier.GetEventByGithubID(ctx, types.NewGithubEventID(id))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+			return nil, nil //nolint:nilnil // not found is not an error condition
 		}
 
 		return nil, fmt.Errorf("failed to get item by ID %q: %w", id, err)

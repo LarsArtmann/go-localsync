@@ -107,7 +107,7 @@ func (m *MockStorage) GetByID(ctx context.Context, id string) (*provider.Item, e
 		}
 	}
 
-	return nil, nil
+	return nil, nil //nolint:nilnil // not found is not an error condition
 }
 
 func (m *MockStorage) GetLatest(ctx context.Context) (*provider.Item, error) {

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-
 	localsync "github.com/larsartmann/go-localfirst/pkg/sync"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -56,7 +55,7 @@ func NewConflictAwareSyncer(
 		logger = log.Default()
 	}
 
-	s := &ConflictAwareSyncer{
+	syncer := &ConflictAwareSyncer{
 		provider: p,
 		storage:  store,
 		resolver: nil,
@@ -66,16 +65,16 @@ func NewConflictAwareSyncer(
 	}
 
 	for _, opt := range opts {
-		opt(s)
+		opt(syncer)
 	}
 
-	if s.resolver == nil {
-		s.resolver = localsync.NewLWWResolver(func(item *provider.Item) time.Time {
+	if syncer.resolver == nil {
+		syncer.resolver = localsync.NewLWWResolver(func(item *provider.Item) time.Time {
 			return item.UpdatedAt
 		})
 	}
 
-	return s
+	return syncer
 }
 
 // ConflictResult extends SyncResult with conflict resolution details.
@@ -299,7 +298,7 @@ func (s *ConflictAwareSyncer) findExistingItem(
 		return nil, fmt.Errorf("failed to find existing item %q: %w", item.ID.Get(), err)
 	}
 
-	return existing, nil //nolint:nilnil // nil item means "not found", which is not an error
+	return existing, nil
 }
 
 // isConflict determines if the remote item conflicts with the existing local item.
