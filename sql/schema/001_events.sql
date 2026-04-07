@@ -3,12 +3,14 @@
 CREATE TABLE IF NOT EXISTS events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     github_id TEXT UNIQUE NOT NULL,
+    source TEXT NOT NULL DEFAULT 'github',
     type TEXT NOT NULL,
     actor_login TEXT,
     actor_avatar_url TEXT,
     repo_name TEXT,
     repo_url TEXT,
     created_at DATETIME NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     raw_json JSON NOT NULL,
     synced_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

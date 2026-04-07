@@ -1,7 +1,8 @@
 -- name: UpsertEvent :exec
--- Insert an event, ignoring if it already exists (idempotency)
+-- Insert an event, updating if it already exists (conflict resolution)
 INSERT INTO events (
     github_id,
+    source,
     type,
     actor_login,
     actor_avatar_url,
@@ -10,8 +11,16 @@ INSERT INTO events (
     created_at,
     raw_json,
     synced_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-ON CONFLICT(github_id) DO NOTHING;
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+ON CONFLICT(github_id) DO UPDATE SET
+    source = excluded.source,
+    type = excluded.type,
+    actor_login = excluded.actor_login,
+    actor_avatar_url = excluded.actor_avatar_url,
+    repo_name = excluded.repo_name,
+    repo_url = excluded.repo_url,
+    raw_json = excluded.raw_json,
+    updated_at = CURRENT_TIMESTAMP;
 
 -- name: GetLatestEvent :one
 -- Get the most recent event by GitHub timestamp (for incremental sync)
