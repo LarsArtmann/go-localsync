@@ -27,6 +27,9 @@ type Item struct {
 	RepoURL string `json:"repoUrl,omitempty"`
 	// CreatedAt is when the item was created.
 	CreatedAt time.Time `json:"createdAt"`
+	// UpdatedAt is when the item was last modified at the source.
+	// For immutable events (e.g., GitHub events), this equals CreatedAt.
+	UpdatedAt time.Time `json:"updatedAt"`
 	// RawJSON contains the complete original payload for full fidelity.
 	RawJSON []byte `json:"rawJson"`
 }
