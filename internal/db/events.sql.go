@@ -69,13 +69,13 @@ func (q *Queries) DeleteEventByGithubID(ctx context.Context, githubID types.Gith
 }
 
 const GetEventByGithubID = `-- name: GetEventByGithubID :one
-SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 WHERE github_id = ?
 `
 
 // Get a single event by its GitHub ID
 //
-//	SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	WHERE github_id = ?
 func (q *Queries) GetEventByGithubID(ctx context.Context, githubID types.GithubEventID) (*Events, error) {
 	row := q.queryRow(ctx, q.getEventByGithubIDStmt, GetEventByGithubID, githubID)
@@ -83,12 +83,14 @@ func (q *Queries) GetEventByGithubID(ctx context.Context, githubID types.GithubE
 	err := row.Scan(
 		&i.ID,
 		&i.GithubID,
+		&i.Source,
 		&i.Type,
 		&i.ActorLogin,
 		&i.ActorAvatarUrl,
 		&i.RepoName,
 		&i.RepoUrl,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.RawJson,
 		&i.SyncedAt,
 	)
@@ -128,7 +130,7 @@ func (q *Queries) GetEventTypes(ctx context.Context) ([]string, error) {
 }
 
 const GetEvents = `-- name: GetEvents :many
-SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?
 `
@@ -140,7 +142,7 @@ type GetEventsParams struct {
 
 // Get all events, ordered by creation date (newest first)
 //
-//	SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	ORDER BY created_at DESC
 //	LIMIT ? OFFSET ?
 func (q *Queries) GetEvents(ctx context.Context, arg *GetEventsParams) ([]*Events, error) {
@@ -155,12 +157,14 @@ func (q *Queries) GetEvents(ctx context.Context, arg *GetEventsParams) ([]*Event
 		if err := rows.Scan(
 			&i.ID,
 			&i.GithubID,
+			&i.Source,
 			&i.Type,
 			&i.ActorLogin,
 			&i.ActorAvatarUrl,
 			&i.RepoName,
 			&i.RepoUrl,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.RawJson,
 			&i.SyncedAt,
 		); err != nil {
@@ -178,7 +182,7 @@ func (q *Queries) GetEvents(ctx context.Context, arg *GetEventsParams) ([]*Event
 }
 
 const GetEventsByActor = `-- name: GetEventsByActor :many
-SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 WHERE actor_login = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?
@@ -192,7 +196,7 @@ type GetEventsByActorParams struct {
 
 // Get events filtered by actor login
 //
-//	SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	WHERE actor_login = ?
 //	ORDER BY created_at DESC
 //	LIMIT ? OFFSET ?
@@ -208,12 +212,14 @@ func (q *Queries) GetEventsByActor(ctx context.Context, arg *GetEventsByActorPar
 		if err := rows.Scan(
 			&i.ID,
 			&i.GithubID,
+			&i.Source,
 			&i.Type,
 			&i.ActorLogin,
 			&i.ActorAvatarUrl,
 			&i.RepoName,
 			&i.RepoUrl,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.RawJson,
 			&i.SyncedAt,
 		); err != nil {
@@ -231,7 +237,7 @@ func (q *Queries) GetEventsByActor(ctx context.Context, arg *GetEventsByActorPar
 }
 
 const GetEventsByRepo = `-- name: GetEventsByRepo :many
-SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 WHERE repo_name = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?
@@ -245,7 +251,7 @@ type GetEventsByRepoParams struct {
 
 // Get events filtered by repository name
 //
-//	SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	WHERE repo_name = ?
 //	ORDER BY created_at DESC
 //	LIMIT ? OFFSET ?
@@ -261,12 +267,14 @@ func (q *Queries) GetEventsByRepo(ctx context.Context, arg *GetEventsByRepoParam
 		if err := rows.Scan(
 			&i.ID,
 			&i.GithubID,
+			&i.Source,
 			&i.Type,
 			&i.ActorLogin,
 			&i.ActorAvatarUrl,
 			&i.RepoName,
 			&i.RepoUrl,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.RawJson,
 			&i.SyncedAt,
 		); err != nil {
@@ -284,7 +292,7 @@ func (q *Queries) GetEventsByRepo(ctx context.Context, arg *GetEventsByRepoParam
 }
 
 const GetEventsByType = `-- name: GetEventsByType :many
-SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 WHERE type = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?
@@ -298,7 +306,7 @@ type GetEventsByTypeParams struct {
 
 // Get events filtered by type
 //
-//	SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	WHERE type = ?
 //	ORDER BY created_at DESC
 //	LIMIT ? OFFSET ?
@@ -314,12 +322,14 @@ func (q *Queries) GetEventsByType(ctx context.Context, arg *GetEventsByTypeParam
 		if err := rows.Scan(
 			&i.ID,
 			&i.GithubID,
+			&i.Source,
 			&i.Type,
 			&i.ActorLogin,
 			&i.ActorAvatarUrl,
 			&i.RepoName,
 			&i.RepoUrl,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.RawJson,
 			&i.SyncedAt,
 		); err != nil {
@@ -337,14 +347,14 @@ func (q *Queries) GetEventsByType(ctx context.Context, arg *GetEventsByTypeParam
 }
 
 const GetEventsSince = `-- name: GetEventsSince :many
-SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 WHERE created_at > ?
 ORDER BY created_at DESC
 `
 
 // Get events created after a specific timestamp (for incremental sync)
 //
-//	SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	WHERE created_at > ?
 //	ORDER BY created_at DESC
 func (q *Queries) GetEventsSince(ctx context.Context, createdAt time.Time) ([]*Events, error) {
@@ -359,12 +369,14 @@ func (q *Queries) GetEventsSince(ctx context.Context, createdAt time.Time) ([]*E
 		if err := rows.Scan(
 			&i.ID,
 			&i.GithubID,
+			&i.Source,
 			&i.Type,
 			&i.ActorLogin,
 			&i.ActorAvatarUrl,
 			&i.RepoName,
 			&i.RepoUrl,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 			&i.RawJson,
 			&i.SyncedAt,
 		); err != nil {
@@ -382,14 +394,14 @@ func (q *Queries) GetEventsSince(ctx context.Context, createdAt time.Time) ([]*E
 }
 
 const GetLatestEvent = `-- name: GetLatestEvent :one
-SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 ORDER BY created_at DESC
 LIMIT 1
 `
 
 // Get the most recent event by GitHub timestamp (for incremental sync)
 //
-//	SELECT id, github_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, raw_json, synced_at FROM events
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	ORDER BY created_at DESC
 //	LIMIT 1
 func (q *Queries) GetLatestEvent(ctx context.Context) (*Events, error) {
@@ -398,12 +410,14 @@ func (q *Queries) GetLatestEvent(ctx context.Context) (*Events, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.GithubID,
+		&i.Source,
 		&i.Type,
 		&i.ActorLogin,
 		&i.ActorAvatarUrl,
 		&i.RepoName,
 		&i.RepoUrl,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 		&i.RawJson,
 		&i.SyncedAt,
 	)
@@ -413,6 +427,7 @@ func (q *Queries) GetLatestEvent(ctx context.Context) (*Events, error) {
 const UpsertEvent = `-- name: UpsertEvent :exec
 INSERT INTO events (
     github_id,
+    source,
     type,
     actor_login,
     actor_avatar_url,
@@ -421,12 +436,21 @@ INSERT INTO events (
     created_at,
     raw_json,
     synced_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-ON CONFLICT(github_id) DO NOTHING
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+ON CONFLICT(github_id) DO UPDATE SET
+    source = excluded.source,
+    type = excluded.type,
+    actor_login = excluded.actor_login,
+    actor_avatar_url = excluded.actor_avatar_url,
+    repo_name = excluded.repo_name,
+    repo_url = excluded.repo_url,
+    raw_json = excluded.raw_json,
+    updated_at = CURRENT_TIMESTAMP
 `
 
 type UpsertEventParams struct {
 	GithubID       types.GithubEventID `db:"github_id" json:"githubId"`
+	Source         string              `db:"source" json:"source"`
 	Type           string              `db:"type" json:"type"`
 	ActorLogin     sql.NullString      `db:"actor_login" json:"actorLogin"`
 	ActorAvatarUrl sql.NullString      `db:"actor_avatar_url" json:"actorAvatarUrl"`
@@ -436,10 +460,11 @@ type UpsertEventParams struct {
 	RawJson        json.RawMessage     `db:"raw_json" json:"rawJson"`
 }
 
-// Insert an event, ignoring if it already exists (idempotency)
+// Insert an event, updating if it already exists (conflict resolution)
 //
 //	INSERT INTO events (
 //	    github_id,
+//	    source,
 //	    type,
 //	    actor_login,
 //	    actor_avatar_url,
@@ -448,11 +473,20 @@ type UpsertEventParams struct {
 //	    created_at,
 //	    raw_json,
 //	    synced_at
-//	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-//	ON CONFLICT(github_id) DO NOTHING
+//	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+//	ON CONFLICT(github_id) DO UPDATE SET
+//	    source = excluded.source,
+//	    type = excluded.type,
+//	    actor_login = excluded.actor_login,
+//	    actor_avatar_url = excluded.actor_avatar_url,
+//	    repo_name = excluded.repo_name,
+//	    repo_url = excluded.repo_url,
+//	    raw_json = excluded.raw_json,
+//	    updated_at = CURRENT_TIMESTAMP
 func (q *Queries) UpsertEvent(ctx context.Context, arg *UpsertEventParams) error {
 	_, err := q.exec(ctx, q.upsertEventStmt, UpsertEvent,
 		arg.GithubID,
+		arg.Source,
 		arg.Type,
 		arg.ActorLogin,
 		arg.ActorAvatarUrl,

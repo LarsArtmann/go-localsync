@@ -27,6 +27,7 @@ type PaginationMixin struct {
 type EventCoreMixin struct {
 	RawJson        json.RawMessage     `db:"raw_json"         json:"rawJson"`
 	GithubID       types.GithubEventID `db:"github_id"        json:"githubId"`
+	Source         string              `db:"source"           json:"source"`
 	ActorLogin     sql.NullString      `db:"actor_login"      json:"actorLogin"`
 	ActorAvatarUrl sql.NullString      `db:"actor_avatar_url" json:"actorAvatarUrl"`
 	RepoName       sql.NullString      `db:"repo_name"        json:"repoName"`
