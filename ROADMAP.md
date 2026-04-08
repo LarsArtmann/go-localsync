@@ -18,11 +18,23 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 - [x] **Database migration system**  
        **Source:** `internal/database/migration.go`  
-       **Description:** Version-tracked migrations with `schema_migrations` table, transactional applies.
+       **Description:** Version-tracked migrations with `schema_migrations` table, transactional applies, 6 tests.
 
 - [x] **Provider architecture refactor**  
        **Source:** `pkg/provider/`, `pkg/providers/github/`  
-       **Description:** Generic provider interface with GitHub as first implementation.
+       **Description:** Generic provider interface with GitHub as first implementation. Branded IDs from go-composable-business-types.
+
+- [x] **Branded type IDs**  
+       **Source:** `pkg/types/ids.go`  
+       **Description:** `ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID` — phantom types for compile-time safety.
+
+- [x] **Source provider indexes**  
+       **Source:** `internal/database/migration.go` (migration 002)  
+       **Description:** `idx_events_source` and `idx_events_source_github_id` for multi-provider queries.
+
+- [x] **Unused code cleanup**  
+       **Source:** `internal/db/mixins.go` (deleted)  
+       **Description:** Removed `PaginationMixin` and `EventCoreMixin` — never embedded in any struct.
 
 ---
 
@@ -68,6 +80,11 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 ### Code Quality
 
+- [ ] **Migrate testify→Ginkgo/GOmega**  
+       **Source:** 8 test files across `pkg/storage`, `pkg/sync`, `pkg/providers/github`  
+       **Description:** Pre-commit hooks ban testify. All 39 tests use it.  
+       **Context:** ~3h effort. Unblocks pre-commit hooks.
+
 - [ ] **Standardize null string conversion**  
        **Source:** `pkg/storage/interface.go`  
        **Description:** Consider using generics or code generation for NullString conversions.  
@@ -77,6 +94,33 @@ Aspirational features and improvements with no fixed timeline. These are planned
        **Source:** `internal/db/`, `sql/queries/events.sql`  
        **Description:** Rename `github_id` column to `source_id` for multi-provider support.  
        **Context:** Breaking schema change — needs migration 003.
+
+### Infrastructure
+
+- [ ] **Align Go toolchain (1.26.0 vs 1.26.1)**  
+       **Source:** `go.mod`  
+       **Description:** `go.mod` says 1.26.1 but installed toolchain is 1.26.0. Blocks coverage reports.  
+       **Context:** Regular build/test works. Only `-cover` flag fails.
+
+- [ ] **Install golangci-lint v2 binary**  
+       **Source:** `.golangci.yml`  
+       **Description:** Config is v2 format. Binary is v1.64.8.  
+       **Context:** Blocks lint gate. `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest`.
+
+### Missing Test Coverage
+
+- [ ] **Storage error path tests**  
+       **Source:** `pkg/storage/sqlite.go`  
+       **Description:** Coverage at 56%. Error paths for GetItemsByActor, GetItemsByRepo, CountByType untested.  
+       **Context:** Target 80%+.
+
+- [ ] **CLI integration tests**  
+       **Source:** `cmd/examples/github-sync/main.go`  
+       **Description:** Zero test coverage for flag parsing, signal handling, exit codes.
+
+- [ ] **pkg/errors and pkg/types tests**  
+       **Source:** `pkg/errors/errors.go`, `pkg/types/ids.go`  
+       **Description:** Zero test coverage. Quick wins.
 
 ---
 
@@ -98,3 +142,6 @@ These require product/architecture decisions before becoming actionable tasks:
 
 5. **Update strategy for existing events**
    - Current `ON CONFLICT(github_id) DO UPDATE SET` correctly updates all fields using `excluded.updated_at` for LWW. The `updated_at` is now properly passed from provider data instead of using `CURRENT_TIMESTAMP`.
+
+6. **testify vs Ginkgo decision**
+   - Migrate to Ginkgo/GOmega to satisfy pre-commit hooks, or disable the hook rule? ~3h migration effort.
