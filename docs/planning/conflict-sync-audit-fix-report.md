@@ -10,24 +10,29 @@ The audit found 5 critical bugs that made conflict resolution completely non-fun
 ## Bugs Fixed
 
 ### 1. `findExistingItem` fetched wrong item (CRITICAL)
+
 - **Before:** Used `s.storage.GetItems(ctx, 1, 0)` — fetched the first item by date, ignoring the target ID entirely
 - **After:** Uses `s.storage.GetByID(ctx, item.ID.Get())` — correct ID-based lookup
 - **Required:** Added `GetByID` method to `Storage` interface, implemented in `SQLiteStorage`, added to all mock implementations
 
 ### 2. Upsert SQL was `DO NOTHING` (CRITICAL)
+
 - **Before:** `ON CONFLICT(github_id) DO NOTHING` — existing items were never updated
 - **After:** `ON CONFLICT(github_id) DO UPDATE SET ...` with all updatable fields + `updated_at = CURRENT_TIMESTAMP`
 
 ### 3. LWW resolver compared `CreatedAt` instead of `UpdatedAt` (CRITICAL)
+
 - **Before:** `TimestampFunc` used `item.CreatedAt` — never changes between versions, so LWW always hit tiebreaker
 - **After:** Uses `item.UpdatedAt` — correctly reflects the most recent modification
 
 ### 4. Missing `UpdatedAt` field on `provider.Item` (CRITICAL)
+
 - **Added:** `UpdatedAt time.Time` field to `provider.Item` struct
 - **Added:** `updated_at DATETIME DEFAULT CURRENT_TIMESTAMP` column to SQL schema
 - **Updated:** All construction sites now set `UpdatedAt = CreatedAt` (GitHub events are immutable)
 
 ### 5. Missing `source` column tracking (HIGH)
+
 - **Added:** `source TEXT NOT NULL DEFAULT 'github'` column to SQL schema
 - **Added:** `Source` field to `EventCoreMixin` for sqlc code generation
 - **Updated:** `toItem` reads source from DB, `toDBParams` passes source to upsert
@@ -46,24 +51,24 @@ e12d64a fix: add source/updated_at columns and change upsert to DO UPDATE SET
 
 ## Files Modified
 
-| File | Change |
-|------|--------|
-| `sql/schema/001_events.sql` | Added `source` + `updated_at` columns |
-| `sql/queries/events.sql` | Changed upsert to `DO UPDATE SET` |
-| `internal/database/connection.go` | Added same columns to inline schema |
-| `internal/db/models.go` | Regenerated — `Source`, `UpdatedAt` fields |
-| `internal/db/events.sql.go` | Regenerated — updated Scan calls, upsert params |
-| `internal/db/querier.go` | Regenerated — updated interface |
-| `internal/db/mixins.go` | Added `Source` to `EventCoreMixin` |
-| `pkg/provider/provider.go` | Added `UpdatedAt time.Time` to `Item` |
-| `pkg/storage/interface.go` | Added `GetByID` to `Storage` interface |
-| `pkg/storage/sqlite.go` | Implemented `GetByID` using sqlc query |
-| `pkg/providers/github/client.go` | Set `UpdatedAt = createdAt` |
-| `pkg/testhelpers/sync.go` | Set `UpdatedAt` in `NewTestItem`, added `GetByID` to mocks |
-| `pkg/testhelpers/storage.go` | Set `UpdatedAt` in `NewStorageItem` |
-| `pkg/storage/sqlite_test.go` | Set `UpdatedAt` in `testItem` |
-| `pkg/sync/sync_test.go` | Added `GetByID` to `mockStorage` |
-| `pkg/sync/conflict_aware.go` | Complete rewrite with all fixes + lint compliance |
+| File                              | Change                                                     |
+| --------------------------------- | ---------------------------------------------------------- |
+| `sql/schema/001_events.sql`       | Added `source` + `updated_at` columns                      |
+| `sql/queries/events.sql`          | Changed upsert to `DO UPDATE SET`                          |
+| `internal/database/connection.go` | Added same columns to inline schema                        |
+| `internal/db/models.go`           | Regenerated — `Source`, `UpdatedAt` fields                 |
+| `internal/db/events.sql.go`       | Regenerated — updated Scan calls, upsert params            |
+| `internal/db/querier.go`          | Regenerated — updated interface                            |
+| `internal/db/mixins.go`           | Added `Source` to `EventCoreMixin`                         |
+| `pkg/provider/provider.go`        | Added `UpdatedAt time.Time` to `Item`                      |
+| `pkg/storage/interface.go`        | Added `GetByID` to `Storage` interface                     |
+| `pkg/storage/sqlite.go`           | Implemented `GetByID` using sqlc query                     |
+| `pkg/providers/github/client.go`  | Set `UpdatedAt = createdAt`                                |
+| `pkg/testhelpers/sync.go`         | Set `UpdatedAt` in `NewTestItem`, added `GetByID` to mocks |
+| `pkg/testhelpers/storage.go`      | Set `UpdatedAt` in `NewStorageItem`                        |
+| `pkg/storage/sqlite_test.go`      | Set `UpdatedAt` in `testItem`                              |
+| `pkg/sync/sync_test.go`           | Added `GetByID` to `mockStorage`                           |
+| `pkg/sync/conflict_aware.go`      | Complete rewrite with all fixes + lint compliance          |
 
 ## Verification
 
