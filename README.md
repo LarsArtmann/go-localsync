@@ -9,14 +9,14 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 
 ## Overview
 
-| Component               | Description                                                                                        |
-| ----------------------- | -------------------------------------------------------------------------------------------------- |
-| **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)            |
-| **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload                       |
-| **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                    |
-| **Conflict-Aware Sync** | CRDT-backed conflict detection via [go-localfirst](https://github.com/larsartmann/go-localfirst)   |
+| Component               | Description                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)                        |
+| **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload                                   |
+| **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                                |
+| **Conflict-Aware Sync** | CRDT-backed conflict detection via [go-localfirst](https://github.com/larsartmann/go-localfirst)               |
 | **Branded IDs**         | Type-safe IDs from [go-composable-business-types](https://github.com/larsartmann/go-composable-business-types) |
-| **Schema Migrations**   | Version-tracked database migrations with automatic application on startup                          |
+| **Schema Migrations**   | Version-tracked database migrations with automatic application on startup                                      |
 
 ## Who is this for?
 
@@ -35,10 +35,12 @@ go get github.com/larsartmann/go-localsync
 ```
 
 > **Note:** This module depends on two private repositories (`go-localfirst` and `go-composable-business-types`). Set environment variables for private module access:
+>
 > ```bash
 > export GONOSUMCHECK=github.com/larsartmann/*
 > export GONOSUMDB=github.com/larsartmann/*
 > ```
+>
 > For local development, create a `go.work` file — see [AGENTS.md](AGENTS.md) for setup instructions.
 
 ## Quick Start
@@ -189,16 +191,16 @@ gh-sync -user octocat
 
 ## Features
 
-| Feature                 | Status     | Description                                              |
-| ----------------------- | ---------- | -------------------------------------------------------- |
-| Incremental Sync        | ✅ Done    | Only fetch new items since last sync — no duplicate data |
-| Full Fidelity           | ✅ Done    | Raw JSON stored for 100% data preservation               |
-| Branded IDs             | ✅ Done    | Compile-time type-safe identifiers                       |
-| Schema Migrations       | ✅ Done    | Version-tracked, idempotent, auto-applied                |
-| Conflict-Aware Sync     | ✅ Done    | CRDT-backed conflict detection with vector clocks        |
-| No CGO                  | ✅ Done    | Pure Go SQLite driver (modernc.org/sqlite)               |
-| Rate Limiting           | ⚙️ Config  | Config structs defined, not yet wired into sync flow     |
-| Retry Logic             | ⚙️ Config  | Config structs defined, not yet wired into sync flow     |
+| Feature             | Status    | Description                                              |
+| ------------------- | --------- | -------------------------------------------------------- |
+| Incremental Sync    | ✅ Done   | Only fetch new items since last sync — no duplicate data |
+| Full Fidelity       | ✅ Done   | Raw JSON stored for 100% data preservation               |
+| Branded IDs         | ✅ Done   | Compile-time type-safe identifiers                       |
+| Schema Migrations   | ✅ Done   | Version-tracked, idempotent, auto-applied                |
+| Conflict-Aware Sync | ✅ Done   | CRDT-backed conflict detection with vector clocks        |
+| No CGO              | ✅ Done   | Pure Go SQLite driver (modernc.org/sqlite)               |
+| Rate Limiting       | ⚙️ Config | Config structs defined, not yet wired into sync flow     |
+| Retry Logic         | ⚙️ Config | Config structs defined, not yet wired into sync flow     |
 
 ## Development
 
@@ -240,12 +242,12 @@ cmd/examples/github-sync/   # Example CLI application
 
 39 tests across 4 test suites:
 
-| Package                | Tests | Coverage                          |
-| ---------------------- | ----- | --------------------------------- |
-| `internal/database`    | 6     | Migrations, idempotency, schema   |
-| `pkg/providers/github` | 21    | Client, fetch, retry, errors      |
-| `pkg/storage`          | Suite | SQLite CRUD operations            |
-| `pkg/sync`             | 11    | Syncer + ConflictAwareSyncer      |
+| Package                | Tests | Coverage                        |
+| ---------------------- | ----- | ------------------------------- |
+| `internal/database`    | 6     | Migrations, idempotency, schema |
+| `pkg/providers/github` | 21    | Client, fetch, retry, errors    |
+| `pkg/storage`          | Suite | SQLite CRUD operations          |
+| `pkg/sync`             | 11    | Syncer + ConflictAwareSyncer    |
 
 ```bash
 just test              # Run all tests
@@ -272,12 +274,12 @@ resolver := pkgsync.NewLWWResolver[*MyType](func(t *MyType) time.Time { return t
 
 ### When to Use Which
 
-| Need | Use |
-|------|-----|
-| Build a local-first application (server, WebSocket sync, event sourcing) | **go-localfirst** |
-| Sync primitives (vector clocks, conflict resolution) in any Go project | **go-localfirst/pkg/sync** |
-| Sync external API data (GitHub, Jira, etc.) to local SQLite | **go-localsync** |
-| Both: local-first app + external data aggregation | Use both — they share `pkg/sync` |
+| Need                                                                     | Use                              |
+| ------------------------------------------------------------------------ | -------------------------------- |
+| Build a local-first application (server, WebSocket sync, event sourcing) | **go-localfirst**                |
+| Sync primitives (vector clocks, conflict resolution) in any Go project   | **go-localfirst/pkg/sync**       |
+| Sync external API data (GitHub, Jira, etc.) to local SQLite              | **go-localsync**                 |
+| Both: local-first app + external data aggregation                        | Use both — they share `pkg/sync` |
 
 ## License
 

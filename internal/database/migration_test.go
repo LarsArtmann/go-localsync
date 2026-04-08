@@ -75,7 +75,8 @@ func TestRunMigrations_CreatesEventsTable(t *testing.T) {
 	}
 
 	var name string
-	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='events'").Scan(&name)
+	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='events'").
+		Scan(&name)
 	if err != nil {
 		t.Fatal("events table not found after migration")
 	}
@@ -107,7 +108,8 @@ func TestRunMigrations_CreatesIndexes(t *testing.T) {
 
 	for _, idx := range expectedIndexes {
 		var name string
-		err := db.QueryRow("SELECT name FROM sqlite_master WHERE type='index' AND name=?", idx).Scan(&name)
+		err := db.QueryRow("SELECT name FROM sqlite_master WHERE type='index' AND name=?", idx).
+			Scan(&name)
 		if err != nil {
 			t.Errorf("index %s not found: %v", idx, err)
 		}

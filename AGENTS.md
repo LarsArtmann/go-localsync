@@ -6,20 +6,20 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## Architecture
 
-| Package | Purpose |
-|---------|---------|
-| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`) |
-| `pkg/providers/github/` | GitHub provider implementation (only provider currently) |
-| `pkg/storage/` | Storage abstraction with SQLite backend |
-| `pkg/sync/` | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst) |
-| `pkg/types/` | Branded phantom-type IDs (`ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID`) |
-| `pkg/errors/` | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.) |
-| `pkg/testhelpers/` | Shared test mocks and factories |
-| `internal/database/` | Connection management (`Open()`) + migration system (`RunMigrations()`) |
-| `internal/db/` | sqlc-generated query code from `sql/queries/events.sql` |
-| `sql/queries/` | SQL query definitions for sqlc |
-| `sql/migrations/` | Reference copies of migration SQL (embedded as Go constants) |
-| `cmd/examples/github-sync/` | Example CLI entry point |
+| Package                     | Purpose                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                  |
+| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
+| `pkg/storage/`              | Storage abstraction with SQLite backend                                                                |
+| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
+| `pkg/types/`                | Branded phantom-type IDs (`ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID`) |
+| `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
+| `pkg/testhelpers/`          | Shared test mocks and factories                                                                        |
+| `internal/database/`        | Connection management (`Open()`) + migration system (`RunMigrations()`)                                |
+| `internal/db/`              | sqlc-generated query code from `sql/queries/events.sql`                                                |
+| `sql/queries/`              | SQL query definitions for sqlc                                                                         |
+| `sql/migrations/`           | Reference copies of migration SQL (embedded as Go constants)                                           |
+| `cmd/examples/github-sync/` | Example CLI entry point                                                                                |
 
 ## Development Workflow
 
@@ -43,6 +43,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 ### CI (No go.work)
 
 CI uses pseudo-versions from GitHub (no replace directives in `go.mod`):
+
 ```bash
 GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go build ./...
 GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test ./... -count=1
@@ -56,17 +57,17 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 
 ## Testing
 
-| Package | Tests | Status |
-|---------|-------|--------|
-| `internal/database` | 6 | ✅ Migration tests (idempotency, ordering, schema, indexes) |
-| `pkg/providers/github` | 21 | ✅ Client, fetch, retry, error handling |
-| `pkg/storage` | suite | ✅ SQLite CRUD operations |
-| `pkg/sync` | 11 | ✅ Syncer + ConflictAwareSyncer |
-| `cmd/examples/github-sync` | 0 | ⬜ No tests |
-| `pkg/errors` | 0 | ⬜ No tests |
-| `pkg/provider` | 0 | ⬜ Interface only |
-| `pkg/types` | 0 | ⬜ No tests |
-| `pkg/testhelpers` | 0 | ⬜ Helper package |
+| Package                    | Tests | Status                                                      |
+| -------------------------- | ----- | ----------------------------------------------------------- |
+| `internal/database`        | 6     | ✅ Migration tests (idempotency, ordering, schema, indexes) |
+| `pkg/providers/github`     | 21    | ✅ Client, fetch, retry, error handling                     |
+| `pkg/storage`              | suite | ✅ SQLite CRUD operations                                   |
+| `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                             |
+| `cmd/examples/github-sync` | 0     | ⬜ No tests                                                 |
+| `pkg/errors`               | 0     | ⬜ No tests                                                 |
+| `pkg/provider`             | 0     | ⬜ Interface only                                           |
+| `pkg/types`                | 0     | ⬜ No tests                                                 |
+| `pkg/testhelpers`          | 0     | ⬜ Helper package                                           |
 
 Run: `go test ./... -count=1`
 
@@ -108,11 +109,11 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 
 ## Dependencies
 
-| Dependency | Purpose |
-|------------|---------|
-| `go-localfirst` | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync |
-| `go-composable-business-types` | Branded phantom-type IDs for compile-time safety |
-| `modernc.org/sqlite` | Pure Go SQLite driver (no CGO) |
-| `cockroachdb/errors` | Sentinel errors with detail wrapping |
-| `go-github/v69` | GitHub API client |
-| `charmbracelet/log` | Structured logging |
+| Dependency                     | Purpose                                                                   |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| `go-localfirst`                | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync |
+| `go-composable-business-types` | Branded phantom-type IDs for compile-time safety                          |
+| `modernc.org/sqlite`           | Pure Go SQLite driver (no CGO)                                            |
+| `cockroachdb/errors`           | Sentinel errors with detail wrapping                                      |
+| `go-github/v69`                | GitHub API client                                                         |
+| `charmbracelet/log`            | Structured logging                                                        |
