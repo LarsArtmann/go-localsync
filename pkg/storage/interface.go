@@ -101,6 +101,7 @@ func toDBParams(item *provider.Item) *db.UpsertEventParams {
 		RepoName:       toNullString(item.RepoName.Get()),
 		RepoUrl:        toNullString(item.RepoURL),
 		CreatedAt:      item.CreatedAt,
+		UpdatedAt:      item.UpdatedAt,
 		RawJson:        item.RawJSON,
 	}
 }

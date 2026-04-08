@@ -89,9 +89,10 @@ type Querier interface {
 	//      repo_name,
 	//      repo_url,
 	//      created_at,
+	//      updated_at,
 	//      raw_json,
 	//      synced_at
-	//  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+	//  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	//  ON CONFLICT(github_id) DO UPDATE SET
 	//      source = excluded.source,
 	//      type = excluded.type,
@@ -99,8 +100,8 @@ type Querier interface {
 	//      actor_avatar_url = excluded.actor_avatar_url,
 	//      repo_name = excluded.repo_name,
 	//      repo_url = excluded.repo_url,
-	//      raw_json = excluded.raw_json,
-	//      updated_at = CURRENT_TIMESTAMP
+	//      updated_at = excluded.updated_at,
+	//      raw_json = excluded.raw_json
 	UpsertEvent(ctx context.Context, arg *UpsertEventParams) error
 }
 
