@@ -2,28 +2,36 @@
 
 ## Project Overview
 
-Go-LocalSync is a generic synchronization SDK that was recently refactored from a GitHub-specific CLI application into a pluggable provider-based architecture.
+Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It supports conflict-aware sync via go-localfirst CRDT primitives.
 
 ## Architecture
 
-- **Core SDK**: Located in `pkg/provider/` with generic interfaces
-- **Providers**: Implemented in `pkg/providers/` (currently only GitHub)
-- **Storage**: Abstraction layer in `pkg/storage/` with SQLite implementation
-- **Sync Engine**: Core synchronization logic in `pkg/sync/`
+- **Core SDK**: `pkg/provider/` — Generic interfaces (`Provider`, `Item`, `FetchResult`)
+- **Providers**: `pkg/providers/github/` — GitHub implementation (only provider currently)
+- **Storage**: `pkg/storage/` — Storage abstraction with SQLite backend
+- **Sync Engine**: `pkg/sync/` — `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)
+- **Types**: `pkg/types/` — Branded IDs from go-composable-business-types
+- **Errors**: `pkg/errors/` — Sentinel errors using cockroachdb/errors
+- **Test Helpers**: `pkg/testhelpers/` — Shared mocks and factories
+- **Database**: `internal/database/` — Connection management + migration system
+- **SQLC**: `internal/db/` — Auto-generated query code from `sql/queries/events.sql`
+- **CLI**: `cmd/examples/github-sync/` — Example CLI entry point
 
 ## Development Workflow
 
-1. Code should follow Go best practices and use the configured golangci-lint rules
-2. All changes should include appropriate tests
-3. Use `go test ./...` to run tests
-4. Use `golangci-lint run` to check code quality
-5. Build with `go build ./cmd/...`
+1. Use `go.work` for local development (already in `.gitignore`)
+2. CI uses pseudo-versions from GitHub (no replace directives in `go.mod`)
+3. Build: `go build ./...`
+4. Test: `go test ./... -count=1`
+5. Lint: `golangci-lint run ./... --timeout=5m` (requires v2 binary)
+6. Format: `golangci-lint fmt ./...`
 
 ## Testing
 
-- Unit tests exist for all major components
-- Run tests with `go test ./...`
-- For coverage, use `go test -cover ./...`
+- Unit tests for `pkg/providers/github`, `pkg/storage`, `pkg/sync`
+- Run: `go test ./... -count=1`
+- Coverage: `go test -cover ./...`
+- Missing: `internal/database` migration tests, CLI integration tests
 
 ## Provider Development
 
@@ -36,26 +44,24 @@ When adding new providers:
 
 ## Database Schema
 
-Current schema uses GitHub-specific column names (`github_id`) but should be generalized in future iterations to support multiple providers.
+- Events table with `github_id` as unique key (to be generalized to `source_id` in future)
+- `source` column for multi-provider tracking
+- `updated_at` passed from provider (not CURRENT_TIMESTAMP) for proper LWW
 
 ## SQLC Code Generation
 
 The `internal/db/` directory contains sqlc-generated code:
 
-- `events.sql.go` - Query functions and parameter structs (AUTO-GENERATED)
-- `models.go` - Data model structs (AUTO-GENERATED)
-- `mixins.go` - **Manual** mixin types for code reuse
+- `events.sql.go` — Query functions and parameter structs (AUTO-GENERATED)
+- `models.go` — Data model structs (AUTO-GENERATED)
+- `db.go` — DB connection and query helpers (AUTO-GENERATED)
+- `querier.go` — Querier interface (AUTO-GENERATED)
 
-### ⚠️ Regeneration Warning
+After running `sqlc generate`, all files in `internal/db/` are overwritten.
 
-The `events.sql.go` file has **manual mixin embedding** applied. After running `sqlc generate`, these changes will be **lost**. To reapply:
+## Migration System
 
-1. Edit `internal/db/events.sql.go` and replace the struct definitions with embedded mixins
-2. Update callers in `pkg/storage/sqlite.go` to use `PaginationMixin: db.PaginationMixin{...}` syntax
-
-### Mixin Types
-
-| Mixin             | Purpose                    | Used By                                                                                       |
-| ----------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
-| `PaginationMixin` | Shared Limit/Offset fields | `GetEventsParams`, `GetEventsByActorParams`, `GetEventsByRepoParams`, `GetEventsByTypeParams` |
-| `EventCoreMixin`  | Shared event fields        | (Available for future use with `UpsertEventParams` ↔ `Events`)                                |
+- `internal/database/migration.go` — Migration runner with `RunMigrations()`
+- Migrations tracked in `schema_migrations` table (version, name, applied_at)
+- SQL reference files in `sql/migrations/` (embedded as constants in Go)
+- Each migration runs in a transaction; `CREATE IF NOT EXISTS` for idempotency
