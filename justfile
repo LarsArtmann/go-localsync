@@ -20,8 +20,13 @@ test-coverage:
     go tool cover -html=coverage.out -o coverage.html
 
 lint:
-    go vet ./...
-    go fmt ./...
+    golangci-lint run ./... --timeout=5m
+
+lint-fix:
+    golangci-lint run --fix ./... --timeout=5m
+
+fmt:
+    golangci-lint fmt ./...
 
 clean:
     rm -rf bin/
