@@ -3,6 +3,9 @@ bin/
 *.db-journal
 coverage.out
 coverage.html
+.DS_Store
+go.work
+go.work.sum
 # Dependencies
 node_modules/
 # Test coverage

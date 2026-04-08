@@ -2,17 +2,12 @@ module github.com/larsartmann/go-localsync
 
 go 1.26.1
 
-replace (
-	github.com/larsartmann/go-composable-business-types => /Users/larsartmann/projects/go-composable-business-types
-	github.com/larsartmann/go-localfirst => ../go-localfirst
-)
-
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/cockroachdb/errors v1.12.0
 	github.com/google/go-github/v69 v69.2.0
-	github.com/larsartmann/go-composable-business-types v0.0.0
-	github.com/larsartmann/go-localfirst v0.0.0-00010101000000-000000000000
+	github.com/larsartmann/go-composable-business-types v0.0.0-20260405033705-4c3f7284f2f8
+	github.com/larsartmann/go-localfirst v0.0.0-20260405181035-3760f7291fc0
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
 	github.com/stretchr/testify v1.11.1
