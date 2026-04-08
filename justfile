@@ -28,6 +28,12 @@ lint-fix:
 fmt:
     golangci-lint fmt ./...
 
+ci: build test
+    @echo "CI checks passed"
+
+verify: build test lint
+    @echo "All verification checks passed"
+
 clean:
     rm -rf bin/
     rm -f *.db
