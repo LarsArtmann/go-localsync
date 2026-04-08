@@ -252,6 +252,33 @@ just test              # Run all tests
 go test -cover ./...   # Coverage (requires Go 1.26.1 toolchain)
 ```
 
+## Related Projects
+
+### `go-localfirst` — Local-First Application Framework
+
+[go-localfirst](https://github.com/larsartmann/go-localfirst) is a full local-first application framework with HTTP server, WebSocket sync, event sourcing, and Pebble storage. Its `pkg/sync` package provides the CRDT primitives (vector clocks, LWW resolution) that `go-localsync` uses for conflict-aware sync.
+
+### `go-localfirst/pkg/sync` — Shared CRDT Primitives
+
+Both projects share the same CRDT primitives from `go-localfirst/pkg/sync`:
+
+```go
+import pkgsync "github.com/larsartmann/go-localfirst/pkg/sync"
+
+vc := pkgsync.NewVectorClock()
+vc.Increment("node-1")
+resolver := pkgsync.NewLWWResolver[*MyType](func(t *MyType) time.Time { return t.UpdatedAt })
+```
+
+### When to Use Which
+
+| Need | Use |
+|------|-----|
+| Build a local-first application (server, WebSocket sync, event sourcing) | **go-localfirst** |
+| Sync primitives (vector clocks, conflict resolution) in any Go project | **go-localfirst/pkg/sync** |
+| Sync external API data (GitHub, Jira, etc.) to local SQLite | **go-localsync** |
+| Both: local-first app + external data aggregation | Use both — they share `pkg/sync` |
+
 ## License
 
 MIT
