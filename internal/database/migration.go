@@ -7,6 +7,12 @@ import (
 	"sort"
 )
 
+// Migration version constants.
+const (
+	migrationVersionInitial       = 1
+	migrationVersionSourceIndexes = 2
+)
+
 type migration struct {
 	version int
 	name    string
@@ -15,12 +21,12 @@ type migration struct {
 
 var migrations = []migration{
 	{
-		version: 1,
+		version: migrationVersionInitial,
 		name:    "initial",
 		sql:     migration001Initial,
 	},
 	{
-		version: 2,
+		version: migrationVersionSourceIndexes,
 		name:    "source_indexes",
 		sql:     migration002SourceIndexes,
 	},
