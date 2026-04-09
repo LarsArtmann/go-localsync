@@ -46,6 +46,60 @@ func (w *storageTestWorld) upsert(id, eventType, actor, repo string, createdAt t
 	_ = w.store.Upsert(w.ctx, testhelpers.NewStorageItem(id, eventType, actor, repo, createdAt))
 }
 
+// testItem holds parameters for creating a test storage item.
+type testItem struct {
+	id        string
+	eventType string
+	actor     string
+	repo      string
+	createdAt time.Time
+}
+
+// upsertItems inserts multiple test items into storage.
+func (w *storageTestWorld) upsertItems(items ...testItem) {
+	for _, item := range items {
+		w.upsert(item.id, item.eventType, item.actor, item.repo, item.createdAt)
+	}
+}
+
+// testDataMixedTypes returns test items with various event types.
+func testDataMixedTypes(now time.Time) []testItem {
+	return []testItem{
+		{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo1", createdAt: now},
+		{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "repo2", createdAt: now},
+		{id: "3", eventType: "PushEvent", actor: "charlie", repo: "repo3", createdAt: now},
+		{id: "4", eventType: "PullRequestEvent", actor: "alice", repo: "repo1", createdAt: now},
+	}
+}
+
+// testDataMultiActor returns test items from multiple actors.
+func testDataMultiActor(now time.Time) []testItem {
+	return []testItem{
+		{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo1", createdAt: now},
+		{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "repo2", createdAt: now},
+		{id: "3", eventType: "PushEvent", actor: "alice", repo: "repo3", createdAt: now},
+	}
+}
+
+// testDataMultiRepo returns test items from multiple repos.
+func testDataMultiRepo(now time.Time) []testItem {
+	return []testItem{
+		{id: "1", eventType: "PushEvent", actor: "alice", repo: "owner/repo-a", createdAt: now},
+		{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "owner/repo-b", createdAt: now},
+		{id: "3", eventType: "PushEvent", actor: "charlie", repo: "owner/repo-a", createdAt: now},
+	}
+}
+
+// testDataVariousTypes returns test items with various event types for statistics.
+func testDataVariousTypes(now time.Time) []testItem {
+	return []testItem{
+		{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo", createdAt: now},
+		{id: "2", eventType: "PushEvent", actor: "bob", repo: "repo", createdAt: now},
+		{id: "3", eventType: "IssuesEvent", actor: "alice", repo: "repo", createdAt: now},
+		{id: "4", eventType: "PullRequestEvent", actor: "bob", repo: "repo", createdAt: now},
+	}
+}
+
 var _ = Describe("SQLite Storage", func() {
 	var world storageTestWorld
 
@@ -152,9 +206,7 @@ var _ = Describe("SQLite Storage", func() {
 			})
 
 			It("should only store one copy", func() {
-				count, err := world.store.Count(world.ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(count).To(Equal(int64(1)))
+				world.assertCountEquals(1)
 			})
 		})
 
@@ -192,12 +244,7 @@ var _ = Describe("SQLite Storage", func() {
 
 		Context("when I filter events by type", func() {
 			BeforeEach(func() {
-				// Given: I have mixed event types
-				now := time.Now()
-				world.upsert("1", "PushEvent", "alice", "repo1", now)
-				world.upsert("2", "IssuesEvent", "bob", "repo2", now)
-				world.upsert("3", "PushEvent", "charlie", "repo3", now)
-				world.upsert("4", "PullRequestEvent", "alice", "repo1", now)
+				world.upsertItems(testDataMixedTypes(time.Now())...)
 			})
 
 			JustBeforeEach(func() {
@@ -216,11 +263,7 @@ var _ = Describe("SQLite Storage", func() {
 
 		Context("when I filter events by actor", func() {
 			BeforeEach(func() {
-				// Given: I have events from multiple actors
-				now := time.Now()
-				world.upsert("1", "PushEvent", "alice", "repo1", now)
-				world.upsert("2", "IssuesEvent", "bob", "repo2", now)
-				world.upsert("3", "PushEvent", "alice", "repo3", now)
+				world.upsertItems(testDataMultiActor(time.Now())...)
 			})
 
 			JustBeforeEach(func() {
@@ -239,11 +282,7 @@ var _ = Describe("SQLite Storage", func() {
 
 		Context("when I filter events by repository", func() {
 			BeforeEach(func() {
-				// Given: I have events from multiple repos
-				now := time.Now()
-				world.upsert("1", "PushEvent", "alice", "owner/repo-a", now)
-				world.upsert("2", "IssuesEvent", "bob", "owner/repo-b", now)
-				world.upsert("3", "PushEvent", "charlie", "owner/repo-a", now)
+				world.upsertItems(testDataMultiRepo(time.Now())...)
 			})
 
 			JustBeforeEach(func() {
@@ -267,12 +306,7 @@ var _ = Describe("SQLite Storage", func() {
 
 		Context("when I request statistics", func() {
 			BeforeEach(func() {
-				// Given: I have various event types
-				now := time.Now()
-				world.upsert("1", "PushEvent", "alice", "repo", now)
-				world.upsert("2", "PushEvent", "bob", "repo", now)
-				world.upsert("3", "IssuesEvent", "alice", "repo", now)
-				world.upsert("4", "PullRequestEvent", "bob", "repo", now)
+				world.upsertItems(testDataVariousTypes(time.Now())...)
 			})
 
 			JustBeforeEach(func() {

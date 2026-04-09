@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -80,38 +81,42 @@ func TestFetch_DefaultOptions(t *testing.T) {
 }
 
 func TestFetch_CustomOptions(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "50", r.URL.Query().Get("per_page"))
-		assert.Equal(t, "2", r.URL.Query().Get("page"))
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode([]*gh.Event{})
-	}))
+	server, expectedPerPage, expectedPage := createTestServerForFetch(t, 50, 2)
 	defer server.Close()
 
 	client := newTestClient(server)
 	result, err := client.Fetch(
 		context.Background(),
-		&provider.FetchOptions{Source: "testuser", PerPage: 50, Page: 2},
+		&provider.FetchOptions{Source: "testuser", PerPage: expectedPerPage, Page: expectedPage},
 	)
 	require.NoError(t, err)
 	assert.Empty(t, result.Items)
 }
 
 func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal(t, "100", r.URL.Query().Get("per_page"))
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode([]*gh.Event{})
-	}))
+	server, _, expectedPage := createTestServerForFetch(t, 100, 1)
 	defer server.Close()
 
 	client := newTestClient(server)
 	result, err := client.Fetch(
 		context.Background(),
-		&provider.FetchOptions{Source: "testuser", PerPage: 0, Page: 1},
+		&provider.FetchOptions{Source: "testuser", PerPage: 0, Page: expectedPage},
 	)
 	require.NoError(t, err)
 	assert.Empty(t, result.Items)
+}
+
+func createTestServerForFetch(
+	t *testing.T,
+	expectedPerPage, expectedPage int,
+) (*httptest.Server, int, int) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, strconv.Itoa(expectedPerPage), r.URL.Query().Get("per_page"))
+		assert.Equal(t, strconv.Itoa(expectedPage), r.URL.Query().Get("page"))
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode([]*gh.Event{})
+	}))
+	return server, expectedPerPage, expectedPage
 }
 
 func TestFetch_APIError(t *testing.T) {

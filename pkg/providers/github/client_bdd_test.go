@@ -283,12 +283,7 @@ var _ = Describe("GitHub Provider", func() {
 				world.callCount = *retryCountPtr
 
 				world.client = newGitHubTestClient(world.server)
-				world.client = world.client.WithRetryConfig(provider.RetryConfig{
-					Enabled:        true,
-					MaxRetries:     3,
-					InitialBackoff: 1 * time.Millisecond,
-					MaxBackoff:     10 * time.Millisecond,
-				})
+				world.withRetryConfig()
 			})
 
 			JustBeforeEach(func() {
@@ -310,12 +305,7 @@ var _ = Describe("GitHub Provider", func() {
 				world.server = testhelpers.NewErrorTestServer(http.StatusBadRequest, "Bad Request")
 
 				world.client = newGitHubTestClient(world.server)
-				world.client = world.client.WithRetryConfig(provider.RetryConfig{
-					Enabled:        true,
-					MaxRetries:     3,
-					InitialBackoff: 1 * time.Millisecond,
-					MaxBackoff:     10 * time.Millisecond,
-				})
+				world.withRetryConfig()
 			})
 
 			JustBeforeEach(func() {
