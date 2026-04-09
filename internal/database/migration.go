@@ -47,7 +47,8 @@ func RunMigrations(db *sql.DB) error {
 			continue
 		}
 
-		if err := applyMigration(db, m); err != nil {
+		err := applyMigration(db, m)
+		if err != nil {
 			return fmt.Errorf("migration %d (%s) failed: %w", m.version, m.name, err)
 		}
 	}
@@ -75,11 +76,15 @@ func getAppliedVersions(db *sql.DB) (map[int]bool, error) {
 	defer rows.Close()
 
 	applied := make(map[int]bool)
+
 	for rows.Next() {
 		var v int
-		if err := rows.Scan(&v); err != nil {
+
+		err := rows.Scan(&v)
+		if err != nil {
 			return nil, err
 		}
+
 		applied[v] = true
 	}
 

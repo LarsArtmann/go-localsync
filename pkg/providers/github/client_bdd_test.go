@@ -26,6 +26,16 @@ type githubTestWorld struct {
 	callCount int
 }
 
+// fetchFor invokes the client's Fetch method for the given source.
+func (w *githubTestWorld) fetchFor(source string) {
+	w.result, w.err = w.client.Fetch(w.ctx, &provider.FetchOptions{Source: source})
+}
+
+// withRetryConfig enables retry with fast backoff on the client.
+func (w *githubTestWorld) withRetryConfig() {
+	w.client = w.client.WithRetryConfig(testhelpers.TestRetryConfig())
+}
+
 // newGitHubTestClient creates a client pointing to the test server.
 func newGitHubTestClient(server *httptest.Server) *github.Client {
 	httpClient := &http.Client{}
@@ -84,10 +94,7 @@ var _ = Describe("GitHub Provider", func() {
 			})
 
 			JustBeforeEach(func() {
-				// When: I fetch events for octocat
-				world.result, world.err = world.client.Fetch(world.ctx, &provider.FetchOptions{
-					Source: "octocat",
-				})
+				world.fetchFor("octocat")
 			})
 
 			It("should succeed", func() {
@@ -207,10 +214,7 @@ var _ = Describe("GitHub Provider", func() {
 			})
 
 			JustBeforeEach(func() {
-				// When: I fetch events for nonexistent user
-				world.result, world.err = world.client.Fetch(world.ctx, &provider.FetchOptions{
-					Source: "nonexistent-user-xyz",
-				})
+				world.fetchFor("nonexistent-user-xyz")
 			})
 
 			It("should return an error", func() {
@@ -288,10 +292,7 @@ var _ = Describe("GitHub Provider", func() {
 			})
 
 			JustBeforeEach(func() {
-				// When: I fetch with retry enabled
-				world.result, world.err = world.client.Fetch(world.ctx, &provider.FetchOptions{
-					Source: "testuser",
-				})
+				world.fetchFor("testuser")
 			})
 
 			It("should retry and eventually succeed", func() {
@@ -318,10 +319,7 @@ var _ = Describe("GitHub Provider", func() {
 			})
 
 			JustBeforeEach(func() {
-				// When: I fetch
-				world.result, world.err = world.client.Fetch(world.ctx, &provider.FetchOptions{
-					Source: "testuser",
-				})
+				world.fetchFor("testuser")
 			})
 
 			It("should not retry on client errors", func() {

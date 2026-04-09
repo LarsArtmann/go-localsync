@@ -24,6 +24,30 @@ type syncTestWorld struct {
 	result   *sync.SyncResult
 	err      error
 	db       interface{ Close() error }
+	count    int64
+}
+
+// sync invokes the syncer with default options.
+func (w *syncTestWorld) sync() {
+	w.result, w.err = w.syncer.Sync(w.ctx, &sync.SyncOptions{
+		Source:   "testuser",
+		MaxPages: 10,
+	})
+}
+
+// syncIncremental invokes the syncer's incremental sync with default options.
+func (w *syncTestWorld) syncIncremental() {
+	w.result, w.err = w.syncer.SyncIncremental(w.ctx, &sync.SyncOptions{
+		Source:   "testuser",
+		MaxPages: 10,
+	})
+}
+
+// countItems returns the count from storage.
+func (w *syncTestWorld) countItems() int64 {
+	w.count, w.err = w.storage.Count(w.ctx)
+	Expect(w.err).ToNot(HaveOccurred())
+	return w.count
 }
 
 var _ = Describe("Sync Engine", func() {
@@ -63,10 +87,7 @@ var _ = Describe("Sync Engine", func() {
 
 			JustBeforeEach(func() {
 				// When: I perform a full sync
-				world.result, world.err = world.syncer.Sync(world.ctx, &sync.SyncOptions{
-					Source:   "testuser",
-					MaxPages: 10,
-				})
+				world.sync()
 			})
 
 			It("should succeed without errors", func() {
@@ -78,9 +99,7 @@ var _ = Describe("Sync Engine", func() {
 			})
 
 			It("should store all items in the database", func() {
-				count, err := world.storage.Count(world.ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(count).To(Equal(int64(3)))
+				Expect(world.countItems()).To(Equal(int64(3)))
 			})
 
 			It("should preserve all event types", func() {
@@ -106,18 +125,12 @@ var _ = Describe("Sync Engine", func() {
 					MaxPages: 10,
 				})
 				Expect(world.err).ToNot(HaveOccurred())
-
-				world.result, world.err = world.syncer.Sync(world.ctx, &sync.SyncOptions{
-					Source:   "testuser",
-					MaxPages: 10,
-				})
+				world.sync()
 			})
 
 			It("should not duplicate items", func() {
 				Expect(world.err).ToNot(HaveOccurred())
-				count, err := world.storage.Count(world.ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(count).To(Equal(int64(1)))
+				Expect(world.countItems()).To(Equal(int64(1)))
 			})
 		})
 
@@ -141,10 +154,7 @@ var _ = Describe("Sync Engine", func() {
 
 			JustBeforeEach(func() {
 				// When: I perform incremental sync
-				world.result, world.err = world.syncer.SyncIncremental(world.ctx, &sync.SyncOptions{
-					Source:   "testuser",
-					MaxPages: 10,
-				})
+				world.syncIncremental()
 			})
 
 			It("should succeed", func() {
@@ -156,9 +166,7 @@ var _ = Describe("Sync Engine", func() {
 			})
 
 			It("should store new items", func() {
-				count, err := world.storage.Count(world.ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(count).To(Equal(int64(3)))
+				Expect(world.countItems()).To(Equal(int64(3)))
 			})
 		})
 
@@ -170,10 +178,7 @@ var _ = Describe("Sync Engine", func() {
 
 			JustBeforeEach(func() {
 				// When: I try to sync
-				world.result, world.err = world.syncer.Sync(world.ctx, &sync.SyncOptions{
-					Source:   "testuser",
-					MaxPages: 10,
-				})
+				world.sync()
 			})
 
 			It("should return an error", func() {
@@ -182,9 +187,7 @@ var _ = Describe("Sync Engine", func() {
 			})
 
 			It("should not store any items", func() {
-				count, err := world.storage.Count(world.ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(count).To(Equal(int64(0)))
+				Expect(world.countItems()).To(Equal(int64(0)))
 			})
 		})
 
@@ -240,10 +243,7 @@ var _ = Describe("Sync Engine", func() {
 
 			JustBeforeEach(func() {
 				// When: I sync
-				world.result, world.err = world.syncer.Sync(world.ctx, &sync.SyncOptions{
-					Source:   "testuser",
-					MaxPages: 10,
-				})
+				world.sync()
 			})
 
 			It("should complete sync but report errors", func() {

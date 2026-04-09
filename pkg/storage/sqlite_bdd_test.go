@@ -34,6 +34,11 @@ func (w *storageTestWorld) getCountsAndTypes() {
 	w.types, w.err = w.store.GetTypes(w.ctx)
 }
 
+// upsert is a helper to insert a test item into storage.
+func (w *storageTestWorld) upsert(id, eventType, actor, repo string, createdAt time.Time) {
+	_ = w.store.Upsert(w.ctx, testhelpers.NewStorageItem(id, eventType, actor, repo, createdAt))
+}
+
 var _ = Describe("SQLite Storage", func() {
 	var world storageTestWorld
 
@@ -152,30 +157,9 @@ var _ = Describe("SQLite Storage", func() {
 			BeforeEach(func() {
 				// Given: I have events in chronological order
 				now := time.Now()
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem(
-						"old",
-						"PushEvent",
-						"user",
-						"repo",
-						now.Add(-2*time.Hour),
-					),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem(
-						"middle",
-						"IssuesEvent",
-						"user",
-						"repo",
-						now.Add(-1*time.Hour),
-					),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("newest", "PullRequestEvent", "user", "repo", now),
-				)
+				world.upsert("old", "PushEvent", "user", "repo", now.Add(-2*time.Hour))
+				world.upsert("middle", "IssuesEvent", "user", "repo", now.Add(-1*time.Hour))
+				world.upsert("newest", "PullRequestEvent", "user", "repo", now)
 			})
 
 			JustBeforeEach(func() {
@@ -205,22 +189,10 @@ var _ = Describe("SQLite Storage", func() {
 			BeforeEach(func() {
 				// Given: I have mixed event types
 				now := time.Now()
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("1", "PushEvent", "alice", "repo1", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("2", "IssuesEvent", "bob", "repo2", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("3", "PushEvent", "charlie", "repo3", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("4", "PullRequestEvent", "alice", "repo1", now),
-				)
+				world.upsert("1", "PushEvent", "alice", "repo1", now)
+				world.upsert("2", "IssuesEvent", "bob", "repo2", now)
+				world.upsert("3", "PushEvent", "charlie", "repo3", now)
+				world.upsert("4", "PullRequestEvent", "alice", "repo1", now)
 			})
 
 			JustBeforeEach(func() {
@@ -241,18 +213,9 @@ var _ = Describe("SQLite Storage", func() {
 			BeforeEach(func() {
 				// Given: I have events from multiple actors
 				now := time.Now()
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("1", "PushEvent", "alice", "repo1", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("2", "IssuesEvent", "bob", "repo2", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("3", "PushEvent", "alice", "repo3", now),
-				)
+				world.upsert("1", "PushEvent", "alice", "repo1", now)
+				world.upsert("2", "IssuesEvent", "bob", "repo2", now)
+				world.upsert("3", "PushEvent", "alice", "repo3", now)
 			})
 
 			JustBeforeEach(func() {
@@ -273,18 +236,9 @@ var _ = Describe("SQLite Storage", func() {
 			BeforeEach(func() {
 				// Given: I have events from multiple repos
 				now := time.Now()
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("1", "PushEvent", "alice", "owner/repo-a", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("2", "IssuesEvent", "bob", "owner/repo-b", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("3", "PushEvent", "charlie", "owner/repo-a", now),
-				)
+				world.upsert("1", "PushEvent", "alice", "owner/repo-a", now)
+				world.upsert("2", "IssuesEvent", "bob", "owner/repo-b", now)
+				world.upsert("3", "PushEvent", "charlie", "owner/repo-a", now)
 			})
 
 			JustBeforeEach(func() {
@@ -310,22 +264,10 @@ var _ = Describe("SQLite Storage", func() {
 			BeforeEach(func() {
 				// Given: I have various event types
 				now := time.Now()
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("1", "PushEvent", "alice", "repo", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("2", "PushEvent", "bob", "repo", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("3", "IssuesEvent", "alice", "repo", now),
-				)
-				_ = world.store.Upsert(
-					world.ctx,
-					testhelpers.NewStorageItem("4", "PullRequestEvent", "bob", "repo", now),
-				)
+				world.upsert("1", "PushEvent", "alice", "repo", now)
+				world.upsert("2", "PushEvent", "bob", "repo", now)
+				world.upsert("3", "IssuesEvent", "alice", "repo", now)
+				world.upsert("4", "PullRequestEvent", "bob", "repo", now)
 			})
 
 			JustBeforeEach(func() {

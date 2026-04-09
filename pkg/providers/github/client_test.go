@@ -16,23 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// newTestEvent creates a test GitHub event with the specified parameters.
-func newTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
-	return &gh.Event{
-		ID:   new(id),
-		Type: new(eventType),
-		Actor: &gh.User{
-			Login:     new("testuser"),
-			AvatarURL: new("https://avatar.url"),
-		},
-		Repo: &gh.Repository{
-			Name: new("test/repo"),
-			URL:  new("https://api.github.com/repos/test/repo"),
-		},
-		CreatedAt: &gh.Timestamp{Time: createdAt},
-	}
-}
-
 func TestNewClient(t *testing.T) {
 	client := NewClient("test-token")
 	require.NotNil(t, client)
@@ -74,7 +57,11 @@ func TestFetch_DefaultOptions(t *testing.T) {
 		assert.Equal(t, "1", r.URL.Query().Get("page"))
 
 		events := []*gh.Event{
-			newTestEvent("123", "PushEvent", time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)),
+			testhelpers.NewTestEvent(
+				"123",
+				"PushEvent",
+				time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC),
+			),
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -88,8 +75,8 @@ func TestFetch_DefaultOptions(t *testing.T) {
 	require.Len(t, result.Items, 1)
 	assert.Equal(t, "123", result.Items[0].ID.Get())
 	assert.Equal(t, "PushEvent", result.Items[0].Type.Get())
-	assert.Equal(t, "testuser", result.Items[0].ActorLogin.Get())
-	assert.Equal(t, "test/repo", result.Items[0].RepoName.Get())
+	assert.Equal(t, "octocat", result.Items[0].ActorLogin.Get())
+	assert.Equal(t, "octocat/Hello-World", result.Items[0].RepoName.Get())
 }
 
 func TestFetch_CustomOptions(t *testing.T) {

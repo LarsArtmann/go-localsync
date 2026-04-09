@@ -160,7 +160,8 @@ func TestMigrations_Ordered(t *testing.T) {
 	var versions []int
 	for rows.Next() {
 		var v int
-		if err := rows.Scan(&v); err != nil {
+		err := rows.Scan(&v)
+		if err != nil {
 			t.Fatalf("scan: %v", err)
 		}
 
