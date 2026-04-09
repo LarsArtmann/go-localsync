@@ -34,6 +34,13 @@ func (w *storageTestWorld) getCountsAndTypes() {
 	w.types, w.err = w.store.GetTypes(w.ctx)
 }
 
+// assertCountEquals asserts the store count matches the expected value.
+func (w *storageTestWorld) assertCountEquals(expected int64) {
+	count, err := w.store.Count(w.ctx)
+	Expect(err).ToNot(HaveOccurred())
+	Expect(count).To(Equal(expected))
+}
+
 // upsert is a helper to insert a test item into storage.
 func (w *storageTestWorld) upsert(id, eventType, actor, repo string, createdAt time.Time) {
 	_ = w.store.Upsert(w.ctx, testhelpers.NewStorageItem(id, eventType, actor, repo, createdAt))
@@ -104,9 +111,7 @@ var _ = Describe("SQLite Storage", func() {
 			})
 
 			It("should persist all events", func() {
-				count, err := world.store.Count(world.ctx)
-				Expect(err).ToNot(HaveOccurred())
-				Expect(count).To(Equal(int64(3)))
+				world.assertCountEquals(3)
 			})
 
 			It("should preserve the complete JSON payload", func() {
