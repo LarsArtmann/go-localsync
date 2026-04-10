@@ -86,6 +86,17 @@ type ConflictResult struct {
 	Errors    int
 }
 
+// newConflictResult creates a ConflictResult initialized with the given fetched count.
+func newConflictResult(fetched int) *ConflictResult {
+	return &ConflictResult{
+		Fetched:   fetched,
+		Upserted:  0,
+		Skipped:   0,
+		Conflicts: 0,
+		Errors:    0,
+	}
+}
+
 // SyncWithConflictDetection performs a full sync with conflict detection and resolution.
 // Each fetched item is compared against the stored version using vector clocks.
 // Conflicts are resolved using the configured ConflictResolver (LWW by default).
@@ -113,13 +124,7 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		)
 	}
 
-	cr := &ConflictResult{
-		Fetched:   len(result.Items),
-		Upserted:  0,
-		Skipped:   0,
-		Conflicts: 0,
-		Errors:    0,
-	}
+	cr := newConflictResult(len(result.Items))
 
 	for _, item := range result.Items {
 		s.clock.Increment(s.nodeID)
@@ -138,6 +143,18 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	return cr, nil
 }
 
+// logError logs a warning and increments the error counter.
+func (s *ConflictAwareSyncer) logError(
+	msg string,
+	item *provider.Item,
+	err error,
+	cr *ConflictResult,
+) {
+	s.logger.Warn(msg, "id", item.ID, "error", err)
+
+	cr.Errors++
+}
+
 // processItem handles a single item during conflict-aware sync.
 func (s *ConflictAwareSyncer) processItem(
 	ctx context.Context,
@@ -146,9 +163,7 @@ func (s *ConflictAwareSyncer) processItem(
 ) {
 	existing, err := s.findExistingItem(ctx, item)
 	if err != nil {
-		s.logger.Warn("Failed to check existing item", "id", item.ID, "error", err)
-
-		cr.Errors++
+		s.logError("Failed to check existing item", item, err, cr)
 
 		return
 	}
@@ -174,9 +189,7 @@ func (s *ConflictAwareSyncer) upsertNewItem(
 ) {
 	err := s.storage.Upsert(ctx, item)
 	if err != nil {
-		s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
-
-		cr.Errors++
+		s.logError("Failed to upsert item", item, err, cr)
 
 		return
 	}
@@ -198,18 +211,14 @@ func (s *ConflictAwareSyncer) resolveConflict(
 		Timestamp: time.Now(),
 	})
 	if err != nil {
-		s.logger.Warn("Conflict resolution failed", "id", remote.ID, "error", err)
-
-		cr.Errors++
+		s.logError("Conflict resolution failed", remote, err, cr)
 
 		return
 	}
 
 	err = s.storage.Upsert(ctx, resolved)
 	if err != nil {
-		s.logger.Warn("Failed to upsert resolved item", "id", resolved.ID, "error", err)
-
-		cr.Errors++
+		s.logError("Failed to upsert resolved item", resolved, err, cr)
 
 		return
 	}
@@ -241,13 +250,7 @@ func (s *ConflictAwareSyncer) SyncOperations(
 	}
 
 	operations := make([]*localsync.Operation[*provider.Item], 0, len(result.Items))
-	cr := &ConflictResult{
-		Fetched:   len(result.Items),
-		Upserted:  0,
-		Skipped:   0,
-		Conflicts: 0,
-		Errors:    0,
-	}
+	cr := newConflictResult(len(result.Items))
 
 	for idx, item := range result.Items {
 		s.clock.Increment(s.nodeID)

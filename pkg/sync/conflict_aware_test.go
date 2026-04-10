@@ -9,6 +9,7 @@ import (
 	"charm.land/log/v2"
 	localsync "github.com/larsartmann/go-localfirst/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -58,19 +59,12 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 	})
 
 	t.Run("upserts new items when no conflicts", func(t *testing.T) {
+		now := time.Now()
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{
 				Items: []*provider.Item{
-					{
-						ID:        types.NewItemID("1"),
-						Type:      types.NewEventTypeID("PushEvent"),
-						CreatedAt: time.Now(),
-					},
-					{
-						ID:        types.NewItemID("2"),
-						Type:      types.NewEventTypeID("IssuesEvent"),
-						CreatedAt: time.Now(),
-					},
+					testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+					testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
 				},
 			},
 		}
@@ -92,16 +86,8 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 
 	t.Run("detects and resolves conflicts", func(t *testing.T) {
 		now := time.Now()
-		existingItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			Type:      types.NewEventTypeID("PushEvent"),
-			CreatedAt: now,
-		}
-		updatedItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			Type:      types.NewEventTypeID("IssuesEvent"),
-			CreatedAt: now.Add(time.Hour),
-		}
+		existingItem := testhelpers.NewMinimalTestItem("1", "PushEvent", now)
+		updatedItem := testhelpers.NewMinimalTestItem("1", "IssuesEvent", now.Add(time.Hour))
 
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{
@@ -146,11 +132,7 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{
 				Items: []*provider.Item{
-					{
-						ID:        types.NewItemID("1"),
-						Type:      types.NewEventTypeID("PushEvent"),
-						CreatedAt: time.Now(),
-					},
+					testhelpers.NewMinimalTestItem("1", "PushEvent", time.Now()),
 				},
 			},
 		}
@@ -192,16 +174,8 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{
 				Items: []*provider.Item{
-					{
-						ID:        types.NewItemID("1"),
-						Type:      types.NewEventTypeID("PushEvent"),
-						CreatedAt: now,
-					},
-					{
-						ID:        types.NewItemID("2"),
-						Type:      types.NewEventTypeID("IssuesEvent"),
-						CreatedAt: now,
-					},
+					testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+					testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
 				},
 			},
 		}
@@ -236,24 +210,13 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 	})
 
 	t.Run("operations have incrementing vector clocks", func(t *testing.T) {
+		now := time.Now()
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{
 				Items: []*provider.Item{
-					{
-						ID:        types.NewItemID("1"),
-						Type:      types.NewEventTypeID("PushEvent"),
-						CreatedAt: time.Now(),
-					},
-					{
-						ID:        types.NewItemID("2"),
-						Type:      types.NewEventTypeID("IssuesEvent"),
-						CreatedAt: time.Now(),
-					},
-					{
-						ID:        types.NewItemID("3"),
-						Type:      types.NewEventTypeID("PullRequestEvent"),
-						CreatedAt: time.Now(),
-					},
+					testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+					testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
+					testhelpers.NewMinimalTestItem("3", "PullRequestEvent", now),
 				},
 			},
 		}
@@ -288,16 +251,8 @@ func TestConflictAwareSyncer_Close(t *testing.T) {
 func TestConflictAwareSyncer_LWWResolution(t *testing.T) {
 	t.Run("remote wins with later timestamp", func(t *testing.T) {
 		now := time.Now()
-		existingItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			Type:      types.NewEventTypeID("PushEvent"),
-			CreatedAt: now,
-		}
-		newerItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			Type:      types.NewEventTypeID("IssuesEvent"),
-			CreatedAt: now.Add(2 * time.Hour),
-		}
+		existingItem := testhelpers.NewMinimalTestItem("1", "PushEvent", now)
+		newerItem := testhelpers.NewMinimalTestItem("1", "IssuesEvent", now.Add(2*time.Hour))
 
 		mockProv := &mockProvider{
 			result: &provider.FetchResult{

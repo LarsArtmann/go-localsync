@@ -8,6 +8,7 @@ import (
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -72,12 +73,22 @@ func (m *mockStorage) GetItems(ctx context.Context, limit, offset int) ([]*provi
 	return m.items, nil
 }
 
+// getItemsByFilter returns items for GetItemsByType/Actor/Repo.
+// This eliminates duplication across the mock storage interface methods.
+func (m *mockStorage) getItemsByFilter(
+	_ context.Context,
+	_ string,
+	_, _ int,
+) ([]*provider.Item, error) {
+	return m.items, nil
+}
+
 func (m *mockStorage) GetItemsByType(
 	ctx context.Context,
 	itemType string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return m.items, nil
+	return m.getItemsByFilter(ctx, itemType, limit, offset)
 }
 
 func (m *mockStorage) GetItemsByActor(
@@ -85,7 +96,7 @@ func (m *mockStorage) GetItemsByActor(
 	actorLogin string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return m.items, nil
+	return m.getItemsByFilter(ctx, actorLogin, limit, offset)
 }
 
 func (m *mockStorage) GetItemsByRepo(
@@ -93,7 +104,7 @@ func (m *mockStorage) GetItemsByRepo(
 	repoName string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return m.items, nil
+	return m.getItemsByFilter(ctx, repoName, limit, offset)
 }
 
 func (m *mockStorage) Count(ctx context.Context) (int64, error) {
@@ -348,16 +359,16 @@ func TestProcessIncrementalItems(t *testing.T) {
 		}
 
 		items := []*provider.Item{
-			{
-				ID:        types.NewItemID("2"),
-				Type:      types.NewEventTypeID("PushEvent"),
-				CreatedAt: time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC),
-			},
-			{
-				ID:        types.NewItemID("3"),
-				Type:      types.NewEventTypeID("IssuesEvent"),
-				CreatedAt: time.Date(2024, 1, 15, 13, 0, 0, 0, time.UTC),
-			},
+			testhelpers.NewMinimalTestItem(
+				"2",
+				"PushEvent",
+				time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC),
+			),
+			testhelpers.NewMinimalTestItem(
+				"3",
+				"IssuesEvent",
+				time.Date(2024, 1, 15, 13, 0, 0, 0, time.UTC),
+			),
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), latestItem, items)
@@ -374,11 +385,7 @@ func TestProcessIncrementalItems(t *testing.T) {
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		items := []*provider.Item{
-			{
-				ID:        types.NewItemID("1"),
-				Type:      types.NewEventTypeID("PushEvent"),
-				CreatedAt: time.Now(),
-			},
+			testhelpers.NewMinimalTestItem("1", "PushEvent", time.Now()),
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), nil, items)
@@ -400,16 +407,8 @@ func TestProcessIncrementalItems(t *testing.T) {
 		}
 
 		items := []*provider.Item{
-			{
-				ID:        types.NewItemID("2"),
-				Type:      types.NewEventTypeID("PushEvent"),
-				CreatedAt: sameTime,
-			},
-			{
-				ID:        types.NewItemID("3"),
-				Type:      types.NewEventTypeID("IssuesEvent"),
-				CreatedAt: sameTime.Add(1),
-			},
+			testhelpers.NewMinimalTestItem("2", "PushEvent", sameTime),
+			testhelpers.NewMinimalTestItem("3", "IssuesEvent", sameTime.Add(1)),
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
@@ -455,16 +454,8 @@ func TestProcessIncrementalItems(t *testing.T) {
 		}
 
 		items := []*provider.Item{
-			{
-				ID:        types.NewItemID("2"),
-				Type:      types.NewEventTypeID("PushEvent"),
-				CreatedAt: pastTime,
-			},
-			{
-				ID:        types.NewItemID("3"),
-				Type:      types.NewEventTypeID("IssuesEvent"),
-				CreatedAt: futureTime,
-			},
+			testhelpers.NewMinimalTestItem("2", "PushEvent", pastTime),
+			testhelpers.NewMinimalTestItem("3", "IssuesEvent", futureTime),
 		}
 
 		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)

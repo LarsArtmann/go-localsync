@@ -55,6 +55,13 @@ type Stats struct {
 }
 
 // Sync performs a full sync from the provider to storage.
+// logUpsertError logs a warning and increments the error counter.
+func (s *Syncer) logUpsertError(item *provider.Item, err error, result *SyncResult) {
+	s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
+
+	result.Errors++
+}
+
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
@@ -77,9 +84,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	for _, item := range result.Items {
 		err := s.storage.Upsert(ctx, item)
 		if err != nil {
-			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
-
-			syncResult.Errors++
+			s.logUpsertError(item, err, syncResult)
 
 			continue
 		}
@@ -194,9 +199,7 @@ func (s *Syncer) processIncrementalItems(
 
 		err := s.storage.Upsert(ctx, item)
 		if err != nil {
-			s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
-
-			syncResult.Errors++
+			s.logUpsertError(item, err, syncResult)
 
 			continue
 		}

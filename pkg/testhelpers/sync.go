@@ -24,6 +24,16 @@ func NewTestItem(id, eventType string, createdAt time.Time) *provider.Item {
 	}
 }
 
+// NewMinimalTestItem creates a test item with only the essential fields for sync tests.
+// This is useful when the tests only care about ID, Type, and CreatedAt.
+func NewMinimalTestItem(id, eventType string, createdAt time.Time) *provider.Item {
+	return &provider.Item{
+		ID:        types.NewItemID(id),
+		Type:      types.NewEventTypeID(eventType),
+		CreatedAt: createdAt,
+	}
+}
+
 // mockProvider implements provider.Provider for testing.
 type MockProvider struct {
 	NameVal      string
@@ -122,12 +132,22 @@ func (m *MockStorage) GetItems(ctx context.Context, limit, offset int) ([]*provi
 	return m.ItemsVal, nil
 }
 
+// getItemsByFilter returns items for GetItemsByType/Actor/Repo.
+// This eliminates duplication across the storage interface mock methods.
+func (m *MockStorage) getItemsByFilter(
+	_ context.Context,
+	_ string,
+	_, _ int,
+) ([]*provider.Item, error) {
+	return m.ItemsVal, nil
+}
+
 func (m *MockStorage) GetItemsByType(
 	ctx context.Context,
 	itemType string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return m.ItemsVal, nil
+	return m.getItemsByFilter(ctx, itemType, limit, offset)
 }
 
 func (m *MockStorage) GetItemsByActor(
@@ -135,7 +155,7 @@ func (m *MockStorage) GetItemsByActor(
 	actorLogin string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return m.ItemsVal, nil
+	return m.getItemsByFilter(ctx, actorLogin, limit, offset)
 }
 
 func (m *MockStorage) GetItemsByRepo(
@@ -143,7 +163,7 @@ func (m *MockStorage) GetItemsByRepo(
 	repoName string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return m.ItemsVal, nil
+	return m.getItemsByFilter(ctx, repoName, limit, offset)
 }
 
 func (m *MockStorage) Count(ctx context.Context) (int64, error) {
@@ -184,12 +204,22 @@ func (f *FailingStorage) GetItems(
 	return nil, nil
 }
 
+// getItemsByFilter returns nil for GetItemsByType/Actor/Repo.
+// This eliminates duplication across the failing storage interface mock methods.
+func (*FailingStorage) getItemsByFilter(
+	context.Context,
+	string,
+	int, int,
+) ([]*provider.Item, error) {
+	return nil, nil
+}
+
 func (f *FailingStorage) GetItemsByType(
 	ctx context.Context,
 	itemType string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return nil, nil
+	return f.getItemsByFilter(ctx, itemType, limit, offset)
 }
 
 func (f *FailingStorage) GetItemsByActor(
@@ -197,7 +227,7 @@ func (f *FailingStorage) GetItemsByActor(
 	actorLogin string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return nil, nil
+	return f.getItemsByFilter(ctx, actorLogin, limit, offset)
 }
 
 func (f *FailingStorage) GetItemsByRepo(
@@ -205,7 +235,7 @@ func (f *FailingStorage) GetItemsByRepo(
 	repoName string,
 	limit, offset int,
 ) ([]*provider.Item, error) {
-	return nil, nil
+	return f.getItemsByFilter(ctx, repoName, limit, offset)
 }
 
 func (f *FailingStorage) Count(ctx context.Context) (int64, error) {
