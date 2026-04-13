@@ -12,3 +12,5 @@ node_modules/
 /coverage
 # Build artifacts
 /go-localsync
+Copy/paste detection report
+/report/jscpd-report.json
