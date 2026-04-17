@@ -60,14 +60,10 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 
 	t.Run("upserts new items when no conflicts", func(t *testing.T) {
 		now := time.Now()
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{
-					testhelpers.NewMinimalTestItem("1", "PushEvent", now),
-					testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
-				},
-			},
-		}
+		mockProv := newMockProviderWithTestItems(
+			testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+			testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
+		)
 		mockStore := &mockStorage{}
 
 		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
@@ -171,14 +167,10 @@ func TestConflictAwareSyncer_GetVectorClock(t *testing.T) {
 func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 	t.Run("returns operations for fetched items", func(t *testing.T) {
 		now := time.Now()
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{
-					testhelpers.NewMinimalTestItem("1", "PushEvent", now),
-					testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
-				},
-			},
-		}
+		mockProv := newMockProviderWithTestItems(
+			testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+			testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
+		)
 		mockStore := &mockStorage{}
 
 		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)

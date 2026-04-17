@@ -233,17 +233,7 @@ var _ = Describe("GitHub Provider", func() {
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 						if r.URL.Path == "/rate_limit/" {
 							w.Header().Set("Content-Type", "application/json")
-							_ = json.NewEncoder(w).Encode(map[string]any{
-								"resources": gh.RateLimits{
-									Core: &gh.Rate{
-										Limit:     5000,
-										Remaining: 5, // Low remaining
-										Reset: gh.Timestamp{
-											Time: time.Now().Add(1 * time.Hour),
-										},
-									},
-								},
-							})
+							_ = json.NewEncoder(w).Encode(testhelpers.RateLimitResponse(5))
 							return
 						}
 					}),

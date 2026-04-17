@@ -277,15 +277,7 @@ func TestGetRateLimit(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Contains(t, r.URL.Path, "/rate_limit")
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"resources": gh.RateLimits{
-				Core: &gh.Rate{
-					Limit:     5000,
-					Remaining: 4999,
-					Reset:     gh.Timestamp{Time: time.Now().Add(1 * time.Hour)},
-				},
-			},
-		})
+		_ = json.NewEncoder(w).Encode(testhelpers.RateLimitResponse(4999))
 	}))
 	defer server.Close()
 

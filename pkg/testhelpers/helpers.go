@@ -85,3 +85,16 @@ func TestRetryConfig() provider.RetryConfig {
 		MaxBackoff:     10 * time.Millisecond,
 	}
 }
+
+// RateLimitResponse returns a JSON payload for GitHub rate limit responses.
+func RateLimitResponse(remaining int) map[string]any {
+	return map[string]any{
+		"resources": gh.RateLimits{
+			Core: &gh.Rate{
+				Limit:     5000,
+				Remaining: remaining,
+				Reset:     gh.Timestamp{Time: time.Now().Add(1 * time.Hour)},
+			},
+		},
+	}
+}

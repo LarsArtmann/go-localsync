@@ -62,36 +62,33 @@ func (w *storageTestWorld) upsertItems(items ...testItem) {
 	}
 }
 
-// testDataMixedTypes returns test items with various event types.
-func testDataMixedTypes(now time.Time) []testItem {
-	return []testItem{
-		{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo1", createdAt: now},
-		{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "repo2", createdAt: now},
-		{id: "3", eventType: "PushEvent", actor: "charlie", repo: "repo3", createdAt: now},
-		{id: "4", eventType: "PullRequestEvent", actor: "alice", repo: "repo1", createdAt: now},
-	}
-}
-
 // testDataMultiActor returns test items from multiple actors.
 func testDataMultiActor(now time.Time) []testItem {
-	return []testItem{
-		{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo1", createdAt: now},
-		{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "repo2", createdAt: now},
-		{id: "3", eventType: "PushEvent", actor: "alice", repo: "repo3", createdAt: now},
-	}
+	a1 := testItem{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo1", createdAt: now}
+	a2 := testItem{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "repo2", createdAt: now}
+	a3 := testItem{id: "3", eventType: "PushEvent", actor: "alice", repo: "repo3", createdAt: now}
+	return []testItem{a1, a2, a3}
 }
 
 // testDataMultiRepo returns test items from multiple repos.
 func testDataMultiRepo(now time.Time) []testItem {
-	return []testItem{
-		{id: "1", eventType: "PushEvent", actor: "alice", repo: "owner/repo-a", createdAt: now},
-		{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "owner/repo-b", createdAt: now},
-		{id: "3", eventType: "PushEvent", actor: "charlie", repo: "owner/repo-a", createdAt: now},
-	}
+	r1 := testItem{id: "1", eventType: "PushEvent", actor: "alice", repo: "owner/repo-a", createdAt: now}
+	r2 := testItem{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "owner/repo-b", createdAt: now}
+	r3 := testItem{id: "3", eventType: "PushEvent", actor: "charlie", repo: "owner/repo-a", createdAt: now}
+	return []testItem{r1, r2, r3}
 }
 
-// testDataVariousTypes returns test items with various event types for statistics.
-func testDataVariousTypes(now time.Time) []testItem {
+// pushEventsForFiltering returns test items with push events for filter tests.
+func pushEventsForFiltering(now time.Time) []testItem {
+	i1 := testItem{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo1", createdAt: now}
+	i2 := testItem{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "repo2", createdAt: now}
+	i3 := testItem{id: "3", eventType: "PushEvent", actor: "charlie", repo: "repo3", createdAt: now}
+	i4 := testItem{id: "4", eventType: "PullRequestEvent", actor: "alice", repo: "repo1", createdAt: now}
+	return []testItem{i1, i2, i3, i4}
+}
+
+// statisticsTestData returns test items for statistics tests.
+func statisticsTestData(now time.Time) []testItem {
 	return []testItem{
 		{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo", createdAt: now},
 		{id: "2", eventType: "PushEvent", actor: "bob", repo: "repo", createdAt: now},
@@ -244,7 +241,7 @@ var _ = Describe("SQLite Storage", func() {
 
 		Context("when I filter events by type", func() {
 			BeforeEach(func() {
-				world.upsertItems(testDataMixedTypes(time.Now())...)
+				world.upsertItems(pushEventsForFiltering(time.Now())...)
 			})
 
 			JustBeforeEach(func() {
@@ -306,7 +303,7 @@ var _ = Describe("SQLite Storage", func() {
 
 		Context("when I request statistics", func() {
 			BeforeEach(func() {
-				world.upsertItems(testDataVariousTypes(time.Now())...)
+				world.upsertItems(statisticsTestData(time.Now())...)
 			})
 
 			JustBeforeEach(func() {

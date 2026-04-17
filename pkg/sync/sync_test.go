@@ -166,6 +166,11 @@ func (m *mockProvider) GetRateLimit(ctx context.Context) (*provider.RateLimitInf
 	return m.rateLimit, m.err
 }
 
+// newMockProviderWithError creates a mock provider that returns an error.
+func newMockProviderWithError(err error) *mockProvider {
+	return &mockProvider{err: err}
+}
+
 func TestNewSyncer(t *testing.T) {
 	t.Run("creates syncer with provided logger", func(t *testing.T) {
 		mockStore := &mockStorage{}
@@ -195,6 +200,13 @@ func newMockProviderWithItems() *mockProvider {
 				{ID: types.NewItemID("2"), Type: types.NewEventTypeID("IssuesEvent")},
 			},
 		},
+	}
+}
+
+// newMockProviderWithTestItems creates a mock provider that returns the given items.
+func newMockProviderWithTestItems(items ...*provider.Item) *mockProvider {
+	return &mockProvider{
+		result: &provider.FetchResult{Items: items},
 	}
 }
 
