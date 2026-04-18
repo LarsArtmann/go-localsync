@@ -44,11 +44,6 @@ type FetchOptions struct {
 	Page int
 }
 
-// FetchSource represents a source identifier for fetching items.
-// This is separate from typed IDs to maintain flexibility for provider-specific
-// source identifiers (usernames, project IDs, etc.).
-type FetchSource = string
-
 // FetchResult contains the result of a fetch operation.
 type FetchResult struct {
 	// Items is the list of fetched items.
