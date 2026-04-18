@@ -61,6 +61,13 @@ WHERE repo_name = ?
 ORDER BY created_at DESC
 LIMIT ? OFFSET ?;
 
+-- name: GetEventsBySource :many
+-- Get events filtered by source provider
+SELECT * FROM events
+WHERE source = ?
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?;
+
 -- name: GetEventsSince :many
 -- Get events created after a specific timestamp (for incremental sync)
 SELECT * FROM events

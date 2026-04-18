@@ -177,6 +177,46 @@ func (s *SQLiteStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return types, nil
 }
 
+func (s *SQLiteStorage) GetItemsBySource(
+	ctx context.Context,
+	source string,
+	limit, offset int,
+) ([]*provider.Item, error) {
+	events, err := s.querier.GetEventsBySource(ctx, &db.GetEventsBySourceParams{
+		Source: source,
+		Limit:  int64(limit),
+		Offset: int64(offset),
+	})
+	if err != nil {
+		return nil, fmt.Errorf(
+			"%w: get events by source %q (limit=%d, offset=%d): %w",
+			pkgerrors.ErrDatabase,
+			source,
+			limit,
+			offset,
+			err,
+		)
+	}
+
+	return convertItems(events), nil
+}
+
+func (s *SQLiteStorage) Delete(ctx context.Context, id string) error {
+	if err := s.querier.DeleteEventByGithubID(ctx, types.NewGithubEventID(id)); err != nil {
+		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, id, err)
+	}
+
+	return nil
+}
+
+func (s *SQLiteStorage) DeleteAll(ctx context.Context) error {
+	if err := s.querier.DeleteAllEvents(ctx); err != nil {
+		return fmt.Errorf("%w: delete all events: %w", pkgerrors.ErrDatabase, err)
+	}
+
+	return nil
+}
+
 func convertItems(events []*db.Events) []*provider.Item {
 	result := make([]*provider.Item, len(events))
 	for i, e := range events {

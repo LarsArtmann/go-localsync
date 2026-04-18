@@ -119,6 +119,22 @@ func (m *mockStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return m.typesResult, m.typesErr
 }
 
+func (m *mockStorage) GetItemsBySource(
+	_ context.Context,
+	_ string,
+	_, _ int,
+) ([]*provider.Item, error) {
+	return m.items, nil
+}
+
+func (m *mockStorage) Delete(_ context.Context, _ string) error {
+	return nil
+}
+
+func (m *mockStorage) DeleteAll(_ context.Context) error {
+	return nil
+}
+
 func (m *mockStorage) Close() error {
 	return m.closeErr
 }

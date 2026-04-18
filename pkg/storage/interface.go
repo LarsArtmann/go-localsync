@@ -37,6 +37,16 @@ type Storage interface {
 		repoName string,
 		limit, offset int,
 	) ([]*provider.Item, error)
+	// GetItemsBySource retrieves items filtered by source provider.
+	GetItemsBySource(
+		ctx context.Context,
+		source string,
+		limit, offset int,
+	) ([]*provider.Item, error)
+	// Delete removes an item by its source ID.
+	Delete(ctx context.Context, id string) error
+	// DeleteAll removes all items.
+	DeleteAll(ctx context.Context) error
 	// Count returns the total number of items.
 	Count(ctx context.Context) (int64, error)
 	// CountByType returns the number of items of a specific type.

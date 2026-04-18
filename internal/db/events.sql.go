@@ -291,6 +291,61 @@ func (q *Queries) GetEventsByRepo(ctx context.Context, arg *GetEventsByRepoParam
 	return items, nil
 }
 
+const GetEventsBySource = `-- name: GetEventsBySource :many
+SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+WHERE source = ?
+ORDER BY created_at DESC
+LIMIT ? OFFSET ?
+`
+
+type GetEventsBySourceParams struct {
+	Source string `db:"source" json:"source"`
+	Limit  int64  `db:"limit" json:"limit"`
+	Offset int64  `db:"offset" json:"offset"`
+}
+
+// Get events filtered by source provider
+//
+//	SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+//	WHERE source = ?
+//	ORDER BY created_at DESC
+//	LIMIT ? OFFSET ?
+func (q *Queries) GetEventsBySource(ctx context.Context, arg *GetEventsBySourceParams) ([]*Events, error) {
+	rows, err := q.query(ctx, q.getEventsBySourceStmt, GetEventsBySource, arg.Source, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []*Events{}
+	for rows.Next() {
+		var i Events
+		if err := rows.Scan(
+			&i.ID,
+			&i.GithubID,
+			&i.Source,
+			&i.Type,
+			&i.ActorLogin,
+			&i.ActorAvatarUrl,
+			&i.RepoName,
+			&i.RepoUrl,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.RawJson,
+			&i.SyncedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, &i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const GetEventsByType = `-- name: GetEventsByType :many
 SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 WHERE type = ?

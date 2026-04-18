@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/storage"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
@@ -39,10 +40,7 @@ func (s *StorageItemSet) AddItem(
 }
 
 // UpsertAll inserts all items into the storage.
-func (s *StorageItemSet) UpsertAll(ctx context.Context, store interface {
-	Upsert(context.Context, *provider.Item) error
-},
-) error {
+func (s *StorageItemSet) UpsertAll(ctx context.Context, store storage.Storage) error {
 	for _, item := range s.Items {
 		err := store.Upsert(ctx, item)
 		if err != nil {

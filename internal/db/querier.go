@@ -59,6 +59,13 @@ type Querier interface {
 	//  ORDER BY created_at DESC
 	//  LIMIT ? OFFSET ?
 	GetEventsByRepo(ctx context.Context, arg *GetEventsByRepoParams) ([]*Events, error)
+	// Get events filtered by source provider
+	//
+	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  WHERE source = ?
+	//  ORDER BY created_at DESC
+	//  LIMIT ? OFFSET ?
+	GetEventsBySource(ctx context.Context, arg *GetEventsBySourceParams) ([]*Events, error)
 	// Get events filtered by type
 	//
 	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events

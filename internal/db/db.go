@@ -11,10 +11,10 @@ import (
 )
 
 type DBTX interface {
-	ExecContext(context.Context, string, ...any) (sql.Result, error)
+	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
 	PrepareContext(context.Context, string) (*sql.Stmt, error)
-	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
-	QueryRowContext(context.Context, string, ...any) *sql.Row
+	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
+	QueryRowContext(context.Context, string, ...interface{}) *sql.Row
 }
 
 func New(db DBTX) *Queries {
@@ -50,6 +50,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getEventsByRepoStmt, err = db.PrepareContext(ctx, GetEventsByRepo); err != nil {
 		return nil, fmt.Errorf("error preparing query GetEventsByRepo: %w", err)
+	}
+	if q.getEventsBySourceStmt, err = db.PrepareContext(ctx, GetEventsBySource); err != nil {
+		return nil, fmt.Errorf("error preparing query GetEventsBySource: %w", err)
 	}
 	if q.getEventsByTypeStmt, err = db.PrepareContext(ctx, GetEventsByType); err != nil {
 		return nil, fmt.Errorf("error preparing query GetEventsByType: %w", err)
@@ -113,6 +116,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getEventsByRepoStmt: %w", cerr)
 		}
 	}
+	if q.getEventsBySourceStmt != nil {
+		if cerr := q.getEventsBySourceStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getEventsBySourceStmt: %w", cerr)
+		}
+	}
 	if q.getEventsByTypeStmt != nil {
 		if cerr := q.getEventsByTypeStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getEventsByTypeStmt: %w", cerr)
@@ -136,7 +144,7 @@ func (q *Queries) Close() error {
 	return err
 }
 
-func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...any) (sql.Result, error) {
+func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (sql.Result, error) {
 	switch {
 	case stmt != nil && q.tx != nil:
 		return q.tx.StmtContext(ctx, stmt).ExecContext(ctx, args...)
@@ -147,7 +155,7 @@ func (q *Queries) exec(ctx context.Context, stmt *sql.Stmt, query string, args .
 	}
 }
 
-func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...any) (*sql.Rows, error) {
+func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) (*sql.Rows, error) {
 	switch {
 	case stmt != nil && q.tx != nil:
 		return q.tx.StmtContext(ctx, stmt).QueryContext(ctx, args...)
@@ -158,7 +166,7 @@ func (q *Queries) query(ctx context.Context, stmt *sql.Stmt, query string, args 
 	}
 }
 
-func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, args ...any) *sql.Row {
+func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, args ...interface{}) *sql.Row {
 	switch {
 	case stmt != nil && q.tx != nil:
 		return q.tx.StmtContext(ctx, stmt).QueryRowContext(ctx, args...)
@@ -181,6 +189,7 @@ type Queries struct {
 	getEventsStmt             *sql.Stmt
 	getEventsByActorStmt      *sql.Stmt
 	getEventsByRepoStmt       *sql.Stmt
+	getEventsBySourceStmt     *sql.Stmt
 	getEventsByTypeStmt       *sql.Stmt
 	getEventsSinceStmt        *sql.Stmt
 	getLatestEventStmt        *sql.Stmt
@@ -200,6 +209,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getEventsStmt:             q.getEventsStmt,
 		getEventsByActorStmt:      q.getEventsByActorStmt,
 		getEventsByRepoStmt:       q.getEventsByRepoStmt,
+		getEventsBySourceStmt:     q.getEventsBySourceStmt,
 		getEventsByTypeStmt:       q.getEventsByTypeStmt,
 		getEventsSinceStmt:        q.getEventsSinceStmt,
 		getLatestEventStmt:        q.getLatestEventStmt,

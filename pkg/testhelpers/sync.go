@@ -178,6 +178,18 @@ func (m *MockStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return m.TypesResultVal, m.TypesErrVal
 }
 
+func (m *MockStorage) GetItemsBySource(_ context.Context, _ string, _, _ int) ([]*provider.Item, error) {
+	return m.ItemsVal, nil
+}
+
+func (m *MockStorage) Delete(_ context.Context, _ string) error {
+	return nil
+}
+
+func (m *MockStorage) DeleteAll(_ context.Context) error {
+	return nil
+}
+
 func (m *MockStorage) Close() error {
 	return m.CloseErrVal
 }
@@ -248,6 +260,18 @@ func (f *FailingStorage) CountByType(ctx context.Context, itemType string) (int6
 
 func (f *FailingStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return nil, nil
+}
+
+func (f *FailingStorage) GetItemsBySource(_ context.Context, _ string, _, _ int) ([]*provider.Item, error) {
+	return nil, nil
+}
+
+func (f *FailingStorage) Delete(_ context.Context, _ string) error {
+	return errors.New("disk full")
+}
+
+func (f *FailingStorage) DeleteAll(_ context.Context) error {
+	return errors.New("disk full")
 }
 
 func (f *FailingStorage) Close() error {
