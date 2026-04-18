@@ -312,7 +312,7 @@ func (s *ConflictAwareSyncer) isConflict(local, remote *provider.Item) bool {
 func (s *ConflictAwareSyncer) buildClockForItem(item *provider.Item) localsync.VectorClock {
 	vc := s.clock.Clone()
 
-	vc.Increment(item.Source.Get())
+	vc.Increment(item.ID.Get())
 
 	return vc
 }
