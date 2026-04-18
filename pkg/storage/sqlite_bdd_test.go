@@ -72,9 +72,27 @@ func testDataMultiActor(now time.Time) []testItem {
 
 // testDataMultiRepo returns test items from multiple repos.
 func testDataMultiRepo(now time.Time) []testItem {
-	r1 := testItem{id: "1", eventType: "PushEvent", actor: "alice", repo: "owner/repo-a", createdAt: now}
-	r2 := testItem{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "owner/repo-b", createdAt: now}
-	r3 := testItem{id: "3", eventType: "PushEvent", actor: "charlie", repo: "owner/repo-a", createdAt: now}
+	r1 := testItem{
+		id:        "1",
+		eventType: "PushEvent",
+		actor:     "alice",
+		repo:      "owner/repo-a",
+		createdAt: now,
+	}
+	r2 := testItem{
+		id:        "2",
+		eventType: "IssuesEvent",
+		actor:     "bob",
+		repo:      "owner/repo-b",
+		createdAt: now,
+	}
+	r3 := testItem{
+		id:        "3",
+		eventType: "PushEvent",
+		actor:     "charlie",
+		repo:      "owner/repo-a",
+		createdAt: now,
+	}
 	return []testItem{r1, r2, r3}
 }
 
@@ -83,7 +101,13 @@ func pushEventsForFiltering(now time.Time) []testItem {
 	i1 := testItem{id: "1", eventType: "PushEvent", actor: "alice", repo: "repo1", createdAt: now}
 	i2 := testItem{id: "2", eventType: "IssuesEvent", actor: "bob", repo: "repo2", createdAt: now}
 	i3 := testItem{id: "3", eventType: "PushEvent", actor: "charlie", repo: "repo3", createdAt: now}
-	i4 := testItem{id: "4", eventType: "PullRequestEvent", actor: "alice", repo: "repo1", createdAt: now}
+	i4 := testItem{
+		id:        "4",
+		eventType: "PullRequestEvent",
+		actor:     "alice",
+		repo:      "repo1",
+		createdAt: now,
+	}
 	return []testItem{i1, i2, i3, i4}
 }
 
