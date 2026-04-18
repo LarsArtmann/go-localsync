@@ -3,11 +3,8 @@ package storage
 
 import (
 	"context"
-	"database/sql"
 
-	"github.com/larsartmann/go-localsync/internal/db"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // Storage defines the interface for storing and retrieving sync items.
@@ -48,60 +45,4 @@ type Storage interface {
 	GetTypes(ctx context.Context) ([]string, error)
 	// Close releases resources.
 	Close() error
-}
-
-// Legacy Storage interface names (deprecated, use new methods)
-// These are kept for backward compatibility during migration.
-
-func toNullString(s string) sql.NullString {
-	if s == "" {
-		return sql.NullString{String: "", Valid: false}
-	}
-
-	return sql.NullString{String: s, Valid: true}
-}
-
-func fromNullString(ns sql.NullString) string {
-	if !ns.Valid {
-		return ""
-	}
-
-	return ns.String
-}
-
-// toItem converts a database row to provider.Item.
-// Note: The database column is named "github_id" for backward compatibility,
-// but we treat it as a generic source ID.
-func toItem(e *db.Events) *provider.Item {
-	return &provider.Item{
-		ID:             types.NewItemID(e.GithubID.Get()), // Map github_id column to generic ID
-		Source:         types.NewProviderID(e.Source),     // Read from DB source column
-		Type:           types.NewEventTypeID(e.Type),      // Convert type string to branded ID
-		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
-		ActorAvatarURL: fromNullString(e.ActorAvatarUrl),
-		RepoName:       types.NewRepoID(fromNullString(e.RepoName)),
-		RepoURL:        fromNullString(e.RepoUrl),
-		CreatedAt:      e.CreatedAt,
-		UpdatedAt:      e.UpdatedAt,
-		RawJSON:        e.RawJson,
-	}
-}
-
-// toDBParams converts provider.Item to database parameters.
-// Note: Item.ID is stored in the "github_id" column for backward compatibility.
-func toDBParams(item *provider.Item) *db.UpsertEventParams {
-	return &db.UpsertEventParams{
-		GithubID: types.NewGithubEventID(
-			item.ID.Get(),
-		), // Store generic ID in github_id column
-		Source:         item.Source.Get(),
-		Type:           item.Type.Get(),
-		ActorLogin:     toNullString(item.ActorLogin.Get()),
-		ActorAvatarUrl: toNullString(item.ActorAvatarURL),
-		RepoName:       toNullString(item.RepoName.Get()),
-		RepoUrl:        toNullString(item.RepoURL),
-		CreatedAt:      item.CreatedAt,
-		UpdatedAt:      item.UpdatedAt,
-		RawJson:        item.RawJSON,
-	}
 }

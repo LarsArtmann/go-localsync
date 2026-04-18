@@ -188,3 +188,49 @@ func (s *SQLiteStorage) queryWithFilter(
 
 	return convertItems(items), nil
 }
+
+func toNullString(s string) sql.NullString {
+	if s == "" {
+		return sql.NullString{String: "", Valid: false}
+	}
+
+	return sql.NullString{String: s, Valid: true}
+}
+
+func fromNullString(ns sql.NullString) string {
+	if !ns.Valid {
+		return ""
+	}
+
+	return ns.String
+}
+
+func toItem(e *db.Events) *provider.Item {
+	return &provider.Item{
+		ID:             types.NewItemID(e.GithubID.Get()),
+		Source:         types.NewProviderID(e.Source),
+		Type:           types.NewEventTypeID(e.Type),
+		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
+		ActorAvatarURL: fromNullString(e.ActorAvatarUrl),
+		RepoName:       types.NewRepoID(fromNullString(e.RepoName)),
+		RepoURL:        fromNullString(e.RepoUrl),
+		CreatedAt:      e.CreatedAt,
+		UpdatedAt:      e.UpdatedAt,
+		RawJSON:        e.RawJson,
+	}
+}
+
+func toDBParams(item *provider.Item) *db.UpsertEventParams {
+	return &db.UpsertEventParams{
+		GithubID:       types.NewGithubEventID(item.ID.Get()),
+		Source:         item.Source.Get(),
+		Type:           item.Type.Get(),
+		ActorLogin:     toNullString(item.ActorLogin.Get()),
+		ActorAvatarUrl: toNullString(item.ActorAvatarURL),
+		RepoName:       toNullString(item.RepoName.Get()),
+		RepoUrl:        toNullString(item.RepoURL),
+		CreatedAt:      item.CreatedAt,
+		UpdatedAt:      item.UpdatedAt,
+		RawJson:        item.RawJSON,
+	}
+}
