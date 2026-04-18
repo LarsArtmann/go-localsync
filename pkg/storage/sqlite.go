@@ -39,7 +39,11 @@ func (s *SQLiteStorage) Close() error {
 }
 
 func (s *SQLiteStorage) Upsert(ctx context.Context, item *provider.Item) error {
-	return s.querier.UpsertEvent(ctx, toDBParams(item))
+	if err := s.querier.UpsertEvent(ctx, toDBParams(item)); err != nil {
+		return fmt.Errorf("%w: upsert item %q: %w", pkgerrors.ErrDatabase, item.ID.Get(), err)
+	}
+
+	return nil
 }
 
 func (s *SQLiteStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
@@ -49,7 +53,7 @@ func (s *SQLiteStorage) GetByID(ctx context.Context, id string) (*provider.Item,
 			return nil, nil //nolint:nilnil // not found is not an error condition
 		}
 
-		return nil, fmt.Errorf("failed to get item by ID %q: %w", id, err)
+		return nil, fmt.Errorf("%w: get item by ID %q: %w", pkgerrors.ErrDatabase, id, err)
 	}
 
 	return toItem(e), nil
@@ -62,7 +66,7 @@ func (s *SQLiteStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 			return nil, pkgerrors.ErrNotFound
 		}
 
-		return nil, err
+		return nil, fmt.Errorf("%w: get latest event: %w", pkgerrors.ErrDatabase, err)
 	}
 
 	return toItem(e), nil
@@ -74,7 +78,7 @@ func (s *SQLiteStorage) GetItems(ctx context.Context, limit, offset int) ([]*pro
 		Offset: int64(offset),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get events (limit=%d, offset=%d): %w", limit, offset, err)
+		return nil, fmt.Errorf("%w: get events (limit=%d, offset=%d): %w", pkgerrors.ErrDatabase, limit, offset, err)
 	}
 
 	return convertItems(events), nil
@@ -92,7 +96,8 @@ func (s *SQLiteStorage) GetItemsByType(
 	})
 	if err != nil {
 		return nil, fmt.Errorf(
-			"failed to get events by type %q (limit=%d, offset=%d): %w",
+			"%w: get events by type %q (limit=%d, offset=%d): %w",
+			pkgerrors.ErrDatabase,
 			itemType,
 			limit,
 			offset,
@@ -146,15 +151,30 @@ func (s *SQLiteStorage) GetItemsByRepo(
 }
 
 func (s *SQLiteStorage) Count(ctx context.Context) (int64, error) {
-	return s.querier.CountEvents(ctx)
+	count, err := s.querier.CountEvents(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("%w: count events: %w", pkgerrors.ErrDatabase, err)
+	}
+
+	return count, nil
 }
 
 func (s *SQLiteStorage) CountByType(ctx context.Context, itemType string) (int64, error) {
-	return s.querier.CountEventsByType(ctx, itemType)
+	count, err := s.querier.CountEventsByType(ctx, itemType)
+	if err != nil {
+		return 0, fmt.Errorf("%w: count events by type %q: %w", pkgerrors.ErrDatabase, itemType, err)
+	}
+
+	return count, nil
 }
 
 func (s *SQLiteStorage) GetTypes(ctx context.Context) ([]string, error) {
-	return s.querier.GetEventTypes(ctx)
+	types, err := s.querier.GetEventTypes(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%w: get event types: %w", pkgerrors.ErrDatabase, err)
+	}
+
+	return types, nil
 }
 
 func convertItems(events []*db.Events) []*provider.Item {
@@ -177,7 +197,8 @@ func (s *SQLiteStorage) queryWithFilter(
 	items, err := f(ctx)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"failed to get events by %s %q (limit=%d, offset=%d): %w",
+			"%w: get events by %s %q (limit=%d, offset=%d): %w",
+			pkgerrors.ErrDatabase,
 			filterName,
 			filterValue,
 			limit,

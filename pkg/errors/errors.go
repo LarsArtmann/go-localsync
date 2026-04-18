@@ -11,6 +11,8 @@ var (
 	ErrUserNotFound = errors.New("user not found")
 	ErrSyncFailed   = errors.New("sync failed")
 	ErrStorage      = errors.New("storage error")
+	ErrDatabase     = errors.New("database error")
+	ErrConflict     = errors.New("conflict detected")
 	ErrInvalidInput = errors.New("invalid input")
 )
 
