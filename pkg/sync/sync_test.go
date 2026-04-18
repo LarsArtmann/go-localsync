@@ -197,11 +197,6 @@ func (m *mockProvider) GetRateLimit(ctx context.Context) (*provider.RateLimitInf
 	return m.rateLimit, m.err
 }
 
-// newMockProviderWithError creates a mock provider that returns an error.
-func newMockProviderWithError(err error) *mockProvider {
-	return &mockProvider{err: err}
-}
-
 func TestNewSyncer(t *testing.T) {
 	t.Run("creates syncer with provided logger", func(t *testing.T) {
 		mockStore := &mockStorage{}
@@ -413,18 +408,6 @@ func TestSyncer_Close(t *testing.T) {
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "close error")
 	})
-}
-
-func TestSyncResult(t *testing.T) {
-	result := &SyncResult{
-		Fetched: 100,
-		Skipped: 20,
-		Errors:  2,
-	}
-
-	assert.Equal(t, 100, result.Fetched)
-	assert.Equal(t, 20, result.Skipped)
-	assert.Equal(t, 2, result.Errors)
 }
 
 func TestProcessIncrementalItems(t *testing.T) {

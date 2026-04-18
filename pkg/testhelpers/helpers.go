@@ -11,13 +11,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-// Ptr returns a pointer to the given string.
-//
-//go:fix inline
-func Ptr(s string) *string {
-	return new(s)
-}
-
 // mustParseURL parses a URL and adds trailing slash (required by go-github).
 func MustParseURL(rawURL string) *url.URL {
 	u, err := url.Parse(rawURL)
