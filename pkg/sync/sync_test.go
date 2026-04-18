@@ -308,6 +308,33 @@ func TestSyncer_Sync(t *testing.T) {
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 2, result.Errors)
 	})
+
+	t.Run("calls OnProgress callback", func(t *testing.T) {
+		mockProv := newMockProviderWithItems()
+		mockStore := &mockStorage{}
+		syncer := NewSyncer(mockProv, mockStore, nil)
+
+		var progressCalled bool
+		var gotFetched, gotSkipped, gotErrors int
+
+		result, err := syncer.Sync(context.Background(), &SyncOptions{
+			Source:   "testuser",
+			MaxPages: 1,
+			OnProgress: func(fetched, skipped, errors int) {
+				progressCalled = true
+				gotFetched = fetched
+				gotSkipped = skipped
+				gotErrors = errors
+			},
+		})
+
+		require.NoError(t, err)
+		require.NotNil(t, result)
+		assert.True(t, progressCalled)
+		assert.Equal(t, 2, gotFetched)
+		assert.Equal(t, 0, gotSkipped)
+		assert.Equal(t, 0, gotErrors)
+	})
 }
 
 func TestSyncer_SyncIncremental(t *testing.T) {

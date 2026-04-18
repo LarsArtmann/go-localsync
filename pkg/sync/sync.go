@@ -32,12 +32,17 @@ func NewSyncer(p provider.Provider, store storage.Storage, logger *log.Logger) *
 	}
 }
 
+// SyncProgressFunc is called after each batch operation to report progress.
+type SyncProgressFunc func(fetched, skipped, errors int)
+
 // SyncOptions configures a sync operation.
 type SyncOptions struct {
 	// Source identifies what to sync (e.g., username for GitHub).
 	Source string
 	// MaxPages is the maximum number of pages to fetch.
 	MaxPages int
+	// OnProgress is an optional callback invoked after each batch operation.
+	OnProgress SyncProgressFunc
 }
 
 // Validate checks that the SyncOptions has required fields set.
@@ -92,6 +97,10 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(result.Items))
 	}
 
+	if opts.OnProgress != nil {
+		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
+	}
+
 	s.logger.Info("Sync completed", "fetched", syncResult.Fetched, "errors", syncResult.Errors)
 
 	return syncResult, nil
@@ -133,6 +142,10 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	}
 
 	syncResult := s.processIncrementalItems(ctx, latestItem, result.Items)
+
+	if opts.OnProgress != nil {
+		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
+	}
 
 	s.logger.Info(
 		"Incremental sync completed",
