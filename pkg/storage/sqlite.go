@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/larsartmann/go-localsync/internal/database"
 	"github.com/larsartmann/go-localsync/internal/db"
@@ -196,6 +197,18 @@ func (s *SQLiteStorage) GetItemsBySource(
 			offset,
 			err,
 		)
+	}
+
+	return convertItems(events), nil
+}
+
+func (s *SQLiteStorage) GetItemsSince(
+	ctx context.Context,
+	since time.Time,
+) ([]*provider.Item, error) {
+	events, err := s.querier.GetEventsSince(ctx, since)
+	if err != nil {
+		return nil, fmt.Errorf("%w: get events since %v: %w", pkgerrors.ErrDatabase, since, err)
 	}
 
 	return convertItems(events), nil

@@ -190,6 +190,10 @@ func (m *MockStorage) DeleteAll(_ context.Context) error {
 	return nil
 }
 
+func (m *MockStorage) GetItemsSince(_ context.Context, _ time.Time) ([]*provider.Item, error) {
+	return m.ItemsVal, nil
+}
+
 func (m *MockStorage) Close() error {
 	return m.CloseErrVal
 }
@@ -272,6 +276,10 @@ func (f *FailingStorage) Delete(_ context.Context, _ string) error {
 
 func (f *FailingStorage) DeleteAll(_ context.Context) error {
 	return errors.New("disk full")
+}
+
+func (f *FailingStorage) GetItemsSince(_ context.Context, _ time.Time) ([]*provider.Item, error) {
+	return nil, nil
 }
 
 func (f *FailingStorage) Close() error {

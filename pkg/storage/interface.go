@@ -3,6 +3,7 @@ package storage
 
 import (
 	"context"
+	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -43,6 +44,8 @@ type Storage interface {
 		source string,
 		limit, offset int,
 	) ([]*provider.Item, error)
+	// GetItemsSince retrieves items created after the given timestamp.
+	GetItemsSince(ctx context.Context, since time.Time) ([]*provider.Item, error)
 	// Delete removes an item by its source ID.
 	Delete(ctx context.Context, id string) error
 	// DeleteAll removes all items.

@@ -135,6 +135,10 @@ func (m *mockStorage) DeleteAll(_ context.Context) error {
 	return nil
 }
 
+func (m *mockStorage) GetItemsSince(_ context.Context, _ time.Time) ([]*provider.Item, error) {
+	return m.items, nil
+}
+
 func (m *mockStorage) Close() error {
 	return m.closeErr
 }
