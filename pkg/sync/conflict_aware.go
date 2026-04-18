@@ -5,22 +5,18 @@ import (
 	"fmt"
 	"time"
 
-	"charm.land/log/v2"
 	localsync "github.com/larsartmann/go-localfirst/pkg/sync"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/storage"
 )
 
 // ConflictAwareSyncer extends Syncer with vector clock tracking and conflict resolution.
 // It uses go-localfirst sync primitives for causal ordering and Last-Write-Wins conflict resolution.
 type ConflictAwareSyncer struct {
-	provider provider.Provider
-	storage  storage.Storage
+	*Syncer
 	resolver localsync.ConflictResolver[*provider.Item]
 	clock    localsync.VectorClock
 	nodeID   string
-	logger   *log.Logger
 }
 
 // ConflictAwareSyncerOption configures a ConflictAwareSyncer.
@@ -44,24 +40,16 @@ func WithNodeID(nodeID string) ConflictAwareSyncerOption {
 	}
 }
 
-// NewConflictAwareSyncer creates a new ConflictAwareSyncer with go-localfirst primitives.
+// NewConflictAwareSyncer creates a new ConflictAwareSyncer wrapping the given Syncer.
 func NewConflictAwareSyncer(
-	p provider.Provider,
-	store storage.Storage,
-	logger *log.Logger,
+	base *Syncer,
 	opts ...ConflictAwareSyncerOption,
 ) *ConflictAwareSyncer {
-	if logger == nil {
-		logger = log.Default()
-	}
-
 	syncer := &ConflictAwareSyncer{
-		provider: p,
-		storage:  store,
+		Syncer:   base,
 		resolver: nil,
 		clock:    localsync.NewVectorClock(),
-		nodeID:   p.Name(),
-		logger:   logger,
+		nodeID:   base.provider.Name(),
 	}
 
 	for _, opt := range opts {
@@ -319,9 +307,4 @@ func (s *ConflictAwareSyncer) buildClockForItem(item *provider.Item) localsync.V
 	vc.Increment(item.Source.Get())
 
 	return vc
-}
-
-// Close releases resources.
-func (s *ConflictAwareSyncer) Close() error {
-	return s.storage.Close()
 }

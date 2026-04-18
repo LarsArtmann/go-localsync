@@ -19,8 +19,9 @@ func TestNewConflictAwareSyncer(t *testing.T) {
 	t.Run("creates with defaults", func(t *testing.T) {
 		mockProv := &mockProvider{name: "test-provider"}
 		mockStore := &mockStorage{}
+		base := NewSyncer(mockProv, mockStore, nil)
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(base)
 
 		require.NotNil(t, syncer)
 		assert.Equal(t, "test-provider", syncer.nodeID)
@@ -37,7 +38,8 @@ func TestNewConflictAwareSyncer(t *testing.T) {
 			},
 		)
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, log.New(nil),
+		base := NewSyncer(mockProv, mockStore, log.New(nil))
+		syncer := NewConflictAwareSyncer(base,
 			WithConflictResolver(customResolver),
 			WithNodeID("custom-node"),
 		)
@@ -50,7 +52,8 @@ func TestNewConflictAwareSyncer(t *testing.T) {
 
 func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 	t.Run("returns error for nil options", func(t *testing.T) {
-		syncer := NewConflictAwareSyncer(&mockProvider{}, &mockStorage{}, nil)
+		base := NewSyncer(&mockProvider{}, &mockStorage{}, nil)
+		syncer := NewConflictAwareSyncer(base)
 
 		result, err := syncer.SyncWithConflictDetection(context.Background(), nil)
 
@@ -66,7 +69,7 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 		)
 		mockStore := &mockStorage{}
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{
 			Source:   "testuser",
 			MaxPages: 1,
@@ -94,7 +97,7 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 			items: []*provider.Item{existingItem},
 		}
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{
 			Source:   "testuser",
 			MaxPages: 1,
@@ -113,7 +116,8 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 		}
 		mockStore := &mockStorage{}
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		base := NewSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(base)
 		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{
 			Source:   "testuser",
 			MaxPages: 1,
@@ -136,7 +140,7 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 			upsertErr: errors.New("upsert error"),
 		}
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{
 			Source:   "testuser",
 			MaxPages: 1,
@@ -150,7 +154,8 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 }
 
 func TestConflictAwareSyncer_GetVectorClock(t *testing.T) {
-	syncer := NewConflictAwareSyncer(&mockProvider{name: "test"}, &mockStorage{}, nil)
+	base := NewSyncer(&mockProvider{name: "test"}, &mockStorage{}, nil)
+	syncer := NewConflictAwareSyncer(base)
 
 	vc := syncer.GetVectorClock()
 	require.NotNil(t, vc)
@@ -173,7 +178,7 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 		)
 		mockStore := &mockStorage{}
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		ops, result, err := syncer.SyncOperations(context.Background(), &SyncOptions{
 			Source:   "testuser",
 			MaxPages: 1,
@@ -193,7 +198,8 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 	})
 
 	t.Run("returns error for nil options", func(t *testing.T) {
-		syncer := NewConflictAwareSyncer(&mockProvider{}, &mockStorage{}, nil)
+		base := NewSyncer(&mockProvider{}, &mockStorage{}, nil)
+		syncer := NewConflictAwareSyncer(base)
 		ops, result, err := syncer.SyncOperations(context.Background(), nil)
 
 		require.Error(t, err)
@@ -214,7 +220,7 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 		}
 		mockStore := &mockStorage{}
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		ops, _, err := syncer.SyncOperations(context.Background(), &SyncOptions{
 			Source:   "testuser",
 			MaxPages: 1,
@@ -232,7 +238,7 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 func TestConflictAwareSyncer_Close(t *testing.T) {
 	t.Run("closes successfully", func(t *testing.T) {
 		mockStore := &mockStorage{}
-		syncer := NewConflictAwareSyncer(&mockProvider{}, mockStore, nil)
+		syncer := NewConflictAwareSyncer(NewSyncer(&mockProvider{}, mockStore, nil))
 
 		err := syncer.Close()
 
@@ -255,7 +261,7 @@ func TestConflictAwareSyncer_LWWResolution(t *testing.T) {
 			items: []*provider.Item{existingItem},
 		}
 
-		syncer := NewConflictAwareSyncer(mockProv, mockStore, nil)
+		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{
 			Source:   "testuser",
 			MaxPages: 1,
