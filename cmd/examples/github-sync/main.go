@@ -49,9 +49,10 @@ func main() {
 			"",
 			"Path to SQLite database (default: ~/.local/share/go-localsync/events.db)",
 		)
-		maxPages    = flag.Int("pages", 10, "Maximum number of pages to fetch")
-		incremental = flag.Bool("incremental", true, "Only sync new events")
-		showStats   = flag.Bool("stats", false, "Show database statistics and exit")
+		maxPages       = flag.Int("pages", 10, "Maximum number of pages to fetch")
+		incremental    = flag.Bool("incremental", true, "Only sync new events")
+		conflictAware  = flag.Bool("conflict-aware", false, "Use conflict-aware sync with CRDT resolution")
+		showStats      = flag.Bool("stats", false, "Show database statistics and exit")
 		showVersion = flag.Bool("version", false, "Show version information and exit")
 		verbose     = flag.Bool("verbose", false, "Enable verbose logging")
 	)
@@ -126,7 +127,7 @@ func main() {
 
 	// Create GitHub provider
 	ghProvider := github.NewClient(*token)
-	syncer := synclib.NewSyncer(ghProvider, store, logger)
+	baseSyncer := synclib.NewSyncer(ghProvider, store, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -143,13 +144,32 @@ func main() {
 	opts := &synclib.SyncOptions{
 		Source:   *username,
 		MaxPages: *maxPages,
+		OnProgress: func(fetched, skipped, errors int) {
+			logger.Info("Progress", "fetched", fetched, "skipped", skipped, "errors", errors)
+		},
+	}
+
+	if *conflictAware {
+		cas := synclib.NewConflictAwareSyncer(baseSyncer)
+		cr, err := cas.SyncWithConflictDetection(ctx, opts)
+		if err != nil {
+			logger.Error("Conflict-aware sync failed", "error", err)
+			os.Exit(exitCodeForError(err))
+		}
+
+		fmt.Printf(
+				"Sync completed: fetched=%d, upserted=%d, conflicts=%d, skipped=%d, errors=%d\n",
+				cr.Fetched, cr.Upserted, cr.Conflicts, cr.Skipped, cr.Errors,
+			)
+
+		return
 	}
 
 	var result *synclib.SyncResult
 	if *incremental {
-		result, err = syncer.SyncIncremental(ctx, opts)
+		result, err = baseSyncer.SyncIncremental(ctx, opts)
 	} else {
-		result, err = syncer.Sync(ctx, opts)
+		result, err = baseSyncer.Sync(ctx, opts)
 	}
 
 	if err != nil {
