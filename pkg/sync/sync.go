@@ -95,6 +95,8 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	if err := s.storage.UpsertBatch(ctx, result.Items); err != nil {
 		syncResult.Errors = len(result.Items)
 		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(result.Items))
+
+		return syncResult, fmt.Errorf("batch upsert failed: %w", err)
 	}
 
 	if opts.OnProgress != nil {
@@ -141,7 +143,10 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 		)
 	}
 
-	syncResult := s.processIncrementalItems(ctx, latestItem, result.Items)
+	syncResult, err := s.processIncrementalItems(ctx, latestItem, result.Items)
+	if err != nil {
+		return nil, err
+	}
 
 	if opts.OnProgress != nil {
 		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
@@ -177,6 +182,8 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	for _, t := range types {
 		c, err := s.storage.CountByType(ctx, t)
 		if err != nil {
+			s.logger.Warn("Failed to count items by type", "type", t, "error", err)
+
 			continue
 		}
 
@@ -200,7 +207,7 @@ func (s *Syncer) processIncrementalItems(
 	ctx context.Context,
 	latestItem *provider.Item,
 	items []*provider.Item,
-) *SyncResult {
+) (*SyncResult, error) {
 	syncResult := &SyncResult{Fetched: len(items), Skipped: 0, Errors: 0}
 
 	cutoff := time.Time{}
@@ -225,8 +232,10 @@ func (s *Syncer) processIncrementalItems(
 		if err := s.storage.UpsertBatch(ctx, toUpsert); err != nil {
 			syncResult.Errors = len(toUpsert)
 			s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(toUpsert))
+
+			return syncResult, fmt.Errorf("batch upsert failed: %w", err)
 		}
 	}
 
-	return syncResult
+	return syncResult, nil
 }

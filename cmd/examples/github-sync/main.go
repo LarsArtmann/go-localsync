@@ -106,7 +106,10 @@ func main() {
 			os.Exit(exitSoftware)
 		}
 
-		types, _ := store.GetTypes(context.Background())
+		types, err := store.GetTypes(context.Background())
+		if err != nil {
+			logger.Error("Failed to get item types", "error", err)
+		}
 
 		fmt.Printf("Total items: %d\n", stats)
 		fmt.Printf("Item types: %v\n", types)

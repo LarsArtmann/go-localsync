@@ -303,7 +303,8 @@ func TestSyncer_Sync(t *testing.T) {
 			MaxPages: 1,
 		})
 
-		require.NoError(t, err)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "batch upsert failed")
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 2, result.Errors)
@@ -450,7 +451,8 @@ func TestProcessIncrementalItems(t *testing.T) {
 			),
 		}
 
-		result := syncer.processIncrementalItems(context.Background(), latestItem, items)
+		result, err := syncer.processIncrementalItems(context.Background(), latestItem, items)
+		require.NoError(t, err)
 
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
@@ -467,7 +469,8 @@ func TestProcessIncrementalItems(t *testing.T) {
 			testhelpers.NewMinimalTestItem("1", "PushEvent", time.Now()),
 		}
 
-		result := syncer.processIncrementalItems(context.Background(), nil, items)
+		result, err := syncer.processIncrementalItems(context.Background(), nil, items)
+		require.NoError(t, err)
 
 		require.NotNil(t, result)
 		assert.Equal(t, 1, result.Fetched)
@@ -490,7 +493,8 @@ func TestProcessIncrementalItems(t *testing.T) {
 			testhelpers.NewMinimalTestItem("3", "IssuesEvent", sameTime.Add(1)),
 		}
 
-		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
+		result, err := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
+		require.NoError(t, err)
 
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
@@ -507,11 +511,12 @@ func TestProcessIncrementalItems(t *testing.T) {
 			CreatedAt: time.Now(),
 		}
 
-		result := syncer.processIncrementalItems(
+		result, err := syncer.processIncrementalItems(
 			context.Background(),
 			cutoffItem,
 			[]*provider.Item{},
 		)
+		require.NoError(t, err)
 
 		require.NotNil(t, result)
 		assert.Equal(t, 0, result.Fetched)
@@ -537,7 +542,8 @@ func TestProcessIncrementalItems(t *testing.T) {
 			testhelpers.NewMinimalTestItem("3", "IssuesEvent", futureTime),
 		}
 
-		result := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
+		result, err := syncer.processIncrementalItems(context.Background(), cutoffItem, items)
+		require.NoError(t, err)
 
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
