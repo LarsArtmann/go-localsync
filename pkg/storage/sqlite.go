@@ -47,6 +47,33 @@ func (s *SQLiteStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return nil
 }
 
+func (s *SQLiteStorage) UpsertBatch(ctx context.Context, items []*provider.Item) error {
+	if len(items) == 0 {
+		return nil
+	}
+
+	tx, err := s.dbc.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("%w: begin transaction for batch upsert: %w", pkgerrors.ErrDatabase, err)
+	}
+
+	qtx := db.New(tx)
+
+	for _, item := range items {
+		if err := qtx.UpsertEvent(ctx, toDBParams(item)); err != nil {
+			_ = tx.Rollback()
+
+			return fmt.Errorf("%w: batch upsert item %q: %w", pkgerrors.ErrDatabase, item.ID.Get(), err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("%w: commit batch upsert: %w", pkgerrors.ErrDatabase, err)
+	}
+
+	return nil
+}
+
 func (s *SQLiteStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
 	e, err := s.querier.GetEventByGithubID(ctx, types.NewGithubEventID(id))
 	if err != nil {

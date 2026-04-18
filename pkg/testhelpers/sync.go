@@ -110,6 +110,16 @@ func (m *MockStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return nil
 }
 
+func (m *MockStorage) UpsertBatch(_ context.Context, items []*provider.Item) error {
+	if m.UpsertErrVal != nil {
+		return m.UpsertErrVal
+	}
+
+	m.ItemsVal = append(m.ItemsVal, items...)
+
+	return nil
+}
+
 func (m *MockStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
 	for _, item := range m.ItemsVal {
 		if item.ID.Get() == id {
@@ -202,6 +212,10 @@ func (m *MockStorage) Close() error {
 type FailingStorage struct{}
 
 func (f *FailingStorage) Upsert(ctx context.Context, item *provider.Item) error {
+	return errors.New("disk full")
+}
+
+func (f *FailingStorage) UpsertBatch(_ context.Context, _ []*provider.Item) error {
 	return errors.New("disk full")
 }
 

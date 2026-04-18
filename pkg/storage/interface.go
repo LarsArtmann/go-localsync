@@ -14,6 +14,9 @@ import (
 type Storage interface {
 	// Upsert inserts or updates an item. ID is used as the unique key.
 	Upsert(ctx context.Context, item *provider.Item) error
+	// UpsertBatch inserts or updates multiple items in a single transaction.
+	// On error, no items are persisted.
+	UpsertBatch(ctx context.Context, items []*provider.Item) error
 	// GetByID retrieves a single item by its source ID. Returns nil if not found.
 	GetByID(ctx context.Context, id string) (*provider.Item, error)
 	// GetLatest returns the most recently created item, or nil if empty.

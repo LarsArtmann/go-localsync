@@ -41,14 +41,7 @@ func (s *StorageItemSet) AddItem(
 
 // UpsertAll inserts all items into the storage.
 func (s *StorageItemSet) UpsertAll(ctx context.Context, store storage.Storage) error {
-	for _, item := range s.Items {
-		err := store.Upsert(ctx, item)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return store.UpsertBatch(ctx, s.Items)
 }
 
 // NewStorageItemSet creates a new StorageItemSet with the given items.

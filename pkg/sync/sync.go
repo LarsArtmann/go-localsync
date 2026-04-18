@@ -55,13 +55,6 @@ type Stats struct {
 }
 
 // Sync performs a full sync from the provider to storage.
-// logUpsertError logs a warning and increments the error counter.
-func (s *Syncer) logUpsertError(item *provider.Item, err error, result *SyncResult) {
-	s.logger.Warn("Failed to upsert item", "id", item.ID, "error", err)
-
-	result.Errors++
-}
-
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
@@ -81,13 +74,9 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 
 	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}
 
-	for _, item := range result.Items {
-		err := s.storage.Upsert(ctx, item)
-		if err != nil {
-			s.logUpsertError(item, err, syncResult)
-
-			continue
-		}
+	if err := s.storage.UpsertBatch(ctx, result.Items); err != nil {
+		syncResult.Errors = len(result.Items)
+		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(result.Items))
 	}
 
 	s.logger.Info("Sync completed", "fetched", syncResult.Fetched, "errors", syncResult.Errors)
@@ -190,6 +179,8 @@ func (s *Syncer) processIncrementalItems(
 		s.logger.Debug("Using cutoff time", "cutoff", cutoff)
 	}
 
+	toUpsert := make([]*provider.Item, 0, len(items))
+
 	for _, item := range items {
 		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
 			syncResult.Skipped++
@@ -197,11 +188,13 @@ func (s *Syncer) processIncrementalItems(
 			continue
 		}
 
-		err := s.storage.Upsert(ctx, item)
-		if err != nil {
-			s.logUpsertError(item, err, syncResult)
+		toUpsert = append(toUpsert, item)
+	}
 
-			continue
+	if len(toUpsert) > 0 {
+		if err := s.storage.UpsertBatch(ctx, toUpsert); err != nil {
+			syncResult.Errors = len(toUpsert)
+			s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(toUpsert))
 		}
 	}
 

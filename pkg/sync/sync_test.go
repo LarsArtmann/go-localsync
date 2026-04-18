@@ -51,6 +51,16 @@ func (m *mockStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return nil
 }
 
+func (m *mockStorage) UpsertBatch(_ context.Context, items []*provider.Item) error {
+	if m.upsertErr != nil {
+		return m.upsertErr
+	}
+
+	m.items = append(m.items, items...)
+
+	return nil
+}
+
 func (m *mockStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
 	for _, item := range m.items {
 		if item.ID.Get() == id {
