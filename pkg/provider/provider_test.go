@@ -1,0 +1,48 @@
+package provider
+
+import (
+	"testing"
+	"time"
+
+	"github.com/larsartmann/go-localsync/pkg/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func TestItem_Validate(t *testing.T) {
+	validItem := &Item{
+		ID:        types.NewItemID("123"),
+		Source:    types.NewProviderID("github"),
+		Type:      types.NewEventTypeID("PushEvent"),
+		CreatedAt: time.Now(),
+	}
+
+	t.Run("valid item passes", func(t *testing.T) {
+		err := validItem.Validate()
+		require.NoError(t, err)
+	})
+
+	t.Run("rejects zero ID", func(t *testing.T) {
+		item := *validItem
+		item.ID = types.ItemID{}
+		assert.EqualError(t, item.Validate(), "item.ID is required")
+	})
+
+	t.Run("rejects zero Source", func(t *testing.T) {
+		item := *validItem
+		item.Source = types.ProviderID{}
+		assert.EqualError(t, item.Validate(), "item.Source is required")
+	})
+
+	t.Run("rejects zero Type", func(t *testing.T) {
+		item := *validItem
+		item.Type = types.EventTypeID{}
+		assert.EqualError(t, item.Validate(), "item.Type is required")
+	})
+
+	t.Run("rejects zero CreatedAt", func(t *testing.T) {
+		item := *validItem
+		item.CreatedAt = time.Time{}
+		assert.EqualError(t, item.Validate(), "item.CreatedAt is required")
+	})
+}

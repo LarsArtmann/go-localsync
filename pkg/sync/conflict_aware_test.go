@@ -8,6 +8,7 @@ import (
 
 	"charm.land/log/v2"
 	localsync "github.com/larsartmann/go-localfirst/pkg/sync"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 	"github.com/larsartmann/go-localsync/pkg/types"
@@ -59,6 +60,17 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 
 		require.Error(t, err)
 		assert.Nil(t, result)
+	})
+
+	t.Run("returns error for empty source", func(t *testing.T) {
+		base := NewSyncer(&mockProvider{}, &mockStorage{}, nil)
+		syncer := NewConflictAwareSyncer(base)
+
+		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{Source: ""})
+
+		require.Error(t, err)
+		assert.Nil(t, result)
+		assert.True(t, errors.Is(err, pkgerrors.ErrInvalidInput))
 	})
 
 	t.Run("upserts new items when no conflicts", func(t *testing.T) {

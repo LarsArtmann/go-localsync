@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 	"github.com/larsartmann/go-localsync/pkg/types"
@@ -246,6 +247,15 @@ func TestSyncer_Sync(t *testing.T) {
 			syncer := NewSyncer(nil, &mockStorage{}, nil)
 			return syncer.Sync(ctx, opts)
 		})
+	})
+
+	t.Run("returns error for empty source", func(t *testing.T) {
+		syncer := NewSyncer(nil, &mockStorage{}, nil)
+		result, err := syncer.Sync(context.Background(), &SyncOptions{Source: ""})
+
+		require.Error(t, err)
+		assert.Nil(t, result)
+		assert.True(t, errors.Is(err, pkgerrors.ErrInvalidInput))
 	})
 
 	t.Run("syncs items successfully", func(t *testing.T) {

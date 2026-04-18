@@ -96,6 +96,10 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
 	}
 
+	if err := opts.Validate(); err != nil {
+		return nil, err
+	}
+
 	s.logger.Info("Starting conflict-aware sync",
 		"provider", s.provider.Name(),
 		"source", opts.Source,
@@ -230,6 +234,10 @@ func (s *ConflictAwareSyncer) SyncOperations(
 ) ([]*localsync.Operation[*provider.Item], *ConflictResult, error) {
 	if opts == nil {
 		return nil, nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
+	}
+
+	if err := opts.Validate(); err != nil {
+		return nil, nil, err
 	}
 
 	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)

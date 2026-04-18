@@ -40,6 +40,15 @@ type SyncOptions struct {
 	MaxPages int
 }
 
+// Validate checks that the SyncOptions has required fields set.
+func (o *SyncOptions) Validate() error {
+	if o.Source == "" {
+		return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "SyncOptions.Source is required")
+	}
+
+	return nil
+}
+
 // SyncResult contains the results of a sync operation.
 type SyncResult struct {
 	Fetched int
@@ -58,6 +67,10 @@ type Stats struct {
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
+	}
+
+	if err := opts.Validate(); err != nil {
+		return nil, err
 	}
 
 	s.logger.Info("Starting sync", "provider", s.provider.Name(), "source", opts.Source)
@@ -88,6 +101,10 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
+	}
+
+	if err := opts.Validate(); err != nil {
+		return nil, err
 	}
 
 	latestItem, err := s.storage.GetLatest(ctx)
