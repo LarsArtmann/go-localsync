@@ -3,7 +3,6 @@ package sync
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"charm.land/log/v2"
@@ -82,11 +81,11 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 
 	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"sync failed for source %q (maxPages=%d): %w",
+		return nil, pkgerrors.Wrapf(
+			err,
+			"sync failed for source %q (maxPages=%d)",
 			opts.Source,
 			opts.MaxPages,
-			err,
 		)
 	}
 
@@ -96,7 +95,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		syncResult.Errors = len(result.Items)
 		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(result.Items))
 
-		return syncResult, fmt.Errorf("batch upsert failed: %w", err)
+		return syncResult, pkgerrors.Wrap(err, "batch upsert failed")
 	}
 
 	if opts.OnProgress != nil {
@@ -124,10 +123,10 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 			return s.Sync(ctx, opts)
 		}
 
-		return nil, fmt.Errorf(
-			"failed to get latest item for incremental sync (source=%q): %w",
-			opts.Source,
+		return nil, pkgerrors.Wrapf(
 			err,
+			"failed to get latest item for incremental sync (source=%q)",
+			opts.Source,
 		)
 	}
 
@@ -135,12 +134,12 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"incremental sync failed for source %q (maxPages=%d): %w",
-			opts.Source,
-			opts.MaxPages,
-			err,
-		)
+		return nil, pkgerrors.Wrapf(
+				err,
+				"incremental sync failed for source %q (maxPages=%d)",
+				opts.Source,
+				opts.MaxPages,
+			)
 	}
 
 	syncResult, err := s.processIncrementalItems(ctx, latestItem, result.Items)
@@ -233,7 +232,7 @@ func (s *Syncer) processIncrementalItems(
 			syncResult.Errors = len(toUpsert)
 			s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(toUpsert))
 
-			return syncResult, fmt.Errorf("batch upsert failed: %w", err)
+			return syncResult, pkgerrors.Wrap(err, "batch upsert failed")
 		}
 	}
 
