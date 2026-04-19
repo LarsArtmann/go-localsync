@@ -104,6 +104,12 @@ func (s *ConflictAwareSyncer) processItem(
 	item *provider.Item,
 	cr *ConflictResult,
 ) {
+	if err := item.Validate(); err != nil {
+		s.logError("Invalid item", item, err, cr)
+
+		return
+	}
+
 	existing, err := s.findExistingItem(ctx, item)
 	if err != nil {
 		s.logError("Failed to check existing item", item, err, cr)
@@ -152,6 +158,14 @@ func (s *ConflictAwareSyncer) resolveConflict(
 		resolved = remote
 	} else {
 		resolved = local
+	}
+
+	if resolved == local {
+		cr.Conflicts++
+		cr.Skipped++
+		s.logger.Debug("Resolved conflict: local wins, skipping write", "id", remote.ID)
+
+		return
 	}
 
 	err := s.storage.Upsert(ctx, resolved)

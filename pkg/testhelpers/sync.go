@@ -29,8 +29,10 @@ func NewTestItem(id, eventType string, createdAt time.Time) *provider.Item {
 func NewMinimalTestItem(id, eventType string, createdAt time.Time) *provider.Item {
 	return &provider.Item{
 		ID:        types.NewItemID(id),
+		Source:    types.NewProviderID("mock"),
 		Type:      types.NewEventTypeID(eventType),
 		CreatedAt: createdAt,
+		UpdatedAt: createdAt,
 	}
 }
 

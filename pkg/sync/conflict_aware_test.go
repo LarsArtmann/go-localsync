@@ -207,6 +207,7 @@ func TestConflictAwareSyncer_LWWResolution(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Equal(t, 1, result.Conflicts)
-		assert.Equal(t, 1, result.Upserted)
+		assert.Equal(t, 0, result.Upserted)
+		assert.Equal(t, 1, result.Skipped)
 	})
 }

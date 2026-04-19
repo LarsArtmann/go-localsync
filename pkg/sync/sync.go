@@ -224,6 +224,13 @@ func (s *Syncer) processIncrementalItems(
 			continue
 		}
 
+		if err := item.Validate(); err != nil {
+			syncResult.Errors++
+			s.logger.Warn("Skipping invalid item", "id", item.ID, "error", err)
+
+			continue
+		}
+
 		toUpsert = append(toUpsert, item)
 	}
 
