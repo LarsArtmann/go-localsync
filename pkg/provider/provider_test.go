@@ -1,9 +1,11 @@
 package provider
 
 import (
+	"errors"
 	"testing"
 	"time"
 
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -25,24 +27,24 @@ func TestItem_Validate(t *testing.T) {
 	t.Run("rejects zero ID", func(t *testing.T) {
 		item := *validItem
 		item.ID = types.ItemID{}
-		assert.EqualError(t, item.Validate(), "item.ID is required")
+		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
 	})
 
 	t.Run("rejects zero Source", func(t *testing.T) {
 		item := *validItem
 		item.Source = types.ProviderID{}
-		assert.EqualError(t, item.Validate(), "item.Source is required")
+		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
 	})
 
 	t.Run("rejects zero Type", func(t *testing.T) {
 		item := *validItem
 		item.Type = types.EventTypeID{}
-		assert.EqualError(t, item.Validate(), "item.Type is required")
+		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
 	})
 
 	t.Run("rejects zero CreatedAt", func(t *testing.T) {
 		item := *validItem
 		item.CreatedAt = time.Time{}
-		assert.EqualError(t, item.Validate(), "item.CreatedAt is required")
+		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
 	})
 }

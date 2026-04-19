@@ -4,9 +4,9 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
@@ -38,19 +38,19 @@ type Item struct {
 // Validate checks that the Item has all required fields set.
 func (item *Item) Validate() error {
 	if item.ID.IsZero() {
-		return fmt.Errorf("item.ID is required")
+		return errors.WithDetail(errors.ErrInvalidInput, "item.ID is required")
 	}
 
 	if item.Source.IsZero() {
-		return fmt.Errorf("item.Source is required")
+		return errors.WithDetail(errors.ErrInvalidInput, "item.Source is required")
 	}
 
 	if item.Type.IsZero() {
-		return fmt.Errorf("item.Type is required")
+		return errors.WithDetail(errors.ErrInvalidInput, "item.Type is required")
 	}
 
 	if item.CreatedAt.IsZero() {
-		return fmt.Errorf("item.CreatedAt is required")
+		return errors.WithDetail(errors.ErrInvalidInput, "item.CreatedAt is required")
 	}
 
 	return nil
