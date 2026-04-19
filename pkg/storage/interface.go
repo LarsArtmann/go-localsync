@@ -51,6 +51,9 @@ type Storage interface {
 	) ([]*provider.Item, error)
 	// GetItemsSince retrieves items created after the given timestamp.
 	GetItemsSince(ctx context.Context, since time.Time) ([]*provider.Item, error)
+	// BatchGetByIDs retrieves multiple items by their source IDs.
+	// Returns items that exist; missing IDs are silently omitted.
+	BatchGetByIDs(ctx context.Context, ids []types.ItemID) ([]*provider.Item, error)
 	// Delete removes an item by its source ID.
 	Delete(ctx context.Context, id types.ItemID) error
 	// DeleteAll removes all items.

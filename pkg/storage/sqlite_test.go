@@ -403,6 +403,81 @@ func TestSQLiteStorage_UpsertBatch(t *testing.T) {
 	})
 }
 
+func TestSQLiteStorage_BatchGetByIDs(t *testing.T) {
+	db, err := database.Open(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to open database: %v", err)
+	}
+
+	defer db.Close()
+
+	store := NewSQLiteStorage(db)
+	ctx := context.Background()
+	now := time.Now()
+
+	items := []*provider.Item{
+		{
+			ID: types.NewItemID("batch-a"), Source: types.NewProviderID("github"),
+			Type: types.NewEventTypeID("PushEvent"), ActorLogin: types.NewActorID("user1"),
+			RepoName: types.NewRepoID("repo1"), CreatedAt: now, UpdatedAt: now,
+			RawJSON: json.RawMessage(`{"id":"batch-a"}`),
+		},
+		{
+			ID: types.NewItemID("batch-b"), Source: types.NewProviderID("github"),
+			Type: types.NewEventTypeID("IssuesEvent"), ActorLogin: types.NewActorID("user2"),
+			RepoName: types.NewRepoID("repo2"), CreatedAt: now, UpdatedAt: now,
+			RawJSON: json.RawMessage(`{"id":"batch-b"}`),
+		},
+		{
+			ID: types.NewItemID("batch-c"), Source: types.NewProviderID("github"),
+			Type: types.NewEventTypeID("WatchEvent"), ActorLogin: types.NewActorID("user3"),
+			RepoName: types.NewRepoID("repo3"), CreatedAt: now, UpdatedAt: now,
+			RawJSON: json.RawMessage(`{"id":"batch-c"}`),
+		},
+	}
+
+	err = store.UpsertBatch(ctx, items)
+	if err != nil {
+		t.Fatalf("UpsertBatch failed: %v", err)
+	}
+
+	t.Run("returns all existing items", func(t *testing.T) {
+		ids := []types.ItemID{types.NewItemID("batch-a"), types.NewItemID("batch-c")}
+		result, err := store.BatchGetByIDs(ctx, ids)
+		require.NoError(t, err)
+		require.Len(t, result, 2)
+
+		gotIDs := make(map[string]bool)
+		for _, item := range result {
+			gotIDs[item.ID.Get()] = true
+		}
+
+		assert.True(t, gotIDs["batch-a"])
+		assert.True(t, gotIDs["batch-c"])
+	})
+
+	t.Run("omits non-existent IDs", func(t *testing.T) {
+		ids := []types.ItemID{types.NewItemID("batch-a"), types.NewItemID("nonexistent")}
+		result, err := store.BatchGetByIDs(ctx, ids)
+		require.NoError(t, err)
+		require.Len(t, result, 1)
+		assert.Equal(t, "batch-a", result[0].ID.Get())
+	})
+
+	t.Run("returns empty for empty input", func(t *testing.T) {
+		result, err := store.BatchGetByIDs(ctx, nil)
+		require.NoError(t, err)
+		assert.Empty(t, result)
+	})
+
+	t.Run("returns empty when no IDs match", func(t *testing.T) {
+		ids := []types.ItemID{types.NewItemID("nope1"), types.NewItemID("nope2")}
+		result, err := store.BatchGetByIDs(ctx, ids)
+		require.NoError(t, err)
+		assert.Empty(t, result)
+	})
+}
+
 func TestSQLiteStorage_Close(t *testing.T) {
 	db, err := database.Open(":memory:")
 	if err != nil {

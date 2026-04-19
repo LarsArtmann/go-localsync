@@ -39,12 +39,12 @@ func NewMinimalTestItem(id, eventType string, createdAt time.Time) *provider.Ite
 
 // mockProvider implements provider.Provider for testing.
 type MockProvider struct {
-	NameVal       string
-	ItemsVal      []*provider.Item
-	FetchErr      error
-	FetchCalls    int
-	RateLimitVal  *provider.RateLimitInfo
-	RateLimitErr  error
+	NameVal      string
+	ItemsVal     []*provider.Item
+	FetchErr     error
+	FetchCalls   int
+	RateLimitVal *provider.RateLimitInfo
+	RateLimitErr error
 }
 
 func (m *MockProvider) Name() string {
@@ -196,6 +196,21 @@ func (m *MockStorage) GetItemsBySource(_ context.Context, _ string, _, _ int) ([
 	return m.ItemsVal, nil
 }
 
+func (m *MockStorage) BatchGetByIDs(ctx context.Context, ids []types.ItemID) ([]*provider.Item, error) {
+	var result []*provider.Item
+	for _, id := range ids {
+		for _, item := range m.ItemsVal {
+			if item.ID.Get() == id.Get() {
+				result = append(result, item)
+
+				break
+			}
+		}
+	}
+
+	return result, nil
+}
+
 func (m *MockStorage) Delete(_ context.Context, _ types.ItemID) error {
 	return nil
 }
@@ -286,6 +301,10 @@ func (f *FailingStorage) GetTypes(ctx context.Context) ([]string, error) {
 
 func (f *FailingStorage) GetItemsBySource(_ context.Context, _ string, _, _ int) ([]*provider.Item, error) {
 	return nil, nil
+}
+
+func (f *FailingStorage) BatchGetByIDs(_ context.Context, _ []types.ItemID) ([]*provider.Item, error) {
+	return nil, errors.New("disk full")
 }
 
 func (f *FailingStorage) Delete(_ context.Context, _ types.ItemID) error {

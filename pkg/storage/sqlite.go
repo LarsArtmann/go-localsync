@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/larsartmann/go-localsync/internal/database"
@@ -81,10 +82,63 @@ func (s *SQLiteStorage) GetByID(ctx context.Context, id types.ItemID) (*provider
 			return nil, pkgerrors.ErrNotFound
 		}
 
-	return nil, fmt.Errorf("%w: get item by ID %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
+		return nil, fmt.Errorf("%w: get item by ID %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
 	}
 
 	return toItem(e), nil
+}
+
+func (s *SQLiteStorage) BatchGetByIDs(ctx context.Context, ids []types.ItemID) ([]*provider.Item, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+
+	placeholders := make([]string, len(ids))
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		placeholders[i] = "?"
+		args[i] = types.NewGithubEventID(id.Get())
+	}
+
+	query := fmt.Sprintf(
+		`SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events WHERE github_id IN (%s)`,
+		strings.Join(placeholders, ", "),
+	)
+
+	rows, err := s.dbc.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("%w: batch get by IDs: %w", pkgerrors.ErrDatabase, err)
+	}
+	defer rows.Close()
+
+	var items []*provider.Item
+	for rows.Next() {
+		var e db.Events
+		if err := rows.Scan(
+			&e.ID,
+			&e.GithubID,
+			&e.Source,
+			&e.Type,
+			&e.ActorLogin,
+			&e.ActorAvatarUrl,
+			&e.RepoName,
+			&e.RepoUrl,
+			&e.CreatedAt,
+			&e.UpdatedAt,
+			&e.RawJson,
+			&e.SyncedAt,
+		); err != nil {
+			return nil, fmt.Errorf("%w: scan in batch get by IDs: %w", pkgerrors.ErrDatabase, err)
+		}
+
+		items = append(items, toItem(&e))
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("%w: iterate batch get by IDs: %w", pkgerrors.ErrDatabase, err)
+	}
+
+	return items, nil
 }
 
 func (s *SQLiteStorage) GetLatest(ctx context.Context) (*provider.Item, error) {

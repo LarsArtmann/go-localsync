@@ -2,10 +2,10 @@ package sync
 
 import (
 	"context"
-	"errors"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // ConflictAwareSyncer extends Syncer with conflict detection and LWW resolution.
@@ -72,8 +72,18 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 
 	cr := newConflictResult(len(result.Items))
 
+	ids := make([]types.ItemID, len(result.Items))
+	for i, item := range result.Items {
+		ids[i] = item.ID
+	}
+
+	existing, err := s.batchFetchExisting(ctx, ids)
+	if err != nil {
+		return nil, pkgerrors.Wrapf(err, "failed to fetch existing items for conflict detection")
+	}
+
 	for _, item := range result.Items {
-		s.processItem(ctx, item, cr)
+		s.processItem(ctx, item, existing[item.ID.Get()], cr)
 	}
 
 	s.logger.Info("Conflict-aware sync completed",
@@ -103,17 +113,11 @@ func (s *ConflictAwareSyncer) logError(
 func (s *ConflictAwareSyncer) processItem(
 	ctx context.Context,
 	item *provider.Item,
+	existing *provider.Item,
 	cr *ConflictResult,
 ) {
 	if err := item.Validate(); err != nil {
 		s.logError("Invalid item", item, err, cr)
-
-		return
-	}
-
-	existing, err := s.findExistingItem(ctx, item)
-	if err != nil {
-		s.logError("Failed to check existing item", item, err, cr)
 
 		return
 	}
@@ -182,21 +186,27 @@ func (s *ConflictAwareSyncer) resolveConflict(
 	s.logger.Debug("Resolved conflict", "id", remote.ID, "winner_source", resolved.Source)
 }
 
-// findExistingItem checks if an item with the same ID already exists in storage.
-func (s *ConflictAwareSyncer) findExistingItem(
+// batchFetchExisting fetches all existing items for the given IDs in a single query.
+// Returns a map keyed by the string representation of each item's ID.
+func (s *ConflictAwareSyncer) batchFetchExisting(
 	ctx context.Context,
-	item *provider.Item,
-) (*provider.Item, error) {
-	existing, err := s.storage.GetByID(ctx, item.ID)
-	if err != nil {
-		if errors.Is(err, pkgerrors.ErrNotFound) {
-			return nil, nil
-		}
-
-		return nil, pkgerrors.Wrapf(err, "failed to find existing item %q", item.ID.Get())
+	ids []types.ItemID,
+) (map[string]*provider.Item, error) {
+	if len(ids) == 0 {
+		return nil, nil
 	}
 
-	return existing, nil
+	items, err := s.storage.BatchGetByIDs(ctx, ids)
+	if err != nil {
+		return nil, pkgerrors.Wrapf(err, "batch fetch existing items")
+	}
+
+	result := make(map[string]*provider.Item, len(items))
+	for _, item := range items {
+		result[item.ID.Get()] = item
+	}
+
+	return result, nil
 }
 
 // isConflict determines if the remote item conflicts with the existing local item.
