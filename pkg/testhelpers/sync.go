@@ -192,12 +192,20 @@ func (m *MockStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return m.TypesResultVal, m.TypesErrVal
 }
 
-func (m *MockStorage) GetItemsBySource(_ context.Context, _ string, _, _ int) ([]*provider.Item, error) {
+func (m *MockStorage) GetItemsBySource(
+	_ context.Context,
+	_ string,
+	_, _ int,
+) ([]*provider.Item, error) {
 	return m.ItemsVal, nil
 }
 
-func (m *MockStorage) BatchGetByIDs(ctx context.Context, ids []types.ItemID) ([]*provider.Item, error) {
+func (m *MockStorage) BatchGetByIDs(
+	ctx context.Context,
+	ids []types.ItemID,
+) ([]*provider.Item, error) {
 	var result []*provider.Item
+
 	for _, id := range ids {
 		for _, item := range m.ItemsVal {
 			if item.ID.Get() == id.Get() {
@@ -299,11 +307,18 @@ func (f *FailingStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return nil, nil
 }
 
-func (f *FailingStorage) GetItemsBySource(_ context.Context, _ string, _, _ int) ([]*provider.Item, error) {
+func (f *FailingStorage) GetItemsBySource(
+	_ context.Context,
+	_ string,
+	_, _ int,
+) ([]*provider.Item, error) {
 	return nil, nil
 }
 
-func (f *FailingStorage) BatchGetByIDs(_ context.Context, _ []types.ItemID) ([]*provider.Item, error) {
+func (f *FailingStorage) BatchGetByIDs(
+	_ context.Context,
+	_ []types.ItemID,
+) ([]*provider.Item, error) {
 	return nil, errors.New("disk full")
 }
 

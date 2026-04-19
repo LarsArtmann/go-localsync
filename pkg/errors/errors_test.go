@@ -9,9 +9,9 @@ func TestSentinelErrors(t *testing.T) {
 	t.Parallel()
 
 	sentinels := []struct {
-		name  string
-		err   error
-		msg   string
+		name string
+		err  error
+		msg  string
 	}{
 		{"ErrNotFound", ErrNotFound, "not found"},
 		{"ErrRateLimited", ErrRateLimited, "rate limited"},

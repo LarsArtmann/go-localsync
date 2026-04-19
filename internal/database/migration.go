@@ -62,6 +62,7 @@ func parseMigrationFile(filename string) (migration, error) {
 
 func parseMigrationFilename(filename string) (int, string, error) {
 	base := strings.TrimSuffix(filename, ".sql")
+
 	parts := strings.SplitN(base, "_", 2)
 	if len(parts) != 2 {
 		return 0, "", pkgerrors.WithDetail(

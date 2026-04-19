@@ -197,16 +197,16 @@ gh-sync -user octocat
 
 ## Features
 
-| Feature             | Status    | Description                                              |
-| ------------------- | --------- | -------------------------------------------------------- |
-| Incremental Sync    | ✅ Done   | Only fetch new items since last sync — no duplicate data |
-| Full Fidelity       | ✅ Done   | Raw JSON stored for 100% data preservation               |
-| Branded IDs         | ✅ Done   | Compile-time type-safe identifiers                       |
-| Schema Migrations   | ✅ Done   | Version-tracked, idempotent, auto-applied                |
-| Conflict-Aware Sync | ✅ Done   | CRDT-backed conflict detection with vector clocks        |
-| No CGO              | ✅ Done   | Pure Go SQLite driver (modernc.org/sqlite)               |
-| Rate Limiting       | ✅ Done   | Configurable rate limiting wired into sync flow             |
-| Retry Logic         | ✅ Done   | Exponential backoff retry with configurable limits         |
+| Feature             | Status  | Description                                              |
+| ------------------- | ------- | -------------------------------------------------------- |
+| Incremental Sync    | ✅ Done | Only fetch new items since last sync — no duplicate data |
+| Full Fidelity       | ✅ Done | Raw JSON stored for 100% data preservation               |
+| Branded IDs         | ✅ Done | Compile-time type-safe identifiers                       |
+| Schema Migrations   | ✅ Done | Version-tracked, idempotent, auto-applied                |
+| Conflict-Aware Sync | ✅ Done | CRDT-backed conflict detection with vector clocks        |
+| No CGO              | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)               |
+| Rate Limiting       | ✅ Done | Configurable rate limiting wired into sync flow          |
+| Retry Logic         | ✅ Done | Exponential backoff retry with configurable limits       |
 
 ## Development
 

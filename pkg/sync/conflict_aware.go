@@ -116,7 +116,8 @@ func (s *ConflictAwareSyncer) processItem(
 	existing *provider.Item,
 	cr *ConflictResult,
 ) {
-	if err := item.Validate(); err != nil {
+	err := item.Validate()
+	if err != nil {
 		s.logError("Invalid item", item, err, cr)
 
 		return
@@ -168,6 +169,7 @@ func (s *ConflictAwareSyncer) resolveConflict(
 	if resolved == local {
 		cr.Conflicts++
 		cr.Skipped++
+
 		s.logger.Debug("Resolved conflict: local wins, skipping write", "id", remote.ID)
 
 		return

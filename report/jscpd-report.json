@@ -1,36 +1,36 @@
 {
   "statistics": {
-    "detectionDate": "2026-04-05T10:48:24.329Z",
+    "detectionDate": "2026-04-19T08:10:20.867Z",
     "formats": {
       "go": {
         "sources": {
           "pkg/providers/github/client_test.go": {
-            "lines": 441,
-            "tokens": 4665,
+            "lines": 425,
+            "tokens": 4463,
             "sources": 1,
-            "clones": 8,
-            "duplicatedLines": 70,
-            "duplicatedTokens": 732,
-            "percentage": 15.87,
-            "percentageTokens": 15.69,
+            "clones": 4,
+            "duplicatedLines": 36,
+            "duplicatedTokens": 364,
+            "percentage": 8.47,
+            "percentageTokens": 8.16,
             "newDuplicatedLines": 0,
             "newClones": 0
           },
           "pkg/providers/github/client_bdd_test.go": {
-            "lines": 373,
-            "tokens": 3146,
+            "lines": 351,
+            "tokens": 2920,
             "sources": 1,
-            "clones": 2,
-            "duplicatedLines": 20,
-            "duplicatedTokens": 180,
-            "percentage": 5.36,
-            "percentageTokens": 5.72,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
             "newDuplicatedLines": 0,
             "newClones": 0
           },
           "pkg/providers/github/client.go": {
-            "lines": 352,
-            "tokens": 2608,
+            "lines": 367,
+            "tokens": 2731,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -41,8 +41,20 @@
             "newClones": 0
           },
           "cmd/examples/github-sync/main.go": {
-            "lines": 183,
-            "tokens": 1310,
+            "lines": 211,
+            "tokens": 1538,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "pkg/types/ids_test.go": {
+            "lines": 78,
+            "tokens": 594,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -65,8 +77,8 @@
             "newClones": 0
           },
           "pkg/testhelpers/sync.go": {
-            "lines": 209,
-            "tokens": 1670,
+            "lines": 338,
+            "tokens": 2836,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -77,8 +89,8 @@
             "newClones": 0
           },
           "pkg/testhelpers/storage.go": {
-            "lines": 57,
-            "tokens": 427,
+            "lines": 21,
+            "tokens": 157,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -89,8 +101,8 @@
             "newClones": 0
           },
           "pkg/testhelpers/helpers.go": {
-            "lines": 86,
-            "tokens": 623,
+            "lines": 92,
+            "tokens": 698,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -101,20 +113,20 @@
             "newClones": 0
           },
           "pkg/sync/sync_test.go": {
-            "lines": 467,
-            "tokens": 4202,
+            "lines": 347,
+            "tokens": 3424,
             "sources": 1,
-            "clones": 6,
-            "duplicatedLines": 54,
-            "duplicatedTokens": 568,
-            "percentage": 11.56,
-            "percentageTokens": 13.52,
+            "clones": 7,
+            "duplicatedLines": 58,
+            "duplicatedTokens": 611,
+            "percentage": 16.71,
+            "percentageTokens": 17.84,
             "newDuplicatedLines": 0,
             "newClones": 0
           },
           "pkg/sync/sync_bdd_test.go": {
             "lines": 265,
-            "tokens": 2377,
+            "tokens": 2270,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -125,8 +137,32 @@
             "newClones": 0
           },
           "pkg/sync/sync.go": {
-            "lines": 205,
-            "tokens": 1461,
+            "lines": 275,
+            "tokens": 2061,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 30,
+            "duplicatedTokens": 338,
+            "percentage": 10.91,
+            "percentageTokens": 16.4,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "pkg/sync/conflict_aware_test.go": {
+            "lines": 215,
+            "tokens": 2124,
+            "sources": 1,
+            "clones": 13,
+            "duplicatedLines": 142,
+            "duplicatedTokens": 1367,
+            "percentage": 66.05,
+            "percentageTokens": 64.36,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "pkg/sync/conflict_aware.go": {
+            "lines": 219,
+            "tokens": 1534,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -137,8 +173,20 @@
             "newClones": 0
           },
           "pkg/storage/sqlite_test.go": {
-            "lines": 173,
-            "tokens": 1422,
+            "lines": 492,
+            "tokens": 4549,
+            "sources": 1,
+            "clones": 4,
+            "duplicatedLines": 34,
+            "duplicatedTokens": 342,
+            "percentage": 6.91,
+            "percentageTokens": 7.52,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "pkg/storage/sqlite_bdd_test.go": {
+            "lines": 391,
+            "tokens": 3475,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -148,21 +196,9 @@
             "newDuplicatedLines": 0,
             "newClones": 0
           },
-          "pkg/storage/sqlite_bdd_test.go": {
-            "lines": 389,
-            "tokens": 3276,
-            "sources": 1,
-            "clones": 2,
-            "duplicatedLines": 22,
-            "duplicatedTokens": 246,
-            "percentage": 5.66,
-            "percentageTokens": 7.51,
-            "newDuplicatedLines": 0,
-            "newClones": 0
-          },
           "pkg/storage/sqlite.go": {
-            "lines": 165,
-            "tokens": 1350,
+            "lines": 416,
+            "tokens": 3530,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -173,8 +209,20 @@
             "newClones": 0
           },
           "pkg/storage/interface.go": {
-            "lines": 99,
-            "tokens": 767,
+            "lines": 68,
+            "tokens": 544,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "pkg/provider/provider_test.go": {
+            "lines": 49,
+            "tokens": 440,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -185,8 +233,20 @@
             "newClones": 0
           },
           "pkg/provider/provider.go": {
-            "lines": 117,
-            "tokens": 554,
+            "lines": 138,
+            "tokens": 715,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "pkg/errors/errors_test.go": {
+            "lines": 73,
+            "tokens": 531,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -197,8 +257,8 @@
             "newClones": 0
           },
           "pkg/errors/errors.go": {
-            "lines": 29,
-            "tokens": 213,
+            "lines": 35,
+            "tokens": 271,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -209,8 +269,8 @@
             "newClones": 0
           },
           "internal/db/querier.go": {
-            "lines": 97,
-            "tokens": 541,
+            "lines": 114,
+            "tokens": 615,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -221,20 +281,8 @@
             "newClones": 0
           },
           "internal/db/models.go": {
-            "lines": 25,
-            "tokens": 130,
-            "sources": 1,
-            "clones": 0,
-            "duplicatedLines": 0,
-            "duplicatedTokens": 0,
-            "percentage": 0,
-            "percentageTokens": 0,
-            "newDuplicatedLines": 0,
-            "newClones": 0
-          },
-          "internal/db/mixins.go": {
-            "lines": 33,
-            "tokens": 133,
+            "lines": 27,
+            "tokens": 146,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -245,20 +293,44 @@
             "newClones": 0
           },
           "internal/db/events.sql.go": {
-            "lines": 464,
-            "tokens": 3089,
+            "lines": 557,
+            "tokens": 3636,
             "sources": 1,
-            "clones": 12,
-            "duplicatedLines": 320,
-            "duplicatedTokens": 2536,
-            "percentage": 68.97,
-            "percentageTokens": 82.1,
+            "clones": 14,
+            "duplicatedLines": 414,
+            "duplicatedTokens": 3280,
+            "percentage": 74.33,
+            "percentageTokens": 90.21,
             "newDuplicatedLines": 0,
             "newClones": 0
           },
           "internal/db/db.go": {
-            "lines": 207,
-            "tokens": 2404,
+            "lines": 217,
+            "tokens": 2529,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "internal/database/migration_test.go": {
+            "lines": 179,
+            "tokens": 1590,
+            "sources": 1,
+            "clones": 8,
+            "duplicatedLines": 106,
+            "duplicatedTokens": 1174,
+            "percentage": 59.22,
+            "percentageTokens": 73.84,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "internal/database/migration.go": {
+            "lines": 169,
+            "tokens": 1297,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -269,8 +341,8 @@
             "newClones": 0
           },
           "internal/database/connection.go": {
-            "lines": 44,
-            "tokens": 185,
+            "lines": 22,
+            "tokens": 163,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -282,23 +354,23 @@
           }
         },
         "total": {
-          "lines": 4561,
-          "tokens": 37036,
-          "sources": 23,
-          "clones": 15,
-          "duplicatedLines": 243,
-          "duplicatedTokens": 2131,
-          "percentage": 5.33,
-          "percentageTokens": 5.75,
+          "lines": 6232,
+          "tokens": 51864,
+          "sources": 29,
+          "clones": 27,
+          "duplicatedLines": 410,
+          "duplicatedTokens": 3738,
+          "percentage": 6.58,
+          "percentageTokens": 7.21,
           "newDuplicatedLines": 0,
           "newClones": 0
         }
       },
       "sql": {
         "sources": {
-          "sql/schema/001_events.sql": {
-            "lines": 20,
-            "tokens": 211,
+          "internal/database/migrations/002_source_indexes.sql": {
+            "lines": 3,
+            "tokens": 45,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -308,9 +380,33 @@
             "newDuplicatedLines": 0,
             "newClones": 0
           },
+          "internal/database/migrations/001_initial.sql": {
+            "lines": 21,
+            "tokens": 233,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 129,
+            "percentage": 71.43,
+            "percentageTokens": 55.36,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "sql/schema/001_events.sql": {
+            "lines": 22,
+            "tokens": 235,
+            "sources": 1,
+            "clones": 1,
+            "duplicatedLines": 15,
+            "duplicatedTokens": 129,
+            "percentage": 68.18,
+            "percentageTokens": 54.89,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
           "sql/queries/events.sql": {
-            "lines": 79,
-            "tokens": 415,
+            "lines": 96,
+            "tokens": 548,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -322,20 +418,128 @@
           }
         },
         "total": {
-          "lines": 99,
-          "tokens": 626,
-          "sources": 2,
-          "clones": 0,
-          "duplicatedLines": 0,
-          "duplicatedTokens": 0,
-          "percentage": 0,
-          "percentageTokens": 0,
+          "lines": 142,
+          "tokens": 1061,
+          "sources": 4,
+          "clones": 1,
+          "duplicatedLines": 15,
+          "duplicatedTokens": 129,
+          "percentage": 10.56,
+          "percentageTokens": 12.16,
           "newDuplicatedLines": 0,
           "newClones": 0
         }
       },
       "markdown": {
         "sources": {
+          "docs/status/2026-04-19_10-02_SESSION5_FINAL_STATUS.md": {
+            "lines": 201,
+            "tokens": 2995,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-19_07-04_SESSION3_STATUS_REPORT.md": {
+            "lines": 185,
+            "tokens": 2952,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-19_05-08_SESSION_STATUS_REPORT.md": {
+            "lines": 262,
+            "tokens": 3654,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-19_03-11_COMPREHENSIVE_BRUTAL_AUDIT.md": {
+            "lines": 295,
+            "tokens": 4573,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-18_20-25_execution-plan-round-2.md": {
+            "lines": 193,
+            "tokens": 3496,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-18_20-21_comprehensive-second-audit.md": {
+            "lines": 211,
+            "tokens": 4210,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-08_21-58_SESSION_7_COMPREHENSIVE_STATUS.md": {
+            "lines": 348,
+            "tokens": 5937,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-08_21-10_COMPREHENSIVE_STATUS_REPORT.md": {
+            "lines": 309,
+            "tokens": 4025,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/status/2026-04-07_14-36_CONFLICT_SYNC_FIX_COMPLETE.md": {
+            "lines": 311,
+            "tokens": 4332,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
           "docs/status/2026-02-24_01-42_SDK_REFACTORING_COMPLETE.md": {
             "lines": 221,
             "tokens": 1362,
@@ -420,6 +624,42 @@
             "newDuplicatedLines": 0,
             "newClones": 0
           },
+          "docs/planning/conflict-sync-audit-fix-report.md": {
+            "lines": 82,
+            "tokens": 997,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/planning/2026-04-19_0628-COMPREHENSIVE_THIRD_AUDIT_PLAN.md": {
+            "lines": 222,
+            "tokens": 3982,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
+          "docs/planning/2026-04-08_05-02_COMPREHENSIVE_EXECUTION_PLAN.md": {
+            "lines": 468,
+            "tokens": 7859,
+            "sources": 1,
+            "clones": 0,
+            "duplicatedLines": 0,
+            "duplicatedTokens": 0,
+            "percentage": 0,
+            "percentageTokens": 0,
+            "newDuplicatedLines": 0,
+            "newClones": 0
+          },
           "docs/branching-strategy.md": {
             "lines": 236,
             "tokens": 1119,
@@ -445,8 +685,8 @@
             "newClones": 0
           },
           "TODO_LIST.md": {
-            "lines": 80,
-            "tokens": 344,
+            "lines": 125,
+            "tokens": 586,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -457,8 +697,8 @@
             "newClones": 0
           },
           "ROADMAP.md": {
-            "lines": 75,
-            "tokens": 410,
+            "lines": 145,
+            "tokens": 688,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -469,8 +709,8 @@
             "newClones": 0
           },
           "README.md": {
-            "lines": 167,
-            "tokens": 970,
+            "lines": 292,
+            "tokens": 2132,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -505,8 +745,8 @@
             "newClones": 0
           },
           "CHANGELOG.md": {
-            "lines": 37,
-            "tokens": 311,
+            "lines": 69,
+            "tokens": 745,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -517,8 +757,8 @@
             "newClones": 0
           },
           "AGENTS.md": {
-            "lines": 56,
-            "tokens": 569,
+            "lines": 114,
+            "tokens": 1307,
             "sources": 1,
             "clones": 0,
             "duplicatedLines": 0,
@@ -530,14 +770,14 @@
           }
         },
         "total": {
-          "lines": 2960,
-          "tokens": 21688,
-          "sources": 16,
+          "lines": 6377,
+          "tokens": 73554,
+          "sources": 28,
           "clones": 1,
           "duplicatedLines": 8,
           "duplicatedTokens": 134,
-          "percentage": 0.27,
-          "percentageTokens": 0.62,
+          "percentage": 0.13,
+          "percentageTokens": 0.18,
           "newDuplicatedLines": 0,
           "newClones": 0
         }
@@ -596,14 +836,14 @@
       }
     },
     "total": {
-      "lines": 8093,
-      "tokens": 62035,
-      "sources": 44,
-      "clones": 16,
-      "duplicatedLines": 251,
-      "duplicatedTokens": 2265,
-      "percentage": 3.1,
-      "percentageTokens": 3.65,
+      "lines": 13224,
+      "tokens": 129164,
+      "sources": 64,
+      "clones": 29,
+      "duplicatedLines": 433,
+      "duplicatedTokens": 4001,
+      "percentage": 3.27,
+      "percentageTokens": 3.1,
       "newDuplicatedLines": 0,
       "newClones": 0
     }
@@ -611,217 +851,109 @@
   "duplicates": [
     {
       "format": "go",
-      "lines": 10,
-      "fragment": "))\n\t\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t\t_ = json.NewEncoder(w).Encode([]*gh.Event{})\n\t}))\n\tdefer server.Close()\n\n\tclient := newTestClient(server)\n\tresult, err := client.Fetch(\n\t\tcontext.Background(),\n\t\t&provider.FetchOptions{Source: \"testuser\", PerPage: 0",
-      "tokens": 0,
-      "firstFile": {
-        "name": "pkg/providers/github/client_test.go",
-        "start": 115,
-        "end": 124,
-        "startLoc": {
-          "line": 115,
-          "column": 11,
-          "position": 1150
-        },
-        "endLoc": {
-          "line": 124,
-          "column": 2,
-          "position": 1253
-        }
-      },
-      "secondFile": {
-        "name": "pkg/providers/github/client_test.go",
-        "start": 98,
-        "end": 107,
-        "startLoc": {
-          "line": 98,
-          "column": 7,
-          "position": 939
-        },
-        "endLoc": {
-          "line": 107,
-          "column": 3,
-          "position": 1042
-        }
-      }
-    },
-    {
-      "format": "go",
       "lines": 8,
       "fragment": "(t *testing.T) {\n\tcallCount := 0\n\n\tserver := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {\n\t\tcallCount++\n\t\tpage := r.URL.Query().Get(\"page\")\n\n\t\tif",
       "tokens": 0,
       "firstFile": {
         "name": "pkg/providers/github/client_test.go",
-        "start": 197,
-        "end": 204,
+        "start": 189,
+        "end": 196,
         "startLoc": {
-          "line": 197,
+          "line": 189,
           "column": 30,
-          "position": 1970
+          "position": 1842
         },
         "endLoc": {
-          "line": 204,
+          "line": 196,
           "column": 3,
-          "position": 2045
+          "position": 1917
         }
       },
       "secondFile": {
         "name": "pkg/providers/github/client_test.go",
-        "start": 141,
-        "end": 147,
+        "start": 133,
+        "end": 139,
         "startLoc": {
-          "line": 141,
+          "line": 133,
           "column": 27,
-          "position": 1417
+          "position": 1289
         },
         "endLoc": {
-          "line": 147,
+          "line": 139,
           "column": 8,
-          "position": 1491
-        }
-      }
-    },
-    {
-      "format": "go",
-      "lines": 7,
-      "fragment": "w.Header().Set(\"Content-Type\", \"application/json\")\n\t\t_ = json.NewEncoder(w).Encode([]*gh.Event{})\n\t}))\n\tdefer server.Close()\n\n\tclient := newTestClient(server)\n\tresult, err := client.FetchAll",
-      "tokens": 0,
-      "firstFile": {
-        "name": "pkg/providers/github/client_test.go",
-        "start": 211,
-        "end": 217,
-        "startLoc": {
-          "line": 211,
-          "column": 3,
-          "position": 2121
-        },
-        "endLoc": {
-          "line": 217,
-          "column": 9,
-          "position": 2194
-        }
-      },
-      "secondFile": {
-        "name": "pkg/providers/github/client_test.go",
-        "start": 99,
-        "end": 105,
-        "startLoc": {
-          "line": 99,
-          "column": 3,
-          "position": 943
-        },
-        "endLoc": {
-          "line": 105,
-          "column": 6,
-          "position": 1016
-        }
-      }
-    },
-    {
-      "format": "go",
-      "lines": 14,
-      "fragment": ",\n\t\t\t},\n\t\t})\n\t}))\n\tdefer server.Close()\n\n\thttpClient := &http.Client{}\n\tclient := NewClientWithHTTP(httpClient)\n\tclient.client.BaseURL = testhelpers.MustParseURL(server.URL)\n\n\tlimits, err := client.GetRateLimit(context.Background())\n\trequire.NoError(t, err)\n\trequire.NotNil(t, limits)\n\tassert.Equal(t, 0",
-      "tokens": 0,
-      "firstFile": {
-        "name": "pkg/providers/github/client_test.go",
-        "start": 380,
-        "end": 393,
-        "startLoc": {
-          "line": 380,
-          "column": 4,
-          "position": 4057
-        },
-        "endLoc": {
-          "line": 393,
-          "column": 2,
-          "position": 4172
-        }
-      },
-      "secondFile": {
-        "name": "pkg/providers/github/client_test.go",
-        "start": 294,
-        "end": 307,
-        "startLoc": {
-          "line": 294,
-          "column": 2,
-          "position": 3127
-        },
-        "endLoc": {
-          "line": 307,
-          "column": 5,
-          "position": 3242
-        }
-      }
-    },
-    {
-      "format": "go",
-      "lines": 11,
-      "fragment": "world.client = newGitHubTestClient(world.server)\n\t\t\t\tworld.client = world.client.WithRetryConfig(provider.RetryConfig{\n\t\t\t\t\tEnabled:        true,\n\t\t\t\t\tMaxRetries:     3,\n\t\t\t\t\tInitialBackoff: 1 * time.Millisecond,\n\t\t\t\t\tMaxBackoff:     10 * time.Millisecond,\n\t\t\t\t})\n\t\t\t})\n\n\t\t\tJustBeforeEach(func() {\n\t\t\t\t// When: I fetch",
-      "tokens": 0,
-      "firstFile": {
-        "name": "pkg/providers/github/client_bdd_test.go",
-        "start": 311,
-        "end": 321,
-        "startLoc": {
-          "line": 311,
-          "column": 5,
-          "position": 2628
-        },
-        "endLoc": {
-          "line": 321,
-          "column": 17,
-          "position": 2718
-        }
-      },
-      "secondFile": {
-        "name": "pkg/providers/github/client_bdd_test.go",
-        "start": 281,
-        "end": 291,
-        "startLoc": {
-          "line": 281,
-          "column": 5,
-          "position": 2374
-        },
-        "endLoc": {
-          "line": 291,
-          "column": 36,
-          "position": 2464
+          "position": 1363
         }
       }
     },
     {
       "format": "go",
       "lines": 12,
-      "fragment": "}\n\t\tsyncer := NewSyncer(mockProv, mockStore, nil)\n\n\t\tresult, err := syncer.Sync(context.Background(), &SyncOptions{\n\t\t\tSource:   \"testuser\",\n\t\t\tMaxPages: 1,\n\t\t})\n\n\t\trequire.NoError(t, err)\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 2, result.Fetched)\n\t\tassert.Equal(t, 2",
+      "fragment": ")\n\t}))\n\tdefer server.Close()\n\n\thttpClient := &http.Client{}\n\tclient := NewClientWithHTTP(httpClient)\n\tclient.client.BaseURL = testhelpers.MustParseURL(server.URL)\n\n\tlimits, err := client.GetRateLimit(context.Background())\n\trequire.NoError(t, err)\n\trequire.NotNil(t, limits)\n\tassert.Equal(t, 0",
       "tokens": 0,
       "firstFile": {
-        "name": "pkg/sync/sync_test.go",
-        "start": 225,
-        "end": 236,
+        "name": "pkg/providers/github/client_test.go",
+        "start": 366,
+        "end": 377,
         "startLoc": {
-          "line": 225,
-          "column": 3,
-          "position": 1815
+          "line": 366,
+          "column": 2,
+          "position": 3863
         },
         "endLoc": {
-          "line": 236,
+          "line": 377,
           "column": 2,
-          "position": 1922
+          "position": 3970
         }
       },
       "secondFile": {
-        "name": "pkg/sync/sync_test.go",
-        "start": 190,
-        "end": 201,
+        "name": "pkg/providers/github/client_test.go",
+        "start": 280,
+        "end": 291,
         "startLoc": {
-          "line": 190,
+          "line": 280,
           "column": 2,
-          "position": 1488
+          "position": 2933
         },
         "endLoc": {
-          "line": 201,
-          "column": 2,
-          "position": 1595
+          "line": 291,
+          "column": 5,
+          "position": 3040
+        }
+      }
+    },
+    {
+      "format": "sql",
+      "lines": 16,
+      "fragment": "CREATE TABLE IF NOT EXISTS events (\n    id INTEGER PRIMARY KEY AUTOINCREMENT,\n    github_id TEXT UNIQUE NOT NULL,\n    source TEXT NOT NULL DEFAULT 'github',\n    type TEXT NOT NULL,\n    actor_login TEXT,\n    actor_avatar_url TEXT,\n    repo_name TEXT,\n    repo_url TEXT,\n    created_at DATETIME NOT NULL,\n    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,\n    raw_json JSON NOT NULL,\n    synced_at DATETIME DEFAULT CURRENT_TIMESTAMP\n);\n\n-- Indexes for common query patterns",
+      "tokens": 0,
+      "firstFile": {
+        "name": "sql/schema/001_events.sql",
+        "start": 3,
+        "end": 18,
+        "startLoc": {
+          "line": 3,
+          "column": 1,
+          "position": 4
+        },
+        "endLoc": {
+          "line": 18,
+          "column": 37,
+          "position": 133
+        }
+      },
+      "secondFile": {
+        "name": "internal/database/migrations/001_initial.sql",
+        "start": 3,
+        "end": 18,
+        "startLoc": {
+          "line": 3,
+          "column": 1,
+          "position": 4
+        },
+        "endLoc": {
+          "line": 18,
+          "column": 7,
+          "position": 133
         }
       }
     },
@@ -832,320 +964,896 @@
       "tokens": 0,
       "firstFile": {
         "name": "pkg/sync/sync_test.go",
-        "start": 282,
-        "end": 290,
+        "start": 189,
+        "end": 197,
         "startLoc": {
-          "line": 282,
+          "line": 189,
           "column": 14,
-          "position": 2398
+          "position": 1782
         },
         "endLoc": {
-          "line": 290,
+          "line": 197,
           "column": 14,
-          "position": 2478
+          "position": 1862
         }
       },
       "secondFile": {
         "name": "pkg/sync/sync_test.go",
-        "start": 268,
-        "end": 276,
+        "start": 175,
+        "end": 183,
         "startLoc": {
-          "line": 268,
+          "line": 175,
           "column": 14,
-          "position": 2265
+          "position": 1647
         },
         "endLoc": {
-          "line": 276,
+          "line": 183,
           "column": 14,
-          "position": 2345
+          "position": 1727
         }
       }
     },
     {
       "format": "go",
       "lines": 9,
-      "fragment": ", items)\n\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 2, result.Fetched)\n\t\tassert.Equal(t, 1, result.Skipped)\n\t\tassert.Equal(t, 1, len(mockStore.items))\n\t\tassert.Equal(t, \"3\", mockStore.items[0].ID.Get())\n\t})\n}",
+      "fragment": "),\n\t\t}\n\n\t\tresult, err := syncer.processIncrementalItems(context.Background(), cutoffItem, items)\n\t\trequire.NoError(t, err)\n\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 2, result.Fetched)\n\t\tassert.Equal(t, 1",
       "tokens": 0,
       "firstFile": {
         "name": "pkg/sync/sync_test.go",
-        "start": 460,
-        "end": 468,
+        "start": 336,
+        "end": 344,
         "startLoc": {
-          "line": 460,
+          "line": 336,
           "column": 11,
-          "position": 4105
+          "position": 3289
         },
         "endLoc": {
-          "line": 468,
+          "line": 344,
           "column": 2,
-          "position": 4202
+          "position": 3368
         }
       },
       "secondFile": {
         "name": "pkg/sync/sync_test.go",
-        "start": 353,
-        "end": 362,
+        "start": 287,
+        "end": 295,
         "startLoc": {
-          "line": 353,
-          "column": 11,
-          "position": 3081
+          "line": 287,
+          "column": 2,
+          "position": 2804
         },
         "endLoc": {
-          "line": 362,
+          "line": 295,
           "column": 2,
-          "position": 3180
+          "position": 2883
         }
       }
     },
     {
       "format": "go",
-      "lines": 12,
-      "fragment": "now := time.Now()\n\t\t\t\t_ = world.store.Upsert(\n\t\t\t\t\tworld.ctx,\n\t\t\t\t\ttesthelpers.NewStorageItem(\"1\", \"PushEvent\", \"alice\", \"repo1\", now),\n\t\t\t\t)\n\t\t\t\t_ = world.store.Upsert(\n\t\t\t\t\tworld.ctx,\n\t\t\t\t\ttesthelpers.NewStorageItem(\"2\", \"IssuesEvent\", \"bob\", \"repo2\", now),\n\t\t\t\t)\n\t\t\t\t_ = world.store.Upsert(\n\t\t\t\t\tworld.ctx,\n\t\t\t\t\ttesthelpers.NewStorageItem(\"3\", \"PushEvent\", \"alice\"",
+      "lines": 10,
+      "fragment": ", items)\n\t\trequire.NoError(t, err)\n\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 2, result.Fetched)\n\t\tassert.Equal(t, 1, result.Skipped)\n\t\tassert.Equal(t, 1, len(mockStore.ItemsVal))\n\t\tassert.Equal(t, \"3\", mockStore.ItemsVal[0].ID.Get())\n\t})\n}",
       "tokens": 0,
       "firstFile": {
-        "name": "pkg/storage/sqlite_bdd_test.go",
-        "start": 243,
-        "end": 254,
+        "name": "pkg/sync/sync_test.go",
+        "start": 339,
+        "end": 348,
         "startLoc": {
-          "line": 243,
-          "column": 5,
-          "position": 1895
+          "line": 339,
+          "column": 11,
+          "position": 3316
         },
         "endLoc": {
-          "line": 254,
-          "column": 8,
-          "position": 2018
+          "line": 348,
+          "column": 2,
+          "position": 3424
         }
       },
       "secondFile": {
-        "name": "pkg/storage/sqlite_bdd_test.go",
-        "start": 207,
-        "end": 218,
+        "name": "pkg/sync/sync_test.go",
+        "start": 248,
+        "end": 258,
         "startLoc": {
-          "line": 207,
-          "column": 5,
-          "position": 1545
+          "line": 248,
+          "column": 11,
+          "position": 2343
         },
         "endLoc": {
-          "line": 218,
+          "line": 258,
+          "column": 2,
+          "position": 2453
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 10,
+      "fragment": "(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {\n\tif opts == nil {\n\t\treturn nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, \"opts is nil\")\n\t}\n\n\tif err := opts.Validate(); err != nil {\n\t\treturn nil, err\n\t}\n\n\tlatestItem",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/sync.go",
+        "start": 137,
+        "end": 146,
+        "startLoc": {
+          "line": 137,
+          "column": 16,
+          "position": 941
+        },
+        "endLoc": {
+          "line": 146,
+          "column": 11,
+          "position": 1033
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/sync.go",
+        "start": 71,
+        "end": 80,
+        "startLoc": {
+          "line": 71,
+          "column": 5,
+          "position": 354
+        },
+        "endLoc": {
+          "line": 80,
+          "column": 2,
+          "position": 446
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 7,
+      "fragment": ", \"provider\", s.provider.Name(), \"source\", opts.Source)\n\n\tresult, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)\n\tif err != nil {\n\t\treturn nil, pkgerrors.Wrapf(\n\t\t\terr,\n\t\t\t\"incremental sync failed for source %q (maxPages=%d)\"",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/sync.go",
+        "start": 159,
+        "end": 165,
+        "startLoc": {
+          "line": 159,
+          "column": 28,
+          "position": 1134
+        },
+        "endLoc": {
+          "line": 165,
+          "column": 54,
+          "position": 1211
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/sync.go",
+        "start": 80,
+        "end": 86,
+        "startLoc": {
+          "line": 80,
+          "column": 16,
+          "position": 453
+        },
+        "endLoc": {
+          "line": 86,
+          "column": 42,
+          "position": 530
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 7,
+      "fragment": ", func(t *testing.T) {\n\t\tbase := NewSyncer(&testhelpers.MockProvider{}, &testhelpers.MockStorage{}, nil)\n\t\tsyncer := NewConflictAwareSyncer(base)\n\n\t\tresult, err := syncer.SyncWithConflictDetection(\n\t\t\tcontext.Background(),\n\t\t\t&",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 40,
+        "end": 46,
+        "startLoc": {
+          "line": 40,
+          "column": 33,
+          "position": 293
+        },
+        "endLoc": {
+          "line": 46,
+          "column": 2,
+          "position": 366
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 30,
+        "end": 34,
+        "startLoc": {
+          "line": 30,
+          "column": 32,
+          "position": 186
+        },
+        "endLoc": {
+          "line": 34,
+          "column": 4,
+          "position": 256
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 9,
+      "fragment": "(context.Background(), &SyncOptions{\n\t\t\tSource:   \"testuser\",\n\t\t\tMaxPages: 1,\n\t\t})\n\n\t\trequire.NoError(t, err)\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 2, result.Fetched)\n\t\tassert.Equal(t, 2",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 65,
+        "end": 73,
+        "startLoc": {
+          "line": 65,
+          "column": 26,
+          "position": 562
+        },
+        "endLoc": {
+          "line": 73,
+          "column": 2,
+          "position": 639
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/sync_test.go",
+        "start": 72,
+        "end": 80,
+        "startLoc": {
+          "line": 72,
+          "column": 5,
+          "position": 614
+        },
+        "endLoc": {
+          "line": 80,
+          "column": 2,
+          "position": 691
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 11,
+      "fragment": "}\n\n\t\tsyncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))\n\t\tresult, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{\n\t\t\tSource:   \"testuser\",\n\t\t\tMaxPages: 1,\n\t\t})\n\n\t\trequire.NoError(t, err)\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 1",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 88,
+        "end": 98,
+        "startLoc": {
+          "line": 88,
+          "column": 3,
+          "position": 815
+        },
+        "endLoc": {
+          "line": 98,
+          "column": 2,
+          "position": 909
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 62,
+        "end": 72,
+        "startLoc": {
+          "line": 62,
+          "column": 2,
+          "position": 529
+        },
+        "endLoc": {
+          "line": 72,
+          "column": 2,
+          "position": 623
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 13,
+      "fragment": ",\n\t\t}\n\n\t\tsyncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))\n\t\tresult, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{\n\t\t\tSource:   \"testuser\",\n\t\t\tMaxPages: 1,\n\t\t})\n\n\t\trequire.NoError(t, err)\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 1, result.Fetched)\n\t\tassert.Equal(t, 1, result.Errors",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 128,
+        "end": 140,
+        "startLoc": {
+          "line": 128,
+          "column": 2,
+          "position": 1216
+        },
+        "endLoc": {
+          "line": 140,
+          "column": 7,
+          "position": 1334
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 87,
+        "end": 99,
+        "startLoc": {
+          "line": 87,
+          "column": 2,
+          "position": 812
+        },
+        "endLoc": {
+          "line": 99,
           "column": 10,
-          "position": 1668
+          "position": 930
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 16,
+      "fragment": "},\n\t\t}\n\t\tmockStore := &testhelpers.MockStorage{\n\t\t\tItemsVal: []*provider.Item{existingItem},\n\t\t}\n\n\t\tsyncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))\n\t\tresult, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{\n\t\t\tSource:   \"testuser\",\n\t\t\tMaxPages: 1,\n\t\t})\n\n\t\trequire.NoError(t, err)\n\t\trequire.NotNil(t, result)\n\t\tassert.Equal(t, 1, result.Fetched)\n\t\tassert.Equal(t, 1, result.Skipped",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 148,
+        "end": 163,
+        "startLoc": {
+          "line": 148,
+          "column": 13,
+          "position": 1415
+        },
+        "endLoc": {
+          "line": 163,
+          "column": 8,
+          "position": 1563
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 84,
+        "end": 99,
+        "startLoc": {
+          "line": 84,
+          "column": 12,
+          "position": 782
+        },
+        "endLoc": {
+          "line": 99,
+          "column": 10,
+          "position": 930
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 14,
+      "fragment": "},\n\t\t}\n\t\tmockStore := &testhelpers.MockStorage{\n\t\t\tItemsVal: []*provider.Item{existingItem},\n\t\t}\n\n\t\tsyncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))\n\t\tresult, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{\n\t\t\tSource:   \"testuser\",\n\t\t\tMaxPages: 1,\n\t\t})\n\n\t\trequire.NoError(t, err)\n\t\tassert",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 176,
+        "end": 189,
+        "startLoc": {
+          "line": 176,
+          "column": 10,
+          "position": 1719
+        },
+        "endLoc": {
+          "line": 189,
+          "column": 7,
+          "position": 1828
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 84,
+        "end": 97,
+        "startLoc": {
+          "line": 84,
+          "column": 12,
+          "position": 782
+        },
+        "endLoc": {
+          "line": 97,
+          "column": 8,
+          "position": 891
         }
       }
     },
     {
       "format": "go",
       "lines": 12,
-      "fragment": ".Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t);",
+      "fragment": "},\n\t\t}\n\n\t\tsyncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))\n\t\tresult, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{\n\t\t\tSource:   \"testuser\",\n\t\t\tMaxPages: 1,\n\t\t})\n\n\t\trequire.NoError(t, err)\n\t\tassert.Equal(t, 1, result.Conflicts)\n\t\tassert.Equal(t, 0",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 202,
+        "end": 213,
+        "startLoc": {
+          "line": 202,
+          "column": 10,
+          "position": 1993
+        },
+        "endLoc": {
+          "line": 213,
+          "column": 2,
+          "position": 2096
+        }
+      },
+      "secondFile": {
+        "name": "pkg/sync/conflict_aware_test.go",
+        "start": 87,
+        "end": 190,
+        "startLoc": {
+          "line": 87,
+          "column": 13,
+          "position": 811
+        },
+        "endLoc": {
+          "line": 190,
+          "column": 2,
+          "position": 1851
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 11,
+      "fragment": "(t *testing.T) {\n\tdb, err := database.Open(\":memory:\")\n\tif err != nil {\n\t\tt.Fatalf(\"Failed to open database: %v\", err)\n\t}\n\tdefer func() { _ = db.Close() }()\n\n\tstore := NewSQLiteStorage(db)\n\tctx := context.Background()\n\n\tnow",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/storage/sqlite_test.go",
+        "start": 315,
+        "end": 325,
+        "startLoc": {
+          "line": 315,
+          "column": 30,
+          "position": 2749
+        },
+        "endLoc": {
+          "line": 325,
+          "column": 4,
+          "position": 2847
+        }
+      },
+      "secondFile": {
+        "name": "pkg/storage/sqlite_test.go",
+        "start": 58,
+        "end": 68,
+        "startLoc": {
+          "line": 58,
+          "column": 18,
+          "position": 350
+        },
+        "endLoc": {
+          "line": 68,
+          "column": 2,
+          "position": 448
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 8,
+      "fragment": "),\n\t\t\t\tSource:     types.NewProviderID(\"github\"),\n\t\t\t\tType:       types.NewEventTypeID(\"PushEvent\"),\n\t\t\t\tActorLogin: types.NewActorID(\"user1\"),\n\t\t\t\tRepoName:   types.NewRepoID(\"repo1\"),\n\t\t\t\tCreatedAt:  now,\n\t\t\t\tUpdatedAt:  now,\n\t\t\t\tRawJSON:    json.RawMessage(`{\"id\":\"batch-ok\"}`",
+      "tokens": 0,
+      "firstFile": {
+        "name": "pkg/storage/sqlite_test.go",
+        "start": 386,
+        "end": 393,
+        "startLoc": {
+          "line": 386,
+          "column": 11,
+          "position": 3425
+        },
+        "endLoc": {
+          "line": 393,
+          "column": 20,
+          "position": 3498
+        }
+      },
+      "secondFile": {
+        "name": "pkg/storage/sqlite_test.go",
+        "start": 328,
+        "end": 335,
+        "startLoc": {
+          "line": 328,
+          "column": 10,
+          "position": 2882
+        },
+        "endLoc": {
+          "line": 335,
+          "column": 19,
+          "position": 2955
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 14,
+      "fragment": ".Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Source,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.UpdatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t);",
       "tokens": 0,
       "firstFile": {
         "name": "internal/db/events.sql.go",
-        "start": 155,
-        "end": 166,
+        "start": 157,
+        "end": 170,
         "startLoc": {
-          "line": 155,
+          "line": 157,
           "column": 5,
-          "position": 997
+          "position": 1011
         },
         "endLoc": {
-          "line": 166,
+          "line": 170,
           "column": 2,
-          "position": 1073
+          "position": 1101
         }
       },
       "secondFile": {
         "name": "internal/db/events.sql.go",
         "start": 83,
-        "end": 95,
+        "end": 97,
         "startLoc": {
           "line": 83,
           "column": 4,
           "position": 469
         },
         "endLoc": {
-          "line": 95,
+          "line": 97,
           "column": 7,
-          "position": 547
+          "position": 561
         }
       }
     },
     {
       "format": "go",
-      "lines": 34,
-      "fragment": ", arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetEventsByRepo",
+      "lines": 36,
+      "fragment": ", arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Source,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.UpdatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetEventsByRepo",
       "tokens": 0,
       "firstFile": {
         "name": "internal/db/events.sql.go",
-        "start": 200,
-        "end": 233,
+        "start": 204,
+        "end": 239,
         "startLoc": {
-          "line": 200,
+          "line": 204,
           "column": 11,
-          "position": 1305
+          "position": 1333
         },
         "endLoc": {
-          "line": 233,
+          "line": 239,
           "column": 16,
-          "position": 1579
+          "position": 1621
         }
       },
       "secondFile": {
         "name": "internal/db/events.sql.go",
-        "start": 147,
-        "end": 180,
+        "start": 149,
+        "end": 184,
         "startLoc": {
-          "line": 147,
+          "line": 149,
           "column": 10,
-          "position": 916
+          "position": 930
         },
         "endLoc": {
-          "line": 180,
+          "line": 184,
           "column": 17,
-          "position": 1190
+          "position": 1218
         }
       }
     },
     {
       "format": "go",
-      "lines": 34,
-      "fragment": ", arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetEventsByType",
+      "lines": 36,
+      "fragment": ", arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Source,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.UpdatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetEventsBySource",
       "tokens": 0,
       "firstFile": {
         "name": "internal/db/events.sql.go",
-        "start": 253,
-        "end": 286,
+        "start": 259,
+        "end": 294,
         "startLoc": {
-          "line": 253,
+          "line": 259,
           "column": 9,
-          "position": 1694
+          "position": 1736
         },
         "endLoc": {
-          "line": 286,
-          "column": 16,
-          "position": 1968
+          "line": 294,
+          "column": 18,
+          "position": 2024
         }
       },
       "secondFile": {
         "name": "internal/db/events.sql.go",
-        "start": 147,
-        "end": 180,
+        "start": 149,
+        "end": 184,
         "startLoc": {
-          "line": 147,
+          "line": 149,
           "column": 10,
-          "position": 916
+          "position": 930
         },
         "endLoc": {
-          "line": 180,
+          "line": 184,
           "column": 17,
-          "position": 1190
+          "position": 1218
         }
       }
     },
     {
       "format": "go",
-      "lines": 34,
-      "fragment": ", arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetEventsSince",
+      "lines": 36,
+      "fragment": ", arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Source,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.UpdatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetEventsByType",
       "tokens": 0,
       "firstFile": {
         "name": "internal/db/events.sql.go",
-        "start": 306,
-        "end": 339,
+        "start": 314,
+        "end": 349,
         "startLoc": {
-          "line": 306,
-          "column": 5,
-          "position": 2081
-        },
-        "endLoc": {
-          "line": 339,
-          "column": 15,
-          "position": 2355
-        }
-      },
-      "secondFile": {
-        "name": "internal/db/events.sql.go",
-        "start": 147,
-        "end": 180,
-        "startLoc": {
-          "line": 147,
-          "column": 10,
-          "position": 916
-        },
-        "endLoc": {
-          "line": 180,
-          "column": 17,
-          "position": 1190
-        }
-      }
-    },
-    {
-      "format": "go",
-      "lines": 34,
-      "fragment": ")\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetLatestEvent",
-      "tokens": 0,
-      "firstFile": {
-        "name": "internal/db/events.sql.go",
-        "start": 351,
-        "end": 384,
-        "startLoc": {
-          "line": 351,
-          "column": 10,
-          "position": 2433
-        },
-        "endLoc": {
-          "line": 384,
-          "column": 15,
-          "position": 2697
-        }
-      },
-      "secondFile": {
-        "name": "internal/db/events.sql.go",
-        "start": 147,
-        "end": 180,
-        "startLoc": {
-          "line": 147,
+          "line": 314,
           "column": 7,
-          "position": 926
+          "position": 2137
         },
         "endLoc": {
-          "line": 180,
+          "line": 349,
+          "column": 16,
+          "position": 2425
+        }
+      },
+      "secondFile": {
+        "name": "internal/db/events.sql.go",
+        "start": 149,
+        "end": 184,
+        "startLoc": {
+          "line": 149,
+          "column": 10,
+          "position": 930
+        },
+        "endLoc": {
+          "line": 184,
           "column": 17,
-          "position": 1190
+          "position": 1218
         }
       }
     },
     {
       "format": "go",
-      "lines": 18,
-      "fragment": ")\n\tvar i Events\n\terr := row.Scan(\n\t\t&i.ID,\n\t\t&i.GithubID,\n\t\t&i.Type,\n\t\t&i.ActorLogin,\n\t\t&i.ActorAvatarUrl,\n\t\t&i.RepoName,\n\t\t&i.RepoUrl,\n\t\t&i.CreatedAt,\n\t\t&i.RawJson,\n\t\t&i.SyncedAt,\n\t)\n\treturn &i, err\n}\n\nconst UpsertEvent",
+      "lines": 36,
+      "fragment": ", arg.Limit, arg.Offset)\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Source,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.UpdatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetEventsSince",
       "tokens": 0,
       "firstFile": {
         "name": "internal/db/events.sql.go",
-        "start": 396,
-        "end": 413,
+        "start": 369,
+        "end": 404,
         "startLoc": {
-          "line": 396,
-          "column": 15,
-          "position": 2760
+          "line": 369,
+          "column": 5,
+          "position": 2538
         },
         "endLoc": {
-          "line": 413,
+          "line": 404,
+          "column": 15,
+          "position": 2826
+        }
+      },
+      "secondFile": {
+        "name": "internal/db/events.sql.go",
+        "start": 149,
+        "end": 184,
+        "startLoc": {
+          "line": 149,
+          "column": 10,
+          "position": 930
+        },
+        "endLoc": {
+          "line": 184,
+          "column": 17,
+          "position": 1218
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 36,
+      "fragment": ")\n\tif err != nil {\n\t\treturn nil, err\n\t}\n\tdefer rows.Close()\n\titems := []*Events{}\n\tfor rows.Next() {\n\t\tvar i Events\n\t\tif err := rows.Scan(\n\t\t\t&i.ID,\n\t\t\t&i.GithubID,\n\t\t\t&i.Source,\n\t\t\t&i.Type,\n\t\t\t&i.ActorLogin,\n\t\t\t&i.ActorAvatarUrl,\n\t\t\t&i.RepoName,\n\t\t\t&i.RepoUrl,\n\t\t\t&i.CreatedAt,\n\t\t\t&i.UpdatedAt,\n\t\t\t&i.RawJson,\n\t\t\t&i.SyncedAt,\n\t\t); err != nil {\n\t\t\treturn nil, err\n\t\t}\n\t\titems = append(items, &i)\n\t}\n\tif err := rows.Close(); err != nil {\n\t\treturn nil, err\n\t}\n\tif err := rows.Err(); err != nil {\n\t\treturn nil, err\n\t}\n\treturn items, nil\n}\n\nconst GetLatestEvent",
+      "tokens": 0,
+      "firstFile": {
+        "name": "internal/db/events.sql.go",
+        "start": 416,
+        "end": 451,
+        "startLoc": {
+          "line": 416,
+          "column": 10,
+          "position": 2904
+        },
+        "endLoc": {
+          "line": 451,
+          "column": 15,
+          "position": 3182
+        }
+      },
+      "secondFile": {
+        "name": "internal/db/events.sql.go",
+        "start": 149,
+        "end": 184,
+        "startLoc": {
+          "line": 149,
+          "column": 7,
+          "position": 940
+        },
+        "endLoc": {
+          "line": 184,
+          "column": 17,
+          "position": 1218
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 20,
+      "fragment": ")\n\tvar i Events\n\terr := row.Scan(\n\t\t&i.ID,\n\t\t&i.GithubID,\n\t\t&i.Source,\n\t\t&i.Type,\n\t\t&i.ActorLogin,\n\t\t&i.ActorAvatarUrl,\n\t\t&i.RepoName,\n\t\t&i.RepoUrl,\n\t\t&i.CreatedAt,\n\t\t&i.UpdatedAt,\n\t\t&i.RawJson,\n\t\t&i.SyncedAt,\n\t)\n\treturn &i, err\n}\n\nconst UpsertEvent",
+      "tokens": 0,
+      "firstFile": {
+        "name": "internal/db/events.sql.go",
+        "start": 463,
+        "end": 482,
+        "startLoc": {
+          "line": 463,
+          "column": 15,
+          "position": 3245
+        },
+        "endLoc": {
+          "line": 482,
           "column": 12,
-          "position": 2866
+          "position": 3365
         }
       },
       "secondFile": {
         "name": "internal/db/events.sql.go",
         "start": 81,
-        "end": 98,
+        "end": 100,
         "startLoc": {
           "line": 81,
           "column": 9,
           "position": 454
         },
         "endLoc": {
-          "line": 98,
+          "line": 100,
           "column": 14,
-          "position": 560
+          "position": 574
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 12,
+      "fragment": "(t *testing.T) {\n\tpath := t.Name() + \".db\"\n\tt.Cleanup(func() { os.Remove(path) })\n\n\tdb, err := sql.Open(\"sqlite\", path)\n\tif err != nil {\n\t\tt.Fatalf(\"open db: %v\", err)\n\t}\n\tt.Cleanup(func() { db.Close() })\n\n\tif err := RunMigrations(db); err != nil {\n\t\tt.Fatalf(\"first RunMigrations: %v\"",
+      "tokens": 0,
+      "firstFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 34,
+        "end": 45,
+        "startLoc": {
+          "line": 34,
+          "column": 29,
+          "position": 263
+        },
+        "endLoc": {
+          "line": 45,
+          "column": 26,
+          "position": 401
+        }
+      },
+      "secondFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 9,
+        "end": 20,
+        "startLoc": {
+          "line": 9,
+          "column": 26,
+          "position": 24
+        },
+        "endLoc": {
+          "line": 20,
+          "column": 20,
+          "position": 162
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 15,
+      "fragment": "(t *testing.T) {\n\tpath := t.Name() + \".db\"\n\tt.Cleanup(func() { os.Remove(path) })\n\n\tdb, err := sql.Open(\"sqlite\", path)\n\tif err != nil {\n\t\tt.Fatalf(\"open db: %v\", err)\n\t}\n\tt.Cleanup(func() { db.Close() })\n\n\tif err := RunMigrations(db); err != nil {\n\t\tt.Fatalf(\"RunMigrations: %v\", err)\n\t}\n\n\tvar name",
+      "tokens": 0,
+      "firstFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 63,
+        "end": 77,
+        "startLoc": {
+          "line": 63,
+          "column": 37,
+          "position": 538
+        },
+        "endLoc": {
+          "line": 77,
+          "column": 5,
+          "position": 689
+        }
+      },
+      "secondFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 26,
+          "position": 24
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 6,
+          "position": 175
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 15,
+      "fragment": "(t *testing.T) {\n\tpath := t.Name() + \".db\"\n\tt.Cleanup(func() { os.Remove(path) })\n\n\tdb, err := sql.Open(\"sqlite\", path)\n\tif err != nil {\n\t\tt.Fatalf(\"open db: %v\", err)\n\t}\n\tt.Cleanup(func() { db.Close() })\n\n\tif err := RunMigrations(db); err != nil {\n\t\tt.Fatalf(\"RunMigrations: %v\", err)\n\t}\n\n\texpectedIndexes",
+      "tokens": 0,
+      "firstFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 85,
+        "end": 99,
+        "startLoc": {
+          "line": 85,
+          "column": 33,
+          "position": 741
+        },
+        "endLoc": {
+          "line": 99,
+          "column": 16,
+          "position": 890
+        }
+      },
+      "secondFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 26,
+          "position": 24
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 4,
+          "position": 173
+        }
+      }
+    },
+    {
+      "format": "go",
+      "lines": 15,
+      "fragment": "(t *testing.T) {\n\tpath := t.Name() + \".db\"\n\tt.Cleanup(func() { os.Remove(path) })\n\n\tdb, err := sql.Open(\"sqlite\", path)\n\tif err != nil {\n\t\tt.Fatalf(\"open db: %v\", err)\n\t}\n\tt.Cleanup(func() { db.Close() })\n\n\tif err := RunMigrations(db); err != nil {\n\t\tt.Fatalf(\"RunMigrations: %v\", err)\n\t}\n\n\trows",
+      "tokens": 0,
+      "firstFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 140,
+        "end": 154,
+        "startLoc": {
+          "line": 140,
+          "column": 23,
+          "position": 1200
+        },
+        "endLoc": {
+          "line": 154,
+          "column": 5,
+          "position": 1349
+        }
+      },
+      "secondFile": {
+        "name": "internal/database/migration_test.go",
+        "start": 9,
+        "end": 23,
+        "startLoc": {
+          "line": 9,
+          "column": 26,
+          "position": 24
+        },
+        "endLoc": {
+          "line": 23,
+          "column": 4,
+          "position": 173
         }
       }
     },

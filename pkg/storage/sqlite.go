@@ -41,7 +41,8 @@ func (s *SQLiteStorage) Close() error {
 }
 
 func (s *SQLiteStorage) Upsert(ctx context.Context, item *provider.Item) error {
-	if err := s.querier.UpsertEvent(ctx, toDBParams(item)); err != nil {
+	err := s.querier.UpsertEvent(ctx, toDBParams(item))
+	if err != nil {
 		return fmt.Errorf("%w: upsert item %q: %w", pkgerrors.ErrDatabase, item.ID.Get(), err)
 	}
 
@@ -61,10 +62,16 @@ func (s *SQLiteStorage) UpsertBatch(ctx context.Context, items []*provider.Item)
 	qtx := db.New(tx)
 
 	for _, item := range items {
-		if err := qtx.UpsertEvent(ctx, toDBParams(item)); err != nil {
+		err := qtx.UpsertEvent(ctx, toDBParams(item))
+		if err != nil {
 			_ = tx.Rollback()
 
-			return fmt.Errorf("%w: batch upsert item %q: %w", pkgerrors.ErrDatabase, item.ID.Get(), err)
+			return fmt.Errorf(
+				"%w: batch upsert item %q: %w",
+				pkgerrors.ErrDatabase,
+				item.ID.Get(),
+				err,
+			)
 		}
 	}
 
@@ -88,13 +95,17 @@ func (s *SQLiteStorage) GetByID(ctx context.Context, id types.ItemID) (*provider
 	return toItem(e), nil
 }
 
-func (s *SQLiteStorage) BatchGetByIDs(ctx context.Context, ids []types.ItemID) ([]*provider.Item, error) {
+func (s *SQLiteStorage) BatchGetByIDs(
+	ctx context.Context,
+	ids []types.ItemID,
+) ([]*provider.Item, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}
 
 	placeholders := make([]string, len(ids))
-	args := make([]interface{}, len(ids))
+
+	args := make([]any, len(ids))
 	for i, id := range ids {
 		placeholders[i] = "?"
 		args[i] = types.NewGithubEventID(id.Get())
@@ -112,9 +123,11 @@ func (s *SQLiteStorage) BatchGetByIDs(ctx context.Context, ids []types.ItemID) (
 	defer rows.Close()
 
 	var items []*provider.Item
+
 	for rows.Next() {
 		var e db.Events
-		if err := rows.Scan(
+
+		err := rows.Scan(
 			&e.ID,
 			&e.GithubID,
 			&e.Source,
@@ -127,7 +140,8 @@ func (s *SQLiteStorage) BatchGetByIDs(ctx context.Context, ids []types.ItemID) (
 			&e.UpdatedAt,
 			&e.RawJson,
 			&e.SyncedAt,
-		); err != nil {
+		)
+		if err != nil {
 			return nil, fmt.Errorf("%w: scan in batch get by IDs: %w", pkgerrors.ErrDatabase, err)
 		}
 
@@ -160,7 +174,13 @@ func (s *SQLiteStorage) GetItems(ctx context.Context, limit, offset int) ([]*pro
 		Offset: int64(offset),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%w: get events (limit=%d, offset=%d): %w", pkgerrors.ErrDatabase, limit, offset, err)
+		return nil, fmt.Errorf(
+			"%w: get events (limit=%d, offset=%d): %w",
+			pkgerrors.ErrDatabase,
+			limit,
+			offset,
+			err,
+		)
 	}
 
 	return convertItems(events), nil
@@ -244,7 +264,12 @@ func (s *SQLiteStorage) Count(ctx context.Context) (int64, error) {
 func (s *SQLiteStorage) CountByType(ctx context.Context, itemType string) (int64, error) {
 	count, err := s.querier.CountEventsByType(ctx, itemType)
 	if err != nil {
-		return 0, fmt.Errorf("%w: count events by type %q: %w", pkgerrors.ErrDatabase, itemType, err)
+		return 0, fmt.Errorf(
+			"%w: count events by type %q: %w",
+			pkgerrors.ErrDatabase,
+			itemType,
+			err,
+		)
 	}
 
 	return count, nil
@@ -296,7 +321,8 @@ func (s *SQLiteStorage) GetItemsSince(
 }
 
 func (s *SQLiteStorage) Delete(ctx context.Context, id types.ItemID) error {
-	if err := s.querier.DeleteEventByGithubID(ctx, types.NewGithubEventID(id.Get())); err != nil {
+	err := s.querier.DeleteEventByGithubID(ctx, types.NewGithubEventID(id.Get()))
+	if err != nil {
 		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
 	}
 
@@ -304,7 +330,8 @@ func (s *SQLiteStorage) Delete(ctx context.Context, id types.ItemID) error {
 }
 
 func (s *SQLiteStorage) DeleteAll(ctx context.Context) error {
-	if err := s.querier.DeleteAllEvents(ctx); err != nil {
+	err := s.querier.DeleteAllEvents(ctx)
+	if err != nil {
 		return fmt.Errorf("%w: delete all events: %w", pkgerrors.ErrDatabase, err)
 	}
 

@@ -41,7 +41,10 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 		base := NewSyncer(&testhelpers.MockProvider{}, &testhelpers.MockStorage{}, nil)
 		syncer := NewConflictAwareSyncer(base)
 
-		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{Source: ""})
+		result, err := syncer.SyncWithConflictDetection(
+			context.Background(),
+			&SyncOptions{Source: ""},
+		)
 
 		require.Error(t, err)
 		assert.Nil(t, result)

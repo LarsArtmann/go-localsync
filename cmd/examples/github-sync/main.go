@@ -51,10 +51,14 @@ func main() {
 		)
 		maxPages      = flag.Int("pages", 10, "Maximum number of pages to fetch")
 		incremental   = flag.Bool("incremental", true, "Only sync new events")
-		conflictAware = flag.Bool("conflict-aware", false, "Use conflict-aware sync with CRDT resolution")
-		showStats     = flag.Bool("stats", false, "Show database statistics and exit")
-		showVersion   = flag.Bool("version", false, "Show version information and exit")
-		verbose       = flag.Bool("verbose", false, "Enable verbose logging")
+		conflictAware = flag.Bool(
+			"conflict-aware",
+			false,
+			"Use conflict-aware sync with CRDT resolution",
+		)
+		showStats   = flag.Bool("stats", false, "Show database statistics and exit")
+		showVersion = flag.Bool("version", false, "Show version information and exit")
+		verbose     = flag.Bool("verbose", false, "Enable verbose logging")
 	)
 
 	flag.Parse()
@@ -154,6 +158,7 @@ func main() {
 
 	if *conflictAware {
 		cas := synclib.NewConflictAwareSyncer(baseSyncer)
+
 		cr, err := cas.SyncWithConflictDetection(ctx, opts)
 		if err != nil {
 			logger.Error("Conflict-aware sync failed", "error", err)

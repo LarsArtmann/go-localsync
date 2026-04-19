@@ -8,9 +8,9 @@ func TestNewStringIDs(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name    string
-		got     string
-		want    string
+		name string
+		got  string
+		want string
 	}{
 		{"NewItemID", NewItemID("event-123").Get(), "event-123"},
 		{"NewProviderID", NewProviderID("github").Get(), "github"},

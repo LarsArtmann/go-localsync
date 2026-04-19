@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -75,6 +74,7 @@ func (c *Client) WithBaseURL(rawURL string) *Client {
 		retryConfig:     c.retryConfig,
 	}
 	next.client.BaseURL, _ = url.Parse(rawURL)
+
 	return next
 }
 
