@@ -18,8 +18,8 @@ import (
 
 func TestNewConflictAwareSyncer(t *testing.T) {
 	t.Run("creates with defaults", func(t *testing.T) {
-		mockProv := &mockProvider{name: "test-provider"}
-		mockStore := &mockStorage{}
+		mockProv := &testhelpers.MockProvider{NameVal: "test-provider"}
+		mockStore := &testhelpers.MockStorage{}
 		base := NewSyncer(mockProv, mockStore, nil)
 
 		syncer := NewConflictAwareSyncer(base)
@@ -31,8 +31,8 @@ func TestNewConflictAwareSyncer(t *testing.T) {
 	})
 
 	t.Run("creates with custom options", func(t *testing.T) {
-		mockProv := &mockProvider{name: "test-provider"}
-		mockStore := &mockStorage{}
+		mockProv := &testhelpers.MockProvider{NameVal: "test-provider"}
+		mockStore := &testhelpers.MockStorage{}
 		customResolver := localsync.NewLWWResolver[*provider.Item](
 			func(item *provider.Item) time.Time {
 				return item.CreatedAt
@@ -53,7 +53,7 @@ func TestNewConflictAwareSyncer(t *testing.T) {
 
 func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 	t.Run("returns error for nil options", func(t *testing.T) {
-		base := NewSyncer(&mockProvider{}, &mockStorage{}, nil)
+		base := NewSyncer(&testhelpers.MockProvider{}, &testhelpers.MockStorage{}, nil)
 		syncer := NewConflictAwareSyncer(base)
 
 		result, err := syncer.SyncWithConflictDetection(context.Background(), nil)
@@ -63,7 +63,7 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 	})
 
 	t.Run("returns error for empty source", func(t *testing.T) {
-		base := NewSyncer(&mockProvider{}, &mockStorage{}, nil)
+		base := NewSyncer(&testhelpers.MockProvider{}, &testhelpers.MockStorage{}, nil)
 		syncer := NewConflictAwareSyncer(base)
 
 		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{Source: ""})
@@ -75,11 +75,13 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 
 	t.Run("upserts new items when no conflicts", func(t *testing.T) {
 		now := time.Now()
-		mockProv := newMockProviderWithTestItems(
-			testhelpers.NewMinimalTestItem("1", "PushEvent", now),
-			testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
-		)
-		mockStore := &mockStorage{}
+		mockProv := &testhelpers.MockProvider{
+			ItemsVal: []*provider.Item{
+				testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+				testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
+			},
+		}
+		mockStore := &testhelpers.MockStorage{}
 
 		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		result, err := syncer.SyncWithConflictDetection(context.Background(), &SyncOptions{
@@ -100,13 +102,11 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 		existingItem := testhelpers.NewMinimalTestItem("1", "PushEvent", now)
 		updatedItem := testhelpers.NewMinimalTestItem("1", "IssuesEvent", now.Add(time.Hour))
 
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{updatedItem},
-			},
+		mockProv := &testhelpers.MockProvider{
+			ItemsVal: []*provider.Item{updatedItem},
 		}
-		mockStore := &mockStorage{
-			items: []*provider.Item{existingItem},
+		mockStore := &testhelpers.MockStorage{
+			ItemsVal: []*provider.Item{existingItem},
 		}
 
 		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
@@ -123,10 +123,10 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 	})
 
 	t.Run("returns error when fetch fails", func(t *testing.T) {
-		mockProv := &mockProvider{
-			err: errors.New("fetch error"),
+		mockProv := &testhelpers.MockProvider{
+			FetchErr: errors.New("fetch error"),
 		}
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 
 		base := NewSyncer(mockProv, mockStore, nil)
 		syncer := NewConflictAwareSyncer(base)
@@ -141,15 +141,13 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 	})
 
 	t.Run("counts upsert errors", func(t *testing.T) {
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{
-					testhelpers.NewMinimalTestItem("1", "PushEvent", time.Now()),
-				},
+		mockProv := &testhelpers.MockProvider{
+			ItemsVal: []*provider.Item{
+				testhelpers.NewMinimalTestItem("1", "PushEvent", time.Now()),
 			},
 		}
-		mockStore := &mockStorage{
-			upsertErr: errors.New("upsert error"),
+		mockStore := &testhelpers.MockStorage{
+			UpsertErrVal: errors.New("upsert error"),
 		}
 
 		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
@@ -166,7 +164,7 @@ func TestConflictAwareSyncer_SyncWithConflictDetection(t *testing.T) {
 }
 
 func TestConflictAwareSyncer_GetVectorClock(t *testing.T) {
-	base := NewSyncer(&mockProvider{name: "test"}, &mockStorage{}, nil)
+	base := NewSyncer(&testhelpers.MockProvider{NameVal: "test"}, &testhelpers.MockStorage{}, nil)
 	syncer := NewConflictAwareSyncer(base)
 
 	vc := syncer.GetVectorClock()
@@ -184,11 +182,13 @@ func TestConflictAwareSyncer_GetVectorClock(t *testing.T) {
 func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 	t.Run("returns operations for fetched items", func(t *testing.T) {
 		now := time.Now()
-		mockProv := newMockProviderWithTestItems(
-			testhelpers.NewMinimalTestItem("1", "PushEvent", now),
-			testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
-		)
-		mockStore := &mockStorage{}
+		mockProv := &testhelpers.MockProvider{
+			ItemsVal: []*provider.Item{
+				testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+				testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
+			},
+		}
+		mockStore := &testhelpers.MockStorage{}
 
 		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		ops, result, err := syncer.SyncOperations(context.Background(), &SyncOptions{
@@ -210,7 +210,7 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 	})
 
 	t.Run("returns error for nil options", func(t *testing.T) {
-		base := NewSyncer(&mockProvider{}, &mockStorage{}, nil)
+		base := NewSyncer(&testhelpers.MockProvider{}, &testhelpers.MockStorage{}, nil)
 		syncer := NewConflictAwareSyncer(base)
 		ops, result, err := syncer.SyncOperations(context.Background(), nil)
 
@@ -221,16 +221,14 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 
 	t.Run("operations have incrementing vector clocks", func(t *testing.T) {
 		now := time.Now()
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{
-					testhelpers.NewMinimalTestItem("1", "PushEvent", now),
-					testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
-					testhelpers.NewMinimalTestItem("3", "PullRequestEvent", now),
-				},
+		mockProv := &testhelpers.MockProvider{
+			ItemsVal: []*provider.Item{
+				testhelpers.NewMinimalTestItem("1", "PushEvent", now),
+				testhelpers.NewMinimalTestItem("2", "IssuesEvent", now),
+				testhelpers.NewMinimalTestItem("3", "PullRequestEvent", now),
 			},
 		}
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 
 		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
 		ops, _, err := syncer.SyncOperations(context.Background(), &SyncOptions{
@@ -249,8 +247,8 @@ func TestConflictAwareSyncer_SyncOperations(t *testing.T) {
 
 func TestConflictAwareSyncer_Close(t *testing.T) {
 	t.Run("closes successfully", func(t *testing.T) {
-		mockStore := &mockStorage{}
-		syncer := NewConflictAwareSyncer(NewSyncer(&mockProvider{}, mockStore, nil))
+		mockStore := &testhelpers.MockStorage{}
+		syncer := NewConflictAwareSyncer(NewSyncer(&testhelpers.MockProvider{}, mockStore, nil))
 
 		err := syncer.Close()
 
@@ -264,13 +262,11 @@ func TestConflictAwareSyncer_LWWResolution(t *testing.T) {
 		existingItem := testhelpers.NewMinimalTestItem("1", "PushEvent", now)
 		newerItem := testhelpers.NewMinimalTestItem("1", "IssuesEvent", now.Add(2*time.Hour))
 
-		mockProv := &mockProvider{
-			result: &provider.FetchResult{
-				Items: []*provider.Item{newerItem},
-			},
+		mockProv := &testhelpers.MockProvider{
+			ItemsVal: []*provider.Item{newerItem},
 		}
-		mockStore := &mockStorage{
-			items: []*provider.Item{existingItem},
+		mockStore := &testhelpers.MockStorage{
+			ItemsVal: []*provider.Item{existingItem},
 		}
 
 		syncer := NewConflictAwareSyncer(NewSyncer(mockProv, mockStore, nil))
@@ -283,8 +279,8 @@ func TestConflictAwareSyncer_LWWResolution(t *testing.T) {
 		assert.Equal(t, 1, result.Conflicts)
 		assert.Equal(t, 1, result.Upserted)
 
-		require.Len(t, mockStore.items, 2)
-		lastItem := mockStore.items[1]
+		require.Len(t, mockStore.ItemsVal, 2)
+		lastItem := mockStore.ItemsVal[1]
 		assert.Equal(t, types.NewEventTypeID("IssuesEvent"), lastItem.Type,
 			"newer item (IssuesEvent) should win via LWW")
 	})

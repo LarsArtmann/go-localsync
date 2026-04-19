@@ -27,179 +27,9 @@ func testNilOptionsError(
 	assert.Nil(t, result)
 }
 
-// mockStorage implements storage.Storage for testing.
-type mockStorage struct {
-	items          []*provider.Item
-	latestItem     *provider.Item
-	upsertErr      error
-	latestErr      error
-	countResult    int64
-	countErr       error
-	typesResult    []string
-	typesErr       error
-	countByType    int64
-	countByTypeErr error
-	closeErr       error
-}
-
-func (m *mockStorage) Upsert(ctx context.Context, item *provider.Item) error {
-	if m.upsertErr != nil {
-		return m.upsertErr
-	}
-
-	m.items = append(m.items, item)
-
-	return nil
-}
-
-func (m *mockStorage) UpsertBatch(_ context.Context, items []*provider.Item) error {
-	if m.upsertErr != nil {
-		return m.upsertErr
-	}
-
-	m.items = append(m.items, items...)
-
-	return nil
-}
-
-func (m *mockStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
-	for _, item := range m.items {
-		if item.ID.Get() == id {
-			return item, nil
-		}
-	}
-
-	return nil, nil //nolint:nilnil // not found is not an error condition
-}
-
-func (m *mockStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
-	if m.latestErr != nil {
-		return nil, m.latestErr
-	}
-
-	return m.latestItem, nil
-}
-
-func (m *mockStorage) GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error) {
-	return m.items, nil
-}
-
-// getItemsByFilter returns items for GetItemsByType/Actor/Repo.
-// This eliminates duplication across the mock storage interface methods.
-func (m *mockStorage) getItemsByFilter(
-	_ context.Context,
-	_ string,
-	_, _ int,
-) ([]*provider.Item, error) {
-	return m.items, nil
-}
-
-func (m *mockStorage) GetItemsByType(
-	ctx context.Context,
-	itemType string,
-	limit, offset int,
-) ([]*provider.Item, error) {
-	return m.getItemsByFilter(ctx, itemType, limit, offset)
-}
-
-func (m *mockStorage) GetItemsByActor(
-	ctx context.Context,
-	actorLogin string,
-	limit, offset int,
-) ([]*provider.Item, error) {
-	return m.getItemsByFilter(ctx, actorLogin, limit, offset)
-}
-
-func (m *mockStorage) GetItemsByRepo(
-	ctx context.Context,
-	repoName string,
-	limit, offset int,
-) ([]*provider.Item, error) {
-	return m.getItemsByFilter(ctx, repoName, limit, offset)
-}
-
-func (m *mockStorage) Count(ctx context.Context) (int64, error) {
-	return m.countResult, m.countErr
-}
-
-func (m *mockStorage) CountByType(ctx context.Context, itemType string) (int64, error) {
-	return m.countByType, m.countByTypeErr
-}
-
-func (m *mockStorage) GetTypes(ctx context.Context) ([]string, error) {
-	return m.typesResult, m.typesErr
-}
-
-func (m *mockStorage) GetItemsBySource(
-	_ context.Context,
-	_ string,
-	_, _ int,
-) ([]*provider.Item, error) {
-	return m.items, nil
-}
-
-func (m *mockStorage) Delete(_ context.Context, _ string) error {
-	return nil
-}
-
-func (m *mockStorage) DeleteAll(_ context.Context) error {
-	return nil
-}
-
-func (m *mockStorage) GetItemsSince(_ context.Context, _ time.Time) ([]*provider.Item, error) {
-	return m.items, nil
-}
-
-func (m *mockStorage) Close() error {
-	return m.closeErr
-}
-
-// mockProvider implements provider.Provider for testing.
-type mockProvider struct {
-	name      string
-	result    *provider.FetchResult
-	rateLimit *provider.RateLimitInfo
-	err       error
-}
-
-func (m *mockProvider) Name() string {
-	if m.name == "" {
-		return "mock"
-	}
-
-	return m.name
-}
-
-func (m *mockProvider) Fetch(
-	ctx context.Context,
-	opts *provider.FetchOptions,
-) (*provider.FetchResult, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-
-	return m.result, nil
-}
-
-func (m *mockProvider) FetchAll(
-	ctx context.Context,
-	source string,
-	maxPages int,
-) (*provider.FetchResult, error) {
-	if m.err != nil {
-		return nil, m.err
-	}
-
-	return m.result, nil
-}
-
-func (m *mockProvider) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, error) {
-	return m.rateLimit, m.err
-}
-
 func TestNewSyncer(t *testing.T) {
 	t.Run("creates syncer with provided logger", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		logger := log.New(nil)
 
 		syncer := NewSyncer(nil, mockStore, logger)
@@ -208,7 +38,7 @@ func TestNewSyncer(t *testing.T) {
 	})
 
 	t.Run("uses default logger when nil", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 
 		syncer := NewSyncer(nil, mockStore, nil)
 
@@ -217,35 +47,16 @@ func TestNewSyncer(t *testing.T) {
 	})
 }
 
-// newMockProviderWithItems creates a mock provider with standard test items.
-func newMockProviderWithItems() *mockProvider {
-	return &mockProvider{
-		result: &provider.FetchResult{
-			Items: []*provider.Item{
-				{ID: types.NewItemID("1"), Type: types.NewEventTypeID("PushEvent")},
-				{ID: types.NewItemID("2"), Type: types.NewEventTypeID("IssuesEvent")},
-			},
-		},
-	}
-}
-
-// newMockProviderWithTestItems creates a mock provider that returns the given items.
-func newMockProviderWithTestItems(items ...*provider.Item) *mockProvider {
-	return &mockProvider{
-		result: &provider.FetchResult{Items: items},
-	}
-}
-
 func TestSyncer_Sync(t *testing.T) {
 	t.Run("returns error for nil options", func(t *testing.T) {
 		testNilOptionsError(t, func(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-			syncer := NewSyncer(nil, &mockStorage{}, nil)
+			syncer := NewSyncer(nil, &testhelpers.MockStorage{}, nil)
 			return syncer.Sync(ctx, opts)
 		})
 	})
 
 	t.Run("returns error for empty source", func(t *testing.T) {
-		syncer := NewSyncer(nil, &mockStorage{}, nil)
+		syncer := NewSyncer(nil, &testhelpers.MockStorage{}, nil)
 		result, err := syncer.Sync(context.Background(), &SyncOptions{Source: ""})
 
 		require.Error(t, err)
@@ -254,8 +65,8 @@ func TestSyncer_Sync(t *testing.T) {
 	})
 
 	t.Run("syncs items successfully", func(t *testing.T) {
-		mockProv := newMockProviderWithItems()
-		mockStore := &mockStorage{}
+		mockProv := testhelpers.NewMockProviderWithItems()
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(mockProv, mockStore, nil)
 
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
@@ -267,14 +78,14 @@ func TestSyncer_Sync(t *testing.T) {
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 0, result.Skipped)
-		assert.Len(t, mockStore.items, 2)
+		assert.Len(t, mockStore.ItemsVal, 2)
 	})
 
 	t.Run("returns error when fetch fails", func(t *testing.T) {
-		mockProv := &mockProvider{
-			err: errors.New("fetch error"),
+		mockProv := &testhelpers.MockProvider{
+			FetchErr: errors.New("fetch error"),
 		}
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(mockProv, mockStore, nil)
 
 		result, err := syncer.Sync(context.Background(), &SyncOptions{
@@ -287,9 +98,9 @@ func TestSyncer_Sync(t *testing.T) {
 	})
 
 	t.Run("counts errors when upsert fails", func(t *testing.T) {
-		mockProv := newMockProviderWithItems()
-		mockStore := &mockStorage{
-			upsertErr: errors.New("upsert error"),
+		mockProv := testhelpers.NewMockProviderWithItems()
+		mockStore := &testhelpers.MockStorage{
+			UpsertErrVal: errors.New("upsert error"),
 		}
 		syncer := NewSyncer(mockProv, mockStore, nil)
 
@@ -306,8 +117,8 @@ func TestSyncer_Sync(t *testing.T) {
 	})
 
 	t.Run("calls OnProgress callback", func(t *testing.T) {
-		mockProv := newMockProviderWithItems()
-		mockStore := &mockStorage{}
+		mockProv := testhelpers.NewMockProviderWithItems()
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(mockProv, mockStore, nil)
 
 		var progressCalled bool
@@ -336,7 +147,7 @@ func TestSyncer_Sync(t *testing.T) {
 func TestSyncer_SyncIncremental(t *testing.T) {
 	t.Run("returns error for nil options", func(t *testing.T) {
 		testNilOptionsError(t, func(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-			syncer := NewSyncer(nil, &mockStorage{}, nil)
+			syncer := NewSyncer(nil, &testhelpers.MockStorage{}, nil)
 			return syncer.SyncIncremental(ctx, opts)
 		})
 	})
@@ -344,10 +155,10 @@ func TestSyncer_SyncIncremental(t *testing.T) {
 
 func TestSyncer_GetStats(t *testing.T) {
 	t.Run("returns stats successfully", func(t *testing.T) {
-		mockStore := &mockStorage{
-			countResult: 100,
-			typesResult: []string{"PushEvent", "IssuesEvent"},
-			countByType: 50,
+		mockStore := &testhelpers.MockStorage{
+			CountResultVal: 100,
+			TypesResultVal: []string{"PushEvent", "IssuesEvent"},
+			CountByTypeVal: 50,
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
 
@@ -360,8 +171,8 @@ func TestSyncer_GetStats(t *testing.T) {
 	})
 
 	t.Run("returns error when count fails", func(t *testing.T) {
-		mockStore := &mockStorage{
-			countErr: errors.New("count error"),
+		mockStore := &testhelpers.MockStorage{
+			CountErrVal: errors.New("count error"),
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
 
@@ -373,9 +184,9 @@ func TestSyncer_GetStats(t *testing.T) {
 	})
 
 	t.Run("returns error when get types fails", func(t *testing.T) {
-		mockStore := &mockStorage{
-			countResult: 100,
-			typesErr:    errors.New("types error"),
+		mockStore := &testhelpers.MockStorage{
+			CountResultVal: 100,
+			TypesErrVal:    errors.New("types error"),
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
 
@@ -389,7 +200,7 @@ func TestSyncer_GetStats(t *testing.T) {
 
 func TestSyncer_Close(t *testing.T) {
 	t.Run("closes successfully", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		err := syncer.Close()
@@ -398,8 +209,8 @@ func TestSyncer_Close(t *testing.T) {
 	})
 
 	t.Run("returns error on close failure", func(t *testing.T) {
-		mockStore := &mockStorage{
-			closeErr: errors.New("close error"),
+		mockStore := &testhelpers.MockStorage{
+			CloseErrVal: errors.New("close error"),
 		}
 		syncer := NewSyncer(nil, mockStore, nil)
 
@@ -412,7 +223,7 @@ func TestSyncer_Close(t *testing.T) {
 
 func TestProcessIncrementalItems(t *testing.T) {
 	t.Run("skips items older than cutoff", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		cutoff := time.Date(2024, 1, 15, 12, 0, 0, 0, time.UTC)
@@ -440,12 +251,12 @@ func TestProcessIncrementalItems(t *testing.T) {
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 1, result.Skipped)
-		assert.Equal(t, 1, len(mockStore.items))
-		assert.Equal(t, "3", mockStore.items[0].ID.Get())
+		assert.Equal(t, 1, len(mockStore.ItemsVal))
+		assert.Equal(t, "3", mockStore.ItemsVal[0].ID.Get())
 	})
 
 	t.Run("handles nil latest item", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		items := []*provider.Item{
@@ -458,11 +269,11 @@ func TestProcessIncrementalItems(t *testing.T) {
 		require.NotNil(t, result)
 		assert.Equal(t, 1, result.Fetched)
 		assert.Equal(t, 0, result.Skipped)
-		assert.Equal(t, 1, len(mockStore.items))
+		assert.Equal(t, 1, len(mockStore.ItemsVal))
 	})
 
 	t.Run("handles identical timestamps at cutoff boundary", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		sameTime := time.Date(2024, 1, 15, 12, 0, 0, 0, time.UTC)
@@ -482,11 +293,11 @@ func TestProcessIncrementalItems(t *testing.T) {
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 0, result.Skipped)
-		assert.Equal(t, 2, len(mockStore.items))
+		assert.Equal(t, 2, len(mockStore.ItemsVal))
 	})
 
 	t.Run("handles empty items slice", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		cutoffItem := &provider.Item{
@@ -508,7 +319,7 @@ func TestProcessIncrementalItems(t *testing.T) {
 	})
 
 	t.Run("handles clock skew with future items", func(t *testing.T) {
-		mockStore := &mockStorage{}
+		mockStore := &testhelpers.MockStorage{}
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		now := time.Now()
@@ -531,7 +342,7 @@ func TestProcessIncrementalItems(t *testing.T) {
 		require.NotNil(t, result)
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 1, result.Skipped)
-		assert.Equal(t, 1, len(mockStore.items))
-		assert.Equal(t, "3", mockStore.items[0].ID.Get())
+		assert.Equal(t, 1, len(mockStore.ItemsVal))
+		assert.Equal(t, "3", mockStore.ItemsVal[0].ID.Get())
 	})
 }
