@@ -4,6 +4,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/errors"
@@ -32,7 +33,7 @@ type Item struct {
 	// For immutable events (e.g., GitHub events), this equals CreatedAt.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// RawJSON contains the complete original payload for full fidelity.
-	RawJSON []byte `json:"rawJson"`
+	RawJSON json.RawMessage `json:"rawJson"`
 }
 
 // Validate checks that the Item has all required fields set.
