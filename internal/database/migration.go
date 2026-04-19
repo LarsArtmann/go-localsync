@@ -3,8 +3,9 @@ package database
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"sort"
+
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
 // Migration version constants.
@@ -34,12 +35,12 @@ var migrations = []migration{
 
 func RunMigrations(db *sql.DB) error {
 	if err := ensureMigrationsTable(db); err != nil {
-		return fmt.Errorf("failed to create migrations table: %w", err)
+		return pkgerrors.Wrap(err, "failed to create migrations table")
 	}
 
 	applied, err := getAppliedVersions(db)
 	if err != nil {
-		return fmt.Errorf("failed to get applied migrations: %w", err)
+		return pkgerrors.Wrap(err, "failed to get applied migrations")
 	}
 
 	sorted := make([]migration, len(migrations))
@@ -55,7 +56,7 @@ func RunMigrations(db *sql.DB) error {
 
 		err := applyMigration(db, m)
 		if err != nil {
-			return fmt.Errorf("migration %d (%s) failed: %w", m.version, m.name, err)
+			return pkgerrors.Wrapf(err, "migration %d (%s) failed", m.version, m.name)
 		}
 	}
 
@@ -100,12 +101,12 @@ func getAppliedVersions(db *sql.DB) (map[int]bool, error) {
 func applyMigration(db *sql.DB, m migration) error {
 	tx, err := db.BeginTx(context.Background(), nil)
 	if err != nil {
-		return fmt.Errorf("begin transaction: %w", err)
+		return pkgerrors.Wrap(err, "begin transaction")
 	}
 	defer tx.Rollback()
 
 	if _, err := tx.ExecContext(context.Background(), m.sql); err != nil {
-		return fmt.Errorf("execute migration SQL: %w", err)
+		return pkgerrors.Wrap(err, "execute migration SQL")
 	}
 
 	if _, err := tx.ExecContext(
@@ -113,7 +114,7 @@ func applyMigration(db *sql.DB, m migration) error {
 		"INSERT INTO schema_migrations (version, name) VALUES (?, ?)",
 		m.version, m.name,
 	); err != nil {
-		return fmt.Errorf("record migration: %w", err)
+		return pkgerrors.Wrap(err, "record migration")
 	}
 
 	return tx.Commit()
