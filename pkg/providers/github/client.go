@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -90,7 +89,7 @@ func (c *Client) Fetch(
 	}
 
 	if err := c.waitForRateLimit(ctx); err != nil {
-		return nil, fmt.Errorf("rate limit check failed for %s: %w", opts.Source, err)
+		return nil, pkgerrors.Wrapf(err, "rate limit check failed for %s", opts.Source)
 	}
 
 	var (
@@ -112,11 +111,11 @@ func (c *Client) Fetch(
 		return err
 	})
 	if err != nil {
-		return nil, fmt.Errorf(
-			"fetching events for %s failed (page %d): %w",
+		return nil, pkgerrors.Wrapf(
+			wrapGitHubError(err, opts.Source),
+			"fetching events for %s failed (page %d)",
 			opts.Source,
 			opts.Page,
-			wrapGitHubError(err, opts.Source),
 		)
 	}
 
@@ -157,13 +156,12 @@ func (c *Client) FetchAll(
 			Page:    page,
 		})
 		if err != nil {
-			return nil, fmt.Errorf(
-				"fetch page %d/%d for %s failed (fetched %d items): %w",
+			return nil, pkgerrors.Wrapf(err,
+				"fetch page %d/%d for %s failed (fetched %d items)",
 				page,
 				maxPages,
 				source,
 				len(allItems),
-				err,
 			)
 		}
 
@@ -249,7 +247,7 @@ func (c *Client) waitForRateLimit(ctx context.Context) error {
 
 	limits, _, err := c.client.RateLimit.Get(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to check rate limit: %w", err)
+		return pkgerrors.Wrap(err, "failed to check rate limit")
 	}
 
 	core := limits.GetCore()
@@ -269,8 +267,8 @@ func (c *Client) waitForRateLimit(ctx context.Context) error {
 	}
 
 	if waitDuration > c.rateLimitConfig.MaxWait {
-		return fmt.Errorf("%w: reset in %v (exceeds max wait %v)",
-			pkgerrors.ErrRateLimited, waitDuration, c.rateLimitConfig.MaxWait)
+		return pkgerrors.Wrapf(pkgerrors.ErrRateLimited, "reset in %v (exceeds max wait %v)",
+			waitDuration, c.rateLimitConfig.MaxWait)
 	}
 
 	select {
@@ -293,7 +291,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 	for attempt := 0; attempt <= c.retryConfig.MaxRetries; attempt++ {
 		if err := ctx.Err(); err != nil {
-			return fmt.Errorf("retry loop interrupted (attempt %d): %w", attempt, err)
+			return pkgerrors.Wrapf(err, "retry loop interrupted (attempt %d)", attempt)
 		}
 
 		err := fn()
@@ -303,7 +301,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 		lastErr = err
 		if !isRetryableError(err) {
-			return fmt.Errorf("non-retryable error during retry (attempt %d): %w", attempt, err)
+			return pkgerrors.Wrapf(err, "non-retryable error during retry (attempt %d)", attempt)
 		}
 
 		if attempt < c.retryConfig.MaxRetries {
@@ -313,11 +311,11 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 
 			select {
 			case <-ctx.Done():
-				return fmt.Errorf(
-					"retry loop cancelled after %d attempts (last error: %v): %w",
+				return pkgerrors.Wrapf(
+					ctx.Err(),
+					"retry loop cancelled after %d attempts (last error: %v)",
 					attempt,
 					lastErr,
-					ctx.Err(),
 				)
 			case <-time.After(backoff):
 				backoff *= 2
@@ -325,7 +323,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 		}
 	}
 
-	return fmt.Errorf("retry exhausted after %d attempts: %w", c.retryConfig.MaxRetries+1, lastErr)
+	return pkgerrors.Wrapf(lastErr, "retry exhausted after %d attempts", c.retryConfig.MaxRetries+1)
 }
 
 // isRetryableError determines if an error is transient and should be retried.
