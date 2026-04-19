@@ -124,12 +124,17 @@ The `storage.Storage` interface for custom backends:
 ```go
 type Storage interface {
     Upsert(ctx context.Context, item *provider.Item) error
+    UpsertBatch(ctx context.Context, items []*provider.Item) error
     GetByID(ctx context.Context, id string) (*provider.Item, error)
     GetLatest(ctx context.Context) (*provider.Item, error)
     GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error)
     GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error)
     GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error)
     GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error)
+    GetItemsBySource(ctx context.Context, source string, limit, offset int) ([]*provider.Item, error)
+    GetItemsSince(ctx context.Context, since time.Time) ([]*provider.Item, error)
+    Delete(ctx context.Context, id string) error
+    DeleteAll(ctx context.Context) error
     Count(ctx context.Context) (int64, error)
     CountByType(ctx context.Context, itemType string) (int64, error)
     GetTypes(ctx context.Context) ([]string, error)
@@ -142,10 +147,11 @@ type Storage interface {
 For multi-device or multi-source scenarios, use `ConflictAwareSyncer` which leverages [go-localfirst](https://github.com/larsartmann/go-localfirst) CRDT primitives (vector clocks, LWW resolution):
 
 ```go
-syncer := sync.NewConflictAwareSyncer(ghProvider, store, logger,
+baseSyncer := sync.NewSyncer(ghProvider, store, nil)
+conflictSyncer := sync.NewConflictAwareSyncer(baseSyncer,
     sync.WithNodeID("device-1"),
 )
-result, err := syncer.SyncWithConflictDetection(ctx, &sync.SyncOptions{
+result, err := conflictSyncer.SyncWithConflictDetection(ctx, &sync.SyncOptions{
     Source: "username",
 })
 // result.Conflicts contains detected conflicts
@@ -199,14 +205,14 @@ gh-sync -user octocat
 | Schema Migrations   | ✅ Done   | Version-tracked, idempotent, auto-applied                |
 | Conflict-Aware Sync | ✅ Done   | CRDT-backed conflict detection with vector clocks        |
 | No CGO              | ✅ Done   | Pure Go SQLite driver (modernc.org/sqlite)               |
-| Rate Limiting       | ⚙️ Config | Config structs defined, not yet wired into sync flow     |
-| Retry Logic         | ⚙️ Config | Config structs defined, not yet wired into sync flow     |
+| Rate Limiting       | ✅ Done   | Configurable rate limiting wired into sync flow             |
+| Retry Logic         | ✅ Done   | Exponential backoff retry with configurable limits         |
 
 ## Development
 
 ```bash
 just build    # Build
-just test     # Run tests (39 tests across 4 suites)
+just test     # Run tests (48 tests across 8 suites)
 just lint     # Run linter (requires golangci-lint v2)
 just sqlc     # Generate sqlc code
 just verify   # Build + test + lint
@@ -240,14 +246,17 @@ cmd/examples/github-sync/   # Example CLI application
 
 ## Testing
 
-39 tests across 4 test suites:
+48 tests across 8 test suites (121 including subtests):
 
 | Package                | Tests | Coverage                        |
 | ---------------------- | ----- | ------------------------------- |
 | `internal/database`    | 6     | Migrations, idempotency, schema |
+| `pkg/errors`           | 4     | Sentinel error matching         |
+| `pkg/provider`         | 1     | Interface validation            |
 | `pkg/providers/github` | 21    | Client, fetch, retry, errors    |
 | `pkg/storage`          | Suite | SQLite CRUD operations          |
 | `pkg/sync`             | 11    | Syncer + ConflictAwareSyncer    |
+| `pkg/types`            | 5     | Branded ID construction         |
 
 ```bash
 just test              # Run all tests

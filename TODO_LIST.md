@@ -23,7 +23,7 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 - [ ] **Migrate testify→Ginkgo/GOmega**  
        **Source:** All 8 `*_test.go` files across `pkg/storage`, `pkg/sync`, `pkg/providers/github`  
        **Description:** Pre-commit hooks ban testify; entire test suite uses it.  
-       **Context:** 8 test files, 39 test cases. Required to unblock pre-commit hooks. ~3h effort.
+       **Context:** 8 test files, 48 test cases. Required to unblock pre-commit hooks. ~3h effort.
 
 ### Infrastructure
 
@@ -82,15 +82,15 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 
 ### Reliability
 
-- [ ] **Implement rate limit handling in sync flow**  
+- [x] **Rate limit handling in sync flow**  
        **Source:** `pkg/providers/github/client.go`, `pkg/sync/sync.go`  
-       **Description:** `GetRateLimit()` and `RateLimitConfig` exist but are not used in the sync loop.  
-       **Context:** Critical for production use with large syncs (>10 pages).
+       **Description:** `GetRateLimit()` and `RateLimitConfig` are wired into the GitHub client's fetch loop.  
+       **Completed:** Round 1 audit sessions.
 
-- [ ] **Implement retry logic with exponential backoff**  
+- [x] **Retry logic with exponential backoff**  
        **Source:** `pkg/providers/github/client.go`  
-       **Description:** `RetryConfig` exists but retry is not implemented in the sync flow.  
-       **Context:** Currently fails immediately on network errors. Config struct ready, logic missing.
+       **Description:** `RetryConfig` drives configurable exponential backoff with jitter.  
+       **Completed:** Round 1 audit sessions.
 
 - [ ] **Add structured logging fields**  
        **Source:** `pkg/sync/sync.go`, `pkg/providers/github/client.go`  

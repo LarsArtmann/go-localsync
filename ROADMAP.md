@@ -82,7 +82,7 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 - [ ] **Migrate testify→Ginkgo/GOmega**  
        **Source:** 8 test files across `pkg/storage`, `pkg/sync`, `pkg/providers/github`  
-       **Description:** Pre-commit hooks ban testify. All 39 tests use it.  
+       **Description:** Pre-commit hooks ban testify. All 48 tests use it.  
        **Context:** ~3h effort. Unblocks pre-commit hooks.
 
 - [ ] **Standardize null string conversion**  
@@ -118,9 +118,10 @@ Aspirational features and improvements with no fixed timeline. These are planned
        **Source:** `cmd/examples/github-sync/main.go`  
        **Description:** Zero test coverage for flag parsing, signal handling, exit codes.
 
-- [ ] **pkg/errors and pkg/types tests**  
-       **Source:** `pkg/errors/errors.go`, `pkg/types/ids.go`  
-       **Description:** Zero test coverage. Quick wins.
+- [x] **pkg/errors and pkg/types tests**  
+       **Source:** `pkg/errors/errors_test.go`, `pkg/types/ids_test.go`  
+       **Description:** 4 error tests + 5 type tests.  
+       **Completed:** Round 1 audit sessions.
 
 ---
 
