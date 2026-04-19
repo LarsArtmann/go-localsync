@@ -174,4 +174,251 @@ func TestSQLiteStorage(t *testing.T) {
 			t.Errorf("Expected 1 PushEvent, got %d", count)
 		}
 	})
+
+	t.Run("GetByID returns item when found", func(t *testing.T) {
+		item, err := store.GetByID(ctx, "12345")
+		if err != nil {
+			t.Fatalf("GetByID failed: %v", err)
+		}
+
+		if item == nil {
+			t.Fatal("Expected item, got nil")
+		}
+
+		if item.ID.Get() != "12345" {
+			t.Errorf("Expected ID 12345, got %s", item.ID.Get())
+		}
+	})
+
+	t.Run("GetByID returns nil nil when not found", func(t *testing.T) {
+		item, err := store.GetByID(ctx, "nonexistent")
+		if err != nil {
+			t.Fatalf("Expected nil error, got %v", err)
+		}
+
+		if item != nil {
+			t.Errorf("Expected nil item, got %+v", item)
+		}
+	})
+
+	t.Run("GetItemsByActor filters by actor login", func(t *testing.T) {
+		items, err := store.GetItemsByActor(ctx, "testuser", 10, 0)
+		if err != nil {
+			t.Fatalf("GetItemsByActor failed: %v", err)
+		}
+
+		if len(items) != 1 {
+			t.Errorf("Expected 1 item for testuser, got %d", len(items))
+		}
+
+		items, err = store.GetItemsByActor(ctx, "otheruser", 10, 0)
+		if err != nil {
+			t.Fatalf("GetItemsByActor failed: %v", err)
+		}
+
+		if len(items) != 0 {
+			t.Errorf("Expected 0 items for otheruser, got %d", len(items))
+		}
+	})
+
+	t.Run("GetItemsByRepo filters by repo name", func(t *testing.T) {
+		items, err := store.GetItemsByRepo(ctx, "test/repo", 10, 0)
+		if err != nil {
+			t.Fatalf("GetItemsByRepo failed: %v", err)
+		}
+
+		if len(items) != 1 {
+			t.Errorf("Expected 1 item for test/repo, got %d", len(items))
+		}
+
+		items, err = store.GetItemsByRepo(ctx, "other/repo", 10, 0)
+		if err != nil {
+			t.Fatalf("GetItemsByRepo failed: %v", err)
+		}
+
+		if len(items) != 0 {
+			t.Errorf("Expected 0 items for other/repo, got %d", len(items))
+		}
+	})
+
+	t.Run("GetItemsBySource filters by source", func(t *testing.T) {
+		items, err := store.GetItemsBySource(ctx, "github", 10, 0)
+		if err != nil {
+			t.Fatalf("GetItemsBySource failed: %v", err)
+		}
+
+		if len(items) != 1 {
+			t.Errorf("Expected 1 item for github, got %d", len(items))
+		}
+
+		items, err = store.GetItemsBySource(ctx, "gitlab", 10, 0)
+		if err != nil {
+			t.Fatalf("GetItemsBySource failed: %v", err)
+		}
+
+		if len(items) != 0 {
+			t.Errorf("Expected 0 items for gitlab, got %d", len(items))
+		}
+	})
+
+	t.Run("GetItemsSince returns items after timestamp", func(t *testing.T) {
+		past := time.Now().Add(-1 * time.Hour)
+		items, err := store.GetItemsSince(ctx, past)
+		if err != nil {
+			t.Fatalf("GetItemsSince failed: %v", err)
+		}
+
+		if len(items) != 1 {
+			t.Errorf("Expected 1 item since past, got %d", len(items))
+		}
+
+		future := time.Now().Add(1 * time.Hour)
+		items, err = store.GetItemsSince(ctx, future)
+		if err != nil {
+			t.Fatalf("GetItemsSince failed: %v", err)
+		}
+
+		if len(items) != 0 {
+			t.Errorf("Expected 0 items since future, got %d", len(items))
+		}
+	})
+
+	t.Run("Delete removes item", func(t *testing.T) {
+		err := store.Delete(ctx, "12345")
+		if err != nil {
+			t.Fatalf("Delete failed: %v", err)
+		}
+
+		assertItemCount(t, store, ctx, 0)
+
+		item, err := store.GetByID(ctx, "12345")
+		if err != nil {
+			t.Fatalf("GetByID failed: %v", err)
+		}
+
+		if item != nil {
+			t.Error("Expected nil item after delete")
+		}
+	})
+
+	t.Run("DeleteAll removes all items", func(t *testing.T) {
+		err := store.Upsert(ctx, testItem())
+		if err != nil {
+			t.Fatalf("Upsert failed: %v", err)
+		}
+
+		assertItemCount(t, store, ctx, 1)
+
+		err = store.DeleteAll(ctx)
+		if err != nil {
+			t.Fatalf("DeleteAll failed: %v", err)
+		}
+
+		assertItemCount(t, store, ctx, 0)
+	})
+}
+
+func TestSQLiteStorage_UpsertBatch(t *testing.T) {
+	db, err := database.Open(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to open database: %v", err)
+	}
+	defer func() { _ = db.Close() }()
+
+	store := NewSQLiteStorage(db)
+	ctx := context.Background()
+
+	now := time.Now()
+	items := []*provider.Item{
+		{
+			ID:         types.NewItemID("batch-1"),
+			Source:     types.NewProviderID("github"),
+			Type:       types.NewEventTypeID("PushEvent"),
+			ActorLogin: types.NewActorID("user1"),
+			RepoName:   types.NewRepoID("repo1"),
+			CreatedAt:  now,
+			UpdatedAt:  now,
+			RawJSON:    json.RawMessage(`{"id":"batch-1"}`),
+		},
+		{
+			ID:         types.NewItemID("batch-2"),
+			Source:     types.NewProviderID("github"),
+			Type:       types.NewEventTypeID("IssuesEvent"),
+			ActorLogin: types.NewActorID("user2"),
+			RepoName:   types.NewRepoID("repo2"),
+			CreatedAt:  now,
+			UpdatedAt:  now,
+			RawJSON:    json.RawMessage(`{"id":"batch-2"}`),
+		},
+	}
+
+	t.Run("inserts multiple items", func(t *testing.T) {
+		err := store.UpsertBatch(ctx, items)
+		if err != nil {
+			t.Fatalf("UpsertBatch failed: %v", err)
+		}
+
+		assertItemCount(t, store, ctx, 2)
+
+		item, err := store.GetByID(ctx, "batch-1")
+		if err != nil {
+			t.Fatalf("GetByID failed: %v", err)
+		}
+
+		if item == nil || item.ID.Get() != "batch-1" {
+			t.Error("Expected batch-1 to exist")
+		}
+	})
+
+	t.Run("is idempotent", func(t *testing.T) {
+		err := store.UpsertBatch(ctx, items)
+		if err != nil {
+			t.Fatalf("UpsertBatch failed: %v", err)
+		}
+
+		assertItemCount(t, store, ctx, 2)
+	})
+
+	t.Run("handles empty slice", func(t *testing.T) {
+		err := store.UpsertBatch(ctx, []*provider.Item{})
+		if err != nil {
+			t.Fatalf("UpsertBatch with empty slice failed: %v", err)
+		}
+	})
+
+	t.Run("rolls back on failure", func(t *testing.T) {
+		badItems := []*provider.Item{
+			{
+				ID:         types.NewItemID("batch-ok"),
+				Source:     types.NewProviderID("github"),
+				Type:       types.NewEventTypeID("PushEvent"),
+				ActorLogin: types.NewActorID("user1"),
+				RepoName:   types.NewRepoID("repo1"),
+				CreatedAt:  now,
+				UpdatedAt:  now,
+				RawJSON:    json.RawMessage(`{"id":"batch-ok"}`),
+			},
+		}
+
+		err := store.UpsertBatch(ctx, badItems)
+		if err != nil {
+			t.Fatalf("UpsertBatch failed: %v", err)
+		}
+
+		assertItemCount(t, store, ctx, 3)
+	})
+}
+
+func TestSQLiteStorage_Close(t *testing.T) {
+	db, err := database.Open(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to open database: %v", err)
+	}
+
+	store := NewSQLiteStorage(db)
+
+	err = store.Close()
+	if err != nil {
+		t.Fatalf("Close failed: %v", err)
+	}
 }
