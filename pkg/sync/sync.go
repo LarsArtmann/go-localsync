@@ -91,9 +91,27 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 
 	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}
 
-	if err := s.storage.UpsertBatch(ctx, result.Items); err != nil {
-		syncResult.Errors = len(result.Items)
-		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(result.Items))
+	valid := make([]*provider.Item, 0, len(result.Items))
+	for _, item := range result.Items {
+		if err := item.Validate(); err != nil {
+			syncResult.Errors++
+			s.logger.Warn("Skipping invalid item", "id", item.ID, "error", err)
+
+			continue
+		}
+
+		valid = append(valid, item)
+	}
+
+	if len(valid) == 0 {
+		s.logger.Info("Sync completed: no valid items", "fetched", syncResult.Fetched, "errors", syncResult.Errors)
+
+		return syncResult, nil
+	}
+
+	if err := s.storage.UpsertBatch(ctx, valid); err != nil {
+		syncResult.Errors = len(valid)
+		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(valid))
 
 		return syncResult, pkgerrors.Wrap(err, "batch upsert failed")
 	}
