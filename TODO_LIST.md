@@ -53,10 +53,10 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
        **Description:** Add tests for error paths, GetItemsByActor, GetItemsByRepo, CountByType edge cases.  
        **Context:** Current 56% coverage. Many methods untested for error conditions.
 
-- [ ] **Add test coverage for pkg/errors and pkg/types**  
-       **Source:** `pkg/errors/errors.go`, `pkg/types/ids.go`  
-       **Description:** Sentinel errors and branded IDs have zero test coverage.  
-       **Context:** Quick wins — small files, simple logic.
+- [x] **pkg/errors and pkg/types tests**  
+       **Source:** `pkg/errors/errors_test.go`, `pkg/types/ids_test.go`  
+       **Description:** 4 error tests + 5 type tests.  
+       **Completed:** Round 1 audit sessions.
 
 - [ ] **Real GitHub PAT smoke test**  
        **Source:** `cmd/examples/github-sync/`  

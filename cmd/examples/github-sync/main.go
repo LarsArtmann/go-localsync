@@ -197,7 +197,7 @@ func exitCodeForError(err error) int {
 		return exitUsage
 	case errors.Is(err, pkgerrors.ErrUserNotFound):
 		return exitDataErr
-	case errors.Is(err, pkgerrors.ErrStorage):
+	case errors.Is(err, pkgerrors.ErrDatabase):
 		return exitNoInput
 	case errors.Is(err, pkgerrors.ErrSyncFailed):
 		return exitSoftware
