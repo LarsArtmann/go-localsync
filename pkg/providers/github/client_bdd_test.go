@@ -40,7 +40,7 @@ func (w *githubTestWorld) withRetryConfig() {
 func newGitHubTestClient(server *httptest.Server) *github.Client {
 	httpClient := &http.Client{}
 	client := github.NewClientWithHTTP(httpClient)
-	return client
+	return client.WithBaseURL(server.URL)
 }
 
 // newGitHubTestClientWithoutRateLimit creates a client with rate limiting disabled.
