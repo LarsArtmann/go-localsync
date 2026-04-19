@@ -3,16 +3,16 @@ package database
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"sort"
+	"strconv"
+	"strings"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
-// Migration version constants.
-const (
-	migrationVersionInitial       = 1
-	migrationVersionSourceIndexes = 2
-)
+//go:embed migrations/*.sql
+var migrationFS embed.FS
 
 type migration struct {
 	version int
@@ -20,17 +20,65 @@ type migration struct {
 	sql     string
 }
 
-var migrations = []migration{
-	{
-		version: migrationVersionInitial,
-		name:    "initial",
-		sql:     migration001Initial,
-	},
-	{
-		version: migrationVersionSourceIndexes,
-		name:    "source_indexes",
-		sql:     migration002SourceIndexes,
-	},
+var migrations []migration
+
+func init() {
+	entries, err := migrationFS.ReadDir("migrations")
+	if err != nil {
+		panic("failed to read embedded migrations: " + err.Error())
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".sql") {
+			continue
+		}
+
+		m, err := parseMigrationFile(entry.Name())
+		if err != nil {
+			panic("failed to parse migration " + entry.Name() + ": " + err.Error())
+		}
+
+		migrations = append(migrations, m)
+	}
+}
+
+func parseMigrationFile(filename string) (migration, error) {
+	content, err := migrationFS.ReadFile("migrations/" + filename)
+	if err != nil {
+		return migration{}, pkgerrors.Wrapf(err, "read migration file %s", filename)
+	}
+
+	version, name, err := parseMigrationFilename(filename)
+	if err != nil {
+		return migration{}, err
+	}
+
+	return migration{
+		version: version,
+		name:    name,
+		sql:     string(content),
+	}, nil
+}
+
+func parseMigrationFilename(filename string) (int, string, error) {
+	base := strings.TrimSuffix(filename, ".sql")
+	parts := strings.SplitN(base, "_", 2)
+	if len(parts) != 2 {
+		return 0, "", pkgerrors.WithDetail(
+			pkgerrors.ErrInvalidInput,
+			"migration filename must match NNN_name.sql: "+filename,
+		)
+	}
+
+	version, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, "", pkgerrors.WithDetail(
+			pkgerrors.ErrInvalidInput,
+			"migration version must be numeric: "+parts[0],
+		)
+	}
+
+	return version, parts[1], nil
 }
 
 func RunMigrations(db *sql.DB) error {
@@ -119,31 +167,3 @@ func applyMigration(db *sql.DB, m migration) error {
 
 	return tx.Commit()
 }
-
-const migration001Initial = `
-CREATE TABLE IF NOT EXISTS events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    github_id TEXT UNIQUE NOT NULL,
-    source TEXT NOT NULL DEFAULT 'github',
-    type TEXT NOT NULL,
-    actor_login TEXT,
-    actor_avatar_url TEXT,
-    repo_name TEXT,
-    repo_url TEXT,
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    raw_json JSON NOT NULL,
-    synced_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX IF NOT EXISTS idx_events_created_at ON events(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_events_type ON events(type);
-CREATE INDEX IF NOT EXISTS idx_events_github_id ON events(github_id);
-CREATE INDEX IF NOT EXISTS idx_events_actor_login ON events(actor_login);
-CREATE INDEX IF NOT EXISTS idx_events_repo_name ON events(repo_name);
-`
-
-const migration002SourceIndexes = `
-CREATE INDEX IF NOT EXISTS idx_events_source ON events(source);
-CREATE INDEX IF NOT EXISTS idx_events_source_github_id ON events(source, github_id);
-`
