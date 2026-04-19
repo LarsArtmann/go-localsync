@@ -242,7 +242,7 @@ func (s *ConflictAwareSyncer) SyncOperations(
 
 	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
-		return nil, nil, fmt.Errorf("fetch operations failed for source %q: %w", opts.Source, err)
+		return nil, nil, pkgerrors.Wrapf(err, "fetch operations failed for source %q", opts.Source)
 	}
 
 	operations := make([]*localsync.Operation[*provider.Item], 0, len(result.Items))
@@ -294,7 +294,7 @@ func (s *ConflictAwareSyncer) findExistingItem(
 ) (*provider.Item, error) {
 	existing, err := s.storage.GetByID(ctx, item.ID.Get())
 	if err != nil {
-		return nil, fmt.Errorf("failed to find existing item %q: %w", item.ID.Get(), err)
+		return nil, pkgerrors.Wrapf(err, "failed to find existing item %q", item.ID.Get())
 	}
 
 	return existing, nil
