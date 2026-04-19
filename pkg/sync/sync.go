@@ -153,11 +153,11 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
 	if err != nil {
 		return nil, pkgerrors.Wrapf(
-				err,
-				"incremental sync failed for source %q (maxPages=%d)",
-				opts.Source,
-				opts.MaxPages,
-			)
+			err,
+			"incremental sync failed for source %q (maxPages=%d)",
+			opts.Source,
+			opts.MaxPages,
+		)
 	}
 
 	syncResult, err := s.processIncrementalItems(ctx, latestItem, result.Items)

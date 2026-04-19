@@ -49,12 +49,12 @@ func main() {
 			"",
 			"Path to SQLite database (default: ~/.local/share/go-localsync/events.db)",
 		)
-		maxPages       = flag.Int("pages", 10, "Maximum number of pages to fetch")
-		incremental    = flag.Bool("incremental", true, "Only sync new events")
-		conflictAware  = flag.Bool("conflict-aware", false, "Use conflict-aware sync with CRDT resolution")
-		showStats      = flag.Bool("stats", false, "Show database statistics and exit")
-		showVersion = flag.Bool("version", false, "Show version information and exit")
-		verbose     = flag.Bool("verbose", false, "Enable verbose logging")
+		maxPages      = flag.Int("pages", 10, "Maximum number of pages to fetch")
+		incremental   = flag.Bool("incremental", true, "Only sync new events")
+		conflictAware = flag.Bool("conflict-aware", false, "Use conflict-aware sync with CRDT resolution")
+		showStats     = flag.Bool("stats", false, "Show database statistics and exit")
+		showVersion   = flag.Bool("version", false, "Show version information and exit")
+		verbose       = flag.Bool("verbose", false, "Enable verbose logging")
 	)
 
 	flag.Parse()
@@ -161,9 +161,9 @@ func main() {
 		}
 
 		fmt.Printf(
-				"Sync completed: fetched=%d, upserted=%d, conflicts=%d, skipped=%d, errors=%d\n",
-				cr.Fetched, cr.Upserted, cr.Conflicts, cr.Skipped, cr.Errors,
-			)
+			"Sync completed: fetched=%d, upserted=%d, conflicts=%d, skipped=%d, errors=%d\n",
+			cr.Fetched, cr.Upserted, cr.Conflicts, cr.Skipped, cr.Errors,
+		)
 
 		return
 	}
