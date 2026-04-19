@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
@@ -130,7 +131,7 @@ func (m *MockStorage) GetByID(ctx context.Context, id string) (*provider.Item, e
 		}
 	}
 
-	return nil, nil //nolint:nilnil // not found is not an error condition
+	return nil, pkgerrors.ErrNotFound
 }
 
 func (m *MockStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
@@ -223,7 +224,7 @@ func (f *FailingStorage) UpsertBatch(_ context.Context, _ []*provider.Item) erro
 }
 
 func (f *FailingStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
-	return nil, errors.New("not found")
+	return nil, pkgerrors.ErrNotFound
 }
 
 func (f *FailingStorage) GetLatest(ctx context.Context) (*provider.Item, error) {

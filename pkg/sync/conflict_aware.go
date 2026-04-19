@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"errors"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -188,6 +189,10 @@ func (s *ConflictAwareSyncer) findExistingItem(
 ) (*provider.Item, error) {
 	existing, err := s.storage.GetByID(ctx, item.ID.Get())
 	if err != nil {
+		if errors.Is(err, pkgerrors.ErrNotFound) {
+			return nil, nil
+		}
+
 		return nil, pkgerrors.Wrapf(err, "failed to find existing item %q", item.ID.Get())
 	}
 

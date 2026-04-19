@@ -17,9 +17,10 @@ type Storage interface {
 	// UpsertBatch inserts or updates multiple items in a single transaction.
 	// On error, no items are persisted.
 	UpsertBatch(ctx context.Context, items []*provider.Item) error
-	// GetByID retrieves a single item by its source ID. Returns nil if not found.
+	// GetByID retrieves a single item by its source ID.
+	// Returns nil and ErrNotFound if not found.
 	GetByID(ctx context.Context, id string) (*provider.Item, error)
-	// GetLatest returns the most recently created item, or nil if empty.
+	// GetLatest returns the most recently created item, or ErrNotFound if empty.
 	GetLatest(ctx context.Context) (*provider.Item, error)
 	// GetItems retrieves items with pagination.
 	GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error)

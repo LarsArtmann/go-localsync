@@ -11,6 +11,8 @@ import (
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // testItem creates a consistent test item for use across multiple tests.
@@ -190,15 +192,11 @@ func TestSQLiteStorage(t *testing.T) {
 		}
 	})
 
-	t.Run("GetByID returns nil nil when not found", func(t *testing.T) {
+	t.Run("GetByID returns ErrNotFound when not found", func(t *testing.T) {
 		item, err := store.GetByID(ctx, "nonexistent")
-		if err != nil {
-			t.Fatalf("Expected nil error, got %v", err)
-		}
-
-		if item != nil {
-			t.Errorf("Expected nil item, got %+v", item)
-		}
+		require.Error(t, err)
+		assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
+		assert.Nil(t, item)
 	})
 
 	t.Run("GetItemsByActor filters by actor login", func(t *testing.T) {
@@ -292,13 +290,9 @@ func TestSQLiteStorage(t *testing.T) {
 		assertItemCount(t, store, ctx, 0)
 
 		item, err := store.GetByID(ctx, "12345")
-		if err != nil {
-			t.Fatalf("GetByID failed: %v", err)
-		}
-
-		if item != nil {
-			t.Error("Expected nil item after delete")
-		}
+		require.Error(t, err)
+		assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
+		assert.Nil(t, item)
 	})
 
 	t.Run("DeleteAll removes all items", func(t *testing.T) {
