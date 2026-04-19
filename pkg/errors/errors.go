@@ -29,3 +29,8 @@ func WithUserDetail(err error, username string) error {
 func Wrap(err error, message string) error {
 	return errors.Wrap(err, message)
 }
+
+// Wrapf wraps an error with a formatted message.
+func Wrapf(err error, format string, args ...any) error {
+	return errors.Wrapf(err, format, args...)
+}
