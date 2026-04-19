@@ -7,9 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"time"
+
+	"charm.land/log/v2"
 
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -123,7 +124,7 @@ func (c *Client) Fetch(
 	for _, e := range activity {
 		item, err := convertEvent(e)
 		if err != nil {
-			slog.Warn("failed to convert GitHub event", "eventID", e.GetID(), "error", err)
+			log.Warn("failed to convert GitHub event", "eventID", e.GetID(), "error", err)
 
 			continue
 		}
