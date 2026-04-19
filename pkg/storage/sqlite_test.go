@@ -380,7 +380,7 @@ func TestSQLiteStorage_UpsertBatch(t *testing.T) {
 		}
 	})
 
-	t.Run("rolls back on failure", func(t *testing.T) {
+	t.Run("adds items after previous batch", func(t *testing.T) {
 		badItems := []*provider.Item{
 			{
 				ID:         types.NewItemID("batch-ok"),
