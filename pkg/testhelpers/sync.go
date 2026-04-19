@@ -38,11 +38,12 @@ func NewMinimalTestItem(id, eventType string, createdAt time.Time) *provider.Ite
 
 // mockProvider implements provider.Provider for testing.
 type MockProvider struct {
-	NameVal      string
-	ItemsVal     []*provider.Item
-	FetchErr     error
-	FetchCalls   int
-	RateLimitVal *provider.RateLimitInfo
+	NameVal       string
+	ItemsVal      []*provider.Item
+	FetchErr      error
+	FetchCalls    int
+	RateLimitVal  *provider.RateLimitInfo
+	RateLimitErr  error
 }
 
 func (m *MockProvider) Name() string {
@@ -74,7 +75,7 @@ func (m *MockProvider) FetchAll(
 }
 
 func (m *MockProvider) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, error) {
-	return m.RateLimitVal, m.FetchErr
+	return m.RateLimitVal, m.RateLimitErr
 }
 
 // NewMockProviderWithItems creates a mock provider with standard test items.
