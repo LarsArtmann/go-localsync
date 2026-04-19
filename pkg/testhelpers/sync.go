@@ -124,9 +124,9 @@ func (m *MockStorage) UpsertBatch(_ context.Context, items []*provider.Item) err
 	return nil
 }
 
-func (m *MockStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
+func (m *MockStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
 	for _, item := range m.ItemsVal {
-		if item.ID.Get() == id {
+		if item.ID.Get() == id.Get() {
 			return item, nil
 		}
 	}
@@ -196,7 +196,7 @@ func (m *MockStorage) GetItemsBySource(_ context.Context, _ string, _, _ int) ([
 	return m.ItemsVal, nil
 }
 
-func (m *MockStorage) Delete(_ context.Context, _ string) error {
+func (m *MockStorage) Delete(_ context.Context, _ types.ItemID) error {
 	return nil
 }
 
@@ -223,7 +223,7 @@ func (f *FailingStorage) UpsertBatch(_ context.Context, _ []*provider.Item) erro
 	return errors.New("disk full")
 }
 
-func (f *FailingStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
+func (f *FailingStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
 	return nil, pkgerrors.ErrNotFound
 }
 
@@ -288,7 +288,7 @@ func (f *FailingStorage) GetItemsBySource(_ context.Context, _ string, _, _ int)
 	return nil, nil
 }
 
-func (f *FailingStorage) Delete(_ context.Context, _ string) error {
+func (f *FailingStorage) Delete(_ context.Context, _ types.ItemID) error {
 	return errors.New("disk full")
 }
 

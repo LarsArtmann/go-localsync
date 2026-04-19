@@ -187,7 +187,7 @@ func (s *ConflictAwareSyncer) findExistingItem(
 	ctx context.Context,
 	item *provider.Item,
 ) (*provider.Item, error) {
-	existing, err := s.storage.GetByID(ctx, item.ID.Get())
+	existing, err := s.storage.GetByID(ctx, item.ID)
 	if err != nil {
 		if errors.Is(err, pkgerrors.ErrNotFound) {
 			return nil, nil

@@ -74,14 +74,14 @@ func (s *SQLiteStorage) UpsertBatch(ctx context.Context, items []*provider.Item)
 	return nil
 }
 
-func (s *SQLiteStorage) GetByID(ctx context.Context, id string) (*provider.Item, error) {
-	e, err := s.querier.GetEventByGithubID(ctx, types.NewGithubEventID(id))
+func (s *SQLiteStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
+	e, err := s.querier.GetEventByGithubID(ctx, types.NewGithubEventID(id.Get()))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, pkgerrors.ErrNotFound
 		}
 
-		return nil, fmt.Errorf("%w: get item by ID %q: %w", pkgerrors.ErrDatabase, id, err)
+	return nil, fmt.Errorf("%w: get item by ID %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
 	}
 
 	return toItem(e), nil
@@ -241,9 +241,9 @@ func (s *SQLiteStorage) GetItemsSince(
 	return convertItems(events), nil
 }
 
-func (s *SQLiteStorage) Delete(ctx context.Context, id string) error {
-	if err := s.querier.DeleteEventByGithubID(ctx, types.NewGithubEventID(id)); err != nil {
-		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, id, err)
+func (s *SQLiteStorage) Delete(ctx context.Context, id types.ItemID) error {
+	if err := s.querier.DeleteEventByGithubID(ctx, types.NewGithubEventID(id.Get())); err != nil {
+		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
 	}
 
 	return nil

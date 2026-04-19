@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // Storage defines the interface for storing and retrieving sync items.
@@ -19,7 +20,7 @@ type Storage interface {
 	UpsertBatch(ctx context.Context, items []*provider.Item) error
 	// GetByID retrieves a single item by its source ID.
 	// Returns nil and ErrNotFound if not found.
-	GetByID(ctx context.Context, id string) (*provider.Item, error)
+	GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error)
 	// GetLatest returns the most recently created item, or ErrNotFound if empty.
 	GetLatest(ctx context.Context) (*provider.Item, error)
 	// GetItems retrieves items with pagination.
@@ -51,7 +52,7 @@ type Storage interface {
 	// GetItemsSince retrieves items created after the given timestamp.
 	GetItemsSince(ctx context.Context, since time.Time) ([]*provider.Item, error)
 	// Delete removes an item by its source ID.
-	Delete(ctx context.Context, id string) error
+	Delete(ctx context.Context, id types.ItemID) error
 	// DeleteAll removes all items.
 	DeleteAll(ctx context.Context) error
 	// Count returns the total number of items.

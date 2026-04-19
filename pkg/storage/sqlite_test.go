@@ -178,7 +178,7 @@ func TestSQLiteStorage(t *testing.T) {
 	})
 
 	t.Run("GetByID returns item when found", func(t *testing.T) {
-		item, err := store.GetByID(ctx, "12345")
+		item, err := store.GetByID(ctx, types.NewItemID("12345"))
 		if err != nil {
 			t.Fatalf("GetByID failed: %v", err)
 		}
@@ -193,7 +193,7 @@ func TestSQLiteStorage(t *testing.T) {
 	})
 
 	t.Run("GetByID returns ErrNotFound when not found", func(t *testing.T) {
-		item, err := store.GetByID(ctx, "nonexistent")
+		item, err := store.GetByID(ctx, types.NewItemID("nonexistent"))
 		require.Error(t, err)
 		assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
 		assert.Nil(t, item)
@@ -282,14 +282,14 @@ func TestSQLiteStorage(t *testing.T) {
 	})
 
 	t.Run("Delete removes item", func(t *testing.T) {
-		err := store.Delete(ctx, "12345")
+		err := store.Delete(ctx, types.NewItemID("12345"))
 		if err != nil {
 			t.Fatalf("Delete failed: %v", err)
 		}
 
 		assertItemCount(t, store, ctx, 0)
 
-		item, err := store.GetByID(ctx, "12345")
+		item, err := store.GetByID(ctx, types.NewItemID("12345"))
 		require.Error(t, err)
 		assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
 		assert.Nil(t, item)
@@ -354,7 +354,7 @@ func TestSQLiteStorage_UpsertBatch(t *testing.T) {
 
 		assertItemCount(t, store, ctx, 2)
 
-		item, err := store.GetByID(ctx, "batch-1")
+		item, err := store.GetByID(ctx, types.NewItemID("batch-1"))
 		if err != nil {
 			t.Fatalf("GetByID failed: %v", err)
 		}
