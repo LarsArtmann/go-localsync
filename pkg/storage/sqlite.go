@@ -29,7 +29,7 @@ func NewSQLiteStorage(dbc *sql.DB) *SQLiteStorage {
 func Open(path string) (*SQLiteStorage, error) {
 	dbc, err := database.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open storage at %s: %w", path, err)
+		return nil, pkgerrors.Wrapf(err, "failed to open storage at %s", path)
 	}
 
 	return NewSQLiteStorage(dbc), nil
