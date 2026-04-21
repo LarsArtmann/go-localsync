@@ -13,7 +13,6 @@ import (
 	"syscall"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-localsync/internal/database"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/providers/github"
 	"github.com/larsartmann/go-localsync/pkg/storage"
@@ -49,6 +48,7 @@ func main() {
 			"",
 			"Path to SQLite database (default: ~/.local/share/go-localsync/events.db)",
 		)
+		backend       = flag.String("backend", "sqlite", "Storage backend: sqlite, memory")
 		maxPages      = flag.Int("pages", 10, "Maximum number of pages to fetch")
 		incremental   = flag.Bool("incremental", true, "Only sync new events")
 		conflictAware = flag.Bool(
@@ -73,7 +73,7 @@ func main() {
 		logger.SetLevel(log.DebugLevel)
 	}
 
-	if *dbPath == "" {
+	if *dbPath == "" && *backend == "sqlite" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			logger.Error("Failed to get home directory", "error", err)
@@ -83,25 +83,30 @@ func main() {
 		*dbPath = filepath.Join(homeDir, ".local", "share", "go-localsync", "events.db")
 	}
 
-	if err := os.MkdirAll(filepath.Dir(*dbPath), 0o755); err != nil {
-		logger.Error("Failed to create database directory", "error", err)
-		os.Exit(exitNoInput)
+	if *backend == "sqlite" {
+		if err := os.MkdirAll(filepath.Dir(*dbPath), 0o755); err != nil {
+			logger.Error("Failed to create database directory", "error", err)
+			os.Exit(exitNoInput)
+		}
 	}
 
-	dbc, err := database.Open(*dbPath)
+	storeCfg := storage.NewConfig(
+		storage.WithBackend(storage.Backend(*backend)),
+		storage.WithDBPath(*dbPath),
+	)
+
+	store, err := storage.NewStorage(storeCfg)
 	if err != nil {
-		logger.Error("Failed to open database", "error", err)
+		logger.Error("Failed to create storage", "error", err)
 		os.Exit(exitNoInput)
 	}
 
 	defer func() {
-		err := dbc.Close()
+		err := store.Close()
 		if err != nil {
-			logger.Error("Failed to close database", "error", err)
+			logger.Error("Failed to close storage", "error", err)
 		}
 	}()
-
-	store := storage.NewSQLiteStorage(dbc)
 
 	if *showStats {
 		stats, err := store.Count(context.Background())
