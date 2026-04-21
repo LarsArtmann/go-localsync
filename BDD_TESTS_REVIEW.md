@@ -12,9 +12,9 @@
 |---|---|---|
 | `pkg/storage/sqlite_bdd_test.go` | 14 | SQLite storage CRUD, filtering, pagination |
 | `pkg/storage/memory_storage_bdd_test.go` | 9 | Memory storage edge cases (concurrency, boundaries, batching) |
-| `pkg/sync/sync_bdd_test.go` | 14 | Full sync, incremental sync, error handling |
+| `pkg/sync/sync_bdd_test.go` | 22 | Full sync, incremental sync, error handling, progress callbacks |
 
-**Total: 37 specs**
+**Total: 45 specs**
 
 ### Supporting files
 
@@ -76,13 +76,24 @@ Unique scenarios that complement (not duplicate) the compliance suite:
 
 Uses real SQLite storage + mock provider:
 
+**Full sync (Sync):**
 - First sync: fetch 3 events, store all, preserve event types
 - Double sync: same data twice → no duplicates
-- Incremental sync: skip items at or older than latest stored
 - Provider failure: returns error, no items stored
-- Statistics: total count and per-type breakdown
 - Storage failure during sync: batch upsert returns error
 - Nil options: returns error
+- Statistics: total count and per-type breakdown
+- OnProgress callback invoked after sync
+
+**Incremental sync (SyncIncremental):**
+- Incremental with new items: skip items at or older than latest, store new ones
+- **Empty store fallback** — `GetLatest` returns `ErrNotFound` → falls back to full `Sync`
+- **Nil options** → error
+- **Empty source** → validation error
+- **GetLatest non-ErrNotFound error** — wrapped error returned (uses `getLatestErrStorage` test helper)
+- **Provider failure during incremental** — returns fetch error
+- **Storage failure during incremental batch upsert** — returns error
+- **All items fail validation** — reports errors, stores nothing new
 
 ---
 

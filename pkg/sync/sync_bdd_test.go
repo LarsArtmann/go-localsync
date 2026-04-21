@@ -262,5 +262,155 @@ var _ = Describe("Sync Engine", func() {
 				Expect(world.err).To(HaveOccurred())
 			})
 		})
+
+		Context("when I pass nil options to SyncIncremental", func() {
+			JustBeforeEach(func() {
+				world.result, world.err = world.syncer.SyncIncremental(world.ctx, nil)
+			})
+
+			It("should return an error", func() {
+				Expect(world.err).To(HaveOccurred())
+			})
+		})
+
+		Context("when I pass empty source to SyncIncremental", func() {
+			JustBeforeEach(func() {
+				world.result, world.err = world.syncer.SyncIncremental(world.ctx, &sync.SyncOptions{
+					Source:   "",
+					MaxPages: 10,
+				})
+			})
+
+			It("should return a validation error", func() {
+				Expect(world.err).To(HaveOccurred())
+				Expect(world.err.Error()).To(ContainSubstring("invalid input"))
+			})
+		})
+
+		Context("when storage is empty and I call SyncIncremental", func() {
+			BeforeEach(func() {
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("1", "PushEvent", time.Now()),
+					testhelpers.NewTestItem("2", "IssuesEvent", time.Now()),
+				}
+			})
+
+			JustBeforeEach(func() {
+				world.syncIncremental()
+			})
+
+			It("should fall back to full sync", func() {
+				Expect(world.err).ToNot(HaveOccurred())
+				Expect(world.result.Fetched).To(Equal(2))
+				Expect(world.countItems()).To(Equal(int64(2)))
+			})
+		})
+
+		Context("when GetLatest fails with a non-ErrNotFound error during SyncIncremental", func() {
+			BeforeEach(func() {
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("1", "PushEvent", time.Now()),
+				}
+				world.storage = &getLatestErrStorage{MockStorage: &testhelpers.MockStorage{}, err: errors.New("corrupt index")}
+				world.syncer = sync.NewSyncer(world.provider, world.storage, log.New(nil))
+			})
+
+			JustBeforeEach(func() {
+				world.syncIncremental()
+			})
+
+			It("should return the wrapped error", func() {
+				Expect(world.err).To(HaveOccurred())
+				Expect(world.err.Error()).To(ContainSubstring("corrupt index"))
+			})
+		})
+
+		Context("when the provider fails during SyncIncremental", func() {
+			BeforeEach(func() {
+				oldItem := testhelpers.NewTestItem("old", "PushEvent", time.Now().Add(-2*time.Hour))
+				Expect(world.storage.Upsert(world.ctx, oldItem)).To(Succeed())
+
+				world.provider.FetchErr = errors.New("rate limited")
+			})
+
+			JustBeforeEach(func() {
+				world.syncIncremental()
+			})
+
+			It("should return the fetch error", func() {
+				Expect(world.err).To(HaveOccurred())
+				Expect(world.err.Error()).To(ContainSubstring("rate limited"))
+			})
+		})
+
+		Context("when storage fails during SyncIncremental batch upsert", func() {
+			BeforeEach(func() {
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("1", "PushEvent", time.Now()),
+				}
+
+				world.storage = &testhelpers.FailingStorage{}
+				world.syncer = sync.NewSyncer(world.provider, world.storage, log.New(nil))
+			})
+
+			JustBeforeEach(func() {
+				world.syncIncremental()
+			})
+
+			It("should report errors when batch upsert fails", func() {
+				Expect(world.err).To(HaveOccurred())
+			})
+		})
+
+		Context("when all fetched items fail validation during SyncIncremental", func() {
+			BeforeEach(func() {
+				oldItem := testhelpers.NewTestItem("old", "PushEvent", time.Now().Add(-2*time.Hour))
+				Expect(world.storage.Upsert(world.ctx, oldItem)).To(Succeed())
+
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewMinimalTestItem("inv-1", "", time.Now()),
+				}
+			})
+
+			JustBeforeEach(func() {
+				world.syncIncremental()
+			})
+
+			It("should report errors for all invalid items without storing anything new", func() {
+				Expect(world.err).ToNot(HaveOccurred())
+				Expect(world.result.Errors).To(BeNumerically(">=", 1))
+			})
+		})
+
+		Context("when OnProgress callback is set", func() {
+			BeforeEach(func() {
+				world.provider.ItemsVal = []*provider.Item{
+					testhelpers.NewTestItem("1", "PushEvent", time.Now()),
+				}
+			})
+
+			It("should invoke the callback after sync", func() {
+				var progressCalls int
+				_, err := world.syncer.Sync(world.ctx, &sync.SyncOptions{
+					Source:   "testuser",
+					MaxPages: 10,
+					OnProgress: func(fetched, skipped, errors int) {
+						progressCalls++
+					},
+				})
+				Expect(err).ToNot(HaveOccurred())
+				Expect(progressCalls).To(Equal(1))
+			})
+		})
 	})
 })
+
+// getLatestErrStorage wraps MockStorage but returns a custom error on GetLatest.
+type getLatestErrStorage struct {
+	*testhelpers.MockStorage
+	err error
+}
+
+func (s *getLatestErrStorage) GetLatest(_ context.Context) (*provider.Item, error) {
+	return nil, s.err
+}
