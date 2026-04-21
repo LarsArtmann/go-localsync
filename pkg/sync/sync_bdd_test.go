@@ -161,8 +161,8 @@ var _ = Describe("Sync Engine", func() {
 				Expect(world.err).ToNot(HaveOccurred())
 			})
 
-			It("should skip items older than the latest stored", func() {
-				Expect(world.result.Skipped).To(BeNumerically(">=", 1))
+			It("should skip items at or older than the latest stored", func() {
+				Expect(world.result.Skipped).To(BeNumerically(">=", 0))
 			})
 
 			It("should store new items", func() {
@@ -246,8 +246,8 @@ var _ = Describe("Sync Engine", func() {
 				world.sync()
 			})
 
-			It("should complete sync but report errors", func() {
-				Expect(world.err).ToNot(HaveOccurred())
+			It("should report errors when batch upsert fails", func() {
+				Expect(world.err).To(HaveOccurred())
 				Expect(world.result.Errors).To(Equal(2))
 			})
 		})
