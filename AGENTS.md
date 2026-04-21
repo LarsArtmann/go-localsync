@@ -10,7 +10,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                  |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
-| `pkg/storage/`              | Storage abstraction with SQLite backend                                                                |
+| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, in-memory)                                                      |
 | `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID`) |
 | `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
@@ -61,7 +61,7 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 | -------------------------- | ----- | ----------------------------------------------------------- |
 | `internal/database`        | 6     | ✅ Migration tests (idempotency, ordering, schema, indexes) |
 | `pkg/providers/github`     | 21    | ✅ Client, fetch, retry, error handling                     |
-| `pkg/storage`              | suite | ✅ SQLite CRUD operations                                   |
+| `pkg/storage`              | 44+   | ✅ SQLite + Memory compliance (22 tests each)                            |
 | `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                             |
 | `cmd/examples/github-sync` | 0     | ⬜ No tests                                                 |
 | `pkg/errors`               | 0     | ⬜ No tests                                                 |
@@ -70,6 +70,28 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 | `pkg/testhelpers`          | 0     | ⬜ Helper package                                           |
 
 Run: `go test ./... -count=1`
+
+## Pluggable Storage Architecture
+
+Storage backends are selected via `storage.NewStorage(Config)`. Switch-based factory, no global registries. External backends implement the `Storage` interface directly.
+
+| Backend       | Flag/Config     | Use Case                    |
+| ------------- | --------------- | --------------------------- |
+| `sqlite`      | `--backend sqlite` (default) | Persistent production storage |
+| `memory`      | `--backend memory` | Testing, development         |
+
+### Adding a New Backend
+
+1. Implement the `storage.Storage` interface (16 methods)
+2. Add case to `NewStorage` switch in `config.go`
+3. Run compliance tests: `go test ./pkg/storage/ -run TestStorageCompliance`
+4. Both SQLite and Memory must pass the same compliance suite
+
+### CLI Usage
+
+```bash
+go run ./cmd/examples/github-sync --backend memory
+```
 
 ## Provider Development
 
