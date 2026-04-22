@@ -3,6 +3,8 @@ package storage_test
 import (
 	"context"
 	"sort"
+	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -36,6 +38,7 @@ func TestStorageCompliance_SQLite(t *testing.T) {
 	factory := func(t *testing.T) (storage.Storage, func()) {
 		db, err := database.Open(":memory:")
 		require.NoError(t, err)
+		db.SetMaxOpenConns(1)
 		s := storage.NewSQLiteStorage(db)
 		return s, func() { _ = s.Close() }
 	}
@@ -272,9 +275,7 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		err := s.Delete(ctx, types.NewItemID("nonexistent"))
-		if err != nil {
-			assert.ErrorIs(t, err, pkgerrors.ErrNotFound)
-		}
+		assert.NoError(t, err)
 	})
 
 	t.Run("DeleteAll", func(t *testing.T) {
@@ -338,5 +339,121 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		assert.NoError(t, s.Close())
+	})
+
+	t.Run("ConcurrentUpsert", func(t *testing.T) {
+		s, cleanup := factory(t)
+		defer cleanup()
+
+		const goroutines = 20
+		var wg sync.WaitGroup
+		errs := make([]error, goroutines)
+
+		now := time.Now()
+		for i := range goroutines {
+			wg.Add(1)
+
+			go func(idx int) {
+				defer wg.Done()
+
+				errs[idx] = s.Upsert(ctx, makeItem(
+					strconv.Itoa(idx),
+					"github",
+					"PushEvent",
+					"alice",
+					"org/repo",
+					now.Add(time.Duration(idx)*time.Millisecond),
+				))
+			}(i)
+		}
+
+		wg.Wait()
+
+		for i, err := range errs {
+			assert.NoError(t, err, "goroutine %d", i)
+		}
+
+		count, err := s.Count(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, int64(goroutines), count)
+	})
+
+	t.Run("ConcurrentUpsertBatch", func(t *testing.T) {
+		s, cleanup := factory(t)
+		defer cleanup()
+
+		const batches = 10
+		const batchSize = 5
+		var wg sync.WaitGroup
+		errs := make([]error, batches)
+
+		for b := range batches {
+			wg.Add(1)
+
+			go func(batchIdx int) {
+				defer wg.Done()
+
+				items := make([]*provider.Item, batchSize)
+				for i := range batchSize {
+					id := string(rune('A'+batchIdx*batchSize+i)) + "-" + string(rune('0'+batchIdx))
+					items[i] = makeItem(id, "github", "PushEvent", "alice", "org/repo", time.Now())
+				}
+
+				errs[batchIdx] = s.UpsertBatch(ctx, items)
+			}(b)
+		}
+
+		wg.Wait()
+
+		for i, err := range errs {
+			assert.NoError(t, err, "batch %d", i)
+		}
+
+		count, err := s.Count(ctx)
+		require.NoError(t, err)
+		assert.Equal(t, int64(batches*batchSize), count)
+	})
+
+	t.Run("ConcurrentReadsAndWrites", func(t *testing.T) {
+		s, cleanup := factory(t)
+		defer cleanup()
+
+		for i := range 10 {
+			require.NoError(t, s.Upsert(ctx, makeItem(
+				string(rune('a'+i)),
+				"github",
+				"PushEvent",
+				"alice",
+				"org/repo",
+				time.Now().Add(time.Duration(i)*time.Second),
+			)))
+		}
+
+		const goroutines = 30
+		var wg sync.WaitGroup
+		errs := make([]error, goroutines)
+
+		for i := range goroutines {
+			wg.Add(1)
+
+			go func(idx int) {
+				defer wg.Done()
+
+				switch idx % 3 {
+				case 0:
+					_, errs[idx] = s.GetByID(ctx, types.NewItemID(string(rune('a'+idx%10))))
+				case 1:
+					_, errs[idx] = s.GetItems(ctx, 10, 0)
+				case 2:
+					_, errs[idx] = s.Count(ctx)
+				}
+			}(i)
+		}
+
+		wg.Wait()
+
+		for i, err := range errs {
+			assert.NoError(t, err, "goroutine %d", i)
+		}
 	})
 }

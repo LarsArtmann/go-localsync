@@ -17,7 +17,7 @@ func TestNewStringIDs(t *testing.T) {
 		{"NewActorID", NewActorID("octocat").Get(), "octocat"},
 		{"NewRepoID", NewRepoID("org/repo").Get(), "org/repo"},
 		{"NewEventTypeID", NewEventTypeID("PushEvent").Get(), "PushEvent"},
-		{"NewGithubEventID", NewGithubEventID("999").Get(), "999"},
+		{"NewSourceItemID", NewSourceItemID("999").Get(), "999"},
 	}
 
 	for _, tt := range tests {

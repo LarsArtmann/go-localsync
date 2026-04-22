@@ -27,13 +27,13 @@ type Querier interface {
 	DeleteAllEvents(ctx context.Context) error
 	// Delete an event by its GitHub ID
 	//
-	//  DELETE FROM events WHERE github_id = ?
-	DeleteEventByGithubID(ctx context.Context, githubID types.GithubEventID) error
+	//  DELETE FROM events WHERE source_id = ?
+	DeleteEventBySourceID(ctx context.Context, sourceItemID types.SourceItemID) error
 	// Get a single event by its GitHub ID
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
-	//  WHERE github_id = ?
-	GetEventByGithubID(ctx context.Context, githubID types.GithubEventID) (*Events, error)
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  WHERE source_id = ?
+	GetEventBySourceID(ctx context.Context, sourceItemID types.SourceItemID) (*Events, error)
 	// Get distinct event types in the database
 	//
 	//  SELECT DISTINCT type FROM events
@@ -41,54 +41,54 @@ type Querier interface {
 	GetEventTypes(ctx context.Context) ([]string, error)
 	// Get all events, ordered by creation date (newest first)
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  ORDER BY created_at DESC
 	//  LIMIT ? OFFSET ?
 	GetEvents(ctx context.Context, arg *GetEventsParams) ([]*Events, error)
 	// Get events filtered by actor login
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  WHERE actor_login = ?
 	//  ORDER BY created_at DESC
 	//  LIMIT ? OFFSET ?
 	GetEventsByActor(ctx context.Context, arg *GetEventsByActorParams) ([]*Events, error)
 	// Get events filtered by repository name
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  WHERE repo_name = ?
 	//  ORDER BY created_at DESC
 	//  LIMIT ? OFFSET ?
 	GetEventsByRepo(ctx context.Context, arg *GetEventsByRepoParams) ([]*Events, error)
 	// Get events filtered by source provider
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  WHERE source = ?
 	//  ORDER BY created_at DESC
 	//  LIMIT ? OFFSET ?
 	GetEventsBySource(ctx context.Context, arg *GetEventsBySourceParams) ([]*Events, error)
 	// Get events filtered by type
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  WHERE type = ?
 	//  ORDER BY created_at DESC
 	//  LIMIT ? OFFSET ?
 	GetEventsByType(ctx context.Context, arg *GetEventsByTypeParams) ([]*Events, error)
 	// Get events created after a specific timestamp (for incremental sync)
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  WHERE created_at > ?
 	//  ORDER BY created_at DESC
 	GetEventsSince(ctx context.Context, createdAt time.Time) ([]*Events, error)
 	// Get the most recent event by GitHub timestamp (for incremental sync)
 	//
-	//  SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
+	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  ORDER BY created_at DESC
 	//  LIMIT 1
 	GetLatestEvent(ctx context.Context) (*Events, error)
 	// Insert an event, updating if it already exists (conflict resolution)
 	//
 	//  INSERT INTO events (
-	//      github_id,
+	//      source_id,
 	//      source,
 	//      type,
 	//      actor_login,
@@ -100,7 +100,7 @@ type Querier interface {
 	//      raw_json,
 	//      synced_at
 	//  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-	//  ON CONFLICT(github_id) DO UPDATE SET
+	//  ON CONFLICT(source_id) DO UPDATE SET
 	//      source = excluded.source,
 	//      type = excluded.type,
 	//      actor_login = excluded.actor_login,

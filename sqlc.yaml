@@ -45,14 +45,14 @@ sql:
               import: "github.com/larsartmann/go-localsync/pkg/types"
               package: "types"
               type: "EventID"
-          - column: "events.github_id"
+          - column: "events.source_id"
             go_type:
               import: "github.com/larsartmann/go-localsync/pkg/types"
               package: "types"
-              type: "GithubEventID"
+              type: "SourceItemID"
         rename:
           id: "ID"
-          github_id: "GithubID"
+          source_id: "SourceID"
           url: "URL"
           api: "API"
           json: "JSON"

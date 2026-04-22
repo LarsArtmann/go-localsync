@@ -1,7 +1,7 @@
 -- name: UpsertEvent :exec
 -- Insert an event, updating if it already exists (conflict resolution)
 INSERT INTO events (
-    github_id,
+    source_id,
     source,
     type,
     actor_login,
@@ -13,7 +13,7 @@ INSERT INTO events (
     raw_json,
     synced_at
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-ON CONFLICT(github_id) DO UPDATE SET
+ON CONFLICT(source_id) DO UPDATE SET
     source = excluded.source,
     type = excluded.type,
     actor_login = excluded.actor_login,
@@ -24,15 +24,15 @@ ON CONFLICT(github_id) DO UPDATE SET
     raw_json = excluded.raw_json;
 
 -- name: GetLatestEvent :one
--- Get the most recent event by GitHub timestamp (for incremental sync)
+-- Get the most recent event by creation timestamp (for incremental sync)
 SELECT * FROM events
 ORDER BY created_at DESC
 LIMIT 1;
 
--- name: GetEventByGithubID :one
--- Get a single event by its GitHub ID
+-- name: GetEventBySourceID :one
+-- Get a single event by its source ID
 SELECT * FROM events
-WHERE github_id = ?;
+WHERE source_id = ?;
 
 -- name: GetEvents :many
 -- Get all events, ordered by creation date (newest first)
@@ -83,9 +83,9 @@ SELECT COUNT(*) as count FROM events;
 SELECT COUNT(*) as count FROM events
 WHERE type = ?;
 
--- name: DeleteEventByGithubID :exec
--- Delete an event by its GitHub ID
-DELETE FROM events WHERE github_id = ?;
+-- name: DeleteEventBySourceID :exec
+-- Delete an event by its source ID
+DELETE FROM events WHERE source_id = ?;
 
 -- name: DeleteAllEvents :exec
 -- Delete all events (use with caution)

@@ -14,7 +14,7 @@ import (
 
 type Events struct {
 	ID             types.EventID       `db:"id" json:"id"`
-	GithubID       types.GithubEventID `db:"github_id" json:"githubId"`
+	SourceID        types.SourceItemID  `db:"source_id" json:"sourceId"`
 	Source         string              `db:"source" json:"source"`
 	Type           string              `db:"type" json:"type"`
 	ActorLogin     sql.NullString      `db:"actor_login" json:"actorLogin"`

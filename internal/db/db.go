@@ -33,11 +33,11 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.deleteAllEventsStmt, err = db.PrepareContext(ctx, DeleteAllEvents); err != nil {
 		return nil, fmt.Errorf("error preparing query DeleteAllEvents: %w", err)
 	}
-	if q.deleteEventByGithubIDStmt, err = db.PrepareContext(ctx, DeleteEventByGithubID); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteEventByGithubID: %w", err)
+	if q.deleteEventBySourceIDStmt, err = db.PrepareContext(ctx, DeleteEventBySourceID); err != nil {
+		return nil, fmt.Errorf("error preparing query DeleteEventBySourceID: %w", err)
 	}
-	if q.getEventByGithubIDStmt, err = db.PrepareContext(ctx, GetEventByGithubID); err != nil {
-		return nil, fmt.Errorf("error preparing query GetEventByGithubID: %w", err)
+	if q.getEventBySourceIDStmt, err = db.PrepareContext(ctx, GetEventBySourceID); err != nil {
+		return nil, fmt.Errorf("error preparing query GetEventBySourceID: %w", err)
 	}
 	if q.getEventTypesStmt, err = db.PrepareContext(ctx, GetEventTypes); err != nil {
 		return nil, fmt.Errorf("error preparing query GetEventTypes: %w", err)
@@ -86,14 +86,14 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing deleteAllEventsStmt: %w", cerr)
 		}
 	}
-	if q.deleteEventByGithubIDStmt != nil {
-		if cerr := q.deleteEventByGithubIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteEventByGithubIDStmt: %w", cerr)
+	if q.deleteEventBySourceIDStmt != nil {
+		if cerr := q.deleteEventBySourceIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing deleteEventBySourceIDStmt: %w", cerr)
 		}
 	}
-	if q.getEventByGithubIDStmt != nil {
-		if cerr := q.getEventByGithubIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getEventByGithubIDStmt: %w", cerr)
+	if q.getEventBySourceIDStmt != nil {
+		if cerr := q.getEventBySourceIDStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getEventBySourceIDStmt: %w", cerr)
 		}
 	}
 	if q.getEventTypesStmt != nil {
@@ -183,8 +183,8 @@ type Queries struct {
 	countEventsStmt           *sql.Stmt
 	countEventsByTypeStmt     *sql.Stmt
 	deleteAllEventsStmt       *sql.Stmt
-	deleteEventByGithubIDStmt *sql.Stmt
-	getEventByGithubIDStmt    *sql.Stmt
+	deleteEventBySourceIDStmt *sql.Stmt
+	getEventBySourceIDStmt    *sql.Stmt
 	getEventTypesStmt         *sql.Stmt
 	getEventsStmt             *sql.Stmt
 	getEventsByActorStmt      *sql.Stmt
@@ -203,8 +203,8 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		countEventsStmt:           q.countEventsStmt,
 		countEventsByTypeStmt:     q.countEventsByTypeStmt,
 		deleteAllEventsStmt:       q.deleteAllEventsStmt,
-		deleteEventByGithubIDStmt: q.deleteEventByGithubIDStmt,
-		getEventByGithubIDStmt:    q.getEventByGithubIDStmt,
+		deleteEventBySourceIDStmt: q.deleteEventBySourceIDStmt,
+		getEventBySourceIDStmt:    q.getEventBySourceIDStmt,
 		getEventTypesStmt:         q.getEventTypesStmt,
 		getEventsStmt:             q.getEventsStmt,
 		getEventsByActorStmt:      q.getEventsByActorStmt,

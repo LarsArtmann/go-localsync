@@ -83,7 +83,7 @@ func (s *SQLiteStorage) UpsertBatch(ctx context.Context, items []*provider.Item)
 }
 
 func (s *SQLiteStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
-	e, err := s.querier.GetEventByGithubID(ctx, types.NewGithubEventID(id.Get()))
+	e, err := s.querier.GetEventBySourceID(ctx, types.NewSourceItemID(id.Get()))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, pkgerrors.ErrNotFound
@@ -108,11 +108,11 @@ func (s *SQLiteStorage) BatchGetByIDs(
 	args := make([]any, len(ids))
 	for i, id := range ids {
 		placeholders[i] = "?"
-		args[i] = types.NewGithubEventID(id.Get())
+		args[i] = types.NewSourceItemID(id.Get())
 	}
 
 	query := fmt.Sprintf(
-		`SELECT id, github_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events WHERE github_id IN (%s)`,
+		`SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events WHERE source_id IN (%s)`,
 		strings.Join(placeholders, ", "),
 	)
 
@@ -129,7 +129,7 @@ func (s *SQLiteStorage) BatchGetByIDs(
 
 		err := rows.Scan(
 			&e.ID,
-			&e.GithubID,
+			&e.SourceID,
 			&e.Source,
 			&e.Type,
 			&e.ActorLogin,
@@ -321,7 +321,7 @@ func (s *SQLiteStorage) GetItemsSince(
 }
 
 func (s *SQLiteStorage) Delete(ctx context.Context, id types.ItemID) error {
-	err := s.querier.DeleteEventByGithubID(ctx, types.NewGithubEventID(id.Get()))
+	err := s.querier.DeleteEventBySourceID(ctx, types.NewSourceItemID(id.Get()))
 	if err != nil {
 		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
 	}
@@ -389,7 +389,7 @@ func fromNullString(ns sql.NullString) string {
 
 func toItem(e *db.Events) *provider.Item {
 	return &provider.Item{
-		ID:             types.NewItemID(e.GithubID.Get()),
+		ID:             types.NewItemID(e.SourceID.Get()),
 		Source:         types.NewProviderID(e.Source),
 		Type:           types.NewEventTypeID(e.Type),
 		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
@@ -404,7 +404,7 @@ func toItem(e *db.Events) *provider.Item {
 
 func toDBParams(item *provider.Item) *db.UpsertEventParams {
 	return &db.UpsertEventParams{
-		GithubID:       types.NewGithubEventID(item.ID.Get()),
+		SourceID:       types.NewSourceItemID(item.ID.Get()),
 		Source:         item.Source.Get(),
 		Type:           item.Type.Get(),
 		ActorLogin:     toNullString(item.ActorLogin.Get()),

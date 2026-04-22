@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"sync"
 	"time"
@@ -177,10 +176,6 @@ func (s *MemoryStorage) BatchGetByIDs(_ context.Context, ids []types.ItemID) ([]
 func (s *MemoryStorage) Delete(_ context.Context, id types.ItemID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	if _, ok := s.items[id.Get()]; !ok {
-		return fmt.Errorf("%w: delete item %q", pkgerrors.ErrNotFound, id.Get())
-	}
 
 	delete(s.items, id.Get())
 

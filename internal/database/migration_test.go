@@ -99,11 +99,11 @@ func TestRunMigrations_CreatesIndexes(t *testing.T) {
 	expectedIndexes := []string{
 		"idx_events_created_at",
 		"idx_events_type",
-		"idx_events_github_id",
+		"idx_events_source_id",
 		"idx_events_actor_login",
 		"idx_events_repo_name",
 		"idx_events_source",
-		"idx_events_source_github_id",
+		"idx_events_source_source_id",
 	}
 
 	for _, idx := range expectedIndexes {

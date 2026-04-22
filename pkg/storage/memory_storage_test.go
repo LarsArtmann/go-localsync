@@ -231,7 +231,7 @@ func TestMemoryStorage_DeleteNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	err := store.Delete(ctx, types.NewItemID("nonexistent"))
-	assert.ErrorIs(t, err, pkgerrors.ErrNotFound)
+	assert.NoError(t, err)
 }
 
 func TestMemoryStorage_DeleteAll(t *testing.T) {

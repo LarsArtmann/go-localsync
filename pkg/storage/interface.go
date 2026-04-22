@@ -11,12 +11,28 @@ import (
 
 // Storage defines the interface for storing and retrieving sync items.
 //
+// # Interface Contracts
+//
+// All implementations must satisfy the compliance test suite in compliance_test.go.
+// Key behavioral contracts:
+//
+//   - Upsert is idempotent: inserting the same ID twice overwrites the previous value.
+//   - UpsertBatch is atomic: on error, no items from the batch are persisted.
+//   - UpsertBatch with an empty or nil slice returns nil (no-op).
+//   - Delete is idempotent: deleting a non-existent item returns nil.
+//   - GetByID returns (nil, ErrNotFound) for missing items.
+//   - GetLatest returns (nil, ErrNotFound) when storage is empty.
+//   - BatchGetByIDs silently omits missing IDs (no error).
+//   - All pagination methods use limit/offset with items ordered by CreatedAt descending.
+//   - All implementations must be safe for concurrent use.
+//
 //nolint:interfacebloat // storage interfaces naturally have many CRUD methods
 type Storage interface {
 	// Upsert inserts or updates an item. ID is used as the unique key.
+	// Idempotent: calling twice with the same ID overwrites the previous value.
 	Upsert(ctx context.Context, item *provider.Item) error
 	// UpsertBatch inserts or updates multiple items in a single transaction.
-	// On error, no items are persisted.
+	// Atomic: on error, no items are persisted. Empty/nil slice is a no-op.
 	UpsertBatch(ctx context.Context, items []*provider.Item) error
 	// GetByID retrieves a single item by its source ID.
 	// Returns nil and ErrNotFound if not found.
@@ -55,6 +71,7 @@ type Storage interface {
 	// Returns items that exist; missing IDs are silently omitted.
 	BatchGetByIDs(ctx context.Context, ids []types.ItemID) ([]*provider.Item, error)
 	// Delete removes an item by its source ID.
+	// It is idempotent: deleting a non-existent item returns nil.
 	Delete(ctx context.Context, id types.ItemID) error
 	// DeleteAll removes all items.
 	DeleteAll(ctx context.Context) error
