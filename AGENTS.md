@@ -10,7 +10,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                  |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
-| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, in-memory)                                                      |
+| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, LibSQL/Turso, in-memory)                                      |
 | `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID`) |
 | `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
@@ -61,7 +61,7 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 | -------------------------- | ----- | ----------------------------------------------------------- |
 | `internal/database`        | 6     | ✅ Migration tests (idempotency, ordering, schema, indexes) |
 | `pkg/providers/github`     | 21    | ✅ Client, fetch, retry, error handling                     |
-| `pkg/storage`              | 44+   | ✅ SQLite + Memory compliance (22 tests each)                            |
+| `pkg/storage`              | 70+   | ✅ SQLite + Memory + LibSQL compliance (22+ tests each)                            |
 | `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                             |
 | `cmd/examples/github-sync` | 0     | ⬜ No tests                                                 |
 | `pkg/errors`               | 0     | ⬜ No tests                                                 |
@@ -78,14 +78,15 @@ Storage backends are selected via `storage.NewStorage(Config)`. Switch-based fac
 | Backend       | Flag/Config     | Use Case                    |
 | ------------- | --------------- | --------------------------- |
 | `sqlite`      | `--backend sqlite` (default) | Persistent production storage |
+| `libsql`      | `--backend libsql` | Local LibSQL file or remote Turso database  |
 | `memory`      | `--backend memory` | Testing, development         |
 
 ### Adding a New Backend
 
-1. Implement the `storage.Storage` interface (16 methods)
+1. Implement the `storage.Storage` interface (17 methods)
 2. Add case to `NewStorage` switch in `config.go`
 3. Run compliance tests: `go test ./pkg/storage/ -run TestStorageCompliance`
-4. Both SQLite and Memory must pass the same compliance suite
+4. SQLite, LibSQL, and Memory must all pass the same compliance suite
 
 ### CLI Usage
 
@@ -138,4 +139,5 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 | `modernc.org/sqlite`           | Pure Go SQLite driver (no CGO)                                            |
 | `cockroachdb/errors`           | Sentinel errors with detail wrapping                                      |
 | `go-github/v69`                | GitHub API client                                                         |
+| `libsql-client-go`             | LibSQL/Turso database driver (local file or remote)                       |
 | `charmbracelet/log`            | Structured logging                                                        |

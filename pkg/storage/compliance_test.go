@@ -2,6 +2,7 @@ package storage_test
 
 import (
 	"context"
+	"os"
 	"sort"
 	"strconv"
 	"sync"
@@ -50,6 +51,23 @@ func TestStorageCompliance_Memory(t *testing.T) {
 	factory := func(t *testing.T) (storage.Storage, func()) {
 		s := storage.NewMemoryStorage()
 		return s, func() { _ = s.Close() }
+	}
+	testStorageCompliance(t, factory)
+}
+
+// TestStorageCompliance_LibSQL runs the compliance suite against LibSQLStorage.
+func TestStorageCompliance_LibSQL(t *testing.T) {
+	factory := func(t *testing.T) (storage.Storage, func()) {
+		tmpFile, err := os.CreateTemp("", "libsql-test-*.db")
+		require.NoError(t, err)
+		require.NoError(t, tmpFile.Close())
+
+		s, err := storage.OpenLibSQL("file:"+tmpFile.Name(), "")
+		require.NoError(t, err)
+		return s, func() {
+			_ = s.Close()
+			_ = os.Remove(tmpFile.Name())
+		}
 	}
 	testStorageCompliance(t, factory)
 }
