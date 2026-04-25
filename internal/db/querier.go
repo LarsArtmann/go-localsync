@@ -25,15 +25,15 @@ type Querier interface {
 	//
 	//  DELETE FROM events
 	DeleteAllEvents(ctx context.Context) error
-	// Delete an event by its GitHub ID
+	// Delete an event by its source ID
 	//
 	//  DELETE FROM events WHERE source_id = ?
-	DeleteEventBySourceID(ctx context.Context, sourceItemID types.SourceItemID) error
-	// Get a single event by its GitHub ID
+	DeleteEventBySourceID(ctx context.Context, sourceID types.SourceItemID) error
+	// Get a single event by its source ID
 	//
 	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  WHERE source_id = ?
-	GetEventBySourceID(ctx context.Context, sourceItemID types.SourceItemID) (*Events, error)
+	GetEventBySourceID(ctx context.Context, sourceID types.SourceItemID) (*Events, error)
 	// Get distinct event types in the database
 	//
 	//  SELECT DISTINCT type FROM events
@@ -79,7 +79,7 @@ type Querier interface {
 	//  WHERE created_at > ?
 	//  ORDER BY created_at DESC
 	GetEventsSince(ctx context.Context, createdAt time.Time) ([]*Events, error)
-	// Get the most recent event by GitHub timestamp (for incremental sync)
+	// Get the most recent event by creation timestamp (for incremental sync)
 	//
 	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  ORDER BY created_at DESC
@@ -88,6 +88,7 @@ type Querier interface {
 	// Insert an event, updating if it already exists (conflict resolution)
 	//
 	//  INSERT INTO events (
+	//      id,
 	//      source_id,
 	//      source,
 	//      type,
@@ -99,7 +100,7 @@ type Querier interface {
 	//      updated_at,
 	//      raw_json,
 	//      synced_at
-	//  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+	//  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 	//  ON CONFLICT(source_id) DO UPDATE SET
 	//      source = excluded.source,
 	//      type = excluded.type,

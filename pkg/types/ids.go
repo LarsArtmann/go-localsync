@@ -12,7 +12,11 @@
 package types
 
 import (
+	"crypto/rand"
+	"time"
+
 	"github.com/larsartmann/go-composable-business-types/id"
+	"github.com/oklog/ulid/v2"
 )
 
 // Brand types (phantom types for type safety).
@@ -35,11 +39,10 @@ type (
 )
 
 // ID type aliases for domain-specific identifiers.
-// All use string as the underlying value type for flexibility and JSON compatibility.
 type (
-	// EventID is the internal database identifier for events.
-	// Example: 12345 (auto-incremented primary key).
-	EventID = id.ID[EventBrand, int64]
+	// EventID is the internal database identifier for events using ULID.
+	// Example: "01H0G0K1P1V2J3M4N5O6P7Q8R9" (ULID, time-sortable unique identifier).
+	EventID = id.ID[EventBrand, ulid.ULID]
 	// SourceItemID is the provider-specific item identifier used for upsert operations.
 	// Example: "1234567890" (GitHub event ID as string for compatibility).
 	SourceItemID = id.ID[SourceItemBrand, string]
@@ -60,8 +63,15 @@ type (
 	EventTypeID = id.ID[EventTypeBrand, string]
 )
 
-// NewEventID creates a new EventID from an int64 value.
-func NewEventID(v int64) EventID { return id.NewID[EventBrand](v) }
+// NewEventID creates a new EventID with a freshly generated ULID.
+func NewEventID() EventID {
+	return id.NewID[EventBrand](ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader))
+}
+
+// MustParseEventID parses a ULID string into an EventID. Panics on invalid input.
+func MustParseEventID(s string) EventID {
+	return id.NewID[EventBrand](ulid.MustParse(s))
+}
 
 // NewSourceItemID creates a new SourceItemID from a string value.
 func NewSourceItemID(v string) SourceItemID { return id.NewID[SourceItemBrand](v) }

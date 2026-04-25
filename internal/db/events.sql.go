@@ -60,11 +60,11 @@ const DeleteEventBySourceID = `-- name: DeleteEventBySourceID :exec
 DELETE FROM events WHERE source_id = ?
 `
 
-// Delete an event by its GitHub ID
+// Delete an event by its source ID
 //
 //	DELETE FROM events WHERE source_id = ?
-func (q *Queries) DeleteEventBySourceID(ctx context.Context, sourceItemID types.SourceItemID) error {
-	_, err := q.exec(ctx, q.deleteEventBySourceIDStmt, DeleteEventBySourceID, sourceItemID)
+func (q *Queries) DeleteEventBySourceID(ctx context.Context, sourceID types.SourceItemID) error {
+	_, err := q.exec(ctx, q.deleteEventBySourceIDStmt, DeleteEventBySourceID, sourceID)
 	return err
 }
 
@@ -73,12 +73,12 @@ SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, re
 WHERE source_id = ?
 `
 
-// Get a single event by its GitHub ID
+// Get a single event by its source ID
 //
 //	SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	WHERE source_id = ?
-func (q *Queries) GetEventBySourceID(ctx context.Context, sourceItemID types.SourceItemID) (*Events, error) {
-	row := q.queryRow(ctx, q.getEventBySourceIDStmt, GetEventBySourceID, sourceItemID)
+func (q *Queries) GetEventBySourceID(ctx context.Context, sourceID types.SourceItemID) (*Events, error) {
+	row := q.queryRow(ctx, q.getEventBySourceIDStmt, GetEventBySourceID, sourceID)
 	var i Events
 	err := row.Scan(
 		&i.ID,
@@ -454,7 +454,7 @@ ORDER BY created_at DESC
 LIMIT 1
 `
 
-// Get the most recent event by GitHub timestamp (for incremental sync)
+// Get the most recent event by creation timestamp (for incremental sync)
 //
 //	SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	ORDER BY created_at DESC
@@ -481,6 +481,7 @@ func (q *Queries) GetLatestEvent(ctx context.Context) (*Events, error) {
 
 const UpsertEvent = `-- name: UpsertEvent :exec
 INSERT INTO events (
+    id,
     source_id,
     source,
     type,
@@ -492,7 +493,7 @@ INSERT INTO events (
     updated_at,
     raw_json,
     synced_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 ON CONFLICT(source_id) DO UPDATE SET
     source = excluded.source,
     type = excluded.type,
@@ -505,21 +506,23 @@ ON CONFLICT(source_id) DO UPDATE SET
 `
 
 type UpsertEventParams struct {
-	SourceID       types.SourceItemID `db:"source_id" json:"githubId"`
-	Source         string              `db:"source" json:"source"`
-	Type           string              `db:"type" json:"type"`
-	ActorLogin     sql.NullString      `db:"actor_login" json:"actorLogin"`
-	ActorAvatarUrl sql.NullString      `db:"actor_avatar_url" json:"actorAvatarUrl"`
-	RepoName       sql.NullString      `db:"repo_name" json:"repoName"`
-	RepoUrl        sql.NullString      `db:"repo_url" json:"repoUrl"`
-	CreatedAt      time.Time           `db:"created_at" json:"createdAt"`
-	UpdatedAt      time.Time           `db:"updated_at" json:"updatedAt"`
-	RawJson        json.RawMessage     `db:"raw_json" json:"rawJson"`
+	ID             types.EventID      `db:"id" json:"id"`
+	SourceID       types.SourceItemID `db:"source_id" json:"sourceId"`
+	Source         string             `db:"source" json:"source"`
+	Type           string             `db:"type" json:"type"`
+	ActorLogin     sql.NullString     `db:"actor_login" json:"actorLogin"`
+	ActorAvatarUrl sql.NullString     `db:"actor_avatar_url" json:"actorAvatarUrl"`
+	RepoName       sql.NullString     `db:"repo_name" json:"repoName"`
+	RepoUrl        sql.NullString     `db:"repo_url" json:"repoUrl"`
+	CreatedAt      time.Time          `db:"created_at" json:"createdAt"`
+	UpdatedAt      time.Time          `db:"updated_at" json:"updatedAt"`
+	RawJson        json.RawMessage    `db:"raw_json" json:"rawJson"`
 }
 
 // Insert an event, updating if it already exists (conflict resolution)
 //
 //	INSERT INTO events (
+//	    id,
 //	    source_id,
 //	    source,
 //	    type,
@@ -531,7 +534,7 @@ type UpsertEventParams struct {
 //	    updated_at,
 //	    raw_json,
 //	    synced_at
-//	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+//	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 //	ON CONFLICT(source_id) DO UPDATE SET
 //	    source = excluded.source,
 //	    type = excluded.type,
@@ -543,6 +546,7 @@ type UpsertEventParams struct {
 //	    raw_json = excluded.raw_json
 func (q *Queries) UpsertEvent(ctx context.Context, arg *UpsertEventParams) error {
 	_, err := q.exec(ctx, q.upsertEventStmt, UpsertEvent,
+		arg.ID,
 		arg.SourceID,
 		arg.Source,
 		arg.Type,

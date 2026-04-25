@@ -1,6 +1,7 @@
 -- name: UpsertEvent :exec
 -- Insert an event, updating if it already exists (conflict resolution)
 INSERT INTO events (
+    id,
     source_id,
     source,
     type,
@@ -12,7 +13,7 @@ INSERT INTO events (
     updated_at,
     raw_json,
     synced_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 ON CONFLICT(source_id) DO UPDATE SET
     source = excluded.source,
     type = excluded.type,

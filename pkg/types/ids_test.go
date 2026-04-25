@@ -1,6 +1,7 @@
 package types
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -34,9 +35,50 @@ func TestNewStringIDs(t *testing.T) {
 func TestNewEventID(t *testing.T) {
 	t.Parallel()
 
-	got := NewEventID(42)
-	if got.Get() != int64(42) {
-		t.Errorf("expected 42, got %d", got.Get())
+	got := NewEventID()
+	if got.Get().IsZero() {
+		t.Error("expected non-zero ULID")
+	}
+
+	s := got.String()
+	if len(s) != 26 {
+		t.Errorf("expected 26-char ULID string, got %d chars: %s", len(s), s)
+	}
+}
+
+func TestMustParseEventID(t *testing.T) {
+	t.Parallel()
+
+	original := NewEventID()
+	parsed := MustParseEventID(original.String())
+
+	if !original.Equal(parsed) {
+		t.Errorf("expected %s, got %s", original.String(), parsed.String())
+	}
+}
+
+func TestMustParseEventID_panics(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for invalid ULID string")
+		}
+	}()
+
+	MustParseEventID("not-a-valid-ulid")
+}
+
+func TestEventIDIsZero(t *testing.T) {
+	t.Parallel()
+
+	var zero EventID
+	if !zero.IsZero() {
+		t.Error("expected zero EventID to be zero")
+	}
+
+	if NewEventID().IsZero() {
+		t.Error("expected new EventID to not be zero")
 	}
 }
 
@@ -75,5 +117,21 @@ func TestIDString(t *testing.T) {
 	s := id.String()
 	if s == "" {
 		t.Error("expected non-empty string representation")
+	}
+}
+
+func TestEventIDStringRoundTrip(t *testing.T) {
+	t.Parallel()
+
+	id := NewEventID()
+	s := id.String()
+
+	if !strings.HasPrefix(s, "0") {
+		t.Errorf("ULID should start with '0' in this millennium, got: %s", s)
+	}
+
+	parsed := MustParseEventID(s)
+	if !id.Equal(parsed) {
+		t.Errorf("round-trip failed: %s != %s", id.String(), parsed.String())
 	}
 }

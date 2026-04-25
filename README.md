@@ -172,7 +172,7 @@ ProviderID    // id.ID[ProviderBrand, string]
 EventTypeID   // id.ID[EventTypeBrand, string]
 ActorID       // id.ID[ActorBrand, string]
 RepoID        // id.ID[RepoBrand, string]
-EventID       // id.ID[EventBrand, int64]
+EventID       // id.ID[EventBrand, ulid.ULID]
 GithubEventID // id.ID[GithubEventBrand, string]
 ```
 

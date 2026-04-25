@@ -404,6 +404,7 @@ func toItem(e *db.Events) *provider.Item {
 
 func toDBParams(item *provider.Item) *db.UpsertEventParams {
 	return &db.UpsertEventParams{
+		ID:             types.NewEventID(),
 		SourceID:       types.NewSourceItemID(item.ID.Get()),
 		Source:         item.Source.Get(),
 		Type:           item.Type.Get(),
