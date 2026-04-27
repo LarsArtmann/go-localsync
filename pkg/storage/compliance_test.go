@@ -58,7 +58,7 @@ func TestStorageCompliance_Memory(t *testing.T) {
 // TestStorageCompliance_LibSQL runs the compliance suite against LibSQLStorage.
 func TestStorageCompliance_LibSQL(t *testing.T) {
 	factory := func(t *testing.T) (storage.Storage, func()) {
-		tmpFile, err := os.CreateTemp("", "libsql-test-*.db")
+		tmpFile, err := os.CreateTemp(t.TempDir(), "libsql-test-*.db")
 		require.NoError(t, err)
 		require.NoError(t, tmpFile.Close())
 
@@ -141,8 +141,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Hour))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Hour)),
+			),
+		)
 
 		latest, err := s.GetLatest(ctx)
 		require.NoError(t, err)
@@ -183,8 +192,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
 
 		items, err := s.GetItemsByType(ctx, "PushEvent", 10, 0)
 		require.NoError(t, err)
@@ -197,8 +215,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "PushEvent", "bob", "org/repo", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "PushEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
 
 		items, err := s.GetItemsByActor(ctx, "alice", 10, 0)
 		require.NoError(t, err)
@@ -211,8 +238,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo-a", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "PushEvent", "bob", "org/repo-b", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo-a", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "PushEvent", "bob", "org/repo-b", now.Add(1*time.Second)),
+			),
+		)
 
 		items, err := s.GetItemsByRepo(ctx, "org/repo-a", 10, 0)
 		require.NoError(t, err)
@@ -225,8 +261,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "gitlab", "PushEvent", "bob", "org/repo", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "gitlab", "PushEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
 
 		items, err := s.GetItemsBySource(ctx, "github", 10, 0)
 		require.NoError(t, err)
@@ -241,8 +286,14 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		now := time.Now()
 		old := now.Add(-2 * time.Hour)
 		recent := now.Add(-5 * time.Minute)
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", old)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "PushEvent", "bob", "org/repo", recent)))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", old)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("2", "github", "PushEvent", "bob", "org/repo", recent)),
+		)
 
 		cutoff := now.Add(-1 * time.Hour)
 		items, err := s.GetItemsSince(ctx, cutoff)
@@ -256,8 +307,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
 
 		items, err := s.BatchGetByIDs(ctx, []types.ItemID{
 			types.NewItemID("1"),
@@ -281,7 +341,10 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		s, cleanup := factory(t)
 		defer cleanup()
 
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", time.Now())))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", time.Now())),
+		)
 		require.NoError(t, s.Delete(ctx, types.NewItemID("1")))
 
 		_, err := s.GetByID(ctx, types.NewItemID("1"))
@@ -301,8 +364,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
 
 		require.NoError(t, s.DeleteAll(ctx))
 
@@ -316,8 +388,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
 
 		count, err := s.Count(ctx)
 		require.NoError(t, err)
@@ -329,9 +410,24 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "PushEvent", "bob", "org/repo", now.Add(1*time.Second))))
-		require.NoError(t, s.Upsert(ctx, makeItem("3", "github", "IssueEvent", "carol", "org/repo", now.Add(2*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "PushEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("3", "github", "IssueEvent", "carol", "org/repo", now.Add(2*time.Second)),
+			),
+		)
 
 		count, err := s.CountByType(ctx, "PushEvent")
 		require.NoError(t, err)
@@ -343,8 +439,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		defer cleanup()
 
 		now := time.Now()
-		require.NoError(t, s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)))
-		require.NoError(t, s.Upsert(ctx, makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second))))
+		require.NoError(
+			t,
+			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", now)),
+		)
+		require.NoError(
+			t,
+			s.Upsert(
+				ctx,
+				makeItem("2", "github", "IssueEvent", "bob", "org/repo", now.Add(1*time.Second)),
+			),
+		)
 
 		types, err := s.GetTypes(ctx)
 		require.NoError(t, err)

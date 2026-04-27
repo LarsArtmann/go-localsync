@@ -311,7 +311,10 @@ var _ = Describe("Sync Engine", func() {
 				world.provider.ItemsVal = []*provider.Item{
 					testhelpers.NewTestItem("1", "PushEvent", time.Now()),
 				}
-				world.storage = &getLatestErrStorage{MockStorage: &testhelpers.MockStorage{}, err: errors.New("corrupt index")}
+				world.storage = &getLatestErrStorage{
+					MockStorage: &testhelpers.MockStorage{},
+					err:         errors.New("corrupt index"),
+				}
 				world.syncer = sync.NewSyncer(world.provider, world.storage, log.New(nil))
 			})
 
@@ -408,6 +411,7 @@ var _ = Describe("Sync Engine", func() {
 // getLatestErrStorage wraps MockStorage but returns a custom error on GetLatest.
 type getLatestErrStorage struct {
 	*testhelpers.MockStorage
+
 	err error
 }
 

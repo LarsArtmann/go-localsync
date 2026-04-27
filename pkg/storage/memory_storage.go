@@ -133,7 +133,10 @@ func (s *MemoryStorage) GetItemsBySource(
 }
 
 // GetItemsSince retrieves items created after the given timestamp.
-func (s *MemoryStorage) GetItemsSince(_ context.Context, since time.Time) ([]*provider.Item, error) {
+func (s *MemoryStorage) GetItemsSince(
+	_ context.Context,
+	since time.Time,
+) ([]*provider.Item, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -153,7 +156,10 @@ func (s *MemoryStorage) GetItemsSince(_ context.Context, since time.Time) ([]*pr
 }
 
 // BatchGetByIDs retrieves multiple items by their source IDs.
-func (s *MemoryStorage) BatchGetByIDs(_ context.Context, ids []types.ItemID) ([]*provider.Item, error) {
+func (s *MemoryStorage) BatchGetByIDs(
+	_ context.Context,
+	ids []types.ItemID,
+) ([]*provider.Item, error) {
 	if len(ids) == 0 {
 		return nil, nil
 	}

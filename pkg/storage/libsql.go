@@ -41,11 +41,13 @@ func OpenLibSQL(url, authToken string) (*LibSQLStorage, error) {
 
 	if err := dbc.Ping(); err != nil {
 		_ = dbc.Close()
+
 		return nil, pkgerrors.Wrapf(err, "failed to ping libsql at %s", url)
 	}
 
 	if err := database.RunMigrations(dbc); err != nil {
 		_ = dbc.Close()
+
 		return nil, pkgerrors.Wrapf(err, "failed to run migrations at %s", url)
 	}
 
@@ -125,6 +127,7 @@ func (s *LibSQLStorage) BatchGetByIDs(
 	}
 
 	placeholders := make([]string, len(ids))
+
 	args := make([]any, len(ids))
 	for i, id := range ids {
 		placeholders[i] = "?"

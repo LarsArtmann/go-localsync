@@ -45,7 +45,8 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 							fmt.Sprintf("concurrent-%03d", seq),
 							"PushEvent", "user", "repo", time.Now(),
 						)
-						if err := store.Upsert(ctx, item); err != nil {
+						err := store.Upsert(ctx, item)
+						if err != nil {
 							errors.Add(1)
 						}
 					}(i)
@@ -64,9 +65,27 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 			It("should exclude items created exactly at the boundary (strictly after)", func() {
 				boundary := time.Now()
 
-				beforeItem := testhelpers.NewStorageItem("before", "PushEvent", "alice", "repo", boundary.Add(-1*time.Second))
-				exactItem := testhelpers.NewStorageItem("exact", "PushEvent", "bob", "repo", boundary)
-				afterItem := testhelpers.NewStorageItem("after", "PushEvent", "charlie", "repo", boundary.Add(1*time.Second))
+				beforeItem := testhelpers.NewStorageItem(
+					"before",
+					"PushEvent",
+					"alice",
+					"repo",
+					boundary.Add(-1*time.Second),
+				)
+				exactItem := testhelpers.NewStorageItem(
+					"exact",
+					"PushEvent",
+					"bob",
+					"repo",
+					boundary,
+				)
+				afterItem := testhelpers.NewStorageItem(
+					"after",
+					"PushEvent",
+					"charlie",
+					"repo",
+					boundary.Add(1*time.Second),
+				)
 
 				Expect(store.Upsert(ctx, beforeItem)).To(Succeed())
 				Expect(store.Upsert(ctx, exactItem)).To(Succeed())
@@ -108,8 +127,18 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 		Context("when I BatchGetByIDs with a mix of existing and missing IDs", func() {
 			It("should return only the items that exist", func() {
 				now := time.Now()
-				Expect(store.Upsert(ctx, testhelpers.NewStorageItem("exists-1", "PushEvent", "alice", "repo", now))).To(Succeed())
-				Expect(store.Upsert(ctx, testhelpers.NewStorageItem("exists-2", "IssuesEvent", "bob", "repo", now))).To(Succeed())
+				Expect(
+					store.Upsert(
+						ctx,
+						testhelpers.NewStorageItem("exists-1", "PushEvent", "alice", "repo", now),
+					),
+				).To(Succeed())
+				Expect(
+					store.Upsert(
+						ctx,
+						testhelpers.NewStorageItem("exists-2", "IssuesEvent", "bob", "repo", now),
+					),
+				).To(Succeed())
 
 				items, err := store.BatchGetByIDs(ctx, []types.ItemID{
 					types.NewItemID("exists-1"),
