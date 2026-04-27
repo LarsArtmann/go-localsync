@@ -139,5 +139,5 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 | `modernc.org/sqlite`           | Pure Go SQLite driver (no CGO)                                            |
 | `cockroachdb/errors`           | Sentinel errors with detail wrapping                                      |
 | `go-github/v69`                | GitHub API client                                                         |
-| `libsql-client-go`             | LibSQL/Turso database driver (local file or remote)                       |
+| `turso.tech/database/tursogo`  | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go) |
 | `charmbracelet/log`            | Structured logging                                                        |

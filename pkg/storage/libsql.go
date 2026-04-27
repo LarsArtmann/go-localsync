@@ -13,7 +13,7 @@ import (
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
+	turso "turso.tech/database/tursogo"
 )
 
 type LibSQLStorage struct {
@@ -29,33 +29,59 @@ func NewLibSQLStorage(dbc *sql.DB) *LibSQLStorage {
 }
 
 func OpenLibSQL(url, authToken string) (*LibSQLStorage, error) {
-	connStr := url
-	if authToken != "" {
-		connStr = url + "?authToken=" + authToken
+	ctx := context.Background()
+
+	var dbc *sql.DB
+
+	if isRemoteURL(url) {
+		//nolint:exhaustruct // optional fields have sensible defaults
+		syncDb, err := turso.NewTursoSyncDb(ctx, turso.TursoSyncDbConfig{
+			Path:      ":memory:",
+			RemoteUrl: url,
+			AuthToken: authToken,
+		})
+		if err != nil {
+			return nil, pkgerrors.Wrapf(err, "failed to create turso sync db for %s", url)
+		}
+
+		dbc, err = syncDb.Connect(ctx)
+		if err != nil {
+			return nil, pkgerrors.Wrapf(err, "failed to connect turso sync db at %s", url)
+		}
+	} else {
+		path := strings.TrimPrefix(url, "file:")
+
+		var err error
+
+		dbc, err = sql.Open("turso", path)
+		if err != nil {
+			return nil, pkgerrors.Wrapf(err, "failed to open turso at %s", url)
+		}
 	}
 
-	dbc, err := sql.Open("libsql", connStr)
+	err := dbc.PingContext(ctx)
 	if err != nil {
-		return nil, pkgerrors.Wrapf(err, "failed to open libsql at %s", url)
-	}
-
-	if err := dbc.Ping(); err != nil {
 		_ = dbc.Close()
 
-		return nil, pkgerrors.Wrapf(err, "failed to ping libsql at %s", url)
+		return nil, pkgerrors.Wrapf(err, "failed to ping turso at %s", url)
 	}
 
-	if err := database.RunMigrations(dbc); err != nil {
+	err = database.RunMigrations(dbc)
+	if err != nil {
 		_ = dbc.Close()
 
 		return nil, pkgerrors.Wrapf(err, "failed to run migrations at %s", url)
 	}
 
-	if strings.HasPrefix(url, "file:") {
-		dbc.SetMaxOpenConns(1)
-	}
+	dbc.SetMaxOpenConns(1)
 
 	return NewLibSQLStorage(dbc), nil
+}
+
+func isRemoteURL(url string) bool {
+	return strings.HasPrefix(url, "libsql://") ||
+		strings.HasPrefix(url, "https://") ||
+		strings.HasPrefix(url, "http://")
 }
 
 func (s *LibSQLStorage) Close() error {
