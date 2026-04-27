@@ -91,7 +91,10 @@ func TestMemoryStorage_GetLatest(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now()
 
-	require.NoError(t, store.Upsert(ctx, testMemoryItem("old", "PushEvent", "a", "r", now.Add(-1*time.Hour))))
+	require.NoError(
+		t,
+		store.Upsert(ctx, testMemoryItem("old", "PushEvent", "a", "r", now.Add(-1*time.Hour))),
+	)
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("new", "PushEvent", "a", "r", now)))
 
 	latest, err := store.GetLatest(ctx)
@@ -113,7 +116,19 @@ func TestMemoryStorage_GetItems(t *testing.T) {
 	now := time.Now()
 
 	for i := range 5 {
-		require.NoError(t, store.Upsert(ctx, testMemoryItem(string(rune('A'+i)), "PushEvent", "user", "repo", now.Add(time.Duration(i)*time.Minute))))
+		require.NoError(
+			t,
+			store.Upsert(
+				ctx,
+				testMemoryItem(
+					string(rune('A'+i)),
+					"PushEvent",
+					"user",
+					"repo",
+					now.Add(time.Duration(i)*time.Minute),
+				),
+			),
+		)
 	}
 
 	items, err := store.GetItems(ctx, 3, 0)
@@ -154,8 +169,14 @@ func TestMemoryStorage_GetItemsByRepo(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now()
 
-	require.NoError(t, store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "owner/repo-a", now)))
-	require.NoError(t, store.Upsert(ctx, testMemoryItem("2", "PushEvent", "a", "owner/repo-b", now)))
+	require.NoError(
+		t,
+		store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "owner/repo-a", now)),
+	)
+	require.NoError(
+		t,
+		store.Upsert(ctx, testMemoryItem("2", "PushEvent", "a", "owner/repo-b", now)),
+	)
 
 	items, err := store.GetItemsByRepo(ctx, "owner/repo-a", 10, 0)
 	require.NoError(t, err)
@@ -179,7 +200,10 @@ func TestMemoryStorage_GetItemsSince(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now()
 
-	require.NoError(t, store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "r", now.Add(-2*time.Hour))))
+	require.NoError(
+		t,
+		store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "r", now.Add(-2*time.Hour))),
+	)
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("2", "PushEvent", "a", "r", now)))
 
 	items, err := store.GetItemsSince(ctx, now.Add(-1*time.Hour))
@@ -195,7 +219,10 @@ func TestMemoryStorage_BatchGetByIDs(t *testing.T) {
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "r", now)))
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("2", "PushEvent", "a", "r", now)))
 
-	items, err := store.BatchGetByIDs(ctx, []types.ItemID{types.NewItemID("1"), types.NewItemID("2")})
+	items, err := store.BatchGetByIDs(
+		ctx,
+		[]types.ItemID{types.NewItemID("1"), types.NewItemID("2")},
+	)
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 }
@@ -207,7 +234,10 @@ func TestMemoryStorage_BatchGetByIDsMissing(t *testing.T) {
 
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "r", now)))
 
-	items, err := store.BatchGetByIDs(ctx, []types.ItemID{types.NewItemID("1"), types.NewItemID("nonexistent")})
+	items, err := store.BatchGetByIDs(
+		ctx,
+		[]types.ItemID{types.NewItemID("1"), types.NewItemID("nonexistent")},
+	)
 	require.NoError(t, err)
 	assert.Len(t, items, 1)
 }

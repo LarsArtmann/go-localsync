@@ -9,11 +9,13 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 ## A) FULLY DONE
 
 ### go-cqrs-lite
+
 - **`event/store_config.go`** (49 lines) — `Backend` type, `StoreConfig`, `StoreOption`, `NewStoreFromConfig` factory. Clean switch-based dispatch for built-in `memory` backend. External backends implement `Store` interface directly (Go idiom, no global registries).
 - **`event/store_config_test.go`** (45 lines) — 3 tests: memory backend, default backend, unknown backend error.
 - All 393 tests pass. Committed `de7f0de`. Pushed.
 
 ### go-localfirst
+
 - **`internal/storage/config.go`** (76 lines) — `Backend` type (`pebble`/`memory`), `Config`, `Option`, `NewStateStore` factory. Switch-based, no Pebble in the config package itself (only in the factory case). Passes `DataDir` through config.
 - **`internal/storage/memory_store.go`** (167 lines) — `MemoryTodoStore` implementing `domain.TodoRepository` with full CRUD, filtering (status/priority/tags/search), pagination, and count. Uses `strings` stdlib (not hand-rolled).
 - **`internal/storage/memory_store_test.go`** (221 lines) — 13 tests covering Create, CreateDuplicate, Get, GetNotFound, Update, UpdateNotFound, Delete, DeleteNotFound, List, ListWithStatusFilter, ListWithPagination, ListWithSearch, Count, CountWithFilter.
@@ -24,6 +26,7 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 - All 269 tests pass. Committed `c4913b2`. Pushed.
 
 ### go-localsync
+
 - **`pkg/storage/config.go`** (75 lines) — `Backend` type (`sqlite`/`memory`), `Config`, `Option`, `NewStorage` factory. Validates DBPath for sqlite backend.
 - **`pkg/storage/memory_storage.go`** (287 lines) — `MemoryStorage` implementing full 16-method `Storage` interface with: Upsert, UpsertBatch, GetByID, GetLatest, GetItems, GetItemsByType/Actor/Repo/Source, GetItemsSince, BatchGetByIDs, Delete, DeleteAll, Count, CountByType, GetTypes, Close. Sorted pagination, proper `ErrNotFound` errors.
 - **`pkg/storage/memory_storage_test.go`** (295 lines) — 22 tests covering every method on the Storage interface.
@@ -33,12 +36,12 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 
 ### Architecture Summary
 
-| Project | Interface | Backends | Config Pattern | Env/Flag |
-|---|---|---|---|---|
-| go-cqrs-lite | `event.Store` | memory | `NewStoreConfig` + `NewStoreFromConfig` | — |
-| go-localfirst (state) | `domain.TodoRepository` | pebble, memory | `storage.NewConfig` + `NewStateStore` | `STATE_BACKEND` |
-| go-localfirst (events) | `event.Store` | pebble, memory, custom | `cqrsStore.NewConfig` + `NewEventStore` | `EVENT_BACKEND` |
-| go-localsync | `storage.Storage` | sqlite, memory | `storage.NewConfig` + `NewStorage` | `--backend` |
+| Project                | Interface               | Backends               | Config Pattern                          | Env/Flag        |
+| ---------------------- | ----------------------- | ---------------------- | --------------------------------------- | --------------- |
+| go-cqrs-lite           | `event.Store`           | memory                 | `NewStoreConfig` + `NewStoreFromConfig` | —               |
+| go-localfirst (state)  | `domain.TodoRepository` | pebble, memory         | `storage.NewConfig` + `NewStateStore`   | `STATE_BACKEND` |
+| go-localfirst (events) | `event.Store`           | pebble, memory, custom | `cqrsStore.NewConfig` + `NewEventStore` | `EVENT_BACKEND` |
+| go-localsync           | `storage.Storage`       | sqlite, memory         | `storage.NewConfig` + `NewStorage`      | `--backend`     |
 
 **Total new code**: 1,482 lines across 13 new files.
 **Total new tests**: 52 new test functions (all passing).
@@ -49,6 +52,7 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 ## B) PARTIALLY DONE
 
 ### NATS JetStream backend itself
+
 - The pluggable architecture is now in place to support NATS JetStream as a backend, but the actual NATS JetStream implementation has **not been written**. The factory/switch pattern makes this trivial to add — you'd implement the existing interface and add a case to the switch (or use `WithProvider`).
 
 ---
@@ -83,6 +87,7 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 ## E) WHAT WE SHOULD IMPROVE
 
 ### Architecture
+
 1. **Dual-write problem in go-localfirst** — Commands write to both event store (cqrs_event: prefix) AND state store (todo: prefix) with no transactional guarantee. If one fails, they're out of sync.
 2. **Legacy `domain.EventStore` / `PebbleEventStore` is dead code** — Only the deprecated `TodoService` used it. Should be removed or officially deprecated.
 3. **Event Bus is wired but never triggered** — `MemoryBus` + `SSEEventBusBridge` are set up but no code calls `eventBus.Publish()` from command handlers.
@@ -90,11 +95,13 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 5. **`github_id` column name** in go-localsync schema — Should be generalized to `source_id` for multi-provider support (noted in AGENTS.md as planned).
 
 ### Code Quality
+
 6. **`strings` import inconsistency** — PebbleStore uses `strings.ToLower` for search filter but the filter logic is duplicated between PebbleStore and MemoryTodoStore.
 7. **Test coverage gaps** — No tests for `cmd/api/main.go`, `internal/cqrs/commands/`, `internal/cqrs/queries/` in go-localfirst.
 8. **No interface compliance test** — Should have a shared test suite that both PebbleStore and MemoryTodoStore pass (e.g., `TestTodoRepositoryCompliance`).
 
 ### Dependency Management
+
 9. **go-localfirst `pebble` import in main.go** — Even though `cqrs/store/config.go` is Pebble-free, `main.go` still imports Pebble for the `DB()` accessor. Could use an interface.
 10. **go-localsync still has `internal/database` package** — Example CLI no longer imports it, but it exists. Should it be public for custom SQLite usage?
 
@@ -103,6 +110,7 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 ## F) TOP 25 THINGS WE SHOULD GET DONE NEXT
 
 ### High Impact, Low Effort (do first)
+
 1. ✏️ Remove dead `PebbleEventStore` / `domain.EventStore` from go-localfirst (unused in production)
 2. ✏️ Wire `eventBus.Publish()` in go-localfirst command handlers (SSE is currently broken)
 3. ✏️ Add shared `TodoRepositoryCompliance` test suite in go-localfirst (both backends pass same tests)
@@ -112,6 +120,7 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 7. ✏️ Update go-localsync README.md with `--backend` flag docs
 
 ### High Impact, Medium Effort
+
 8. 🔨 Implement NATS JetStream `event.Store` for go-cqrs-lite
 9. 🔨 Implement NATS JetStream `Storage` for go-localsync
 10. 🔨 Add PostgreSQL `event.Store` for go-cqrs-lite (was on their roadmap)
@@ -121,6 +130,7 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 14. 🔨 Rename `github_id` → `source_id` in go-localsync schema (migration 003)
 
 ### Medium Impact, Low Effort
+
 15. ✏️ Add `WithProvider` example to go-localfirst cqrs/store docs
 16. ✏️ Add backend health-check interface (`Ping(ctx) error`)
 17. ✏️ Add `storage.BackendMemory` to go-localsync testhelpers (replace MockStorage in some tests)
@@ -128,12 +138,14 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 19. ✏️ Add config validation method (`cfg.Validate() error`)
 
 ### Medium Impact, Medium Effort
+
 20. 🔨 Extract `DBProvider` interface in go-localfirst (decouple main.go from `*pebble.DB`)
 21. 🔨 Add benchmark tests comparing PebbleStore vs MemoryTodoStore
 22. 🔨 Add benchmark tests comparing SQLiteStorage vs MemoryStorage
 23. 🔨 Add migration tool for backend switching (sqlite → memory, pebble → memory)
 
 ### Lower Priority
+
 24. 🔨 Add `EventStreamer` implementation using NATS JetStream consumer
 25. 🔨 Add `go.work` documentation for cross-project development workflow
 
@@ -144,10 +156,12 @@ Add pluggable backend architecture to go-cqrs-lite, go-localfirst, and go-locals
 **Should the NATS JetStream backend live in go-cqrs-lite itself, or in a separate module/repo?**
 
 Arguments for keeping it in go-cqrs-lite:
+
 - It's the canonical event store library; having official backends makes adoption easier
 - The `Store` interface is already defined there
 
 Arguments for separate module:
+
 - go-cqrs-lite currently has **zero external dependencies** (only `cockroachdb/errors`, `google/uuid`, `go-json-experiment/json`). Adding `nats.go/nats.go` would break this principle
 - The `WithProvider` / `EventStoreProvider` pattern already solves this — consumers inject the backend
 - Separate repo allows independent versioning
@@ -158,19 +172,19 @@ Arguments for separate module:
 
 ## Test Results (All Green)
 
-| Project | Tests | Status |
-|---|---|---|
-| go-cqrs-lite | 393 PASS | ✅ |
-| go-localfirst | 269 PASS | ✅ |
-| go-localsync | 160 PASS | ✅ |
-| **Total** | **822 PASS** | ✅ |
+| Project       | Tests        | Status |
+| ------------- | ------------ | ------ |
+| go-cqrs-lite  | 393 PASS     | ✅     |
+| go-localfirst | 269 PASS     | ✅     |
+| go-localsync  | 160 PASS     | ✅     |
+| **Total**     | **822 PASS** | ✅     |
 
 ## Commits Made (This Session)
 
-| Project | SHA | Message |
-|---|---|---|
-| go-cqrs-lite | `de7f0de` | Add pluggable event store backend configuration |
-| go-localfirst | `c4913b2` | Add pluggable storage backend architecture |
-| go-localsync | `a5484ae` | Add pluggable storage backend architecture |
+| Project       | SHA       | Message                                         |
+| ------------- | --------- | ----------------------------------------------- |
+| go-cqrs-lite  | `de7f0de` | Add pluggable event store backend configuration |
+| go-localfirst | `c4913b2` | Add pluggable storage backend architecture      |
+| go-localsync  | `a5484ae` | Add pluggable storage backend architecture      |
 
 All three pushed to `origin/master`.

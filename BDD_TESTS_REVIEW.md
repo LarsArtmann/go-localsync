@@ -8,20 +8,20 @@
 
 ## Test Files
 
-| File | Specs | Focus |
-|---|---|---|
-| `pkg/storage/sqlite_bdd_test.go` | 14 | SQLite storage CRUD, filtering, pagination |
-| `pkg/storage/memory_storage_bdd_test.go` | 9 | Memory storage edge cases (concurrency, boundaries, batching) |
-| `pkg/sync/sync_bdd_test.go` | 22 | Full sync, incremental sync, error handling, progress callbacks |
+| File                                     | Specs | Focus                                                           |
+| ---------------------------------------- | ----- | --------------------------------------------------------------- |
+| `pkg/storage/sqlite_bdd_test.go`         | 14    | SQLite storage CRUD, filtering, pagination                      |
+| `pkg/storage/memory_storage_bdd_test.go` | 9     | Memory storage edge cases (concurrency, boundaries, batching)   |
+| `pkg/sync/sync_bdd_test.go`              | 22    | Full sync, incremental sync, error handling, progress callbacks |
 
 **Total: 45 specs**
 
 ### Supporting files
 
-| File | Purpose |
-|---|---|
+| File                                    | Purpose                                     |
+| --------------------------------------- | ------------------------------------------- |
 | `pkg/storage/storage_bdd_suite_test.go` | `TestStorageBDD` — Ginkgo suite entry point |
-| `pkg/sync/sync_bdd_suite_test.go` | `TestSyncBDD` — Ginkgo suite entry point |
+| `pkg/sync/sync_bdd_suite_test.go`       | `TestSyncBDD` — Ginkgo suite entry point    |
 
 ---
 
@@ -77,6 +77,7 @@ Unique scenarios that complement (not duplicate) the compliance suite:
 Uses real SQLite storage + mock provider:
 
 **Full sync (Sync):**
+
 - First sync: fetch 3 events, store all, preserve event types
 - Double sync: same data twice → no duplicates
 - Provider failure: returns error, no items stored
@@ -86,6 +87,7 @@ Uses real SQLite storage + mock provider:
 - OnProgress callback invoked after sync
 
 **Incremental sync (SyncIncremental):**
+
 - Incremental with new items: skip items at or older than latest, store new ones
 - **Empty store fallback** — `GetLatest` returns `ErrNotFound` → falls back to full `Sync`
 - **Nil options** → error
@@ -101,10 +103,10 @@ Uses real SQLite storage + mock provider:
 
 The BDD tests sit alongside these existing test suites:
 
-| Suite | File | Type |
-|---|---|---|
-| Storage compliance | `pkg/storage/compliance_test.go` | 22 tests × 2 backends (testify) |
-| Memory storage unit | `pkg/storage/memory_storage_test.go` | Unit tests (testify) |
-| SQLite unit | `pkg/storage/sqlite_test.go` | Unit tests (testify) |
-| Sync unit | `pkg/sync/sync_test.go` | Unit tests (testify) |
-| Conflict-aware sync | `pkg/sync/conflict_aware_test.go` | Unit tests (testify) |
+| Suite               | File                                 | Type                            |
+| ------------------- | ------------------------------------ | ------------------------------- |
+| Storage compliance  | `pkg/storage/compliance_test.go`     | 22 tests × 2 backends (testify) |
+| Memory storage unit | `pkg/storage/memory_storage_test.go` | Unit tests (testify)            |
+| SQLite unit         | `pkg/storage/sqlite_test.go`         | Unit tests (testify)            |
+| Sync unit           | `pkg/sync/sync_test.go`              | Unit tests (testify)            |
+| Conflict-aware sync | `pkg/sync/conflict_aware_test.go`    | Unit tests (testify)            |
