@@ -195,7 +195,7 @@ func (s *ConflictAwareSyncer) batchFetchExisting(
 	ids []types.ItemID,
 ) (map[string]*provider.Item, error) {
 	if len(ids) == 0 {
-		return nil, nil
+		return map[string]*provider.Item{}, nil
 	}
 
 	items, err := s.storage.BatchGetByIDs(ctx, ids)

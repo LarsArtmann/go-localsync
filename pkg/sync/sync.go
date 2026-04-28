@@ -205,14 +205,14 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	typeCounts := make(map[string]int64)
 
 	for _, t := range types {
-		c, err := s.storage.CountByType(ctx, t)
+		count, err := s.storage.CountByType(ctx, t)
 		if err != nil {
 			s.logger.Warn("Failed to count items by type", "type", t, "error", err)
 
 			continue
 		}
 
-		typeCounts[t] = c
+		typeCounts[t] = count
 	}
 
 	return &Stats{

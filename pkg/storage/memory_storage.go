@@ -20,6 +20,7 @@ type MemoryStorage struct {
 // NewMemoryStorage creates a new in-memory storage.
 func NewMemoryStorage() *MemoryStorage {
 	return &MemoryStorage{
+		mu:    sync.RWMutex{},
 		items: make(map[string]*provider.Item),
 	}
 }
