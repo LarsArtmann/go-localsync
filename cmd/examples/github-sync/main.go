@@ -54,7 +54,11 @@ func main() {
 			envCfg.DBPath,
 			"Path to SQLite database (default: ~/.local/share/go-localsync/events.db)",
 		)
-		backend       = flag.String("backend", envCfg.Backend, "Storage backend: sqlite, turso, memory")
+		backend = flag.String(
+			"backend",
+			envCfg.Backend,
+			"Storage backend: sqlite, turso, memory",
+		)
 		maxPages      = flag.Int("pages", envCfg.MaxPages, "Maximum number of pages to fetch")
 		incremental   = flag.Bool("incremental", envCfg.Incremental, "Only sync new events")
 		conflictAware = flag.Bool(
