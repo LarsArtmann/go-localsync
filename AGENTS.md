@@ -10,7 +10,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                  |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
-| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, LibSQL/Turso, in-memory)                                      |
+| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory)                                             |
 | `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID`) |
 | `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
@@ -78,7 +78,7 @@ Storage backends are selected via `storage.NewStorage(Config)`. Switch-based fac
 | Backend       | Flag/Config     | Use Case                    |
 | ------------- | --------------- | --------------------------- |
 | `sqlite`      | `--backend sqlite` (default) | Persistent production storage |
-| `libsql`      | `--backend libsql` | Local LibSQL file or remote Turso database  |
+| `turso`       | `--backend turso`  | Local Turso file or remote Turso database   |
 | `memory`      | `--backend memory` | Testing, development         |
 
 ### Adding a New Backend
@@ -86,7 +86,7 @@ Storage backends are selected via `storage.NewStorage(Config)`. Switch-based fac
 1. Implement the `storage.Storage` interface (17 methods)
 2. Add case to `NewStorage` switch in `config.go`
 3. Run compliance tests: `go test ./pkg/storage/ -run TestStorageCompliance`
-4. SQLite, LibSQL, and Memory must all pass the same compliance suite
+4. SQLite, Turso, and Memory must all pass the same compliance suite
 
 ### CLI Usage
 
