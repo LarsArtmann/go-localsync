@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/larsartmann/go-localsync/internal/database"
@@ -75,7 +74,8 @@ func (s *SQLiteStorage) UpsertBatch(ctx context.Context, items []*provider.Item)
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
+	err = tx.Commit()
+	if err != nil {
 		return fmt.Errorf("%w: commit batch upsert: %w", pkgerrors.ErrDatabase, err)
 	}
 
@@ -99,60 +99,7 @@ func (s *SQLiteStorage) BatchGetByIDs(
 	ctx context.Context,
 	ids []types.ItemID,
 ) ([]*provider.Item, error) {
-	if len(ids) == 0 {
-		return nil, nil
-	}
-
-	placeholders := make([]string, len(ids))
-
-	args := make([]any, len(ids))
-	for i, id := range ids {
-		placeholders[i] = "?"
-		args[i] = types.NewSourceItemID(id.Get())
-	}
-
-	query := fmt.Sprintf(
-		`SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events WHERE source_id IN (%s)`,
-		strings.Join(placeholders, ", "),
-	)
-
-	rows, err := s.dbc.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, fmt.Errorf("%w: batch get by IDs: %w", pkgerrors.ErrDatabase, err)
-	}
-	defer rows.Close()
-
-	var items []*provider.Item
-
-	for rows.Next() {
-		var e db.Events
-
-		err := rows.Scan(
-			&e.ID,
-			&e.SourceID,
-			&e.Source,
-			&e.Type,
-			&e.ActorLogin,
-			&e.ActorAvatarUrl,
-			&e.RepoName,
-			&e.RepoUrl,
-			&e.CreatedAt,
-			&e.UpdatedAt,
-			&e.RawJson,
-			&e.SyncedAt,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("%w: scan in batch get by IDs: %w", pkgerrors.ErrDatabase, err)
-		}
-
-		items = append(items, toItem(&e))
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%w: iterate batch get by IDs: %w", pkgerrors.ErrDatabase, err)
-	}
-
-	return items, nil
+	return batchGetByIDs(ctx, s.dbc, ids)
 }
 
 func (s *SQLiteStorage) GetLatest(ctx context.Context) (*provider.Item, error) {

@@ -46,8 +46,9 @@ func WithAuthToken(token string) Option {
 // NewConfig builds a Config from options, applying defaults.
 func NewConfig(opts ...Option) Config {
 	cfg := Config{
-		Backend: BackendSQLite,
-		DBPath:  "",
+		Backend:   BackendSQLite,
+		DBPath:    "",
+		AuthToken: "",
 	}
 
 	for _, opt := range opts {

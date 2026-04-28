@@ -37,6 +37,7 @@ func makeItem(id, source, itemType, actor, repo string, createdAt time.Time) *pr
 // TestStorageCompliance_SQLite runs the compliance suite against SQLiteStorage.
 func TestStorageCompliance_SQLite(t *testing.T) {
 	factory := func(t *testing.T) (storage.Storage, func()) {
+		t.Helper()
 		db, err := database.Open(":memory:")
 		require.NoError(t, err)
 		db.SetMaxOpenConns(1)
@@ -49,6 +50,7 @@ func TestStorageCompliance_SQLite(t *testing.T) {
 // TestStorageCompliance_Memory runs the compliance suite against MemoryStorage.
 func TestStorageCompliance_Memory(t *testing.T) {
 	factory := func(t *testing.T) (storage.Storage, func()) {
+		t.Helper()
 		s := storage.NewMemoryStorage()
 		return s, func() { _ = s.Close() }
 	}
@@ -58,6 +60,7 @@ func TestStorageCompliance_Memory(t *testing.T) {
 // TestStorageCompliance_LibSQL runs the compliance suite against LibSQLStorage.
 func TestStorageCompliance_LibSQL(t *testing.T) {
 	factory := func(t *testing.T) (storage.Storage, func()) {
+		t.Helper()
 		tmpFile, err := os.CreateTemp(t.TempDir(), "libsql-test-*.db")
 		require.NoError(t, err)
 		require.NoError(t, tmpFile.Close())
