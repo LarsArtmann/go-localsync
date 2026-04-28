@@ -36,29 +36,35 @@ var (
 )
 
 func main() {
+	envCfg, err := LoadConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to load config: %v\n", err)
+		os.Exit(exitSoftware)
+	}
+
 	var (
 		token = flag.String(
 			"token",
-			os.Getenv("GITHUB_TOKEN"),
+			envCfg.Token,
 			"GitHub personal access token (or set GITHUB_TOKEN env)",
 		)
-		username = flag.String("user", "", "GitHub username to sync events for")
+		username = flag.String("user", envCfg.Username, "GitHub username to sync events for")
 		dbPath   = flag.String(
 			"db",
-			"",
+			envCfg.DBPath,
 			"Path to SQLite database (default: ~/.local/share/go-localsync/events.db)",
 		)
-		backend       = flag.String("backend", "sqlite", "Storage backend: sqlite, turso, memory")
-		maxPages      = flag.Int("pages", 10, "Maximum number of pages to fetch")
-		incremental   = flag.Bool("incremental", true, "Only sync new events")
+		backend       = flag.String("backend", envCfg.Backend, "Storage backend: sqlite, turso, memory")
+		maxPages      = flag.Int("pages", envCfg.MaxPages, "Maximum number of pages to fetch")
+		incremental   = flag.Bool("incremental", envCfg.Incremental, "Only sync new events")
 		conflictAware = flag.Bool(
 			"conflict-aware",
-			false,
+			envCfg.ConflictAware,
 			"Use conflict-aware sync with CRDT resolution",
 		)
-		showStats   = flag.Bool("stats", false, "Show database statistics and exit")
+		showStats   = flag.Bool("stats", envCfg.ShowStats, "Show database statistics and exit")
 		showVersion = flag.Bool("version", false, "Show version information and exit")
-		verbose     = flag.Bool("verbose", false, "Enable verbose logging")
+		verbose     = flag.Bool("verbose", envCfg.Verbose, "Enable verbose logging")
 	)
 
 	flag.Parse()
