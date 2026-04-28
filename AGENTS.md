@@ -61,7 +61,7 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 | -------------------------- | ----- | ----------------------------------------------------------- |
 | `internal/database`        | 6     | ✅ Migration tests (idempotency, ordering, schema, indexes) |
 | `pkg/providers/github`     | 21    | ✅ Client, fetch, retry, error handling                     |
-| `pkg/storage`              | 70+   | ✅ SQLite + Memory + LibSQL compliance (22+ tests each)                            |
+| `pkg/storage`              | 70+   | ✅ SQLite + Memory + Turso compliance (22+ tests each)                             |
 | `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                             |
 | `cmd/examples/github-sync` | 0     | ⬜ No tests                                                 |
 | `pkg/errors`               | 0     | ⬜ No tests                                                 |

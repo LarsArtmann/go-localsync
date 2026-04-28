@@ -14,8 +14,8 @@ const (
 	BackendSQLite Backend = "sqlite"
 	// BackendMemory uses an in-memory store (testing, development).
 	BackendMemory Backend = "memory"
-	// BackendLibSQL uses LibSQL (local file or remote Turso database).
-	BackendLibSQL Backend = "libsql"
+	// BackendTurso uses Turso (local file or remote Turso database).
+	BackendTurso Backend = "turso"
 )
 
 // Config holds configuration for constructing storage backends.
@@ -74,16 +74,16 @@ func NewStorage(cfg Config) (Storage, error) {
 		return Open(path)
 	case BackendMemory:
 		return NewMemoryStorage(), nil
-	case BackendLibSQL:
+	case BackendTurso:
 		url := cfg.DBPath
 		if url == "" {
 			return nil, fmt.Errorf(
-				"%w: url is required for libsql backend",
+				"%w: url is required for turso backend",
 				pkgerrors.ErrDatabase,
 			)
 		}
 
-		return OpenLibSQL(url, cfg.AuthToken)
+		return OpenTurso(url, cfg.AuthToken)
 	default:
 		return nil, fmt.Errorf(
 			"%w: unknown storage backend: %q",

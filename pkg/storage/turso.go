@@ -16,19 +16,19 @@ import (
 	turso "turso.tech/database/tursogo"
 )
 
-type LibSQLStorage struct {
+type TursoStorage struct {
 	dbc     *sql.DB
 	querier db.Querier
 }
 
-func NewLibSQLStorage(dbc *sql.DB) *LibSQLStorage {
-	return &LibSQLStorage{
+func NewTursoStorage(dbc *sql.DB) *TursoStorage {
+	return &TursoStorage{
 		dbc:     dbc,
 		querier: db.New(dbc),
 	}
 }
 
-func OpenLibSQL(url, authToken string) (*LibSQLStorage, error) {
+func OpenTurso(url, authToken string) (*TursoStorage, error) {
 	ctx := context.Background()
 
 	var dbc *sql.DB
@@ -75,7 +75,7 @@ func OpenLibSQL(url, authToken string) (*LibSQLStorage, error) {
 
 	dbc.SetMaxOpenConns(1)
 
-	return NewLibSQLStorage(dbc), nil
+	return NewTursoStorage(dbc), nil
 }
 
 func isRemoteURL(url string) bool {
@@ -84,11 +84,11 @@ func isRemoteURL(url string) bool {
 		strings.HasPrefix(url, "http://")
 }
 
-func (s *LibSQLStorage) Close() error {
+func (s *TursoStorage) Close() error {
 	return s.dbc.Close()
 }
 
-func (s *LibSQLStorage) Upsert(ctx context.Context, item *provider.Item) error {
+func (s *TursoStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	err := s.querier.UpsertEvent(ctx, toDBParams(item))
 	if err != nil {
 		return fmt.Errorf("%w: upsert item %q: %w", pkgerrors.ErrDatabase, item.ID.Get(), err)
@@ -97,7 +97,7 @@ func (s *LibSQLStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	return nil
 }
 
-func (s *LibSQLStorage) UpsertBatch(ctx context.Context, items []*provider.Item) error {
+func (s *TursoStorage) UpsertBatch(ctx context.Context, items []*provider.Item) error {
 	if len(items) == 0 {
 		return nil
 	}
@@ -131,7 +131,7 @@ func (s *LibSQLStorage) UpsertBatch(ctx context.Context, items []*provider.Item)
 	return nil
 }
 
-func (s *LibSQLStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
+func (s *TursoStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
 	e, err := s.querier.GetEventBySourceID(ctx, types.NewSourceItemID(id.Get()))
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -144,14 +144,14 @@ func (s *LibSQLStorage) GetByID(ctx context.Context, id types.ItemID) (*provider
 	return toItem(e), nil
 }
 
-func (s *LibSQLStorage) BatchGetByIDs(
+func (s *TursoStorage) BatchGetByIDs(
 	ctx context.Context,
 	ids []types.ItemID,
 ) ([]*provider.Item, error) {
 	return batchGetByIDs(ctx, s.dbc, ids)
 }
 
-func (s *LibSQLStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
+func (s *TursoStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 	e, err := s.querier.GetLatestEvent(ctx)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -164,7 +164,7 @@ func (s *LibSQLStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
 	return toItem(e), nil
 }
 
-func (s *LibSQLStorage) GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error) {
+func (s *TursoStorage) GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error) {
 	events, err := s.querier.GetEvents(ctx, &db.GetEventsParams{
 		Limit:  int64(limit),
 		Offset: int64(offset),
@@ -182,7 +182,7 @@ func (s *LibSQLStorage) GetItems(ctx context.Context, limit, offset int) ([]*pro
 	return convertItems(events), nil
 }
 
-func (s *LibSQLStorage) GetItemsByType(
+func (s *TursoStorage) GetItemsByType(
 	ctx context.Context,
 	itemType string,
 	limit, offset int,
@@ -206,7 +206,7 @@ func (s *LibSQLStorage) GetItemsByType(
 	return convertItems(events), nil
 }
 
-func (s *LibSQLStorage) GetItemsByActor(
+func (s *TursoStorage) GetItemsByActor(
 	ctx context.Context,
 	actorLogin string,
 	limit, offset int,
@@ -230,7 +230,7 @@ func (s *LibSQLStorage) GetItemsByActor(
 	return convertItems(events), nil
 }
 
-func (s *LibSQLStorage) GetItemsByRepo(
+func (s *TursoStorage) GetItemsByRepo(
 	ctx context.Context,
 	repoName string,
 	limit, offset int,
@@ -254,7 +254,7 @@ func (s *LibSQLStorage) GetItemsByRepo(
 	return convertItems(events), nil
 }
 
-func (s *LibSQLStorage) GetItemsBySource(
+func (s *TursoStorage) GetItemsBySource(
 	ctx context.Context,
 	source string,
 	limit, offset int,
@@ -278,7 +278,7 @@ func (s *LibSQLStorage) GetItemsBySource(
 	return convertItems(events), nil
 }
 
-func (s *LibSQLStorage) GetItemsSince(
+func (s *TursoStorage) GetItemsSince(
 	ctx context.Context,
 	since time.Time,
 ) ([]*provider.Item, error) {
@@ -290,7 +290,7 @@ func (s *LibSQLStorage) GetItemsSince(
 	return convertItems(events), nil
 }
 
-func (s *LibSQLStorage) Count(ctx context.Context) (int64, error) {
+func (s *TursoStorage) Count(ctx context.Context) (int64, error) {
 	count, err := s.querier.CountEvents(ctx)
 	if err != nil {
 		return 0, fmt.Errorf("%w: count events: %w", pkgerrors.ErrDatabase, err)
@@ -299,7 +299,7 @@ func (s *LibSQLStorage) Count(ctx context.Context) (int64, error) {
 	return count, nil
 }
 
-func (s *LibSQLStorage) CountByType(ctx context.Context, itemType string) (int64, error) {
+func (s *TursoStorage) CountByType(ctx context.Context, itemType string) (int64, error) {
 	count, err := s.querier.CountEventsByType(ctx, itemType)
 	if err != nil {
 		return 0, fmt.Errorf(
@@ -313,7 +313,7 @@ func (s *LibSQLStorage) CountByType(ctx context.Context, itemType string) (int64
 	return count, nil
 }
 
-func (s *LibSQLStorage) GetTypes(ctx context.Context) ([]string, error) {
+func (s *TursoStorage) GetTypes(ctx context.Context) ([]string, error) {
 	types, err := s.querier.GetEventTypes(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("%w: get event types: %w", pkgerrors.ErrDatabase, err)
@@ -322,7 +322,7 @@ func (s *LibSQLStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return types, nil
 }
 
-func (s *LibSQLStorage) Delete(ctx context.Context, id types.ItemID) error {
+func (s *TursoStorage) Delete(ctx context.Context, id types.ItemID) error {
 	err := s.querier.DeleteEventBySourceID(ctx, types.NewSourceItemID(id.Get()))
 	if err != nil {
 		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
@@ -331,7 +331,7 @@ func (s *LibSQLStorage) Delete(ctx context.Context, id types.ItemID) error {
 	return nil
 }
 
-func (s *LibSQLStorage) DeleteAll(ctx context.Context) error {
+func (s *TursoStorage) DeleteAll(ctx context.Context) error {
 	err := s.querier.DeleteAllEvents(ctx)
 	if err != nil {
 		return fmt.Errorf("%w: delete all events: %w", pkgerrors.ErrDatabase, err)

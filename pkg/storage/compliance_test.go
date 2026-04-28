@@ -57,15 +57,15 @@ func TestStorageCompliance_Memory(t *testing.T) {
 	testStorageCompliance(t, factory)
 }
 
-// TestStorageCompliance_LibSQL runs the compliance suite against LibSQLStorage.
-func TestStorageCompliance_LibSQL(t *testing.T) {
+// TestStorageCompliance_Turso runs the compliance suite against TursoStorage.
+func TestStorageCompliance_Turso(t *testing.T) {
 	factory := func(t *testing.T) (storage.Storage, func()) {
 		t.Helper()
-		tmpFile, err := os.CreateTemp(t.TempDir(), "libsql-test-*.db")
+		tmpFile, err := os.CreateTemp(t.TempDir(), "turso-test-*.db")
 		require.NoError(t, err)
 		require.NoError(t, tmpFile.Close())
 
-		s, err := storage.OpenLibSQL("file:"+tmpFile.Name(), "")
+		s, err := storage.OpenTurso("file:"+tmpFile.Name(), "")
 		require.NoError(t, err)
 		return s, func() {
 			_ = s.Close()

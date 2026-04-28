@@ -59,10 +59,10 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 ### Data & Export
 
-- [ ] **Add Turso/LibSQL backend support**  
-       **Source:** `internal/database/connection.go`  
-       **Description:** Support Turso remote SQLite databases via libsql driver.  
-       **Context:** Currently uses `modernc.org/sqlite`. Migration system makes this easier to add.
+- [x] **Add Turso backend support**  
+       **Source:** `pkg/storage/turso.go`  
+       **Description:** Support Turso remote SQLite databases via turso.tech/database/tursogo.  
+       **Context:** Completed. Migrated from deprecated libsql-client-go to tursogo.
 
 - [ ] **Create HTTP API endpoint**  
        **Source:** New package `pkg/api/`  
