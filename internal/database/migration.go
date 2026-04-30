@@ -24,9 +24,9 @@ type migration struct {
 const migrationFilenameParts = 2
 
 var (
-	migrationsOnce     sync.Once
-	loadedMigrations   []migration
-	migrationsLoadErr  error
+	migrationsOnce    sync.Once
+	loadedMigrations  []migration
+	migrationsLoadErr error
 )
 
 func loadMigrations() {

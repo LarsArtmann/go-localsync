@@ -10,7 +10,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                  |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
-| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory)                                             |
+| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory)                                              |
 | `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID`) |
 | `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
@@ -61,7 +61,7 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 | -------------------------- | ----- | ----------------------------------------------------------- |
 | `internal/database`        | 6     | ✅ Migration tests (idempotency, ordering, schema, indexes) |
 | `pkg/providers/github`     | 21    | ✅ Client, fetch, retry, error handling                     |
-| `pkg/storage`              | 70+   | ✅ SQLite + Memory + Turso compliance (22+ tests each)                             |
+| `pkg/storage`              | 70+   | ✅ SQLite + Memory + Turso compliance (22+ tests each)      |
 | `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                             |
 | `cmd/examples/github-sync` | 0     | ⬜ No tests                                                 |
 | `pkg/errors`               | 0     | ⬜ No tests                                                 |
@@ -75,11 +75,11 @@ Run: `go test ./... -count=1`
 
 Storage backends are selected via `storage.NewStorage(Config)`. Switch-based factory, no global registries. External backends implement the `Storage` interface directly.
 
-| Backend       | Flag/Config     | Use Case                    |
-| ------------- | --------------- | --------------------------- |
-| `sqlite`      | `--backend sqlite` (default) | Persistent production storage |
-| `turso`       | `--backend turso`  | Local Turso file or remote Turso database   |
-| `memory`      | `--backend memory` | Testing, development         |
+| Backend  | Flag/Config                  | Use Case                                  |
+| -------- | ---------------------------- | ----------------------------------------- |
+| `sqlite` | `--backend sqlite` (default) | Persistent production storage             |
+| `turso`  | `--backend turso`            | Local Turso file or remote Turso database |
+| `memory` | `--backend memory`           | Testing, development                      |
 
 ### Adding a New Backend
 
@@ -132,12 +132,12 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 
 ## Dependencies
 
-| Dependency                     | Purpose                                                                   |
-| ------------------------------ | ------------------------------------------------------------------------- |
-| `go-localfirst`                | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync |
-| `go-branded-id`                | Branded phantom-type IDs for compile-time safety                          |
-| `modernc.org/sqlite`           | Pure Go SQLite driver (no CGO)                                            |
-| `cockroachdb/errors`           | Sentinel errors with detail wrapping                                      |
-| `go-github/v69`                | GitHub API client                                                         |
-| `turso.tech/database/tursogo`  | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go) |
-| `charmbracelet/log`            | Structured logging                                                        |
+| Dependency                    | Purpose                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------- |
+| `go-localfirst`               | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync             |
+| `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                      |
+| `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                        |
+| `cockroachdb/errors`          | Sentinel errors with detail wrapping                                                  |
+| `go-github/v69`               | GitHub API client                                                                     |
+| `turso.tech/database/tursogo` | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go) |
+| `charmbracelet/log`           | Structured logging                                                                    |

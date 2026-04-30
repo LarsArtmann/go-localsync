@@ -7,6 +7,7 @@ go-localsync currently has a hand-rolled CRUD storage layer (16-method `Storage`
 go-localfirst already builds on go-cqrs-lite with Pebble-backed event sourcing. We should too.
 
 **What we gain:**
+
 - Shared `event.Store` (Pebble) instead of 3 duplicated SQL backends
 - Event sourcing — full audit trail of every sync operation
 - Command/Query separation — clean write/read paths
@@ -16,6 +17,7 @@ go-localfirst already builds on go-cqrs-lite with Pebble-backed event sourcing. 
 - Natural conflict detection through aggregate versioning
 
 **What we lose:**
+
 - SQL query flexibility (offset/limit pagination, type/actor/repo filters)
 - `internal/db/` sqlc-generated code
 - Migration system (`internal/database/`)
@@ -118,6 +120,7 @@ AggregateID:   derived from source + sourceID (e.g. "github:12345")
 ```
 
 This gives us:
+
 - Per-item version tracking (optimistic concurrency for free)
 - Per-item event history (full audit trail)
 - Natural conflict detection (version mismatch = concurrent edit)
@@ -133,6 +136,7 @@ const (
 ```
 
 **Payload structs** (JSON-encoded `[]byte`):
+
 ```go
 type ItemSyncedPayload struct {
     Source         string `json:"source"`
@@ -184,6 +188,7 @@ func (s *SyncItem) Apply(evt event.Event) error { ... }
 The projection subscribes to `event.Bus` and maintains current item state in a KV store.
 
 **Pebble-backed read model** (production):
+
 ```
 Key:   "item:{source}:{sourceID}"
 Value: JSON(provider.Item)
@@ -196,6 +201,7 @@ Value: ""  (exists = source present)
 ```
 
 Queries use Pebble prefix scans:
+
 - `GetItem(source, sourceID)` → point lookup
 - `ListItems(limit, offset)` → prefix scan `item:` with skip/take
 - `ListItemsByType(type, limit, offset)` → prefix scan `item:` filtered
@@ -203,6 +209,7 @@ Queries use Pebble prefix scans:
 - `GetTypes()` → scan `item_type:` prefix
 
 **In-memory read model** (testing):
+
 - `map[string]*provider.Item` with `sync.RWMutex`
 - Same query methods, just backed by a map
 
@@ -221,11 +228,13 @@ For the initial bulk sync (first run), we use `event.Store.AppendBatch` to skip 
 The Pebble `event.Store` adapter at `go-localfirst/internal/cqrs/store/pebble_adapter.go` is not imported — it lives in `internal/`. Two options:
 
 **Option A (recommended): Extract to shared package**
+
 - Move `CQRSAdapter` to `go-cqrs-lite/event/pebble_store.go` (or a new `go-cqrs-lite/store/pebble/` package)
 - Both go-localfirst and go-localsync import it
 - go-cqrs-lite already has `BackendMemory`; add `BackendPebble`
 
 **Option B: Copy into go-localsync**
+
 - Copy the adapter into `pkg/cqrs/store/pebble_adapter.go`
 - Simpler, no cross-project changes
 - But duplicates code with go-localfirst
@@ -314,25 +323,25 @@ The Pebble `event.Store` adapter at `go-localfirst/internal/cqrs/store/pebble_ad
 
 ## Interface Mapping (Old → New)
 
-| Old (CRUD) | New (CQRS) |
-|---|---|
-| `storage.Storage.Upsert(item)` | `command.Dispatcher.Dispatch(SyncItemCommand{item})` |
-| `storage.Storage.UpsertBatch(items)` | Loop: dispatch `SyncItemCommand` per item |
-| `storage.Storage.GetByID(id)` | `query.Dispatcher.Dispatch(GetItemQuery{id})` |
-| `storage.Storage.GetLatest()` | `query.Dispatcher.Dispatch(ListItemsQuery{Limit:1})` |
-| `storage.Storage.GetItems(limit, offset)` | `query.Dispatcher.Dispatch(ListItemsQuery{Limit,Offset})` |
-| `storage.Storage.GetItemsByType(t, l, o)` | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:TypeFilter{t}})` |
-| `storage.Storage.GetItemsByActor(a, l, o)` | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:ActorFilter{a}})` |
-| `storage.Storage.GetItemsByRepo(r, l, o)` | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:RepoFilter{r}})` |
+| Old (CRUD)                                  | New (CQRS)                                                          |
+| ------------------------------------------- | ------------------------------------------------------------------- |
+| `storage.Storage.Upsert(item)`              | `command.Dispatcher.Dispatch(SyncItemCommand{item})`                |
+| `storage.Storage.UpsertBatch(items)`        | Loop: dispatch `SyncItemCommand` per item                           |
+| `storage.Storage.GetByID(id)`               | `query.Dispatcher.Dispatch(GetItemQuery{id})`                       |
+| `storage.Storage.GetLatest()`               | `query.Dispatcher.Dispatch(ListItemsQuery{Limit:1})`                |
+| `storage.Storage.GetItems(limit, offset)`   | `query.Dispatcher.Dispatch(ListItemsQuery{Limit,Offset})`           |
+| `storage.Storage.GetItemsByType(t, l, o)`   | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:TypeFilter{t}})`   |
+| `storage.Storage.GetItemsByActor(a, l, o)`  | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:ActorFilter{a}})`  |
+| `storage.Storage.GetItemsByRepo(r, l, o)`   | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:RepoFilter{r}})`   |
 | `storage.Storage.GetItemsBySource(s, l, o)` | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:SourceFilter{s}})` |
-| `storage.Storage.GetItemsSince(t)` | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:SinceFilter{t}})` |
-| `storage.Storage.BatchGetByIDs(ids)` | `query.Dispatcher.Dispatch(BatchGetItemsQuery{ids})` |
-| `storage.Storage.Delete(id)` | `command.Dispatcher.Dispatch(DeleteItemCommand{id})` |
-| `storage.Storage.DeleteAll()` | Iterate + delete (or dedicated command) |
-| `storage.Storage.Count()` | `query.Dispatcher.Dispatch(CountItemsQuery{})` |
-| `storage.Storage.CountByType(t)` | `query.Dispatcher.Dispatch(CountItemsQuery{Filter:TypeFilter{t}})` |
-| `storage.Storage.GetTypes()` | `query.Dispatcher.Dispatch(GetItemTypesQuery{})` |
-| `storage.Storage.Close()` | Close event store + read model |
+| `storage.Storage.GetItemsSince(t)`          | `query.Dispatcher.Dispatch(ListItemsQuery{Filter:SinceFilter{t}})`  |
+| `storage.Storage.BatchGetByIDs(ids)`        | `query.Dispatcher.Dispatch(BatchGetItemsQuery{ids})`                |
+| `storage.Storage.Delete(id)`                | `command.Dispatcher.Dispatch(DeleteItemCommand{id})`                |
+| `storage.Storage.DeleteAll()`               | Iterate + delete (or dedicated command)                             |
+| `storage.Storage.Count()`                   | `query.Dispatcher.Dispatch(CountItemsQuery{})`                      |
+| `storage.Storage.CountByType(t)`            | `query.Dispatcher.Dispatch(CountItemsQuery{Filter:TypeFilter{t}})`  |
+| `storage.Storage.GetTypes()`                | `query.Dispatcher.Dispatch(GetItemTypesQuery{})`                    |
+| `storage.Storage.Close()`                   | Close event store + read model                                      |
 
 ---
 
@@ -366,17 +375,17 @@ This replaces the 16-method `Storage` interface with a cleaner 7-method interfac
 
 ## Dependencies (Old → New)
 
-| Old | New |
-|---|---|
-| `modernc.org/sqlite` | **removed** |
-| `tursodatabase/libsql-client-go` | **removed** |
-| sqlc (build tool) | **removed** |
-| `github.com/larsartmann/go-cqrs-lite` | **added** |
-| `github.com/cockroachdb/pebble` | **added** (via go-cqrs-lite or direct) |
-| `go.uber.org/zap` | **added** (for Pebble adapter logging, consistent with go-localfirst) |
-| `google/go-github/v69` | unchanged |
-| `cockroachdb/errors` | unchanged |
-| `charm.land/log/v2` | unchanged |
+| Old                                   | New                                                                   |
+| ------------------------------------- | --------------------------------------------------------------------- |
+| `modernc.org/sqlite`                  | **removed**                                                           |
+| `tursodatabase/libsql-client-go`      | **removed**                                                           |
+| sqlc (build tool)                     | **removed**                                                           |
+| `github.com/larsartmann/go-cqrs-lite` | **added**                                                             |
+| `github.com/cockroachdb/pebble`       | **added** (via go-cqrs-lite or direct)                                |
+| `go.uber.org/zap`                     | **added** (for Pebble adapter logging, consistent with go-localfirst) |
+| `google/go-github/v69`                | unchanged                                                             |
+| `cockroachdb/errors`                  | unchanged                                                             |
+| `charm.land/log/v2`                   | unchanged                                                             |
 
 ---
 
@@ -394,9 +403,9 @@ This replaces the 16-method `Storage` interface with a cleaner 7-method interfac
 
 ## Estimated Effort
 
-| Phase | Scope | Effort |
-|---|---|---|
-| Phase 1: Foundation | 7 new files, ~800 lines | Medium |
-| Phase 2: Wire sync | 2 files refactored | Medium |
-| Phase 3: Update consumers | 1 CLI + test rewrites | Medium |
-| Phase 4: Cleanup | Delete ~2000 lines | Easy |
+| Phase                     | Scope                   | Effort |
+| ------------------------- | ----------------------- | ------ |
+| Phase 1: Foundation       | 7 new files, ~800 lines | Medium |
+| Phase 2: Wire sync        | 2 files refactored      | Medium |
+| Phase 3: Update consumers | 1 CLI + test rewrites   | Medium |
+| Phase 4: Cleanup          | Delete ~2000 lines      | Easy   |

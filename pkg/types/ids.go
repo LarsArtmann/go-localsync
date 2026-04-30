@@ -20,7 +20,7 @@ import (
 	"crypto/rand"
 	"time"
 
-	"github.com/larsartmann/go-branded-id"
+	id "github.com/larsartmann/go-branded-id"
 	"github.com/oklog/ulid/v2"
 )
 

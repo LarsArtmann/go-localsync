@@ -88,18 +88,18 @@ This makes the SDK truly provider-agnostic. Each provider defines its own metada
 
 Before implementing anything from scratch, check what we already have:
 
-| Requirement | Existing Code | Reuse Strategy |
-|---|---|---|
-| In-memory read model | `pkg/storage/memory_storage.go` | Extract interface, use as base for CQRS read model |
-| Filter/pagination pattern | `MemoryStorage.filterItems()` | Extract to generic `pkg/filter` package |
-| Test server factories | `pkg/testhelpers/helpers.go` | Already reusable, just add more variants |
-| Retry logic | `pkg/providers/github/client.go` | Extract to `pkg/retry` — already generic enough |
-| Rate limit handling | `pkg/providers/github/client.go` | Extract to `pkg/ratelimit` |
-| BDD test patterns | `pkg/storage/storage_bdd_suite_test.go` | Reuse pattern for sync BDD tests |
-| Config options pattern | `pkg/storage/config.go` | Same functional options pattern works everywhere |
-| Null string helpers | `pkg/storage/sqlite.go` | `toNullString`/`fromNullString` — move to `pkg/dbutil` |
-| Item conversion | `pkg/storage/sqlite.go` | `toItem`, `toDBParams`, `convertItems` — move to `pkg/convert` |
-| Event conversion | `pkg/providers/github/client.go` | `convertEvent` — stays in github package |
+| Requirement               | Existing Code                           | Reuse Strategy                                                 |
+| ------------------------- | --------------------------------------- | -------------------------------------------------------------- |
+| In-memory read model      | `pkg/storage/memory_storage.go`         | Extract interface, use as base for CQRS read model             |
+| Filter/pagination pattern | `MemoryStorage.filterItems()`           | Extract to generic `pkg/filter` package                        |
+| Test server factories     | `pkg/testhelpers/helpers.go`            | Already reusable, just add more variants                       |
+| Retry logic               | `pkg/providers/github/client.go`        | Extract to `pkg/retry` — already generic enough                |
+| Rate limit handling       | `pkg/providers/github/client.go`        | Extract to `pkg/ratelimit`                                     |
+| BDD test patterns         | `pkg/storage/storage_bdd_suite_test.go` | Reuse pattern for sync BDD tests                               |
+| Config options pattern    | `pkg/storage/config.go`                 | Same functional options pattern works everywhere               |
+| Null string helpers       | `pkg/storage/sqlite.go`                 | `toNullString`/`fromNullString` — move to `pkg/dbutil`         |
+| Item conversion           | `pkg/storage/sqlite.go`                 | `toItem`, `toDBParams`, `convertItems` — move to `pkg/convert` |
+| Event conversion          | `pkg/providers/github/client.go`        | `convertEvent` — stays in github package                       |
 
 ---
 
@@ -107,31 +107,31 @@ Before implementing anything from scratch, check what we already have:
 
 ### Already in go.mod (transitive or direct)
 
-| Library | Use Case | Already Have? |
-|---|---|---|
-| `golang.org/x/sync/errgroup` | Concurrent provider fetches (multi-user) | ✅ Transitive |
-| `golang.org/x/sync/singleflight` | Deduplicate concurrent identical fetches | ✅ Transitive |
-| `charmbracelet/log` | Structured logging | ✅ Direct |
-| `charmbracelet/lipgloss` | TUI styling | ✅ Transitive (from log) |
-| `cockroachdb/errors` | Rich error wrapping | ✅ Direct |
+| Library                          | Use Case                                 | Already Have?            |
+| -------------------------------- | ---------------------------------------- | ------------------------ |
+| `golang.org/x/sync/errgroup`     | Concurrent provider fetches (multi-user) | ✅ Transitive            |
+| `golang.org/x/sync/singleflight` | Deduplicate concurrent identical fetches | ✅ Transitive            |
+| `charmbracelet/log`              | Structured logging                       | ✅ Direct                |
+| `charmbracelet/lipgloss`         | TUI styling                              | ✅ Transitive (from log) |
+| `cockroachdb/errors`             | Rich error wrapping                      | ✅ Direct                |
 
 ### Should Add
 
-| Library | Use Case | Effort |
-|---|---|---|
-| `github.com/caarlos0/env/v11` | 12-factor config from env vars | Low |
-| `github.com/go-chi/chi/v5` | HTTP API routing | Low |
-| `github.com/robfig/cron/v3` | Daemon mode scheduling | Low |
-| `github.com/knadh/koanf` | Unified config (env + flags + files) | Medium |
+| Library                       | Use Case                             | Effort |
+| ----------------------------- | ------------------------------------ | ------ |
+| `github.com/caarlos0/env/v11` | 12-factor config from env vars       | Low    |
+| `github.com/go-chi/chi/v5`    | HTTP API routing                     | Low    |
+| `github.com/robfig/cron/v3`   | Daemon mode scheduling               | Low    |
+| `github.com/knadh/koanf`      | Unified config (env + flags + files) | Medium |
 
 ### Should NOT Add (overkill)
 
-| Library | Why Not |
-|---|---|
-| `uber-go/zap` | We already have `charmbracelet/log` which is excellent |
-| `spf13/cobra` | Our CLI is simple; `flag` is fine. Only add if we get subcommands |
-| `gorm.io/gorm` | We're moving away from SQL, not deeper into it |
-| `sqlx` | Same reason — sqlc already generates typed queries |
+| Library        | Why Not                                                           |
+| -------------- | ----------------------------------------------------------------- |
+| `uber-go/zap`  | We already have `charmbracelet/log` which is excellent            |
+| `spf13/cobra`  | Our CLI is simple; `flag` is fine. Only add if we get subcommands |
+| `gorm.io/gorm` | We're moving away from SQL, not deeper into it                    |
+| `sqlx`         | Same reason — sqlc already generates typed queries                |
 
 ---
 
@@ -141,49 +141,49 @@ Sorted by **Impact / Effort ratio** (highest first).
 
 ### Tier S: Critical Fixes (Do First — Minutes Each)
 
-| # | Task | Effort | Impact | Files |
-|---|---|---|---|---|
-| S1 | Fix `exhaustruct` in `config.go` (add `AuthToken: ""`) | 1m | Fixes lint | `config.go` |
-| S2 | Fix `noinlineerr` in `libsql.go` (lines 48, 68) | 3m | Fixes lint | `libsql.go` |
-| S3 | Fix `noinlineerr` in `sqlite.go` (lines 78, 151) | 3m | Fixes lint | `sqlite.go` |
-| S4 | Add `t.Helper()` to compliance test factories | 2m | Fixes lint | `compliance_test.go` |
-| S5 | Fix `errcheck` for `rows.Close()` | 5m | Fixes lint | `libsql.go`, `sqlite.go` |
-| S6 | Extract shared `batchGetByIDs` from sqlite.go + libsql.go | 15m | Fixes `dupl`, -60 LOC | New `pkg/storage/helpers.go` |
-| S7 | Extract `queryWithFilter` to also cover `GetItemsByType` and `GetItemsBySource` | 10m | Consistency | `sqlite.go` |
+| #   | Task                                                                            | Effort | Impact                | Files                        |
+| --- | ------------------------------------------------------------------------------- | ------ | --------------------- | ---------------------------- |
+| S1  | Fix `exhaustruct` in `config.go` (add `AuthToken: ""`)                          | 1m     | Fixes lint            | `config.go`                  |
+| S2  | Fix `noinlineerr` in `libsql.go` (lines 48, 68)                                 | 3m     | Fixes lint            | `libsql.go`                  |
+| S3  | Fix `noinlineerr` in `sqlite.go` (lines 78, 151)                                | 3m     | Fixes lint            | `sqlite.go`                  |
+| S4  | Add `t.Helper()` to compliance test factories                                   | 2m     | Fixes lint            | `compliance_test.go`         |
+| S5  | Fix `errcheck` for `rows.Close()`                                               | 5m     | Fixes lint            | `libsql.go`, `sqlite.go`     |
+| S6  | Extract shared `batchGetByIDs` from sqlite.go + libsql.go                       | 15m    | Fixes `dupl`, -60 LOC | New `pkg/storage/helpers.go` |
+| S7  | Extract `queryWithFilter` to also cover `GetItemsByType` and `GetItemsBySource` | 10m    | Consistency           | `sqlite.go`                  |
 
 ### Tier A: High Impact / Low Effort (Do Next — Hours)
 
-| # | Task | Effort | Impact | Rationale |
-|---|---|---|---|---|
-| A1 | Consolidate `ItemID` + `SourceItemID` into single type | 30m | Removes conversion friction everywhere | Eliminates `NewSourceItemID(id.Get())` pattern |
-| A2 | Rename `LibSQLStorage` → `TursoStorage`, `BackendLibSQL` → `BackendTurso` | 20m | Naming accuracy | Already committed to Turso |
-| A3 | Add `isRemoteURL` tests | 10m | Test coverage | Zero coverage on remote path |
-| A4 | Extract `toNullString`/`fromNullString` to `pkg/dbutil` | 10m | Reusability | Used by any SQL backend |
-| A5 | Add `golang.org/x/sync/errgroup` for concurrent syncs | 30m | Performance | Multi-user sync foundation |
-| A6 | Add `github.com/caarlos0/env/v11` for config | 20m | 12-factor compliance | Clean env-based config |
-| A7 | Extract retry logic to `pkg/retry` package | 30m | Reusability | All providers need retry |
-| A8 | Add `sync.RWMutex` benchmark for `MemoryStorage` | 15m | Performance insight | Determine if `xsync.Map` is worth it |
+| #   | Task                                                                      | Effort | Impact                                 | Rationale                                      |
+| --- | ------------------------------------------------------------------------- | ------ | -------------------------------------- | ---------------------------------------------- |
+| A1  | Consolidate `ItemID` + `SourceItemID` into single type                    | 30m    | Removes conversion friction everywhere | Eliminates `NewSourceItemID(id.Get())` pattern |
+| A2  | Rename `LibSQLStorage` → `TursoStorage`, `BackendLibSQL` → `BackendTurso` | 20m    | Naming accuracy                        | Already committed to Turso                     |
+| A3  | Add `isRemoteURL` tests                                                   | 10m    | Test coverage                          | Zero coverage on remote path                   |
+| A4  | Extract `toNullString`/`fromNullString` to `pkg/dbutil`                   | 10m    | Reusability                            | Used by any SQL backend                        |
+| A5  | Add `golang.org/x/sync/errgroup` for concurrent syncs                     | 30m    | Performance                            | Multi-user sync foundation                     |
+| A6  | Add `github.com/caarlos0/env/v11` for config                              | 20m    | 12-factor compliance                   | Clean env-based config                         |
+| A7  | Extract retry logic to `pkg/retry` package                                | 30m    | Reusability                            | All providers need retry                       |
+| A8  | Add `sync.RWMutex` benchmark for `MemoryStorage`                          | 15m    | Performance insight                    | Determine if `xsync.Map` is worth it           |
 
 ### Tier B: Medium Impact / Medium Effort (Do After)
 
-| # | Task | Effort | Impact | Rationale |
-|---|---|---|---|---|
-| B1 | Decompose `Storage` interface into `Reader` + `Writer` + `Admin` | 45m | Architecture | 17 methods → 3 small interfaces |
-| B2 | Make `ConflictAwareSyncer` use composition, not embedding | 20m | Idiomatic Go | `struct { syncer *Syncer }` instead of embedding |
-| B3 | Add streaming fetch (`FetchStream` returning `<-chan *Item`) | 1h | Memory efficiency | Large datasets won't OOM |
-| B4 | Add `github.com/go-chi/chi/v5` HTTP API | 2h | Usability | REST API for queries |
-| B5 | Add `github.com/robfig/cron/v3` daemon mode | 1h | Automation | Periodic sync without cron job |
-| B6 | Add GitHub Actions CI | 2h | Quality gate | Automated test/lint on PRs |
-| B7 | Add `Metadata` field to `Item`, migrate GitHub fields | 2h | Provider agnosticism | Foundation for GitLab, etc. |
+| #   | Task                                                             | Effort | Impact               | Rationale                                        |
+| --- | ---------------------------------------------------------------- | ------ | -------------------- | ------------------------------------------------ |
+| B1  | Decompose `Storage` interface into `Reader` + `Writer` + `Admin` | 45m    | Architecture         | 17 methods → 3 small interfaces                  |
+| B2  | Make `ConflictAwareSyncer` use composition, not embedding        | 20m    | Idiomatic Go         | `struct { syncer *Syncer }` instead of embedding |
+| B3  | Add streaming fetch (`FetchStream` returning `<-chan *Item`)     | 1h     | Memory efficiency    | Large datasets won't OOM                         |
+| B4  | Add `github.com/go-chi/chi/v5` HTTP API                          | 2h     | Usability            | REST API for queries                             |
+| B5  | Add `github.com/robfig/cron/v3` daemon mode                      | 1h     | Automation           | Periodic sync without cron job                   |
+| B6  | Add GitHub Actions CI                                            | 2h     | Quality gate         | Automated test/lint on PRs                       |
+| B7  | Add `Metadata` field to `Item`, migrate GitHub fields            | 2h     | Provider agnosticism | Foundation for GitLab, etc.                      |
 
 ### Tier C: High Impact / High Effort (Strategic)
 
-| # | Task | Effort | Impact | Rationale |
-|---|---|---|---|---|
-| C1 | CQRS migration (go-cqrs-lite + Pebble) | 8h+ | Architecture | Eliminates ~2000 LOC of SQL infra |
-| C2 | Build TUI with Bubble Tea | 2h | UX | Interactive event browser |
-| C3 | Add second provider (GitLab) | 4h | Architecture validation | Proves provider abstraction |
-| C4 | Add event retention/TTL | 1h | Operations | Prevent unbounded growth |
+| #   | Task                                   | Effort | Impact                  | Rationale                         |
+| --- | -------------------------------------- | ------ | ----------------------- | --------------------------------- |
+| C1  | CQRS migration (go-cqrs-lite + Pebble) | 8h+    | Architecture            | Eliminates ~2000 LOC of SQL infra |
+| C2  | Build TUI with Bubble Tea              | 2h     | UX                      | Interactive event browser         |
+| C3  | Add second provider (GitLab)           | 4h     | Architecture validation | Proves provider abstraction       |
+| C4  | Add event retention/TTL                | 1h     | Operations              | Prevent unbounded growth          |
 
 ---
 
@@ -211,6 +211,7 @@ Sorted by **Impact / Effort ratio** (highest first).
 **Is the `Item` struct's current shape (11 fields, GitHub-specific) an acceptable temporary state, or should we migrate to a generic `Metadata` approach BEFORE adding any new providers?**
 
 The current `Item` works perfectly for GitHub events. But adding GitLab would require:
+
 - Either adding GitLab-specific fields (bloat)
 - Or cramming GitLab data into existing fields (wrong semantics)
 - Or changing `Item` to use `Metadata` (breaking change)
