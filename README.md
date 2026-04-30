@@ -15,7 +15,7 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 | **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload                                   |
 | **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                                |
 | **Conflict-Aware Sync** | CRDT-backed conflict detection via [go-localfirst](https://github.com/larsartmann/go-localfirst)               |
-| **Branded IDs**         | Type-safe IDs from [go-composable-business-types](https://github.com/larsartmann/go-composable-business-types) |
+| **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id) |
 | **Schema Migrations**   | Version-tracked database migrations with automatic application on startup                                      |
 
 ## Who is this for?
@@ -34,7 +34,7 @@ This SDK is for Go developers building applications that need:
 go get github.com/larsartmann/go-localsync
 ```
 
-> **Note:** This module depends on two private repositories (`go-localfirst` and `go-composable-business-types`). Set environment variables for private module access:
+> **Note:** This module depends on two private repositories (`go-localfirst` and `go-branded-id`). Set environment variables for private module access:
 >
 > ```bash
 > export GONOSUMCHECK=github.com/larsartmann/*
@@ -164,7 +164,7 @@ The storage layer automatically applies database migrations on `storage.Open()`.
 
 ## Branded IDs
 
-All entity identifiers use branded types from [go-composable-business-types](https://github.com/larsartmann/go-composable-business-types), providing compile-time type safety:
+All entity identifiers use branded types from [go-branded-id](https://github.com/larsartmann/go-branded-id), providing compile-time type safety:
 
 ```go
 ItemID        // id.ID[ItemBrand, string]
@@ -230,7 +230,7 @@ pkg/
 ├── sync/
 │   ├── sync.go            # Syncer — basic full/incremental sync
 │   └── conflict_aware.go  # ConflictAwareSyncer — CRDT-backed sync
-├── types/            # Branded ID types (go-composable-business-types)
+├── types/            # Branded ID types (go-branded-id)
 ├── errors/           # Sentinel errors (cockroachdb/errors)
 └── testhelpers/      # Shared test mocks and factories
 

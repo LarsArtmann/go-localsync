@@ -22,7 +22,7 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 - [x] **Provider architecture refactor**  
        **Source:** `pkg/provider/`, `pkg/providers/github/`  
-       **Description:** Generic provider interface with GitHub as first implementation. Branded IDs from go-composable-business-types.
+       **Description:** Generic provider interface with GitHub as first implementation. Branded IDs from go-branded-id.
 
 - [x] **Branded type IDs**  
        **Source:** `pkg/types/ids.go`  

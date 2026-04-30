@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It supports conflict-aware sync via go-localfirst CRDT primitives and uses branded IDs from go-composable-business-types for compile-time type safety.
+Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It supports conflict-aware sync via go-localfirst CRDT primitives and uses branded IDs from go-branded-id for compile-time type safety.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
    use .
    use (
        ../go-localfirst
-       ../go-composable-business-types
+       ../go-branded-id
    )
    ```
 2. Build: `go build ./...`
@@ -135,7 +135,7 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 | Dependency                     | Purpose                                                                   |
 | ------------------------------ | ------------------------------------------------------------------------- |
 | `go-localfirst`                | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync |
-| `go-composable-business-types` | Branded phantom-type IDs for compile-time safety                          |
+| `go-branded-id`                | Branded phantom-type IDs for compile-time safety                          |
 | `modernc.org/sqlite`           | Pure Go SQLite driver (no CGO)                                            |
 | `cockroachdb/errors`           | Sentinel errors with detail wrapping                                      |
 | `go-github/v69`                | GitHub API client                                                         |
