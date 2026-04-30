@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
@@ -20,12 +21,20 @@ type migration struct {
 	sql     string
 }
 
-var migrations []migration
+const migrationFilenameParts = 2
 
-func init() {
-	entries, err := migrationFS.ReadDir("migrations")
-	if err != nil {
-		panic("failed to read embedded migrations: " + err.Error())
+var (
+	migrationsOnce     sync.Once
+	loadedMigrations   []migration
+	migrationsLoadErr  error
+)
+
+func loadMigrations() {
+	entries, readErr := migrationFS.ReadDir("migrations")
+	if readErr != nil {
+		migrationsLoadErr = readErr
+
+		return
 	}
 
 	for _, entry := range entries {
@@ -33,13 +42,21 @@ func init() {
 			continue
 		}
 
-		m, err := parseMigrationFile(entry.Name())
-		if err != nil {
-			panic("failed to parse migration " + entry.Name() + ": " + err.Error())
+		mig, parseErr := parseMigrationFile(entry.Name())
+		if parseErr != nil {
+			migrationsLoadErr = parseErr
+
+			return
 		}
 
-		migrations = append(migrations, m)
+		loadedMigrations = append(loadedMigrations, mig)
 	}
+}
+
+func getMigrations() ([]migration, error) {
+	migrationsOnce.Do(loadMigrations)
+
+	return loadedMigrations, migrationsLoadErr
 }
 
 func parseMigrationFile(filename string) (migration, error) {
@@ -63,8 +80,8 @@ func parseMigrationFile(filename string) (migration, error) {
 func parseMigrationFilename(filename string) (int, string, error) {
 	base := strings.TrimSuffix(filename, ".sql")
 
-	parts := strings.SplitN(base, "_", 2)
-	if len(parts) != 2 {
+	parts := strings.SplitN(base, "_", migrationFilenameParts)
+	if len(parts) != migrationFilenameParts {
 		return 0, "", pkgerrors.WithDetail(
 			pkgerrors.ErrInvalidInput,
 			"migration filename must match NNN_name.sql: "+filename,
@@ -83,7 +100,8 @@ func parseMigrationFilename(filename string) (int, string, error) {
 }
 
 func RunMigrations(db *sql.DB) error {
-	if err := ensureMigrationsTable(db); err != nil {
+	err := ensureMigrationsTable(db)
+	if err != nil {
 		return pkgerrors.Wrap(err, "failed to create migrations table")
 	}
 
@@ -92,20 +110,25 @@ func RunMigrations(db *sql.DB) error {
 		return pkgerrors.Wrap(err, "failed to get applied migrations")
 	}
 
-	sorted := make([]migration, len(migrations))
-	copy(sorted, migrations)
+	allMigrations, err := getMigrations()
+	if err != nil {
+		return pkgerrors.Wrap(err, "failed to load migrations")
+	}
+
+	sorted := make([]migration, len(allMigrations))
+	copy(sorted, allMigrations)
 	sort.Slice(sorted, func(i, j int) bool {
 		return sorted[i].version < sorted[j].version
 	})
 
-	for _, m := range sorted {
-		if applied[m.version] {
+	for _, mig := range sorted {
+		if applied[mig.version] {
 			continue
 		}
 
-		err := applyMigration(db, m)
+		err = applyMigration(db, mig)
 		if err != nil {
-			return pkgerrors.Wrapf(err, "migration %d (%s) failed", m.version, m.name)
+			return pkgerrors.Wrapf(err, "migration %d (%s) failed", mig.version, mig.name)
 		}
 	}
 
@@ -129,40 +152,48 @@ func getAppliedVersions(db *sql.DB) (map[int]bool, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+
+	defer func() {
+		_ = rows.Close()
+	}()
 
 	applied := make(map[int]bool)
 
 	for rows.Next() {
-		var v int
+		var version int
 
-		err := rows.Scan(&v)
+		err = rows.Scan(&version)
 		if err != nil {
 			return nil, err
 		}
 
-		applied[v] = true
+		applied[version] = true
 	}
 
 	return applied, rows.Err()
 }
 
-func applyMigration(db *sql.DB, m migration) error {
+func applyMigration(db *sql.DB, mig migration) error {
 	tx, err := db.BeginTx(context.Background(), nil)
 	if err != nil {
 		return pkgerrors.Wrap(err, "begin transaction")
 	}
-	defer tx.Rollback()
 
-	if _, err := tx.ExecContext(context.Background(), m.sql); err != nil {
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	_, err = tx.ExecContext(context.Background(), mig.sql)
+	if err != nil {
 		return pkgerrors.Wrap(err, "execute migration SQL")
 	}
 
-	if _, err := tx.ExecContext(
+	_, err = tx.ExecContext(
 		context.Background(),
 		"INSERT INTO schema_migrations (version, name) VALUES (?, ?)",
-		m.version, m.name,
-	); err != nil {
+		mig.version, mig.name,
+	)
+	if err != nil {
 		return pkgerrors.Wrap(err, "record migration")
 	}
 

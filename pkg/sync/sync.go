@@ -117,7 +117,8 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		return syncResult, nil
 	}
 
-	if err := s.storage.UpsertBatch(ctx, valid); err != nil {
+	err = s.storage.UpsertBatch(ctx, valid)
+	if err != nil {
 		syncResult.Errors = len(valid)
 		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(valid))
 

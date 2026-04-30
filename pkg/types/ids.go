@@ -1,6 +1,11 @@
 // Package types provides domain-specific identifier types using branded IDs
-// from go-composable-business-types/id. These types provide compile-time safety
-// by preventing accidental mixing of different identifier kinds.
+// from go-branded-id. These types provide compile-time safety by preventing
+// accidental mixing of different identifier kinds.
+//
+// go-cqrs-lite provides a related ID system (id.Of[T] backed by ULID) for
+// CQRS aggregates and events. The two systems share the same underlying
+// library (go-branded-id) but use different generic parameters and are not
+// directly interoperable at the type level.
 //
 // # Usage
 //

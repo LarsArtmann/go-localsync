@@ -26,8 +26,13 @@ func TestRunMigrations_FreshDB(t *testing.T) {
 		t.Fatalf("query migrations: %v", err)
 	}
 
-	if count != len(migrations) {
-		t.Errorf("expected %d migrations, got %d", len(migrations), count)
+	migs, migErr := getMigrations()
+	if migErr != nil {
+		t.Fatalf("getMigrations: %v", migErr)
+	}
+
+	if count != len(migs) {
+		t.Errorf("expected %d migrations, got %d", len(migs), count)
 	}
 }
 
@@ -55,8 +60,13 @@ func TestRunMigrations_Idempotent(t *testing.T) {
 		t.Fatalf("query migrations: %v", err)
 	}
 
-	if count != len(migrations) {
-		t.Errorf("expected %d migrations after idempotent run, got %d", len(migrations), count)
+	migs, migErr := getMigrations()
+	if migErr != nil {
+		t.Fatalf("getMigrations: %v", migErr)
+	}
+
+	if count != len(migs) {
+		t.Errorf("expected %d migrations after idempotent run, got %d", len(migs), count)
 	}
 }
 

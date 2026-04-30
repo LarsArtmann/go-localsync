@@ -33,6 +33,7 @@ func batchGetByIDs(
 		args[i] = types.NewSourceItemID(id.Get())
 	}
 
+	//nolint:gosec // G201: Placeholders are all "?" — values come from typed IDs, not user input.
 	query := fmt.Sprintf(
 		`SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events WHERE source_id IN (%s)`,
 		strings.Join(placeholders, ", "),
