@@ -24,15 +24,15 @@ type migration struct {
 const migrationFilenameParts = 2
 
 var (
-	migrationsOnce    sync.Once
-	loadedMigrations  []migration
-	migrationsLoadErr error
+	migrationsOnce   sync.Once
+	loadedMigrations []migration
+	errMigrationsLoad error
 )
 
 func loadMigrations() {
 	entries, readErr := migrationFS.ReadDir("migrations")
 	if readErr != nil {
-		migrationsLoadErr = readErr
+		errMigrationsLoad = readErr
 
 		return
 	}
@@ -44,7 +44,7 @@ func loadMigrations() {
 
 		mig, parseErr := parseMigrationFile(entry.Name())
 		if parseErr != nil {
-			migrationsLoadErr = parseErr
+			errMigrationsLoad = parseErr
 
 			return
 		}
@@ -56,7 +56,7 @@ func loadMigrations() {
 func getMigrations() ([]migration, error) {
 	migrationsOnce.Do(loadMigrations)
 
-	return loadedMigrations, migrationsLoadErr
+	return loadedMigrations, errMigrationsLoad
 }
 
 func parseMigrationFile(filename string) (migration, error) {

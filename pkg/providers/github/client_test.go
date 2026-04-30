@@ -110,6 +110,7 @@ func createTestServerForFetch(
 	t *testing.T,
 	expectedPerPage, expectedPage int,
 ) (*httptest.Server, int, int) {
+	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, strconv.Itoa(expectedPerPage), r.URL.Query().Get("per_page"))
 		assert.Equal(t, strconv.Itoa(expectedPage), r.URL.Query().Get("page"))

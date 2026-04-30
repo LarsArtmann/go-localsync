@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"os"
 	"testing"
@@ -8,20 +9,21 @@ import (
 
 func TestRunMigrations_FreshDB(t *testing.T) {
 	path := t.Name() + ".db"
-	t.Cleanup(func() { os.Remove(path) })
+	t.Cleanup(func() { _ = os.Remove(path) })
 
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		t.Fatalf("open db: %v", err)
 	}
-	t.Cleanup(func() { db.Close() })
+	t.Cleanup(func() { _ = db.Close() })
 
-	if err := RunMigrations(db); err != nil {
+	err = RunMigrations(db)
+	if err != nil {
 		t.Fatalf("RunMigrations: %v", err)
 	}
 
 	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM schema_migrations").Scan(&count)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").Scan(&count)
 	if err != nil {
 		t.Fatalf("query migrations: %v", err)
 	}
@@ -38,24 +40,26 @@ func TestRunMigrations_FreshDB(t *testing.T) {
 
 func TestRunMigrations_Idempotent(t *testing.T) {
 	path := t.Name() + ".db"
-	t.Cleanup(func() { os.Remove(path) })
+	t.Cleanup(func() { _ = os.Remove(path) })
 
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		t.Fatalf("open db: %v", err)
 	}
-	t.Cleanup(func() { db.Close() })
+	t.Cleanup(func() { _ = db.Close() })
 
-	if err := RunMigrations(db); err != nil {
+	err = RunMigrations(db)
+	if err != nil {
 		t.Fatalf("first RunMigrations: %v", err)
 	}
 
-	if err := RunMigrations(db); err != nil {
+	err = RunMigrations(db)
+	if err != nil {
 		t.Fatalf("second RunMigrations: %v", err)
 	}
 
 	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM schema_migrations").Scan(&count)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").Scan(&count)
 	if err != nil {
 		t.Fatalf("query migrations: %v", err)
 	}
@@ -72,21 +76,23 @@ func TestRunMigrations_Idempotent(t *testing.T) {
 
 func TestRunMigrations_CreatesEventsTable(t *testing.T) {
 	path := t.Name() + ".db"
-	t.Cleanup(func() { os.Remove(path) })
+	t.Cleanup(func() { _ = os.Remove(path) })
 
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		t.Fatalf("open db: %v", err)
 	}
-	t.Cleanup(func() { db.Close() })
+	t.Cleanup(func() { _ = db.Close() })
 
-	if err := RunMigrations(db); err != nil {
+	err = RunMigrations(db)
+	if err != nil {
 		t.Fatalf("RunMigrations: %v", err)
 	}
 
 	var name string
-	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='events'").
-		Scan(&name)
+	err = db.QueryRowContext(context.Background(),
+		"SELECT name FROM sqlite_master WHERE type='table' AND name='events'",
+	).Scan(&name)
 	if err != nil {
 		t.Fatal("events table not found after migration")
 	}
@@ -94,15 +100,16 @@ func TestRunMigrations_CreatesEventsTable(t *testing.T) {
 
 func TestRunMigrations_CreatesIndexes(t *testing.T) {
 	path := t.Name() + ".db"
-	t.Cleanup(func() { os.Remove(path) })
+	t.Cleanup(func() { _ = os.Remove(path) })
 
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		t.Fatalf("open db: %v", err)
 	}
-	t.Cleanup(func() { db.Close() })
+	t.Cleanup(func() { _ = db.Close() })
 
-	if err := RunMigrations(db); err != nil {
+	err = RunMigrations(db)
+	if err != nil {
 		t.Fatalf("RunMigrations: %v", err)
 	}
 
@@ -118,8 +125,9 @@ func TestRunMigrations_CreatesIndexes(t *testing.T) {
 
 	for _, idx := range expectedIndexes {
 		var name string
-		err := db.QueryRow("SELECT name FROM sqlite_master WHERE type='index' AND name=?", idx).
-			Scan(&name)
+		err = db.QueryRowContext(context.Background(),
+			"SELECT name FROM sqlite_master WHERE type='index' AND name=?", idx,
+		).Scan(&name)
 		if err != nil {
 			t.Errorf("index %s not found: %v", idx, err)
 		}
@@ -128,16 +136,16 @@ func TestRunMigrations_CreatesIndexes(t *testing.T) {
 
 func TestOpen_CreatesAndMigrates(t *testing.T) {
 	path := t.Name() + ".db"
-	t.Cleanup(func() { os.Remove(path) })
+	t.Cleanup(func() { _ = os.Remove(path) })
 
 	db, err := Open(path)
 	if err != nil {
 		t.Fatalf("Open: %v", err)
 	}
-	t.Cleanup(func() { db.Close() })
+	t.Cleanup(func() { _ = db.Close() })
 
 	var count int
-	err = db.QueryRow("SELECT COUNT(*) FROM schema_migrations").Scan(&count)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").Scan(&count)
 	if err != nil {
 		t.Fatalf("query migrations: %v", err)
 	}
@@ -149,36 +157,39 @@ func TestOpen_CreatesAndMigrates(t *testing.T) {
 
 func TestMigrations_Ordered(t *testing.T) {
 	path := t.Name() + ".db"
-	t.Cleanup(func() { os.Remove(path) })
+	t.Cleanup(func() { _ = os.Remove(path) })
 
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		t.Fatalf("open db: %v", err)
 	}
-	t.Cleanup(func() { db.Close() })
+	t.Cleanup(func() { _ = db.Close() })
 
-	if err := RunMigrations(db); err != nil {
+	err = RunMigrations(db)
+	if err != nil {
 		t.Fatalf("RunMigrations: %v", err)
 	}
 
-	rows, err := db.Query("SELECT version FROM schema_migrations ORDER BY version")
+	rows, err := db.QueryContext(context.Background(), "SELECT version FROM schema_migrations ORDER BY version")
 	if err != nil {
 		t.Fatalf("query: %v", err)
 	}
-	t.Cleanup(func() { rows.Close() })
+	t.Cleanup(func() { _ = rows.Close() })
 
 	var versions []int
 	for rows.Next() {
-		var v int
-		err := rows.Scan(&v)
+		var version int
+
+		err = rows.Scan(&version)
 		if err != nil {
 			t.Fatalf("scan: %v", err)
 		}
 
-		versions = append(versions, v)
+		versions = append(versions, version)
 	}
 
-	if err := rows.Err(); err != nil {
+	err = rows.Err()
+	if err != nil {
 		t.Fatalf("rows: %v", err)
 	}
 

@@ -36,7 +36,7 @@ func TestNewStorage_MemoryImplementsInterface(t *testing.T) {
 	cfg := NewConfig(WithBackend(BackendMemory))
 	store, err := NewStorage(cfg)
 	require.NoError(t, err)
-	defer store.Close()
+	defer func() { _ = store.Close() }()
 
 	assert.NotNil(t, store)
 }
