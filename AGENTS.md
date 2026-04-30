@@ -124,16 +124,17 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 
 ## Migration System
 
-- `internal/database/migration.go` — Migration runner with `RunMigrations()`
+- `internal/database/migration.go` — Migration runner with `RunMigrations()`, uses `sync.Once` for lazy loading
 - Migrations tracked in `schema_migrations` table (version, name, applied_at)
-- SQL reference files in `sql/migrations/` (embedded as constants in Go)
+- SQL reference files in `sql/migrations/` (embedded as Go constants)
 - Each migration runs in a transaction; `CREATE IF NOT EXISTS` for idempotency
-- Current migrations: 001 (initial schema + indexes), 002 (source indexes)
+- Current migrations: 001 (initial schema + indexes), 002 (source indexes), 003 (rename github_id), 004 (ULID PK)
 
 ## Dependencies
 
 | Dependency                    | Purpose                                                                               |
 | ----------------------------- | ------------------------------------------------------------------------------------- |
+| `go-cqrs-lite`               | CQRS library with event sourcing, branded IDs, catalog — **NOT yet imported** (planned) |
 | `go-localfirst`               | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync             |
 | `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                      |
 | `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                        |
@@ -141,3 +142,20 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 | `go-github/v69`               | GitHub API client                                                                     |
 | `turso.tech/database/tursogo` | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go) |
 | `charmbracelet/log`           | Structured logging                                                                    |
+
+## go-cqrs-lite Integration Status
+
+go-localsync **does not import** go-cqrs-lite despite sharing go-branded-id and having a detailed CQRS migration plan (`CQRS_MIGRATION_PLAN.md`).
+
+| Area | go-localsync (current) | go-cqrs-lite (available) |
+|------|------------------------|-------------------------|
+| IDs | `id.ID[T, string/ULID]` via go-branded-id | `id.Of[T]` (ULID-only) via go-branded-id |
+| Storage | 16-method `Storage` interface, 3 SQL backends | `event.Store` (4 methods) + projections |
+| Conflict | Inline LWW in `ConflictAwareSyncer` | `LWWResolver[T]` in go-localfirst |
+| Retry | Hand-rolled in `github/client.go` | `middleware.CommandRetry` with jitter |
+
+**ID incompatibility**: Both use go-branded-id but with different generic parameters. Not interoperable at compile time. Migration requires design decision on ULID-only vs string-backed.
+
+**Code duplication**: `sqlite.go` and `turso.go` are ~90% identical (341+ lines each). Only constructors differ.
+
+See `docs/planning/2026-04-30_23-08-CQRS_LITE_INTEGRATION.md` for full audit and execution plan.

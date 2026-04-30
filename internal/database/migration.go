@@ -24,9 +24,9 @@ type migration struct {
 const migrationFilenameParts = 2
 
 var (
-	migrationsOnce   sync.Once
-	loadedMigrations []migration
-	errMigrationsLoad error
+	migrationsOnce   sync.Once  //nolint:gochecknoglobals // lazy init via sync.Once is standard Go
+	loadedMigrations []migration //nolint:gochecknoglobals // populated once by sync.Once
+	errMigrationsLoad error      //nolint:gochecknoglobals // populated once by sync.Once
 )
 
 func loadMigrations() {

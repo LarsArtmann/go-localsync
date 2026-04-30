@@ -73,7 +73,8 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
 	}
 
-	if err := opts.Validate(); err != nil {
+	err := opts.Validate()
+	if err != nil {
 		return nil, err
 	}
 

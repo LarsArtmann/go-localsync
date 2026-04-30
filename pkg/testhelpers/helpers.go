@@ -79,12 +79,15 @@ func TestRetryConfig() provider.RetryConfig {
 	}
 }
 
+// DefaultGitHubRateLimit is the standard GitHub API rate limit for authenticated requests.
+const DefaultGitHubRateLimit = 5000
+
 // RateLimitResponse returns a JSON payload for GitHub rate limit responses.
 func RateLimitResponse(remaining int) map[string]any {
 	return map[string]any{
 		"resources": gh.RateLimits{
 			Core: &gh.Rate{
-				Limit:     5000,
+				Limit:     DefaultGitHubRateLimit,
 				Remaining: remaining,
 				Reset:     gh.Timestamp{Time: time.Now().Add(1 * time.Hour)},
 			},

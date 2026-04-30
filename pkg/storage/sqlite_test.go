@@ -409,7 +409,7 @@ func TestSQLiteStorage_BatchGetByIDs(t *testing.T) {
 		t.Fatalf("Failed to open database: %v", err)
 	}
 
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	store := NewSQLiteStorage(db)
 	ctx := context.Background()
