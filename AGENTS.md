@@ -83,8 +83,9 @@ Storage backends are selected via `storage.NewStorage(Config)`. Switch-based fac
 
 ### Adding a New Backend
 
-1. Implement the `storage.Storage` interface (17 methods)
-2. Add case to `NewStorage` switch in `config.go`
+1. Implement the `storage.Storage` interface (16 methods)
+2. Create constructor that embeds `sqlStorage` (for SQL backends) or implement directly
+3. Add case to `NewStorage` switch in `config.go`
 3. Run compliance tests: `go test ./pkg/storage/ -run TestStorageCompliance`
 4. SQLite, Turso, and Memory must all pass the same compliance suite
 
@@ -156,6 +157,10 @@ go-localsync **does not import** go-cqrs-lite despite sharing go-branded-id and 
 
 **ID incompatibility**: Both use go-branded-id but with different generic parameters. Not interoperable at compile time. Migration requires design decision on ULID-only vs string-backed.
 
-**Code duplication**: `sqlite.go` and `turso.go` are ~90% identical (341+ lines each). Only constructors differ.
+**Deduplication done**: `sqlite.go` (27 lines) and `turso.go` (77 lines) now embed shared `sqlStorage` (356 lines). ~247 lines of duplication eliminated.
 
 See `docs/planning/2026-04-30_23-08-CQRS_LITE_INTEGRATION.md` for full audit and execution plan.
+
+## Lint Status
+
+golangci-lint v2.11.4 reports **0 issues**. Config is strict with 125+ linters enabled.
