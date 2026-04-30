@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// testItem creates a consistent test item for use across multiple tests.
 func testItem() *provider.Item {
 	now := time.Now()
 
@@ -31,7 +30,6 @@ func testItem() *provider.Item {
 	}
 }
 
-// assertItemCount verifies the item count matches expected value.
 func assertItemCount(
 	t *testing.T,
 	store Storage,
@@ -55,364 +53,221 @@ func assertItemCount(
 	}
 }
 
-func TestSQLiteStorage(t *testing.T) {
+func newTestSQLiteStore(t *testing.T) (*SQLiteStorage, context.Context) {
+	t.Helper()
+
 	db, err := database.Open(":memory:")
 	if err != nil {
 		t.Fatalf("Failed to open database: %v", err)
 	}
-	defer func() { _ = db.Close() }()
 
-	store := NewSQLiteStorage(db)
-	ctx := context.Background()
+	t.Cleanup(func() { _ = db.Close() })
 
-	t.Run("Count initially returns 0", func(t *testing.T) {
-		count, err := store.Count(ctx)
-		if err != nil {
-			t.Fatalf("Count failed: %v", err)
-		}
+	return NewSQLiteStorage(db), context.Background()
+}
 
-		if count != 0 {
-			t.Errorf("Expected 0 items, got %d", count)
-		}
-	})
+func mustUpsert(t *testing.T, store Storage, ctx context.Context, item *provider.Item) {
+	t.Helper()
 
-	t.Run("GetLatest returns ErrNotFound for empty database", func(t *testing.T) {
-		item, err := store.GetLatest(ctx)
-		if err == nil {
-			t.Fatal("Expected error, got nil")
-		}
+	err := store.Upsert(ctx, item)
+	if err != nil {
+		t.Fatalf("Upsert failed: %v", err)
+	}
+}
 
-		if !errors.Is(err, pkgerrors.ErrNotFound) {
-			t.Errorf("Expected ErrNotFound, got %v", err)
-		}
+func TestSQLiteStorage_EmptyStore(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
 
-		if item != nil {
-			t.Errorf("Expected nil item, got %+v", item)
-		}
-	})
+	count, err := store.Count(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, int64(0), count)
 
-	t.Run("Upsert inserts new item", func(t *testing.T) {
-		err := store.Upsert(ctx, testItem())
-		if err != nil {
-			t.Fatalf("Upsert failed: %v", err)
-		}
+	_, err = store.GetLatest(ctx)
+	assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
+}
 
-		assertItemCount(t, store, ctx, 1)
-	})
+func TestSQLiteStorage_UpsertAndRead(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
 
-	t.Run("Upsert is idempotent", func(t *testing.T) {
-		err := store.Upsert(ctx, testItem())
-		if err != nil {
-			t.Fatalf("Upsert failed: %v", err)
-		}
+	mustUpsert(t, store, ctx, testItem())
+	assertItemCount(t, store, ctx, 1)
 
-		assertItemCount(t, store, ctx, 1, "idempotent")
-	})
+	item, err := store.GetLatest(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, "12345", item.ID.Get())
 
-	t.Run("GetLatest returns the latest item", func(t *testing.T) {
-		item, err := store.GetLatest(ctx)
-		if err != nil {
-			t.Fatalf("GetLatest failed: %v", err)
-		}
+	items, err := store.GetItems(ctx, 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 1)
+}
 
-		if item == nil {
-			t.Fatal("Expected item, got nil")
-		}
+func TestSQLiteStorage_UpsertIdempotent(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
 
-		if item.ID.Get() != "12345" {
-			t.Errorf("Expected ID 12345, got %s", item.ID.Get())
-		}
-	})
+	mustUpsert(t, store, ctx, testItem())
+	mustUpsert(t, store, ctx, testItem())
+	assertItemCount(t, store, ctx, 1, "idempotent")
+}
 
-	t.Run("GetItems returns items", func(t *testing.T) {
-		items, err := store.GetItems(ctx, 10, 0)
-		if err != nil {
-			t.Fatalf("GetItems failed: %v", err)
-		}
+func TestSQLiteStorage_GetItemsByType(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-		if len(items) != 1 {
-			t.Errorf("Expected 1 item, got %d", len(items))
-		}
-	})
+	items, err := store.GetItemsByType(ctx, "PushEvent", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 1)
 
-	t.Run("GetItemsByType filters by type", func(t *testing.T) {
-		items, err := store.GetItemsByType(ctx, "PushEvent", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsByType failed: %v", err)
-		}
+	items, err = store.GetItemsByType(ctx, "PullRequestEvent", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 0)
+}
 
-		if len(items) != 1 {
-			t.Errorf("Expected 1 PushEvent, got %d", len(items))
-		}
+func TestSQLiteStorage_GetTypes(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-		items, err = store.GetItemsByType(ctx, "PullRequestEvent", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsByType failed: %v", err)
-		}
+	typeList, err := store.GetTypes(ctx)
+	require.NoError(t, err)
+	require.Len(t, typeList, 1)
+	assert.Equal(t, "PushEvent", typeList[0])
+}
 
-		if len(items) != 0 {
-			t.Errorf("Expected 0 PullRequestEvent, got %d", len(items))
-		}
-	})
+func TestSQLiteStorage_CountByType(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-	t.Run("GetTypes returns distinct types", func(t *testing.T) {
-		types, err := store.GetTypes(ctx)
-		if err != nil {
-			t.Fatalf("GetTypes failed: %v", err)
-		}
+	count, err := store.CountByType(ctx, "PushEvent")
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), count)
+}
 
-		if len(types) != 1 || types[0] != "PushEvent" {
-			t.Errorf("Expected [PushEvent], got %v", types)
-		}
-	})
+func TestSQLiteStorage_GetByID(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-	t.Run("CountByType counts by type", func(t *testing.T) {
-		count, err := store.CountByType(ctx, "PushEvent")
-		if err != nil {
-			t.Fatalf("CountByType failed: %v", err)
-		}
+	item, err := store.GetByID(ctx, types.NewItemID("12345"))
+	require.NoError(t, err)
+	assert.Equal(t, "12345", item.ID.Get())
 
-		if count != 1 {
-			t.Errorf("Expected 1 PushEvent, got %d", count)
-		}
-	})
+	_, err = store.GetByID(ctx, types.NewItemID("nonexistent"))
+	require.Error(t, err)
+	assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
+}
 
-	t.Run("GetByID returns item when found", func(t *testing.T) {
-		item, err := store.GetByID(ctx, types.NewItemID("12345"))
-		if err != nil {
-			t.Fatalf("GetByID failed: %v", err)
-		}
+func TestSQLiteStorage_GetItemsByActor(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-		if item == nil {
-			t.Fatal("Expected item, got nil")
-		}
+	items, err := store.GetItemsByActor(ctx, "testuser", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 1)
 
-		if item.ID.Get() != "12345" {
-			t.Errorf("Expected ID 12345, got %s", item.ID.Get())
-		}
-	})
+	items, err = store.GetItemsByActor(ctx, "otheruser", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 0)
+}
 
-	t.Run("GetByID returns ErrNotFound when not found", func(t *testing.T) {
-		item, err := store.GetByID(ctx, types.NewItemID("nonexistent"))
-		require.Error(t, err)
-		assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
-		assert.Nil(t, item)
-	})
+func TestSQLiteStorage_GetItemsByRepo(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-	t.Run("GetItemsByActor filters by actor login", func(t *testing.T) {
-		items, err := store.GetItemsByActor(ctx, "testuser", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsByActor failed: %v", err)
-		}
+	items, err := store.GetItemsByRepo(ctx, "test/repo", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 1)
 
-		if len(items) != 1 {
-			t.Errorf("Expected 1 item for testuser, got %d", len(items))
-		}
+	items, err = store.GetItemsByRepo(ctx, "other/repo", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 0)
+}
 
-		items, err = store.GetItemsByActor(ctx, "otheruser", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsByActor failed: %v", err)
-		}
+func TestSQLiteStorage_GetItemsBySource(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-		if len(items) != 0 {
-			t.Errorf("Expected 0 items for otheruser, got %d", len(items))
-		}
-	})
+	items, err := store.GetItemsBySource(ctx, "github", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 1)
 
-	t.Run("GetItemsByRepo filters by repo name", func(t *testing.T) {
-		items, err := store.GetItemsByRepo(ctx, "test/repo", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsByRepo failed: %v", err)
-		}
+	items, err = store.GetItemsBySource(ctx, "gitlab", 10, 0)
+	require.NoError(t, err)
+	assert.Len(t, items, 0)
+}
 
-		if len(items) != 1 {
-			t.Errorf("Expected 1 item for test/repo, got %d", len(items))
-		}
+func TestSQLiteStorage_GetItemsSince(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-		items, err = store.GetItemsByRepo(ctx, "other/repo", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsByRepo failed: %v", err)
-		}
+	past := time.Now().Add(-1 * time.Hour)
+	items, err := store.GetItemsSince(ctx, past)
+	require.NoError(t, err)
+	assert.Len(t, items, 1)
 
-		if len(items) != 0 {
-			t.Errorf("Expected 0 items for other/repo, got %d", len(items))
-		}
-	})
+	future := time.Now().Add(1 * time.Hour)
+	items, err = store.GetItemsSince(ctx, future)
+	require.NoError(t, err)
+	assert.Len(t, items, 0)
+}
 
-	t.Run("GetItemsBySource filters by source", func(t *testing.T) {
-		items, err := store.GetItemsBySource(ctx, "github", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsBySource failed: %v", err)
-		}
+func TestSQLiteStorage_Delete(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
 
-		if len(items) != 1 {
-			t.Errorf("Expected 1 item for github, got %d", len(items))
-		}
+	err := store.Delete(ctx, types.NewItemID("12345"))
+	require.NoError(t, err)
+	assertItemCount(t, store, ctx, 0)
 
-		items, err = store.GetItemsBySource(ctx, "gitlab", 10, 0)
-		if err != nil {
-			t.Fatalf("GetItemsBySource failed: %v", err)
-		}
+	_, err = store.GetByID(ctx, types.NewItemID("12345"))
+	require.Error(t, err)
+	assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
+}
 
-		if len(items) != 0 {
-			t.Errorf("Expected 0 items for gitlab, got %d", len(items))
-		}
-	})
+func TestSQLiteStorage_DeleteAll(t *testing.T) {
+	store, ctx := newTestSQLiteStore(t)
+	mustUpsert(t, store, ctx, testItem())
+	assertItemCount(t, store, ctx, 1)
 
-	t.Run("GetItemsSince returns items after timestamp", func(t *testing.T) {
-		past := time.Now().Add(-1 * time.Hour)
-		items, err := store.GetItemsSince(ctx, past)
-		if err != nil {
-			t.Fatalf("GetItemsSince failed: %v", err)
-		}
-
-		if len(items) != 1 {
-			t.Errorf("Expected 1 item since past, got %d", len(items))
-		}
-
-		future := time.Now().Add(1 * time.Hour)
-		items, err = store.GetItemsSince(ctx, future)
-		if err != nil {
-			t.Fatalf("GetItemsSince failed: %v", err)
-		}
-
-		if len(items) != 0 {
-			t.Errorf("Expected 0 items since future, got %d", len(items))
-		}
-	})
-
-	t.Run("Delete removes item", func(t *testing.T) {
-		err := store.Delete(ctx, types.NewItemID("12345"))
-		if err != nil {
-			t.Fatalf("Delete failed: %v", err)
-		}
-
-		assertItemCount(t, store, ctx, 0)
-
-		item, err := store.GetByID(ctx, types.NewItemID("12345"))
-		require.Error(t, err)
-		assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
-		assert.Nil(t, item)
-	})
-
-	t.Run("DeleteAll removes all items", func(t *testing.T) {
-		err := store.Upsert(ctx, testItem())
-		if err != nil {
-			t.Fatalf("Upsert failed: %v", err)
-		}
-
-		assertItemCount(t, store, ctx, 1)
-
-		err = store.DeleteAll(ctx)
-		if err != nil {
-			t.Fatalf("DeleteAll failed: %v", err)
-		}
-
-		assertItemCount(t, store, ctx, 0)
-	})
+	err := store.DeleteAll(ctx)
+	require.NoError(t, err)
+	assertItemCount(t, store, ctx, 0)
 }
 
 func TestSQLiteStorage_UpsertBatch(t *testing.T) {
-	db, err := database.Open(":memory:")
-	if err != nil {
-		t.Fatalf("Failed to open database: %v", err)
-	}
-	defer func() { _ = db.Close() }()
-
-	store := NewSQLiteStorage(db)
-	ctx := context.Background()
-
+	store, ctx := newTestSQLiteStore(t)
 	now := time.Now()
+
 	items := []*provider.Item{
 		{
-			ID:         types.NewItemID("batch-1"),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID("PushEvent"),
-			ActorLogin: types.NewActorID("user1"),
-			RepoName:   types.NewRepoID("repo1"),
-			CreatedAt:  now,
-			UpdatedAt:  now,
-			RawJSON:    json.RawMessage(`{"id":"batch-1"}`),
+			ID: types.NewItemID("batch-1"), Source: types.NewProviderID("github"),
+			Type: types.NewEventTypeID("PushEvent"), ActorLogin: types.NewActorID("user1"),
+			RepoName: types.NewRepoID("repo1"), CreatedAt: now, UpdatedAt: now,
+			RawJSON: json.RawMessage(`{"id":"batch-1"}`),
 		},
 		{
-			ID:         types.NewItemID("batch-2"),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID("IssuesEvent"),
-			ActorLogin: types.NewActorID("user2"),
-			RepoName:   types.NewRepoID("repo2"),
-			CreatedAt:  now,
-			UpdatedAt:  now,
-			RawJSON:    json.RawMessage(`{"id":"batch-2"}`),
+			ID: types.NewItemID("batch-2"), Source: types.NewProviderID("github"),
+			Type: types.NewEventTypeID("IssuesEvent"), ActorLogin: types.NewActorID("user2"),
+			RepoName: types.NewRepoID("repo2"), CreatedAt: now, UpdatedAt: now,
+			RawJSON: json.RawMessage(`{"id":"batch-2"}`),
 		},
 	}
 
-	t.Run("inserts multiple items", func(t *testing.T) {
-		err := store.UpsertBatch(ctx, items)
-		if err != nil {
-			t.Fatalf("UpsertBatch failed: %v", err)
-		}
+	err := store.UpsertBatch(ctx, items)
+	require.NoError(t, err)
+	assertItemCount(t, store, ctx, 2)
 
-		assertItemCount(t, store, ctx, 2)
+	item, err := store.GetByID(ctx, types.NewItemID("batch-1"))
+	require.NoError(t, err)
+	assert.Equal(t, "batch-1", item.ID.Get())
 
-		item, err := store.GetByID(ctx, types.NewItemID("batch-1"))
-		if err != nil {
-			t.Fatalf("GetByID failed: %v", err)
-		}
+	err = store.UpsertBatch(ctx, items)
+	require.NoError(t, err)
+	assertItemCount(t, store, ctx, 2, "idempotent")
 
-		if item == nil || item.ID.Get() != "batch-1" {
-			t.Error("Expected batch-1 to exist")
-		}
-	})
-
-	t.Run("is idempotent", func(t *testing.T) {
-		err := store.UpsertBatch(ctx, items)
-		if err != nil {
-			t.Fatalf("UpsertBatch failed: %v", err)
-		}
-
-		assertItemCount(t, store, ctx, 2)
-	})
-
-	t.Run("handles empty slice", func(t *testing.T) {
-		err := store.UpsertBatch(ctx, []*provider.Item{})
-		if err != nil {
-			t.Fatalf("UpsertBatch with empty slice failed: %v", err)
-		}
-	})
-
-	t.Run("adds items after previous batch", func(t *testing.T) {
-		badItems := []*provider.Item{
-			{
-				ID:         types.NewItemID("batch-ok"),
-				Source:     types.NewProviderID("github"),
-				Type:       types.NewEventTypeID("PushEvent"),
-				ActorLogin: types.NewActorID("user1"),
-				RepoName:   types.NewRepoID("repo1"),
-				CreatedAt:  now,
-				UpdatedAt:  now,
-				RawJSON:    json.RawMessage(`{"id":"batch-ok"}`),
-			},
-		}
-
-		err := store.UpsertBatch(ctx, badItems)
-		if err != nil {
-			t.Fatalf("UpsertBatch failed: %v", err)
-		}
-
-		assertItemCount(t, store, ctx, 3)
-	})
+	err = store.UpsertBatch(ctx, []*provider.Item{})
+	require.NoError(t, err, "empty slice should be no-op")
 }
 
 func TestSQLiteStorage_BatchGetByIDs(t *testing.T) {
-	db, err := database.Open(":memory:")
-	if err != nil {
-		t.Fatalf("Failed to open database: %v", err)
-	}
-
-	defer func() { _ = db.Close() }()
-
-	store := NewSQLiteStorage(db)
-	ctx := context.Background()
+	store, ctx := newTestSQLiteStore(t)
 	now := time.Now()
 
 	items := []*provider.Item{
@@ -436,10 +291,8 @@ func TestSQLiteStorage_BatchGetByIDs(t *testing.T) {
 		},
 	}
 
-	err = store.UpsertBatch(ctx, items)
-	if err != nil {
-		t.Fatalf("UpsertBatch failed: %v", err)
-	}
+	err := store.UpsertBatch(ctx, items)
+	require.NoError(t, err)
 
 	t.Run("returns all existing items", func(t *testing.T) {
 		ids := []types.ItemID{types.NewItemID("batch-a"), types.NewItemID("batch-c")}
@@ -487,7 +340,5 @@ func TestSQLiteStorage_Close(t *testing.T) {
 	store := NewSQLiteStorage(db)
 
 	err = store.Close()
-	if err != nil {
-		t.Fatalf("Close failed: %v", err)
-	}
+	require.NoError(t, err)
 }

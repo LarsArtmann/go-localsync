@@ -23,7 +23,8 @@ func TestRunMigrations_FreshDB(t *testing.T) {
 	}
 
 	var count int
-	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").Scan(&count)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").
+		Scan(&count)
 	if err != nil {
 		t.Fatalf("query migrations: %v", err)
 	}
@@ -59,7 +60,8 @@ func TestRunMigrations_Idempotent(t *testing.T) {
 	}
 
 	var count int
-	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").Scan(&count)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").
+		Scan(&count)
 	if err != nil {
 		t.Fatalf("query migrations: %v", err)
 	}
@@ -145,7 +147,8 @@ func TestOpen_CreatesAndMigrates(t *testing.T) {
 	t.Cleanup(func() { _ = db.Close() })
 
 	var count int
-	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").Scan(&count)
+	err = db.QueryRowContext(context.Background(), "SELECT COUNT(*) FROM schema_migrations").
+		Scan(&count)
 	if err != nil {
 		t.Fatalf("query migrations: %v", err)
 	}
@@ -170,7 +173,10 @@ func TestMigrations_Ordered(t *testing.T) {
 		t.Fatalf("RunMigrations: %v", err)
 	}
 
-	rows, err := db.QueryContext(context.Background(), "SELECT version FROM schema_migrations ORDER BY version")
+	rows, err := db.QueryContext(
+		context.Background(),
+		"SELECT version FROM schema_migrations ORDER BY version",
+	)
 	if err != nil {
 		t.Fatalf("query: %v", err)
 	}

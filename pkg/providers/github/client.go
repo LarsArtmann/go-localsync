@@ -131,17 +131,7 @@ func (c *Client) Fetch(
 		)
 	}
 
-	items := make([]*provider.Item, 0, len(activity))
-	for _, e := range activity {
-		item, err := convertEvent(e)
-		if err != nil {
-			log.Warn("failed to convert GitHub event", "eventID", e.GetID(), "error", err)
-
-			continue
-		}
-
-		items = append(items, item)
-	}
+	items := convertEvents(activity)
 
 	return &provider.FetchResult{
 		Items:   items,
@@ -207,6 +197,23 @@ func (c *Client) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, err
 		Remaining: core.Remaining,
 		ResetAt:   core.Reset.Time,
 	}, nil
+}
+
+func convertEvents(activity []*gh.Event) []*provider.Item {
+	items := make([]*provider.Item, 0, len(activity))
+
+	for _, e := range activity {
+		item, err := convertEvent(e)
+		if err != nil {
+			log.Warn("failed to convert GitHub event", "eventID", e.GetID(), "error", err)
+
+			continue
+		}
+
+		items = append(items, item)
+	}
+
+	return items
 }
 
 func convertEvent(e *gh.Event) (*provider.Item, error) {

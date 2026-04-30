@@ -60,6 +60,8 @@ func NewConfig(opts ...Option) Config {
 
 // NewStorage creates a Storage based on the configuration.
 // External backends should implement the Storage interface directly.
+//
+//nolint:ireturn // Factory functions intentionally return interfaces.
 func NewStorage(cfg Config) (Storage, error) {
 	switch cfg.Backend {
 	case BackendSQLite:

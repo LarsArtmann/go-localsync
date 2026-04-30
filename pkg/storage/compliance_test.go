@@ -76,6 +76,19 @@ func TestStorageCompliance_Turso(t *testing.T) {
 }
 
 func testStorageCompliance(t *testing.T, factory StorageFactory) {
+	t.Helper()
+
+	t.Run("CRUD", func(t *testing.T) { testCRUDCompliance(t, factory) })
+	t.Run("Queries", func(t *testing.T) { testQueryCompliance(t, factory) })
+	t.Run("BatchAndDelete", func(t *testing.T) { testBatchDeleteCompliance(t, factory) })
+	t.Run("CountAndTypes", func(t *testing.T) { testCountTypesCompliance(t, factory) })
+	t.Run("Concurrency", func(t *testing.T) { testConcurrencyCompliance(t, factory) })
+	t.Run("Close", func(t *testing.T) { testCloseCompliance(t, factory) })
+}
+
+func testCRUDCompliance(t *testing.T, factory StorageFactory) {
+	t.Helper()
+
 	ctx := context.Background()
 
 	t.Run("Upsert_and_GetByID", func(t *testing.T) {
@@ -138,6 +151,12 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		err := s.UpsertBatch(ctx, nil)
 		assert.NoError(t, err)
 	})
+}
+
+func testQueryCompliance(t *testing.T, factory StorageFactory) {
+	t.Helper()
+
+	ctx := context.Background()
 
 	t.Run("GetLatest", func(t *testing.T) {
 		s, cleanup := factory(t)
@@ -304,6 +323,12 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		assert.Len(t, items, 1)
 		assert.Equal(t, "2", items[0].ID.Get())
 	})
+}
+
+func testBatchDeleteCompliance(t *testing.T, factory StorageFactory) {
+	t.Helper()
+
+	ctx := context.Background()
 
 	t.Run("BatchGetByIDs", func(t *testing.T) {
 		s, cleanup := factory(t)
@@ -385,6 +410,12 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 		require.NoError(t, err)
 		assert.Equal(t, int64(0), count)
 	})
+}
+
+func testCountTypesCompliance(t *testing.T, factory StorageFactory) {
+	t.Helper()
+
+	ctx := context.Background()
 
 	t.Run("Count", func(t *testing.T) {
 		s, cleanup := factory(t)
@@ -454,18 +485,17 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 			),
 		)
 
-		types, err := s.GetTypes(ctx)
+		typeList, err := s.GetTypes(ctx)
 		require.NoError(t, err)
-		sort.Strings(types)
-		assert.Equal(t, []string{"IssueEvent", "PushEvent"}, types)
+		sort.Strings(typeList)
+		assert.Equal(t, []string{"IssueEvent", "PushEvent"}, typeList)
 	})
+}
 
-	t.Run("Close", func(t *testing.T) {
-		s, cleanup := factory(t)
-		defer cleanup()
+func testConcurrencyCompliance(t *testing.T, factory StorageFactory) {
+	t.Helper()
 
-		assert.NoError(t, s.Close())
-	})
+	ctx := context.Background()
 
 	t.Run("ConcurrentUpsert", func(t *testing.T) {
 		s, cleanup := factory(t)
@@ -521,7 +551,7 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 
 				items := make([]*provider.Item, batchSize)
 				for i := range batchSize {
-					id := string(rune('A'+batchIdx*batchSize+i)) + "-" + string(rune('0'+batchIdx))
+					id := strconv.Itoa(batchIdx) + "-" + strconv.Itoa(i)
 					items[i] = makeItem(id, "github", "PushEvent", "alice", "org/repo", time.Now())
 				}
 
@@ -582,4 +612,13 @@ func testStorageCompliance(t *testing.T, factory StorageFactory) {
 			assert.NoError(t, err, "goroutine %d", i)
 		}
 	})
+}
+
+func testCloseCompliance(t *testing.T, factory StorageFactory) {
+	t.Helper()
+
+	s, cleanup := factory(t)
+	defer cleanup()
+
+	assert.NoError(t, s.Close())
 }
