@@ -1,12 +1,13 @@
 module github.com/larsartmann/go-localsync
 
-go 1.26.1
+go 1.26.2
 
 require (
 	charm.land/log/v2 v2.0.0
+	github.com/caarlos0/env/v11 v11.4.0
 	github.com/cockroachdb/errors v1.12.0
 	github.com/google/go-github/v69 v69.2.0
-	github.com/larsartmann/go-composable-business-types v0.0.0-20260405033705-4c3f7284f2f8
+	github.com/larsartmann/go-branded-id v0.1.0
 	github.com/oklog/ulid/v2 v2.1.1
 	github.com/onsi/ginkgo/v2 v2.28.1
 	github.com/onsi/gomega v1.39.1
@@ -19,7 +20,6 @@ require (
 require (
 	charm.land/lipgloss/v2 v2.0.2 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
-	github.com/caarlos0/env/v11 v11.4.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
 	github.com/charmbracelet/ultraviolet v0.0.0-20260316091819-b93f6a3b8502 // indirect
 	github.com/charmbracelet/x/ansi v0.11.6 // indirect
@@ -72,4 +72,4 @@ require (
 	modernc.org/memory v1.11.0 // indirect
 )
 
-replace github.com/larsartmann/go-composable-business-types => ../go-composable-business-types
+replace github.com/larsartmann/go-branded-id => ../go-branded-id

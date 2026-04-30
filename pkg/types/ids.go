@@ -15,7 +15,7 @@ import (
 	"crypto/rand"
 	"time"
 
-	"github.com/larsartmann/go-composable-business-types/id"
+	"github.com/larsartmann/go-branded-id"
 	"github.com/oklog/ulid/v2"
 )
 
