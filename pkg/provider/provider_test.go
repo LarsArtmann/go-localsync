@@ -13,10 +13,11 @@ import (
 
 func TestItem_Validate(t *testing.T) {
 	validItem := &Item{
-		ID:        types.NewItemID("123"),
-		Source:    types.NewProviderID("github"),
-		Type:      types.NewEventTypeID("PushEvent"),
-		CreatedAt: time.Now(),
+		ID:         types.NewItemID(),
+		ExternalID: types.NewExternalID("123"),
+		Source:     types.NewProviderID("github"),
+		Type:       types.NewEventTypeID("PushEvent"),
+		CreatedAt:  time.Now(),
 	}
 
 	t.Run("valid item passes", func(t *testing.T) {
@@ -24,9 +25,9 @@ func TestItem_Validate(t *testing.T) {
 		require.NoError(t, err)
 	})
 
-	t.Run("rejects zero ID", func(t *testing.T) {
+	t.Run("rejects zero ExternalID", func(t *testing.T) {
 		item := *validItem
-		item.ID = types.ItemID{}
+		item.ExternalID = types.ExternalID{}
 		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
 	})
 

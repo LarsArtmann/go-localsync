@@ -245,7 +245,8 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 	}
 
 	return &provider.Item{
-		ID:             types.NewItemID(e.GetID()),
+		ID:             types.NewItemID(),
+		ExternalID:     types.NewExternalID(e.GetID()),
 		Source:         types.NewProviderID("github"),
 		Type:           types.NewEventTypeID(e.GetType()),
 		ActorLogin:     types.NewActorID(actorLogin),

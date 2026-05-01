@@ -106,8 +106,8 @@ var _ = Describe("GitHub Provider", func() {
 			})
 
 			It("should preserve event IDs", func() {
-				Expect(world.result.Items[0].ID.Get()).To(Equal("event-123"))
-				Expect(world.result.Items[1].ID.Get()).To(Equal("event-456"))
+				Expect(world.result.Items[0].ExternalID.Get()).To(Equal("event-123"))
+				Expect(world.result.Items[1].ExternalID.Get()).To(Equal("event-456"))
 			})
 
 			It("should map event types correctly", func() {

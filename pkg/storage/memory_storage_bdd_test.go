@@ -96,7 +96,7 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 
 				ids := make(map[string]bool)
 				for _, item := range items {
-					ids[item.ID.Get()] = true
+					ids[item.ExternalID.Get()] = true
 				}
 				Expect(ids).ToNot(HaveKey("before"))
 				Expect(ids).ToNot(HaveKey("exact"))
@@ -124,7 +124,7 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 			})
 		})
 
-		Context("when I BatchGetByIDs with a mix of existing and missing IDs", func() {
+		Context("when I BatchGetByExternalIDs with a mix of existing and missing IDs", func() {
 			It("should return only the items that exist", func() {
 				now := time.Now()
 				Expect(
@@ -140,29 +140,29 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 					),
 				).To(Succeed())
 
-				items, err := store.BatchGetByIDs(ctx, []types.ItemID{
-					types.NewItemID("exists-1"),
-					types.NewItemID("missing-1"),
-					types.NewItemID("exists-2"),
-					types.NewItemID("missing-2"),
+				items, err := store.BatchGetByExternalIDs(ctx, []types.ExternalID{
+					types.NewExternalID("exists-1"),
+					types.NewExternalID("missing-1"),
+					types.NewExternalID("exists-2"),
+					types.NewExternalID("missing-2"),
 				})
 				Expect(err).ToNot(HaveOccurred())
 				Expect(items).To(HaveLen(2))
 
 				found := make(map[string]bool)
 				for _, item := range items {
-					found[item.ID.Get()] = true
+					found[item.ExternalID.Get()] = true
 				}
 				Expect(found).To(HaveKeyWithValue("exists-1", true))
 				Expect(found).To(HaveKeyWithValue("exists-2", true))
 			})
 		})
 
-		Context("when I BatchGetByIDs with all missing IDs", func() {
+		Context("when I BatchGetByExternalIDs with all missing IDs", func() {
 			It("should return an empty slice without error", func() {
-				items, err := store.BatchGetByIDs(ctx, []types.ItemID{
-					types.NewItemID("ghost-1"),
-					types.NewItemID("ghost-2"),
+				items, err := store.BatchGetByExternalIDs(ctx, []types.ExternalID{
+					types.NewExternalID("ghost-1"),
+					types.NewExternalID("ghost-2"),
 				})
 				Expect(err).ToNot(HaveOccurred())
 				Expect(items).To(BeEmpty())
@@ -210,7 +210,7 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 						break
 					}
 					for _, item := range page {
-						allIDs = append(allIDs, item.ID.Get())
+						allIDs = append(allIDs, item.ExternalID.Get())
 					}
 					offset += pageSize
 				}
@@ -235,7 +235,7 @@ var _ = Describe("Memory Storage Edge Cases", func() {
 				Expect(err).ToNot(HaveOccurred())
 				Expect(count).To(Equal(int64(1)))
 
-				item, err := store.GetByID(ctx, types.NewItemID("same-id"))
+				item, err := store.GetByExternalID(ctx, types.NewExternalID("same-id"))
 				Expect(err).ToNot(HaveOccurred())
 				Expect(item.Type.Get()).To(Equal("IssuesEvent"))
 				Expect(item.Source.Get()).To(Equal("gitlab"))

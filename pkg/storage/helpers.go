@@ -12,25 +12,22 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
-// batchGetByIDs is a shared implementation for SQL-backed storage backends.
-// It builds a dynamic IN clause with placeholders and scans results into items.
-//
 //nolint:funlen // Scanning 12 DB fields requires lines; extraction would not improve readability.
-func batchGetByIDs(
+func batchGetByExternalIDs(
 	ctx context.Context,
 	dbc *sql.DB,
-	ids []types.ItemID,
+	externalIDs []types.ExternalID,
 ) ([]*provider.Item, error) {
-	if len(ids) == 0 {
+	if len(externalIDs) == 0 {
 		return nil, nil
 	}
 
-	placeholders := make([]string, len(ids))
-	args := make([]any, len(ids))
+	placeholders := make([]string, len(externalIDs))
+	args := make([]any, len(externalIDs))
 
-	for i, id := range ids {
+	for i, id := range externalIDs {
 		placeholders[i] = "?"
-		args[i] = types.NewSourceItemID(id.Get())
+		args[i] = id
 	}
 
 	//nolint:gosec // G201: Placeholders are all "?" — values come from typed IDs, not user input.
@@ -41,7 +38,7 @@ func batchGetByIDs(
 
 	rows, err := dbc.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("%w: batch get by IDs: %w", pkgerrors.ErrDatabase, err)
+		return nil, fmt.Errorf("%w: batch get by external IDs: %w", pkgerrors.ErrDatabase, err)
 	}
 
 	defer func() {
@@ -68,7 +65,11 @@ func batchGetByIDs(
 			&e.SyncedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("%w: scan in batch get by IDs: %w", pkgerrors.ErrDatabase, err)
+			return nil, fmt.Errorf(
+				"%w: scan in batch get by external IDs: %w",
+				pkgerrors.ErrDatabase,
+				err,
+			)
 		}
 
 		items = append(items, toItem(&e))
@@ -76,7 +77,11 @@ func batchGetByIDs(
 
 	err = rows.Err()
 	if err != nil {
-		return nil, fmt.Errorf("%w: iterate batch get by IDs: %w", pkgerrors.ErrDatabase, err)
+		return nil, fmt.Errorf(
+			"%w: iterate batch get by external IDs: %w",
+			pkgerrors.ErrDatabase,
+			err,
+		)
 	}
 
 	return items, nil

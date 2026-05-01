@@ -21,9 +21,13 @@ import (
 // StorageFactory creates a Storage and a cleanup function.
 type StorageFactory func(t *testing.T) (storage.Storage, func())
 
-func makeItem(id, source, itemType, actor, repo string, createdAt time.Time) *provider.Item {
+func makeItem(
+	externalID, source, itemType, actor, repo string,
+	createdAt time.Time,
+) *provider.Item {
 	return &provider.Item{
-		ID:         types.NewItemID(id),
+		ID:         types.NewItemID(),
+		ExternalID: types.NewExternalID(externalID),
 		Source:     types.NewProviderID(source),
 		Type:       types.NewEventTypeID(itemType),
 		ActorLogin: types.NewActorID(actor),
@@ -91,25 +95,25 @@ func testCRUDCompliance(t *testing.T, factory StorageFactory) {
 
 	ctx := context.Background()
 
-	t.Run("Upsert_and_GetByID", func(t *testing.T) {
+	t.Run("Upsert_and_GetByExternalID", func(t *testing.T) {
 		s, cleanup := factory(t)
 		defer cleanup()
 
 		item := makeItem("1", "github", "PushEvent", "alice", "org/repo", time.Now())
 		require.NoError(t, s.Upsert(ctx, item))
 
-		got, err := s.GetByID(ctx, item.ID)
+		got, err := s.GetByExternalID(ctx, item.ExternalID)
 		require.NoError(t, err)
-		assert.Equal(t, item.ID.Get(), got.ID.Get())
+		assert.Equal(t, item.ExternalID.Get(), got.ExternalID.Get())
 		assert.Equal(t, item.Source.Get(), got.Source.Get())
 		assert.Equal(t, item.Type.Get(), got.Type.Get())
 	})
 
-	t.Run("GetByID_NotFound", func(t *testing.T) {
+	t.Run("GetByExternalID_NotFound", func(t *testing.T) {
 		s, cleanup := factory(t)
 		defer cleanup()
 
-		_, err := s.GetByID(ctx, types.NewItemID("nonexistent"))
+		_, err := s.GetByExternalID(ctx, types.NewExternalID("nonexistent"))
 		assert.ErrorIs(t, err, pkgerrors.ErrNotFound)
 	})
 
@@ -123,7 +127,7 @@ func testCRUDCompliance(t *testing.T, factory StorageFactory) {
 		item.ActorLogin = types.NewActorID("bob")
 		require.NoError(t, s.Upsert(ctx, item))
 
-		got, err := s.GetByID(ctx, item.ID)
+		got, err := s.GetByExternalID(ctx, item.ExternalID)
 		require.NoError(t, err)
 		assert.Equal(t, "bob", got.ActorLogin.Get())
 	})
@@ -177,7 +181,7 @@ func testQueryCompliance(t *testing.T, factory StorageFactory) {
 
 		latest, err := s.GetLatest(ctx)
 		require.NoError(t, err)
-		assert.Equal(t, "2", latest.ID.Get())
+		assert.Equal(t, "2", latest.ExternalID.Get())
 	})
 
 	t.Run("GetLatest_Empty", func(t *testing.T) {
@@ -321,7 +325,7 @@ func testQueryCompliance(t *testing.T, factory StorageFactory) {
 		items, err := s.GetItemsSince(ctx, cutoff)
 		require.NoError(t, err)
 		assert.Len(t, items, 1)
-		assert.Equal(t, "2", items[0].ID.Get())
+		assert.Equal(t, "2", items[0].ExternalID.Get())
 	})
 }
 
@@ -330,7 +334,7 @@ func testBatchDeleteCompliance(t *testing.T, factory StorageFactory) {
 
 	ctx := context.Background()
 
-	t.Run("BatchGetByIDs", func(t *testing.T) {
+	t.Run("BatchGetByExternalIDs", func(t *testing.T) {
 		s, cleanup := factory(t)
 		defer cleanup()
 
@@ -347,25 +351,25 @@ func testBatchDeleteCompliance(t *testing.T, factory StorageFactory) {
 			),
 		)
 
-		items, err := s.BatchGetByIDs(ctx, []types.ItemID{
-			types.NewItemID("1"),
-			types.NewItemID("2"),
-			types.NewItemID("missing"),
+		items, err := s.BatchGetByExternalIDs(ctx, []types.ExternalID{
+			types.NewExternalID("1"),
+			types.NewExternalID("2"),
+			types.NewExternalID("missing"),
 		})
 		require.NoError(t, err)
 		assert.Len(t, items, 2)
 	})
 
-	t.Run("BatchGetByIDs_Empty", func(t *testing.T) {
+	t.Run("BatchGetByExternalIDs_Empty", func(t *testing.T) {
 		s, cleanup := factory(t)
 		defer cleanup()
 
-		items, err := s.BatchGetByIDs(ctx, nil)
+		items, err := s.BatchGetByExternalIDs(ctx, nil)
 		require.NoError(t, err)
 		assert.Nil(t, items)
 	})
 
-	t.Run("Delete", func(t *testing.T) {
+	t.Run("DeleteByExternalID", func(t *testing.T) {
 		s, cleanup := factory(t)
 		defer cleanup()
 
@@ -373,17 +377,17 @@ func testBatchDeleteCompliance(t *testing.T, factory StorageFactory) {
 			t,
 			s.Upsert(ctx, makeItem("1", "github", "PushEvent", "alice", "org/repo", time.Now())),
 		)
-		require.NoError(t, s.Delete(ctx, types.NewItemID("1")))
+		require.NoError(t, s.DeleteByExternalID(ctx, types.NewExternalID("1")))
 
-		_, err := s.GetByID(ctx, types.NewItemID("1"))
+		_, err := s.GetByExternalID(ctx, types.NewExternalID("1"))
 		assert.ErrorIs(t, err, pkgerrors.ErrNotFound)
 	})
 
-	t.Run("Delete_NotFound", func(t *testing.T) {
+	t.Run("DeleteByExternalID_NotFound", func(t *testing.T) {
 		s, cleanup := factory(t)
 		defer cleanup()
 
-		err := s.Delete(ctx, types.NewItemID("nonexistent"))
+		err := s.DeleteByExternalID(ctx, types.NewExternalID("nonexistent"))
 		assert.NoError(t, err)
 	})
 
@@ -597,7 +601,10 @@ func testConcurrencyCompliance(t *testing.T, factory StorageFactory) {
 
 				switch idx % 3 {
 				case 0:
-					_, errs[idx] = s.GetByID(ctx, types.NewItemID(string(rune('a'+idx%10))))
+					_, errs[idx] = s.GetByExternalID(
+						ctx,
+						types.NewExternalID(string(rune('a'+idx%10))),
+					)
 				case 1:
 					_, errs[idx] = s.GetItems(ctx, 10, 0)
 				case 2:

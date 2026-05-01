@@ -32,7 +32,12 @@ func (s *sqlStorage) Close() error {
 func (s *sqlStorage) Upsert(ctx context.Context, item *provider.Item) error {
 	err := s.querier.UpsertEvent(ctx, toDBParams(item))
 	if err != nil {
-		return fmt.Errorf("%w: upsert item %q: %w", pkgerrors.ErrDatabase, item.ID.Get(), err)
+		return fmt.Errorf(
+			"%w: upsert item %q: %w",
+			pkgerrors.ErrDatabase,
+			item.ExternalID.Get(),
+			err,
+		)
 	}
 
 	return nil
@@ -58,7 +63,7 @@ func (s *sqlStorage) UpsertBatch(ctx context.Context, items []*provider.Item) er
 			return fmt.Errorf(
 				"%w: batch upsert item %q: %w",
 				pkgerrors.ErrDatabase,
-				item.ID.Get(),
+				item.ExternalID.Get(),
 				err,
 			)
 		}
@@ -72,24 +77,32 @@ func (s *sqlStorage) UpsertBatch(ctx context.Context, items []*provider.Item) er
 	return nil
 }
 
-func (s *sqlStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
-	e, err := s.querier.GetEventBySourceID(ctx, types.NewSourceItemID(id.Get()))
+func (s *sqlStorage) GetByExternalID(
+	ctx context.Context,
+	externalID types.ExternalID,
+) (*provider.Item, error) {
+	e, err := s.querier.GetEventBySourceID(ctx, externalID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, pkgerrors.ErrNotFound
 		}
 
-		return nil, fmt.Errorf("%w: get item by ID %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
+		return nil, fmt.Errorf(
+			"%w: get item by external ID %q: %w",
+			pkgerrors.ErrDatabase,
+			externalID.Get(),
+			err,
+		)
 	}
 
 	return toItem(e), nil
 }
 
-func (s *sqlStorage) BatchGetByIDs(
+func (s *sqlStorage) BatchGetByExternalIDs(
 	ctx context.Context,
-	ids []types.ItemID,
+	externalIDs []types.ExternalID,
 ) ([]*provider.Item, error) {
-	return batchGetByIDs(ctx, s.dbc, ids)
+	return batchGetByExternalIDs(ctx, s.dbc, externalIDs)
 }
 
 func (s *sqlStorage) GetLatest(ctx context.Context) (*provider.Item, error) {
@@ -257,10 +270,13 @@ func (s *sqlStorage) GetTypes(ctx context.Context) ([]string, error) {
 	return types, nil
 }
 
-func (s *sqlStorage) Delete(ctx context.Context, id types.ItemID) error {
-	err := s.querier.DeleteEventBySourceID(ctx, types.NewSourceItemID(id.Get()))
+func (s *sqlStorage) DeleteByExternalID(
+	ctx context.Context,
+	externalID types.ExternalID,
+) error {
+	err := s.querier.DeleteEventBySourceID(ctx, externalID)
 	if err != nil {
-		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, id.Get(), err)
+		return fmt.Errorf("%w: delete item %q: %w", pkgerrors.ErrDatabase, externalID.Get(), err)
 	}
 
 	return nil
@@ -326,7 +342,8 @@ func fromNullString(ns sql.NullString) string {
 
 func toItem(e *db.Events) *provider.Item {
 	return &provider.Item{
-		ID:             types.NewItemID(e.SourceID.Get()),
+		ID:             e.ID,
+		ExternalID:     e.SourceID,
 		Source:         types.NewProviderID(e.Source),
 		Type:           types.NewEventTypeID(e.Type),
 		ActorLogin:     types.NewActorID(fromNullString(e.ActorLogin)),
@@ -341,8 +358,8 @@ func toItem(e *db.Events) *provider.Item {
 
 func toDBParams(item *provider.Item) *db.UpsertEventParams {
 	return &db.UpsertEventParams{
-		ID:             types.NewEventID(),
-		SourceID:       types.NewSourceItemID(item.ID.Get()),
+		ID:             item.ID,
+		SourceID:       item.ExternalID,
 		Source:         item.Source.Get(),
 		Type:           item.Type.Get(),
 		ActorLogin:     toNullString(item.ActorLogin.Get()),

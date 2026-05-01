@@ -28,12 +28,12 @@ type Querier interface {
 	// Delete an event by its source ID
 	//
 	//  DELETE FROM events WHERE source_id = ?
-	DeleteEventBySourceID(ctx context.Context, sourceID types.SourceItemID) error
+	DeleteEventBySourceID(ctx context.Context, sourceID types.ExternalID) error
 	// Get a single event by its source ID
 	//
 	//  SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 	//  WHERE source_id = ?
-	GetEventBySourceID(ctx context.Context, sourceID types.SourceItemID) (*Events, error)
+	GetEventBySourceID(ctx context.Context, sourceID types.ExternalID) (*Events, error)
 	// Get distinct event types in the database
 	//
 	//  SELECT DISTINCT type FROM events

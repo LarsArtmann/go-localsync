@@ -247,7 +247,7 @@ var _ = Describe("SQLite Storage", func() {
 
 			It("should return the most recent event", func() {
 				Expect(world.err).ToNot(HaveOccurred())
-				Expect(world.item.ID.Get()).To(Equal("newest"))
+				Expect(world.item.ExternalID.Get()).To(Equal("newest"))
 			})
 		})
 

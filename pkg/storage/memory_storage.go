@@ -30,7 +30,7 @@ func (s *MemoryStorage) Upsert(_ context.Context, item *provider.Item) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.items[item.ID.Get()] = item
+	s.items[item.ExternalID.Get()] = item
 
 	return nil
 }
@@ -45,18 +45,21 @@ func (s *MemoryStorage) UpsertBatch(_ context.Context, items []*provider.Item) e
 	defer s.mu.Unlock()
 
 	for _, item := range items {
-		s.items[item.ID.Get()] = item
+		s.items[item.ExternalID.Get()] = item
 	}
 
 	return nil
 }
 
-// GetByID retrieves a single item by its source ID.
-func (s *MemoryStorage) GetByID(_ context.Context, id types.ItemID) (*provider.Item, error) {
+// GetByExternalID retrieves a single item by its external provider ID.
+func (s *MemoryStorage) GetByExternalID(
+	_ context.Context,
+	externalID types.ExternalID,
+) (*provider.Item, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	item, ok := s.items[id.Get()]
+	item, ok := s.items[externalID.Get()]
 	if !ok {
 		return nil, pkgerrors.ErrNotFound
 	}
@@ -156,12 +159,12 @@ func (s *MemoryStorage) GetItemsSince(
 	return result, nil
 }
 
-// BatchGetByIDs retrieves multiple items by their source IDs.
-func (s *MemoryStorage) BatchGetByIDs(
+// BatchGetByExternalIDs retrieves multiple items by their external provider IDs.
+func (s *MemoryStorage) BatchGetByExternalIDs(
 	_ context.Context,
-	ids []types.ItemID,
+	externalIDs []types.ExternalID,
 ) ([]*provider.Item, error) {
-	if len(ids) == 0 {
+	if len(externalIDs) == 0 {
 		return nil, nil
 	}
 
@@ -170,7 +173,7 @@ func (s *MemoryStorage) BatchGetByIDs(
 
 	var result []*provider.Item
 
-	for _, id := range ids {
+	for _, id := range externalIDs {
 		if item, ok := s.items[id.Get()]; ok {
 			result = append(result, item)
 		}
@@ -179,12 +182,15 @@ func (s *MemoryStorage) BatchGetByIDs(
 	return result, nil
 }
 
-// Delete removes an item by its source ID.
-func (s *MemoryStorage) Delete(_ context.Context, id types.ItemID) error {
+// DeleteByExternalID removes an item by its external provider ID.
+func (s *MemoryStorage) DeleteByExternalID(
+	_ context.Context,
+	externalID types.ExternalID,
+) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	delete(s.items, id.Get())
+	delete(s.items, externalID.Get())
 
 	return nil
 }

@@ -63,7 +63,7 @@ DELETE FROM events WHERE source_id = ?
 // Delete an event by its source ID
 //
 //	DELETE FROM events WHERE source_id = ?
-func (q *Queries) DeleteEventBySourceID(ctx context.Context, sourceID types.SourceItemID) error {
+func (q *Queries) DeleteEventBySourceID(ctx context.Context, sourceID types.ExternalID) error {
 	_, err := q.exec(ctx, q.deleteEventBySourceIDStmt, DeleteEventBySourceID, sourceID)
 	return err
 }
@@ -77,7 +77,7 @@ WHERE source_id = ?
 //
 //	SELECT id, source_id, source, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json, synced_at FROM events
 //	WHERE source_id = ?
-func (q *Queries) GetEventBySourceID(ctx context.Context, sourceID types.SourceItemID) (*Events, error) {
+func (q *Queries) GetEventBySourceID(ctx context.Context, sourceID types.ExternalID) (*Events, error) {
 	row := q.queryRow(ctx, q.getEventBySourceIDStmt, GetEventBySourceID, sourceID)
 	var i Events
 	err := row.Scan(
@@ -506,17 +506,17 @@ ON CONFLICT(source_id) DO UPDATE SET
 `
 
 type UpsertEventParams struct {
-	ID             types.EventID      `db:"id" json:"id"`
-	SourceID       types.SourceItemID `db:"source_id" json:"sourceId"`
-	Source         string             `db:"source" json:"source"`
-	Type           string             `db:"type" json:"type"`
-	ActorLogin     sql.NullString     `db:"actor_login" json:"actorLogin"`
-	ActorAvatarUrl sql.NullString     `db:"actor_avatar_url" json:"actorAvatarUrl"`
-	RepoName       sql.NullString     `db:"repo_name" json:"repoName"`
-	RepoUrl        sql.NullString     `db:"repo_url" json:"repoUrl"`
-	CreatedAt      time.Time          `db:"created_at" json:"createdAt"`
-	UpdatedAt      time.Time          `db:"updated_at" json:"updatedAt"`
-	RawJson        json.RawMessage    `db:"raw_json" json:"rawJson"`
+	ID             types.ItemID     `db:"id" json:"id"`
+	SourceID       types.ExternalID `db:"source_id" json:"sourceId"`
+	Source         string           `db:"source" json:"source"`
+	Type           string           `db:"type" json:"type"`
+	ActorLogin     sql.NullString   `db:"actor_login" json:"actorLogin"`
+	ActorAvatarUrl sql.NullString   `db:"actor_avatar_url" json:"actorAvatarUrl"`
+	RepoName       sql.NullString   `db:"repo_name" json:"repoName"`
+	RepoUrl        sql.NullString   `db:"repo_url" json:"repoUrl"`
+	CreatedAt      time.Time        `db:"created_at" json:"createdAt"`
+	UpdatedAt      time.Time        `db:"updated_at" json:"updatedAt"`
+	RawJson        json.RawMessage  `db:"raw_json" json:"rawJson"`
 }
 
 // Insert an event, updating if it already exists (conflict resolution)

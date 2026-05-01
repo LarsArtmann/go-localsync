@@ -15,7 +15,8 @@ import (
 
 func testMemoryItem(id, eventType, actor, repo string, createdAt time.Time) *provider.Item {
 	return &provider.Item{
-		ID:         types.NewItemID(id),
+		ID:         types.NewItemID(),
+		ExternalID: types.NewExternalID(id),
 		Source:     types.NewProviderID("github"),
 		Type:       types.NewEventTypeID(eventType),
 		ActorLogin: types.NewActorID(actor),
@@ -26,7 +27,7 @@ func testMemoryItem(id, eventType, actor, repo string, createdAt time.Time) *pro
 	}
 }
 
-func TestMemoryStorage_UpsertAndGetByID(t *testing.T) {
+func TestMemoryStorage_UpsertAndGetByExternalID(t *testing.T) {
 	store := NewMemoryStorage()
 	ctx := context.Background()
 
@@ -35,16 +36,16 @@ func TestMemoryStorage_UpsertAndGetByID(t *testing.T) {
 	err := store.Upsert(ctx, item)
 	require.NoError(t, err)
 
-	got, err := store.GetByID(ctx, types.NewItemID("1"))
+	got, err := store.GetByExternalID(ctx, types.NewExternalID("1"))
 	require.NoError(t, err)
-	assert.Equal(t, "1", got.ID.Get())
+	assert.Equal(t, "1", got.ExternalID.Get())
 }
 
-func TestMemoryStorage_GetByIDNotFound(t *testing.T) {
+func TestMemoryStorage_GetByExternalIDNotFound(t *testing.T) {
 	store := NewMemoryStorage()
 	ctx := context.Background()
 
-	_, err := store.GetByID(ctx, types.NewItemID("nonexistent"))
+	_, err := store.GetByExternalID(ctx, types.NewExternalID("nonexistent"))
 	assert.ErrorIs(t, err, pkgerrors.ErrNotFound)
 }
 
@@ -99,7 +100,7 @@ func TestMemoryStorage_GetLatest(t *testing.T) {
 
 	latest, err := store.GetLatest(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, "new", latest.ID.Get())
+	assert.Equal(t, "new", latest.ExternalID.Get())
 }
 
 func TestMemoryStorage_GetLatestEmpty(t *testing.T) {
@@ -211,7 +212,7 @@ func TestMemoryStorage_GetItemsSince(t *testing.T) {
 	assert.Len(t, items, 1)
 }
 
-func TestMemoryStorage_BatchGetByIDs(t *testing.T) {
+func TestMemoryStorage_BatchGetByExternalIDs(t *testing.T) {
 	store := NewMemoryStorage()
 	ctx := context.Background()
 	now := time.Now()
@@ -219,40 +220,40 @@ func TestMemoryStorage_BatchGetByIDs(t *testing.T) {
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "r", now)))
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("2", "PushEvent", "a", "r", now)))
 
-	items, err := store.BatchGetByIDs(
+	items, err := store.BatchGetByExternalIDs(
 		ctx,
-		[]types.ItemID{types.NewItemID("1"), types.NewItemID("2")},
+		[]types.ExternalID{types.NewExternalID("1"), types.NewExternalID("2")},
 	)
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 }
 
-func TestMemoryStorage_BatchGetByIDsMissing(t *testing.T) {
+func TestMemoryStorage_BatchGetByExternalIDsMissing(t *testing.T) {
 	store := NewMemoryStorage()
 	ctx := context.Background()
 	now := time.Now()
 
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "r", now)))
 
-	items, err := store.BatchGetByIDs(
+	items, err := store.BatchGetByExternalIDs(
 		ctx,
-		[]types.ItemID{types.NewItemID("1"), types.NewItemID("nonexistent")},
+		[]types.ExternalID{types.NewExternalID("1"), types.NewExternalID("nonexistent")},
 	)
 	require.NoError(t, err)
 	assert.Len(t, items, 1)
 }
 
-func TestMemoryStorage_Delete(t *testing.T) {
+func TestMemoryStorage_DeleteByExternalID(t *testing.T) {
 	store := NewMemoryStorage()
 	ctx := context.Background()
 	now := time.Now()
 
 	require.NoError(t, store.Upsert(ctx, testMemoryItem("1", "PushEvent", "a", "r", now)))
 
-	err := store.Delete(ctx, types.NewItemID("1"))
+	err := store.DeleteByExternalID(ctx, types.NewExternalID("1"))
 	require.NoError(t, err)
 
-	_, err = store.GetByID(ctx, types.NewItemID("1"))
+	_, err = store.GetByExternalID(ctx, types.NewExternalID("1"))
 	assert.ErrorIs(t, err, pkgerrors.ErrNotFound)
 }
 
@@ -260,7 +261,7 @@ func TestMemoryStorage_DeleteNotFound(t *testing.T) {
 	store := NewMemoryStorage()
 	ctx := context.Background()
 
-	err := store.Delete(ctx, types.NewItemID("nonexistent"))
+	err := store.DeleteByExternalID(ctx, types.NewExternalID("nonexistent"))
 	assert.NoError(t, err)
 }
 

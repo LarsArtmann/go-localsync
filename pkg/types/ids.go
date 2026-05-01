@@ -2,15 +2,14 @@
 // from go-branded-id. These types provide compile-time safety by preventing
 // accidental mixing of different identifier kinds.
 //
-// go-cqrs-lite provides a related ID system (id.Of[T] backed by ULID) for
-// CQRS aggregates and events. The two systems share the same underlying
-// library (go-branded-id) but use different generic parameters and are not
-// directly interoperable at the type level.
+// All entity identifiers use ULID as the value type, aligning with go-cqrs-lite's
+// id.Of[T] which wraps cbid.ID[T, ulid.ULID]. External provider IDs (strings from
+// GitHub, GitLab, etc.) are stored as attributes via ExternalID, not as entity IDs.
 //
 // # Usage
 //
-//	itemID := types.NewItemID("event-123")
-//	actorID := types.NewActorID("larsartmann")
+//	itemID := types.NewItemID()
+//	externalID := types.NewExternalID("1234567890")
 //
 //	// This is a compile error - cannot use ItemID where ActorID is expected:
 //	// ProcessActor(itemID) // ERROR: type mismatch
@@ -24,15 +23,13 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
-// Brand types (phantom types for type safety).
-// These are empty structs used only as type parameters.
 type (
 	// EventBrand distinguishes EventID from other identifier types.
 	EventBrand struct{}
-	// SourceItemBrand distinguishes SourceItemID from other identifier types.
-	SourceItemBrand struct{}
 	// ItemBrand distinguishes ItemID from other identifier types.
 	ItemBrand struct{}
+	// ExternalBrand distinguishes ExternalID from other identifier types.
+	ExternalBrand struct{}
 	// ProviderBrand distinguishes ProviderID from other identifier types.
 	ProviderBrand struct{}
 	// ActorBrand distinguishes ActorID from other identifier types.
@@ -43,17 +40,16 @@ type (
 	EventTypeBrand struct{}
 )
 
-// ID type aliases for domain-specific identifiers.
 type (
 	// EventID is the internal database identifier for events using ULID.
 	// Example: "01H0G0K1P1V2J3M4N5O6P7Q8R9" (ULID, time-sortable unique identifier).
 	EventID = id.ID[EventBrand, ulid.ULID]
-	// SourceItemID is the provider-specific item identifier used for upsert operations.
-	// Example: "1234567890" (GitHub event ID as string for compatibility).
-	SourceItemID = id.ID[SourceItemBrand, string]
-	// ItemID is a unique identifier for sync items.
-	// Example: "1234567890" (GitHub event ID).
-	ItemID = id.ID[ItemBrand, string]
+	// ItemID is the internal ULID-based identifier for sync items.
+	// Aligned with go-cqrs-lite's id.Of[T] which uses ULID-only identifiers.
+	ItemID = id.ID[ItemBrand, ulid.ULID]
+	// ExternalID is the provider-specific item identifier used for upsert operations.
+	// Stores the original string ID from external providers (e.g., GitHub event "1234567890").
+	ExternalID = id.ID[ExternalBrand, string]
 	// ProviderID identifies the source provider.
 	// Example: "github", "gitlab".
 	ProviderID = id.ID[ProviderBrand, string]
@@ -78,11 +74,18 @@ func MustParseEventID(s string) EventID {
 	return id.NewID[EventBrand](ulid.MustParse(s))
 }
 
-// NewSourceItemID creates a new SourceItemID from a string value.
-func NewSourceItemID(v string) SourceItemID { return id.NewID[SourceItemBrand](v) }
+// NewItemID creates a new ItemID with a freshly generated ULID.
+func NewItemID() ItemID {
+	return id.NewID[ItemBrand](ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader))
+}
 
-// NewItemID creates a new ItemID from a string value.
-func NewItemID(v string) ItemID { return id.NewID[ItemBrand](v) }
+// MustParseItemID parses a ULID string into an ItemID. Panics on invalid input.
+func MustParseItemID(s string) ItemID {
+	return id.NewID[ItemBrand](ulid.MustParse(s))
+}
+
+// NewExternalID creates a new ExternalID from a string value.
+func NewExternalID(v string) ExternalID { return id.NewID[ExternalBrand](v) }
 
 // NewProviderID creates a new ProviderID from a string value.
 func NewProviderID(v string) ProviderID { return id.NewID[ProviderBrand](v) }

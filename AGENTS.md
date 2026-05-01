@@ -12,7 +12,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
 | `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory)                                              |
 | `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
-| `pkg/types/`                | Branded phantom-type IDs (`ItemID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`, `GithubEventID`) |
+| `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`) |
 | `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
 | `pkg/testhelpers/`          | Shared test mocks and factories                                                                        |
 | `internal/database/`        | Connection management (`Open()`) + migration system (`RunMigrations()`)                                |
@@ -66,7 +66,7 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 | `cmd/examples/github-sync` | 0     | ⬜ No tests                                                 |
 | `pkg/errors`               | 0     | ⬜ No tests                                                 |
 | `pkg/provider`             | 0     | ⬜ Interface only                                           |
-| `pkg/types`                | 0     | ⬜ No tests                                                 |
+| `pkg/types`                | 13    | ⚠️ ID construction, roundtrip, zero, equal — no edge case tests               |
 | `pkg/testhelpers`          | 0     | ⬜ Helper package                                           |
 
 Run: `go test ./... -count=1`
@@ -107,10 +107,11 @@ When adding new providers:
 
 ## Database Schema
 
-- Events table with `github_id` as unique key (to be generalized to `source_id` in future migration)
+- Events table with `source_id` as unique key for upsert conflict detection
 - `source` column for multi-provider tracking (default: `'github'`)
+- `id` column is ULID PK (`ItemID`), `source_id` stores external provider ID (`ExternalID`)
 - `updated_at` passed from provider (not CURRENT_TIMESTAMP) for proper LWW conflict resolution
-- 7 indexes: `created_at`, `type`, `github_id`, `actor_login`, `repo_name`, `source`, `(source, github_id)`
+- 7 indexes: `created_at`, `type`, `source_id`, `actor_login`, `repo_name`, `source`, `(source, source_id)`
 
 ## SQLC Code Generation
 
@@ -150,12 +151,12 @@ go-localsync **does not import** go-cqrs-lite despite sharing go-branded-id and 
 
 | Area | go-localsync (current) | go-cqrs-lite (available) |
 |------|------------------------|-------------------------|
-| IDs | `id.ID[T, string/ULID]` via go-branded-id | `id.Of[T]` (ULID-only) via go-branded-id |
+| IDs | `id.ID[T, ULID]` (ItemID) + `id.ID[T, string]` (ExternalID) via go-branded-id | `id.Of[T]` (ULID-only) via go-branded-id |
 | Storage | 16-method `Storage` interface, 3 SQL backends | `event.Store` (4 methods) + projections |
 | Conflict | Inline LWW in `ConflictAwareSyncer` | `LWWResolver[T]` in go-localfirst |
 | Retry | Hand-rolled in `github/client.go` | `middleware.CommandRetry` with jitter |
 
-**ID incompatibility**: Both use go-branded-id but with different generic parameters. Not interoperable at compile time. Migration requires design decision on ULID-only vs string-backed.
+**Option A completed (2026-05-01)**: `ItemID` migrated from `id.ID[ItemBrand, string]` to `id.ID[ItemBrand, ulid.ULID]`. External provider IDs now stored as `ExternalID` (string-backed `id.ID[ExternalBrand, string]`). This aligns with go-cqrs-lite's `id.Of[T]` which uses ULID-only. Both systems share the same value type (ULID) — conversion is trivial (`.Get()` the ULID, wrap in the other brand). The ID type incompatibility blocker is **resolved**.
 
 **Deduplication done**: `sqlite.go` (27 lines) and `turso.go` (77 lines) now embed shared `sqlStorage` (356 lines). ~247 lines of duplication eliminated.
 

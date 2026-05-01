@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestNewStringIDs(t *testing.T) {
+func TestNewExternalIDs(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -13,12 +13,11 @@ func TestNewStringIDs(t *testing.T) {
 		got  string
 		want string
 	}{
-		{"NewItemID", NewItemID("event-123").Get(), "event-123"},
+		{"NewExternalID", NewExternalID("event-123").Get(), "event-123"},
 		{"NewProviderID", NewProviderID("github").Get(), "github"},
 		{"NewActorID", NewActorID("octocat").Get(), "octocat"},
 		{"NewRepoID", NewRepoID("org/repo").Get(), "org/repo"},
 		{"NewEventTypeID", NewEventTypeID("PushEvent").Get(), "PushEvent"},
-		{"NewSourceItemID", NewSourceItemID("999").Get(), "999"},
 	}
 
 	for _, tt := range tests {
@@ -29,6 +28,56 @@ func TestNewStringIDs(t *testing.T) {
 				t.Errorf("expected %q, got %q", tt.want, tt.got)
 			}
 		})
+	}
+}
+
+func TestNewItemID(t *testing.T) {
+	t.Parallel()
+
+	got := NewItemID()
+	if got.Get().IsZero() {
+		t.Error("expected non-zero ULID")
+	}
+
+	s := got.String()
+	if len(s) != 26 {
+		t.Errorf("expected 26-char ULID string, got %d chars: %s", len(s), s)
+	}
+}
+
+func TestMustParseItemID(t *testing.T) {
+	t.Parallel()
+
+	original := NewItemID()
+	parsed := MustParseItemID(original.String())
+
+	if !original.Equal(parsed) {
+		t.Errorf("expected %s, got %s", original.String(), parsed.String())
+	}
+}
+
+func TestMustParseItemID_panics(t *testing.T) {
+	t.Parallel()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic for invalid ULID string")
+		}
+	}()
+
+	MustParseItemID("not-a-valid-ulid")
+}
+
+func TestItemIDIsZero(t *testing.T) {
+	t.Parallel()
+
+	var zero ItemID
+	if !zero.IsZero() {
+		t.Error("expected zero ItemID to be zero")
+	}
+
+	if NewItemID().IsZero() {
+		t.Error("expected new ItemID to not be zero")
 	}
 }
 
@@ -82,24 +131,40 @@ func TestEventIDIsZero(t *testing.T) {
 	}
 }
 
-func TestIDIsZero(t *testing.T) {
+func TestExternalIDIsZero(t *testing.T) {
 	t.Parallel()
 
-	if !NewItemID("").IsZero() {
-		t.Error("expected empty ItemID to be zero")
+	if !NewExternalID("").IsZero() {
+		t.Error("expected empty ExternalID to be zero")
 	}
 
-	if NewItemID("abc").IsZero() {
-		t.Error("expected non-empty ItemID to not be zero")
+	if NewExternalID("abc").IsZero() {
+		t.Error("expected non-empty ExternalID to not be zero")
 	}
 }
 
 func TestIDEqual(t *testing.T) {
 	t.Parallel()
 
-	a := NewItemID("1")
-	b := NewItemID("1")
-	c := NewItemID("2")
+	a := NewExternalID("1")
+	b := NewExternalID("1")
+	c := NewExternalID("2")
+
+	if !a.Equal(b) {
+		t.Error("expected equal IDs to be equal")
+	}
+
+	if a.Equal(c) {
+		t.Error("expected different IDs to not be equal")
+	}
+}
+
+func TestItemIDEqual(t *testing.T) {
+	t.Parallel()
+
+	a := NewItemID()
+	b := a
+	c := NewItemID()
 
 	if !a.Equal(b) {
 		t.Error("expected equal IDs to be equal")
@@ -113,24 +178,24 @@ func TestIDEqual(t *testing.T) {
 func TestIDString(t *testing.T) {
 	t.Parallel()
 
-	id := NewItemID("test-id")
+	id := NewExternalID("test-id")
 	s := id.String()
 	if s == "" {
 		t.Error("expected non-empty string representation")
 	}
 }
 
-func TestEventIDStringRoundTrip(t *testing.T) {
+func TestItemIDStringRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	id := NewEventID()
+	id := NewItemID()
 	s := id.String()
 
 	if !strings.HasPrefix(s, "0") {
 		t.Errorf("ULID should start with '0' in this millennium, got: %s", s)
 	}
 
-	parsed := MustParseEventID(s)
+	parsed := MustParseItemID(s)
 	if !id.Equal(parsed) {
 		t.Errorf("round-trip failed: %s != %s", id.String(), parsed.String())
 	}

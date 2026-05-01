@@ -228,8 +228,9 @@ func TestProcessIncrementalItems(t *testing.T) {
 
 		cutoff := time.Date(2024, 1, 15, 12, 0, 0, 0, time.UTC)
 		latestItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			CreatedAt: cutoff,
+			ID:         types.NewItemID(),
+			ExternalID: types.NewExternalID("1"),
+			CreatedAt:  cutoff,
 		}
 
 		items := []*provider.Item{
@@ -252,7 +253,7 @@ func TestProcessIncrementalItems(t *testing.T) {
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 1, result.Skipped)
 		assert.Equal(t, 1, len(mockStore.ItemsVal))
-		assert.Equal(t, "3", mockStore.ItemsVal[0].ID.Get())
+		assert.Equal(t, "3", mockStore.ItemsVal[0].ExternalID.Get())
 	})
 
 	t.Run("handles nil latest item", func(t *testing.T) {
@@ -278,8 +279,9 @@ func TestProcessIncrementalItems(t *testing.T) {
 
 		sameTime := time.Date(2024, 1, 15, 12, 0, 0, 0, time.UTC)
 		cutoffItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			CreatedAt: sameTime,
+			ID:         types.NewItemID(),
+			ExternalID: types.NewExternalID("1"),
+			CreatedAt:  sameTime,
 		}
 
 		items := []*provider.Item{
@@ -301,8 +303,9 @@ func TestProcessIncrementalItems(t *testing.T) {
 		syncer := NewSyncer(nil, mockStore, nil)
 
 		cutoffItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			CreatedAt: time.Now(),
+			ID:         types.NewItemID(),
+			ExternalID: types.NewExternalID("1"),
+			CreatedAt:  time.Now(),
 		}
 
 		result, err := syncer.processIncrementalItems(
@@ -327,8 +330,9 @@ func TestProcessIncrementalItems(t *testing.T) {
 		pastTime := now.Add(-24 * time.Hour)
 
 		cutoffItem := &provider.Item{
-			ID:        types.NewItemID("1"),
-			CreatedAt: now,
+			ID:         types.NewItemID(),
+			ExternalID: types.NewExternalID("1"),
+			CreatedAt:  now,
 		}
 
 		items := []*provider.Item{
@@ -343,6 +347,6 @@ func TestProcessIncrementalItems(t *testing.T) {
 		assert.Equal(t, 2, result.Fetched)
 		assert.Equal(t, 1, result.Skipped)
 		assert.Equal(t, 1, len(mockStore.ItemsVal))
-		assert.Equal(t, "3", mockStore.ItemsVal[0].ID.Get())
+		assert.Equal(t, "3", mockStore.ItemsVal[0].ExternalID.Get())
 	})
 }

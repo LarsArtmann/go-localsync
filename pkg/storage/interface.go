@@ -14,9 +14,9 @@ import (
 //
 //nolint:interfacebloat // 12 methods are needed for complete CRUD read semantics.
 type Reader interface {
-	// GetByID retrieves a single item by its source ID.
+	// GetByExternalID retrieves a single item by its external provider ID.
 	// Returns nil and ErrNotFound if not found.
-	GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error)
+	GetByExternalID(ctx context.Context, externalID types.ExternalID) (*provider.Item, error)
 	// GetLatest returns the most recently created item, or ErrNotFound if empty.
 	GetLatest(ctx context.Context) (*provider.Item, error)
 	// GetItems retrieves items with pagination.
@@ -47,9 +47,12 @@ type Reader interface {
 	) ([]*provider.Item, error)
 	// GetItemsSince retrieves items created after the given timestamp.
 	GetItemsSince(ctx context.Context, since time.Time) ([]*provider.Item, error)
-	// BatchGetByIDs retrieves multiple items by their source IDs.
+	// BatchGetByExternalIDs retrieves multiple items by their external provider IDs.
 	// Returns items that exist; missing IDs are silently omitted.
-	BatchGetByIDs(ctx context.Context, ids []types.ItemID) ([]*provider.Item, error)
+	BatchGetByExternalIDs(
+		ctx context.Context,
+		externalIDs []types.ExternalID,
+	) ([]*provider.Item, error)
 	// Count returns the total number of items.
 	Count(ctx context.Context) (int64, error)
 	// CountByType returns the number of items of a specific type.
@@ -61,15 +64,15 @@ type Reader interface {
 // Writer defines write operations on stored items.
 // All implementations must satisfy the write contracts documented on each method.
 type Writer interface {
-	// Upsert inserts or updates an item. ID is used as the unique key.
-	// Idempotent: calling twice with the same ID overwrites the previous value.
+	// Upsert inserts or updates an item. ExternalID is used as the unique key.
+	// Idempotent: calling twice with the same ExternalID overwrites the previous value.
 	Upsert(ctx context.Context, item *provider.Item) error
 	// UpsertBatch inserts or updates multiple items in a single transaction.
 	// Atomic: on error, no items are persisted. Empty/nil slice is a no-op.
 	UpsertBatch(ctx context.Context, items []*provider.Item) error
-	// Delete removes an item by its source ID.
+	// Delete removes an item by its external provider ID.
 	// It is idempotent: deleting a non-existent item returns nil.
-	Delete(ctx context.Context, id types.ItemID) error
+	DeleteByExternalID(ctx context.Context, externalID types.ExternalID) error
 	// DeleteAll removes all items.
 	DeleteAll(ctx context.Context) error
 }
@@ -82,13 +85,13 @@ type Writer interface {
 // All implementations must satisfy the compliance test suite in compliance_test.go.
 // Key behavioral contracts:
 //
-//   - Upsert is idempotent: inserting the same ID twice overwrites the previous value.
+//   - Upsert is idempotent: inserting the same ExternalID twice overwrites the previous value.
 //   - UpsertBatch is atomic: on error, no items from the batch are persisted.
 //   - UpsertBatch with an empty or nil slice returns nil (no-op).
-//   - Delete is idempotent: deleting a non-existent item returns nil.
-//   - GetByID returns (nil, ErrNotFound) for missing items.
+//   - DeleteByExternalID is idempotent: deleting a non-existent item returns nil.
+//   - GetByExternalID returns (nil, ErrNotFound) for missing items.
 //   - GetLatest returns (nil, ErrNotFound) when storage is empty.
-//   - BatchGetByIDs silently omits missing IDs (no error).
+//   - BatchGetByExternalIDs silently omits missing IDs (no error).
 //   - All pagination methods use limit/offset with items ordered by CreatedAt descending.
 //   - All implementations must be safe for concurrent use.
 type Storage interface {

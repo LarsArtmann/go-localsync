@@ -19,7 +19,8 @@ func testItem() *provider.Item {
 	now := time.Now()
 
 	return &provider.Item{
-		ID:         types.NewItemID("12345"),
+		ID:         types.NewItemID(),
+		ExternalID: types.NewExternalID("12345"),
 		Source:     types.NewProviderID("github"),
 		Type:       types.NewEventTypeID("PushEvent"),
 		ActorLogin: types.NewActorID("testuser"),
@@ -94,7 +95,7 @@ func TestSQLiteStorage_UpsertAndRead(t *testing.T) {
 
 	item, err := store.GetLatest(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, "12345", item.ID.Get())
+	assert.Equal(t, "12345", item.ExternalID.Get())
 
 	items, err := store.GetItems(ctx, 10, 0)
 	require.NoError(t, err)
@@ -141,15 +142,15 @@ func TestSQLiteStorage_CountByType(t *testing.T) {
 	assert.Equal(t, int64(1), count)
 }
 
-func TestSQLiteStorage_GetByID(t *testing.T) {
+func TestSQLiteStorage_GetByExternalID(t *testing.T) {
 	store, ctx := newTestSQLiteStore(t)
 	mustUpsert(t, store, ctx, testItem())
 
-	item, err := store.GetByID(ctx, types.NewItemID("12345"))
+	item, err := store.GetByExternalID(ctx, types.NewExternalID("12345"))
 	require.NoError(t, err)
-	assert.Equal(t, "12345", item.ID.Get())
+	assert.Equal(t, "12345", item.ExternalID.Get())
 
-	_, err = store.GetByID(ctx, types.NewItemID("nonexistent"))
+	_, err = store.GetByExternalID(ctx, types.NewExternalID("nonexistent"))
 	require.Error(t, err)
 	assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
 }
@@ -208,15 +209,15 @@ func TestSQLiteStorage_GetItemsSince(t *testing.T) {
 	assert.Len(t, items, 0)
 }
 
-func TestSQLiteStorage_Delete(t *testing.T) {
+func TestSQLiteStorage_DeleteByExternalID(t *testing.T) {
 	store, ctx := newTestSQLiteStore(t)
 	mustUpsert(t, store, ctx, testItem())
 
-	err := store.Delete(ctx, types.NewItemID("12345"))
+	err := store.DeleteByExternalID(ctx, types.NewExternalID("12345"))
 	require.NoError(t, err)
 	assertItemCount(t, store, ctx, 0)
 
-	_, err = store.GetByID(ctx, types.NewItemID("12345"))
+	_, err = store.GetByExternalID(ctx, types.NewExternalID("12345"))
 	require.Error(t, err)
 	assert.True(t, errors.Is(err, pkgerrors.ErrNotFound))
 }
@@ -237,14 +238,16 @@ func TestSQLiteStorage_UpsertBatch(t *testing.T) {
 
 	items := []*provider.Item{
 		{
-			ID: types.NewItemID("batch-1"), Source: types.NewProviderID("github"),
-			Type: types.NewEventTypeID("PushEvent"), ActorLogin: types.NewActorID("user1"),
+			ID: types.NewItemID(), ExternalID: types.NewExternalID("batch-1"),
+			Source: types.NewProviderID("github"),
+			Type:   types.NewEventTypeID("PushEvent"), ActorLogin: types.NewActorID("user1"),
 			RepoName: types.NewRepoID("repo1"), CreatedAt: now, UpdatedAt: now,
 			RawJSON: json.RawMessage(`{"id":"batch-1"}`),
 		},
 		{
-			ID: types.NewItemID("batch-2"), Source: types.NewProviderID("github"),
-			Type: types.NewEventTypeID("IssuesEvent"), ActorLogin: types.NewActorID("user2"),
+			ID: types.NewItemID(), ExternalID: types.NewExternalID("batch-2"),
+			Source: types.NewProviderID("github"),
+			Type:   types.NewEventTypeID("IssuesEvent"), ActorLogin: types.NewActorID("user2"),
 			RepoName: types.NewRepoID("repo2"), CreatedAt: now, UpdatedAt: now,
 			RawJSON: json.RawMessage(`{"id":"batch-2"}`),
 		},
@@ -254,9 +257,9 @@ func TestSQLiteStorage_UpsertBatch(t *testing.T) {
 	require.NoError(t, err)
 	assertItemCount(t, store, ctx, 2)
 
-	item, err := store.GetByID(ctx, types.NewItemID("batch-1"))
+	item, err := store.GetByExternalID(ctx, types.NewExternalID("batch-1"))
 	require.NoError(t, err)
-	assert.Equal(t, "batch-1", item.ID.Get())
+	assert.Equal(t, "batch-1", item.ExternalID.Get())
 
 	err = store.UpsertBatch(ctx, items)
 	require.NoError(t, err)
@@ -266,26 +269,29 @@ func TestSQLiteStorage_UpsertBatch(t *testing.T) {
 	require.NoError(t, err, "empty slice should be no-op")
 }
 
-func TestSQLiteStorage_BatchGetByIDs(t *testing.T) {
+func TestSQLiteStorage_BatchGetByExternalIDs(t *testing.T) {
 	store, ctx := newTestSQLiteStore(t)
 	now := time.Now()
 
 	items := []*provider.Item{
 		{
-			ID: types.NewItemID("batch-a"), Source: types.NewProviderID("github"),
-			Type: types.NewEventTypeID("PushEvent"), ActorLogin: types.NewActorID("user1"),
+			ID: types.NewItemID(), ExternalID: types.NewExternalID("batch-a"),
+			Source: types.NewProviderID("github"),
+			Type:   types.NewEventTypeID("PushEvent"), ActorLogin: types.NewActorID("user1"),
 			RepoName: types.NewRepoID("repo1"), CreatedAt: now, UpdatedAt: now,
 			RawJSON: json.RawMessage(`{"id":"batch-a"}`),
 		},
 		{
-			ID: types.NewItemID("batch-b"), Source: types.NewProviderID("github"),
-			Type: types.NewEventTypeID("IssuesEvent"), ActorLogin: types.NewActorID("user2"),
+			ID: types.NewItemID(), ExternalID: types.NewExternalID("batch-b"),
+			Source: types.NewProviderID("github"),
+			Type:   types.NewEventTypeID("IssuesEvent"), ActorLogin: types.NewActorID("user2"),
 			RepoName: types.NewRepoID("repo2"), CreatedAt: now, UpdatedAt: now,
 			RawJSON: json.RawMessage(`{"id":"batch-b"}`),
 		},
 		{
-			ID: types.NewItemID("batch-c"), Source: types.NewProviderID("github"),
-			Type: types.NewEventTypeID("WatchEvent"), ActorLogin: types.NewActorID("user3"),
+			ID: types.NewItemID(), ExternalID: types.NewExternalID("batch-c"),
+			Source: types.NewProviderID("github"),
+			Type:   types.NewEventTypeID("WatchEvent"), ActorLogin: types.NewActorID("user3"),
 			RepoName: types.NewRepoID("repo3"), CreatedAt: now, UpdatedAt: now,
 			RawJSON: json.RawMessage(`{"id":"batch-c"}`),
 		},
@@ -295,14 +301,14 @@ func TestSQLiteStorage_BatchGetByIDs(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("returns all existing items", func(t *testing.T) {
-		ids := []types.ItemID{types.NewItemID("batch-a"), types.NewItemID("batch-c")}
-		result, err := store.BatchGetByIDs(ctx, ids)
+		ids := []types.ExternalID{types.NewExternalID("batch-a"), types.NewExternalID("batch-c")}
+		result, err := store.BatchGetByExternalIDs(ctx, ids)
 		require.NoError(t, err)
 		require.Len(t, result, 2)
 
 		gotIDs := make(map[string]bool)
 		for _, item := range result {
-			gotIDs[item.ID.Get()] = true
+			gotIDs[item.ExternalID.Get()] = true
 		}
 
 		assert.True(t, gotIDs["batch-a"])
@@ -310,22 +316,25 @@ func TestSQLiteStorage_BatchGetByIDs(t *testing.T) {
 	})
 
 	t.Run("omits non-existent IDs", func(t *testing.T) {
-		ids := []types.ItemID{types.NewItemID("batch-a"), types.NewItemID("nonexistent")}
-		result, err := store.BatchGetByIDs(ctx, ids)
+		ids := []types.ExternalID{
+			types.NewExternalID("batch-a"),
+			types.NewExternalID("nonexistent"),
+		}
+		result, err := store.BatchGetByExternalIDs(ctx, ids)
 		require.NoError(t, err)
 		require.Len(t, result, 1)
-		assert.Equal(t, "batch-a", result[0].ID.Get())
+		assert.Equal(t, "batch-a", result[0].ExternalID.Get())
 	})
 
 	t.Run("returns empty for empty input", func(t *testing.T) {
-		result, err := store.BatchGetByIDs(ctx, nil)
+		result, err := store.BatchGetByExternalIDs(ctx, nil)
 		require.NoError(t, err)
 		assert.Empty(t, result)
 	})
 
 	t.Run("returns empty when no IDs match", func(t *testing.T) {
-		ids := []types.ItemID{types.NewItemID("nope1"), types.NewItemID("nope2")}
-		result, err := store.BatchGetByIDs(ctx, ids)
+		ids := []types.ExternalID{types.NewExternalID("nope1"), types.NewExternalID("nope2")}
+		result, err := store.BatchGetByExternalIDs(ctx, ids)
 		require.NoError(t, err)
 		assert.Empty(t, result)
 	})

@@ -13,8 +13,12 @@ import (
 
 // Item represents a single syncable item from any provider.
 type Item struct {
-	// ID is the unique identifier from the source system.
+	// ID is the internal ULID-based identifier for this item.
+	// Generated on first insert and stable thereafter.
 	ID types.ItemID `json:"id"`
+	// ExternalID is the original identifier from the source system (e.g., GitHub event "1234567890").
+	// Used for upsert conflict detection against the source.
+	ExternalID types.ExternalID `json:"externalId"`
 	// Source identifies which provider this item came from (e.g., "github", "gitlab").
 	Source types.ProviderID `json:"source"`
 	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
@@ -38,8 +42,8 @@ type Item struct {
 
 // Validate checks that the Item has all required fields set.
 func (item *Item) Validate() error {
-	if item.ID.IsZero() {
-		return errors.WithDetail(errors.ErrInvalidInput, "item.ID is required")
+	if item.ExternalID.IsZero() {
+		return errors.WithDetail(errors.ErrInvalidInput, "item.ExternalID is required")
 	}
 
 	if item.Source.IsZero() {

@@ -13,16 +13,16 @@ import (
 )
 
 type Events struct {
-	ID             types.EventID      `db:"id" json:"id"`
-	SourceID       types.SourceItemID `db:"source_id" json:"sourceId"`
-	Source         string             `db:"source" json:"source"`
-	Type           string             `db:"type" json:"type"`
-	ActorLogin     sql.NullString     `db:"actor_login" json:"actorLogin"`
-	ActorAvatarUrl sql.NullString     `db:"actor_avatar_url" json:"actorAvatarUrl"`
-	RepoName       sql.NullString     `db:"repo_name" json:"repoName"`
-	RepoUrl        sql.NullString     `db:"repo_url" json:"repoUrl"`
-	CreatedAt      time.Time          `db:"created_at" json:"createdAt"`
-	UpdatedAt      time.Time          `db:"updated_at" json:"updatedAt"`
-	RawJson        json.RawMessage    `db:"raw_json" json:"rawJson"`
-	SyncedAt       time.Time          `db:"synced_at" json:"syncedAt"`
+	ID             types.ItemID     `db:"id" json:"id"`
+	SourceID       types.ExternalID `db:"source_id" json:"sourceId"`
+	Source         string           `db:"source" json:"source"`
+	Type           string           `db:"type" json:"type"`
+	ActorLogin     sql.NullString   `db:"actor_login" json:"actorLogin"`
+	ActorAvatarUrl sql.NullString   `db:"actor_avatar_url" json:"actorAvatarUrl"`
+	RepoName       sql.NullString   `db:"repo_name" json:"repoName"`
+	RepoUrl        sql.NullString   `db:"repo_url" json:"repoUrl"`
+	CreatedAt      time.Time        `db:"created_at" json:"createdAt"`
+	UpdatedAt      time.Time        `db:"updated_at" json:"updatedAt"`
+	RawJson        json.RawMessage  `db:"raw_json" json:"rawJson"`
+	SyncedAt       time.Time        `db:"synced_at" json:"syncedAt"`
 }

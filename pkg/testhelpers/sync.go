@@ -14,7 +14,8 @@ import (
 // NewTestItem creates a test item with sensible defaults.
 func NewTestItem(id, eventType string, createdAt time.Time) *provider.Item {
 	return &provider.Item{
-		ID:         types.NewItemID(id),
+		ID:         types.NewItemID(),
+		ExternalID: types.NewExternalID(id),
 		Source:     types.NewProviderID("fake"),
 		Type:       types.NewEventTypeID(eventType),
 		ActorLogin: types.NewActorID("testuser"),
@@ -29,11 +30,12 @@ func NewTestItem(id, eventType string, createdAt time.Time) *provider.Item {
 // This is useful when the tests only care about ID, Type, and CreatedAt.
 func NewMinimalTestItem(id, eventType string, createdAt time.Time) *provider.Item {
 	return &provider.Item{
-		ID:        types.NewItemID(id),
-		Source:    types.NewProviderID("mock"),
-		Type:      types.NewEventTypeID(eventType),
-		CreatedAt: createdAt,
-		UpdatedAt: createdAt,
+		ID:         types.NewItemID(),
+		ExternalID: types.NewExternalID(id),
+		Source:     types.NewProviderID("mock"),
+		Type:       types.NewEventTypeID(eventType),
+		CreatedAt:  createdAt,
+		UpdatedAt:  createdAt,
 	}
 }
 
@@ -124,9 +126,12 @@ func (m *MockStorage) UpsertBatch(_ context.Context, items []*provider.Item) err
 	return nil
 }
 
-func (m *MockStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
+func (m *MockStorage) GetByExternalID(
+	ctx context.Context,
+	externalID types.ExternalID,
+) (*provider.Item, error) {
 	for _, item := range m.ItemsVal {
-		if item.ID.Get() == id.Get() {
+		if item.ExternalID.Get() == externalID.Get() {
 			return item, nil
 		}
 	}
@@ -200,15 +205,15 @@ func (m *MockStorage) GetItemsBySource(
 	return m.ItemsVal, nil
 }
 
-func (m *MockStorage) BatchGetByIDs(
-	ctx context.Context,
-	ids []types.ItemID,
+func (m *MockStorage) BatchGetByExternalIDs(
+	_ context.Context,
+	externalIDs []types.ExternalID,
 ) ([]*provider.Item, error) {
 	var result []*provider.Item
 
-	for _, id := range ids {
+	for _, id := range externalIDs {
 		for _, item := range m.ItemsVal {
-			if item.ID.Get() == id.Get() {
+			if item.ExternalID.Get() == id.Get() {
 				result = append(result, item)
 
 				break
@@ -219,7 +224,7 @@ func (m *MockStorage) BatchGetByIDs(
 	return result, nil
 }
 
-func (m *MockStorage) Delete(_ context.Context, _ types.ItemID) error {
+func (m *MockStorage) DeleteByExternalID(_ context.Context, _ types.ExternalID) error {
 	return nil
 }
 
@@ -246,7 +251,10 @@ func (f *FailingStorage) UpsertBatch(_ context.Context, _ []*provider.Item) erro
 	return errors.New("disk full")
 }
 
-func (f *FailingStorage) GetByID(ctx context.Context, id types.ItemID) (*provider.Item, error) {
+func (f *FailingStorage) GetByExternalID(
+	ctx context.Context,
+	externalID types.ExternalID,
+) (*provider.Item, error) {
 	return nil, pkgerrors.ErrNotFound
 }
 
@@ -315,14 +323,14 @@ func (f *FailingStorage) GetItemsBySource(
 	return nil, nil
 }
 
-func (f *FailingStorage) BatchGetByIDs(
+func (f *FailingStorage) BatchGetByExternalIDs(
 	_ context.Context,
-	_ []types.ItemID,
+	_ []types.ExternalID,
 ) ([]*provider.Item, error) {
 	return nil, errors.New("disk full")
 }
 
-func (f *FailingStorage) Delete(_ context.Context, _ types.ItemID) error {
+func (f *FailingStorage) DeleteByExternalID(_ context.Context, _ types.ExternalID) error {
 	return errors.New("disk full")
 }
 

@@ -44,12 +44,12 @@ sql:
             go_type:
               import: "github.com/larsartmann/go-localsync/pkg/types"
               package: "types"
-              type: "EventID"
+              type: "ItemID"
           - column: "events.source_id"
             go_type:
               import: "github.com/larsartmann/go-localsync/pkg/types"
               package: "types"
-              type: "SourceItemID"
+              type: "ExternalID"
         rename:
           id: "ID"
           source_id: "SourceID"

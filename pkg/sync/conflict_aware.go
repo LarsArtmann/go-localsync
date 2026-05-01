@@ -73,18 +73,18 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 
 	cr := newConflictResult(len(result.Items))
 
-	ids := make([]types.ItemID, len(result.Items))
+	externalIDs := make([]types.ExternalID, len(result.Items))
 	for i, item := range result.Items {
-		ids[i] = item.ID
+		externalIDs[i] = item.ExternalID
 	}
 
-	existing, err := s.batchFetchExisting(ctx, ids)
+	existing, err := s.batchFetchExisting(ctx, externalIDs)
 	if err != nil {
 		return nil, pkgerrors.Wrapf(err, "failed to fetch existing items for conflict detection")
 	}
 
 	for _, item := range result.Items {
-		s.processItem(ctx, item, existing[item.ID.Get()], cr)
+		s.processItem(ctx, item, existing[item.ExternalID.Get()], cr)
 	}
 
 	s.logger.Info("Conflict-aware sync completed",
@@ -189,24 +189,24 @@ func (s *ConflictAwareSyncer) resolveConflict(
 	s.logger.Debug("Resolved conflict", "id", remote.ID, "winner_source", resolved.Source)
 }
 
-// batchFetchExisting fetches all existing items for the given IDs in a single query.
-// Returns a map keyed by the string representation of each item's ID.
+// batchFetchExisting fetches all existing items for the given external IDs in a single query.
+// Returns a map keyed by the string representation of each item's ExternalID.
 func (s *ConflictAwareSyncer) batchFetchExisting(
 	ctx context.Context,
-	ids []types.ItemID,
+	externalIDs []types.ExternalID,
 ) (map[string]*provider.Item, error) {
-	if len(ids) == 0 {
+	if len(externalIDs) == 0 {
 		return map[string]*provider.Item{}, nil
 	}
 
-	items, err := s.storage.BatchGetByIDs(ctx, ids)
+	items, err := s.storage.BatchGetByExternalIDs(ctx, externalIDs)
 	if err != nil {
 		return nil, pkgerrors.Wrapf(err, "batch fetch existing items")
 	}
 
 	result := make(map[string]*provider.Item, len(items))
 	for _, item := range items {
-		result[item.ID.Get()] = item
+		result[item.ExternalID.Get()] = item
 	}
 
 	return result, nil
