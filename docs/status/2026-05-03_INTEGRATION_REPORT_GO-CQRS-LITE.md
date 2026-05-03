@@ -34,29 +34,24 @@ This is the most critical integration dimension. Here's the exact type compariso
 
 | Concept | go-localsync | go-cqrs-lite |
 |---|---|---|
-| **Core type** | `id.ID[B, V]` (go-branded-id directly) | `id.Of[T]` wraps `cbid.ID[T, ulid.ULID]` |
-| **ULID-backed ID** | `id.ID[ItemBrand, ulid.ULID]` | `id.Of[T]` → `cbid.ID[T, ulid.ULID]` |
+| **Core type** | `id.ID[B, V]` (go-branded-id directly) | `id.Of[T]` = `cbid.ID[T, ulid.ULID]` (type alias) |
+| **ULID-backed ID** | `id.ID[ItemBrand, ulid.ULID]` | `cbid.ID[T, ulid.ULID]` |
 | **String-backed ID** | `id.ID[ExternalBrand, string]` | Not supported (`Of[T]` is ULID-only) |
-| **Internal structure** | `struct{ value V }` | `struct{ wrapped cbid.ID[T, ulid.ULID] }` |
+| **Internal structure** | `struct{ value ulid.ULID }` | `struct{ value ulid.ULID }` (identical) |
 
-**Critical finding**: These are **NOT the same type**. go-localsync uses `go-branded-id` directly (`id.ID[B, V]`), while go-cqrs-lite wraps it in `id.Of[T]` which contains `cbid.ID[T, ulid.ULID]`. The memory layout differs:
+**Both are `cbid.ID[Brand, ulid.ULID]` with different phantom brands.** go-cqrs-lite's `id.Of[T]` is a type alias (`=`) to `cbid.ID[T, ulid.ULID]`, NOT a wrapper struct. This means the memory layout is identical — `struct{ value ulid.ULID }` everywhere.
 
-```
-localsync: id.ID[ItemBrand, ulid.ULID] = struct{ value ulid.ULID }
-cqrs-lite: id.Of[AggregateMarker]      = struct{ wrapped cbid.ID[AggregateMarker, ulid.ULID] }
-                                                = struct{ value ulid.ULID }
-```
-
-**Conversion is possible but not free**: Both ultimately hold a `ulid.ULID`. You can extract via `.Get()` on either side and reconstruct. But they are not interchangeable types — you cannot pass `types.ItemID` where `id.AggregateID` is expected. A bridge function is needed:
+**Conversion is trivial**: Extract the ULID via `.Get()`, re-wrap with the target brand:
 
 ```go
 // localsync ItemID → cqrs-lite AggregateID
-func itemToAggregateID(itemID types.ItemID) id.AggregateID {
-    return id.Of[aggregateMarker]{wrapped: cbid.NewID[aggregateMarker, ulid.ULID](itemID.Get())}
-}
+aggregateID := cbid.NewID[aggregateMarker](itemID.Get())
+
+// cqrs-lite AggregateID → localsync ItemID
+itemID := id.NewID[ItemBrand](aggregateID.Get())
 ```
 
-**go-localfirst has the same problem** — it defines its own `domain.TodoID` and converts at aggregate boundaries. This is by design (branded types prevent mixing), but it means every integration point needs explicit conversion.
+**This is not free at the type level** (phantom brands prevent accidental mixing — by design), but it is zero-cost at runtime (just copying a `ulid.ULID`). The pattern is identical to go-localfirst's `domain.TodoID` ↔ `id.AggregateID` conversion at aggregate boundaries.
 
 ---
 
@@ -125,7 +120,7 @@ Provider → SyncItemCommand → SyncItem Decider → event.Store (Pebble/Memory
 | # | Blocker | Severity | Resolution |
 |---|---|---|---|
 | 1 | **go-localsync does not import go-cqrs-lite** | Critical | Add dependency to `go.mod` |
-| 2 | **ID type mismatch** — `id.ID[B,V]` vs `id.Of[T]` | High | Bridge functions at boundaries (same pattern as go-localfirst) |
+| 2 | **ID brand conversion** — `ItemBrand` vs `AggregateMarker` phantom types | Low | Simple `cbid.NewID[Brand](id.Get())` at boundaries (identical to go-localfirst pattern) |
 | 3 | **go-cqrs-lite v0.1.1 is 257 commits behind HEAD** | High | Publish `v0.2.0` or use pseudo-version; local `go.work` handles dev |
 | 4 | **Pebble adapter in go-localfirst is in `pkg/` but not extracted** | Medium | Extract to shared package or copy into localsync |
 | 5 | **`oklog/ulid` version drift** (v2.1.0 vs v2.1.1) | Low | Align in go-cqrs-lite's `go.mod` |
@@ -139,7 +134,7 @@ Provider → SyncItemCommand → SyncItem Decider → event.Store (Pebble/Memory
 |---|---|---|---|
 | **P0** | Publish go-cqrs-lite `v0.2.0` (257 commits of improvements) | Unlocks all integration | 30min |
 | **P0** | Add `go-cqrs-lite/core` + `memory` to go-localsync `go.mod` | Foundation for everything | 5min |
-| **P1** | Build ID bridge: `types.ItemID` ↔ `id.AggregateID` conversion | Unlocks aggregate usage | 30min |
+| **P1** | Build ID bridge: `types.ItemID` ↔ `id.AggregateID` conversion | Unlocks aggregate usage | 15min |
 | **P1** | Copy Pebble `event.Store` adapter from go-localfirst | Unlocks non-memory storage | 1hr |
 | **P2** | Build `SyncItem` decider + event types | Core CQRS logic | 2hr |
 | **P2** | Build projection read model | Replaces 16-method Storage interface | 2hr |
