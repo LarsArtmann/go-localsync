@@ -18,7 +18,12 @@ type SyncItemState struct {
 }
 
 // InitialState is the zero state for a new SyncItem aggregate.
-var InitialState = SyncItemState{}
+//
+//nolint:gochecknoglobals
+var InitialState = SyncItemState{
+	Item:    nil,
+	Deleted: false,
+}
 
 // IsNew returns true if no events have been applied (Item is nil).
 func (s SyncItemState) IsNew() bool {
@@ -37,7 +42,11 @@ func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 
 		return state, nil
 	default:
-		return state, fmt.Errorf("unknown event type: %s", evt.Type()) //nolint:err113 // dynamic for unknown type
+		//nolint:err113 // dynamic error for unknown event type
+		return state, fmt.Errorf(
+			"unknown event type: %s",
+			evt.Type(),
+		)
 	}
 }
 
@@ -68,7 +77,9 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 }
 
 // DecideSync returns a DecideFunc that syncs an incoming provider.Item.
-func DecideSync(item *provider.Item) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
+func DecideSync(
+	item *provider.Item,
+) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
@@ -85,7 +96,9 @@ func DecideSync(item *provider.Item) func(state SyncItemState, currentVersion ev
 }
 
 // DecideDelete returns a DecideFunc that marks an item as deleted.
-func DecideDelete(source, sourceID string) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
+func DecideDelete(
+	source, sourceID string,
+) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		if state.Deleted || state.IsNew() {
 			return nil, nil
@@ -105,36 +118,60 @@ func DecideDelete(source, sourceID string) func(state SyncItemState, currentVers
 	}
 }
 
-func syncEvents(item *provider.Item, aggID id.AggregateID, version event.Version, isConflict bool) []event.Event {
-	events := make([]event.Event, 0, 2)
+const syncEventsInitialCap = 2
+
+func syncEvents(
+	item *provider.Item,
+	aggID id.AggregateID,
+	version event.Version,
+	isConflict bool,
+) []event.Event {
+	events := make([]event.Event, 0, syncEventsInitialCap)
 	ver := int(version)
 
 	if isConflict {
-		if evt, err := newEvent(EventItemConflictFound, aggID, ver+1, ItemConflictFoundPayload{
+		evt, err := newEvent(EventItemConflictFound, aggID, ver+1, ItemConflictFoundPayload{
 			Source:          item.Source.Get(),
 			SourceID:        item.ExternalID.Get(),
 			LocalUpdatedAt:  unixNano(item.UpdatedAt),
 			RemoteUpdatedAt: unixNano(item.UpdatedAt),
 			Winner:          "remote",
-		}); err == nil {
+		})
+		if err == nil {
 			events = append(events, evt)
 		}
 	}
 
-	if evt, err := newEvent(EventItemSynced, aggID, ver+len(events)+1, itemToPayload(item)); err == nil {
+	evt, err := newEvent(
+		EventItemSynced,
+		aggID,
+		ver+len(events)+1,
+		itemToPayload(item),
+	)
+	if err == nil {
 		events = append(events, evt)
 	}
 
 	return events
 }
 
-func newEvent(eventType event.Type, aggID id.AggregateID, version int, payload any) (*event.Core, error) {
+func newEvent(
+	eventType event.Type,
+	aggID id.AggregateID,
+	version int,
+	payload any,
+) (*event.Core, error) {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("marshal payload for %s: %w", eventType, err)
 	}
 
-	return event.NewEvent(eventType, aggID, aggregateType, version, data)
+	core, err := event.NewEvent(eventType, aggID, aggregateType, version, data)
+	if err != nil {
+		return nil, fmt.Errorf("create event %s: %w", eventType, err)
+	}
+
+	return core, nil
 }
 
 func itemToPayload(item *provider.Item) ItemSyncedPayload {

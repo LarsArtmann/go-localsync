@@ -15,7 +15,7 @@ func TestCQRSStack_SyncNewItem(t *testing.T) {
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
-	defer stack.Close()
+	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
@@ -37,7 +37,7 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
-	defer stack.Close()
+	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	items := []*provider.Item{
@@ -65,7 +65,7 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
-	defer stack.Close()
+	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
@@ -78,7 +78,12 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 
 	count, err := stack.Count(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, int64(1), count, "same item synced twice should still have count 1 — idempotent")
+	assert.Equal(
+		t,
+		int64(1),
+		count,
+		"same item synced twice should still have count 1 — idempotent",
+	)
 }
 
 func TestCQRSStack_DeleteItem(t *testing.T) {
@@ -86,7 +91,7 @@ func TestCQRSStack_DeleteItem(t *testing.T) {
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
-	defer stack.Close()
+	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
@@ -108,7 +113,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
-	defer stack.Close()
+	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
@@ -133,7 +138,7 @@ func TestCQRSStack_ConflictDetection(t *testing.T) {
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
-	defer stack.Close()
+	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
@@ -158,7 +163,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
-	defer stack.Close()
+	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	items := []*provider.Item{

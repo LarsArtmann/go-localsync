@@ -15,6 +15,7 @@ type MemoryReadModel struct {
 
 func NewMemoryReadModel() *MemoryReadModel {
 	return &MemoryReadModel{
+		mu:    sync.RWMutex{},
 		items: make(map[string]*provider.Item),
 	}
 }
@@ -108,24 +109,24 @@ func (m *MemoryReadModel) Len() int {
 	return len(m.items)
 }
 
-func matchesFilter(item *provider.Item, f ItemFilter) bool {
-	if f.Type != nil && item.Type.Get() != *f.Type {
+func matchesFilter(item *provider.Item, filter ItemFilter) bool {
+	if filter.Type != nil && item.Type.Get() != *filter.Type {
 		return false
 	}
 
-	if f.ActorLogin != nil && item.ActorLogin.Get() != *f.ActorLogin {
+	if filter.ActorLogin != nil && item.ActorLogin.Get() != *filter.ActorLogin {
 		return false
 	}
 
-	if f.RepoName != nil && item.RepoName.Get() != *f.RepoName {
+	if filter.RepoName != nil && item.RepoName.Get() != *filter.RepoName {
 		return false
 	}
 
-	if f.Source != nil && item.Source.Get() != *f.Source {
+	if filter.Source != nil && item.Source.Get() != *filter.Source {
 		return false
 	}
 
-	if f.Since != nil && item.CreatedAt.Before(*f.Since) {
+	if filter.Since != nil && item.CreatedAt.Before(*filter.Since) {
 		return false
 	}
 

@@ -10,9 +10,9 @@ import (
 const aggregateType event.AggregateType = "sync_item"
 
 const (
-	EventItemSynced         event.Type = "sync_item.synced"
-	EventItemConflictFound  event.Type = "sync_item.conflict_found"
-	EventItemDeleted        event.Type = "sync_item.deleted"
+	EventItemSynced        event.Type = "sync_item.synced"
+	EventItemConflictFound event.Type = "sync_item.conflict_found"
+	EventItemDeleted       event.Type = "sync_item.deleted"
 )
 
 type ItemSyncedPayload struct {

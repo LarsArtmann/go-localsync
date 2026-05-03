@@ -8,6 +8,10 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
+// aggIDCache stores computed AggregateIDs to avoid repeated SHA256 hashing.
+// Thread-safe via sync.Map. Intentionally global — cache persists across all CQRSStack instances.
+//
+//nolint:gochecknoglobals
 var aggIDCache sync.Map
 
 // AggregateID returns a deterministic AggregateID derived from (source, sourceID).
@@ -20,10 +24,11 @@ func AggregateID(source, sourceID string) id.AggregateID {
 	}
 
 	h := sha256.Sum256([]byte(key))
+
 	var entropy [10]byte
 	copy(entropy[:], h[:10])
 
-	u := ulid.MustNew(1, &deterministicReader{data: entropy[:]})
+	u := ulid.MustNew(1, &deterministicReader{data: entropy[:], pos: 0})
 
 	aggID := id.MustParseAggregateID(u.String())
 	aggIDCache.Store(key, aggID)

@@ -65,7 +65,11 @@ func (s *CQRSStack) DeleteItem(ctx context.Context, source, sourceID string) err
 	return s.Repo.Execute(ctx, aggID, aggregateType, DecideDelete(source, sourceID))
 }
 
-func (s *CQRSStack) SyncItems(ctx context.Context, items []*provider.Item) (synced, conflicts, errs int) {
+//nolint:nonamedreturns
+func (s *CQRSStack) SyncItems(
+	ctx context.Context,
+	items []*provider.Item,
+) (synced, conflicts, errs int) {
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
@@ -94,7 +98,15 @@ func (s *CQRSStack) SyncItems(ctx context.Context, items []*provider.Item) (sync
 }
 
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
-	return s.ReadModel.Count(ctx, ItemFilter{})
+	return s.ReadModel.Count(ctx, ItemFilter{
+		Type:       nil,
+		ActorLogin: nil,
+		RepoName:   nil,
+		Source:     nil,
+		Since:      nil,
+		Limit:      0,
+		Offset:     0,
+	})
 }
 
 func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
@@ -102,18 +114,24 @@ func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 }
 
 func (s *CQRSStack) Close() error {
-	if err := s.ReadModel.Close(); err != nil {
+	err := s.ReadModel.Close()
+	if err != nil {
 		return err
 	}
 
 	return s.Store.Close()
 }
 
+//nolint:ireturn
 func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, error) {
 	switch cfg.Backend {
 	case "memory", "":
 		return cqrsmemory.NewMemoryStore(), cqrsmemory.NewMemoryBus(), nil
 	default:
-		return nil, nil, fmt.Errorf("unknown backend: %s", cfg.Backend) //nolint:err113 // specific to input
+		//nolint:err113 // error is specific to input, not a generic failure
+		return nil, nil, fmt.Errorf(
+			"unknown backend: %s",
+			cfg.Backend,
+		)
 	}
 }
