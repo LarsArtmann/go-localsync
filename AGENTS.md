@@ -8,18 +8,42 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 | Package                     | Purpose                                                                                                |
 | --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack)                   |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                  |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
-| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory)                                              |
+| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory) — legacy, to be replaced by CQRS            |
 | `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`) |
 | `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
 | `pkg/testhelpers/`          | Shared test mocks and factories                                                                        |
-| `internal/database/`        | Connection management (`Open()`) + migration system (`RunMigrations()`)                                |
-| `internal/db/`              | sqlc-generated query code from `sql/queries/events.sql`                                                |
-| `sql/queries/`              | SQL query definitions for sqlc                                                                         |
-| `sql/migrations/`           | Reference copies of migration SQL (embedded as Go constants)                                           |
+| `internal/database/`        | Connection management (`Open()`) + migration system (`RunMigrations()`) — legacy                       |
+| `internal/db/`              | sqlc-generated query code from `sql/queries/events.sql` — legacy                                       |
+| `sql/queries/`              | SQL query definitions for sqlc — legacy                                                                |
+| `sql/migrations/`           | Reference copies of migration SQL (embedded as Go constants) — legacy                                  |
 | `cmd/examples/github-sync/` | Example CLI entry point                                                                                |
+
+## CQRS Integration Status (2026-05-03)
+
+go-localsync now has a parallel CQRS path alongside the legacy CRUD storage layer.
+
+### What works:
+- `pkg/cqrs/` — full Decider[SyncItemState] with fold + decide functions
+- `CQRSStack` — wired Store + Bus + Decider + ReadModel + Projector
+- `MemoryReadModel` — concurrent-safe in-memory read model with filter/pagination
+- `Projector` — subscribes to events, updates read model
+- 31 tests passing (12 decider, 11 read model, 8 stack integration)
+- All existing tests pass with zero regressions
+
+### Known limitation:
+- `aggregateID()` generates a new random ULID per call. For true idempotency
+  (same external item → same aggregate), this must be deterministic from (source, sourceID).
+  Without this, re-syncing the same item creates a new aggregate instead of updating.
+
+### What's left before Phase 4 (deletion):
+1. Deterministic aggregate IDs from (source, sourceID)
+2. CLI update to use CQRSStack
+3. Existing sync tests passing through CQRS path
+4. Only then: delete internal/database/, internal/db/, sql/, pkg/storage/
 
 ## Development Workflow
 
@@ -147,20 +171,22 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 
 ## go-cqrs-lite Integration Status
 
-go-localsync **does not import** go-cqrs-lite despite sharing go-branded-id and having a detailed CQRS migration plan (`CQRS_MIGRATION_PLAN.md`).
+go-localsync now **imports** go-cqrs-lite via `go.work` (core + memory modules).
 
-| Area | go-localsync (current) | go-cqrs-lite (available) |
+| Area | go-localsync (current) | go-cqrs-lite (integrated) |
 |------|------------------------|-------------------------|
-| IDs | `id.ID[T, ULID]` (ItemID) + `id.ID[T, string]` (ExternalID) via go-branded-id | `id.Of[T]` (ULID-only) via go-branded-id |
-| Storage | 16-method `Storage` interface, 3 SQL backends | `event.Store` (4 methods) + projections |
-| Conflict | Inline LWW in `ConflictAwareSyncer` | `LWWResolver[T]` in go-localfirst |
-| Retry | Hand-rolled in `github/client.go` | `middleware.CommandRetry` with jitter |
+| IDs | `id.ID[B, V]` via go-branded-id directly | `id.Of[T]` = `cbid.ID[T, ulid.ULID]` (type alias) — same memory layout |
+| Storage (legacy) | 16-method `Storage` interface, 3 SQL backends | — |
+| Storage (CQRS) | `pkg/cqrs/CQRSStack` → `decider.Repository[SyncItemState]` | `event.Store` + `event.Bus` via memory module |
+| Conflict (legacy) | Inline LWW in `ConflictAwareSyncer` | `DecideSync` produces ItemConflictFound events |
+| Retry | Hand-rolled in `github/client.go` | `middleware.CommandRetry` available but not yet wired |
+| Read Model | SQL queries against events table | `MemoryReadModel` with filter/pagination, projected from events |
 
-**Option A completed (2026-05-01)**: `ItemID` migrated from `id.ID[ItemBrand, string]` to `id.ID[ItemBrand, ulid.ULID]`. External provider IDs now stored as `ExternalID` (string-backed `id.ID[ExternalBrand, string]`). This aligns with go-cqrs-lite's `id.Of[T]` which uses ULID-only. Both systems share the same value type (ULID) — conversion is trivial (`.Get()` the ULID, wrap in the other brand). The ID type incompatibility blocker is **resolved**.
+**Integration path**: `pkg/cqrs/` is a parallel path. Legacy `pkg/storage/` is untouched and fully functional.
+Phase 4 (deletion of legacy code) is blocked on deterministic aggregate IDs.
 
-**Deduplication done**: `sqlite.go` (27 lines) and `turso.go` (77 lines) now embed shared `sqlStorage` (356 lines). ~247 lines of duplication eliminated.
-
-See `docs/planning/2026-04-30_23-08-CQRS_LITE_INTEGRATION.md` for full audit and execution plan.
+**Known limitation**: `aggregateID()` in `pkg/cqrs/decide.go` generates a new ULID per call.
+For idempotency, same (source, sourceID) must produce the same AggregateID.
 
 ## Lint Status
 
