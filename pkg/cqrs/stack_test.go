@@ -3,9 +3,9 @@ package cqrs
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -13,7 +13,7 @@ import (
 func TestCQRSStack_SyncNewItem(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
 	defer stack.Close()
 
@@ -27,15 +27,15 @@ func TestCQRSStack_SyncNewItem(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), count)
 
-	types, err := stack.GetTypes(ctx)
+	resultTypes, err := stack.GetTypes(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, []string{"PushEvent"}, types)
+	assert.Equal(t, []string{"PushEvent"}, resultTypes)
 }
 
 func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
 	defer stack.Close()
 
@@ -55,78 +55,108 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int64(3), count)
 
-	types, err := stack.GetTypes(ctx)
+	resultTypes, err := stack.GetTypes(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, []string{"IssueEvent", "PushEvent"}, types)
+	assert.Equal(t, []string{"IssueEvent", "PushEvent"}, resultTypes)
 }
 
-func TestCQRSStack_SyncUnchangedItem(t *testing.T) {
+func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
 	defer stack.Close()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	// First sync
 	err = stack.SyncItem(ctx, item)
 	require.NoError(t, err)
 
-	// Re-sync same item (should be no-op at decider level, but aggregate ID changes)
-	// Note: aggregateID generates new ULID each call, so this creates a new aggregate.
-	// This is a known limitation — deterministic aggregate IDs are needed for true idempotency.
+	err = stack.SyncItem(ctx, item)
+	require.NoError(t, err)
+
 	count, err := stack.Count(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, int64(1), count)
+	assert.Equal(t, int64(1), count, "same item synced twice should still have count 1 — idempotent")
 }
 
 func TestCQRSStack_DeleteItem(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
 	defer stack.Close()
 
 	ctx := context.Background()
-	item := testItem("123", "PushEvent")
 
-	err = stack.SyncItem(ctx, item)
-	require.NoError(t, err)
+	require.NoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
 
-	// Delete through the same aggregate — but aggregateID is non-deterministic
-	// So we need to test the stack-level DeleteItem
-	// For now, test that it doesn't error
 	count, err := stack.Count(ctx)
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), count)
+
+	require.NoError(t, stack.DeleteItem(ctx, "github", "123"))
+
+	count, err = stack.Count(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, int64(0), count, "item should be deleted from read model")
+}
+
+func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
+	t.Parallel()
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
+	require.NoError(t, err)
+	defer stack.Close()
+
+	ctx := context.Background()
+
+	require.NoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
+	require.NoError(t, stack.DeleteItem(ctx, "github", "123"))
+
+	count, _ := stack.Count(ctx)
+	assert.Equal(t, int64(0), count)
+
+	require.NoError(t, stack.SyncItem(ctx, testItem("123", "IssueEvent")))
+
+	count, _ = stack.Count(ctx)
+	assert.Equal(t, int64(1), count, "resurrected item should reappear in read model")
+
+	got, err := stack.ReadModel.Get(ctx, "github", "123")
+	require.NoError(t, err)
+	assert.Equal(t, "IssueEvent", got.Type.Get(), "resurrected item should have updated type")
 }
 
 func TestCQRSStack_ConflictDetection(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
 	defer stack.Close()
 
 	ctx := context.Background()
 
-	// Sync items, then sync again with different timestamps to trigger conflicts
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-	}
+	items := []*provider.Item{testItem("1", "PushEvent")}
 
 	synced, conflicts, errors := stack.SyncItems(ctx, items)
 	assert.Equal(t, 1, synced)
 	assert.Equal(t, 0, conflicts)
+	assert.Equal(t, 0, errors)
+
+	updatedItem := testItem("1", "PushEvent")
+	updatedItem.UpdatedAt = time.Now().Add(time.Hour)
+
+	synced, conflicts, errors = stack.SyncItems(ctx, []*provider.Item{updatedItem})
+	assert.Equal(t, 1, synced)
+	assert.Equal(t, 1, conflicts, "updated item with newer timestamp should trigger conflict")
 	assert.Equal(t, 0, errors)
 }
 
 func TestCQRSStack_FilterByType(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
 	defer stack.Close()
 
@@ -149,47 +179,24 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 func TestCQRSStack_Close(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
 	require.NoError(t, err)
 
-	err = stack.Close()
-	require.NoError(t, err)
+	require.NoError(t, stack.Close())
 }
 
 func TestCQRSStack_InvalidBackend(t *testing.T) {
 	t.Parallel()
 
-	_, err := NewCQRSStack(CQRSConfig{Backend: "postgres"}, nil)
+	_, err := NewCQRSStack(CQRSConfig{Backend: "postgres"})
 	assert.Error(t, err)
 }
 
-func TestCQRSStack_ItemValidation(t *testing.T) {
+func TestCQRSStack_DeterministicAggregateID_Matches(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"}, nil)
-	require.NoError(t, err)
-	defer stack.Close()
+	id1 := AggregateID("github", "123")
+	id2 := AggregateID("github", "123")
 
-	ctx := context.Background()
-
-	// An empty item still gets synced at the CQRS level (decider doesn't validate provider semantics).
-	// Validation is the provider's responsibility before calling SyncItem.
-	emptyItem := &provider.Item{}
-	items := []*provider.Item{emptyItem}
-
-	synced, _, errors := stack.SyncItems(ctx, items)
-	// The decider creates an event (state is new), but the payload will have empty fields.
-	assert.Equal(t, 1, synced)
-	assert.Equal(t, 0, errors)
-}
-
-// testItem creates a test provider.Item with the given source ID and type.
-func testStackItem(sourceID, eventType string) *provider.Item {
-	return &provider.Item{
-		ExternalID: types.NewExternalID(sourceID),
-		Source:     types.NewProviderID("github"),
-		Type:       types.NewEventTypeID(eventType),
-		ActorLogin: types.NewActorID("testuser"),
-		RepoName:   types.NewRepoID("owner/repo"),
-	}
+	assert.Equal(t, id1, id2, "deterministic IDs must be equal for same inputs")
 }

@@ -7,17 +7,14 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/event"
 )
 
-// Event type constants for the SyncItem aggregate.
+const aggregateType event.AggregateType = "sync_item"
+
 const (
-	// EventItemSynced is emitted when a new item is synced or an existing item is updated.
-	EventItemSynced event.Type = "sync_item.synced"
-	// EventItemConflictFound is emitted when a conflict is detected between local and remote items.
-	EventItemConflictFound event.Type = "sync_item.conflict_found"
-	// EventItemDeleted is emitted when an item is deleted.
-	EventItemDeleted event.Type = "sync_item.deleted"
+	EventItemSynced         event.Type = "sync_item.synced"
+	EventItemConflictFound  event.Type = "sync_item.conflict_found"
+	EventItemDeleted        event.Type = "sync_item.deleted"
 )
 
-// ItemSyncedPayload is the payload for EventItemSynced events.
 type ItemSyncedPayload struct {
 	Source         string          `json:"source"`
 	SourceID       string          `json:"sourceId"`
@@ -31,7 +28,6 @@ type ItemSyncedPayload struct {
 	RawJSON        json.RawMessage `json:"rawJson,omitempty"`
 }
 
-// ItemConflictFoundPayload is the payload for EventItemConflictFound events.
 type ItemConflictFoundPayload struct {
 	Source          string `json:"source"`
 	SourceID        string `json:"sourceId"`
@@ -40,13 +36,11 @@ type ItemConflictFoundPayload struct {
 	Winner          string `json:"winner"`
 }
 
-// ItemDeletedPayload is the payload for EventItemDeleted events.
 type ItemDeletedPayload struct {
 	Source   string `json:"source"`
 	SourceID string `json:"sourceId"`
 }
 
-// unixNano returns the Unix nano timestamp for the given time, or 0 if zero.
 func unixNano(t time.Time) int64 {
 	if t.IsZero() {
 		return 0
@@ -55,7 +49,6 @@ func unixNano(t time.Time) int64 {
 	return t.UnixNano()
 }
 
-// fromUnixNano converts a Unix nano timestamp back to time.Time.
 func fromUnixNano(n int64) time.Time {
 	if n == 0 {
 		return time.Time{}

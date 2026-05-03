@@ -24,25 +24,33 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## CQRS Integration Status (2026-05-03)
 
-go-localsync now has a parallel CQRS path alongside the legacy CRUD storage layer.
+go-localsync has a parallel CQRS path alongside the legacy CRUD storage layer.
 
-### What works:
-- `pkg/cqrs/` — full Decider[SyncItemState] with fold + decide functions
-- `CQRSStack` — wired Store + Bus + Decider + ReadModel + Projector
-- `MemoryReadModel` — concurrent-safe in-memory read model with filter/pagination
-- `Projector` — subscribes to events, updates read model
-- 31 tests passing (12 decider, 11 read model, 8 stack integration)
+### What works (rewritten 2026-05-03):
+- `pkg/cqrs/` — 7 source files, clean architecture
+- `aggregate_id.go` — deterministic SHA256→ULID from (source, sourceID) with sync.Map cache
+- `decider.go` — `SyncItemState{Item *provider.Item, Deleted bool}`, Fold + DecideSync/DecideDelete
+- `readmodel.go` — `ReadModel` interface + `ItemFilter`, stores `*provider.Item` directly (no duplicate structs)
+- `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
+- `projection.go` — `Projector` implements `event.Handler`, wired to bus via `SubscribeAll`
+- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel, automatic projection via bus subscription
+- 34 tests passing (15 decider, 12 read model, 9 stack integration)
+- Full idempotency: same item synced twice → 1 aggregate, 1 read model entry
+- Delete + resurrect works: deleted items reappear with updated state
+- Conflict detection: version delta tracking counts conflicts correctly
 - All existing tests pass with zero regressions
 
-### Known limitation:
-- `aggregateID()` generates a new random ULID per call. For true idempotency
-  (same external item → same aggregate), this must be deterministic from (source, sourceID).
-  Without this, re-syncing the same item creates a new aggregate instead of updating.
+### Architecture decisions:
+- `SyncItemState` wraps `*provider.Item` + `Deleted bool` — eliminates 3 duplicate structs from original
+- Deterministic aggregate IDs via SHA256→ULID — same (source, sourceID) always → same AggregateID
+- Bus subscription wires projection automatically — no manual HandleEvent calls in SyncItems
+- No double-decide: `SyncItems` uses `Repository.Execute` once per item, counts conflicts via version delta
+- `Decider[State]` pattern from go-cqrs-lite — pure Fold + Decide functions, no aggregate root interface
 
 ### What's left before Phase 4 (deletion):
-1. Deterministic aggregate IDs from (source, sourceID)
-2. CLI update to use CQRSStack
-3. Existing sync tests passing through CQRS path
+1. CLI update to use CQRSStack (`--backend cqrs`)
+2. Existing sync tests passing through CQRS path
+3. Adopt go-cqrs-lite features: `projection.Runner`, `command.Dispatcher`, error taxonomy
 4. Only then: delete internal/database/, internal/db/, sql/, pkg/storage/
 
 ## Development Workflow

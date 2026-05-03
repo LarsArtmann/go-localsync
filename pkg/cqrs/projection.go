@@ -3,71 +3,66 @@ package cqrs
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
+	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
-// Projector subscribes to events and updates the read model.
 type Projector struct {
 	readModel ReadModel
 }
 
-// NewProjector creates a new Projector that updates the given ReadModel.
 func NewProjector(rm ReadModel) *Projector {
 	return &Projector{readModel: rm}
 }
 
-// HandleEvent processes a single event and updates the read model.
-func (p *Projector) HandleEvent(_ context.Context, evt event.Event) error {
+func (p *Projector) HandleEvent(ctx context.Context, evt event.Event) error {
 	switch evt.Type() {
 	case EventItemSynced:
-		return p.handleItemSynced(evt)
-
+		return p.handleItemSynced(ctx, evt)
 	case EventItemDeleted:
-		return p.handleItemDeleted(evt)
-
+		return p.handleItemDeleted(ctx, evt)
 	case EventItemConflictFound:
-		return p.handleItemConflictFound(evt)
+		return nil
 	}
 
 	return nil
 }
 
-func (p *Projector) handleItemSynced(evt event.Event) error {
+func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error {
 	var payload ItemSyncedPayload
 
 	err := json.Unmarshal(evt.Payload(), &payload)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal ItemSyncedPayload: %w", err)
 	}
 
-	state := &itemState{
-		Source:         payload.Source,
-		SourceID:       payload.SourceID,
-		Type:           payload.Type,
-		ActorLogin:     payload.ActorLogin,
+	item := &provider.Item{
+		ID:             types.NewItemID(),
+		ExternalID:     types.NewExternalID(payload.SourceID),
+		Source:         types.NewProviderID(payload.Source),
+		Type:           types.NewEventTypeID(payload.Type),
+		ActorLogin:     types.NewActorID(payload.ActorLogin),
 		ActorAvatarURL: payload.ActorAvatarURL,
-		RepoName:       payload.RepoName,
+		RepoName:       types.NewRepoID(payload.RepoName),
 		RepoURL:        payload.RepoURL,
 		CreatedAt:      fromUnixNano(payload.CreatedAt),
 		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
 		RawJSON:        payload.RawJSON,
 	}
 
-	return p.readModel.Upsert(context.Background(), state)
+	return p.readModel.Upsert(ctx, item)
 }
 
-func (p *Projector) handleItemDeleted(evt event.Event) error {
+func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) error {
 	var payload ItemDeletedPayload
 
 	err := json.Unmarshal(evt.Payload(), &payload)
 	if err != nil {
-		return err
+		return fmt.Errorf("unmarshal ItemDeletedPayload: %w", err)
 	}
 
-	return p.readModel.Delete(context.Background(), payload.Source, payload.SourceID)
-}
-
-func (p *Projector) handleItemConflictFound(_ event.Event) error {
-	return nil
+	return p.readModel.Delete(ctx, payload.Source, payload.SourceID)
 }

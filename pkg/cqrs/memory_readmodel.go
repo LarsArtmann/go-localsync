@@ -4,37 +4,36 @@ import (
 	"context"
 	"sort"
 	"sync"
+
+	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-// MemoryReadModel is an in-memory implementation of ReadModel for testing.
 type MemoryReadModel struct {
 	mu    sync.RWMutex
-	items map[string]*itemState // key: "source:sourceID"
+	items map[string]*provider.Item
 }
 
-// NewMemoryReadModel creates a new empty MemoryReadModel.
 func NewMemoryReadModel() *MemoryReadModel {
 	return &MemoryReadModel{
-		items: make(map[string]*itemState),
+		items: make(map[string]*provider.Item),
 	}
 }
 
-// Get retrieves a single item by source and sourceID.
-func (m *MemoryReadModel) Get(_ context.Context, source, sourceID string) (*itemState, error) {
+func (m *MemoryReadModel) Get(_ context.Context, source, sourceID string) (*provider.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
 	return m.items[source+":"+sourceID], nil
 }
 
-// List retrieves items matching the filter with pagination.
-func (m *MemoryReadModel) List(_ context.Context, filter ItemFilter) ([]*itemState, error) {
+func (m *MemoryReadModel) List(_ context.Context, filter ItemFilter) ([]*provider.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	all := make([]*itemState, 0, len(m.items))
+	all := make([]*provider.Item, 0, len(m.items))
+
 	for _, item := range m.items {
-		if item.matchesFilter(filter) {
+		if matchesFilter(item, filter) {
 			all = append(all, item)
 		}
 	}
@@ -46,15 +45,14 @@ func (m *MemoryReadModel) List(_ context.Context, filter ItemFilter) ([]*itemSta
 	return paginate(all, filter.Limit, filter.Offset), nil
 }
 
-// Count returns the number of items matching the filter.
 func (m *MemoryReadModel) Count(_ context.Context, filter ItemFilter) (int64, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	count := int64(0)
+	var count int64
 
 	for _, item := range m.items {
-		if item.matchesFilter(filter) {
+		if matchesFilter(item, filter) {
 			count++
 		}
 	}
@@ -62,7 +60,6 @@ func (m *MemoryReadModel) Count(_ context.Context, filter ItemFilter) (int64, er
 	return count, nil
 }
 
-// GetTypes returns all unique item types.
 func (m *MemoryReadModel) GetTypes(_ context.Context) ([]string, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -70,10 +67,11 @@ func (m *MemoryReadModel) GetTypes(_ context.Context) ([]string, error) {
 	seen := make(map[string]struct{})
 
 	for _, item := range m.items {
-		seen[item.Type] = struct{}{}
+		seen[item.Type.Get()] = struct{}{}
 	}
 
 	types := make([]string, 0, len(seen))
+
 	for t := range seen {
 		types = append(types, t)
 	}
@@ -83,17 +81,15 @@ func (m *MemoryReadModel) GetTypes(_ context.Context) ([]string, error) {
 	return types, nil
 }
 
-// Upsert inserts or updates an item in the read model.
-func (m *MemoryReadModel) Upsert(_ context.Context, state *itemState) error {
+func (m *MemoryReadModel) Upsert(_ context.Context, item *provider.Item) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.items[state.key()] = state
+	m.items[item.Source.Get()+":"+item.ExternalID.Get()] = item
 
 	return nil
 }
 
-// Delete removes an item from the read model.
 func (m *MemoryReadModel) Delete(_ context.Context, source, sourceID string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -103,10 +99,8 @@ func (m *MemoryReadModel) Delete(_ context.Context, source, sourceID string) err
 	return nil
 }
 
-// Close is a no-op for the in-memory implementation.
 func (m *MemoryReadModel) Close() error { return nil }
 
-// Len returns the number of items (for testing).
 func (m *MemoryReadModel) Len() int {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -114,7 +108,31 @@ func (m *MemoryReadModel) Len() int {
 	return len(m.items)
 }
 
-func paginate(items []*itemState, limit, offset int) []*itemState {
+func matchesFilter(item *provider.Item, f ItemFilter) bool {
+	if f.Type != nil && item.Type.Get() != *f.Type {
+		return false
+	}
+
+	if f.ActorLogin != nil && item.ActorLogin.Get() != *f.ActorLogin {
+		return false
+	}
+
+	if f.RepoName != nil && item.RepoName.Get() != *f.RepoName {
+		return false
+	}
+
+	if f.Source != nil && item.Source.Get() != *f.Source {
+		return false
+	}
+
+	if f.Since != nil && item.CreatedAt.Before(*f.Since) {
+		return false
+	}
+
+	return true
+}
+
+func paginate(items []*provider.Item, limit, offset int) []*provider.Item {
 	if offset >= len(items) {
 		return nil
 	}

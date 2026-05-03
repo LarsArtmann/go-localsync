@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -15,19 +17,20 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	state := &itemState{
-		Source:   "github",
-		SourceID: "123",
-		Type:     "PushEvent",
+	item := &provider.Item{
+		ExternalID: types.NewExternalID("123"),
+		Source:     types.NewProviderID("github"),
+		Type:       types.NewEventTypeID("PushEvent"),
 	}
 
-	err := rm.Upsert(ctx, state)
+	err := rm.Upsert(ctx, item)
 	require.NoError(t, err)
 
 	got, err := rm.Get(ctx, "github", "123")
 	require.NoError(t, err)
 
-	assert.Equal(t, "PushEvent", got.Type)
+	require.NotNil(t, got)
+	assert.Equal(t, "PushEvent", got.Type.Get())
 }
 
 func TestMemoryReadModel_GetNotFound(t *testing.T) {
@@ -48,9 +51,12 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	state := &itemState{Source: "github", SourceID: "123"}
-	require.NoError(t, rm.Upsert(ctx, state))
+	item := &provider.Item{
+		ExternalID: types.NewExternalID("123"),
+		Source:     types.NewProviderID("github"),
+	}
 
+	require.NoError(t, rm.Upsert(ctx, item))
 	require.NoError(t, rm.Delete(ctx, "github", "123"))
 
 	got, err := rm.Get(ctx, "github", "123")
@@ -68,36 +74,35 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	issueType := "IssueEvent"
 	github := "github"
 
-	require.NoError(t, rm.Upsert(ctx, &itemState{
-		Source: "github", SourceID: "1", Type: pushType,
-		ActorLogin: "alice", RepoName: "org/repo1", CreatedAt: time.Now().Add(-2 * time.Hour),
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("1"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID(pushType), ActorLogin: types.NewActorID("alice"),
+		RepoName: types.NewRepoID("org/repo1"), CreatedAt: time.Now().Add(-2 * time.Hour),
 	}))
-	require.NoError(t, rm.Upsert(ctx, &itemState{
-		Source: "github", SourceID: "2", Type: issueType,
-		ActorLogin: "bob", RepoName: "org/repo2", CreatedAt: time.Now().Add(-1 * time.Hour),
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("2"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID(issueType), ActorLogin: types.NewActorID("bob"),
+		RepoName: types.NewRepoID("org/repo2"), CreatedAt: time.Now().Add(-time.Hour),
 	}))
-	require.NoError(t, rm.Upsert(ctx, &itemState{
-		Source: "gitlab", SourceID: "3", Type: pushType,
-		ActorLogin: "alice", RepoName: "org/repo3", CreatedAt: time.Now(),
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("3"), Source: types.NewProviderID("gitlab"),
+		Type: types.NewEventTypeID(pushType), ActorLogin: types.NewActorID("alice"),
+		RepoName: types.NewRepoID("org/repo3"), CreatedAt: time.Now(),
 	}))
 
-	// Filter by type
 	items, err := rm.List(ctx, ItemFilter{Type: &pushType})
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 
-	// Filter by source
 	items, err = rm.List(ctx, ItemFilter{Source: &github})
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 
-	// Filter by actor
 	actor := "alice"
 	items, err = rm.List(ctx, ItemFilter{ActorLogin: &actor})
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 
-	// Pagination
 	items, err = rm.List(ctx, ItemFilter{Limit: 2})
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
@@ -113,8 +118,14 @@ func TestMemoryReadModel_Count(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	require.NoError(t, rm.Upsert(ctx, &itemState{Source: "github", SourceID: "1", Type: "PushEvent"}))
-	require.NoError(t, rm.Upsert(ctx, &itemState{Source: "github", SourceID: "2", Type: "IssueEvent"}))
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("1"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID("PushEvent"),
+	}))
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("2"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID("IssueEvent"),
+	}))
 
 	count, err := rm.Count(ctx, ItemFilter{})
 	require.NoError(t, err)
@@ -132,13 +143,22 @@ func TestMemoryReadModel_GetTypes(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	require.NoError(t, rm.Upsert(ctx, &itemState{Source: "github", SourceID: "1", Type: "PushEvent"}))
-	require.NoError(t, rm.Upsert(ctx, &itemState{Source: "github", SourceID: "2", Type: "IssueEvent"}))
-	require.NoError(t, rm.Upsert(ctx, &itemState{Source: "github", SourceID: "3", Type: "PushEvent"}))
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("1"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID("PushEvent"),
+	}))
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("2"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID("IssueEvent"),
+	}))
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("3"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID("PushEvent"),
+	}))
 
-	types, err := rm.GetTypes(ctx)
+	result, err := rm.GetTypes(ctx)
 	require.NoError(t, err)
-	assert.Equal(t, []string{"IssueEvent", "PushEvent"}, types)
+	assert.Equal(t, []string{"IssueEvent", "PushEvent"}, result)
 }
 
 func TestProjector_ItemSynced(t *testing.T) {
@@ -164,7 +184,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 
 	got, err := rm.Get(context.Background(), "github", "123")
 	require.NoError(t, err)
-	assert.Equal(t, "PushEvent", got.Type)
+	assert.Equal(t, "PushEvent", got.Type.Get())
 }
 
 func TestProjector_ItemDeleted(t *testing.T) {
@@ -172,12 +192,15 @@ func TestProjector_ItemDeleted(t *testing.T) {
 
 	ctx := context.Background()
 	rm := NewMemoryReadModel()
-	require.NoError(t, rm.Upsert(ctx, &itemState{Source: "github", SourceID: "123", Type: "PushEvent"}))
+
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("123"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID("PushEvent"),
+	}))
 
 	proj := NewProjector(rm)
 
-	payload := ItemDeletedPayload{Source: "github", SourceID: "123"}
-	evt := mustNewTestEvent(EventItemDeleted, payload)
+	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
 	err := proj.HandleEvent(ctx, evt)
 	require.NoError(t, err)
@@ -190,12 +213,17 @@ func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
 
 	ctx := context.Background()
 	rm := NewMemoryReadModel()
-	require.NoError(t, rm.Upsert(ctx, &itemState{Source: "github", SourceID: "123", Type: "PushEvent"}))
+
+	require.NoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID("123"), Source: types.NewProviderID("github"),
+		Type: types.NewEventTypeID("PushEvent"),
+	}))
 
 	proj := NewProjector(rm)
 
-	payload := ItemConflictFoundPayload{Source: "github", SourceID: "123", Winner: "remote"}
-	evt := mustNewTestEvent(EventItemConflictFound, payload)
+	evt := mustNewTestEvent(EventItemConflictFound, ItemConflictFoundPayload{
+		Source: "github", SourceID: "123", Winner: "remote",
+	})
 
 	err := proj.HandleEvent(ctx, evt)
 	require.NoError(t, err)
@@ -210,13 +238,10 @@ func TestReadModel_Integration(t *testing.T) {
 	rm := NewMemoryReadModel()
 	proj := NewProjector(rm)
 
-	now := time.Now()
 	item := testItem("123", "PushEvent")
-	item.UpdatedAt = now
 
-	// Simulate: sync a new item → events → project → query
 	decide := DecideSync(item)
-	events, err := decide(InitialSyncItemState, 0)
+	events, err := decide(InitialState, 0)
 	require.NoError(t, err)
 	require.Len(t, events, 1)
 
@@ -227,8 +252,8 @@ func TestReadModel_Integration(t *testing.T) {
 
 	got, err := rm.Get(ctx, "github", "123")
 	require.NoError(t, err)
-	assert.Equal(t, "PushEvent", got.Type)
-	assert.Equal(t, "testuser", got.ActorLogin)
+	assert.Equal(t, "PushEvent", got.Type.Get())
+	assert.Equal(t, "testuser", got.ActorLogin.Get())
 
 	count, err := rm.Count(ctx, ItemFilter{})
 	require.NoError(t, err)

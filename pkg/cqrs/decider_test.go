@@ -13,10 +13,27 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestAggregateID_Deterministic(t *testing.T) {
+	t.Parallel()
+
+	a := AggregateID("github", "123")
+	b := AggregateID("github", "123")
+
+	assert.Equal(t, a, b, "same inputs must produce same AggregateID")
+}
+
+func TestAggregateID_DifferentInputs(t *testing.T) {
+	t.Parallel()
+
+	a := AggregateID("github", "123")
+	b := AggregateID("github", "456")
+
+	assert.NotEqual(t, a, b, "different inputs must produce different AggregateIDs")
+}
+
 func TestFold_ItemSynced(t *testing.T) {
 	t.Parallel()
 
-	state := InitialSyncItemState
 	payload := ItemSyncedPayload{
 		Source:    "github",
 		SourceID:  "123",
@@ -27,22 +44,25 @@ func TestFold_ItemSynced(t *testing.T) {
 
 	evt := mustNewTestEvent(EventItemSynced, payload)
 
-	newState, err := fold(state, evt)
+	state, err := Fold(InitialState, evt)
 	require.NoError(t, err)
 
-	assert.Equal(t, "github", newState.Source)
-	assert.Equal(t, "123", newState.SourceID)
-	assert.Equal(t, "PushEvent", newState.Type)
-	assert.False(t, newState.Deleted)
+	require.NotNil(t, state.Item)
+	assert.Equal(t, "github", state.Item.Source.Get())
+	assert.Equal(t, "123", state.Item.ExternalID.Get())
+	assert.Equal(t, "PushEvent", state.Item.Type.Get())
+	assert.False(t, state.Deleted)
 }
 
 func TestFold_ItemSyncedOverwritesState(t *testing.T) {
 	t.Parallel()
 
-	state := SyncItemState{
-		Source:   "github",
-		SourceID: "123",
-		Type:     "PushEvent",
+	existing := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: types.NewExternalID("123"),
+			Source:     types.NewProviderID("github"),
+			Type:       types.NewEventTypeID("PushEvent"),
+		},
 	}
 
 	updatedPayload := ItemSyncedPayload{
@@ -55,61 +75,58 @@ func TestFold_ItemSyncedOverwritesState(t *testing.T) {
 
 	evt := mustNewTestEvent(EventItemSynced, updatedPayload)
 
-	newState, err := fold(state, evt)
+	state, err := Fold(existing, evt)
 	require.NoError(t, err)
 
-	assert.Equal(t, "IssueEvent", newState.Type)
+	assert.Equal(t, "IssueEvent", state.Item.Type.Get())
 }
 
 func TestFold_ItemDeleted(t *testing.T) {
 	t.Parallel()
 
-	state := SyncItemState{
-		Source:   "github",
-		SourceID: "123",
+	existing := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: types.NewExternalID("123"),
+			Source:     types.NewProviderID("github"),
+		},
 	}
 
-	payload := ItemDeletedPayload{Source: "github", SourceID: "123"}
-	evt := mustNewTestEvent(EventItemDeleted, payload)
+	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
-	newState, err := fold(state, evt)
+	state, err := Fold(existing, evt)
 	require.NoError(t, err)
 
-	assert.True(t, newState.Deleted)
+	assert.True(t, state.Deleted)
+	assert.NotNil(t, state.Item, "deleted state still holds the item for potential resurrection")
 }
 
 func TestFold_ItemConflictFound(t *testing.T) {
 	t.Parallel()
 
-	state := SyncItemState{
-		Source:   "github",
-		SourceID: "123",
-		Type:     "PushEvent",
+	existing := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: types.NewExternalID("123"),
+			Source:     types.NewProviderID("github"),
+			Type:       types.NewEventTypeID("PushEvent"),
+		},
 	}
 
-	payload := ItemConflictFoundPayload{
-		Source:          "github",
-		SourceID:        "123",
-		LocalUpdatedAt:  100,
-		RemoteUpdatedAt: 200,
-		Winner:          "remote",
-	}
+	evt := mustNewTestEvent(EventItemConflictFound, ItemConflictFoundPayload{
+		Source: "github", SourceID: "123", Winner: "remote",
+	})
 
-	evt := mustNewTestEvent(EventItemConflictFound, payload)
-
-	newState, err := fold(state, evt)
+	state, err := Fold(existing, evt)
 	require.NoError(t, err)
 
-	assert.Equal(t, "PushEvent", newState.Type)
+	assert.Equal(t, "PushEvent", state.Item.Type.Get(), "conflict event does not change state")
 }
 
 func TestFold_UnknownEventType(t *testing.T) {
 	t.Parallel()
 
-	state := InitialSyncItemState
 	evt := mustNewTestEvent(event.Type("unknown"), map[string]string{"test": "data"})
 
-	_, err := fold(state, evt)
+	_, err := Fold(InitialState, evt)
 	assert.Error(t, err)
 }
 
@@ -117,9 +134,8 @@ func TestDecideSync_NewItem(t *testing.T) {
 	t.Parallel()
 
 	item := testItem("123", "PushEvent")
-	decide := DecideSync(item)
 
-	events, err := decide(InitialSyncItemState, 0)
+	events, err := DecideSync(item)(InitialState, 0)
 	require.NoError(t, err)
 
 	assert.Len(t, events, 1)
@@ -134,19 +150,20 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 	item.UpdatedAt = now
 
 	state := SyncItemState{
-		Source:       "github",
-		SourceID:     "123",
-		Type:         "PushEvent",
-		ActorLogin:   "testuser",
-		RepoName:     "owner/repo",
-		UpdatedAt:    now,
+		Item: &provider.Item{
+			ExternalID: types.NewExternalID("123"),
+			Source:     types.NewProviderID("github"),
+			Type:       types.NewEventTypeID("PushEvent"),
+			ActorLogin: types.NewActorID("testuser"),
+			RepoName:   types.NewRepoID("owner/repo"),
+			UpdatedAt:  now,
+		},
 	}
 
-	decide := DecideSync(item)
-	events, err := decide(state, 1)
+	events, err := DecideSync(item)(state, 1)
 	require.NoError(t, err)
 
-	assert.Nil(t, events)
+	assert.Nil(t, events, "unchanged item produces no events")
 }
 
 func TestDecideSync_ConflictResolution(t *testing.T) {
@@ -156,14 +173,15 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 	item.UpdatedAt = time.Now().Add(time.Hour)
 
 	state := SyncItemState{
-		Source:    "github",
-		SourceID:  "123",
-		Type:      "PushEvent",
-		UpdatedAt: time.Now(),
+		Item: &provider.Item{
+			ExternalID: types.NewExternalID("123"),
+			Source:     types.NewProviderID("github"),
+			Type:       types.NewEventTypeID("PushEvent"),
+			UpdatedAt:  time.Now(),
+		},
 	}
 
-	decide := DecideSync(item)
-	events, err := decide(state, 1)
+	events, err := DecideSync(item)(state, 1)
 	require.NoError(t, err)
 
 	assert.Len(t, events, 2)
@@ -171,16 +189,34 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 	assert.Equal(t, EventItemSynced, events[1].Type())
 }
 
+func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
+	t.Parallel()
+
+	item := testItem("123", "PushEvent")
+
+	state := SyncItemState{
+		Item:    &provider.Item{ExternalID: types.NewExternalID("123")},
+		Deleted: true,
+	}
+
+	events, err := DecideSync(item)(state, 2)
+	require.NoError(t, err)
+
+	assert.Len(t, events, 1)
+	assert.Equal(t, EventItemSynced, events[0].Type())
+}
+
 func TestDecideDelete_ActiveItem(t *testing.T) {
 	t.Parallel()
 
 	state := SyncItemState{
-		Source:   "github",
-		SourceID: "123",
+		Item: &provider.Item{
+			ExternalID: types.NewExternalID("123"),
+			Source:     types.NewProviderID("github"),
+		},
 	}
 
-	decide := DecideDelete()
-	events, err := decide(state, 1)
+	events, err := DecideDelete("github", "123")(state, 1)
 	require.NoError(t, err)
 
 	assert.Len(t, events, 1)
@@ -191,13 +227,11 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 	t.Parallel()
 
 	state := SyncItemState{
-		Source:   "github",
-		SourceID: "123",
-		Deleted:  true,
+		Item:    &provider.Item{ExternalID: types.NewExternalID("123")},
+		Deleted: true,
 	}
 
-	decide := DecideDelete()
-	events, err := decide(state, 1)
+	events, err := DecideDelete("github", "123")(state, 1)
 	require.NoError(t, err)
 
 	assert.Nil(t, events)
@@ -206,8 +240,7 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 func TestDecideDelete_NewItem(t *testing.T) {
 	t.Parallel()
 
-	decide := DecideDelete()
-	events, err := decide(InitialSyncItemState, 0)
+	events, err := DecideDelete("github", "123")(InitialState, 0)
 	require.NoError(t, err)
 
 	assert.Nil(t, events)
@@ -216,28 +249,10 @@ func TestDecideDelete_NewItem(t *testing.T) {
 func TestSyncItemState_IsNew(t *testing.T) {
 	t.Parallel()
 
-	assert.True(t, InitialSyncItemState.IsNew())
+	assert.True(t, InitialState.IsNew())
 
-	existing := SyncItemState{SourceID: "123"}
+	existing := SyncItemState{Item: &provider.Item{}}
 	assert.False(t, existing.IsNew())
-}
-
-func TestSyncItemState_ToItem(t *testing.T) {
-	t.Parallel()
-
-	state := SyncItemState{
-		Source:     "github",
-		SourceID:   "123",
-		Type:       "PushEvent",
-		ActorLogin: "testuser",
-		CreatedAt:  time.Now(),
-	}
-
-	item := state.ToItem()
-	assert.Equal(t, "123", item.ExternalID.Get())
-	assert.Equal(t, "github", item.Source.Get())
-	assert.Equal(t, "PushEvent", item.Type.Get())
-	assert.Equal(t, "testuser", item.ActorLogin.Get())
 }
 
 func mustNewTestEvent(eventType event.Type, payload any) *event.Core {
