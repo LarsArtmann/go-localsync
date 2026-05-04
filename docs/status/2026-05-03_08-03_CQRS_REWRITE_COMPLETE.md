@@ -16,18 +16,18 @@ The entire `pkg/cqrs/` package was rewritten from scratch this session. The prev
 
 **Files (10 total, 1,372 lines):**
 
-| File | Lines | Purpose |
-|------|-------|---------|
-| `aggregate_id.go` | 44 | Deterministic SHA256→ULID from (source, sourceID) with sync.Map cache |
-| `events.go` | 58 | Event type constants + payload structs (camelCase JSON tags) |
-| `decider.go` | 160 | `SyncItemState`, `Fold`, `DecideSync`, `DecideDelete` — pure functions |
-| `readmodel.go` | 28 | `ReadModel` interface + `ItemFilter` — stores `*provider.Item` directly |
-| `memory_readmodel.go` | 147 | Concurrent-safe in-memory read model with filter/pagination |
-| `projection.go` | 68 | `Projector` implements `event.Handler`, wired to bus via `SubscribeAll` |
-| `stack.go` | 119 | `CQRSStack` wiring: Store+Bus+Repo+ReadModel, auto-projection |
-| `decider_test.go` | 285 | 15 tests: fold, decide, idempotency, delete, resurrect, conflict |
-| `readmodel_test.go` | 261 | 12 tests: CRUD, filters, pagination, projector integration |
-| `stack_test.go` | 202 | 9 tests: end-to-end sync, idempotency, delete+resurrect, conflicts |
+| File                  | Lines | Purpose                                                                 |
+| --------------------- | ----- | ----------------------------------------------------------------------- |
+| `aggregate_id.go`     | 44    | Deterministic SHA256→ULID from (source, sourceID) with sync.Map cache   |
+| `events.go`           | 58    | Event type constants + payload structs (camelCase JSON tags)            |
+| `decider.go`          | 160   | `SyncItemState`, `Fold`, `DecideSync`, `DecideDelete` — pure functions  |
+| `readmodel.go`        | 28    | `ReadModel` interface + `ItemFilter` — stores `*provider.Item` directly |
+| `memory_readmodel.go` | 147   | Concurrent-safe in-memory read model with filter/pagination             |
+| `projection.go`       | 68    | `Projector` implements `event.Handler`, wired to bus via `SubscribeAll` |
+| `stack.go`            | 119   | `CQRSStack` wiring: Store+Bus+Repo+ReadModel, auto-projection           |
+| `decider_test.go`     | 285   | 15 tests: fold, decide, idempotency, delete, resurrect, conflict        |
+| `readmodel_test.go`   | 261   | 12 tests: CRUD, filters, pagination, projector integration              |
+| `stack_test.go`       | 202   | 9 tests: end-to-end sync, idempotency, delete+resurrect, conflicts      |
 
 **Critical bugs FIXED by rewrite:**
 
@@ -62,6 +62,7 @@ The entire `pkg/cqrs/` package was rewritten from scratch this session. The prev
 ### CQRS Phase 3 → 80% complete
 
 The core CQRS path works end-to-end:
+
 - ✅ Decider with pure Fold/Decide functions
 - ✅ Deterministic aggregate IDs
 - ✅ Event store + bus + read model wired
@@ -69,6 +70,7 @@ The core CQRS path works end-to-end:
 - ✅ 34 tests proving idempotency, conflict detection, delete+resurrect
 
 **NOT yet done:**
+
 - ❌ CLI integration (`--backend cqrs` flag)
 - ❌ go-cqrs-lite feature adoption (projection.Runner, command.Dispatcher, error taxonomy)
 - ❌ Middleware pipeline (Recovery, Retry, Logging)
@@ -223,6 +225,7 @@ The execution plan says to align `ItemID` with `id.AggregateID` since sync items
 - Same memory layout, but different phantom types → compile-time incompatible
 
 **Trade-offs:**
+
 - **Pro:** Eliminates a whole class of ID conversion code. Makes go-cqrs-lite integration seamless.
 - **Con:** `ItemID` is used across 30+ files in the codebase. Changing it touches provider.Item, storage, sync, database, all tests.
 - **Con:** `ItemID` is the database PK. `AggregateID` is the event stream identity. They serve different purposes even if they happen to have the same value type.
@@ -233,30 +236,30 @@ This is a **domain modeling decision** that only the project owner can make. The
 
 ## Metrics Summary
 
-| Metric | Value |
-|--------|-------|
-| Total Go LOC | 9,814 |
-| pkg/cqrs/ LOC | 1,372 (624 source, 748 test) |
-| pkg/cqrs/ files | 10 (7 source, 3 test) |
-| Total tests passing | 298 |
-| pkg/cqrs/ tests | 34 PASS, 0 FAIL |
-| Build status | ✅ Clean |
-| `go vet` | ✅ Clean |
-| Regressions | 0 |
-| Files deleted | 5 (decide.go, fold.go, state.go, plus 2 phantom) |
-| Lines deleted | 675 |
-| Lines added | 355 |
-| Net change | -320 lines (simpler code) |
+| Metric              | Value                                            |
+| ------------------- | ------------------------------------------------ |
+| Total Go LOC        | 9,814                                            |
+| pkg/cqrs/ LOC       | 1,372 (624 source, 748 test)                     |
+| pkg/cqrs/ files     | 10 (7 source, 3 test)                            |
+| Total tests passing | 298                                              |
+| pkg/cqrs/ tests     | 34 PASS, 0 FAIL                                  |
+| Build status        | ✅ Clean                                         |
+| `go vet`            | ✅ Clean                                         |
+| Regressions         | 0                                                |
+| Files deleted       | 5 (decide.go, fold.go, state.go, plus 2 phantom) |
+| Lines deleted       | 675                                              |
+| Lines added         | 355                                              |
+| Net change          | -320 lines (simpler code)                        |
 
 ---
 
 ## Session Timeline
 
-| Time | Event |
-|------|-------|
-| ~06:00 | Integration report written, execution plan created |
-| ~06:48 | Phase 1-3 implemented (12 files, 31 tests passing) |
-| ~07:00 | Deep audit revealed 6 critical flaws |
-| ~07:30 | Improvement plan created, user asked for direction |
+| Time   | Event                                                                  |
+| ------ | ---------------------------------------------------------------------- |
+| ~06:00 | Integration report written, execution plan created                     |
+| ~06:48 | Phase 1-3 implemented (12 files, 31 tests passing)                     |
+| ~07:00 | Deep audit revealed 6 critical flaws                                   |
+| ~07:30 | Improvement plan created, user asked for direction                     |
 | ~08:00 | Complete rewrite: 12 files deleted, 10 files created, 34 tests passing |
-| 08:03 | This status report |
+| 08:03  | This status report                                                     |

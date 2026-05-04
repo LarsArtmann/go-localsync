@@ -13,12 +13,12 @@
 
 ## 1. Dependency Alignment
 
-| Dependency | go-localsync | go-cqrs-lite/core | go-localfirst |
-|---|---|---|---|
-| `go-branded-id` | `v0.1.0` | `v0.1.0` | `v0.1.0` (indirect) |
-| `oklog/ulid` | **`v2.1.1`** | `v2.1.0` | `v2.1.0` (indirect) |
-| `go-cqrs-lite/core` | **not imported** | — | `v0.1.1` |
-| `cockroachdb/errors` | `v1.13.0` | `v1.12.0` | `v1.12.0` (indirect) |
+| Dependency           | go-localsync     | go-cqrs-lite/core | go-localfirst        |
+| -------------------- | ---------------- | ----------------- | -------------------- |
+| `go-branded-id`      | `v0.1.0`         | `v0.1.0`          | `v0.1.0` (indirect)  |
+| `oklog/ulid`         | **`v2.1.1`**     | `v2.1.0`          | `v2.1.0` (indirect)  |
+| `go-cqrs-lite/core`  | **not imported** | —                 | `v0.1.1`             |
+| `cockroachdb/errors` | `v1.13.0`        | `v1.12.0`         | `v1.12.0` (indirect) |
 
 **Issue 1**: `oklog/ulid` version drift — localsync is on `v2.1.1`, cqrs-lite declares `v2.1.0`. Go modules will resolve this to `v2.1.1` (MVS picks highest), so functionally benign but should be aligned explicitly.
 
@@ -32,12 +32,12 @@
 
 This is the most critical integration dimension. Here's the exact type comparison:
 
-| Concept | go-localsync | go-cqrs-lite |
-|---|---|---|
-| **Core type** | `id.ID[B, V]` (go-branded-id directly) | `id.Of[T]` = `cbid.ID[T, ulid.ULID]` (type alias) |
-| **ULID-backed ID** | `id.ID[ItemBrand, ulid.ULID]` | `cbid.ID[T, ulid.ULID]` |
-| **String-backed ID** | `id.ID[ExternalBrand, string]` | Not supported (`Of[T]` is ULID-only) |
-| **Internal structure** | `struct{ value ulid.ULID }` | `struct{ value ulid.ULID }` (identical) |
+| Concept                | go-localsync                           | go-cqrs-lite                                      |
+| ---------------------- | -------------------------------------- | ------------------------------------------------- |
+| **Core type**          | `id.ID[B, V]` (go-branded-id directly) | `id.Of[T]` = `cbid.ID[T, ulid.ULID]` (type alias) |
+| **ULID-backed ID**     | `id.ID[ItemBrand, ulid.ULID]`          | `cbid.ID[T, ulid.ULID]`                           |
+| **String-backed ID**   | `id.ID[ExternalBrand, string]`         | Not supported (`Of[T]` is ULID-only)              |
+| **Internal structure** | `struct{ value ulid.ULID }`            | `struct{ value ulid.ULID }` (identical)           |
 
 **Both are `cbid.ID[Brand, ulid.ULID]` with different phantom brands.** go-cqrs-lite's `id.Of[T]` is a type alias (`=`) to `cbid.ID[T, ulid.ULID]`, NOT a wrapper struct. This means the memory layout is identical — `struct{ value ulid.ULID }` everywhere.
 
@@ -59,16 +59,16 @@ itemID := id.NewID[ItemBrand](aggregateID.Get())
 
 go-localfirst successfully integrates go-cqrs-lite and provides a proven pattern:
 
-| Aspect | go-localfirst approach | Relevance to go-localsync |
-|---|---|---|
-| **Aggregate** | Embeds `*aggregate.Core`, implements `Root` interface | Use `Decider[State]` instead (recommended by cqrs-lite) |
-| **Event Store** | `CQRSAdapter` wraps Pebble (in `pkg/cqrs/store/`) | Extract to shared package or copy |
-| **Event Bus** | `memory.NewMemoryBus()` from cqrs-lite | Direct reuse |
-| **Commands** | `command.Dispatcher` + handler pattern | Direct reuse |
-| **Queries** | `query.Dispatcher` + handler pattern | Direct reuse |
-| **Read model** | Custom projection framework (`pkg/projection/`) | Use cqrs-lite's `projection.Runner` instead |
-| **Branded IDs** | Converts `domain.TodoID` ↔ `id.AggregateID` at boundaries | Same pattern for `types.ItemID` ↔ `id.AggregateID` |
-| **Wiring** | `samber/do/v2` DI container | Simpler — factory function or manual wiring |
+| Aspect          | go-localfirst approach                                    | Relevance to go-localsync                               |
+| --------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| **Aggregate**   | Embeds `*aggregate.Core`, implements `Root` interface     | Use `Decider[State]` instead (recommended by cqrs-lite) |
+| **Event Store** | `CQRSAdapter` wraps Pebble (in `pkg/cqrs/store/`)         | Extract to shared package or copy                       |
+| **Event Bus**   | `memory.NewMemoryBus()` from cqrs-lite                    | Direct reuse                                            |
+| **Commands**    | `command.Dispatcher` + handler pattern                    | Direct reuse                                            |
+| **Queries**     | `query.Dispatcher` + handler pattern                      | Direct reuse                                            |
+| **Read model**  | Custom projection framework (`pkg/projection/`)           | Use cqrs-lite's `projection.Runner` instead             |
+| **Branded IDs** | Converts `domain.TodoID` ↔ `id.AggregateID` at boundaries | Same pattern for `types.ItemID` ↔ `id.AggregateID`      |
+| **Wiring**      | `samber/do/v2` DI container                               | Simpler — factory function or manual wiring             |
 
 ---
 
@@ -88,58 +88,58 @@ Provider → SyncItemCommand → SyncItem Decider → event.Store (Pebble/Memory
 
 ### Components from go-cqrs-lite to reuse
 
-| Component | Import | Status |
-|---|---|---|
-| `decider.Decider[State]` + `Repository[State]` | `core/decider` | Production-ready (Session 37+) |
-| `event.Store` interface | `core/event` | Stable |
-| `event.Bus` + `Publisher`/`Subscriber` ISP | `core/event` | Stable (Session 44) |
-| `memory.MemoryStore` + `MemoryBus` | `memory` | Production-ready |
-| `projection.Runner` + `HandlerRegistry` | `projection` | Production-ready |
-| `command.Dispatcher` | `core/command` | Stable |
-| `query.Dispatcher` + `Pagination` | `core/query` | Stable |
-| `event.Error` taxonomy + `RegisterClassification` | `core/event` | Production-ready (Session 31+) |
-| `middleware.CommandRetry` + `CommandLogging` | `middleware` | Production-ready |
+| Component                                         | Import         | Status                         |
+| ------------------------------------------------- | -------------- | ------------------------------ |
+| `decider.Decider[State]` + `Repository[State]`    | `core/decider` | Production-ready (Session 37+) |
+| `event.Store` interface                           | `core/event`   | Stable                         |
+| `event.Bus` + `Publisher`/`Subscriber` ISP        | `core/event`   | Stable (Session 44)            |
+| `memory.MemoryStore` + `MemoryBus`                | `memory`       | Production-ready               |
+| `projection.Runner` + `HandlerRegistry`           | `projection`   | Production-ready               |
+| `command.Dispatcher`                              | `core/command` | Stable                         |
+| `query.Dispatcher` + `Pagination`                 | `core/query`   | Stable                         |
+| `event.Error` taxonomy + `RegisterClassification` | `core/event`   | Production-ready (Session 31+) |
+| `middleware.CommandRetry` + `CommandLogging`      | `middleware`   | Production-ready               |
 
 ### Components to build in go-localsync
 
-| Component | Effort | Notes |
-|---|---|---|
-| `SyncItem` decider (fold + decide) | Medium | Pure functions, ~100 lines |
-| Event types + payloads | Easy | ~80 lines |
-| Command types + handlers | Medium | ~200 lines |
-| Query types + handlers | Medium | ~200 lines |
-| ReadModel interface + implementations | Medium | ~300 lines |
-| Pebble event store adapter | Easy | Copy from go-localfirst `pkg/cqrs/store/` |
-| Syncer refactor to use CQRS | Medium | Wire commands instead of storage directly |
-| ID bridge functions | Easy | ~30 lines |
+| Component                             | Effort | Notes                                     |
+| ------------------------------------- | ------ | ----------------------------------------- |
+| `SyncItem` decider (fold + decide)    | Medium | Pure functions, ~100 lines                |
+| Event types + payloads                | Easy   | ~80 lines                                 |
+| Command types + handlers              | Medium | ~200 lines                                |
+| Query types + handlers                | Medium | ~200 lines                                |
+| ReadModel interface + implementations | Medium | ~300 lines                                |
+| Pebble event store adapter            | Easy   | Copy from go-localfirst `pkg/cqrs/store/` |
+| Syncer refactor to use CQRS           | Medium | Wire commands instead of storage directly |
+| ID bridge functions                   | Easy   | ~30 lines                                 |
 
 ---
 
 ## 5. Concrete Blockers
 
-| # | Blocker | Severity | Resolution |
-|---|---|---|---|
-| 1 | **go-localsync does not import go-cqrs-lite** | Critical | Add dependency to `go.mod` |
-| 2 | **ID brand conversion** — `ItemBrand` vs `AggregateMarker` phantom types | Low | Simple `cbid.NewID[Brand](id.Get())` at boundaries (identical to go-localfirst pattern) |
-| 3 | **go-cqrs-lite v0.1.1 is 257 commits behind HEAD** | High | Publish `v0.2.0` or use pseudo-version; local `go.work` handles dev |
-| 4 | **Pebble adapter in go-localfirst is in `pkg/` but not extracted** | Medium | Extract to shared package or copy into localsync |
-| 5 | **`oklog/ulid` version drift** (v2.1.0 vs v2.1.1) | Low | Align in go-cqrs-lite's `go.mod` |
-| 6 | **No `event.Store` implementation for SQLite** | Low | Use Pebble (migration target) or memory for tests |
+| #   | Blocker                                                                  | Severity | Resolution                                                                              |
+| --- | ------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------- |
+| 1   | **go-localsync does not import go-cqrs-lite**                            | Critical | Add dependency to `go.mod`                                                              |
+| 2   | **ID brand conversion** — `ItemBrand` vs `AggregateMarker` phantom types | Low      | Simple `cbid.NewID[Brand](id.Get())` at boundaries (identical to go-localfirst pattern) |
+| 3   | **go-cqrs-lite v0.1.1 is 257 commits behind HEAD**                       | High     | Publish `v0.2.0` or use pseudo-version; local `go.work` handles dev                     |
+| 4   | **Pebble adapter in go-localfirst is in `pkg/` but not extracted**       | Medium   | Extract to shared package or copy into localsync                                        |
+| 5   | **`oklog/ulid` version drift** (v2.1.0 vs v2.1.1)                        | Low      | Align in go-cqrs-lite's `go.mod`                                                        |
+| 6   | **No `event.Store` implementation for SQLite**                           | Low      | Use Pebble (migration target) or memory for tests                                       |
 
 ---
 
 ## 6. Recommended Next Steps (Pareto Order)
 
-| Priority | Step | Impact | Effort |
-|---|---|---|---|
-| **P0** | Publish go-cqrs-lite `v0.2.0` (257 commits of improvements) | Unlocks all integration | 30min |
-| **P0** | Add `go-cqrs-lite/core` + `memory` to go-localsync `go.mod` | Foundation for everything | 5min |
-| **P1** | Build ID bridge: `types.ItemID` ↔ `id.AggregateID` conversion | Unlocks aggregate usage | 15min |
-| **P1** | Copy Pebble `event.Store` adapter from go-localfirst | Unlocks non-memory storage | 1hr |
-| **P2** | Build `SyncItem` decider + event types | Core CQRS logic | 2hr |
-| **P2** | Build projection read model | Replaces 16-method Storage interface | 2hr |
-| **P3** | Refactor `Syncer` to use `command.Dispatcher` | Wire it together | 2hr |
-| **P3** | Delete `internal/database/`, `internal/db/`, `sql/` | Remove ~2000 lines of duplication | 1hr |
+| Priority | Step                                                          | Impact                               | Effort |
+| -------- | ------------------------------------------------------------- | ------------------------------------ | ------ |
+| **P0**   | Publish go-cqrs-lite `v0.2.0` (257 commits of improvements)   | Unlocks all integration              | 30min  |
+| **P0**   | Add `go-cqrs-lite/core` + `memory` to go-localsync `go.mod`   | Foundation for everything            | 5min   |
+| **P1**   | Build ID bridge: `types.ItemID` ↔ `id.AggregateID` conversion | Unlocks aggregate usage              | 15min  |
+| **P1**   | Copy Pebble `event.Store` adapter from go-localfirst          | Unlocks non-memory storage           | 1hr    |
+| **P2**   | Build `SyncItem` decider + event types                        | Core CQRS logic                      | 2hr    |
+| **P2**   | Build projection read model                                   | Replaces 16-method Storage interface | 2hr    |
+| **P3**   | Refactor `Syncer` to use `command.Dispatcher`                 | Wire it together                     | 2hr    |
+| **P3**   | Delete `internal/database/`, `internal/db/`, `sql/`           | Remove ~2000 lines of duplication    | 1hr    |
 
 ---
 

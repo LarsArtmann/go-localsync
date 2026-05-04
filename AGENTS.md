@@ -6,27 +6,28 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## Architecture
 
-| Package                     | Purpose                                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack)                   |
-| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                  |
-| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                               |
-| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory) — legacy, to be replaced by CQRS            |
-| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                 |
+| Package                     | Purpose                                                                                                         |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack)                            |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                           |
+| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                        |
+| `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory) — legacy, to be replaced by CQRS                      |
+| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                          |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`) |
-| `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)         |
-| `pkg/testhelpers/`          | Shared test mocks and factories                                                                        |
-| `internal/database/`        | Connection management (`Open()`) + migration system (`RunMigrations()`) — legacy                       |
-| `internal/db/`              | sqlc-generated query code from `sql/queries/events.sql` — legacy                                       |
-| `sql/queries/`              | SQL query definitions for sqlc — legacy                                                                |
-| `sql/migrations/`           | Reference copies of migration SQL (embedded as Go constants) — legacy                                  |
-| `cmd/examples/github-sync/` | Example CLI entry point                                                                                |
+| `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)                  |
+| `pkg/testhelpers/`          | Shared test mocks and factories                                                                                 |
+| `internal/database/`        | Connection management (`Open()`) + migration system (`RunMigrations()`) — legacy                                |
+| `internal/db/`              | sqlc-generated query code from `sql/queries/events.sql` — legacy                                                |
+| `sql/queries/`              | SQL query definitions for sqlc — legacy                                                                         |
+| `sql/migrations/`           | Reference copies of migration SQL (embedded as Go constants) — legacy                                           |
+| `cmd/examples/github-sync/` | Example CLI entry point                                                                                         |
 
 ## CQRS Integration Status (2026-05-03)
 
 go-localsync has a parallel CQRS path alongside the legacy CRUD storage layer.
 
 ### What works (rewritten 2026-05-03):
+
 - `pkg/cqrs/` — 7 source files, clean architecture
 - `aggregate_id.go` — deterministic SHA256→ULID from (source, sourceID) with sync.Map cache
 - `decider.go` — `SyncItemState{Item *provider.Item, Deleted bool}`, Fold + DecideSync/DecideDelete
@@ -41,6 +42,7 @@ go-localsync has a parallel CQRS path alongside the legacy CRUD storage layer.
 - All existing tests pass with zero regressions
 
 ### Architecture decisions:
+
 - `SyncItemState` wraps `*provider.Item` + `Deleted bool` — eliminates 3 duplicate structs from original
 - Deterministic aggregate IDs via SHA256→ULID — same (source, sourceID) always → same AggregateID
 - Bus subscription wires projection automatically — no manual HandleEvent calls in SyncItems
@@ -48,6 +50,7 @@ go-localsync has a parallel CQRS path alongside the legacy CRUD storage layer.
 - `Decider[State]` pattern from go-cqrs-lite — pure Fold + Decide functions, no aggregate root interface
 
 ### What's left before Phase 4 (deletion):
+
 1. CLI update to use CQRSStack (`--backend cqrs`)
 2. Existing sync tests passing through CQRS path
 3. Adopt go-cqrs-lite features: `projection.Runner`, `command.Dispatcher`, error taxonomy
@@ -89,17 +92,17 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 
 ## Testing
 
-| Package                    | Tests | Status                                                      |
-| -------------------------- | ----- | ----------------------------------------------------------- |
-| `internal/database`        | 6     | ✅ Migration tests (idempotency, ordering, schema, indexes) |
-| `pkg/providers/github`     | 21    | ✅ Client, fetch, retry, error handling                     |
-| `pkg/storage`              | 70+   | ✅ SQLite + Memory + Turso compliance (22+ tests each)      |
-| `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                             |
-| `cmd/examples/github-sync` | 0     | ⬜ No tests                                                 |
-| `pkg/errors`               | 0     | ⬜ No tests                                                 |
-| `pkg/provider`             | 0     | ⬜ Interface only                                           |
-| `pkg/types`                | 13    | ⚠️ ID construction, roundtrip, zero, equal — no edge case tests               |
-| `pkg/testhelpers`          | 0     | ⬜ Helper package                                           |
+| Package                    | Tests | Status                                                          |
+| -------------------------- | ----- | --------------------------------------------------------------- |
+| `internal/database`        | 6     | ✅ Migration tests (idempotency, ordering, schema, indexes)     |
+| `pkg/providers/github`     | 21    | ✅ Client, fetch, retry, error handling                         |
+| `pkg/storage`              | 70+   | ✅ SQLite + Memory + Turso compliance (22+ tests each)          |
+| `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                                 |
+| `cmd/examples/github-sync` | 0     | ⬜ No tests                                                     |
+| `pkg/errors`               | 0     | ⬜ No tests                                                     |
+| `pkg/provider`             | 0     | ⬜ Interface only                                               |
+| `pkg/types`                | 13    | ⚠️ ID construction, roundtrip, zero, equal — no edge case tests |
+| `pkg/testhelpers`          | 0     | ⬜ Helper package                                               |
 
 Run: `go test ./... -count=1`
 
@@ -118,8 +121,8 @@ Storage backends are selected via `storage.NewStorage(Config)`. Switch-based fac
 1. Implement the `storage.Storage` interface (16 methods)
 2. Create constructor that embeds `sqlStorage` (for SQL backends) or implement directly
 3. Add case to `NewStorage` switch in `config.go`
-3. Run compliance tests: `go test ./pkg/storage/ -run TestStorageCompliance`
-4. SQLite, Turso, and Memory must all pass the same compliance suite
+4. Run compliance tests: `go test ./pkg/storage/ -run TestStorageCompliance`
+5. SQLite, Turso, and Memory must all pass the same compliance suite
 
 ### CLI Usage
 
@@ -166,29 +169,29 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 
 ## Dependencies
 
-| Dependency                    | Purpose                                                                               |
-| ----------------------------- | ------------------------------------------------------------------------------------- |
-| `go-cqrs-lite`               | CQRS library with event sourcing, branded IDs, catalog — **NOT yet imported** (planned) |
-| `go-localfirst`               | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync             |
-| `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                      |
-| `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                        |
-| `cockroachdb/errors`          | Sentinel errors with detail wrapping                                                  |
-| `go-github/v69`               | GitHub API client                                                                     |
-| `turso.tech/database/tursogo` | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go) |
-| `charmbracelet/log`           | Structured logging                                                                    |
+| Dependency                    | Purpose                                                                                 |
+| ----------------------------- | --------------------------------------------------------------------------------------- |
+| `go-cqrs-lite`                | CQRS library with event sourcing, branded IDs, catalog — **NOT yet imported** (planned) |
+| `go-localfirst`               | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync               |
+| `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                        |
+| `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                          |
+| `cockroachdb/errors`          | Sentinel errors with detail wrapping                                                    |
+| `go-github/v69`               | GitHub API client                                                                       |
+| `turso.tech/database/tursogo` | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go)   |
+| `charmbracelet/log`           | Structured logging                                                                      |
 
 ## go-cqrs-lite Integration Status
 
 go-localsync now **imports** go-cqrs-lite via `go.work` (core + memory modules).
 
-| Area | go-localsync (current) | go-cqrs-lite (integrated) |
-|------|------------------------|-------------------------|
-| IDs | `id.ID[B, V]` via go-branded-id directly | `id.Of[T]` = `cbid.ID[T, ulid.ULID]` (type alias) — same memory layout |
-| Storage (legacy) | 16-method `Storage` interface, 3 SQL backends | — |
-| Storage (CQRS) | `pkg/cqrs/CQRSStack` → `decider.Repository[SyncItemState]` | `event.Store` + `event.Bus` via memory module |
-| Conflict (legacy) | Inline LWW in `ConflictAwareSyncer` | `DecideSync` produces ItemConflictFound events |
-| Retry | Hand-rolled in `github/client.go` | `middleware.CommandRetry` available but not yet wired |
-| Read Model | SQL queries against events table | `MemoryReadModel` with filter/pagination, projected from events |
+| Area              | go-localsync (current)                                     | go-cqrs-lite (integrated)                                              |
+| ----------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| IDs               | `id.ID[B, V]` via go-branded-id directly                   | `id.Of[T]` = `cbid.ID[T, ulid.ULID]` (type alias) — same memory layout |
+| Storage (legacy)  | 16-method `Storage` interface, 3 SQL backends              | —                                                                      |
+| Storage (CQRS)    | `pkg/cqrs/CQRSStack` → `decider.Repository[SyncItemState]` | `event.Store` + `event.Bus` via memory module                          |
+| Conflict (legacy) | Inline LWW in `ConflictAwareSyncer`                        | `DecideSync` produces ItemConflictFound events                         |
+| Retry             | Hand-rolled in `github/client.go`                          | `middleware.CommandRetry` available but not yet wired                  |
+| Read Model        | SQL queries against events table                           | `MemoryReadModel` with filter/pagination, projected from events        |
 
 **Integration path**: `pkg/cqrs/` is a parallel path. Legacy `pkg/storage/` is untouched and fully functional.
 Phase 4 (deletion of legacy code) is blocked on deterministic aggregate IDs.
