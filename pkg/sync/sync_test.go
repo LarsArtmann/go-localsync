@@ -20,7 +20,10 @@ type mockProvider struct {
 
 func (m *mockProvider) Name() string { return "mock" }
 
-func (m *mockProvider) Fetch(_ context.Context, _ *provider.FetchOptions) (*provider.FetchResult, error) {
+func (m *mockProvider) Fetch(
+	_ context.Context,
+	_ *provider.FetchOptions,
+) (*provider.FetchResult, error) {
 	return &provider.FetchResult{Items: m.items, HasMore: false}, m.err
 }
 
@@ -167,7 +170,10 @@ func TestConflictAwareSyncer_NewItems(t *testing.T) {
 	defer func() { _ = cas.Close() }()
 
 	ctx := context.Background()
-	result, err := cas.SyncWithConflictDetection(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := cas.SyncWithConflictDetection(
+		ctx,
+		&SyncOptions{Source: "testuser", MaxPages: 10},
+	)
 	require.NoError(t, err)
 	assert.Equal(t, 2, result.Fetched)
 	assert.Equal(t, 2, result.Upserted)
@@ -192,7 +198,10 @@ func TestConflictAwareSyncer_NoChange_Skipped(t *testing.T) {
 	require.NoError(t, stack.SyncItem(ctx, item))
 
 	syncer.provider = &mockProvider{items: []*provider.Item{item}}
-	result, err := cas.SyncWithConflictDetection(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := cas.SyncWithConflictDetection(
+		ctx,
+		&SyncOptions{Source: "testuser", MaxPages: 10},
+	)
 	require.NoError(t, err)
 	assert.Equal(t, 1, result.Fetched)
 	assert.Equal(t, 0, result.Upserted)
@@ -217,7 +226,10 @@ func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
 	newItem.UpdatedAt = time.Now()
 
 	syncer.provider = &mockProvider{items: []*provider.Item{newItem}}
-	result, err := cas.SyncWithConflictDetection(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := cas.SyncWithConflictDetection(
+		ctx,
+		&SyncOptions{Source: "testuser", MaxPages: 10},
+	)
 	require.NoError(t, err)
 	assert.Equal(t, 1, result.Fetched)
 	assert.Equal(t, 1, result.Upserted)
@@ -242,7 +254,10 @@ func TestConflictAwareSyncer_LocalWins(t *testing.T) {
 	oldRemote.UpdatedAt = time.Now().Add(-2 * time.Hour)
 
 	syncer.provider = &mockProvider{items: []*provider.Item{oldRemote}}
-	result, err := cas.SyncWithConflictDetection(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := cas.SyncWithConflictDetection(
+		ctx,
+		&SyncOptions{Source: "testuser", MaxPages: 10},
+	)
 	require.NoError(t, err)
 	assert.Equal(t, 1, result.Fetched)
 	assert.Equal(t, 1, result.Conflicts)

@@ -68,6 +68,10 @@ func TestTursoReadModel_UpsertAndGet(t *testing.T) {
 		t.Fatal("Get returned nil")
 	}
 
+	if got.ID.String() != item.ID.String() {
+		t.Errorf("ID = %q, want %q (ItemID not preserved)", got.ID.String(), item.ID.String())
+	}
+
 	if got.ExternalID.Get() != "123" {
 		t.Errorf("ExternalID = %q, want 123", got.ExternalID.Get())
 	}

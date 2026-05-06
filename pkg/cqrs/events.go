@@ -16,6 +16,7 @@ const (
 )
 
 type ItemSyncedPayload struct {
+	ItemID         string          `json:"itemId"`
 	Source         string          `json:"source"`
 	SourceID       string          `json:"sourceId"`
 	Type           string          `json:"type"`

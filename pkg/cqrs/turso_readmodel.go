@@ -12,6 +12,7 @@ import (
 )
 
 const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
+	item_id TEXT NOT NULL DEFAULT '',
 	source TEXT NOT NULL,
 	source_id TEXT NOT NULL,
 	type TEXT NOT NULL,
@@ -53,7 +54,7 @@ func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 }
 
 func (m *TursoReadModel) Get(ctx context.Context, source, sourceID string) (*provider.Item, error) {
-	query := `SELECT source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
 		FROM sync_items WHERE source = ? AND source_id = ?`
 
 	row := m.db.QueryRowContext(ctx, query, source, sourceID)
@@ -129,11 +130,11 @@ func (m *TursoReadModel) GetTypes(ctx context.Context) ([]string, error) {
 
 func (m *TursoReadModel) Upsert(ctx context.Context, item *provider.Item) error {
 	query := `INSERT OR REPLACE INTO sync_items
-		(source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	_, err := m.db.ExecContext(ctx, query,
-		item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
+		item.ID.String(), item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
 		item.ActorLogin.Get(), item.ActorAvatarURL, item.RepoName.Get(),
 		item.RepoURL, item.CreatedAt, item.UpdatedAt, item.RawJSON,
 	)
@@ -163,7 +164,7 @@ func (m *TursoReadModel) Close() error {
 }
 
 func buildListQuery(filter ItemFilter) (string, []any) {
-	query := `SELECT source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
 		FROM sync_items WHERE 1=1`
 
 	args := appendFilterArgs(&query, filter)
@@ -222,20 +223,18 @@ func appendFilterArgs(query *string, filter ItemFilter) []any {
 }
 
 func scanItem(row *sql.Row) (*provider.Item, error) {
-	var source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-
+	var itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
+	var rawJSON []byte
 	var createdAt, updatedAt time.Time
 
-	var rawJSON []byte
-
-	err := row.Scan(&source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
+	err := row.Scan(&itemIDStr, &source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
 		&repoName, &repoURL, &createdAt, &updatedAt, &rawJSON)
 	if err != nil {
 		return nil, err
 	}
 
 	return &provider.Item{
-		ID:             types.NewItemID(),
+		ID:             parseItemID(itemIDStr),
 		ExternalID:     types.NewExternalID(sourceID),
 		Source:         types.NewProviderID(source),
 		Type:           types.NewEventTypeID(eventType),
@@ -253,20 +252,18 @@ func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 	var items []*provider.Item
 
 	for rows.Next() {
-		var source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-
+		var itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
+		var rawJSON []byte
 		var createdAt, updatedAt time.Time
 
-		var rawJSON []byte
-
-		err := rows.Scan(&source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
+		err := rows.Scan(&itemIDStr, &source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
 			&repoName, &repoURL, &createdAt, &updatedAt, &rawJSON)
 		if err != nil {
 			return nil, fmt.Errorf("scan item: %w", err)
 		}
 
 		items = append(items, &provider.Item{
-			ID:             types.NewItemID(),
+			ID:             parseItemID(itemIDStr),
 			ExternalID:     types.NewExternalID(sourceID),
 			Source:         types.NewProviderID(source),
 			Type:           types.NewEventTypeID(eventType),

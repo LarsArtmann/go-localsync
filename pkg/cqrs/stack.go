@@ -162,6 +162,7 @@ func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Tur
 func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
 	if cfg.RemoteURL != "" {
 		ctx := context.Background()
+
 		syncDB, err := cqrsstorage.OpenTursoSync(ctx, cfg.DBPath, cfg.RemoteURL, cfg.AuthToken)
 		if err != nil {
 			return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
@@ -169,12 +170,14 @@ func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Turs
 
 		if _, err := syncDB.Exec(cqrsstorage.SQLiteSchema()); err != nil {
 			_ = syncDB.Close()
+
 			return nil, nil, nil, fmt.Errorf("create event store schema: %w", err)
 		}
 
 		store, err := cqrsstorage.NewSQLiteEventStore(syncDB.DB)
 		if err != nil {
 			_ = syncDB.Close()
+
 			return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
 		}
 
@@ -193,12 +196,14 @@ func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Turs
 
 	if _, err := db.Exec(cqrsstorage.SQLiteSchema()); err != nil {
 		_ = db.Close()
+
 		return nil, nil, nil, fmt.Errorf("create event store schema: %w", err)
 	}
 
 	store, err := cqrsstorage.NewSQLiteEventStore(db)
 	if err != nil {
 		_ = db.Close()
+
 		return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
 	}
 

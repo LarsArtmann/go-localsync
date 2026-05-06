@@ -65,8 +65,8 @@ func main() {
 		)
 		showStats   = flag.Bool("stats", envCfg.ShowStats, "Show database statistics and exit")
 		showVersion = flag.Bool("version", false, "Show version information and exit")
-		syncPush = flag.Bool("push", false, "Push local changes to remote Turso after sync")
-		syncPull = flag.Bool("pull", false, "Pull remote changes from Turso before sync")
+		syncPush    = flag.Bool("push", false, "Push local changes to remote Turso after sync")
+		syncPull    = flag.Bool("pull", false, "Pull remote changes from Turso before sync")
 		verbose     = flag.Bool("verbose", envCfg.Verbose, "Enable verbose logging")
 	)
 

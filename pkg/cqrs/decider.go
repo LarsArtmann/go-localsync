@@ -60,7 +60,7 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 
 	return SyncItemState{
 		Item: &provider.Item{
-			ID:             types.NewItemID(),
+			ID:             parseItemID(payload.ItemID),
 			ExternalID:     types.NewExternalID(payload.SourceID),
 			Source:         types.NewProviderID(payload.Source),
 			Type:           types.NewEventTypeID(payload.Type),
@@ -176,6 +176,7 @@ func newEvent(
 
 func itemToPayload(item *provider.Item) ItemSyncedPayload {
 	return ItemSyncedPayload{
+		ItemID:         item.ID.String(),
 		Source:         item.Source.Get(),
 		SourceID:       item.ExternalID.Get(),
 		Type:           item.Type.Get(),
@@ -194,4 +195,12 @@ func hasChanged(local, remote *provider.Item) bool {
 		local.Type.Get() != remote.Type.Get() ||
 		local.ActorLogin.Get() != remote.ActorLogin.Get() ||
 		local.RepoName.Get() != remote.RepoName.Get()
+}
+
+func parseItemID(s string) types.ItemID {
+	if s == "" {
+		return types.NewItemID()
+	}
+
+	return types.MustParseItemID(s)
 }

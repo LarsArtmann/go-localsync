@@ -52,7 +52,7 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 	}
 
 	item := &provider.Item{
-		ID:             types.NewItemID(),
+		ID:             parseItemID(payload.ItemID),
 		ExternalID:     types.NewExternalID(payload.SourceID),
 		Source:         types.NewProviderID(payload.Source),
 		Type:           types.NewEventTypeID(payload.Type),

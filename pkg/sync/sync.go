@@ -196,7 +196,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	typeCounts := make(map[string]int64)
 
 	for _, t := range types {
-		c, err := s.stack.ReadModel.Count(ctx, cqrs.ItemFilter{Type: new(t)})
+		c, err := s.stack.ReadModel.Count(ctx, cqrs.ItemFilter{Type: &t})
 		if err != nil {
 			s.logger.Warn("Failed to count items by type", "type", t, "error", err)
 
@@ -259,6 +259,3 @@ func (s *Syncer) processIncrementalItems(
 
 	return syncResult, nil
 }
-
-//go:fix inline
-func ptrStr(s string) *string { return new(s) }
