@@ -2,49 +2,40 @@ package sync
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/storage"
 )
 
-// Syncer orchestrates syncing items from a provider to storage.
 type Syncer struct {
 	provider provider.Provider
-	storage  storage.Storage
+	stack    *cqrs.CQRSStack
 	logger   *log.Logger
 }
 
-// NewSyncer creates a new Syncer with the given provider and storage.
-func NewSyncer(p provider.Provider, store storage.Storage, logger *log.Logger) *Syncer {
+func NewSyncer(p provider.Provider, stack *cqrs.CQRSStack, logger *log.Logger) *Syncer {
 	if logger == nil {
 		logger = log.Default()
 	}
 
 	return &Syncer{
 		provider: p,
-		storage:  store,
+		stack:    stack,
 		logger:   logger,
 	}
 }
 
-// SyncProgressFunc is called after each batch operation to report progress.
 type SyncProgressFunc func(fetched, skipped, errors int)
 
-// SyncOptions configures a sync operation.
 type SyncOptions struct {
-	// Source identifies what to sync (e.g., username for GitHub).
-	Source string
-	// MaxPages is the maximum number of pages to fetch.
-	MaxPages int
-	// OnProgress is an optional callback invoked after each batch operation.
+	Source     string
+	MaxPages   int
 	OnProgress SyncProgressFunc
 }
 
-// Validate checks that the SyncOptions has required fields set.
 func (o *SyncOptions) Validate() error {
 	if o.Source == "" {
 		return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "SyncOptions.Source is required")
@@ -53,21 +44,18 @@ func (o *SyncOptions) Validate() error {
 	return nil
 }
 
-// SyncResult contains the results of a sync operation.
 type SyncResult struct {
 	Fetched int
 	Skipped int
 	Errors  int
 }
 
-// Stats contains storage statistics.
 type Stats struct {
 	TotalItems int64
 	ItemTypes  []string
 	TypeCounts map[string]int64
 }
 
-// Sync performs a full sync from the provider to storage.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
@@ -118,24 +106,27 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		return syncResult, nil
 	}
 
-	err = s.storage.UpsertBatch(ctx, valid)
-	if err != nil {
-		syncResult.Errors = len(valid)
-		s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(valid))
-
-		return syncResult, pkgerrors.Wrap(err, "batch upsert failed")
-	}
+	synced, _, errs := s.stack.SyncItems(ctx, valid)
+	syncResult.Errors = errs + (len(valid) - synced - errs)
+	syncResult.Skipped = len(valid) - synced
 
 	if opts.OnProgress != nil {
 		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
 	}
 
-	s.logger.Info("Sync completed", "fetched", syncResult.Fetched, "errors", syncResult.Errors)
+	s.logger.Info(
+		"Sync completed",
+		"fetched",
+		syncResult.Fetched,
+		"synced",
+		synced,
+		"errors",
+		syncResult.Errors,
+	)
 
 	return syncResult, nil
 }
 
-// SyncIncremental performs an incremental sync, only fetching items newer than the latest stored.
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	if opts == nil {
 		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
@@ -146,18 +137,16 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 		return nil, err
 	}
 
-	latestItem, err := s.storage.GetLatest(ctx)
+	items, err := s.stack.ReadModel.List(ctx, cqrs.ItemFilter{Limit: 1})
 	if err != nil {
-		if errors.Is(err, pkgerrors.ErrNotFound) {
-			return s.Sync(ctx, opts)
-		}
-
-		return nil, pkgerrors.Wrapf(
-			err,
-			"failed to get latest item for incremental sync (source=%q)",
-			opts.Source,
-		)
+		return nil, pkgerrors.Wrapf(err, "failed to list items for incremental sync")
 	}
+
+	if len(items) == 0 {
+		return s.Sync(ctx, opts)
+	}
+
+	latestItem := items[0]
 
 	s.logger.Info("Starting incremental sync", "provider", s.provider.Name(), "source", opts.Source)
 
@@ -193,14 +182,13 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	return syncResult, nil
 }
 
-// GetStats returns statistics about stored items.
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
-	count, err := s.storage.Count(ctx)
+	count, err := s.stack.Count(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	types, err := s.storage.GetTypes(ctx)
+	types, err := s.stack.GetTypes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -208,14 +196,14 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	typeCounts := make(map[string]int64)
 
 	for _, t := range types {
-		count, err := s.storage.CountByType(ctx, t)
+		c, err := s.stack.ReadModel.Count(ctx, cqrs.ItemFilter{Type: new(t)})
 		if err != nil {
 			s.logger.Warn("Failed to count items by type", "type", t, "error", err)
 
 			continue
 		}
 
-		typeCounts[t] = count
+		typeCounts[t] = c
 	}
 
 	return &Stats{
@@ -225,12 +213,10 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	}, nil
 }
 
-// Close releases resources.
 func (s *Syncer) Close() error {
-	return s.storage.Close()
+	return s.stack.Close()
 }
 
-// processIncrementalItems processes items from FetchAll, skipping those older than cutoff.
 func (s *Syncer) processIncrementalItems(
 	ctx context.Context,
 	latestItem *provider.Item,
@@ -244,7 +230,7 @@ func (s *Syncer) processIncrementalItems(
 		s.logger.Debug("Using cutoff time", "cutoff", cutoff)
 	}
 
-	toUpsert := make([]*provider.Item, 0, len(items))
+	toSync := make([]*provider.Item, 0, len(items))
 
 	for _, item := range items {
 		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
@@ -262,18 +248,17 @@ func (s *Syncer) processIncrementalItems(
 			continue
 		}
 
-		toUpsert = append(toUpsert, item)
+		toSync = append(toSync, item)
 	}
 
-	if len(toUpsert) > 0 {
-		err := s.storage.UpsertBatch(ctx, toUpsert)
-		if err != nil {
-			syncResult.Errors = len(toUpsert)
-			s.logger.Warn("Batch upsert failed", "error", err, "itemCount", len(toUpsert))
-
-			return syncResult, pkgerrors.Wrap(err, "batch upsert failed")
-		}
+	if len(toSync) > 0 {
+		synced, _, errs := s.stack.SyncItems(ctx, toSync)
+		syncResult.Errors += errs
+		syncResult.Skipped += len(toSync) - synced - errs
 	}
 
 	return syncResult, nil
 }
+
+//go:fix inline
+func ptrStr(s string) *string { return new(s) }

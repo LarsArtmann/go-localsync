@@ -1,5 +1,3 @@
-// Package main provides a GitHub sync example using the go-localsync SDK.
-// This demonstrates how to use the SDK to build a local sync application.
 package main
 
 import (
@@ -13,20 +11,19 @@ import (
 	"syscall"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/providers/github"
-	"github.com/larsartmann/go-localsync/pkg/storage"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
-// Semantic exit codes (sysexits.h conventions).
 const (
-	exitUsage       = 64 // EX_USAGE - command line usage error
-	exitDataErr     = 65 // EX_DATAERR - data format error
-	exitNoInput     = 66 // EX_NOINPUT - cannot open input
-	exitUnavailable = 69 // EX_UNAVAILABLE - service unavailable
-	exitSoftware    = 70 // EX_SOFTWARE - internal software error
-	exitTempFail    = 75 // EX_TEMPFAIL - temporary failure
+	exitUsage       = 64
+	exitDataErr     = 65
+	exitNoInput     = 66
+	exitUnavailable = 69
+	exitSoftware    = 70
+	exitTempFail    = 75
 )
 
 var (
@@ -52,12 +49,12 @@ func main() {
 		dbPath   = flag.String(
 			"db",
 			envCfg.DBPath,
-			"Path to SQLite database (default: ~/.local/share/go-localsync/events.db)",
+			"Path to database directory (default: ~/.local/share/go-localsync)",
 		)
 		backend = flag.String(
 			"backend",
 			envCfg.Backend,
-			"Storage backend: sqlite, turso, memory",
+			"Storage backend: memory",
 		)
 		maxPages      = flag.Int("pages", envCfg.MaxPages, "Maximum number of pages to fetch")
 		incremental   = flag.Bool("incremental", envCfg.Incremental, "Only sync new events")
@@ -83,49 +80,42 @@ func main() {
 		logger.SetLevel(log.DebugLevel)
 	}
 
-	if *dbPath == "" && *backend == "sqlite" {
+	if *dbPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			logger.Error("Failed to get home directory", "error", err)
 			os.Exit(exitNoInput)
 		}
 
-		*dbPath = filepath.Join(homeDir, ".local", "share", "go-localsync", "events.db")
+		*dbPath = filepath.Join(homeDir, ".local", "share", "go-localsync")
 	}
 
-	if *backend == "sqlite" {
-		if err := os.MkdirAll(filepath.Dir(*dbPath), 0o755); err != nil {
-			logger.Error("Failed to create database directory", "error", err)
-			os.Exit(exitNoInput)
-		}
+	if err := os.MkdirAll(*dbPath, 0o755); err != nil {
+		logger.Error("Failed to create database directory", "error", err)
+		os.Exit(exitNoInput)
 	}
 
-	storeCfg := storage.NewConfig(
-		storage.WithBackend(storage.Backend(*backend)),
-		storage.WithDBPath(*dbPath),
-	)
-
-	store, err := storage.NewStorage(storeCfg)
+	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: *backend})
 	if err != nil {
-		logger.Error("Failed to create storage", "error", err)
+		logger.Error("Failed to create CQRS stack", "error", err)
 		os.Exit(exitNoInput)
 	}
 
 	defer func() {
-		err := store.Close()
+		err := stack.Close()
 		if err != nil {
-			logger.Error("Failed to close storage", "error", err)
+			logger.Error("Failed to close stack", "error", err)
 		}
 	}()
 
 	if *showStats {
-		stats, err := store.Count(context.Background())
+		stats, err := stack.Count(context.Background())
 		if err != nil {
 			logger.Error("Failed to get stats", "error", err)
 			os.Exit(exitSoftware)
 		}
 
-		types, err := store.GetTypes(context.Background())
+		types, err := stack.GetTypes(context.Background())
 		if err != nil {
 			logger.Error("Failed to get item types", "error", err)
 		}
@@ -147,9 +137,8 @@ func main() {
 		os.Exit(exitUsage)
 	}
 
-	// Create GitHub provider
 	ghProvider := github.NewClient(*token)
-	baseSyncer := synclib.NewSyncer(ghProvider, store, logger)
+	baseSyncer := synclib.NewSyncer(ghProvider, stack, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -208,7 +197,6 @@ func main() {
 	)
 }
 
-// exitCodeForError maps errors to semantic exit codes.
 func exitCodeForError(err error) int {
 	switch {
 	case errors.Is(err, pkgerrors.ErrRateLimited):
