@@ -16,8 +16,12 @@ type AppConfig struct {
 	Username string `env:"GITHUB_USER"`
 	// DBPath is the path to the database file.
 	DBPath string `env:"DB_PATH"`
-	// Backend is the storage backend: sqlite, turso, memory.
-	Backend string `env:"BACKEND" envDefault:"sqlite"`
+	// Backend is the storage backend: turso, memory.
+	Backend string `env:"BACKEND" envDefault:"memory"`
+	// RemoteURL is the Turso remote sync URL (optional, enables push/pull).
+	RemoteURL string `env:"TURSO_REMOTE_URL"`
+	// AuthToken is the Turso authentication token.
+	AuthToken string `env:"TURSO_AUTH_TOKEN"`
 	// MaxPages is the maximum number of pages to fetch.
 	MaxPages int `env:"MAX_PAGES" envDefault:"10"`
 	// Incremental enables incremental sync (only new events).

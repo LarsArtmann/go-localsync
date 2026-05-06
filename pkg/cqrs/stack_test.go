@@ -190,6 +190,35 @@ func TestCQRSStack_Close(t *testing.T) {
 	require.NoError(t, stack.Close())
 }
 
+func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
+	t.Parallel()
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
+	require.NoError(t, err)
+	defer func() { _ = stack.Close() }()
+
+	ctx := context.Background()
+	items := []*provider.Item{
+		testItem("1", "PushEvent"),
+		testItem("2", "IssueEvent"),
+	}
+
+	synced, conflicts, errors := stack.SyncItems(ctx, items)
+	assert.Equal(t, 2, synced)
+	assert.Equal(t, 0, conflicts)
+	assert.Equal(t, 0, errors)
+
+	count, err := stack.Count(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, int64(2), count)
+
+	require.NoError(t, stack.DeleteItem(ctx, "github", "1"))
+
+	count, err = stack.Count(ctx)
+	require.NoError(t, err)
+	assert.Equal(t, int64(1), count, "deleted item should be removed from read model")
+}
+
 func TestCQRSStack_InvalidBackend(t *testing.T) {
 	t.Parallel()
 

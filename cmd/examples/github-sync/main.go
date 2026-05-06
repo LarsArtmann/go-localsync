@@ -54,7 +54,7 @@ func main() {
 		backend = flag.String(
 			"backend",
 			envCfg.Backend,
-			"Storage backend: memory",
+			"Storage backend: memory, turso",
 		)
 		maxPages      = flag.Int("pages", envCfg.MaxPages, "Maximum number of pages to fetch")
 		incremental   = flag.Bool("incremental", envCfg.Incremental, "Only sync new events")
@@ -65,6 +65,8 @@ func main() {
 		)
 		showStats   = flag.Bool("stats", envCfg.ShowStats, "Show database statistics and exit")
 		showVersion = flag.Bool("version", false, "Show version information and exit")
+		syncPush = flag.Bool("push", false, "Push local changes to remote Turso after sync")
+		syncPull = flag.Bool("pull", false, "Pull remote changes from Turso before sync")
 		verbose     = flag.Bool("verbose", envCfg.Verbose, "Enable verbose logging")
 	)
 
@@ -95,7 +97,12 @@ func main() {
 		os.Exit(exitNoInput)
 	}
 
-	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: *backend})
+	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
+		Backend:   *backend,
+		DBPath:    *dbPath,
+		RemoteURL: envCfg.RemoteURL,
+		AuthToken: envCfg.AuthToken,
+	})
 	if err != nil {
 		logger.Error("Failed to create CQRS stack", "error", err)
 		os.Exit(exitNoInput)
@@ -160,6 +167,15 @@ func main() {
 		},
 	}
 
+	if *syncPull {
+		changed, err := stack.Pull(ctx)
+		if err != nil {
+			logger.Warn("Pull failed (non-fatal)", "error", err)
+		} else if changed {
+			logger.Info("Pulled remote changes")
+		}
+	}
+
 	if *conflictAware {
 		cas := synclib.NewConflictAwareSyncer(baseSyncer)
 
@@ -195,6 +211,14 @@ func main() {
 		result.Skipped,
 		result.Errors,
 	)
+
+	if *syncPush {
+		if err := stack.Push(ctx); err != nil {
+			logger.Warn("Push failed (non-fatal)", "error", err)
+		} else {
+			logger.Info("Pushed local changes to remote")
+		}
+	}
 }
 
 func exitCodeForError(err error) int {

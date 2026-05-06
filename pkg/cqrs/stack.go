@@ -7,11 +7,15 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/event"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory"
+	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 type CQRSConfig struct {
-	Backend string
+	Backend   string
+	DBPath    string
+	RemoteURL string
+	AuthToken string
 }
 
 type CQRSStack struct {
@@ -19,15 +23,20 @@ type CQRSStack struct {
 	Bus       event.Bus
 	Repo      *decider.Repository[SyncItemState]
 	ReadModel ReadModel
+	syncDB    *cqrsstorage.TursoSyncDB
 }
 
 func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
-	store, bus, err := createStoreAndBus(cfg)
+	store, bus, syncDB, err := createStoreAndBus(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	rm := NewMemoryReadModel()
+	rm, err := createReadModel(cfg, syncDB)
+	if err != nil {
+		return nil, err
+	}
+
 	proj := NewProjector(rm)
 
 	err = bus.SubscribeAll(proj.HandleEvent)
@@ -50,7 +59,24 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		Bus:       bus,
 		Repo:      repo,
 		ReadModel: rm,
+		syncDB:    syncDB,
 	}, nil
+}
+
+func (s *CQRSStack) Push(ctx context.Context) error {
+	if s.syncDB == nil {
+		return nil
+	}
+
+	return s.syncDB.Push(ctx)
+}
+
+func (s *CQRSStack) Pull(ctx context.Context) (bool, error) {
+	if s.syncDB == nil {
+		return false, nil
+	}
+
+	return s.syncDB.Pull(ctx)
 }
 
 func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
@@ -122,16 +148,81 @@ func (s *CQRSStack) Close() error {
 	return s.Store.Close()
 }
 
-//nolint:ireturn
-func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, error) {
+func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
 	switch cfg.Backend {
 	case "memory", "":
-		return cqrsmemory.NewMemoryStore(), cqrsmemory.NewMemoryBus(), nil
+		return cqrsmemory.NewMemoryStore(), cqrsmemory.NewMemoryBus(), nil, nil
+	case "turso":
+		return createTursoStore(cfg)
 	default:
-		//nolint:err113 // error is specific to input, not a generic failure
-		return nil, nil, fmt.Errorf(
-			"unknown backend: %s",
-			cfg.Backend,
-		)
+		return nil, nil, nil, fmt.Errorf("unknown backend: %s", cfg.Backend)
 	}
+}
+
+func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
+	if cfg.RemoteURL != "" {
+		ctx := context.Background()
+		syncDB, err := cqrsstorage.OpenTursoSync(ctx, cfg.DBPath, cfg.RemoteURL, cfg.AuthToken)
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
+		}
+
+		if _, err := syncDB.Exec(cqrsstorage.SQLiteSchema()); err != nil {
+			_ = syncDB.Close()
+			return nil, nil, nil, fmt.Errorf("create event store schema: %w", err)
+		}
+
+		store, err := cqrsstorage.NewSQLiteEventStore(syncDB.DB)
+		if err != nil {
+			_ = syncDB.Close()
+			return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
+		}
+
+		return store, cqrsmemory.NewMemoryBus(), syncDB, nil
+	}
+
+	dbPath := cfg.DBPath
+	if dbPath == "" {
+		dbPath = ":memory:"
+	}
+
+	db, err := cqrsstorage.OpenTurso(dbPath)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("open turso database: %w", err)
+	}
+
+	if _, err := db.Exec(cqrsstorage.SQLiteSchema()); err != nil {
+		_ = db.Close()
+		return nil, nil, nil, fmt.Errorf("create event store schema: %w", err)
+	}
+
+	store, err := cqrsstorage.NewSQLiteEventStore(db)
+	if err != nil {
+		_ = db.Close()
+		return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
+	}
+
+	return store, cqrsmemory.NewMemoryBus(), nil, nil
+}
+
+func createReadModel(cfg CQRSConfig, syncDB *cqrsstorage.TursoSyncDB) (ReadModel, error) {
+	if cfg.Backend == "turso" {
+		if syncDB != nil {
+			return NewTursoReadModel(syncDB.DB)
+		}
+
+		dbPath := cfg.DBPath
+		if dbPath == "" {
+			dbPath = ":memory:"
+		}
+
+		readDB, err := cqrsstorage.OpenTurso(dbPath)
+		if err != nil {
+			return nil, fmt.Errorf("open turso read model db: %w", err)
+		}
+
+		return NewTursoReadModel(readDB)
+	}
+
+	return NewMemoryReadModel(), nil
 }

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"sort"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -286,9 +285,3 @@ func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 
 // Ensure TursoReadModel implements ReadModel.
 var _ ReadModel = (*TursoReadModel)(nil)
-
-// Ensure unused imports are consumed.
-var (
-	_ = sort.Strings
-	_ time.Time
-)
