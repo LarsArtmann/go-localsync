@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 
+	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -110,7 +111,7 @@ func (s *ConflictAwareSyncer) processItem(
 		return
 	}
 
-	if s.isConflict(existing, item) {
+	if cqrs.HasChanged(existing, item) {
 		s.resolveConflict(ctx, existing, item, cr)
 	} else {
 		cr.Skipped++
@@ -155,11 +156,4 @@ func (s *ConflictAwareSyncer) resolveConflict(
 
 		s.logger.Debug("Resolved conflict: local wins, skipping write", "id", remote.ID)
 	}
-}
-
-func (s *ConflictAwareSyncer) isConflict(local, remote *provider.Item) bool {
-	return local.UpdatedAt != remote.UpdatedAt ||
-		local.Type != remote.Type ||
-		local.ActorLogin != remote.ActorLogin ||
-		local.RepoName != remote.RepoName
 }

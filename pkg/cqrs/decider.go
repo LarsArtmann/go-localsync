@@ -87,7 +87,7 @@ func DecideSync(
 			return syncEvents(item, aggID, currentVersion, false), nil
 		}
 
-		if !hasChanged(state.Item, item) {
+		if !HasChanged(state.Item, item) {
 			return nil, nil
 		}
 
@@ -190,7 +190,7 @@ func itemToPayload(item *provider.Item) ItemSyncedPayload {
 	}
 }
 
-func hasChanged(local, remote *provider.Item) bool {
+func HasChanged(local, remote *provider.Item) bool {
 	return local.UpdatedAt != remote.UpdatedAt ||
 		local.Type.Get() != remote.Type.Get() ||
 		local.ActorLogin.Get() != remote.ActorLogin.Get() ||

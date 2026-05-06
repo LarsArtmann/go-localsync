@@ -99,23 +99,31 @@ func (s *CQRSStack) SyncItems(
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
-		_, beforeVer, _ := s.Repo.Load(ctx, aggID, aggregateType)
+		var eventCount int
 
-		err := s.Repo.Execute(ctx, aggID, aggregateType, DecideSync(item))
+		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
+			events, err := DecideSync(item)(state, ver)
+			if err != nil {
+				return nil, err
+			}
+
+			eventCount = len(events)
+
+			return events, nil
+		}
+
+		err := s.Repo.Execute(ctx, aggID, aggregateType, countingDecide)
 		if err != nil {
 			errs++
 
 			continue
 		}
 
-		_, afterVer, _ := s.Repo.Load(ctx, aggID, aggregateType)
-
-		delta := int(afterVer) - int(beforeVer)
-		if delta > 0 {
+		if eventCount > 0 {
 			synced++
 
-			if delta > 1 {
-				conflicts += delta - 1
+			if eventCount > 1 {
+				conflicts += eventCount - 1
 			}
 		}
 	}

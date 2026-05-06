@@ -81,6 +81,27 @@ func TestFold_ItemSyncedOverwritesState(t *testing.T) {
 	assert.Equal(t, "IssueEvent", state.Item.Type.Get())
 }
 
+func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
+	t.Parallel()
+
+	item := testItem("123", "PushEvent")
+	item.ID = types.NewItemID()
+	originalID := item.ID.String()
+
+	events, err := DecideSync(item)(InitialState, 0)
+	require.NoError(t, err)
+	require.Len(t, events, 1)
+
+	var payload ItemSyncedPayload
+	require.NoError(t, json.Unmarshal(events[0].Payload(), &payload))
+	assert.Equal(t, originalID, payload.ItemID, "ItemID must be serialized into the event payload")
+
+	state, err := Fold(InitialState, events[0])
+	require.NoError(t, err)
+	require.NotNil(t, state.Item)
+	assert.Equal(t, originalID, state.Item.ID.String(), "ItemID must survive Fold round-trip")
+}
+
 func TestFold_ItemDeleted(t *testing.T) {
 	t.Parallel()
 
