@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
@@ -37,15 +38,17 @@ type TursoReadModel struct {
 
 func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 	if db == nil {
-		return nil, errors.New("turso read model: db is nil")
+		return nil, fmt.Errorf("turso read model: %w", pkgerrors.ErrDBNil)
 	}
 
-	_, err := db.Exec(syncItemsDDL)
+	ctx := context.Background()
+
+	_, err := db.ExecContext(ctx, syncItemsDDL)
 	if err != nil {
 		return nil, fmt.Errorf("create sync_items table: %w", err)
 	}
 
-	_, err = db.Exec(syncItemsIndexes)
+	_, err = db.ExecContext(ctx, syncItemsIndexes)
 	if err != nil {
 		return nil, fmt.Errorf("create sync_items indexes: %w", err)
 	}
@@ -62,7 +65,7 @@ func (m *TursoReadModel) Get(ctx context.Context, source, sourceID string) (*pro
 	item, err := scanItem(row)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+			return nil, pkgerrors.ErrNotFound
 		}
 
 		return nil, fmt.Errorf("get item %s/%s: %w", source, sourceID, err)
@@ -119,6 +122,11 @@ func (m *TursoReadModel) GetTypes(ctx context.Context) ([]string, error) {
 		}
 
 		types = append(types, t)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, fmt.Errorf("iterate types: %w", err)
 	}
 
 	if types == nil {
@@ -223,9 +231,11 @@ func appendFilterArgs(query *string, filter ItemFilter) []any {
 }
 
 func scanItem(row *sql.Row) (*provider.Item, error) {
-	var itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-	var rawJSON []byte
-	var createdAt, updatedAt time.Time
+	var (
+		itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
+		rawJSON                                                                               []byte
+		createdAt, updatedAt                                                                  time.Time
+	)
 
 	err := row.Scan(&itemIDStr, &source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
 		&repoName, &repoURL, &createdAt, &updatedAt, &rawJSON)
@@ -252,9 +262,11 @@ func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 	var items []*provider.Item
 
 	for rows.Next() {
-		var itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-		var rawJSON []byte
-		var createdAt, updatedAt time.Time
+		var (
+			itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
+			rawJSON                                                                               []byte
+			createdAt, updatedAt                                                                  time.Time
+		)
 
 		err := rows.Scan(&itemIDStr, &source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
 			&repoName, &repoURL, &createdAt, &updatedAt, &rawJSON)

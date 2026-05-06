@@ -137,7 +137,18 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 		return nil, err
 	}
 
-	items, err := s.stack.ReadModel.List(ctx, cqrs.ItemFilter{Limit: 1})
+	items, err := s.stack.ReadModel.List(
+		ctx,
+		cqrs.ItemFilter{
+			Type:       nil,
+			ActorLogin: nil,
+			RepoName:   nil,
+			Source:     nil,
+			Since:      nil,
+			Limit:      1,
+			Offset:     0,
+		},
+	)
 	if err != nil {
 		return nil, pkgerrors.Wrapf(err, "failed to list items for incremental sync")
 	}
@@ -160,10 +171,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 		)
 	}
 
-	syncResult, err := s.processIncrementalItems(ctx, latestItem, result.Items)
-	if err != nil {
-		return nil, err
-	}
+	syncResult := s.processIncrementalItems(ctx, latestItem, result.Items)
 
 	if opts.OnProgress != nil {
 		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
@@ -196,14 +204,25 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	typeCounts := make(map[string]int64)
 
 	for _, t := range types {
-		c, err := s.stack.ReadModel.Count(ctx, cqrs.ItemFilter{Type: &t})
+		count, err := s.stack.ReadModel.Count(
+			ctx,
+			cqrs.ItemFilter{
+				Type:       &t,
+				ActorLogin: nil,
+				RepoName:   nil,
+				Source:     nil,
+				Since:      nil,
+				Limit:      0,
+				Offset:     0,
+			},
+		)
 		if err != nil {
 			s.logger.Warn("Failed to count items by type", "type", t, "error", err)
 
 			continue
 		}
 
-		typeCounts[t] = c
+		typeCounts[t] = count
 	}
 
 	return &Stats{
@@ -221,7 +240,7 @@ func (s *Syncer) processIncrementalItems(
 	ctx context.Context,
 	latestItem *provider.Item,
 	items []*provider.Item,
-) (*SyncResult, error) {
+) *SyncResult {
 	syncResult := &SyncResult{Fetched: len(items), Skipped: 0, Errors: 0}
 
 	cutoff := time.Time{}
@@ -257,5 +276,5 @@ func (s *Syncer) processIncrementalItems(
 		syncResult.Skipped += len(toSync) - synced - errs
 	}
 
-	return syncResult, nil
+	return syncResult
 }

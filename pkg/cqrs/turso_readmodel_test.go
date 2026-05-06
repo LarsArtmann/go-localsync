@@ -2,10 +2,12 @@ package cqrs
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/storage"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
@@ -88,8 +90,11 @@ func TestTursoReadModel_Get_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	got, err := rm.Get(ctx, "github", "nonexistent")
-	if err != nil {
-		t.Fatalf("Get: %v", err)
+	if err == nil {
+		t.Fatal("expected ErrNotFound, got nil")
+	}
+	if !errors.Is(err, pkgerrors.ErrNotFound) {
+		t.Fatalf("Get: got %v, want ErrNotFound", err)
 	}
 
 	if got != nil {

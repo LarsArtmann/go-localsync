@@ -5,14 +5,16 @@ import (
 )
 
 var (
-	ErrNotFound     = errors.New("not found")
-	ErrRateLimited  = errors.New("rate limited")
-	ErrInvalidToken = errors.New("invalid token")
-	ErrUserNotFound = errors.New("user not found")
-	ErrSyncFailed   = errors.New("sync failed")
-	ErrDatabase     = errors.New("database error")
-	ErrConflict     = errors.New("conflict detected")
-	ErrInvalidInput = errors.New("invalid input")
+	ErrNotFound       = errors.New("not found")
+	ErrRateLimited    = errors.New("rate limited")
+	ErrInvalidToken   = errors.New("invalid token")
+	ErrUserNotFound   = errors.New("user not found")
+	ErrSyncFailed     = errors.New("sync failed")
+	ErrDatabase       = errors.New("database error")
+	ErrConflict       = errors.New("conflict detected")
+	ErrInvalidInput   = errors.New("invalid input")
+	ErrUnknownBackend = errors.New("unknown backend")
+	ErrDBNil          = errors.New("database is nil")
 )
 
 // WithDetail wraps err with a detail string for debugging context.
