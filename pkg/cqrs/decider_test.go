@@ -210,6 +210,39 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 	assert.Equal(t, EventItemSynced, events[1].Type())
 }
 
+func TestDecideSync_ConflictTimestamps(t *testing.T) {
+	t.Parallel()
+
+	localTime := time.Now().Truncate(time.Millisecond)
+	remoteTime := localTime.Add(2 * time.Hour)
+
+	item := testItem("123", "PushEvent")
+	item.UpdatedAt = remoteTime
+
+	state := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: types.NewExternalID("123"),
+			Source:     types.NewProviderID("github"),
+			Type:       types.NewEventTypeID("PushEvent"),
+			UpdatedAt:  localTime,
+		},
+	}
+
+	events, err := DecideSync(item)(state, 1)
+	require.NoError(t, err)
+	require.Len(t, events, 2)
+
+	var conflictPayload ItemConflictFoundPayload
+	require.NoError(t, json.Unmarshal(events[0].Payload(), &conflictPayload))
+
+	assert.NotEqual(t, conflictPayload.LocalUpdatedAt, conflictPayload.RemoteUpdatedAt,
+		"LocalUpdatedAt and RemoteUpdatedAt must differ in conflict")
+	assert.Equal(t, localTime.UnixNano(), conflictPayload.LocalUpdatedAt,
+		"LocalUpdatedAt must come from existing state")
+	assert.Equal(t, remoteTime.UnixNano(), conflictPayload.RemoteUpdatedAt,
+		"RemoteUpdatedAt must come from incoming item")
+}
+
 func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 	t.Parallel()
 

@@ -3,6 +3,7 @@ package cqrs
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
 	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
@@ -84,14 +85,14 @@ func DecideSync(
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
 		if state.Deleted || state.IsNew() {
-			return syncEvents(item, aggID, currentVersion, false), nil
+			return syncEvents(item, aggID, currentVersion, false, time.Time{}), nil
 		}
 
 		if !HasChanged(state.Item, item) {
 			return nil, nil
 		}
 
-		return syncEvents(item, aggID, currentVersion, true), nil
+		return syncEvents(item, aggID, currentVersion, true, state.Item.UpdatedAt), nil
 	}
 }
 
@@ -125,6 +126,7 @@ func syncEvents(
 	aggID id.AggregateID,
 	version event.Version,
 	isConflict bool,
+	localUpdatedAt time.Time,
 ) []event.Event {
 	events := make([]event.Event, 0, syncEventsInitialCap)
 	ver := int(version)
@@ -133,7 +135,7 @@ func syncEvents(
 		evt, err := newEvent(EventItemConflictFound, aggID, ver+1, ItemConflictFoundPayload{
 			Source:          item.Source.Get(),
 			SourceID:        item.ExternalID.Get(),
-			LocalUpdatedAt:  unixNano(item.UpdatedAt),
+			LocalUpdatedAt:  unixNano(localUpdatedAt),
 			RemoteUpdatedAt: unixNano(item.UpdatedAt),
 			Winner:          "remote",
 		})
