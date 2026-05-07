@@ -107,8 +107,8 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	}
 
 	synced, _, errs := s.stack.SyncItems(ctx, valid)
-	syncResult.Errors = errs + (len(valid) - synced - errs)
-	syncResult.Skipped = len(valid) - synced
+	syncResult.Errors += errs
+	syncResult.Skipped = len(valid) - synced - errs
 
 	if opts.OnProgress != nil {
 		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
