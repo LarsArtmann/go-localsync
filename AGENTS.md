@@ -168,16 +168,16 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 
 ## Dependencies
 
-| Dependency                    | Purpose                                                                                 |
-| ----------------------------- | --------------------------------------------------------------------------------------- |
-| `go-cqrs-lite`                | CQRS library with event sourcing, branded IDs, catalog — **NOT yet imported** (planned) |
-| `go-cqrs-lite/sync`            | CRDT primitives (VectorClock, LWW, ConflictResolver) — available but not used; go-localsync's single-source sync doesn't need vector clocks |
-| `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                        |
-| `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                          |
-| `cockroachdb/errors`          | Sentinel errors with detail wrapping                                                    |
-| `go-github/v69`               | GitHub API client                                                                       |
-| `turso.tech/database/tursogo` | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go)   |
-| `charmbracelet/log`           | Structured logging                                                                      |
+| Dependency                    | Purpose                                                                                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `go-cqrs-lite`                | CQRS library with event sourcing, branded IDs, catalog — **NOT yet imported** (planned)                                                     |
+| `go-cqrs-lite/sync`           | CRDT primitives (VectorClock, LWW, ConflictResolver) — available but not used; go-localsync's single-source sync doesn't need vector clocks |
+| `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                                                                            |
+| `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                                                                              |
+| `cockroachdb/errors`          | Sentinel errors with detail wrapping                                                                                                        |
+| `go-github/v69`               | GitHub API client                                                                                                                           |
+| `turso.tech/database/tursogo` | Turso Go client — embedded local + remote sync (replaces deprecated libsql-client-go)                                                       |
+| `charmbracelet/log`           | Structured logging                                                                                                                          |
 
 ## go-cqrs-lite Integration Status
 

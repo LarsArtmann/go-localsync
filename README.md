@@ -9,14 +9,14 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 
 ## Overview
 
-| Component               | Description                                                                                      |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)          |
-| **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload                     |
-| **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                  |
-| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy |
-| **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)                 |
-| **Schema Migrations**   | Version-tracked database migrations with automatic application on startup                        |
+| Component               | Description                                                                             |
+| ----------------------- | --------------------------------------------------------------------------------------- |
+| **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.) |
+| **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload            |
+| **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry         |
+| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy                            |
+| **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)        |
+| **Schema Migrations**   | Version-tracked database migrations with automatic application on startup               |
 
 ## Who is this for?
 
@@ -273,11 +273,11 @@ go test -cover ./...   # Coverage (requires Go 1.26.1 toolchain)
 
 ### When to Use Which
 
-| Need                                                                     | Use                              |
-| ------------------------------------------------------------------------ | -------------------------------- |
-| Sync external API data (GitHub, Jira, etc.) to local SQLite              | **go-localsync**                 |
-| Build a local-first application with event sourcing and CQRS             | **go-cqrs-lite**                 |
-| HTTP endpoints with HTMX, templ, Casbin auth                             | **cqrs-htmx**                    |
+| Need                                                         | Use              |
+| ------------------------------------------------------------ | ---------------- |
+| Sync external API data (GitHub, Jira, etc.) to local SQLite  | **go-localsync** |
+| Build a local-first application with event sourcing and CQRS | **go-cqrs-lite** |
+| HTTP endpoints with HTMX, templ, Casbin auth                 | **cqrs-htmx**    |
 
 ## License
 
