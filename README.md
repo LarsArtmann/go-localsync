@@ -14,7 +14,7 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 | **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)          |
 | **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload                     |
 | **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                  |
-| **Conflict-Aware Sync** | CRDT-backed conflict detection via [go-localfirst](https://github.com/larsartmann/go-localfirst) |
+| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy |
 | **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)                 |
 | **Schema Migrations**   | Version-tracked database migrations with automatic application on startup                        |
 
@@ -144,7 +144,7 @@ type Storage interface {
 
 ## Conflict-Aware Sync
 
-For multi-device or multi-source scenarios, use `ConflictAwareSyncer` which leverages [go-localfirst](https://github.com/larsartmann/go-localfirst) CRDT primitives (vector clocks, LWW resolution):
+For multi-device or multi-source scenarios, use `ConflictAwareSyncer` which detects conflicts via timestamp comparison and resolves with a remote-wins strategy:
 
 ```go
 baseSyncer := sync.NewSyncer(ghProvider, stack, nil)
@@ -263,30 +263,21 @@ go test -cover ./...   # Coverage (requires Go 1.26.1 toolchain)
 
 ## Related Projects
 
-### `go-localfirst` — Local-First Application Framework
+### `go-cqrs-lite` — CQRS Framework
 
-[go-localfirst](https://github.com/larsartmann/go-localfirst) is a full local-first application framework with HTTP server, WebSocket sync, event sourcing, and Pebble storage. Its `pkg/sync` package provides the CRDT primitives (vector clocks, LWW resolution) that `go-localsync` uses for conflict-aware sync.
+[go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) provides the core CQRS framework (event sourcing, decider pattern, dispatchers, projections) that go-localsync builds on.
 
-### `go-localfirst/pkg/sync` — Shared CRDT Primitives
+### `cqrs-htmx` — HTTP Adapter
 
-Both projects share the same CRDT primitives from `go-localfirst/pkg/sync`:
-
-```go
-import pkgsync "github.com/larsartmann/go-localfirst/pkg/sync"
-
-vc := pkgsync.NewVectorClock()
-vc.Increment("node-1")
-resolver := pkgsync.NewLWWResolver[*MyType](func(t *MyType) time.Time { return t.UpdatedAt })
-```
+[cqrs-htmx](https://github.com/larsartmann/cqrs-htmx) provides HTMX-aware HTTP integration for go-cqrs-lite applications.
 
 ### When to Use Which
 
 | Need                                                                     | Use                              |
 | ------------------------------------------------------------------------ | -------------------------------- |
-| Build a local-first application (server, WebSocket sync, event sourcing) | **go-localfirst**                |
-| Sync primitives (vector clocks, conflict resolution) in any Go project   | **go-localfirst/pkg/sync**       |
 | Sync external API data (GitHub, Jira, etc.) to local SQLite              | **go-localsync**                 |
-| Both: local-first app + external data aggregation                        | Use both — they share `pkg/sync` |
+| Build a local-first application with event sourcing and CQRS             | **go-cqrs-lite**                 |
+| HTTP endpoints with HTMX, templ, Casbin auth                             | **cqrs-htmx**                    |
 
 ## License
 

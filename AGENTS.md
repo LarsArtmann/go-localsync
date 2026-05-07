@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It supports conflict-aware sync via go-localfirst CRDT primitives and uses branded IDs from go-branded-id for compile-time type safety.
+Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It supports conflict-aware sync via timestamp-based conflict detection and uses branded IDs from go-branded-id for compile-time type safety.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                           |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                        |
 | `pkg/storage/`              | Storage abstraction (pluggable: SQLite, Turso, in-memory) — legacy, to be replaced by CQRS                      |
-| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (CRDT-aware via go-localfirst)                                          |
+| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (timestamp-based conflict detection)                                    |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`) |
 | `pkg/errors/`               | Sentinel errors using cockroachdb/errors (`ErrNotFound`, `ErrStorage`, `ErrRateLimited`, etc.)                  |
 | `pkg/testhelpers/`          | Shared test mocks and factories                                                                                 |
@@ -65,7 +65,6 @@ go-localsync has a parallel CQRS path alongside the legacy CRUD storage layer.
    go 1.26.1
    use .
    use (
-       ../go-localfirst
        ../go-branded-id
    )
    ```
@@ -172,7 +171,7 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 | Dependency                    | Purpose                                                                                 |
 | ----------------------------- | --------------------------------------------------------------------------------------- |
 | `go-cqrs-lite`                | CQRS library with event sourcing, branded IDs, catalog — **NOT yet imported** (planned) |
-| `go-localfirst`               | CRDT primitives (`VectorClock`, `LWWResolver[T]`) for conflict-aware sync               |
+| `go-localfirst`               | ~~CRDT primitives~~ — not actually imported; conflict resolution is inline timestamp comparison |
 | `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                        |
 | `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                          |
 | `cockroachdb/errors`          | Sentinel errors with detail wrapping                                                    |
