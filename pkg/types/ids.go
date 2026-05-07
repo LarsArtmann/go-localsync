@@ -5,14 +5,6 @@
 // All entity identifiers use ULID as the value type, aligning with go-cqrs-lite's
 // id.Of[T] which wraps cbid.ID[T, ulid.ULID]. External provider IDs (strings from
 // GitHub, GitLab, etc.) are stored as attributes via ExternalID, not as entity IDs.
-//
-// # Usage
-//
-//	itemID := types.NewItemID()
-//	externalID := types.NewExternalID("1234567890")
-//
-//	// This is a compile error - cannot use ItemID where ActorID is expected:
-//	// ProcessActor(itemID) // ERROR: type mismatch
 package types
 
 import (
@@ -24,8 +16,6 @@ import (
 )
 
 type (
-	// EventBrand distinguishes EventID from other identifier types.
-	EventBrand struct{}
 	// ItemBrand distinguishes ItemID from other identifier types.
 	ItemBrand struct{}
 	// ExternalBrand distinguishes ExternalID from other identifier types.
@@ -41,9 +31,6 @@ type (
 )
 
 type (
-	// EventID is the internal database identifier for events using ULID.
-	// Example: "01H0G0K1P1V2J3M4N5O6P7Q8R9" (ULID, time-sortable unique identifier).
-	EventID = id.ID[EventBrand, ulid.ULID]
 	// ItemID is the internal ULID-based identifier for sync items.
 	// Aligned with go-cqrs-lite's id.Of[T] which uses ULID-only identifiers.
 	ItemID = id.ID[ItemBrand, ulid.ULID]
@@ -63,16 +50,6 @@ type (
 	// Example: "PushEvent", "CreateEvent".
 	EventTypeID = id.ID[EventTypeBrand, string]
 )
-
-// NewEventID creates a new EventID with a freshly generated ULID.
-func NewEventID() EventID {
-	return id.NewID[EventBrand](ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader))
-}
-
-// MustParseEventID parses a ULID string into an EventID. Panics on invalid input.
-func MustParseEventID(s string) EventID {
-	return id.NewID[EventBrand](ulid.MustParse(s))
-}
 
 // NewItemID creates a new ItemID with a freshly generated ULID.
 func NewItemID() ItemID {

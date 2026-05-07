@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync  
-**Last Updated:** 2026-04-08
+**Last Updated:** 2026-05-07
 
 ## Overview
 
@@ -81,14 +81,13 @@ Aspirational features and improvements with no fixed timeline. These are planned
 ### Code Quality
 
 - [ ] **Migrate testify→Ginkgo/GOmega**  
-       **Source:** 8 test files across `pkg/storage`, `pkg/sync`, `pkg/providers/github`  
-       **Description:** Pre-commit hooks ban testify. All 48 tests use it.  
+       **Source:** Test files across `pkg/sync`, `pkg/providers/github`  
+       **Description:** Pre-commit hooks ban testify. Many tests use it.  
        **Context:** ~3h effort. Unblocks pre-commit hooks.
 
-- [ ] **Standardize null string conversion**  
-       **Source:** `pkg/storage/interface.go`  
-       **Description:** Consider using generics or code generation for NullString conversions.  
-       **Context:** Current helper functions `toNullString`/`fromNullString` are repetitive.
+- [ ] **Standardize null string conversion**
+       **Source:** `pkg/cqrs/turso_readmodel.go`
+       **Description:** Consider using generics or code generation for NullString conversions.
 
 - [ ] **Generalize github_id column name**  
        **Source:** `internal/db/`, `sql/queries/events.sql`  
@@ -109,10 +108,9 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 ### Missing Test Coverage
 
-- [ ] **Storage error path tests**  
-       **Source:** `pkg/storage/sqlite.go`  
-       **Description:** Coverage at 56%. Error paths for GetItemsByActor, GetItemsByRepo, CountByType untested.  
-       **Context:** Target 80%+.
+- [ ] **Storage error path tests**
+       **Source:** `pkg/cqrs/turso_readmodel.go`
+       **Description:** Error paths for GetItemsByActor, GetItemsByRepo, CountByType untested.
 
 - [ ] **CLI integration tests**  
        **Source:** `cmd/examples/github-sync/main.go`  

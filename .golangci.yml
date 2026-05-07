@@ -142,7 +142,6 @@ linters:
         - github\.com/google/go-github/v69/github\.
         - github\.com/larsartmann/go-localsync/pkg/provider\.
         - github\.com/larsartmann/go-localsync/pkg/sync\.
-        - github\.com/larsartmann/go-localsync/internal/db\.
         - database/sql\.Null
         - golang\.org/x/oauth2\.Token
     gocognit:
@@ -248,13 +247,6 @@ linters:
           - mnd
           - golines
           - errorlint
-      - path: pkg/storage/sqlite\.go
-        linters:
-          - wrapcheck
-          - golines
-      - path: pkg/storage/sqlite_test\.go
-        linters:
-          - funlen
       - path: pkg/sync/sync\.go
         linters:
           - wrapcheck

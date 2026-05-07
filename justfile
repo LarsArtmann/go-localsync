@@ -44,9 +44,6 @@ dev *args: build
 install: build
     cp bin/gh-sync ~/bin/
 
-sqlc:
-    sqlc generate
-
 version:
     @echo "go-localsync"
     @go version

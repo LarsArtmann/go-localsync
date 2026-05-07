@@ -52,8 +52,8 @@ import (
     "context"
     "log"
 
+    "github.com/larsartmann/go-localsync/pkg/cqrs"
     "github.com/larsartmann/go-localsync/pkg/providers/github"
-    "github.com/larsartmann/go-localsync/pkg/storage"
     "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
@@ -63,15 +63,15 @@ func main() {
     // Create a provider (GitHub built-in)
     ghProvider := github.NewClient("your-github-token")
 
-    // Open storage (creates DB + runs migrations automatically)
-    store, err := storage.Open("events.db")
+    // Create the CQRS stack (event store + read model)
+    stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
     if err != nil {
         log.Fatal(err)
     }
-    defer store.Close()
+    defer stack.Close()
 
     // Sync
-    syncer := sync.NewSyncer(ghProvider, store, nil)
+    syncer := sync.NewSyncer(ghProvider, stack, nil)
     result, err := syncer.SyncIncremental(ctx, &sync.SyncOptions{
         Source:   "username",
         MaxPages: 10,
@@ -147,10 +147,8 @@ type Storage interface {
 For multi-device or multi-source scenarios, use `ConflictAwareSyncer` which leverages [go-localfirst](https://github.com/larsartmann/go-localfirst) CRDT primitives (vector clocks, LWW resolution):
 
 ```go
-baseSyncer := sync.NewSyncer(ghProvider, store, nil)
-conflictSyncer := sync.NewConflictAwareSyncer(baseSyncer,
-    sync.WithNodeID("device-1"),
-)
+baseSyncer := sync.NewSyncer(ghProvider, stack, nil)
+conflictSyncer := sync.NewConflictAwareSyncer(baseSyncer)
 result, err := conflictSyncer.SyncWithConflictDetection(ctx, &sync.SyncOptions{
     Source: "username",
 })

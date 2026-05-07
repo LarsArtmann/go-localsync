@@ -81,56 +81,6 @@ func TestItemIDIsZero(t *testing.T) {
 	}
 }
 
-func TestNewEventID(t *testing.T) {
-	t.Parallel()
-
-	got := NewEventID()
-	if got.Get().IsZero() {
-		t.Error("expected non-zero ULID")
-	}
-
-	s := got.String()
-	if len(s) != 26 {
-		t.Errorf("expected 26-char ULID string, got %d chars: %s", len(s), s)
-	}
-}
-
-func TestMustParseEventID(t *testing.T) {
-	t.Parallel()
-
-	original := NewEventID()
-	parsed := MustParseEventID(original.String())
-
-	if !original.Equal(parsed) {
-		t.Errorf("expected %s, got %s", original.String(), parsed.String())
-	}
-}
-
-func TestMustParseEventID_panics(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("expected panic for invalid ULID string")
-		}
-	}()
-
-	MustParseEventID("not-a-valid-ulid")
-}
-
-func TestEventIDIsZero(t *testing.T) {
-	t.Parallel()
-
-	var zero EventID
-	if !zero.IsZero() {
-		t.Error("expected zero EventID to be zero")
-	}
-
-	if NewEventID().IsZero() {
-		t.Error("expected new EventID to not be zero")
-	}
-}
-
 func TestExternalIDIsZero(t *testing.T) {
 	t.Parallel()
 
