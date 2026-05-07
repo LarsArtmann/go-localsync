@@ -171,7 +171,7 @@ After running `sqlc generate`, all files in `internal/db/` are overwritten.
 | Dependency                    | Purpose                                                                                 |
 | ----------------------------- | --------------------------------------------------------------------------------------- |
 | `go-cqrs-lite`                | CQRS library with event sourcing, branded IDs, catalog — **NOT yet imported** (planned) |
-| `go-localfirst`               | ~~CRDT primitives~~ — not actually imported; conflict resolution is inline timestamp comparison |
+| `go-cqrs-lite/sync`            | CRDT primitives (VectorClock, LWW, ConflictResolver) — available but not used; go-localsync's single-source sync doesn't need vector clocks |
 | `go-branded-id`               | Branded phantom-type IDs for compile-time safety                                        |
 | `modernc.org/sqlite`          | Pure Go SQLite driver (no CGO)                                                          |
 | `cockroachdb/errors`          | Sentinel errors with detail wrapping                                                    |
