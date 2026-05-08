@@ -11,7 +11,6 @@ var (
 	ErrUserNotFound   = errors.New("user not found")
 	ErrSyncFailed     = errors.New("sync failed")
 	ErrDatabase       = errors.New("database error")
-	ErrConflict       = errors.New("conflict detected")
 	ErrInvalidInput   = errors.New("invalid input")
 	ErrUnknownBackend = errors.New("unknown backend")
 	ErrDBNil          = errors.New("database is nil")

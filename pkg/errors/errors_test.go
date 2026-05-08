@@ -19,7 +19,6 @@ func TestSentinelErrors(t *testing.T) {
 		{"ErrUserNotFound", ErrUserNotFound, "user not found"},
 		{"ErrSyncFailed", ErrSyncFailed, "sync failed"},
 		{"ErrDatabase", ErrDatabase, "database error"},
-		{"ErrConflict", ErrConflict, "conflict detected"},
 		{"ErrInvalidInput", ErrInvalidInput, "invalid input"},
 	}
 
