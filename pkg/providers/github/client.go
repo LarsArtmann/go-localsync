@@ -26,6 +26,8 @@ type Client struct {
 	retryConfig     provider.RetryConfig
 }
 
+var _ provider.Provider = (*Client)(nil)
+
 // NewClient creates a new GitHub provider client with the given token.
 func NewClient(token string) *Client {
 	ts := oauth2.StaticTokenSource(
