@@ -32,12 +32,6 @@ CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
 CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login)`
 
-// SchemaMigration returns the full DDL (table + indexes) for creating the sync_items schema.
-// Consumers should use this instead of copy-pasting the DDL.
-func SchemaMigration() string {
-	return SyncItemsDDL + SyncItemsIndexes
-}
-
 type TursoReadModel struct {
 	db *sql.DB
 }

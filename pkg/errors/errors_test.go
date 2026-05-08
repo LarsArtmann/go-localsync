@@ -20,6 +20,8 @@ func TestSentinelErrors(t *testing.T) {
 		{"ErrSyncFailed", ErrSyncFailed, "sync failed"},
 		{"ErrDatabase", ErrDatabase, "database error"},
 		{"ErrInvalidInput", ErrInvalidInput, "invalid input"},
+		{"ErrUnknownBackend", ErrUnknownBackend, "unknown backend"},
+		{"ErrDBNil", ErrDBNil, "database is nil"},
 	}
 
 	for _, s := range sentinels {
