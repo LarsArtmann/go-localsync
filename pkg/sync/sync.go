@@ -57,7 +57,8 @@ type Stats struct {
 }
 
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	if err := s.validateOpts(opts); err != nil {
+	err := s.validateOpts(opts)
+	if err != nil {
 		return nil, err
 	}
 
@@ -102,7 +103,8 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 }
 
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	if err := s.validateOpts(opts); err != nil {
+	err := s.validateOpts(opts)
+	if err != nil {
 		return nil, err
 	}
 

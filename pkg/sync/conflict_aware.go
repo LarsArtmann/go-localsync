@@ -39,7 +39,8 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	ctx context.Context,
 	opts *SyncOptions,
 ) (*ConflictResult, error) {
-	if err := s.validateOpts(opts); err != nil {
+	err := s.validateOpts(opts)
+	if err != nil {
 		return nil, err
 	}
 
@@ -120,7 +121,7 @@ func (s *ConflictAwareSyncer) syncItemWithErrorHandling(
 	item *provider.Item,
 	errMsg string,
 	cr *ConflictResult,
-) (hadError bool) {
+) bool {
 	err := s.stack.SyncItem(ctx, item)
 	if err != nil {
 		s.logError(errMsg, item, err, cr)

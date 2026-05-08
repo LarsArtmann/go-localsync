@@ -164,7 +164,6 @@ func (s *CQRSStack) Close() error {
 }
 
 //nolint:ireturn
-//nolint:ireturn
 func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
 	switch cfg.Backend {
 	case "memory", "":
@@ -189,6 +188,7 @@ func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Turs
 	return createTursoLocalStore(cfg)
 }
 
+//nolint:ireturn
 func createTursoRemoteStore(
 	cfg CQRSConfig,
 ) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
@@ -199,6 +199,7 @@ func createTursoRemoteStore(
 		return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
 	}
 
+	//nolint:noinlineerr
 	if err := initTursoSyncDB(ctx, syncDB); err != nil {
 		_ = syncDB.Close()
 
@@ -215,6 +216,7 @@ func createTursoRemoteStore(
 	return store, cqrsmemory.NewMemoryBus(), syncDB, nil
 }
 
+//nolint:ireturn
 func createTursoLocalStore(
 	cfg CQRSConfig,
 ) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
@@ -230,6 +232,7 @@ func createTursoLocalStore(
 
 	ctx := context.Background()
 
+	//nolint:noinlineerr
 	if err := initTursoDB(ctx, db); err != nil {
 		_ = db.Close()
 
