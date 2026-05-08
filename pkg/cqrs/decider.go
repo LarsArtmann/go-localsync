@@ -89,14 +89,14 @@ func DecideSync(
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
 		if state.Deleted || state.IsNew() {
-			return syncEvents(item, aggID, currentVersion, false, time.Time{}), nil
+			return syncEvents(item, aggID, currentVersion, false, time.Time{})
 		}
 
 		if !HasChanged(state.Item, item) {
 			return nil, nil
 		}
 
-		return syncEvents(item, aggID, currentVersion, true, state.Item.UpdatedAt), nil
+		return syncEvents(item, aggID, currentVersion, true, state.Item.UpdatedAt)
 	}
 }
 
@@ -131,7 +131,7 @@ func syncEvents(
 	version event.Version,
 	isConflict bool,
 	localUpdatedAt time.Time,
-) []event.Event {
+) ([]event.Event, error) {
 	events := make([]event.Event, 0, syncEventsInitialCap)
 	ver := int(version)
 
@@ -143,9 +143,11 @@ func syncEvents(
 			RemoteUpdatedAt: unixNano(item.UpdatedAt),
 			Winner:          "remote",
 		})
-		if err == nil {
-			events = append(events, evt)
+		if err != nil {
+			return nil, fmt.Errorf("create conflict event: %w", err)
 		}
+
+		events = append(events, evt)
 	}
 
 	evt, err := newEvent(
@@ -154,11 +156,13 @@ func syncEvents(
 		ver+len(events)+1,
 		itemToPayload(item),
 	)
-	if err == nil {
-		events = append(events, evt)
+	if err != nil {
+		return nil, fmt.Errorf("create sync event: %w", err)
 	}
 
-	return events
+	events = append(events, evt)
+
+	return events, nil
 }
 
 func newEvent(
