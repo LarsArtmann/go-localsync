@@ -3,6 +3,7 @@ package github_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -40,7 +41,12 @@ func (w *githubTestWorld) withRetryConfig() {
 func newGitHubTestClient(server *httptest.Server) *github.Client {
 	httpClient := &http.Client{}
 	client := github.NewClientWithHTTP(httpClient)
-	return client.WithBaseURL(server.URL)
+	c, err := client.WithBaseURL(server.URL)
+	if err != nil {
+		panic(fmt.Sprintf("WithBaseURL failed: %v", err))
+	}
+
+	return c
 }
 
 // newGitHubTestClientWithoutRateLimit creates a client with rate limiting disabled.

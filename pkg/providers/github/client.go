@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"time"
@@ -67,15 +68,20 @@ func (c *Client) WithRetryConfig(cfg provider.RetryConfig) *Client {
 }
 
 // WithBaseURL returns a copy of the client with the given base URL.
-func (c *Client) WithBaseURL(rawURL string) *Client {
+func (c *Client) WithBaseURL(rawURL string) (*Client, error) {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, fmt.Errorf("parse base URL %q: %w", rawURL, err)
+	}
+
 	next := &Client{
 		client:          c.client,
 		rateLimitConfig: c.rateLimitConfig,
 		retryConfig:     c.retryConfig,
 	}
-	next.client.BaseURL, _ = url.Parse(rawURL)
+	next.client.BaseURL = parsed
 
-	return next
+	return next, nil
 }
 
 // Name returns the provider identifier.
