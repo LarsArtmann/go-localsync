@@ -12,7 +12,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
-const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
+const SyncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	item_id TEXT NOT NULL DEFAULT '',
 	source TEXT NOT NULL,
 	source_id TEXT NOT NULL,
@@ -27,10 +27,16 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	PRIMARY KEY (source, source_id)
 )`
 
-const syncItemsIndexes = `
+const SyncItemsIndexes = `
 CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
 CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login)`
+
+// SchemaMigration returns the full DDL (table + indexes) for creating the sync_items schema.
+// Consumers should use this instead of copy-pasting the DDL.
+func SchemaMigration() string {
+	return SyncItemsDDL + SyncItemsIndexes
+}
 
 type TursoReadModel struct {
 	db *sql.DB
@@ -43,12 +49,12 @@ func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 
 	ctx := context.Background()
 
-	_, err := db.ExecContext(ctx, syncItemsDDL)
+	_, err := db.ExecContext(ctx, SyncItemsDDL)
 	if err != nil {
 		return nil, fmt.Errorf("create sync_items table: %w", err)
 	}
 
-	_, err = db.ExecContext(ctx, syncItemsIndexes)
+	_, err = db.ExecContext(ctx, SyncItemsIndexes)
 	if err != nil {
 		return nil, fmt.Errorf("create sync_items indexes: %w", err)
 	}
