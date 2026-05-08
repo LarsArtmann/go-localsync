@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type ReadModel interface {
@@ -18,10 +19,10 @@ type ReadModel interface {
 }
 
 type ItemFilter struct {
-	Type       *string
-	ActorLogin *string
-	RepoName   *string
-	Source     *string
+	Type       *types.EventTypeID
+	ActorLogin *types.ActorID
+	RepoName   *types.RepoID
+	Source     *types.ProviderID
 	Since      *time.Time
 	Limit      int
 	Offset     int

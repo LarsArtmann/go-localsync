@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -175,7 +176,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 	synced, _, _ := stack.SyncItems(ctx, items)
 	assert.Equal(t, 3, synced)
 
-	pushType := "PushEvent"
+	pushType := types.NewEventTypeID("PushEvent")
 	results, err := stack.ReadModel.List(ctx, ItemFilter{Type: &pushType})
 	require.NoError(t, err)
 	assert.Len(t, results, 2)

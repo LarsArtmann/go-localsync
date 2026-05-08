@@ -90,16 +90,18 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 		RepoName: types.NewRepoID("org/repo3"), CreatedAt: time.Now(),
 	}))
 
-	items, err := rm.List(ctx, ItemFilter{Type: &pushType})
+	pushTypeFilter := types.NewEventTypeID(pushType)
+	items, err := rm.List(ctx, ItemFilter{Type: &pushTypeFilter})
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 
-	items, err = rm.List(ctx, ItemFilter{Source: &github})
+	sourceFilter := types.NewProviderID(github)
+	items, err = rm.List(ctx, ItemFilter{Source: &sourceFilter})
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 
-	actor := "alice"
-	items, err = rm.List(ctx, ItemFilter{ActorLogin: &actor})
+	actorFilter := types.NewActorID("alice")
+	items, err = rm.List(ctx, ItemFilter{ActorLogin: &actorFilter})
 	require.NoError(t, err)
 	assert.Len(t, items, 2)
 
@@ -131,8 +133,8 @@ func TestMemoryReadModel_Count(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int64(2), count)
 
-	pushType := "PushEvent"
-	count, err = rm.Count(ctx, ItemFilter{Type: &pushType})
+	pushTypeFilter := types.NewEventTypeID("PushEvent")
+	count, err = rm.Count(ctx, ItemFilter{Type: &pushTypeFilter})
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), count)
 }

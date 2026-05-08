@@ -8,6 +8,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type Syncer struct {
@@ -111,13 +112,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	items, err := s.stack.ReadModel.List(
 		ctx,
 		cqrs.ItemFilter{
-			Type:       nil,
-			ActorLogin: nil,
-			RepoName:   nil,
-			Source:     nil,
-			Since:      nil,
-			Limit:      1,
-			Offset:     0,
+			Limit: 1,
 		},
 	)
 	if err != nil {
@@ -158,24 +153,19 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 		return nil, err
 	}
 
-	types, err := s.stack.GetTypes(ctx)
+	eventTypes, err := s.stack.GetTypes(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	typeCounts := make(map[string]int64)
 
-	for _, t := range types {
+	for _, t := range eventTypes {
+		eventType := types.NewEventTypeID(t)
 		count, err := s.stack.ReadModel.Count(
 			ctx,
 			cqrs.ItemFilter{
-				Type:       &t,
-				ActorLogin: nil,
-				RepoName:   nil,
-				Source:     nil,
-				Since:      nil,
-				Limit:      0,
-				Offset:     0,
+				Type: &eventType,
 			},
 		)
 		if err != nil {
@@ -189,7 +179,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 
 	return &Stats{
 		TotalItems: count,
-		ItemTypes:  types,
+		ItemTypes:  eventTypes,
 		TypeCounts: typeCounts,
 	}, nil
 }

@@ -133,7 +133,7 @@ func TestTursoReadModel_List_FilterByType(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
 
-	pushType := "PushEvent"
+	pushType := types.NewEventTypeID("PushEvent")
 	items, err := rm.List(ctx, ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("List: %v", err)
@@ -166,7 +166,7 @@ func TestTursoReadModel_Count(t *testing.T) {
 		t.Errorf("Count = %d, want 2", count)
 	}
 
-	pushType := "PushEvent"
+	pushType := types.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("Count filtered: %v", err)

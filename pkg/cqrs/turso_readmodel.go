@@ -200,25 +200,25 @@ func appendFilterArgs(query *string, filter ItemFilter) []any {
 	if filter.Type != nil {
 		*query += " AND type = ?"
 
-		args = append(args, *filter.Type)
+		args = append(args, filter.Type.Get())
 	}
 
 	if filter.ActorLogin != nil {
 		*query += " AND actor_login = ?"
 
-		args = append(args, *filter.ActorLogin)
+		args = append(args, filter.ActorLogin.Get())
 	}
 
 	if filter.RepoName != nil {
 		*query += " AND repo_name = ?"
 
-		args = append(args, *filter.RepoName)
+		args = append(args, filter.RepoName.Get())
 	}
 
 	if filter.Source != nil {
 		*query += " AND source = ?"
 
-		args = append(args, *filter.Source)
+		args = append(args, filter.Source.Get())
 	}
 
 	if filter.Since != nil {

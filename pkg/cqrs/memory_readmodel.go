@@ -110,19 +110,19 @@ func (m *MemoryReadModel) Len() int {
 }
 
 func matchesFilter(item *provider.Item, filter ItemFilter) bool {
-	if filter.Type != nil && item.Type.Get() != *filter.Type {
+	if filter.Type != nil && item.Type.Get() != filter.Type.Get() {
 		return false
 	}
 
-	if filter.ActorLogin != nil && item.ActorLogin.Get() != *filter.ActorLogin {
+	if filter.ActorLogin != nil && item.ActorLogin.Get() != filter.ActorLogin.Get() {
 		return false
 	}
 
-	if filter.RepoName != nil && item.RepoName.Get() != *filter.RepoName {
+	if filter.RepoName != nil && item.RepoName.Get() != filter.RepoName.Get() {
 		return false
 	}
 
-	if filter.Source != nil && item.Source.Get() != *filter.Source {
+	if filter.Source != nil && item.Source.Get() != filter.Source.Get() {
 		return false
 	}
 
