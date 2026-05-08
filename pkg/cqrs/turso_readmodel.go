@@ -230,63 +230,64 @@ func appendFilterArgs(query *string, filter ItemFilter) []any {
 	return args
 }
 
-func scanItem(row *sql.Row) (*provider.Item, error) {
-	var (
-		itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-		rawJSON                                                                               []byte
-		createdAt, updatedAt                                                                  time.Time
-	)
+type scannedItem struct {
+	itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
+	rawJSON                                                                               []byte
+	createdAt, updatedAt                                                                  time.Time
+}
 
-	err := row.Scan(&itemIDStr, &source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
-		&repoName, &repoURL, &createdAt, &updatedAt, &rawJSON)
+func (si *scannedItem) toItem() *provider.Item {
+	return &provider.Item{
+		ID:             parseItemID(si.itemIDStr),
+		ExternalID:     types.NewExternalID(si.sourceID),
+		Source:         types.NewProviderID(si.source),
+		Type:           types.NewEventTypeID(si.eventType),
+		ActorLogin:     types.NewActorID(si.actorLogin),
+		ActorAvatarURL: si.actorAvatarURL,
+		RepoName:       types.NewRepoID(si.repoName),
+		RepoURL:        si.repoURL,
+		CreatedAt:      si.createdAt,
+		UpdatedAt:      si.updatedAt,
+		RawJSON:        si.rawJSON,
+	}
+}
+
+func scanItem(row *sql.Row) (*provider.Item, error) {
+	si := &scannedItem{}
+
+	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.actorLogin,
+		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt, &si.rawJSON)
 	if err != nil {
 		return nil, err
 	}
 
-	return &provider.Item{
-		ID:             parseItemID(itemIDStr),
-		ExternalID:     types.NewExternalID(sourceID),
-		Source:         types.NewProviderID(source),
-		Type:           types.NewEventTypeID(eventType),
-		ActorLogin:     types.NewActorID(actorLogin),
-		ActorAvatarURL: actorAvatarURL,
-		RepoName:       types.NewRepoID(repoName),
-		RepoURL:        repoURL,
-		CreatedAt:      createdAt,
-		UpdatedAt:      updatedAt,
-		RawJSON:        rawJSON,
-	}, nil
+	return si.toItem(), nil
 }
 
 func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 	var items []*provider.Item
 
 	for rows.Next() {
-		var (
-			itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-			rawJSON                                                                               []byte
-			createdAt, updatedAt                                                                  time.Time
-		)
+		si := &scannedItem{}
 
-		err := rows.Scan(&itemIDStr, &source, &sourceID, &eventType, &actorLogin, &actorAvatarURL,
-			&repoName, &repoURL, &createdAt, &updatedAt, &rawJSON)
+		err := rows.Scan(
+			&si.itemIDStr,
+			&si.source,
+			&si.sourceID,
+			&si.eventType,
+			&si.actorLogin,
+			&si.actorAvatarURL,
+			&si.repoName,
+			&si.repoURL,
+			&si.createdAt,
+			&si.updatedAt,
+			&si.rawJSON,
+		)
 		if err != nil {
 			return nil, fmt.Errorf("scan item: %w", err)
 		}
 
-		items = append(items, &provider.Item{
-			ID:             parseItemID(itemIDStr),
-			ExternalID:     types.NewExternalID(sourceID),
-			Source:         types.NewProviderID(source),
-			Type:           types.NewEventTypeID(eventType),
-			ActorLogin:     types.NewActorID(actorLogin),
-			ActorAvatarURL: actorAvatarURL,
-			RepoName:       types.NewRepoID(repoName),
-			RepoURL:        repoURL,
-			CreatedAt:      createdAt,
-			UpdatedAt:      updatedAt,
-			RawJSON:        rawJSON,
-		})
+		items = append(items, si.toItem())
 	}
 
 	return items, nil

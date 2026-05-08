@@ -6,8 +6,6 @@ import (
 	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
-	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type Projector struct {
@@ -51,21 +49,7 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 		return fmt.Errorf("unmarshal ItemSyncedPayload: %w", err)
 	}
 
-	item := &provider.Item{
-		ID:             parseItemID(payload.ItemID),
-		ExternalID:     types.NewExternalID(payload.SourceID),
-		Source:         types.NewProviderID(payload.Source),
-		Type:           types.NewEventTypeID(payload.Type),
-		ActorLogin:     types.NewActorID(payload.ActorLogin),
-		ActorAvatarURL: payload.ActorAvatarURL,
-		RepoName:       types.NewRepoID(payload.RepoName),
-		RepoURL:        payload.RepoURL,
-		CreatedAt:      fromUnixNano(payload.CreatedAt),
-		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
-		RawJSON:        payload.RawJSON,
-	}
-
-	return p.readModel.Upsert(ctx, item)
+	return p.readModel.Upsert(ctx, itemFromPayload(payload))
 }
 
 func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) error {

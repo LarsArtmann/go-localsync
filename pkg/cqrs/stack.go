@@ -2,6 +2,7 @@ package cqrs
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
@@ -182,30 +183,41 @@ func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Tur
 //nolint:ireturn
 func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
 	if cfg.RemoteURL != "" {
-		ctx := context.Background()
-
-		syncDB, err := cqrsstorage.OpenTursoSync(ctx, cfg.DBPath, cfg.RemoteURL, cfg.AuthToken)
-		if err != nil {
-			return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
-		}
-
-		_, err = syncDB.ExecContext(ctx, cqrsstorage.SQLiteSchema())
-		if err != nil {
-			_ = syncDB.Close()
-
-			return nil, nil, nil, fmt.Errorf("create event store schema: %w", err)
-		}
-
-		store, err := cqrsstorage.NewSQLiteEventStore(syncDB.DB)
-		if err != nil {
-			_ = syncDB.Close()
-
-			return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
-		}
-
-		return store, cqrsmemory.NewMemoryBus(), syncDB, nil
+		return createTursoRemoteStore(cfg)
 	}
 
+	return createTursoLocalStore(cfg)
+}
+
+func createTursoRemoteStore(
+	cfg CQRSConfig,
+) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
+	ctx := context.Background()
+
+	syncDB, err := cqrsstorage.OpenTursoSync(ctx, cfg.DBPath, cfg.RemoteURL, cfg.AuthToken)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
+	}
+
+	if err := initTursoSyncDB(ctx, syncDB); err != nil {
+		_ = syncDB.Close()
+
+		return nil, nil, nil, err
+	}
+
+	store, err := cqrsstorage.NewSQLiteEventStore(syncDB.DB)
+	if err != nil {
+		_ = syncDB.Close()
+
+		return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
+	}
+
+	return store, cqrsmemory.NewMemoryBus(), syncDB, nil
+}
+
+func createTursoLocalStore(
+	cfg CQRSConfig,
+) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
 	dbPath := cfg.DBPath
 	if dbPath == "" {
 		dbPath = ":memory:"
@@ -218,11 +230,10 @@ func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Turs
 
 	ctx := context.Background()
 
-	_, err = db.ExecContext(ctx, cqrsstorage.SQLiteSchema())
-	if err != nil {
+	if err := initTursoDB(ctx, db); err != nil {
 		_ = db.Close()
 
-		return nil, nil, nil, fmt.Errorf("create event store schema: %w", err)
+		return nil, nil, nil, err
 	}
 
 	store, err := cqrsstorage.NewSQLiteEventStore(db)
@@ -233,6 +244,24 @@ func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Turs
 	}
 
 	return store, cqrsmemory.NewMemoryBus(), nil, nil
+}
+
+func initTursoSyncDB(ctx context.Context, syncDB *cqrsstorage.TursoSyncDB) error {
+	_, err := syncDB.ExecContext(ctx, cqrsstorage.SQLiteSchema())
+	if err != nil {
+		return fmt.Errorf("create event store schema: %w", err)
+	}
+
+	return nil
+}
+
+func initTursoDB(ctx context.Context, db *sql.DB) error {
+	_, err := db.ExecContext(ctx, cqrsstorage.SQLiteSchema())
+	if err != nil {
+		return fmt.Errorf("create event store schema: %w", err)
+	}
+
+	return nil
 }
 
 //nolint:ireturn

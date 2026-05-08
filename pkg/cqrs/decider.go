@@ -60,21 +60,25 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 	}
 
 	return SyncItemState{
-		Item: &provider.Item{
-			ID:             parseItemID(payload.ItemID),
-			ExternalID:     types.NewExternalID(payload.SourceID),
-			Source:         types.NewProviderID(payload.Source),
-			Type:           types.NewEventTypeID(payload.Type),
-			ActorLogin:     types.NewActorID(payload.ActorLogin),
-			ActorAvatarURL: payload.ActorAvatarURL,
-			RepoName:       types.NewRepoID(payload.RepoName),
-			RepoURL:        payload.RepoURL,
-			CreatedAt:      fromUnixNano(payload.CreatedAt),
-			UpdatedAt:      fromUnixNano(payload.UpdatedAt),
-			RawJSON:        payload.RawJSON,
-		},
+		Item:    itemFromPayload(payload),
 		Deleted: false,
 	}, nil
+}
+
+func itemFromPayload(payload ItemSyncedPayload) *provider.Item {
+	return &provider.Item{
+		ID:             parseItemID(payload.ItemID),
+		ExternalID:     types.NewExternalID(payload.SourceID),
+		Source:         types.NewProviderID(payload.Source),
+		Type:           types.NewEventTypeID(payload.Type),
+		ActorLogin:     types.NewActorID(payload.ActorLogin),
+		ActorAvatarURL: payload.ActorAvatarURL,
+		RepoName:       types.NewRepoID(payload.RepoName),
+		RepoURL:        payload.RepoURL,
+		CreatedAt:      fromUnixNano(payload.CreatedAt),
+		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
+		RawJSON:        payload.RawJSON,
+	}
 }
 
 // DecideSync returns a DecideFunc that syncs an incoming provider.Item.

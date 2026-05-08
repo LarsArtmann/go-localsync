@@ -57,42 +57,18 @@ type Stats struct {
 }
 
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	if opts == nil {
-		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
+	if err := s.validateOpts(opts); err != nil {
+		return nil, err
 	}
 
-	err := opts.Validate()
+	result, err := s.fetchItems(ctx, opts, "Starting sync", "sync")
 	if err != nil {
 		return nil, err
 	}
 
-	s.logger.Info("Starting sync", "provider", s.provider.Name(), "source", opts.Source)
-
-	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
-	if err != nil {
-		return nil, pkgerrors.Wrapf(
-			err,
-			"sync failed for source %q (maxPages=%d)",
-			opts.Source,
-			opts.MaxPages,
-		)
-	}
-
 	syncResult := &SyncResult{Fetched: len(result.Items), Skipped: 0, Errors: 0}
 
-	valid := make([]*provider.Item, 0, len(result.Items))
-	for _, item := range result.Items {
-		err := item.Validate()
-		if err != nil {
-			syncResult.Errors++
-
-			s.logger.Warn("Skipping invalid item", "id", item.ID, "error", err)
-
-			continue
-		}
-
-		valid = append(valid, item)
-	}
+	valid := s.filterValidItems(result.Items, syncResult)
 
 	if len(valid) == 0 {
 		s.logger.Info(
@@ -110,9 +86,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	syncResult.Errors += errs
 	syncResult.Skipped = len(valid) - synced - errs
 
-	if opts.OnProgress != nil {
-		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
-	}
+	s.reportProgress(opts, syncResult)
 
 	s.logger.Info(
 		"Sync completed",
@@ -128,12 +102,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 }
 
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	if opts == nil {
-		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
-	}
-
-	err := opts.Validate()
-	if err != nil {
+	if err := s.validateOpts(opts); err != nil {
 		return nil, err
 	}
 
@@ -159,23 +128,14 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 	latestItem := items[0]
 
-	s.logger.Info("Starting incremental sync", "provider", s.provider.Name(), "source", opts.Source)
-
-	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
+	result, err := s.fetchItems(ctx, opts, "Starting incremental sync", "incremental sync")
 	if err != nil {
-		return nil, pkgerrors.Wrapf(
-			err,
-			"incremental sync failed for source %q (maxPages=%d)",
-			opts.Source,
-			opts.MaxPages,
-		)
+		return nil, err
 	}
 
 	syncResult := s.processIncrementalItems(ctx, latestItem, result.Items)
 
-	if opts.OnProgress != nil {
-		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
-	}
+	s.reportProgress(opts, syncResult)
 
 	s.logger.Info(
 		"Incremental sync completed",
@@ -249,8 +209,7 @@ func (s *Syncer) processIncrementalItems(
 		s.logger.Debug("Using cutoff time", "cutoff", cutoff)
 	}
 
-	toSync := make([]*provider.Item, 0, len(items))
-
+	filtered := make([]*provider.Item, 0, len(items))
 	for _, item := range items {
 		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
 			syncResult.Skipped++
@@ -258,6 +217,24 @@ func (s *Syncer) processIncrementalItems(
 			continue
 		}
 
+		filtered = append(filtered, item)
+	}
+
+	toSync := s.filterValidItems(filtered, syncResult)
+
+	if len(toSync) > 0 {
+		synced, _, errs := s.stack.SyncItems(ctx, toSync)
+		syncResult.Errors += errs
+		syncResult.Skipped += len(toSync) - synced - errs
+	}
+
+	return syncResult
+}
+
+func (s *Syncer) filterValidItems(items []*provider.Item, syncResult *SyncResult) []*provider.Item {
+	valid := make([]*provider.Item, 0, len(items))
+
+	for _, item := range items {
 		err := item.Validate()
 		if err != nil {
 			syncResult.Errors++
@@ -267,14 +244,43 @@ func (s *Syncer) processIncrementalItems(
 			continue
 		}
 
-		toSync = append(toSync, item)
+		valid = append(valid, item)
 	}
 
-	if len(toSync) > 0 {
-		synced, _, errs := s.stack.SyncItems(ctx, toSync)
-		syncResult.Errors += errs
-		syncResult.Skipped += len(toSync) - synced - errs
+	return valid
+}
+
+func (s *Syncer) fetchItems(
+	ctx context.Context,
+	opts *SyncOptions,
+	logMsg, errPrefix string,
+) (*provider.FetchResult, error) {
+	s.logger.Info(logMsg, "provider", s.provider.Name(), "source", opts.Source)
+
+	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
+	if err != nil {
+		return nil, pkgerrors.Wrapf(
+			err,
+			"%s failed for source %q (maxPages=%d)",
+			errPrefix,
+			opts.Source,
+			opts.MaxPages,
+		)
 	}
 
-	return syncResult
+	return result, nil
+}
+
+func (s *Syncer) reportProgress(opts *SyncOptions, syncResult *SyncResult) {
+	if opts.OnProgress != nil {
+		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
+	}
+}
+
+func (s *Syncer) validateOpts(opts *SyncOptions) error {
+	if opts == nil {
+		return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
+	}
+
+	return opts.Validate()
 }

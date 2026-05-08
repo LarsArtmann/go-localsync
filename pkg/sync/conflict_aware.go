@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
-	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
@@ -40,27 +39,13 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	ctx context.Context,
 	opts *SyncOptions,
 ) (*ConflictResult, error) {
-	if opts == nil {
-		return nil, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "opts is nil")
-	}
-
-	err := opts.Validate()
-	if err != nil {
+	if err := s.validateOpts(opts); err != nil {
 		return nil, err
 	}
 
-	s.logger.Info("Starting conflict-aware sync",
-		"provider", s.provider.Name(),
-		"source", opts.Source,
-	)
-
-	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
+	result, err := s.fetchItems(ctx, opts, "Starting conflict-aware sync", "conflict-aware sync")
 	if err != nil {
-		return nil, pkgerrors.Wrapf(err,
-			"conflict-aware sync failed for source %q (maxPages=%d)",
-			opts.Source,
-			opts.MaxPages,
-		)
+		return nil, err
 	}
 
 	cr := newConflictResult(len(result.Items))
@@ -123,14 +108,27 @@ func (s *ConflictAwareSyncer) upsertNewItem(
 	item *provider.Item,
 	cr *ConflictResult,
 ) {
-	err := s.stack.SyncItem(ctx, item)
-	if err != nil {
-		s.logError("Failed to sync item", item, err, cr)
-
+	if s.syncItemWithErrorHandling(ctx, item, "Failed to sync item", cr) {
 		return
 	}
 
 	cr.Upserted++
+}
+
+func (s *ConflictAwareSyncer) syncItemWithErrorHandling(
+	ctx context.Context,
+	item *provider.Item,
+	errMsg string,
+	cr *ConflictResult,
+) (hadError bool) {
+	err := s.stack.SyncItem(ctx, item)
+	if err != nil {
+		s.logError(errMsg, item, err, cr)
+
+		return true
+	}
+
+	return false
 }
 
 func (s *ConflictAwareSyncer) resolveConflict(
@@ -139,10 +137,7 @@ func (s *ConflictAwareSyncer) resolveConflict(
 	cr *ConflictResult,
 ) {
 	if remote.UpdatedAt.After(local.UpdatedAt) {
-		err := s.stack.SyncItem(ctx, remote)
-		if err != nil {
-			s.logError("Failed to sync resolved item", remote, err, cr)
-
+		if s.syncItemWithErrorHandling(ctx, remote, "Failed to sync resolved item", cr) {
 			return
 		}
 
