@@ -162,6 +162,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 
 	for _, t := range eventTypes {
 		eventType := types.NewEventTypeID(t)
+
 		count, err := s.stack.ReadModel.Count(
 			ctx,
 			cqrs.ItemFilter{
