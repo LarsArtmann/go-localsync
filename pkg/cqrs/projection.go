@@ -46,7 +46,7 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 
 	err := json.Unmarshal(evt.Payload(), &payload)
 	if err != nil {
-		return fmt.Errorf("unmarshal ItemSyncedPayload: %w", err)
+		return fmt.Errorf("unmarshal ItemSyncedPayload for event %s: %w", evt.ID(), err)
 	}
 
 	return p.readModel.Upsert(ctx, itemFromPayload(payload))
@@ -57,7 +57,7 @@ func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) erro
 
 	err := json.Unmarshal(evt.Payload(), &payload)
 	if err != nil {
-		return fmt.Errorf("unmarshal ItemDeletedPayload: %w", err)
+		return fmt.Errorf("unmarshal ItemDeletedPayload for event %s: %w", evt.ID(), err)
 	}
 
 	return p.readModel.Delete(ctx, payload.Source, payload.SourceID)

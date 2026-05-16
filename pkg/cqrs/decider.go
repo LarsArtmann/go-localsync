@@ -45,8 +45,9 @@ func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 	default:
 		//nolint:err113 // dynamic error for unknown event type
 		return state, fmt.Errorf(
-			"unknown event type: %s",
+			"fold: unknown event type %q in state{deleted=%v}",
 			evt.Type(),
+			state.Deleted,
 		)
 	}
 }
@@ -56,7 +57,11 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 
 	err := json.Unmarshal(evt.Payload(), &payload)
 	if err != nil {
-		return SyncItemState{}, fmt.Errorf("unmarshal ItemSyncedPayload: %w", err)
+		return SyncItemState{}, fmt.Errorf(
+			"unmarshal ItemSyncedPayload for event %s: %w",
+			evt.ID(),
+			err,
+		)
 	}
 
 	return SyncItemState{
@@ -144,7 +149,14 @@ func syncEvents(
 			Winner:          "remote",
 		})
 		if err != nil {
-			return nil, fmt.Errorf("create conflict event: %w", err)
+			return nil, fmt.Errorf(
+				"create conflict event for %s/%s (version=%d, localUpdatedAt=%s): %w",
+				aggID,
+				item.ExternalID.Get(),
+				ver+1,
+				localUpdatedAt.Format(time.RFC3339Nano),
+				err,
+			)
 		}
 
 		events = append(events, evt)
@@ -157,7 +169,13 @@ func syncEvents(
 		itemToPayload(item),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("create sync event: %w", err)
+		return nil, fmt.Errorf(
+			"create sync event for %s/%s (version=%d): %w",
+			aggID,
+			item.ExternalID.Get(),
+			ver+len(events)+1,
+			err,
+		)
 	}
 
 	events = append(events, evt)
@@ -173,12 +191,24 @@ func newEvent(
 ) (*event.Core, error) {
 	data, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("marshal payload for %s: %w", eventType, err)
+		return nil, fmt.Errorf(
+			"marshal %s payload for aggregate %s (version=%d): %w",
+			eventType,
+			aggID,
+			version,
+			err,
+		)
 	}
 
 	core, err := event.NewEvent(eventType, aggID, aggregateType, version, data)
 	if err != nil {
-		return nil, fmt.Errorf("create event %s: %w", eventType, err)
+		return nil, fmt.Errorf(
+			"create %s event for aggregate %s (version=%d): %w",
+			eventType,
+			aggID,
+			version,
+			err,
+		)
 	}
 
 	return core, nil

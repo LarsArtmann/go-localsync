@@ -79,7 +79,7 @@ func (m *TursoReadModel) List(ctx context.Context, filter ItemFilter) ([]*provid
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("list items: %w", err)
+		return nil, fmt.Errorf("list items with filter %+v: %w", filter, err)
 	}
 
 	defer func() { _ = rows.Close() }()
@@ -95,7 +95,7 @@ func (m *TursoReadModel) Count(ctx context.Context, filter ItemFilter) (int64, e
 
 	err := m.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("count items: %w", err)
+		return 0, fmt.Errorf("count items with filter %+v: %w", filter, err)
 	}
 
 	return count, nil
@@ -161,7 +161,7 @@ func (m *TursoReadModel) Delete(ctx context.Context, source, sourceID string) er
 		sourceID,
 	)
 	if err != nil {
-		return fmt.Errorf("delete item: %w", err)
+		return fmt.Errorf("delete item %s/%s: %w", source, sourceID, err)
 	}
 
 	return nil

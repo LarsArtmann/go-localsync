@@ -266,8 +266,9 @@ func (s *Syncer) fetchItems(
 	if err != nil {
 		return nil, pkgerrors.Wrapf(
 			err,
-			"%s failed for source %q (maxPages=%d)",
+			"%s (%s) failed for source %q (maxPages=%d)",
 			errPrefix,
+			logMsg,
 			opts.Source,
 			opts.MaxPages,
 		)

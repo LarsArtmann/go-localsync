@@ -111,7 +111,12 @@ func (s *CQRSStack) SyncItems(
 		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
 			events, err := DecideSync(item)(state, ver)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf(
+					"decide sync for %s/%s: %w",
+					item.Source.Get(),
+					item.ExternalID.Get(),
+					err,
+				)
 			}
 
 			eventCount = len(events)
