@@ -112,7 +112,13 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	items, err := s.stack.ReadModel.List(
 		ctx,
 		cqrs.ItemFilter{
-			Limit: 1,
+			Type:       nil,
+			ActorLogin: nil,
+			RepoName:   nil,
+			Source:     nil,
+			Since:      nil,
+			Limit:      1,
+			Offset:     0,
 		},
 	)
 	if err != nil {
@@ -166,7 +172,13 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 		count, err := s.stack.ReadModel.Count(
 			ctx,
 			cqrs.ItemFilter{
-				Type: &eventType,
+				Type:       &eventType,
+				ActorLogin: nil,
+				RepoName:   nil,
+				Source:     nil,
+				Since:      nil,
+				Limit:      0,
+				Offset:     0,
 			},
 		)
 		if err != nil {
