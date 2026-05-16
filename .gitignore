@@ -14,3 +14,4 @@ node_modules/
 /go-localsync
 Copy/paste detection report
 /report/jscpd-report.json
+reports/
