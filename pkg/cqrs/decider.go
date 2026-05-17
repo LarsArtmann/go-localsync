@@ -200,7 +200,7 @@ func newEvent(
 		)
 	}
 
-	core, err := event.NewEvent(eventType, aggID, aggregateType, version, data)
+	core, err := event.NewEvent(eventType, aggID, aggregateType, event.Version(version), data)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"create %s event for aggregate %s (version=%d): %w",
