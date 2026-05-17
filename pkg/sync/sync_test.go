@@ -236,7 +236,7 @@ func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
 	assert.Equal(t, 1, result.Conflicts)
 }
 
-func TestConflictAwareSyncer_LocalWins(t *testing.T) {
+func TestConflictAwareSyncer_RemoteWinsAlways(t *testing.T) {
 	t.Parallel()
 
 	newItem := testSyncItem("1", "PushEvent")
@@ -261,7 +261,7 @@ func TestConflictAwareSyncer_LocalWins(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 1, result.Fetched)
 	assert.Equal(t, 1, result.Conflicts)
-	assert.Equal(t, 1, result.Skipped)
+	assert.Equal(t, 1, result.Upserted)
 }
 
 func TestConflictAwareSyncer_NilOptions(t *testing.T) {

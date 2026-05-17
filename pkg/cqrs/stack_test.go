@@ -47,10 +47,10 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 		testItem("3", "PushEvent"),
 	}
 
-	synced, conflicts, errors := stack.SyncItems(ctx, items)
-	assert.Equal(t, 3, synced)
-	assert.Equal(t, 0, conflicts)
-	assert.Equal(t, 0, errors)
+	result := stack.SyncItems(ctx, items)
+	assert.Equal(t, 3, result.Synced)
+	assert.Equal(t, 0, result.Conflicts)
+	assert.Equal(t, 0, result.Errors)
 
 	count, err := stack.Count(ctx)
 	require.NoError(t, err)
@@ -145,18 +145,18 @@ func TestCQRSStack_ConflictDetection(t *testing.T) {
 
 	items := []*provider.Item{testItem("1", "PushEvent")}
 
-	synced, conflicts, errors := stack.SyncItems(ctx, items)
-	assert.Equal(t, 1, synced)
-	assert.Equal(t, 0, conflicts)
-	assert.Equal(t, 0, errors)
+	result := stack.SyncItems(ctx, items)
+	assert.Equal(t, 1, result.Synced)
+	assert.Equal(t, 0, result.Conflicts)
+	assert.Equal(t, 0, result.Errors)
 
 	updatedItem := testItem("1", "PushEvent")
 	updatedItem.UpdatedAt = time.Now().Add(time.Hour)
 
-	synced, conflicts, errors = stack.SyncItems(ctx, []*provider.Item{updatedItem})
-	assert.Equal(t, 1, synced)
-	assert.Equal(t, 1, conflicts, "updated item with newer timestamp should trigger conflict")
-	assert.Equal(t, 0, errors)
+	result = stack.SyncItems(ctx, []*provider.Item{updatedItem})
+	assert.Equal(t, 1, result.Synced)
+	assert.Equal(t, 1, result.Conflicts, "updated item with newer timestamp should trigger conflict")
+	assert.Equal(t, 0, result.Errors)
 }
 
 func TestCQRSStack_FilterByType(t *testing.T) {
@@ -173,8 +173,8 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 		testItem("3", "PushEvent"),
 	}
 
-	synced, _, _ := stack.SyncItems(ctx, items)
-	assert.Equal(t, 3, synced)
+	result := stack.SyncItems(ctx, items)
+	assert.Equal(t, 3, result.Synced)
 
 	pushType := types.NewEventTypeID("PushEvent")
 	results, err := stack.ReadModel.List(ctx, ItemFilter{Type: &pushType})
@@ -204,10 +204,10 @@ func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 		testItem("2", "IssueEvent"),
 	}
 
-	synced, conflicts, errors := stack.SyncItems(ctx, items)
-	assert.Equal(t, 2, synced)
-	assert.Equal(t, 0, conflicts)
-	assert.Equal(t, 0, errors)
+	result := stack.SyncItems(ctx, items)
+	assert.Equal(t, 2, result.Synced)
+	assert.Equal(t, 0, result.Conflicts)
+	assert.Equal(t, 0, result.Errors)
 
 	count, err := stack.Count(ctx)
 	require.NoError(t, err)

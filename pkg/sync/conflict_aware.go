@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 type ConflictAwareSyncer struct {
@@ -25,16 +24,6 @@ type ConflictResult struct {
 	Errors    int
 }
 
-func newConflictResult(fetched int) *ConflictResult {
-	return &ConflictResult{
-		Fetched:   fetched,
-		Upserted:  0,
-		Skipped:   0,
-		Conflicts: 0,
-		Errors:    0,
-	}
-}
-
 func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	ctx context.Context,
 	opts *SyncOptions,
@@ -49,11 +38,32 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		return nil, err
 	}
 
-	cr := newConflictResult(len(result.Items))
+	cr := &ConflictResult{Fetched: len(result.Items)}
 
-	for _, item := range result.Items {
-		existing, _ := s.stack.ReadModel.Get(ctx, item.Source.Get(), item.ExternalID.Get())
-		s.processItem(ctx, item, existing, cr)
+	valid := s.filterValidItems(result.Items, &SyncResult{Errors: 0})
+
+	if len(valid) == 0 {
+		return cr, nil
+	}
+
+	summary := s.stack.SyncItems(ctx, valid)
+
+	for _, r := range summary.Results {
+		switch r.Action {
+		case cqrs.ActionCreated:
+			cr.Upserted++
+		case cqrs.ActionUpdated:
+			cr.Upserted++
+		case cqrs.ActionConflictRemote:
+			cr.Conflicts++
+			cr.Upserted++
+			s.logger.Debug("Resolved conflict: remote wins", "sourceID", r.SourceID)
+		case cqrs.ActionUnchanged:
+			cr.Skipped++
+		case cqrs.ActionError:
+			cr.Errors++
+			s.logger.Warn("Failed to sync item", "sourceID", r.SourceID, "error", r.Error)
+		}
 	}
 
 	s.logger.Info("Conflict-aware sync completed",
@@ -65,91 +75,4 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	)
 
 	return cr, nil
-}
-
-func (s *ConflictAwareSyncer) logError(
-	msg string,
-	item *provider.Item,
-	err error,
-	cr *ConflictResult,
-) {
-	s.logger.Warn(msg, "id", item.ID, "error", err)
-
-	cr.Errors++
-}
-
-func (s *ConflictAwareSyncer) processItem(
-	ctx context.Context,
-	item *provider.Item,
-	existing *provider.Item,
-	cr *ConflictResult,
-) {
-	err := item.Validate()
-	if err != nil {
-		s.logError("Invalid item", item, err, cr)
-
-		return
-	}
-
-	if existing == nil {
-		s.upsertNewItem(ctx, item, cr)
-
-		return
-	}
-
-	if cqrs.HasChanged(existing, item) {
-		s.resolveConflict(ctx, existing, item, cr)
-	} else {
-		cr.Skipped++
-	}
-}
-
-func (s *ConflictAwareSyncer) upsertNewItem(
-	ctx context.Context,
-	item *provider.Item,
-	cr *ConflictResult,
-) {
-	if s.syncItemWithErrorHandling(ctx, item, "Failed to sync item", cr) {
-		return
-	}
-
-	cr.Upserted++
-}
-
-func (s *ConflictAwareSyncer) syncItemWithErrorHandling(
-	ctx context.Context,
-	item *provider.Item,
-	errMsg string,
-	cr *ConflictResult,
-) bool {
-	err := s.stack.SyncItem(ctx, item)
-	if err != nil {
-		s.logError(errMsg, item, err, cr)
-
-		return true
-	}
-
-	return false
-}
-
-func (s *ConflictAwareSyncer) resolveConflict(
-	ctx context.Context,
-	local, remote *provider.Item,
-	cr *ConflictResult,
-) {
-	if remote.UpdatedAt.After(local.UpdatedAt) {
-		if s.syncItemWithErrorHandling(ctx, remote, "Failed to sync resolved item", cr) {
-			return
-		}
-
-		cr.Conflicts++
-		cr.Upserted++
-
-		s.logger.Debug("Resolved conflict: remote wins", "id", remote.ID)
-	} else {
-		cr.Conflicts++
-		cr.Skipped++
-
-		s.logger.Debug("Resolved conflict: local wins, skipping write", "id", remote.ID)
-	}
 }

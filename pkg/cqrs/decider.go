@@ -231,7 +231,7 @@ func itemToPayload(item *provider.Item) ItemSyncedPayload {
 }
 
 func HasChanged(local, remote *provider.Item) bool {
-	return local.UpdatedAt != remote.UpdatedAt ||
+	return !local.UpdatedAt.Equal(remote.UpdatedAt) ||
 		local.Type.Get() != remote.Type.Get() ||
 		local.ActorLogin.Get() != remote.ActorLogin.Get() ||
 		local.RepoName.Get() != remote.RepoName.Get()

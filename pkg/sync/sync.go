@@ -84,9 +84,9 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		return syncResult, nil
 	}
 
-	synced, _, errs := s.stack.SyncItems(ctx, valid)
-	syncResult.Errors += errs
-	syncResult.Skipped = len(valid) - synced - errs
+	summary := s.stack.SyncItems(ctx, valid)
+	syncResult.Errors += summary.Errors
+	syncResult.Skipped = len(valid) - summary.Synced - summary.Errors
 
 	s.reportProgress(opts, syncResult)
 
@@ -95,7 +95,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		"fetched",
 		syncResult.Fetched,
 		"synced",
-		synced,
+		summary.Synced,
 		"errors",
 		syncResult.Errors,
 	)
@@ -228,9 +228,9 @@ func (s *Syncer) processIncrementalItems(
 	toSync := s.filterValidItems(filtered, syncResult)
 
 	if len(toSync) > 0 {
-		synced, _, errs := s.stack.SyncItems(ctx, toSync)
-		syncResult.Errors += errs
-		syncResult.Skipped += len(toSync) - synced - errs
+		summary := s.stack.SyncItems(ctx, toSync)
+		syncResult.Errors += summary.Errors
+		syncResult.Skipped += len(toSync) - summary.Synced - summary.Errors
 	}
 
 	return syncResult

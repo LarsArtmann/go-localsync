@@ -98,11 +98,35 @@ func (s *CQRSStack) DeleteItem(ctx context.Context, source, sourceID string) err
 	return s.Repo.Execute(ctx, aggID, aggregateType, DecideDelete(source, sourceID))
 }
 
-//nolint:nonamedreturns
+type SyncAction string
+
+const (
+	ActionCreated        SyncAction = "created"
+	ActionUpdated        SyncAction = "updated"
+	ActionConflictRemote SyncAction = "conflict_remote"
+	ActionUnchanged      SyncAction = "unchanged"
+	ActionError          SyncAction = "error"
+)
+
+type ItemSyncResult struct {
+	SourceID string
+	Action   SyncAction
+	Error    error
+}
+
+type SyncSummary struct {
+	Synced    int
+	Conflicts int
+	Errors    int
+	Results   []ItemSyncResult
+}
+
 func (s *CQRSStack) SyncItems(
 	ctx context.Context,
 	items []*provider.Item,
-) (synced, conflicts, errs int) {
+) *SyncSummary {
+	summary := &SyncSummary{Results: make([]ItemSyncResult, 0, len(items))}
+
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
@@ -125,22 +149,30 @@ func (s *CQRSStack) SyncItems(
 		}
 
 		err := s.Repo.Execute(ctx, aggID, aggregateType, countingDecide)
+
+		result := ItemSyncResult{
+			SourceID: item.ExternalID.Get(),
+		}
+
 		if err != nil {
-			errs++
-
-			continue
+			result.Action = ActionError
+			result.Error = err
+			summary.Errors++
+		} else if eventCount > 1 {
+			result.Action = ActionConflictRemote
+			summary.Synced++
+			summary.Conflicts++
+		} else if eventCount == 1 {
+			result.Action = ActionCreated
+			summary.Synced++
+		} else {
+			result.Action = ActionUnchanged
 		}
 
-		if eventCount > 0 {
-			synced++
-
-			if eventCount > 1 {
-				conflicts += eventCount - 1
-			}
-		}
+		summary.Results = append(summary.Results, result)
 	}
 
-	return synced, conflicts, errs
+	return summary
 }
 
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
