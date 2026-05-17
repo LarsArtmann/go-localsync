@@ -12,7 +12,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
-const SyncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
+const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	item_id TEXT NOT NULL DEFAULT '',
 	source TEXT NOT NULL,
 	source_id TEXT NOT NULL,
@@ -27,7 +27,7 @@ const SyncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	PRIMARY KEY (source, source_id)
 )`
 
-const SyncItemsIndexes = `
+const syncItemsIndexes = `
 CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
 CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login)`
@@ -43,12 +43,12 @@ func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 
 	ctx := context.Background()
 
-	_, err := db.ExecContext(ctx, SyncItemsDDL)
+	_, err := db.ExecContext(ctx, syncItemsDDL)
 	if err != nil {
 		return nil, fmt.Errorf("create sync_items table: %w", err)
 	}
 
-	_, err = db.ExecContext(ctx, SyncItemsIndexes)
+	_, err = db.ExecContext(ctx, syncItemsIndexes)
 	if err != nil {
 		return nil, fmt.Errorf("create sync_items indexes: %w", err)
 	}
