@@ -5,7 +5,6 @@ go 1.26.2
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/caarlos0/env/v11 v11.4.0
-	github.com/cockroachdb/errors v1.13.0
 	github.com/google/go-github/v69 v69.2.0
 	github.com/larsartmann/go-branded-id v0.1.0
 	github.com/larsartmann/go-cqrs-lite/core v1.1.0
@@ -32,6 +31,7 @@ require (
 	github.com/charmbracelet/x/windows v0.2.2 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
+	github.com/cockroachdb/errors v1.13.0 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240816210425-c5d0cb0b6fc0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
 	github.com/cockroachdb/pebble v1.1.5 // indirect

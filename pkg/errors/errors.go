@@ -1,7 +1,8 @@
 package errors
 
 import (
-	"github.com/cockroachdb/errors"
+	"errors"
+	"fmt"
 )
 
 var (
@@ -18,20 +19,20 @@ var (
 
 // WithDetail wraps err with a detail string for debugging context.
 func WithDetail(err error, detail string) error {
-	return errors.WithDetail(err, detail)
+	return fmt.Errorf("%s: %w", detail, err)
 }
 
 // WithUserDetail is a convenience function to add username context.
 func WithUserDetail(err error, username string) error {
-	return errors.WithDetail(err, "username="+username)
+	return fmt.Errorf("username=%s: %w", username, err)
 }
 
 // Wrap wraps an error with additional context.
 func Wrap(err error, message string) error {
-	return errors.Wrap(err, message)
+	return fmt.Errorf("%s: %w", message, err)
 }
 
 // Wrapf wraps an error with a formatted message.
 func Wrapf(err error, format string, args ...any) error {
-	return errors.Wrapf(err, format, args...)
+	return fmt.Errorf("%s: %w", fmt.Sprintf(format, args...), err)
 }
