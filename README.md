@@ -9,14 +9,14 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 
 ## Overview
 
-| Component               | Description                                                                             |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.) |
+| Component               | Description                                                                                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)                                     |
 | **CQRS Stack**          | Event-sourced architecture via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) — Decider, ReadModel, Projection |
-| **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry         |
-| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy, emitted as domain events |
-| **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)        |
-| **Turso Backend**       | SQLite/Turso event store with remote Push/Pull sync support                            |
+| **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                                             |
+| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy, emitted as domain events                                      |
+| **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)                                            |
+| **Turso Backend**       | SQLite/Turso event store with remote Push/Pull sync support                                                                 |
 
 ## Who is this for?
 
@@ -118,13 +118,13 @@ type Item struct {
 
 The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite). There is no legacy CRUD path.
 
-| Component        | Description                                                           |
-| ---------------- | --------------------------------------------------------------------- |
+| Component        | Description                                                                |
+| ---------------- | -------------------------------------------------------------------------- |
 | **Decider**      | Pure Fold/DecideSync/DecideDelete — single authority for state transitions |
-| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemDeleted`                      |
-| **Projection**   | Subscribes to event bus, updates read model                           |
-| **Read Model**   | In-memory or Turso-backed with filter/pagination                      |
-| **Aggregate ID** | Deterministic SHA256→ULID from (source, sourceID) for idempotency     |
+| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemDeleted`                           |
+| **Projection**   | Subscribes to event bus, updates read model                                |
+| **Read Model**   | In-memory or Turso-backed with filter/pagination                           |
+| **Aggregate ID** | Deterministic SHA256→ULID from (source, sourceID) for idempotency          |
 
 ### Key Properties
 
@@ -202,19 +202,19 @@ gh-sync -stats
 
 ## Features
 
-| Feature            | Status  | Description                                              |
-| ------------------ | ------- | -------------------------------------------------------- |
+| Feature            | Status  | Description                                                  |
+| ------------------ | ------- | ------------------------------------------------------------ |
 | CQRS Stack         | ✅ Done | Event store, bus, decider repository, read model, projection |
-| Decider Pattern    | ✅ Done | Pure Fold/DecideSync/DecideDelete with SyncItemState     |
-| Incremental Sync   | ✅ Done | Only fetch new items since last sync — no duplicate data |
-| Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation               |
-| Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution       |
-| Branded IDs        | ✅ Done | Compile-time type-safe identifiers                       |
-| Turso Backend      | ✅ Done | SQLite/Turso event store + read model + Push/Pull sync   |
-| No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)               |
-| Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow          |
-| Retry Logic        | ✅ Done | Exponential backoff retry with configurable limits       |
-| GitHub Provider    | ✅ Done | Full implementation with pagination, rate limiting, retry |
+| Decider Pattern    | ✅ Done | Pure Fold/DecideSync/DecideDelete with SyncItemState         |
+| Incremental Sync   | ✅ Done | Only fetch new items since last sync — no duplicate data     |
+| Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation                   |
+| Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution           |
+| Branded IDs        | ✅ Done | Compile-time type-safe identifiers                           |
+| Turso Backend      | ✅ Done | SQLite/Turso event store + read model + Push/Pull sync       |
+| No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                   |
+| Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow              |
+| Retry Logic        | ✅ Done | Exponential backoff retry with configurable limits           |
+| GitHub Provider    | ✅ Done | Full implementation with pagination, rate limiting, retry    |
 
 ## Development
 
@@ -248,14 +248,14 @@ cmd/examples/github-sync/   # Example CLI application
 
 107 test cases across 6 test packages:
 
-| Package                    | Tests | Description                              |
-| -------------------------- | ----- | ---------------------------------------- |
-| `pkg/cqrs`                 | 46    | Decider, ReadModel, Projection, Stack, Turso RM |
-| `pkg/providers/github`     | 35    | Client, fetch, retry, errors (19 unit + 16 BDD) |
-| `pkg/sync`                 | 11    | Syncer + ConflictAwareSyncer             |
-| `pkg/types`                | 10    | Branded ID construction, roundtrip       |
-| `pkg/errors`               | 4     | Sentinel errors, wrapping                |
-| `pkg/provider`             | 1     | Item validation                          |
+| Package                | Tests | Description                                     |
+| ---------------------- | ----- | ----------------------------------------------- |
+| `pkg/cqrs`             | 46    | Decider, ReadModel, Projection, Stack, Turso RM |
+| `pkg/providers/github` | 35    | Client, fetch, retry, errors (19 unit + 16 BDD) |
+| `pkg/sync`             | 11    | Syncer + ConflictAwareSyncer                    |
+| `pkg/types`            | 10    | Branded ID construction, roundtrip              |
+| `pkg/errors`           | 4     | Sentinel errors, wrapping                       |
+| `pkg/provider`         | 1     | Item validation                                 |
 
 ## Related Projects
 
