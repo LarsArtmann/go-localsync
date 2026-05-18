@@ -46,9 +46,11 @@ func newTestClient(server *httptest.Server) *Client {
 	return client
 }
 
-var newErrorTestServer = testhelpers.NewErrorTestServer
-var testRetryConfig = testhelpers.TestRetryConfig
-var newFailingThenSucceedingTestServer = testhelpers.NewFailingThenSucceedingTestServer
+var (
+	newErrorTestServer                 = testhelpers.NewErrorTestServer
+	testRetryConfig                    = testhelpers.TestRetryConfig
+	newFailingThenSucceedingTestServer = testhelpers.NewFailingThenSucceedingTestServer
+)
 
 func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -186,7 +188,7 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 			for i := range 100 {
 				events = append(
 					events,
-					&gh.Event{ID: new(page+"-"+string(rune('0'+i))), Type: new("PushEvent")},
+					&gh.Event{ID: new(page + "-" + string(rune('0'+i))), Type: new("PushEvent")},
 				)
 			}
 		default:

@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -9,8 +10,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 type mockProvider struct {
@@ -39,11 +38,13 @@ func newTestSyncer(items []*provider.Item) (*Syncer, *cqrs.CQRSStack) {
 	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
 	p := &mockProvider{items: items}
 	logger := log.Default()
+
 	return NewSyncer(p, stack, logger), stack
 }
 
 func testSyncItem(externalID, eventType string) *provider.Item {
 	now := time.Now()
+
 	return &provider.Item{
 		ID:         types.NewItemID(),
 		ExternalID: types.NewExternalID(externalID),
@@ -70,11 +71,17 @@ func TestSyncer_Sync(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
-	require.NoError(t, err)
-	assert.Equal(t, 2, result.Fetched)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
 
 	count, _ := stack.Count(ctx)
-	assert.Equal(t, int64(2), count)
+	if count != 2 {
+		t.Errorf("expected count=2, got %d", count)
+	}
 }
 
 func TestSyncer_Sync_EmptyResult(t *testing.T) {
@@ -85,9 +92,15 @@ func TestSyncer_Sync_EmptyResult(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
-	require.NoError(t, err)
-	assert.Equal(t, 0, result.Fetched)
-	assert.Equal(t, 0, result.Errors)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 0 {
+		t.Errorf("expected Fetched=0, got %d", result.Fetched)
+	}
+	if result.Errors != 0 {
+		t.Errorf("expected Errors=0, got %d", result.Errors)
+	}
 }
 
 func TestSyncer_Sync_InvalidItem(t *testing.T) {
@@ -102,9 +115,15 @@ func TestSyncer_Sync_InvalidItem(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
-	require.NoError(t, err)
-	assert.Equal(t, 1, result.Fetched)
-	assert.Equal(t, 1, result.Errors)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 1 {
+		t.Errorf("expected Fetched=1, got %d", result.Fetched)
+	}
+	if result.Errors != 1 {
+		t.Errorf("expected Errors=1, got %d", result.Errors)
+	}
 }
 
 func TestSyncer_Sync_NilOptions(t *testing.T) {
@@ -114,7 +133,9 @@ func TestSyncer_Sync_NilOptions(t *testing.T) {
 	defer func() { _ = syncer.Close() }()
 
 	_, err := syncer.Sync(context.Background(), nil)
-	assert.Error(t, err)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
 }
 
 func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
@@ -127,11 +148,17 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := syncer.SyncIncremental(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
-	require.NoError(t, err)
-	assert.Equal(t, 1, result.Fetched)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 1 {
+		t.Errorf("expected Fetched=1, got %d", result.Fetched)
+	}
 
 	count, _ := stack.Count(ctx)
-	assert.Equal(t, int64(1), count)
+	if count != 1 {
+		t.Errorf("expected count=1, got %d", count)
+	}
 }
 
 func TestSyncer_GetStats(t *testing.T) {
@@ -148,13 +175,35 @@ func TestSyncer_GetStats(t *testing.T) {
 
 	ctx := context.Background()
 	_, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	stats, err := syncer.GetStats(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, int64(3), stats.TotalItems)
-	assert.Contains(t, stats.ItemTypes, "PushEvent")
-	assert.Contains(t, stats.ItemTypes, "IssueEvent")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if stats.TotalItems != 3 {
+		t.Errorf("expected TotalItems=3, got %d", stats.TotalItems)
+	}
+	found := false
+	for _, t := range stats.ItemTypes {
+		if t == "PushEvent" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected ItemTypes to contain PushEvent, got %v", stats.ItemTypes)
+	}
+	found = false
+	for _, t := range stats.ItemTypes {
+		if t == "IssueEvent" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected ItemTypes to contain IssueEvent, got %v", stats.ItemTypes)
+	}
 }
 
 func TestConflictAwareSyncer_NewItems(t *testing.T) {
@@ -174,14 +223,26 @@ func TestConflictAwareSyncer_NewItems(t *testing.T) {
 		ctx,
 		&SyncOptions{Source: "testuser", MaxPages: 10},
 	)
-	require.NoError(t, err)
-	assert.Equal(t, 2, result.Fetched)
-	assert.Equal(t, 2, result.Upserted)
-	assert.Equal(t, 0, result.Conflicts)
-	assert.Equal(t, 0, result.Skipped)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Upserted != 2 {
+		t.Errorf("expected Upserted=2, got %d", result.Upserted)
+	}
+	if result.Conflicts != 0 {
+		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
+	}
+	if result.Skipped != 0 {
+		t.Errorf("expected Skipped=0, got %d", result.Skipped)
+	}
 
 	count, _ := stack.Count(ctx)
-	assert.Equal(t, int64(2), count)
+	if count != 2 {
+		t.Errorf("expected count=2, got %d", count)
+	}
 }
 
 func TestConflictAwareSyncer_NoChange_Skipped(t *testing.T) {
@@ -195,17 +256,27 @@ func TestConflictAwareSyncer_NoChange_Skipped(t *testing.T) {
 
 	ctx := context.Background()
 
-	require.NoError(t, stack.SyncItem(ctx, item))
+	if err := stack.SyncItem(ctx, item); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	syncer.provider = &mockProvider{items: []*provider.Item{item}}
 	result, err := cas.SyncWithConflictDetection(
 		ctx,
 		&SyncOptions{Source: "testuser", MaxPages: 10},
 	)
-	require.NoError(t, err)
-	assert.Equal(t, 1, result.Fetched)
-	assert.Equal(t, 0, result.Upserted)
-	assert.Equal(t, 1, result.Skipped)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 1 {
+		t.Errorf("expected Fetched=1, got %d", result.Fetched)
+	}
+	if result.Upserted != 0 {
+		t.Errorf("expected Upserted=0, got %d", result.Upserted)
+	}
+	if result.Skipped != 1 {
+		t.Errorf("expected Skipped=1, got %d", result.Skipped)
+	}
 }
 
 func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
@@ -220,7 +291,9 @@ func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
 
 	ctx := context.Background()
 
-	require.NoError(t, stack.SyncItem(ctx, oldItem))
+	if err := stack.SyncItem(ctx, oldItem); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	newItem := testSyncItem("1", "IssueEvent")
 	newItem.UpdatedAt = time.Now()
@@ -230,10 +303,18 @@ func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
 		ctx,
 		&SyncOptions{Source: "testuser", MaxPages: 10},
 	)
-	require.NoError(t, err)
-	assert.Equal(t, 1, result.Fetched)
-	assert.Equal(t, 1, result.Upserted)
-	assert.Equal(t, 1, result.Conflicts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 1 {
+		t.Errorf("expected Fetched=1, got %d", result.Fetched)
+	}
+	if result.Upserted != 1 {
+		t.Errorf("expected Upserted=1, got %d", result.Upserted)
+	}
+	if result.Conflicts != 1 {
+		t.Errorf("expected Conflicts=1, got %d", result.Conflicts)
+	}
 }
 
 func TestConflictAwareSyncer_RemoteWinsAlways(t *testing.T) {
@@ -248,7 +329,9 @@ func TestConflictAwareSyncer_RemoteWinsAlways(t *testing.T) {
 
 	ctx := context.Background()
 
-	require.NoError(t, stack.SyncItem(ctx, newItem))
+	if err := stack.SyncItem(ctx, newItem); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	oldRemote := testSyncItem("1", "IssueEvent")
 	oldRemote.UpdatedAt = time.Now().Add(-2 * time.Hour)
@@ -258,10 +341,18 @@ func TestConflictAwareSyncer_RemoteWinsAlways(t *testing.T) {
 		ctx,
 		&SyncOptions{Source: "testuser", MaxPages: 10},
 	)
-	require.NoError(t, err)
-	assert.Equal(t, 1, result.Fetched)
-	assert.Equal(t, 1, result.Conflicts)
-	assert.Equal(t, 1, result.Upserted)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 1 {
+		t.Errorf("expected Fetched=1, got %d", result.Fetched)
+	}
+	if result.Conflicts != 1 {
+		t.Errorf("expected Conflicts=1, got %d", result.Conflicts)
+	}
+	if result.Upserted != 1 {
+		t.Errorf("expected Upserted=1, got %d", result.Upserted)
+	}
 }
 
 func TestConflictAwareSyncer_NilOptions(t *testing.T) {
@@ -272,5 +363,17 @@ func TestConflictAwareSyncer_NilOptions(t *testing.T) {
 	defer func() { _ = cas.Close() }()
 
 	_, err := cas.SyncWithConflictDetection(context.Background(), nil)
-	assert.Error(t, err)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}
+
+func TestSyncOptions_Validate(t *testing.T) {
+	err := (&SyncOptions{}).Validate()
+	if err == nil {
+		t.Fatal("expected error for empty source")
+	}
+	if !strings.Contains(err.Error(), "required") {
+		t.Errorf("expected error to contain 'required', got %v", err)
+	}
 }
