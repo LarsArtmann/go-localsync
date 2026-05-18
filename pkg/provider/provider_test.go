@@ -7,8 +7,6 @@ import (
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/types"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestItem_Validate(t *testing.T) {
@@ -22,30 +20,40 @@ func TestItem_Validate(t *testing.T) {
 
 	t.Run("valid item passes", func(t *testing.T) {
 		err := validItem.Validate()
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
 	})
 
 	t.Run("rejects zero ExternalID", func(t *testing.T) {
 		item := *validItem
 		item.ExternalID = types.ExternalID{}
-		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
+		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
+			t.Error("expected ErrInvalidInput")
+		}
 	})
 
 	t.Run("rejects zero Source", func(t *testing.T) {
 		item := *validItem
 		item.Source = types.ProviderID{}
-		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
+		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
+			t.Error("expected ErrInvalidInput")
+		}
 	})
 
 	t.Run("rejects zero Type", func(t *testing.T) {
 		item := *validItem
 		item.Type = types.EventTypeID{}
-		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
+		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
+			t.Error("expected ErrInvalidInput")
+		}
 	})
 
 	t.Run("rejects zero CreatedAt", func(t *testing.T) {
 		item := *validItem
 		item.CreatedAt = time.Time{}
-		assert.True(t, errors.Is(item.Validate(), pkgerrors.ErrInvalidInput))
+		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
+			t.Error("expected ErrInvalidInput")
+		}
 	})
 }

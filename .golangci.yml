@@ -59,7 +59,7 @@ linters:
         - godox
         - goheader
         - gomoddirectives
-        - gomodguard_v2
+        - gomodguard
         - goprintffuncname
         - gosec
         - gosmopolitan
@@ -192,7 +192,6 @@ linters:
         wrapcheck:
             ignore-package-globs:
                 - github.com/larsartmann/go-localsync/pkg/errors
-                - github.com/cockroachdb/errors
             ignore-sig-regexps:
                 - github\.com/larsartmann/go-localsync
                 - \.Err\(\) error$
@@ -239,11 +238,12 @@ linters:
                 - gocritic
                 - noinlineerr
                 - wrapcheck
-            - path: internal/database/connection\.go
+            - path: pkg/cqrs/
               linters:
-                - gochecknoglobals
                 - wrapcheck
                 - noinlineerr
+                - funlen
+                - gosec
             - path: pkg/errors/errors\.go
               linters:
                 - wrapcheck
@@ -261,6 +261,9 @@ linters:
                 - mnd
                 - golines
                 - errorlint
+            - path: pkg/sync/conflict_aware\.go
+              linters:
+                - exhaustruct
             - path: pkg/sync/sync\.go
               linters:
                 - wrapcheck

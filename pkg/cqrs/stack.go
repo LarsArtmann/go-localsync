@@ -125,7 +125,12 @@ func (s *CQRSStack) SyncItems(
 	ctx context.Context,
 	items []*provider.Item,
 ) *SyncSummary {
-	summary := &SyncSummary{Results: make([]ItemSyncResult, 0, len(items))}
+	summary := &SyncSummary{
+		Results:   make([]ItemSyncResult, 0, len(items)),
+		Synced:    0,
+		Conflicts: 0,
+		Errors:    0,
+	}
 
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
@@ -152,6 +157,8 @@ func (s *CQRSStack) SyncItems(
 
 		result := ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
+			Action:   ActionUnchanged,
+			Error:    nil,
 		}
 
 		if err != nil {
@@ -236,7 +243,6 @@ func createTursoRemoteStore(
 		return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
 	}
 
-	//nolint:noinlineerr
 	if err := initTursoSyncDB(ctx, syncDB); err != nil {
 		_ = syncDB.Close()
 
@@ -269,7 +275,6 @@ func createTursoLocalStore(
 
 	ctx := context.Background()
 
-	//nolint:noinlineerr
 	if err := initTursoDB(ctx, db); err != nil {
 		_ = db.Close()
 

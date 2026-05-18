@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync  
-**Last Updated:** 2026-05-17
+**Last Updated:** 2026-05-18
 
 ## Overview
 
@@ -46,14 +46,14 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [ ] **Add export to JSON/CSV**  
        Export stored events to file formats (`-export json` or `-export csv`).
 
+- [x] **Conflict detection consolidation** — Decider is single authority; `ConflictAwareSyncer` delegates to `SyncItems` results.
+- [x] **HasChanged time comparison fix** — Fixed `!=` to `.Equal()` — was causing false conflict detections.
+
 ---
 
 ## 🔧 TECHNICAL DEBT
 
 ### Architecture
-
-- [ ] **Consolidate conflict detection**  
-       `ConflictAwareSyncer` and `DecideSync` both independently detect conflicts using the same `HasChanged()` but different truth sources (read model vs event store). The decider should be the single authority. `SyncItems` should return per-item results so the sync layer can observe conflicts without duplicating detection.
 
 - [ ] **Adopt projection.Runner**  
        Replace custom `Projector` with go-cqrs-lite's `projection.Runner` for replay + checkpointing.

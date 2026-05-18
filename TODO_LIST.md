@@ -1,8 +1,7 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Generated:** 2026-02-12
-**Last Updated:** 2026-05-07
+**Last Updated:** 2026-05-18
 **Status:** Active Development
 
 ## Overview
@@ -15,32 +14,27 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 
 ### Testing & Quality
 
-- [ ] **Add CLI integration tests**  
-       **Source:** `cmd/examples/github-sync/main.go`  
-       **Description:** Test flag parsing, signal handling, and exit codes.  
-       **Context:** Verify proper error messages for missing token/user, stats command without DB, and graceful shutdown.
+- [ ] **Add CLI tests**
+       **Source:** `cmd/examples/github-sync/main.go`
+       **Description:** Test exitCodeForError, LoadConfig, flag parsing.
+       **Context:** 240-line main.go has zero test coverage. Highest-impact testing gap.
 
-- [ ] **Migrate testify→Ginkgo/GOmega**  
-       **Source:** All 8 `*_test.go` files across `pkg/storage`, `pkg/sync`, `pkg/providers/github`  
-       **Description:** Pre-commit hooks ban testify; entire test suite uses it.  
-       **Context:** 8 test files, 48 test cases. Required to unblock pre-commit hooks. ~3h effort.
+- [ ] **Add Push/Pull tests**
+       **Source:** `pkg/cqrs/stack.go`
+       **Description:** Test `CQRSStack.Push()` and `Pull()` methods.
+       **Context:** Turso remote sync is a key differentiator. Currently untested.
 
-### Infrastructure
+### Architecture
 
-- [ ] **Install golangci-lint v2 binary**  
-       **Source:** `.golangci.yml`  
-       **Description:** Config uses v2 format but installed binary is v1.64.8.  
-       **Context:** `go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@latest` — requires user action.
+- [ ] **Wire error taxonomy**
+       **Source:** `pkg/cqrs/`, `cmd/examples/github-sync/main.go`
+       **Description:** Use go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes.
+       **Context:** Users get generic exit codes instead of domain-specific ones.
 
-- [ ] **Align Go toolchain to 1.26.1**  
-       **Source:** `go.mod`  
-       **Description:** `go.mod` says 1.26.1 but installed toolchain is 1.26.0. Blocks `go test -cover`.  
-       **Context:** Coverage reports fail with compile errors. Regular build/test works fine.
-
-- [ ] **Fix pre-commit hooks**  
-       **Source:** BuildFlow hooks  
-       **Description:** 4 categories of failures: library-policy (testify), go-structure-linter, ast-state-analyzer, todo-check.  
-       **Context:** Currently bypassed with `--no-verify`. Blocked on testify→Ginkgo migration.
+- [ ] **Adopt projection.Runner**
+       **Source:** `pkg/cqrs/projection.go`
+       **Description:** Replace custom Projector with go-cqrs-lite's `projection.Runner` for replay + checkpointing.
+       **Context:** Custom projector doesn't support replay.
 
 ---
 
@@ -48,59 +42,27 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 
 ### Testing & Coverage
 
-- [ ] **Increase storage test coverage (56%→80%)**  
-       **Source:** `pkg/storage/sqlite.go`, `pkg/storage/sqlite_test.go`  
-       **Description:** Add tests for error paths, GetItemsByActor, GetItemsByRepo, CountByType edge cases.  
-       **Context:** Current 56% coverage. Many methods untested for error conditions.
+- [ ] **Migrate test framework to stdlib**
+       **Source:** 6 testify files + 1 Ginkgo file
+       **Description:** Replace testify assertions and Ginkgo BDD with stdlib `t.Errorf`/`t.Fatal`.
+       **Context:** Inconsistent test frameworks. go-cqrs-lite uses stdlib throughout.
 
-- [x] **pkg/errors and pkg/types tests**  
-       **Source:** `pkg/errors/errors_test.go`, `pkg/types/ids_test.go`  
-       **Description:** 4 error tests + 5 type tests.  
-       **Completed:** Round 1 audit sessions.
-
-- [ ] **Real GitHub PAT smoke test**  
-       **Source:** `cmd/examples/github-sync/`  
-       **Description:** Verify actual API sync works end-to-end with a real token.  
+- [ ] **Real GitHub PAT smoke test**
+       **Source:** `cmd/examples/github-sync/`
+       **Description:** Verify actual API sync works end-to-end with a real token.
        **Context:** All testing is mock-based. Never verified with real GitHub API.
 
 ### Features & UX
 
-- [ ] **Add real-time progress display**  
-       **Source:** `pkg/sync/sync.go`  
-       **Description:** Show sync progress (current page/total, events fetched) during execution.  
-       **Context:** Use `charmbracelet/log` or progress bar library. Currently silent except for start/end logs.
-
-- [ ] **Add JSON output flag**  
-       **Source:** `cmd/examples/github-sync/main.go`  
-       **Description:** Implement `-json` flag for structured output (stats, sync results).  
+- [ ] **Add JSON output flag**
+       **Source:** `cmd/examples/github-sync/main.go`
+       **Description:** Implement `-json` flag for structured output (stats, sync results).
        **Context:** Enables scripting and integration with other tools (jq, etc.).
 
-- [ ] **Support configuration file**  
-       **Source:** `cmd/examples/github-sync/main.go`  
-       **Description:** Load defaults from YAML/TOML config file (`~/.config/gh-sync/config.yaml`).  
-       **Context:** Store default user, token path, db path, and page limits.
-
-### Reliability
-
-- [x] **Rate limit handling in sync flow**  
-       **Source:** `pkg/providers/github/client.go`, `pkg/sync/sync.go`  
-       **Description:** `GetRateLimit()` and `RateLimitConfig` are wired into the GitHub client's fetch loop.  
-       **Completed:** Round 1 audit sessions.
-
-- [x] **Retry logic with exponential backoff**  
-       **Source:** `pkg/providers/github/client.go`  
-       **Description:** `RetryConfig` drives configurable exponential backoff with jitter.  
-       **Completed:** Round 1 audit sessions.
-
-- [ ] **Add structured logging fields**  
-       **Source:** `pkg/sync/sync.go`, `pkg/providers/github/client.go`  
-       **Description:** Add consistent context fields (username, page, event_id) to all log statements.  
+- [ ] **Add structured logging fields**
+       **Source:** `pkg/sync/sync.go`, `pkg/providers/github/client.go`
+       **Description:** Add consistent context fields (username, page, event_id) to all log statements.
        **Context:** Improve debuggability when filtering logs for specific users or events.
-
-- [ ] **Handle edge cases in incremental sync**  
-       **Source:** `pkg/sync/sync.go`  
-       **Description:** Handle clock skew and duplicate timestamps in cutoff logic.  
-       **Context:** Current logic uses `event.CreatedAt.Before(cutoff)` — need inclusive comparison and handle identical timestamps.
 
 ---
 
@@ -109,20 +71,13 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 Before Phase 2 (Production Ready):
 
 - [ ] All HIGH priority items complete
-- [x] Test coverage for `pkg/providers/github`, `pkg/sync`, `pkg/storage`, `internal/database`
+- [x] Test coverage for `pkg/cqrs`, `pkg/providers/github`, `pkg/sync`, `pkg/types`, `pkg/errors`
 - [x] CI/CD pipeline configured
 - [x] go.mod properly formatted (no replace directives)
 - [x] Architecture decoupling (domain types, branded IDs) complete
-- [x] Migration system for schema evolution
+- [x] CQRS migration complete (legacy CRUD deleted)
 - [x] Conflict-aware sync engine functional
-- [x] Source provider indexes for multi-provider queries
-- [x] Unused code cleaned up (PaginationMixin, EventCoreMixin removed)
-- [x] Documentation current (CHANGELOG, ROADMAP, TODO_LIST, AGENTS, README)
+- [x] Error handling migrated to stdlib (cockroachdb/errors removed)
+- [x] Documentation current (README, FEATURES, TODO_LIST, AGENTS, ROADMAP)
 - [ ] Real GitHub API sync verified with PAT
-- [ ] golangci-lint v2 binary installed and passing
-- [ ] Pre-commit hooks passing
-- [ ] testify→Ginkgo migration complete
-
----
-
-**Last Updated:** 2026-04-08
+- [x] golangci-lint v2 passing (0 issues)

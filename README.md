@@ -3,7 +3,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**A pluggable SDK for syncing data from any provider to local SQLite storage.** Build local-first applications that work offline with full data fidelity and incremental sync.
+**A pluggable SDK for syncing data from any provider to local event-sourced storage.** Build local-first applications that work offline with full data fidelity, incremental sync, and CQRS-based state management.
 
 _go-localsync is an SDK, not a CLI application._ Use it as a library to add data synchronization to your Go applications.
 
@@ -12,11 +12,11 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 | Component               | Description                                                                             |
 | ----------------------- | --------------------------------------------------------------------------------------- |
 | **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.) |
-| **Storage Abstraction** | SQLite storage with full JSON fidelity — store the complete original payload            |
+| **CQRS Stack**          | Event-sourced architecture via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) — Decider, ReadModel, Projection |
 | **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry         |
-| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy                            |
+| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy, emitted as domain events |
 | **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)        |
-| **Schema Migrations**   | Version-tracked database migrations with automatic application on startup               |
+| **Turso Backend**       | SQLite/Turso event store with remote Push/Pull sync support                            |
 
 ## Who is this for?
 
@@ -25,7 +25,7 @@ This SDK is for Go developers building applications that need:
 - **Offline-first** functionality with local data access
 - **Offline dashboards** that aggregate data from multiple services
 - **Custom sync logic** tailored to specific use cases
-- **Data portability** with SQLite as a simple, embedded database
+- **Event sourcing** with full audit trail and replay capability
 - **Conflict detection** for multi-device or multi-source synchronization
 
 ## Installation
@@ -34,7 +34,7 @@ This SDK is for Go developers building applications that need:
 go get github.com/larsartmann/go-localsync
 ```
 
-> **Note:** This module depends on two private repositories (`go-localfirst` and `go-branded-id`). Set environment variables for private module access:
+> **Note:** This module depends on private repositories (`go-cqrs-lite` and `go-branded-id`). Set environment variables for private module access:
 >
 > ```bash
 > export GONOSUMCHECK=github.com/larsartmann/*
@@ -60,17 +60,14 @@ import (
 func main() {
     ctx := context.Background()
 
-    // Create a provider (GitHub built-in)
     ghProvider := github.NewClient("your-github-token")
 
-    // Create the CQRS stack (event store + read model)
     stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
     if err != nil {
         log.Fatal(err)
     }
     defer stack.Close()
 
-    // Sync
     syncer := sync.NewSyncer(ghProvider, stack, nil)
     result, err := syncer.SyncIncremental(ctx, &sync.SyncOptions{
         Source:   "username",
@@ -93,7 +90,7 @@ Implement `provider.Provider` to add support for any data source:
 type Provider interface {
     Name() string
     Fetch(ctx context.Context, opts *FetchOptions) (*FetchResult, error)
-    FetchAll(ctx context.Context, source string, maxPages int) (*FetchResult, error)
+    FetchAll(ctx context.Context, source string, maxPages int) (*FetchLimitInfo, error)
     GetRateLimit(ctx context.Context) (*RateLimitInfo, error)
 }
 ```
@@ -117,34 +114,28 @@ type Item struct {
 }
 ```
 
-### Storage
+## CQRS Architecture
 
-The `storage.Storage` interface for custom backends:
+The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite). There is no legacy CRUD path.
 
-```go
-type Storage interface {
-    Upsert(ctx context.Context, item *provider.Item) error
-    UpsertBatch(ctx context.Context, items []*provider.Item) error
-    GetByID(ctx context.Context, id string) (*provider.Item, error)
-    GetLatest(ctx context.Context) (*provider.Item, error)
-    GetItems(ctx context.Context, limit, offset int) ([]*provider.Item, error)
-    GetItemsByType(ctx context.Context, itemType string, limit, offset int) ([]*provider.Item, error)
-    GetItemsByActor(ctx context.Context, actorLogin string, limit, offset int) ([]*provider.Item, error)
-    GetItemsByRepo(ctx context.Context, repoName string, limit, offset int) ([]*provider.Item, error)
-    GetItemsBySource(ctx context.Context, source string, limit, offset int) ([]*provider.Item, error)
-    GetItemsSince(ctx context.Context, since time.Time) ([]*provider.Item, error)
-    Delete(ctx context.Context, id string) error
-    DeleteAll(ctx context.Context) error
-    Count(ctx context.Context) (int64, error)
-    CountByType(ctx context.Context, itemType string) (int64, error)
-    GetTypes(ctx context.Context) ([]string, error)
-    Close() error
-}
-```
+| Component        | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| **Decider**      | Pure Fold/DecideSync/DecideDelete — single authority for state transitions |
+| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemDeleted`                      |
+| **Projection**   | Subscribes to event bus, updates read model                           |
+| **Read Model**   | In-memory or Turso-backed with filter/pagination                      |
+| **Aggregate ID** | Deterministic SHA256→ULID from (source, sourceID) for idempotency     |
+
+### Key Properties
+
+- **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
+- **Deterministic IDs**: SHA256→ULID from (source, sourceID)
+- **Conflict detection**: `DecideSync` compares fields and emits `ItemConflictFound` events
+- **Remote wins**: on conflict, incoming item overwrites
 
 ## Conflict-Aware Sync
 
-For multi-device or multi-source scenarios, use `ConflictAwareSyncer` which detects conflicts via timestamp comparison and resolves with a remote-wins strategy:
+For multi-device or multi-source scenarios, use `ConflictAwareSyncer`:
 
 ```go
 baseSyncer := sync.NewSyncer(ghProvider, stack, nil)
@@ -156,9 +147,24 @@ result, err := conflictSyncer.SyncWithConflictDetection(ctx, &sync.SyncOptions{
 // result.Upserted / result.Skipped / result.Errors for totals
 ```
 
-## Schema Migrations
+## Turso Remote Sync
 
-The storage layer automatically applies database migrations on `storage.Open()`. Migrations are tracked in a `schema_migrations` table and applied idempotently in order. No manual migration steps required.
+Push and pull changes to/from a remote Turso database:
+
+```go
+stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
+    Backend:   "turso",
+    DBPath:    "/path/to/local.db",
+    RemoteURL: "libsql://your-db.turso.io",
+    AuthToken: "your-turso-token",
+})
+
+// Pull remote changes before sync
+changed, err := stack.Pull(ctx)
+
+// Push local changes after sync
+err = stack.Push(ctx)
+```
 
 ## Branded IDs
 
@@ -182,39 +188,42 @@ GithubEventID // id.ID[GithubEventBrand, string]
 
 ## Example CLI
 
-See `cmd/examples/github-sync/` for a complete CLI implementation:
+See `cmd/examples/github-sync/` for a complete CLI implementation with flag parsing, signal handling, and exit codes:
 
 ```bash
-# Build the example
 go build -o gh-sync ./cmd/examples/github-sync
 
-# Use it
 export GITHUB_TOKEN=your_token
 gh-sync -user octocat
+gh-sync -user octocat --conflict-aware
+gh-sync -user octocat --push --pull
+gh-sync -stats
 ```
 
 ## Features
 
-| Feature             | Status  | Description                                              |
-| ------------------- | ------- | -------------------------------------------------------- |
-| Incremental Sync    | ✅ Done | Only fetch new items since last sync — no duplicate data |
-| Full Fidelity       | ✅ Done | Raw JSON stored for 100% data preservation               |
-| Branded IDs         | ✅ Done | Compile-time type-safe identifiers                       |
-| Schema Migrations   | ✅ Done | Version-tracked, idempotent, auto-applied                |
-| Conflict-Aware Sync | ✅ Done | CRDT-backed conflict detection with vector clocks        |
-| No CGO              | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)               |
-| Rate Limiting       | ✅ Done | Configurable rate limiting wired into sync flow          |
-| Retry Logic         | ✅ Done | Exponential backoff retry with configurable limits       |
+| Feature            | Status  | Description                                              |
+| ------------------ | ------- | -------------------------------------------------------- |
+| CQRS Stack         | ✅ Done | Event store, bus, decider repository, read model, projection |
+| Decider Pattern    | ✅ Done | Pure Fold/DecideSync/DecideDelete with SyncItemState     |
+| Incremental Sync   | ✅ Done | Only fetch new items since last sync — no duplicate data |
+| Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation               |
+| Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution       |
+| Branded IDs        | ✅ Done | Compile-time type-safe identifiers                       |
+| Turso Backend      | ✅ Done | SQLite/Turso event store + read model + Push/Pull sync   |
+| No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)               |
+| Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow          |
+| Retry Logic        | ✅ Done | Exponential backoff retry with configurable limits       |
+| GitHub Provider    | ✅ Done | Full implementation with pagination, rate limiting, retry |
 
 ## Development
 
 ```bash
-just build    # Build
-just test     # Run tests (48 tests across 8 suites)
-just lint     # Run linter (requires golangci-lint v2)
-just sqlc     # Generate sqlc code
-just verify   # Build + test + lint
-just ci       # Full CI gate
+go build ./...                    # Build
+go test ./... -count=1            # Run tests (107 tests across 6 packages)
+go vet ./...                      # Vet
+golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
+golangci-lint fmt ./...           # Format
 ```
 
 ## Architecture
@@ -224,58 +233,35 @@ pkg/
 ├── provider/         # Core interfaces (Provider, Item, FetchResult, configs)
 ├── providers/
 │   └── github/       # GitHub provider implementation
-├── storage/          # Storage interface and SQLite implementation
+├── cqrs/             # CQRS integration (Decider, ReadModel, Projection, Stack)
 ├── sync/
 │   ├── sync.go            # Syncer — basic full/incremental sync
-│   └── conflict_aware.go  # ConflictAwareSyncer — CRDT-backed sync
+│   └── conflict_aware.go  # ConflictAwareSyncer — conflict-aware sync
 ├── types/            # Branded ID types (go-branded-id)
-├── errors/           # Sentinel errors (cockroachdb/errors)
+├── errors/           # Sentinel errors with stdlib fmt.Errorf wrapping
 └── testhelpers/      # Shared test mocks and factories
 
-internal/
-├── database/
-│   ├── connection.go      # Database connection management
-│   └── migration.go       # Schema migration runner
-└── db/                    # sqlc-generated code (models, queries)
-
-sql/migrations/             # Reference SQL migration files
 cmd/examples/github-sync/   # Example CLI application
 ```
 
 ## Testing
 
-48 tests across 8 test suites (121 including subtests):
+107 test cases across 6 test packages:
 
-| Package                | Tests | Coverage                        |
-| ---------------------- | ----- | ------------------------------- |
-| `internal/database`    | 6     | Migrations, idempotency, schema |
-| `pkg/errors`           | 4     | Sentinel error matching         |
-| `pkg/provider`         | 1     | Interface validation            |
-| `pkg/providers/github` | 21    | Client, fetch, retry, errors    |
-| `pkg/storage`          | Suite | SQLite CRUD operations          |
-| `pkg/sync`             | 11    | Syncer + ConflictAwareSyncer    |
-| `pkg/types`            | 5     | Branded ID construction         |
-
-```bash
-just test              # Run all tests
-go test -cover ./...   # Coverage (requires Go 1.26.1 toolchain)
-```
+| Package                    | Tests | Description                              |
+| -------------------------- | ----- | ---------------------------------------- |
+| `pkg/cqrs`                 | 46    | Decider, ReadModel, Projection, Stack, Turso RM |
+| `pkg/providers/github`     | 35    | Client, fetch, retry, errors (19 unit + 16 BDD) |
+| `pkg/sync`                 | 11    | Syncer + ConflictAwareSyncer             |
+| `pkg/types`                | 10    | Branded ID construction, roundtrip       |
+| `pkg/errors`               | 4     | Sentinel errors, wrapping                |
+| `pkg/provider`             | 1     | Item validation                          |
 
 ## Related Projects
 
-### `go-cqrs-lite` — CQRS Framework
-
-[go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) provides the core CQRS framework (event sourcing, decider pattern, dispatchers, projections) that go-localsync builds on.
-
-### `cqrs-htmx` — HTTP Adapter
-
-[cqrs-htmx](https://github.com/larsartmann/cqrs-htmx) provides HTMX-aware HTTP integration for go-cqrs-lite applications.
-
-### When to Use Which
-
 | Need                                                         | Use              |
 | ------------------------------------------------------------ | ---------------- |
-| Sync external API data (GitHub, Jira, etc.) to local SQLite  | **go-localsync** |
+| Sync external API data (GitHub, Jira, etc.) to local storage | **go-localsync** |
 | Build a local-first application with event sourcing and CQRS | **go-cqrs-lite** |
 | HTTP endpoints with HTMX, templ, Casbin auth                 | **cqrs-htmx**    |
 
