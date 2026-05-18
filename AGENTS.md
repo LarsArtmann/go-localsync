@@ -81,16 +81,16 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package                    | Tests | Status                                              |
-| -------------------------- | ----- | --------------------------------------------------- |
+| Package                    | Tests | Status                                                        |
+| -------------------------- | ----- | ------------------------------------------------------------- |
 | `pkg/cqrs`                 | 51    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull |
-| `pkg/providers/github`     | 35    | ✅ Client, fetch, retry, error handling (19+16 BDD) |
-| `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                     |
-| `pkg/types`                | 10    | ✅ ID construction, roundtrip, zero, equal          |
-| `pkg/errors`               | 4     | ✅ Sentinel errors, wrapping                        |
-| `pkg/provider`             | 1     | ✅ Item validation                                  |
-| `cmd/examples/github-sync` | 6     | ✅ exitCodeForError, LoadConfig, env defaults       |
-| `pkg/testhelpers`          | 0     | ⬜ Helper package                                   |
+| `pkg/providers/github`     | 35    | ✅ Client, fetch, retry, error handling (19+16 BDD)           |
+| `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                               |
+| `pkg/types`                | 10    | ✅ ID construction, roundtrip, zero, equal                    |
+| `pkg/errors`               | 4     | ✅ Sentinel errors, wrapping                                  |
+| `pkg/provider`             | 1     | ✅ Item validation                                            |
+| `cmd/examples/github-sync` | 6     | ✅ exitCodeForError, LoadConfig, env defaults                 |
+| `pkg/testhelpers`          | 0     | ⬜ Helper package                                             |
 
 **118 total test cases** across 7 test packages. Test:Code ratio >1.0:1.
 
@@ -156,10 +156,10 @@ Two tables managed by the CQRS stack:
 
 ### Test Dependencies
 
-| Dependency         | Purpose                                |
-| ------------------ | -------------------------------------- |
-| `onsi/ginkgo/v2`   | Indirect only (via go-cqrs-lite tests) |
-| `onsi/gomega`      | Indirect only (via go-cqrs-lite tests) |
+| Dependency       | Purpose                                |
+| ---------------- | -------------------------------------- |
+| `onsi/ginkgo/v2` | Indirect only (via go-cqrs-lite tests) |
+| `onsi/gomega`    | Indirect only (via go-cqrs-lite tests) |
 
 ## go-cqrs-lite Integration
 

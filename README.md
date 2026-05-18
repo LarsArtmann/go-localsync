@@ -220,7 +220,7 @@ gh-sync -stats
 
 ```bash
 go build ./...                    # Build
-go test ./... -count=1            # Run tests (107 tests across 6 packages)
+go test ./... -count=1            # Run tests (110 tests across 7 packages)
 go vet ./...                      # Vet
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...           # Format
@@ -246,16 +246,17 @@ cmd/examples/github-sync/   # Example CLI application
 
 ## Testing
 
-107 test cases across 6 test packages:
+110 test cases across 7 test packages:
 
-| Package                | Tests | Description                                     |
-| ---------------------- | ----- | ----------------------------------------------- |
-| `pkg/cqrs`             | 46    | Decider, ReadModel, Projection, Stack, Turso RM |
-| `pkg/providers/github` | 35    | Client, fetch, retry, errors (19 unit + 16 BDD) |
-| `pkg/sync`             | 11    | Syncer + ConflictAwareSyncer                    |
-| `pkg/types`            | 10    | Branded ID construction, roundtrip              |
-| `pkg/errors`           | 4     | Sentinel errors, wrapping                       |
-| `pkg/provider`         | 1     | Item validation                                 |
+| Package                    | Tests | Description                                     |
+| -------------------------- | ----- | ----------------------------------------------- |
+| `pkg/cqrs`                 | 51    | Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull |
+| `pkg/providers/github`     | 35    | Client, fetch, retry, errors (19 unit + 16 BDD) |
+| `pkg/sync`                 | 11    | Syncer + ConflictAwareSyncer                    |
+| `pkg/types`                | 10    | Branded ID construction, roundtrip              |
+| `pkg/errors`               | 4     | Sentinel errors, wrapping                       |
+| `pkg/provider`             | 1     | Item validation                                 |
+| `cmd/examples/github-sync` | 6     | exitCodeForError, LoadConfig, env defaults      |
 
 ## Related Projects
 
