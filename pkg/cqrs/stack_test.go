@@ -155,7 +155,12 @@ func TestCQRSStack_ConflictDetection(t *testing.T) {
 
 	result = stack.SyncItems(ctx, []*provider.Item{updatedItem})
 	assert.Equal(t, 1, result.Synced)
-	assert.Equal(t, 1, result.Conflicts, "updated item with newer timestamp should trigger conflict")
+	assert.Equal(
+		t,
+		1,
+		result.Conflicts,
+		"updated item with newer timestamp should trigger conflict",
+	)
 	assert.Equal(t, 0, result.Errors)
 }
 

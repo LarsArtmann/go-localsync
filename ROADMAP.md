@@ -27,24 +27,24 @@ Aspirational features and improvements with no fixed timeline. These are planned
 ### Enhanced Features
 
 - [ ] **Build TUI with Bubble Tea**  
-      Interactive terminal UI for browsing events, filtering, and real-time sync.  
-      Effort: ~2h. Low priority.
+       Interactive terminal UI for browsing events, filtering, and real-time sync.  
+       Effort: ~2h. Low priority.
 
 - [ ] **Support multiple user sync**  
-      Accept multiple `-user` flags or user list from file.  
-      Requires read model schema to track which user each event belongs to.
+       Accept multiple `-user` flags or user list from file.  
+       Requires read model schema to track which user each event belongs to.
 
 - [ ] **Implement daemon/background mode**  
-      Run as cron job or systemd service for periodic sync.
+       Run as cron job or systemd service for periodic sync.
 
 ### Data & Export
 
 - [ ] **Create HTTP API endpoint**  
-      REST API for querying events (GET /events, /stats, /types).  
-      Would use cqrs-htmx library. Effort: ~4h.
+       REST API for querying events (GET /events, /stats, /types).  
+       Would use cqrs-htmx library. Effort: ~4h.
 
 - [ ] **Add export to JSON/CSV**  
-      Export stored events to file formats (`-export json` or `-export csv`).
+       Export stored events to file formats (`-export json` or `-export csv`).
 
 ---
 
@@ -53,27 +53,27 @@ Aspirational features and improvements with no fixed timeline. These are planned
 ### Architecture
 
 - [ ] **Consolidate conflict detection**  
-      `ConflictAwareSyncer` and `DecideSync` both independently detect conflicts using the same `HasChanged()` but different truth sources (read model vs event store). The decider should be the single authority. `SyncItems` should return per-item results so the sync layer can observe conflicts without duplicating detection.
+       `ConflictAwareSyncer` and `DecideSync` both independently detect conflicts using the same `HasChanged()` but different truth sources (read model vs event store). The decider should be the single authority. `SyncItems` should return per-item results so the sync layer can observe conflicts without duplicating detection.
 
 - [ ] **Adopt projection.Runner**  
-      Replace custom `Projector` with go-cqrs-lite's `projection.Runner` for replay + checkpointing.
+       Replace custom `Projector` with go-cqrs-lite's `projection.Runner` for replay + checkpointing.
 
 - [ ] **Wire error taxonomy**  
-      Use go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes instead of generic 1.
+       Use go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes instead of generic 1.
 
 - [ ] **Adopt command.Dispatcher**  
-      Use typed command dispatch from go-cqrs-lite instead of raw `SyncItems` method.
+       Use typed command dispatch from go-cqrs-lite instead of raw `SyncItems` method.
 
 ### Code Quality
 
 - [ ] **Unify test framework**  
-      1 file uses Ginkgo, 6 files use testify. Standardize on one approach (stdlib recommended).
+       1 file uses Ginkgo, 6 files use testify. Standardize on one approach (stdlib recommended).
 
 - [ ] **CLI tests**  
-      Zero test coverage for 240-line `main.go` — flag parsing, signal handling, exit codes.
+       Zero test coverage for 240-line `main.go` — flag parsing, signal handling, exit codes.
 
 - [ ] **Push/Pull tests**  
-      `CQRSStack.Push()` and `Pull()` untested.
+       `CQRSStack.Push()` and `Pull()` untested.
 
 ---
 

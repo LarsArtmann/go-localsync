@@ -100,10 +100,10 @@ Run: `go test ./... -count=1`
 
 Storage backends are selected via `CQRSConfig.Backend` in `cqrs.NewCQRSStack()`.
 
-| Backend  | Flag/Config        | Use Case                                  |
-| -------- | ------------------ | ----------------------------------------- |
-| `memory` | `--backend memory` | Testing, development (default)            |
-| `turso`  | `--backend turso`  | Local SQLite/Turso file or remote Turso   |
+| Backend  | Flag/Config        | Use Case                                |
+| -------- | ------------------ | --------------------------------------- |
+| `memory` | `--backend memory` | Testing, development (default)          |
+| `turso`  | `--backend turso`  | Local SQLite/Turso file or remote Turso |
 
 Event store + read model use the same backend. Turso backend adds remote sync via `Push()`/`Pull()`.
 
@@ -143,35 +143,35 @@ Two tables managed by the CQRS stack:
 
 ## Dependencies
 
-| Dependency                    | Purpose                                                             |
-| ----------------------------- | ------------------------------------------------------------------- |
-| `go-cqrs-lite/core`           | Decider, event types, branded IDs, error taxonomy                   |
-| `go-cqrs-lite/memory`         | In-memory event store + bus                                         |
-| `go-cqrs-lite/storage`        | SQLite/Turso event store with optimistic concurrency                |
-| `go-branded-id`               | Branded phantom-type IDs for compile-time safety                    |
-| `go-github/v69`               | GitHub API client                                                   |
-| `turso.tech/database/tursogo` | Turso Go client — local + remote sync                               |
-| `charm.land/log/v2`           | Structured logging                                                  |
-| `caarlos0/env/v11`            | Environment variable config                                         |
+| Dependency                    | Purpose                                              |
+| ----------------------------- | ---------------------------------------------------- |
+| `go-cqrs-lite/core`           | Decider, event types, branded IDs, error taxonomy    |
+| `go-cqrs-lite/memory`         | In-memory event store + bus                          |
+| `go-cqrs-lite/storage`        | SQLite/Turso event store with optimistic concurrency |
+| `go-branded-id`               | Branded phantom-type IDs for compile-time safety     |
+| `go-github/v69`               | GitHub API client                                    |
+| `turso.tech/database/tursogo` | Turso Go client — local + remote sync                |
+| `charm.land/log/v2`           | Structured logging                                   |
+| `caarlos0/env/v11`            | Environment variable config                          |
 
 ### Test Dependencies
 
-| Dependency          | Purpose                                    |
-| ------------------- | ------------------------------------------ |
-| `onsi/ginkgo/v2`    | BDD-style tests (github provider only)     |
-| `onsi/gomega`       | Ginkgo matchers                            |
-| `stretchr/testify`  | Assertions (6 test files)                  |
+| Dependency         | Purpose                                |
+| ------------------ | -------------------------------------- |
+| `onsi/ginkgo/v2`   | BDD-style tests (github provider only) |
+| `onsi/gomega`      | Ginkgo matchers                        |
+| `stretchr/testify` | Assertions (6 test files)              |
 
 ## go-cqrs-lite Integration
 
-| Area              | go-localsync                                                    | go-cqrs-lite                                              |
-| ----------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| IDs               | `id.ID[B, V]` via go-branded-id directly                        | `id.Of[T]` — same memory layout                           |
-| Storage           | `CQRSStack` → `decider.Repository[SyncItemState]`               | `event.Store` + `event.Bus` via memory/storage modules    |
-| Conflict          | `DecideSync` produces ItemConflictFound events                  | Error taxonomy with 5 families available                  |
-| Read Model        | `MemoryReadModel` + `TursoReadModel` with filter/pagination     | Projected from events via bus subscription                 |
-| Retry             | Hand-rolled in `github/client.go`                               | `middleware.CommandRetry` available but not yet wired      |
-| SchemaVersion     | Preserved in SQL + Pebble serialization (fixed in cqrs-lite)     | Upcasting infrastructure available                         |
+| Area          | go-localsync                                                 | go-cqrs-lite                                           |
+| ------------- | ------------------------------------------------------------ | ------------------------------------------------------ |
+| IDs           | `id.ID[B, V]` via go-branded-id directly                     | `id.Of[T]` — same memory layout                        |
+| Storage       | `CQRSStack` → `decider.Repository[SyncItemState]`            | `event.Store` + `event.Bus` via memory/storage modules |
+| Conflict      | `DecideSync` produces ItemConflictFound events               | Error taxonomy with 5 families available               |
+| Read Model    | `MemoryReadModel` + `TursoReadModel` with filter/pagination  | Projected from events via bus subscription             |
+| Retry         | Hand-rolled in `github/client.go`                            | `middleware.CommandRetry` available but not yet wired  |
+| SchemaVersion | Preserved in SQL + Pebble serialization (fixed in cqrs-lite) | Upcasting infrastructure available                     |
 
 ### Not Yet Adopted
 

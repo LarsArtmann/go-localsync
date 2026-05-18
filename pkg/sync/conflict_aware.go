@@ -57,11 +57,13 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		case cqrs.ActionConflictRemote:
 			cr.Conflicts++
 			cr.Upserted++
+
 			s.logger.Debug("Resolved conflict: remote wins", "sourceID", r.SourceID)
 		case cqrs.ActionUnchanged:
 			cr.Skipped++
 		case cqrs.ActionError:
 			cr.Errors++
+
 			s.logger.Warn("Failed to sync item", "sourceID", r.SourceID, "error", r.Error)
 		}
 	}

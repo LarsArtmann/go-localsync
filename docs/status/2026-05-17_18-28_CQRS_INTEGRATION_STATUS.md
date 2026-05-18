@@ -16,60 +16,60 @@ The main remaining work is: `go mod tidy`, removing cockroachdb/errors, updating
 
 ## a) FULLY DONE
 
-| Area | Status | Detail |
-|------|--------|--------|
-| SchemaVersion serialization | ✅ | Fixed in go-cqrs-lite `a760426` — Pebble + SQL + SQLite paths all preserve schema_version |
-| CQRS decider pattern | ✅ | `Decider[SyncItemState]` with pure Fold + Decide, 17 tests |
-| Deterministic aggregate IDs | ✅ | SHA256→ULID from (source, sourceID), idempotent |
-| Event-sourced read model | ✅ | MemoryReadModel + TursoReadModel, both with filter/pagination |
-| CQRSStack wiring | ✅ | Store+Bus+Repo+ReadModel, automatic projection via bus subscription |
-| CLI uses CQRS | ✅ | `main.go` uses `cqrs.NewCQRSStack()`, no legacy storage imports |
-| Legacy CRUD deleted | ✅ | `pkg/storage/`, `internal/database/`, `internal/db/`, `sql/` — all gone |
-| Conflict-aware sync | ✅ | `ConflictAwareSyncer` with LWW remote-wins |
-| Branded IDs | ✅ | 6 types: ItemID, ExternalID, ProviderID, ActorID, RepoID, EventTypeID |
-| GitHub provider | ✅ | Full implementation with pagination, rate limiting, retry (35 tests) |
-| Sync orchestration | ✅ | `Syncer` + `ConflictAwareSyncer` glue between Provider and CQRS stack |
-| Turso remote sync | ✅ | Push/Pull exposed via CQRSStack, TursoSyncDB integration |
-| Event upcasting infrastructure | ✅ | go-cqrs-lite has version-sorted chaining with cycle detection (now that schema_version is preserved) |
-| go-cqrs-lite all modules | ✅ | 21 test packages pass, zero lint issues |
+| Area                           | Status | Detail                                                                                               |
+| ------------------------------ | ------ | ---------------------------------------------------------------------------------------------------- |
+| SchemaVersion serialization    | ✅     | Fixed in go-cqrs-lite `a760426` — Pebble + SQL + SQLite paths all preserve schema_version            |
+| CQRS decider pattern           | ✅     | `Decider[SyncItemState]` with pure Fold + Decide, 17 tests                                           |
+| Deterministic aggregate IDs    | ✅     | SHA256→ULID from (source, sourceID), idempotent                                                      |
+| Event-sourced read model       | ✅     | MemoryReadModel + TursoReadModel, both with filter/pagination                                        |
+| CQRSStack wiring               | ✅     | Store+Bus+Repo+ReadModel, automatic projection via bus subscription                                  |
+| CLI uses CQRS                  | ✅     | `main.go` uses `cqrs.NewCQRSStack()`, no legacy storage imports                                      |
+| Legacy CRUD deleted            | ✅     | `pkg/storage/`, `internal/database/`, `internal/db/`, `sql/` — all gone                              |
+| Conflict-aware sync            | ✅     | `ConflictAwareSyncer` with LWW remote-wins                                                           |
+| Branded IDs                    | ✅     | 6 types: ItemID, ExternalID, ProviderID, ActorID, RepoID, EventTypeID                                |
+| GitHub provider                | ✅     | Full implementation with pagination, rate limiting, retry (35 tests)                                 |
+| Sync orchestration             | ✅     | `Syncer` + `ConflictAwareSyncer` glue between Provider and CQRS stack                                |
+| Turso remote sync              | ✅     | Push/Pull exposed via CQRSStack, TursoSyncDB integration                                             |
+| Event upcasting infrastructure | ✅     | go-cqrs-lite has version-sorted chaining with cycle detection (now that schema_version is preserved) |
+| go-cqrs-lite all modules       | ✅     | 21 test packages pass, zero lint issues                                                              |
 
 ---
 
 ## b) PARTIALLY DONE
 
-| Area | What's Done | What's Missing |
-|------|-------------|----------------|
-| go mod tidy | Identified changes needed (version bumps, remove unused `golang/protobuf`, `matttproud/golang_protobuf_extensions`) | Not committed yet — affects both go.mod and go.sum |
-| AGENTS.md accuracy | This report identifies all inaccuracies | Not yet updated — still references deleted packages |
-| Test framework migration | 1 file uses Ginkgo (`client_bdd_test.go`), 6 files use testify | Mixed frameworks; pre-commit hooks use buildflow (not a testify ban) |
-| Error taxonomy wiring | go-cqrs-lite provides 5 error families | go-localsync doesn't wire them — domain errors get generic exit codes |
-| CLI tests | CLI is well-structured with `exitCodeForError()` | No tests for `cmd/examples/github-sync/` at all |
+| Area                     | What's Done                                                                                                         | What's Missing                                                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| go mod tidy              | Identified changes needed (version bumps, remove unused `golang/protobuf`, `matttproud/golang_protobuf_extensions`) | Not committed yet — affects both go.mod and go.sum                    |
+| AGENTS.md accuracy       | This report identifies all inaccuracies                                                                             | Not yet updated — still references deleted packages                   |
+| Test framework migration | 1 file uses Ginkgo (`client_bdd_test.go`), 6 files use testify                                                      | Mixed frameworks; pre-commit hooks use buildflow (not a testify ban)  |
+| Error taxonomy wiring    | go-cqrs-lite provides 5 error families                                                                              | go-localsync doesn't wire them — domain errors get generic exit codes |
+| CLI tests                | CLI is well-structured with `exitCodeForError()`                                                                    | No tests for `cmd/examples/github-sync/` at all                       |
 
 ---
 
 ## c) NOT STARTED
 
-| Area | Description | Impact |
-|------|-------------|--------|
-| Remove cockroachdb/errors | Replace with stdlib `fmt.Errorf` + `%w` | Removes 6 transitive deps (pebble, redact, tokenbucket, fifo, logtags, sentry) |
-| CLI test coverage | `cmd/examples/github-sync/` has 0 tests | High — it's the main entry point |
-| Push/Pull test coverage | `CQRSStack.Push()` and `Pull()` untested | Medium — Turso remote sync is a key feature |
-| Adopt projection.Runner | go-cqrs-lite has `projection.Runner` with replay + checkpointing | Replaces custom Projector |
-| Adopt command.Dispatcher | go-cqrs-lite has typed command dispatch | Could replace raw `SyncItems` method |
-| Wire error taxonomy | Use `event.RegisterClassification` for proper HTTP exit codes | Users get generic 500s instead of specific error codes |
-| Testify → stdlib migration | 6 test files use testify | Would eliminate 1 dependency |
-| README/FEATURES update | Reference deleted packages, outdated architecture | New developers will be confused |
+| Area                       | Description                                                      | Impact                                                                         |
+| -------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Remove cockroachdb/errors  | Replace with stdlib `fmt.Errorf` + `%w`                          | Removes 6 transitive deps (pebble, redact, tokenbucket, fifo, logtags, sentry) |
+| CLI test coverage          | `cmd/examples/github-sync/` has 0 tests                          | High — it's the main entry point                                               |
+| Push/Pull test coverage    | `CQRSStack.Push()` and `Pull()` untested                         | Medium — Turso remote sync is a key feature                                    |
+| Adopt projection.Runner    | go-cqrs-lite has `projection.Runner` with replay + checkpointing | Replaces custom Projector                                                      |
+| Adopt command.Dispatcher   | go-cqrs-lite has typed command dispatch                          | Could replace raw `SyncItems` method                                           |
+| Wire error taxonomy        | Use `event.RegisterClassification` for proper HTTP exit codes    | Users get generic 500s instead of specific error codes                         |
+| Testify → stdlib migration | 6 test files use testify                                         | Would eliminate 1 dependency                                                   |
+| README/FEATURES update     | Reference deleted packages, outdated architecture                | New developers will be confused                                                |
 
 ---
 
 ## d) TOTALLY FUCKED UP
 
-| Issue | Severity | Detail |
-|-------|----------|--------|
-| AGENTS.md severely outdated | 🟡 MEDIUM | References `pkg/storage/`, `internal/database/`, `internal/db/`, `sql/` — all deleted. Claims "dual storage path" but only CQRS exists. Claims "Phase 4 blocked" but legacy is already gone. Claims pre-commit hooks "ban testify" but they use buildflow. Claims golangci-lint v1/v2 mismatch. Claims go toolchain mismatch. |
-| cockroachdb/errors still imported | 🟡 MEDIUM | Pulls in pebble, redact, tokenbucket, fifo, logtags, sentry — 6 heavy transitive deps for a convenience wrapper around `fmt.Errorf` + `%w` |
-| go.mod has unused + missing deps | 🟢 LOW | `golang/protobuf` and `matttproud/golang_protobuf_extensions` unused; `munnerz/goautoneg` and `go.yaml.in/yaml/v2` missing |
-| No CLI tests | 🟡 MEDIUM | 240-line main.go with signal handling, error mapping, backend selection — zero test coverage |
+| Issue                             | Severity  | Detail                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AGENTS.md severely outdated       | 🟡 MEDIUM | References `pkg/storage/`, `internal/database/`, `internal/db/`, `sql/` — all deleted. Claims "dual storage path" but only CQRS exists. Claims "Phase 4 blocked" but legacy is already gone. Claims pre-commit hooks "ban testify" but they use buildflow. Claims golangci-lint v1/v2 mismatch. Claims go toolchain mismatch. |
+| cockroachdb/errors still imported | 🟡 MEDIUM | Pulls in pebble, redact, tokenbucket, fifo, logtags, sentry — 6 heavy transitive deps for a convenience wrapper around `fmt.Errorf` + `%w`                                                                                                                                                                                    |
+| go.mod has unused + missing deps  | 🟢 LOW    | `golang/protobuf` and `matttproud/golang_protobuf_extensions` unused; `munnerz/goautoneg` and `go.yaml.in/yaml/v2` missing                                                                                                                                                                                                    |
+| No CLI tests                      | 🟡 MEDIUM | 240-line main.go with signal handling, error mapping, backend selection — zero test coverage                                                                                                                                                                                                                                  |
 
 ---
 
@@ -99,33 +99,33 @@ The main remaining work is: `go mod tidy`, removing cockroachdb/errors, updating
 
 ## f) TOP 25 THINGS TO DO NEXT
 
-| # | Priority | Project | Task | Impact | Effort |
-|---|----------|---------|------|--------|--------|
-| 1 | 🔴 P0 | go-localsync | **`go mod tidy`** — Remove unused deps, add missing ones | HIGH | 5min |
-| 2 | 🔴 P0 | go-localsync | **Update AGENTS.md** — Remove all references to deleted packages, fix outdated claims | HIGH | 30min |
-| 3 | 🔴 P0 | go-cqrs-lite | **Tag v0.1.0-alpha** — First public release, storage as experimental | HIGH | 30min |
-| 4 | 🟡 P1 | go-localsync | **Remove cockroachdb/errors** — Replace with stdlib `fmt.Errorf` + `%w` | MEDIUM | 1h |
-| 5 | 🟡 P1 | go-localsync | **Unexport `SyncItemsDDL`/`SyncItemsIndexes`** — Only used internally | LOW | 5min |
-| 6 | 🟡 P1 | go-localsync | **Fix split-brain conflict detection** — Consolidate `ConflictAwareSyncer` + `DecideSync` | HIGH | 2h |
-| 7 | 🟡 P1 | go-localsync | **Add CLI tests** — Test `exitCodeForError`, flag parsing, signal handling | MEDIUM | 2h |
-| 8 | 🟡 P1 | go-localsync | **Add Push/Pull tests** — Test CQRSStack remote sync methods | MEDIUM | 1h |
-| 9 | 🟡 P1 | go-localsync | **Wire error taxonomy** — Use go-cqrs-lite error classification for exit codes | MEDIUM | 1h |
-| 10 | 🟡 P1 | go-localsync | **Update README.md** — Reflect CQRS-only architecture | MEDIUM | 30min |
-| 11 | 🟡 P1 | go-localsync | **Update FEATURES.md** — Remove legacy storage references | MEDIUM | 15min |
-| 12 | 🟡 P1 | go-localsync | **Update TODO_LIST.md** — Mark completed items, add new ones | LOW | 15min |
-| 13 | 🟡 P1 | go-localsync | **Delete stale docs** — Remove `CQRS_MIGRATION_PLAN.md`, `PROJECT_SPLIT_EXECUTIVE_REPORT.md`, `BDD_TESTS_REVIEW.md`, `PARTS.md`, `ROADmap.md` | LOW | 5min |
-| 14 | 🟡 P1 | go-localsync | **Delete `justfile`** — AGENTS.md says "justfile is deprecated" | LOW | 1min |
-| 15 | 🟢 P2 | go-localsync | **Adopt `projection.Runner`** — Replace custom Projector with go-cqrs-lite's | MEDIUM | 2h |
-| 16 | 🟢 P2 | go-localsync | **Testify → stdlib** — Migrate 6 test files from testify to stdlib `t.Errorf`/`t.Fatal` | LOW | 3h |
-| 17 | 🟢 P2 | go-localsync | **Unify test framework** — Either all Ginkgo or all stdlib, not mixed | LOW | 4h |
-| 18 | 🟢 P2 | go-localsync | **Use `time.Time` in event payloads** — Replace int64 unix nanoseconds | MEDIUM | 1h |
-| 19 | 🟢 P2 | go-cqrs-lite | **PostgreSQL integration tests** — Test against real PG, not just mocks | MEDIUM | 4h |
-| 20 | 🟢 P2 | go-cqrs-lite | **Implement Saga/Process Manager** — Design exists, 18h estimate | HIGH | 18h |
-| 21 | 🟢 P2 | go-cqrs-lite | **CONTRIBUTING.md** — Referenced in README but doesn't exist | LOW | 1h |
-| 22 | 🟢 P2 | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox in single DB tx | HIGH | 4h |
-| 23 | 🟢 P2 | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md | LOW | 30min |
-| 24 | 🟢 P2 | go-localsync | **Real GitHub PAT smoke test** — Verify end-to-end with real API | MEDIUM | 1h |
-| 25 | 🟢 P2 | go-localsync | **Add JSON output flag** — Structured output for CLI | LOW | 1h |
+| #   | Priority | Project      | Task                                                                                                                                          | Impact | Effort |
+| --- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ |
+| 1   | 🔴 P0    | go-localsync | **`go mod tidy`** — Remove unused deps, add missing ones                                                                                      | HIGH   | 5min   |
+| 2   | 🔴 P0    | go-localsync | **Update AGENTS.md** — Remove all references to deleted packages, fix outdated claims                                                         | HIGH   | 30min  |
+| 3   | 🔴 P0    | go-cqrs-lite | **Tag v0.1.0-alpha** — First public release, storage as experimental                                                                          | HIGH   | 30min  |
+| 4   | 🟡 P1    | go-localsync | **Remove cockroachdb/errors** — Replace with stdlib `fmt.Errorf` + `%w`                                                                       | MEDIUM | 1h     |
+| 5   | 🟡 P1    | go-localsync | **Unexport `SyncItemsDDL`/`SyncItemsIndexes`** — Only used internally                                                                         | LOW    | 5min   |
+| 6   | 🟡 P1    | go-localsync | **Fix split-brain conflict detection** — Consolidate `ConflictAwareSyncer` + `DecideSync`                                                     | HIGH   | 2h     |
+| 7   | 🟡 P1    | go-localsync | **Add CLI tests** — Test `exitCodeForError`, flag parsing, signal handling                                                                    | MEDIUM | 2h     |
+| 8   | 🟡 P1    | go-localsync | **Add Push/Pull tests** — Test CQRSStack remote sync methods                                                                                  | MEDIUM | 1h     |
+| 9   | 🟡 P1    | go-localsync | **Wire error taxonomy** — Use go-cqrs-lite error classification for exit codes                                                                | MEDIUM | 1h     |
+| 10  | 🟡 P1    | go-localsync | **Update README.md** — Reflect CQRS-only architecture                                                                                         | MEDIUM | 30min  |
+| 11  | 🟡 P1    | go-localsync | **Update FEATURES.md** — Remove legacy storage references                                                                                     | MEDIUM | 15min  |
+| 12  | 🟡 P1    | go-localsync | **Update TODO_LIST.md** — Mark completed items, add new ones                                                                                  | LOW    | 15min  |
+| 13  | 🟡 P1    | go-localsync | **Delete stale docs** — Remove `CQRS_MIGRATION_PLAN.md`, `PROJECT_SPLIT_EXECUTIVE_REPORT.md`, `BDD_TESTS_REVIEW.md`, `PARTS.md`, `ROADmap.md` | LOW    | 5min   |
+| 14  | 🟡 P1    | go-localsync | **Delete `justfile`** — AGENTS.md says "justfile is deprecated"                                                                               | LOW    | 1min   |
+| 15  | 🟢 P2    | go-localsync | **Adopt `projection.Runner`** — Replace custom Projector with go-cqrs-lite's                                                                  | MEDIUM | 2h     |
+| 16  | 🟢 P2    | go-localsync | **Testify → stdlib** — Migrate 6 test files from testify to stdlib `t.Errorf`/`t.Fatal`                                                       | LOW    | 3h     |
+| 17  | 🟢 P2    | go-localsync | **Unify test framework** — Either all Ginkgo or all stdlib, not mixed                                                                         | LOW    | 4h     |
+| 18  | 🟢 P2    | go-localsync | **Use `time.Time` in event payloads** — Replace int64 unix nanoseconds                                                                        | MEDIUM | 1h     |
+| 19  | 🟢 P2    | go-cqrs-lite | **PostgreSQL integration tests** — Test against real PG, not just mocks                                                                       | MEDIUM | 4h     |
+| 20  | 🟢 P2    | go-cqrs-lite | **Implement Saga/Process Manager** — Design exists, 18h estimate                                                                              | HIGH   | 18h    |
+| 21  | 🟢 P2    | go-cqrs-lite | **CONTRIBUTING.md** — Referenced in README but doesn't exist                                                                                  | LOW    | 1h     |
+| 22  | 🟢 P2    | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox in single DB tx                                                                    | HIGH   | 4h     |
+| 23  | 🟢 P2    | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md                                                                                      | LOW    | 30min  |
+| 24  | 🟢 P2    | go-localsync | **Real GitHub PAT smoke test** — Verify end-to-end with real API                                                                              | MEDIUM | 1h     |
+| 25  | 🟢 P2    | go-localsync | **Add JSON output flag** — Structured output for CLI                                                                                          | LOW    | 1h     |
 
 ---
 
@@ -136,15 +136,18 @@ The main remaining work is: `go mod tidy`, removing cockroachdb/errors, updating
 Current state: `ConflictAwareSyncer.SyncWithConflictDetection()` reads from the ReadModel to check if an item has changed, then calls `Syncer.Sync()` which calls `CQRSStack.SyncItems()` which internally runs `DecideSync` that also checks for changes via `HasChanged()`.
 
 This means every sync goes through **two independent conflict checks**:
+
 1. `ConflictAwareSyncer` reads the read model → compares timestamps
 2. `DecideSync` folds events to get state → compares timestamps
 
 Arguments for consolidating into decider only:
+
 - Single source of truth (event-sourced state, not read model)
 - Eliminates the read model query per item (performance)
 - `ConflictAwareSyncer` becomes just `Syncer` with conflict logging
 
 Arguments for keeping both:
+
 - `ConflictAwareSyncer` can log/warn/notify about conflicts at the sync orchestration layer
 - The decider's conflict detection is about producing events, not about user-facing notifications
 - Read model query is fast and provides a "last known good state" snapshot
@@ -199,15 +202,15 @@ ok  pkg/types             0.002s  (10 tests)
 
 ### Code Metrics
 
-| Metric | go-localsync | go-cqrs-lite |
-|--------|-------------|--------------|
-| Production files | 17 (2,699 lines) | ~100+ files |
-| Test files | 10 (2,431 lines) | ~60+ files |
-| Test:Code ratio | 0.90:1 | ~0.95:1 |
-| Test functions | 107 | ~500+ |
-| TODO/FIXME/HACK | 0 | 0 |
-| Dead code | None | None |
-| Lint issues | 0 | 0 |
+| Metric           | go-localsync     | go-cqrs-lite |
+| ---------------- | ---------------- | ------------ |
+| Production files | 17 (2,699 lines) | ~100+ files  |
+| Test files       | 10 (2,431 lines) | ~60+ files   |
+| Test:Code ratio  | 0.90:1           | ~0.95:1      |
+| Test functions   | 107              | ~500+        |
+| TODO/FIXME/HACK  | 0                | 0            |
+| Dead code        | None             | None         |
+| Lint issues      | 0                | 0            |
 
 ---
 
