@@ -83,16 +83,16 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package                    | Tests | Status                                              |
 | -------------------------- | ----- | --------------------------------------------------- |
-| `pkg/cqrs`                 | 46    | ✅ Decider, ReadModel, Projection, Stack, Turso RM  |
+| `pkg/cqrs`                 | 51    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull |
 | `pkg/providers/github`     | 35    | ✅ Client, fetch, retry, error handling (19+16 BDD) |
 | `pkg/sync`                 | 11    | ✅ Syncer + ConflictAwareSyncer                     |
 | `pkg/types`                | 10    | ✅ ID construction, roundtrip, zero, equal          |
 | `pkg/errors`               | 4     | ✅ Sentinel errors, wrapping                        |
 | `pkg/provider`             | 1     | ✅ Item validation                                  |
-| `cmd/examples/github-sync` | 0     | ⬜ No tests                                         |
+| `cmd/examples/github-sync` | 6     | ✅ exitCodeForError, LoadConfig, env defaults       |
 | `pkg/testhelpers`          | 0     | ⬜ Helper package                                   |
 
-**107 total test cases.** Test:Code ratio 0.90:1.
+**118 total test cases** across 7 test packages. Test:Code ratio >1.0:1.
 
 Run: `go test ./... -count=1`
 
@@ -158,9 +158,8 @@ Two tables managed by the CQRS stack:
 
 | Dependency         | Purpose                                |
 | ------------------ | -------------------------------------- |
-| `onsi/ginkgo/v2`   | BDD-style tests (github provider only) |
-| `onsi/gomega`      | Ginkgo matchers                        |
-| `stretchr/testify` | Assertions (6 test files)              |
+| `onsi/ginkgo/v2`   | Indirect only (via go-cqrs-lite tests) |
+| `onsi/gomega`      | Indirect only (via go-cqrs-lite tests) |
 
 ## go-cqrs-lite Integration
 

@@ -7,37 +7,48 @@ import (
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCQRSStack_SyncNewItem(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	err = stack.SyncItem(ctx, item)
-	require.NoError(t, err)
+	if err := stack.SyncItem(ctx, item); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	count, err := stack.Count(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, int64(1), count)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("expected count=1, got %d", count)
+	}
 
 	resultTypes, err := stack.GetTypes(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, []string{"PushEvent"}, resultTypes)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resultTypes) != 1 || resultTypes[0] != "PushEvent" {
+		t.Errorf("expected [PushEvent], got %v", resultTypes)
+	}
 }
 
 func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -48,97 +59,145 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	}
 
 	result := stack.SyncItems(ctx, items)
-	assert.Equal(t, 3, result.Synced)
-	assert.Equal(t, 0, result.Conflicts)
-	assert.Equal(t, 0, result.Errors)
+	if result.Synced != 3 {
+		t.Errorf("expected Synced=3, got %d", result.Synced)
+	}
+	if result.Conflicts != 0 {
+		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
+	}
+	if result.Errors != 0 {
+		t.Errorf("expected Errors=0, got %d", result.Errors)
+	}
 
 	count, err := stack.Count(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, int64(3), count)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 3 {
+		t.Errorf("expected count=3, got %d", count)
+	}
 
 	resultTypes, err := stack.GetTypes(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, []string{"IssueEvent", "PushEvent"}, resultTypes)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(resultTypes) != 2 {
+		t.Errorf("expected 2 types, got %v", resultTypes)
+	}
 }
 
 func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	err = stack.SyncItem(ctx, item)
-	require.NoError(t, err)
-
-	err = stack.SyncItem(ctx, item)
-	require.NoError(t, err)
+	if err := stack.SyncItem(ctx, item); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := stack.SyncItem(ctx, item); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	count, err := stack.Count(ctx)
-	require.NoError(t, err)
-	assert.Equal(
-		t,
-		int64(1),
-		count,
-		"same item synced twice should still have count 1 — idempotent",
-	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("same item synced twice should still have count 1 — idempotent, got %d", count)
+	}
 }
 
 func TestCQRSStack_DeleteItem(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
-	require.NoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
+	if err := stack.SyncItem(ctx, testItem("123", "PushEvent")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	count, err := stack.Count(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, int64(1), count)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("expected count=1, got %d", count)
+	}
 
-	require.NoError(t, stack.DeleteItem(ctx, "github", "123"))
+	if err := stack.DeleteItem(ctx, "github", "123"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	count, err = stack.Count(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, int64(0), count, "item should be deleted from read model")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 0 {
+		t.Errorf("item should be deleted from read model, got count=%d", count)
+	}
 }
 
 func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
-	require.NoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
-	require.NoError(t, stack.DeleteItem(ctx, "github", "123"))
+	if err := stack.SyncItem(ctx, testItem("123", "PushEvent")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := stack.DeleteItem(ctx, "github", "123"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	count, _ := stack.Count(ctx)
-	assert.Equal(t, int64(0), count)
+	if count != 0 {
+		t.Errorf("expected count=0, got %d", count)
+	}
 
-	require.NoError(t, stack.SyncItem(ctx, testItem("123", "IssueEvent")))
+	if err := stack.SyncItem(ctx, testItem("123", "IssueEvent")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	count, _ = stack.Count(ctx)
-	assert.Equal(t, int64(1), count, "resurrected item should reappear in read model")
+	if count != 1 {
+		t.Errorf("resurrected item should reappear in read model, got count=%d", count)
+	}
 
 	got, err := stack.ReadModel.Get(ctx, "github", "123")
-	require.NoError(t, err)
-	assert.Equal(t, "IssueEvent", got.Type.Get(), "resurrected item should have updated type")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.Type.Get() != "IssueEvent" {
+		t.Errorf("resurrected item should have updated type, got %s", got.Type.Get())
+	}
 }
 
 func TestCQRSStack_ConflictDetection(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -146,29 +205,41 @@ func TestCQRSStack_ConflictDetection(t *testing.T) {
 	items := []*provider.Item{testItem("1", "PushEvent")}
 
 	result := stack.SyncItems(ctx, items)
-	assert.Equal(t, 1, result.Synced)
-	assert.Equal(t, 0, result.Conflicts)
-	assert.Equal(t, 0, result.Errors)
+	if result.Synced != 1 {
+		t.Errorf("expected Synced=1, got %d", result.Synced)
+	}
+	if result.Conflicts != 0 {
+		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
+	}
+	if result.Errors != 0 {
+		t.Errorf("expected Errors=0, got %d", result.Errors)
+	}
 
 	updatedItem := testItem("1", "PushEvent")
 	updatedItem.UpdatedAt = time.Now().Add(time.Hour)
 
 	result = stack.SyncItems(ctx, []*provider.Item{updatedItem})
-	assert.Equal(t, 1, result.Synced)
-	assert.Equal(
-		t,
-		1,
-		result.Conflicts,
-		"updated item with newer timestamp should trigger conflict",
-	)
-	assert.Equal(t, 0, result.Errors)
+	if result.Synced != 1 {
+		t.Errorf("expected Synced=1, got %d", result.Synced)
+	}
+	if result.Conflicts != 1 {
+		t.Errorf(
+			"updated item with newer timestamp should trigger conflict, got Conflicts=%d",
+			result.Conflicts,
+		)
+	}
+	if result.Errors != 0 {
+		t.Errorf("expected Errors=0, got %d", result.Errors)
+	}
 }
 
 func TestCQRSStack_FilterByType(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -179,28 +250,40 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 	}
 
 	result := stack.SyncItems(ctx, items)
-	assert.Equal(t, 3, result.Synced)
+	if result.Synced != 3 {
+		t.Errorf("expected Synced=3, got %d", result.Synced)
+	}
 
 	pushType := types.NewEventTypeID("PushEvent")
 	results, err := stack.ReadModel.List(ctx, ItemFilter{Type: &pushType})
-	require.NoError(t, err)
-	assert.Len(t, results, 2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(results) != 2 {
+		t.Errorf("expected 2 results, got %d", len(results))
+	}
 }
 
 func TestCQRSStack_Close(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-	require.NoError(t, stack.Close())
+	if err := stack.Close(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 }
 
 func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 	t.Parallel()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -210,26 +293,44 @@ func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 	}
 
 	result := stack.SyncItems(ctx, items)
-	assert.Equal(t, 2, result.Synced)
-	assert.Equal(t, 0, result.Conflicts)
-	assert.Equal(t, 0, result.Errors)
+	if result.Synced != 2 {
+		t.Errorf("expected Synced=2, got %d", result.Synced)
+	}
+	if result.Conflicts != 0 {
+		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
+	}
+	if result.Errors != 0 {
+		t.Errorf("expected Errors=0, got %d", result.Errors)
+	}
 
 	count, err := stack.Count(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, int64(2), count)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 2 {
+		t.Errorf("expected count=2, got %d", count)
+	}
 
-	require.NoError(t, stack.DeleteItem(ctx, "github", "1"))
+	if err := stack.DeleteItem(ctx, "github", "1"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	count, err = stack.Count(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, int64(1), count, "deleted item should be removed from read model")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("deleted item should be removed from read model, got count=%d", count)
+	}
 }
 
 func TestCQRSStack_InvalidBackend(t *testing.T) {
 	t.Parallel()
 
 	_, err := NewCQRSStack(CQRSConfig{Backend: "postgres"})
-	assert.Error(t, err)
+	if err == nil {
+		t.Fatal("expected error for invalid backend")
+	}
 }
 
 func TestCQRSStack_DeterministicAggregateID_Matches(t *testing.T) {
@@ -238,5 +339,7 @@ func TestCQRSStack_DeterministicAggregateID_Matches(t *testing.T) {
 	id1 := AggregateID("github", "123")
 	id2 := AggregateID("github", "123")
 
-	assert.Equal(t, id1, id2, "deterministic IDs must be equal for same inputs")
+	if id1 != id2 {
+		t.Error("deterministic IDs must be equal for same inputs")
+	}
 }

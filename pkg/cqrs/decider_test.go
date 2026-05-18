@@ -9,8 +9,6 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAggregateID_Deterministic(t *testing.T) {
@@ -19,7 +17,9 @@ func TestAggregateID_Deterministic(t *testing.T) {
 	a := AggregateID("github", "123")
 	b := AggregateID("github", "123")
 
-	assert.Equal(t, a, b, "same inputs must produce same AggregateID")
+	if a != b {
+		t.Error("same inputs must produce same AggregateID")
+	}
 }
 
 func TestAggregateID_DifferentInputs(t *testing.T) {
@@ -28,7 +28,9 @@ func TestAggregateID_DifferentInputs(t *testing.T) {
 	a := AggregateID("github", "123")
 	b := AggregateID("github", "456")
 
-	assert.NotEqual(t, a, b, "different inputs must produce different AggregateIDs")
+	if a == b {
+		t.Error("different inputs must produce different AggregateIDs")
+	}
 }
 
 func TestFold_ItemSynced(t *testing.T) {
@@ -45,13 +47,24 @@ func TestFold_ItemSynced(t *testing.T) {
 	evt := mustNewTestEvent(EventItemSynced, payload)
 
 	state, err := Fold(InitialState, evt)
-	require.NoError(t, err)
-
-	require.NotNil(t, state.Item)
-	assert.Equal(t, "github", state.Item.Source.Get())
-	assert.Equal(t, "123", state.Item.ExternalID.Get())
-	assert.Equal(t, "PushEvent", state.Item.Type.Get())
-	assert.False(t, state.Deleted)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if state.Item == nil {
+		t.Fatal("expected non-nil Item")
+	}
+	if state.Item.Source.Get() != "github" {
+		t.Errorf("expected Source=github, got %s", state.Item.Source.Get())
+	}
+	if state.Item.ExternalID.Get() != "123" {
+		t.Errorf("expected ExternalID=123, got %s", state.Item.ExternalID.Get())
+	}
+	if state.Item.Type.Get() != "PushEvent" {
+		t.Errorf("expected Type=PushEvent, got %s", state.Item.Type.Get())
+	}
+	if state.Deleted {
+		t.Error("expected Deleted=false")
+	}
 }
 
 func TestFold_ItemSyncedOverwritesState(t *testing.T) {
@@ -76,9 +89,13 @@ func TestFold_ItemSyncedOverwritesState(t *testing.T) {
 	evt := mustNewTestEvent(EventItemSynced, updatedPayload)
 
 	state, err := Fold(existing, evt)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-	assert.Equal(t, "IssueEvent", state.Item.Type.Get())
+	if state.Item.Type.Get() != "IssueEvent" {
+		t.Errorf("expected Type=IssueEvent, got %s", state.Item.Type.Get())
+	}
 }
 
 func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
@@ -89,17 +106,31 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	originalID := item.ID.String()
 
 	events, err := DecideSync(item)(InitialState, 0)
-	require.NoError(t, err)
-	require.Len(t, events, 1)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
 
 	var payload ItemSyncedPayload
-	require.NoError(t, json.Unmarshal(events[0].Payload(), &payload))
-	assert.Equal(t, originalID, payload.ItemID, "ItemID must be serialized into the event payload")
+	if err := json.Unmarshal(events[0].Payload(), &payload); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if payload.ItemID != originalID {
+		t.Errorf("expected ItemID=%s, got %s", originalID, payload.ItemID)
+	}
 
 	state, err := Fold(InitialState, events[0])
-	require.NoError(t, err)
-	require.NotNil(t, state.Item)
-	assert.Equal(t, originalID, state.Item.ID.String(), "ItemID must survive Fold round-trip")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if state.Item == nil {
+		t.Fatal("expected non-nil Item")
+	}
+	if state.Item.ID.String() != originalID {
+		t.Errorf("expected ID=%s, got %s", originalID, state.Item.ID.String())
+	}
 }
 
 func TestFold_ItemDeleted(t *testing.T) {
@@ -115,10 +146,16 @@ func TestFold_ItemDeleted(t *testing.T) {
 	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
 	state, err := Fold(existing, evt)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-	assert.True(t, state.Deleted)
-	assert.NotNil(t, state.Item, "deleted state still holds the item for potential resurrection")
+	if !state.Deleted {
+		t.Error("expected Deleted=true")
+	}
+	if state.Item == nil {
+		t.Error("deleted state still holds the item for potential resurrection")
+	}
 }
 
 func TestFold_ItemConflictFound(t *testing.T) {
@@ -137,9 +174,13 @@ func TestFold_ItemConflictFound(t *testing.T) {
 	})
 
 	state, err := Fold(existing, evt)
-	require.NoError(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-	assert.Equal(t, "PushEvent", state.Item.Type.Get(), "conflict event does not change state")
+	if state.Item.Type.Get() != "PushEvent" {
+		t.Errorf("conflict event should not change state, got Type=%s", state.Item.Type.Get())
+	}
 }
 
 func TestFold_UnknownEventType(t *testing.T) {
@@ -148,7 +189,9 @@ func TestFold_UnknownEventType(t *testing.T) {
 	evt := mustNewTestEvent(event.Type("unknown"), map[string]string{"test": "data"})
 
 	_, err := Fold(InitialState, evt)
-	assert.Error(t, err)
+	if err == nil {
+		t.Fatal("expected error for unknown event type")
+	}
 }
 
 func TestDecideSync_NewItem(t *testing.T) {
@@ -157,10 +200,15 @@ func TestDecideSync_NewItem(t *testing.T) {
 	item := testItem("123", "PushEvent")
 
 	events, err := DecideSync(item)(InitialState, 0)
-	require.NoError(t, err)
-
-	assert.Len(t, events, 1)
-	assert.Equal(t, EventItemSynced, events[0].Type())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
+	if events[0].Type() != EventItemSynced {
+		t.Errorf("expected type=%s, got %s", EventItemSynced, events[0].Type())
+	}
 }
 
 func TestDecideSync_UnchangedItem(t *testing.T) {
@@ -182,9 +230,12 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 	}
 
 	events, err := DecideSync(item)(state, 1)
-	require.NoError(t, err)
-
-	assert.Nil(t, events, "unchanged item produces no events")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if events != nil {
+		t.Errorf("unchanged item produces no events, got %d", len(events))
+	}
 }
 
 func TestDecideSync_ConflictResolution(t *testing.T) {
@@ -203,11 +254,18 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 	}
 
 	events, err := DecideSync(item)(state, 1)
-	require.NoError(t, err)
-
-	assert.Len(t, events, 2)
-	assert.Equal(t, EventItemConflictFound, events[0].Type())
-	assert.Equal(t, EventItemSynced, events[1].Type())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events, got %d", len(events))
+	}
+	if events[0].Type() != EventItemConflictFound {
+		t.Errorf("expected type=%s, got %s", EventItemConflictFound, events[0].Type())
+	}
+	if events[1].Type() != EventItemSynced {
+		t.Errorf("expected type=%s, got %s", EventItemSynced, events[1].Type())
+	}
 }
 
 func TestDecideSync_ConflictTimestamps(t *testing.T) {
@@ -229,18 +287,27 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 	}
 
 	events, err := DecideSync(item)(state, 1)
-	require.NoError(t, err)
-	require.Len(t, events, 2)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events, got %d", len(events))
+	}
 
 	var conflictPayload ItemConflictFoundPayload
-	require.NoError(t, json.Unmarshal(events[0].Payload(), &conflictPayload))
+	if err := json.Unmarshal(events[0].Payload(), &conflictPayload); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
-	assert.NotEqual(t, conflictPayload.LocalUpdatedAt, conflictPayload.RemoteUpdatedAt,
-		"LocalUpdatedAt and RemoteUpdatedAt must differ in conflict")
-	assert.Equal(t, localTime.UnixNano(), conflictPayload.LocalUpdatedAt,
-		"LocalUpdatedAt must come from existing state")
-	assert.Equal(t, remoteTime.UnixNano(), conflictPayload.RemoteUpdatedAt,
-		"RemoteUpdatedAt must come from incoming item")
+	if conflictPayload.LocalUpdatedAt == conflictPayload.RemoteUpdatedAt {
+		t.Error("LocalUpdatedAt and RemoteUpdatedAt must differ in conflict")
+	}
+	if conflictPayload.LocalUpdatedAt != localTime.UnixNano() {
+		t.Errorf("LocalUpdatedAt must come from existing state")
+	}
+	if conflictPayload.RemoteUpdatedAt != remoteTime.UnixNano() {
+		t.Errorf("RemoteUpdatedAt must come from incoming item")
+	}
 }
 
 func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
@@ -254,10 +321,15 @@ func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 	}
 
 	events, err := DecideSync(item)(state, 2)
-	require.NoError(t, err)
-
-	assert.Len(t, events, 1)
-	assert.Equal(t, EventItemSynced, events[0].Type())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
+	if events[0].Type() != EventItemSynced {
+		t.Errorf("expected type=%s, got %s", EventItemSynced, events[0].Type())
+	}
 }
 
 func TestDecideDelete_ActiveItem(t *testing.T) {
@@ -271,10 +343,15 @@ func TestDecideDelete_ActiveItem(t *testing.T) {
 	}
 
 	events, err := DecideDelete("github", "123")(state, 1)
-	require.NoError(t, err)
-
-	assert.Len(t, events, 1)
-	assert.Equal(t, EventItemDeleted, events[0].Type())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(events) != 1 {
+		t.Fatalf("expected 1 event, got %d", len(events))
+	}
+	if events[0].Type() != EventItemDeleted {
+		t.Errorf("expected type=%s, got %s", EventItemDeleted, events[0].Type())
+	}
 }
 
 func TestDecideDelete_AlreadyDeleted(t *testing.T) {
@@ -286,27 +363,37 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 	}
 
 	events, err := DecideDelete("github", "123")(state, 1)
-	require.NoError(t, err)
-
-	assert.Nil(t, events)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if events != nil {
+		t.Errorf("expected no events, got %d", len(events))
+	}
 }
 
 func TestDecideDelete_NewItem(t *testing.T) {
 	t.Parallel()
 
 	events, err := DecideDelete("github", "123")(InitialState, 0)
-	require.NoError(t, err)
-
-	assert.Nil(t, events)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if events != nil {
+		t.Errorf("expected no events, got %d", len(events))
+	}
 }
 
 func TestSyncItemState_IsNew(t *testing.T) {
 	t.Parallel()
 
-	assert.True(t, InitialState.IsNew())
+	if !InitialState.IsNew() {
+		t.Error("expected initial state to be new")
+	}
 
 	existing := SyncItemState{Item: &provider.Item{}}
-	assert.False(t, existing.IsNew())
+	if existing.IsNew() {
+		t.Error("expected existing state to not be new")
+	}
 }
 
 func mustNewTestEvent(eventType event.Type, payload any) *event.Core {

@@ -37,7 +37,7 @@ func (w *githubTestWorld) withRetryConfig() {
 func newGitHubTestClient(server *httptest.Server) *github.Client {
 	httpClient := &http.Client{}
 	client := github.NewClientWithHTTP(httpClient)
-	c, err := client.WithBaseURL(server.URL)
+	c, err := client.WithBaseURL(server.URL + "/")
 	if err != nil {
 		panic(fmt.Sprintf("WithBaseURL failed: %v", err))
 	}
@@ -104,7 +104,10 @@ func TestBDD_FetchValidUser(t *testing.T) {
 			t.Errorf("expected ActorLogin=octocat, got %s", item.ActorLogin.Get())
 		}
 		if !strings.Contains(item.ActorAvatarURL, "avatars.githubusercontent.com") {
-			t.Errorf("expected avatar URL to contain avatars.githubusercontent.com, got %s", item.ActorAvatarURL)
+			t.Errorf(
+				"expected avatar URL to contain avatars.githubusercontent.com, got %s",
+				item.ActorAvatarURL,
+			)
 		}
 		if item.RepoName.Get() != "octocat/Hello-World" {
 			t.Errorf("expected RepoName=octocat/Hello-World, got %s", item.RepoName.Get())
@@ -179,7 +182,7 @@ func TestBDD_UserNotFound(t *testing.T) {
 	world.server = testhelpers.NewErrorTestServer(http.StatusNotFound, "Not Found")
 	defer world.server.Close()
 
-	world.client = newGitHubTestClient(world.server)
+	world.client = newGitHubTestClientWithoutRateLimit(world.server)
 	world.fetchFor("nonexistent-user-xyz")
 
 	if world.err == nil {
@@ -195,7 +198,7 @@ func TestBDD_RateLimitInfo(t *testing.T) {
 
 	world.server = httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == "/rate_limit/" {
+			if r.URL.Path == "/rate_limit/" || r.URL.Path == "/rate_limit" {
 				w.Header().Set("Content-Type", "application/json")
 				_ = json.NewEncoder(w).Encode(testhelpers.RateLimitResponse(5))
 
@@ -229,18 +232,17 @@ func TestBDD_RetryOnServerError(t *testing.T) {
 	world := githubTestWorld{ctx: context.Background()}
 	var retryCountPtr *int
 	world.server, retryCountPtr = testhelpers.NewFailingThenSucceedingTestServer(3)
-	world.callCount = *retryCountPtr
 	defer world.server.Close()
 
-	world.client = newGitHubTestClient(world.server)
+	world.client = newGitHubTestClientWithoutRateLimit(world.server)
 	world.withRetryConfig()
 	world.fetchFor("testuser")
 
 	if world.err != nil {
 		t.Fatalf("expected no error, got %v", world.err)
 	}
-	if world.callCount < 2 {
-		t.Errorf("expected at least 2 retries, got %d", world.callCount)
+	if *retryCountPtr < 2 {
+		t.Errorf("expected at least 2 retries, got %d", *retryCountPtr)
 	}
 }
 
@@ -249,7 +251,7 @@ func TestBDD_NoRetryOnClientError(t *testing.T) {
 	world.server = testhelpers.NewErrorTestServer(http.StatusBadRequest, "Bad Request")
 	defer world.server.Close()
 
-	world.client = newGitHubTestClient(world.server)
+	world.client = newGitHubTestClientWithoutRateLimit(world.server)
 	world.withRetryConfig()
 	world.fetchFor("testuser")
 

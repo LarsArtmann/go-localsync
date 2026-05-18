@@ -256,7 +256,8 @@ func TestConflictAwareSyncer_NoChange_Skipped(t *testing.T) {
 
 	ctx := context.Background()
 
-	if err := stack.SyncItem(ctx, item); err != nil {
+	err := stack.SyncItem(ctx, item)
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -291,7 +292,8 @@ func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
 
 	ctx := context.Background()
 
-	if err := stack.SyncItem(ctx, oldItem); err != nil {
+	err := stack.SyncItem(ctx, oldItem)
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -329,7 +331,8 @@ func TestConflictAwareSyncer_RemoteWinsAlways(t *testing.T) {
 
 	ctx := context.Background()
 
-	if err := stack.SyncItem(ctx, newItem); err != nil {
+	err := stack.SyncItem(ctx, newItem)
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

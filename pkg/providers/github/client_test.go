@@ -474,7 +474,12 @@ func TestWithConfig(t *testing.T) {
 			client := NewClient("test-token")
 			newClient := tt.withConfig(client, tt.config)
 			if tt.getConfig(newClient) != tt.config {
-				t.Errorf("%s: expected %v, got %v", tt.assertField, tt.config, tt.getConfig(newClient))
+				t.Errorf(
+					"%s: expected %v, got %v",
+					tt.assertField,
+					tt.config,
+					tt.getConfig(newClient),
+				)
 			}
 			if client.client != newClient.client {
 				t.Errorf("%s: expected same underlying client", tt.assertField)

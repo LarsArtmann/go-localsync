@@ -11,7 +11,6 @@ require (
 	github.com/larsartmann/go-cqrs-lite/memory v1.1.0
 	github.com/larsartmann/go-cqrs-lite/storage v0.0.0-20260518140447-46b2a16ce733
 	github.com/oklog/ulid/v2 v2.1.1
-	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.36.0
 )
 
@@ -35,7 +34,6 @@ require (
 	github.com/cockroachdb/pebble v1.1.5 // indirect
 	github.com/cockroachdb/redact v1.1.8 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20250429170803-42689b6311bb // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/getsentry/sentry-go v0.46.2 // indirect
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
@@ -54,7 +52,6 @@ require (
 	github.com/onsi/ginkgo/v2 v2.29.0 // indirect
 	github.com/onsi/gomega v1.41.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.67.5 // indirect
@@ -70,7 +67,6 @@ require (
 	golang.org/x/sys v0.44.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	turso.tech/database/tursogo v0.6.0 // indirect
 )
 
