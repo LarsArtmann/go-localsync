@@ -248,15 +248,15 @@ cmd/examples/github-sync/   # Example CLI application
 
 110 test cases across 7 test packages:
 
-| Package                    | Tests | Description                                     |
-| -------------------------- | ----- | ----------------------------------------------- |
+| Package                    | Tests | Description                                                |
+| -------------------------- | ----- | ---------------------------------------------------------- |
 | `pkg/cqrs`                 | 51    | Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull |
-| `pkg/providers/github`     | 35    | Client, fetch, retry, errors (19 unit + 16 BDD) |
-| `pkg/sync`                 | 11    | Syncer + ConflictAwareSyncer                    |
-| `pkg/types`                | 10    | Branded ID construction, roundtrip              |
-| `pkg/errors`               | 4     | Sentinel errors, wrapping                       |
-| `pkg/provider`             | 1     | Item validation                                 |
-| `cmd/examples/github-sync` | 6     | exitCodeForError, LoadConfig, env defaults      |
+| `pkg/providers/github`     | 35    | Client, fetch, retry, errors (19 unit + 16 BDD)            |
+| `pkg/sync`                 | 11    | Syncer + ConflictAwareSyncer                               |
+| `pkg/types`                | 10    | Branded ID construction, roundtrip                         |
+| `pkg/errors`               | 4     | Sentinel errors, wrapping                                  |
+| `pkg/provider`             | 1     | Item validation                                            |
+| `cmd/examples/github-sync` | 6     | exitCodeForError, LoadConfig, env defaults                 |
 
 ## Related Projects
 
