@@ -130,6 +130,8 @@ func DecideDelete(
 
 const syncEventsInitialCap = 2
 
+const conflictWinnerRemote = "remote"
+
 func syncEvents(
 	item *provider.Item,
 	aggID id.AggregateID,
@@ -146,7 +148,7 @@ func syncEvents(
 			SourceID:        item.ExternalID.Get(),
 			LocalUpdatedAt:  unixNano(localUpdatedAt),
 			RemoteUpdatedAt: unixNano(item.UpdatedAt),
-			Winner:          "remote",
+			Winner:          conflictWinnerRemote,
 		})
 		if err != nil {
 			return nil, fmt.Errorf(

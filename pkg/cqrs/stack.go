@@ -13,6 +13,12 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
+const (
+	backendMemory  = "memory"
+	backendTurso   = "turso"
+	dbPathInMemory = ":memory:"
+)
+
 type CQRSConfig struct {
 	Backend   string
 	DBPath    string
@@ -210,9 +216,9 @@ func (s *CQRSStack) Close() error {
 //nolint:ireturn
 func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
 	switch cfg.Backend {
-	case "memory", "":
+	case backendMemory, "":
 		return cqrsmemory.NewMemoryStore(), cqrsmemory.NewMemoryBus(), nil, nil
-	case "turso":
+	case backendTurso:
 		return createTursoStore(cfg)
 	default:
 		return nil, nil, nil, fmt.Errorf(
@@ -265,7 +271,7 @@ func createTursoLocalStore(
 ) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
 	dbPath := cfg.DBPath
 	if dbPath == "" {
-		dbPath = ":memory:"
+		dbPath = dbPathInMemory
 	}
 
 	db, err := cqrsstorage.OpenTurso(dbPath)
@@ -311,14 +317,14 @@ func initTursoDB(ctx context.Context, db *sql.DB) error {
 
 //nolint:ireturn
 func createReadModel(cfg CQRSConfig, syncDB *cqrsstorage.TursoSyncDB) (ReadModel, error) {
-	if cfg.Backend == "turso" {
+	if cfg.Backend == backendTurso {
 		if syncDB != nil {
 			return NewTursoReadModel(syncDB.DB)
 		}
 
 		dbPath := cfg.DBPath
 		if dbPath == "" {
-			dbPath = ":memory:"
+			dbPath = dbPathInMemory
 		}
 
 		readDB, err := cqrsstorage.OpenTurso(dbPath)

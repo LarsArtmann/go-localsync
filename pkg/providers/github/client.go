@@ -19,6 +19,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const providerName = "github"
+
 // Client implements provider.Provider for GitHub.
 type Client struct {
 	client          *gh.Client
@@ -88,7 +90,7 @@ func (c *Client) WithBaseURL(rawURL string) (*Client, error) {
 
 // Name returns the provider identifier.
 func (c *Client) Name() string {
-	return "github"
+	return providerName
 }
 
 // Fetch retrieves a single page of GitHub events.
@@ -255,7 +257,7 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 	return &provider.Item{
 		ID:             types.NewItemID(),
 		ExternalID:     types.NewExternalID(e.GetID()),
-		Source:         types.NewProviderID("github"),
+		Source:         types.NewProviderID(providerName),
 		Type:           types.NewEventTypeID(e.GetType()),
 		ActorLogin:     types.NewActorID(actorLogin),
 		ActorAvatarURL: actorAvatarURL,
