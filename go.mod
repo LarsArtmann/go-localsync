@@ -7,7 +7,7 @@ require (
 	github.com/caarlos0/env/v11 v11.4.1
 	github.com/google/go-github/v69 v69.2.0
 	github.com/larsartmann/go-branded-id v0.1.0
-	github.com/larsartmann/go-cqrs-lite/core v1.2.0
+	github.com/larsartmann/go-cqrs-lite/core v1.3.0
 	github.com/larsartmann/go-cqrs-lite/memory v1.1.0
 	github.com/larsartmann/go-cqrs-lite/storage v0.0.0-20260518140447-46b2a16ce733
 	github.com/oklog/ulid/v2 v2.1.1
@@ -17,7 +17,6 @@ require (
 require (
 	charm.land/lipgloss/v2 v2.0.3 // indirect
 	github.com/DataDog/zstd v1.5.7 // indirect
-	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
@@ -49,8 +48,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/onsi/ginkgo/v2 v2.29.0 // indirect
-	github.com/onsi/gomega v1.41.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
