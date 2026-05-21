@@ -1,7 +1,7 @@
 package errors
 
 import (
-	"errors"
+		stderrors "errors"
 	"fmt"
 
 	errorfamily "github.com/larsartmann/go-error-family"
@@ -24,7 +24,7 @@ var (
 func WithDetail(err error, detail string) error {
 	var e *errorfamily.Error
 
-	if errors.As(err, &e) {
+	if stderrors.As(err, &e) {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), detail)
 	}
 
@@ -36,7 +36,7 @@ func WithDetail(err error, detail string) error {
 func WithUserDetail(err error, username string) error {
 	var e *errorfamily.Error
 
-	if errors.As(err, &e) {
+	if stderrors.As(err, &e) {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), "username="+username)
 	}
 
@@ -48,7 +48,7 @@ func WithUserDetail(err error, username string) error {
 func Wrap(err error, message string) error {
 	var e *errorfamily.Error
 
-	if errors.As(err, &e) {
+	if stderrors.As(err, &e) {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), message)
 	}
 
@@ -62,7 +62,7 @@ func Wrapf(err error, format string, args ...any) error {
 
 	var e *errorfamily.Error
 
-	if errors.As(err, &e) {
+	if stderrors.As(err, &e) {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), msg)
 	}
 
