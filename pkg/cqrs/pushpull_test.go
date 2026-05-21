@@ -95,11 +95,5 @@ func TestCQRSStack_SyncAfterPushPull(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if count != 1 {
-		t.Errorf("expected count=1 after push/pull, got %d", count)
-	}
+	waitForCount(t, stack, ctx, 1)
 }

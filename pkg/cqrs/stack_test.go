@@ -10,6 +10,28 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
+func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected int64) {
+	t.Helper()
+
+	deadline := time.Now().Add(time.Second)
+
+	for time.Now().Before(deadline) {
+		count, err := stack.Count(ctx)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+
+		if count == expected {
+			return
+		}
+
+		time.Sleep(time.Millisecond)
+	}
+
+	count, _ := stack.Count(ctx)
+	t.Fatalf("timed out waiting for count=%d, got %d", expected, count)
+}
+
 func TestCQRSStack_SyncNewItem(t *testing.T) {
 	t.Parallel()
 
@@ -304,25 +326,13 @@ func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 		t.Errorf("expected Errors=0, got %d", result.Errors)
 	}
 
-	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if count != 2 {
-		t.Errorf("expected count=2, got %d", count)
-	}
+	waitForCount(t, stack, ctx, 2)
 
 	if err := stack.DeleteItem(ctx, "github", "1"); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	count, err = stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if count != 1 {
-		t.Errorf("deleted item should be removed from read model, got count=%d", count)
-	}
+	waitForCount(t, stack, ctx, 1)
 }
 
 func TestCQRSStack_InvalidBackend(t *testing.T) {
@@ -391,6 +401,8 @@ func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
 	if err := stack.SyncItem(ctx, testItem("2", "IssueEvent")); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
+
+	waitForCount(t, stack, ctx, 2)
 
 	items, err := stack.ReadModel.List(ctx, ItemFilter{})
 	if err != nil {

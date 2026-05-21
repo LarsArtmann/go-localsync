@@ -113,20 +113,25 @@ func DecideDelete(
 
 		aggID := AggregateID(source, sourceID)
 
-		evt, err := newEvent(
-			EventItemDeleted,
-			aggID,
-			currentVersion.Increment(),
-			ItemDeletedPayload{
+		evts, err := event.NewEvents(
+			aggID, aggregateType, currentVersion,
+			[]event.Type{EventItemDeleted},
+			[]any{ItemDeletedPayload{
 				Source:   source,
 				SourceID: sourceID,
-			},
+			}},
 		)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf(
+				"create delete event for %s/%s (version=%d): %w",
+				aggID,
+				sourceID,
+				currentVersion,
+				err,
+			)
 		}
 
-		return []event.Event{evt}, nil
+		return evts, nil
 	}
 }
 
@@ -170,37 +175,6 @@ func syncEvents(
 	}
 
 	return evts, nil
-}
-
-func newEvent(
-	eventType event.Type,
-	aggID id.AggregateID,
-	version event.Version,
-	payload any,
-) (*event.Core, error) {
-	data, err := event.JSONCodec{}.Encode(payload)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"marshal %s payload for aggregate %s (version=%d): %w",
-			eventType,
-			aggID,
-			version,
-			err,
-		)
-	}
-
-	core, err := event.NewEvent(eventType, aggID, aggregateType, version, data)
-	if err != nil {
-		return nil, fmt.Errorf(
-			"create %s event for aggregate %s (version=%d): %w",
-			eventType,
-			aggID,
-			version,
-			err,
-		)
-	}
-
-	return core, nil
 }
 
 func itemToPayload(item *provider.Item) ItemSyncedPayload {

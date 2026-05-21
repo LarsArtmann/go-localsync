@@ -3,7 +3,9 @@ package cqrs
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
@@ -41,21 +43,24 @@ type CQRSConfig struct {
 }
 
 type CQRSStack struct {
-	Store     event.Store
-	Bus       event.Bus
-	Repo      *decider.Repository[SyncItemState]
-	ReadModel ReadModel
-	Runner    *event.InMemoryRunner
-	syncDB    *cqrsstorage.TursoSyncDB
+	Store        event.Store
+	Bus          event.Bus
+	Repo         *decider.Repository[SyncItemState]
+	ReadModel    ReadModel
+	Runner       *event.InMemoryRunner
+	syncDB       *cqrsstorage.TursoSyncDB
+	outbox       event.Outbox
+	db           *sql.DB
+	cancelOutbox context.CancelFunc
 }
 
 func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
-	store, bus, syncDB, err := createStoreAndBus(cfg)
+	sr, err := createStoreAndBus(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	rm, err := createReadModel(cfg, syncDB)
+	rm, err := createReadModel(cfg, sr)
 	if err != nil {
 		return nil, err
 	}
@@ -71,15 +76,15 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, fmt.Errorf("register projector: %w", err)
 	}
 
-	err = bus.SubscribeAll(runner.Handle)
-	if err != nil {
-		return nil, fmt.Errorf("subscribe projection runner: %w", err)
-	}
-
-	if mwErr := bus.Use(
+	if mwErr := sr.bus.Use(
 		middleware.EventLogging(&charmLogAdapter{logger: log.Default()}),
 	); mwErr != nil {
 		return nil, fmt.Errorf("wire event logging middleware: %w", mwErr)
+	}
+
+	err = sr.bus.SubscribeAll(runner.Handle)
+	if err != nil {
+		return nil, fmt.Errorf("subscribe projection runner: %w", err)
 	}
 
 	deciderSpec := decider.Decider[SyncItemState]{
@@ -87,30 +92,45 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		Fold:    Fold,
 	}
 
-	snapshotStore := cqrsmemory.NewMemorySnapshotStore()
+	snapshotStore, stratStoreErr := createSnapshotStore(cfg, sr.db)
+	if stratStoreErr != nil {
+		return nil, stratStoreErr
+	}
 
 	snapshotStrategy, stratErr := event.EveryNEvents(10)
 	if stratErr != nil {
 		return nil, fmt.Errorf("create snapshot strategy: %w", stratErr)
 	}
 
-	repo, err := decider.NewRepository[SyncItemState](
-		store, bus, deciderSpec,
+	var repoOpts []decider.RepositoryOption[SyncItemState]
+
+	repoOpts = append(repoOpts,
 		decider.WithSnapshotStore[SyncItemState](snapshotStore),
 		decider.WithCodec[SyncItemState](event.JSONCodec{}),
 		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
+	)
+
+	if sr.outbox != nil {
+		repoOpts = append(repoOpts, decider.WithOutbox[SyncItemState](sr.outbox))
+	}
+
+	repo, err := decider.NewRepository[SyncItemState](
+		sr.store, sr.bus, deciderSpec, repoOpts...,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create decider repository: %w", err)
 	}
 
 	return &CQRSStack{
-		Store:     store,
-		Bus:       bus,
-		Repo:      repo,
-		ReadModel: rm,
-		Runner:    runner,
-		syncDB:    syncDB,
+		Store:        sr.store,
+		Bus:          sr.bus,
+		Repo:         repo,
+		ReadModel:    rm,
+		Runner:       runner,
+		syncDB:       sr.syncDB,
+		outbox:       sr.outbox,
+		db:           sr.db,
+		cancelOutbox: startOutboxPoller(sr.outbox, sr.bus),
 	}, nil
 }
 
@@ -271,23 +291,88 @@ func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 }
 
 func (s *CQRSStack) Close() error {
-	err := s.ReadModel.Close()
-	if err != nil {
-		return err
+	var errs []error
+
+	if s.cancelOutbox != nil {
+		s.cancelOutbox()
 	}
 
-	return s.Store.Close()
+	if err := s.ReadModel.Close(); err != nil {
+		errs = append(errs, err)
+	}
+
+	if s.outbox != nil {
+		if err := s.outbox.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if err := s.Store.Close(); err != nil {
+		errs = append(errs, err)
+	}
+
+	return errors.Join(errs...)
 }
 
-//nolint:ireturn
-func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
+func startOutboxPoller(outbox event.Outbox, bus event.Bus) context.CancelFunc {
+	if outbox == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		ticker := time.NewTicker(time.Millisecond)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				entries, err := outbox.PollPending(ctx, 100)
+				if err != nil {
+					continue
+				}
+
+				for _, entry := range entries {
+					for _, evt := range entry.Events {
+						_ = bus.Publish(ctx, evt)
+					}
+
+					_ = outbox.Ack(ctx, []event.OutboxID{entry.ID})
+				}
+			}
+		}
+	}()
+
+	return cancel
+}
+
+var errTursoRequiresDB = errors.New("turso backend requires database connection")
+
+type storeResult struct {
+	store  event.Store
+	bus    event.Bus
+	syncDB *cqrsstorage.TursoSyncDB
+	outbox event.Outbox
+	db     *sql.DB
+}
+
+func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 	switch cfg.Backend {
 	case backendMemory, "":
-		return cqrsmemory.NewMemoryStore(), cqrsmemory.NewMemoryBus(), nil, nil
+		return storeResult{
+			store:  cqrsmemory.NewMemoryStore(),
+			bus:    cqrsmemory.NewMemoryBus(),
+			syncDB: nil,
+			outbox: nil,
+			db:     nil,
+		}, nil
 	case backendTurso:
 		return createTursoStore(cfg)
 	default:
-		return nil, nil, nil, fmt.Errorf(
+		return storeResult{}, fmt.Errorf(
 			"unknown backend: %s: %w",
 			cfg.Backend,
 			pkgerrors.ErrUnknownBackend,
@@ -295,8 +380,7 @@ func createStoreAndBus(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Tur
 	}
 }
 
-//nolint:ireturn
-func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
+func createTursoStore(cfg CQRSConfig) (storeResult, error) {
 	if cfg.RemoteURL != "" {
 		return createTursoRemoteStore(cfg)
 	}
@@ -304,41 +388,57 @@ func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Turs
 	return createTursoLocalStore(cfg)
 }
 
-type dbExecContext interface {
-	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
-}
-
-//nolint:ireturn
 func createTursoRemoteStore(
 	cfg CQRSConfig,
-) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
+) (storeResult, error) {
 	ctx := context.Background()
 
 	syncDB, err := cqrsstorage.OpenTursoSync(ctx, cfg.DBPath, cfg.RemoteURL, cfg.AuthToken)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
+		return storeResult{}, fmt.Errorf("open turso sync database: %w", err)
 	}
 
-	if err := initSchema(ctx, syncDB); err != nil {
+	if err := cqrsstorage.SQLiteInitSchema(ctx, syncDB.DB); err != nil {
 		_ = syncDB.Close()
 
-		return nil, nil, nil, err
+		return storeResult{}, fmt.Errorf("init turso schema: %w", err)
 	}
 
 	store, err := cqrsstorage.NewSQLiteEventStore(syncDB.DB)
 	if err != nil {
 		_ = syncDB.Close()
 
-		return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
+		return storeResult{}, fmt.Errorf("create turso event store: %w", err)
 	}
 
-	return store, cqrsmemory.NewMemoryBus(), syncDB, nil
+	outbox, outboxErr := cqrsstorage.NewSQLiteOutbox(syncDB.DB)
+	if outboxErr != nil {
+		_ = syncDB.Close()
+
+		return storeResult{}, fmt.Errorf("create turso outbox: %w", outboxErr)
+	}
+
+	cqrsstorage.ConfigureTursoPool(syncDB.DB)
+
+	txStore, txErr := cqrsstorage.NewSQLTransactionalStore(store, outbox)
+	if txErr != nil {
+		_ = syncDB.Close()
+
+		return storeResult{}, fmt.Errorf("create turso transactional store: %w", txErr)
+	}
+
+	return storeResult{
+		store:  txStore,
+		bus:    cqrsmemory.NewMemoryBus(),
+		syncDB: syncDB,
+		outbox: outbox,
+		db:     syncDB.DB,
+	}, nil
 }
 
-//nolint:ireturn
 func createTursoLocalStore(
 	cfg CQRSConfig,
-) (event.Store, event.Bus, *cqrsstorage.TursoSyncDB, error) {
+) (storeResult, error) {
 	dbPath := cfg.DBPath
 	if dbPath == "" {
 		dbPath = dbPathInMemory
@@ -346,55 +446,70 @@ func createTursoLocalStore(
 
 	db, err := cqrsstorage.OpenTurso(dbPath)
 	if err != nil {
-		return nil, nil, nil, fmt.Errorf("open turso database: %w", err)
+		return storeResult{}, fmt.Errorf("open turso database: %w", err)
 	}
 
 	ctx := context.Background()
 
-	if err := initSchema(ctx, db); err != nil {
+	if err := cqrsstorage.SQLiteInitSchema(ctx, db); err != nil {
 		_ = db.Close()
 
-		return nil, nil, nil, err
+		return storeResult{}, fmt.Errorf("init turso schema: %w", err)
 	}
 
-	store, err := cqrsstorage.NewSQLiteEventStore(db)
-	if err != nil {
+	store, storeErr := cqrsstorage.NewSQLiteEventStore(db)
+	if storeErr != nil {
 		_ = db.Close()
 
-		return nil, nil, nil, fmt.Errorf("create turso event store: %w", err)
+		return storeResult{}, fmt.Errorf("create turso event store: %w", storeErr)
 	}
 
-	return store, cqrsmemory.NewMemoryBus(), nil, nil
-}
+	outbox, outboxErr := cqrsstorage.NewSQLiteOutbox(db)
+	if outboxErr != nil {
+		_ = db.Close()
 
-func initSchema(ctx context.Context, db dbExecContext) error {
-	_, err := db.ExecContext(ctx, cqrsstorage.SQLiteSchema())
-	if err != nil {
-		return fmt.Errorf("create event store schema: %w", err)
+		return storeResult{}, fmt.Errorf("create turso outbox: %w", outboxErr)
 	}
 
-	return nil
+	cqrsstorage.ConfigureTursoPool(db)
+
+	txStore, txErr := cqrsstorage.NewSQLTransactionalStore(store, outbox)
+	if txErr != nil {
+		_ = db.Close()
+
+		return storeResult{}, fmt.Errorf("create turso transactional store: %w", txErr)
+	}
+
+	return storeResult{
+		store:  txStore,
+		bus:    cqrsmemory.NewMemoryBus(),
+		syncDB: nil,
+		outbox: outbox,
+		db:     db,
+	}, nil
 }
 
 //nolint:ireturn
-func createReadModel(cfg CQRSConfig, syncDB *cqrsstorage.TursoSyncDB) (ReadModel, error) {
+func createReadModel(cfg CQRSConfig, sr storeResult) (ReadModel, error) {
 	if cfg.Backend == backendTurso {
-		if syncDB != nil {
-			return NewTursoReadModel(syncDB.DB)
+		if sr.db != nil {
+			return NewTursoReadModel(sr.db)
 		}
 
-		dbPath := cfg.DBPath
-		if dbPath == "" {
-			dbPath = dbPathInMemory
-		}
-
-		readDB, err := cqrsstorage.OpenTurso(dbPath)
-		if err != nil {
-			return nil, fmt.Errorf("open turso read model db: %w", err)
-		}
-
-		return NewTursoReadModel(readDB)
+		return nil, fmt.Errorf("%w", errTursoRequiresDB)
 	}
 
 	return NewMemoryReadModel(), nil
+}
+
+//nolint:ireturn
+func createSnapshotStore(
+	cfg CQRSConfig,
+	db *sql.DB,
+) (event.SnapshotStore, error) {
+	if cfg.Backend != backendTurso || db == nil {
+		return cqrsmemory.NewMemorySnapshotStore(), nil
+	}
+
+	return cqrsstorage.NewSQLiteSnapshotStore(db)
 }
