@@ -17,7 +17,8 @@ func startOutboxPublisher(
 		return nil, nil //nolint:nilnil // intentional: nil publisher signals no outbox needed
 	}
 
-	publisher, err := event.NewOutboxPublisher(outbox, bus,
+	publisher, err := event.NewOutboxPublisher(
+		outbox, bus,
 		event.WithPollInterval(time.Second),
 		event.WithBatchSize(100),
 	)
