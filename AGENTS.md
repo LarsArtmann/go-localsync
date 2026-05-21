@@ -143,16 +143,16 @@ Two tables managed by the CQRS stack:
 
 ## Dependencies
 
-| Dependency                    | Purpose                                              |
-| ----------------------------- | ---------------------------------------------------- |
-| `go-cqrs-lite/core` | v1.3.0 | Decider, event types, branded IDs, error taxonomy (latest: v1.4.0) |
-| `go-cqrs-lite/memory` | v1.1.0 | In-memory event store + bus (latest: v1.2.0) |
-| `go-cqrs-lite/storage` | pseudo | SQLite/Turso event store with optimistic concurrency (latest: v0.2.0) |
-| `go-branded-id`               | Branded phantom-type IDs for compile-time safety     |
-| `go-github/v69`               | GitHub API client                                    |
-| `turso.tech/database/tursogo` | Turso Go client — local + remote sync                |
-| `charm.land/log/v2`           | Structured logging                                   |
-| `caarlos0/env/v11`            | Environment variable config                          |
+| Dependency                    | Purpose                                          |
+| ----------------------------- | ------------------------------------------------ | --------------------------------------------------------------------- |
+| `go-cqrs-lite/core`           | v1.3.0                                           | Decider, event types, branded IDs, error taxonomy (latest: v1.4.0)    |
+| `go-cqrs-lite/memory`         | v1.1.0                                           | In-memory event store + bus (latest: v1.2.0)                          |
+| `go-cqrs-lite/storage`        | pseudo                                           | SQLite/Turso event store with optimistic concurrency (latest: v0.2.0) |
+| `go-branded-id`               | Branded phantom-type IDs for compile-time safety |
+| `go-github/v69`               | GitHub API client                                |
+| `turso.tech/database/tursogo` | Turso Go client — local + remote sync            |
+| `charm.land/log/v2`           | Structured logging                               |
+| `caarlos0/env/v11`            | Environment variable config                      |
 
 ### Test Dependencies
 
@@ -193,6 +193,7 @@ Modules used: `core/event`, `core/decider`, `core/pkg/id`, `memory`, `storage`.
 Modules unused: `core/command`, `core/query`, `core/aggregate`, `projection`, `middleware`, `sync`, `catalog`, `testhelpers`.
 
 Key anti-patterns:
+
 - `event.Version` cast to `int()` in 3 places (`decider.go:119,143,170`) — bypasses phantom type safety
 - `bus.SubscribeAll` without replay/checkpoint (`stack.go:50`) — events lost on restart
 - Manual `json.Marshal`/`json.Unmarshal` everywhere vs `event.JSONCodec` + `DecodePayload[T]`
