@@ -8,4 +8,5 @@ use (
 	../go-cqrs-lite/memory
 	../go-cqrs-lite/middleware
 	../go-cqrs-lite/storage
+	../go-error-family
 )

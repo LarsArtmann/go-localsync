@@ -40,7 +40,9 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 
 	cr := &ConflictResult{Fetched: len(result.Items)}
 
-	valid := s.filterValidItems(result.Items, &SyncResult{Errors: 0})
+	validationResult := &SyncResult{Errors: 0}
+	valid := s.filterValidItems(result.Items, validationResult)
+	cr.Errors += validationResult.Errors
 
 	if len(valid) == 0 {
 		return cr, nil

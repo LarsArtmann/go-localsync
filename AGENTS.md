@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-05-21
+**Updated:** 2026-05-21 (session 2)
 
 ## Project Overview
 
@@ -44,7 +44,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 
 ### Conflict Flow
 
-`ConflictAwareSyncer` delegates entirely to `CQRSStack.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and emits `ItemConflictFound` + `ItemSynced` events. No split-brain — the decider is the single source of truth for conflict detection.
+`ConflictAwareSyncer` delegates entirely to `CQRSStack.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and emits `ItemConflictFound` + `ItemSynced` events. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
 
 ## Development Workflow
 
@@ -82,18 +82,18 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package                    | Tests | Status                                                                |
-| -------------------------- | ----- | --------------------------------------------------------------------- |
-| `pkg/cqrs`                 | 55    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner |
-| `pkg/providers/github`     | 40    | ✅ Client, fetch, retry, error handling, rate limit                   |
-| `pkg/sync`                 | 15    | ✅ Syncer + ConflictAwareSyncer + Incremental                         |
-| `pkg/types`                | 10    | ✅ ID construction, roundtrip, zero, equal                            |
-| `pkg/errors`               | 8     | ✅ Sentinel errors, wrapping, classification (direct + wrapped)       |
-| `pkg/provider`             | 1     | ✅ Item validation                                                    |
-| `cmd/examples/github-sync` | 6     | ✅ exitCodeForError, LoadConfig, env defaults                         |
-| `pkg/testhelpers`          | 0     | ⬜ Helper package                                                     |
+| Package                    | Tests | Coverage | Status                                                                                |
+| -------------------------- | ----- | -------- | ------------------------------------------------------------------------------------- |
+| `pkg/cqrs`                 | 69    | 83.8%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, classifyAction |
+| `pkg/providers/github`     | 46    | 85.4%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                              |
+| `pkg/sync`                 | 18    | 87.2%    | ✅ Syncer + ConflictAwareSyncer + Incremental + invalid item error counting           |
+| `pkg/types`                | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                            |
+| `pkg/errors`               | 28    | 100.0%   | ✅ Sentinel errors, wrapping, classification, fallback paths                          |
+| `pkg/provider`             | 6     | 100.0%   | ✅ Item validation                                                                    |
+| `cmd/examples/github-sync` | 11    | 10.5%    | ✅ exitCodeForError, LoadConfig, env defaults                                         |
+| `pkg/testhelpers`          | 0     | 0.0%     | ⬜ Helper package                                                                     |
 
-**~135 total test cases** across 7 test packages.
+**193 total test functions** across 7 test packages. **73.7% overall coverage**.
 
 Run: `go test ./... -count=1`
 

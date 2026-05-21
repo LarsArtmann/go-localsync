@@ -238,3 +238,191 @@ func TestTursoReadModel_Upsert_Idempotent(t *testing.T) {
 		t.Errorf("Count = %d, want 1 (upsert should overwrite, not duplicate)", count)
 	}
 }
+
+func TestTursoReadModel_List_FilterByActorLogin(t *testing.T) {
+	t.Parallel()
+
+	rm := newTursoTestDB(t)
+	ctx := context.Background()
+
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
+
+	actor := types.NewActorID("alice")
+	items, err := rm.List(ctx, ItemFilter{ActorLogin: &actor})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 2 {
+		t.Errorf("expected 2 items for alice, got %d", len(items))
+	}
+
+	count, err := rm.Count(ctx, ItemFilter{ActorLogin: &actor})
+	if err != nil {
+		t.Fatalf("Count: %v", err)
+	}
+	if count != 2 {
+		t.Errorf("expected count=2 for alice, got %d", count)
+	}
+}
+
+func TestTursoReadModel_List_FilterByRepoName(t *testing.T) {
+	t.Parallel()
+
+	rm := newTursoTestDB(t)
+	ctx := context.Background()
+
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo-a"))
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo-b"))
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "charlie", "org/repo-a"))
+
+	repo := types.NewRepoID("org/repo-a")
+	items, err := rm.List(ctx, ItemFilter{RepoName: &repo})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 2 {
+		t.Errorf("expected 2 items for org/repo-a, got %d", len(items))
+	}
+}
+
+func TestTursoReadModel_List_FilterBySource(t *testing.T) {
+	t.Parallel()
+
+	rm := newTursoTestDB(t)
+	ctx := context.Background()
+
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, tursoTestItem(t, "gitlab", "2", "PushEvent", "bob", "org/repo"))
+
+	source := types.NewProviderID("github")
+	items, err := rm.List(ctx, ItemFilter{Source: &source})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 1 {
+		t.Errorf("expected 1 item for github source, got %d", len(items))
+	}
+	if items[0].Source.Get() != "github" {
+		t.Errorf("Source = %q, want github", items[0].Source.Get())
+	}
+}
+
+func TestTursoReadModel_List_FilterBySince(t *testing.T) {
+	t.Parallel()
+
+	rm := newTursoTestDB(t)
+	ctx := context.Background()
+
+	oldItem := tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
+	oldItem.CreatedAt = time.Now().Add(-48 * time.Hour).Truncate(time.Microsecond)
+	oldItem.UpdatedAt = oldItem.CreatedAt
+
+	newItem := tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo")
+	newItem.CreatedAt = time.Now().Truncate(time.Microsecond)
+	newItem.UpdatedAt = newItem.CreatedAt
+
+	_ = rm.Upsert(ctx, oldItem)
+	_ = rm.Upsert(ctx, newItem)
+
+	since := time.Now().Add(-24 * time.Hour)
+	items, err := rm.List(ctx, ItemFilter{Since: &since})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 1 {
+		t.Errorf("expected 1 item after Since cutoff, got %d", len(items))
+	}
+	if items[0].ExternalID.Get() != "2" {
+		t.Errorf("expected item 2 (newer), got %s", items[0].ExternalID.Get())
+	}
+
+	count, err := rm.Count(ctx, ItemFilter{Since: &since})
+	if err != nil {
+		t.Fatalf("Count: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("expected count=1 after Since cutoff, got %d", count)
+	}
+}
+
+func TestTursoReadModel_List_Pagination(t *testing.T) {
+	t.Parallel()
+
+	rm := newTursoTestDB(t)
+	ctx := context.Background()
+
+	for i := 0; i < 5; i++ {
+		_ = rm.Upsert(
+			ctx,
+			tursoTestItem(t, "github", string(rune('A'+i)), "PushEvent", "alice", "org/repo"),
+		)
+	}
+
+	items, err := rm.List(ctx, ItemFilter{Limit: 2})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 2 {
+		t.Errorf("expected 2 items with Limit=2, got %d", len(items))
+	}
+
+	items, err = rm.List(ctx, ItemFilter{Limit: 2, Offset: 2})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 2 {
+		t.Errorf("expected 2 items with Limit=2 Offset=2, got %d", len(items))
+	}
+
+	items, err = rm.List(ctx, ItemFilter{Limit: 2, Offset: 4})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 1 {
+		t.Errorf("expected 1 item with Limit=2 Offset=4, got %d", len(items))
+	}
+}
+
+func TestTursoReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
+	t.Parallel()
+
+	rm := newTursoTestDB(t)
+	ctx := context.Background()
+
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
+
+	pushType := types.NewEventTypeID("PushEvent")
+	actor := types.NewActorID("alice")
+	items, err := rm.List(ctx, ItemFilter{Type: &pushType, ActorLogin: &actor})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 1 {
+		t.Errorf("expected 1 PushEvent by alice, got %d", len(items))
+	}
+	if items[0].ExternalID.Get() != "1" {
+		t.Errorf("expected item 1, got %s", items[0].ExternalID.Get())
+	}
+}
+
+func TestTursoReadModel_List_ZeroResults(t *testing.T) {
+	t.Parallel()
+
+	rm := newTursoTestDB(t)
+	ctx := context.Background()
+
+	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+
+	pushType := types.NewEventTypeID("NonExistentType")
+	items, err := rm.List(ctx, ItemFilter{Type: &pushType})
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+	if len(items) != 0 {
+		t.Errorf("expected 0 items for non-existent type, got %d", len(items))
+	}
+}

@@ -127,3 +127,59 @@ func TestErrorClassification_ThroughWrapping(t *testing.T) {
 		t.Error("IsRetryable(wrapped ErrSyncFailed) = false, want true")
 	}
 }
+
+func TestWithDetail_NonErrorFamily(t *testing.T) {
+	t.Parallel()
+
+	original := errors.New("base error")
+	wrapped := WithDetail(original, "extra context")
+
+	if !errors.Is(wrapped, original) {
+		t.Error("expected wrapped to match original via errors.Is")
+	}
+	if wrapped.Error() != "extra context: base error" {
+		t.Errorf("expected 'extra context: base error', got %q", wrapped.Error())
+	}
+}
+
+func TestWithUserDetail_NonErrorFamily(t *testing.T) {
+	t.Parallel()
+
+	original := errors.New("base error")
+	wrapped := WithUserDetail(original, "octocat")
+
+	if !errors.Is(wrapped, original) {
+		t.Error("expected wrapped to match original via errors.Is")
+	}
+	if wrapped.Error() != "username=octocat: base error" {
+		t.Errorf("expected 'username=octocat: base error', got %q", wrapped.Error())
+	}
+}
+
+func TestWrap_NonErrorFamily(t *testing.T) {
+	t.Parallel()
+
+	original := errors.New("base error")
+	wrapped := Wrap(original, "context")
+
+	if !errors.Is(wrapped, original) {
+		t.Error("expected wrapped to match original via errors.Is")
+	}
+	if wrapped.Error() != "context: base error" {
+		t.Errorf("expected 'context: base error', got %q", wrapped.Error())
+	}
+}
+
+func TestWrapf_NonErrorFamily(t *testing.T) {
+	t.Parallel()
+
+	original := errors.New("base error")
+	wrapped := Wrapf(original, "attempt %d", 3)
+
+	if !errors.Is(wrapped, original) {
+		t.Error("expected wrapped to match original via errors.Is")
+	}
+	if wrapped.Error() != "attempt 3: base error" {
+		t.Errorf("expected 'attempt 3: base error', got %q", wrapped.Error())
+	}
+}

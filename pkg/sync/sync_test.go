@@ -495,3 +495,67 @@ func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
 		t.Errorf("expected Errors=1 (invalid item), got %d", result.Errors)
 	}
 }
+
+func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
+	t.Parallel()
+
+	invalidItem := &provider.Item{ID: types.NewItemID()}
+	validItem := testSyncItem("1", "PushEvent")
+
+	mockProv := &mockProvider{items: []*provider.Item{invalidItem, validItem}}
+	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	defer func() { _ = stack.Close() }()
+
+	syncer := NewSyncer(mockProv, stack, log.Default())
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	result, err := cas.SyncWithConflictDetection(
+		context.Background(),
+		&SyncOptions{Source: "testuser", MaxPages: 10},
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Errors != 1 {
+		t.Errorf("expected Errors=1 (invalid item), got %d", result.Errors)
+	}
+	if result.Upserted != 1 {
+		t.Errorf("expected Upserted=1 (valid item), got %d", result.Upserted)
+	}
+}
+
+func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
+	t.Parallel()
+
+	invalidItem1 := &provider.Item{ID: types.NewItemID()}
+	invalidItem2 := &provider.Item{ID: types.NewItemID()}
+
+	mockProv := &mockProvider{items: []*provider.Item{invalidItem1, invalidItem2}}
+	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	defer func() { _ = stack.Close() }()
+
+	syncer := NewSyncer(mockProv, stack, log.Default())
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	result, err := cas.SyncWithConflictDetection(
+		context.Background(),
+		&SyncOptions{Source: "testuser", MaxPages: 10},
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Errors != 2 {
+		t.Errorf("expected Errors=2 (all invalid), got %d", result.Errors)
+	}
+	if result.Upserted != 0 {
+		t.Errorf("expected Upserted=0, got %d", result.Upserted)
+	}
+}
