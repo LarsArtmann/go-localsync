@@ -15,7 +15,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                        |
 | `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (delegates to CQRSStack conflict detection)                             |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`) |
-| `pkg/errors/`               | Sentinel errors classified via `event.RegisterClassification` with error taxonomy                               |
+| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification                               |
 | `pkg/testhelpers/`          | Shared test mocks and factories                                                                                 |
 | `cmd/examples/github-sync/` | Example CLI entry point                                                                                         |
 
@@ -25,8 +25,8 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 
 ### Core Components
 
-- `aggregate_id.go` — deterministic SHA256→hex from (source, sourceID) with sync.Map cache
-- `decider.go` — `SyncItemState{Item *provider.Item, Deleted bool}`, pure Fold + DecideSync/DecideDelete
+- `aggregate_id.go` — deterministic SHA256→hex from (source, sourceID) with sync.Map cache, shared `itemKey` helper
+- `decider.go` — `SyncItemState{Item *provider.Item, Deleted bool}`, pure Fold + DecideSync/DecideDelete, `HasChanged` checks UpdatedAt/Type/ActorLogin/RepoName/RepoURL
 - `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`
 - `readmodel.go` — `ReadModel` interface + `ItemFilter`, stores `*provider.Item` directly
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
@@ -88,12 +88,12 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/providers/github`     | 40    | ✅ Client, fetch, retry, error handling, rate limit                   |
 | `pkg/sync`                 | 15    | ✅ Syncer + ConflictAwareSyncer + Incremental                         |
 | `pkg/types`                | 10    | ✅ ID construction, roundtrip, zero, equal                            |
-| `pkg/errors`               | 4     | ✅ Sentinel errors, wrapping, classification                          |
+| `pkg/errors`               | 8     | ✅ Sentinel errors, wrapping, classification (direct + wrapped)       |
 | `pkg/provider`             | 1     | ✅ Item validation                                                    |
 | `cmd/examples/github-sync` | 6     | ✅ exitCodeForError, LoadConfig, env defaults                         |
 | `pkg/testhelpers`          | 0     | ⬜ Helper package                                                     |
 
-**~130 total test cases** across 7 test packages.
+**~135 total test cases** across 7 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -151,6 +151,7 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/storage`        | pseudo  | SQLite/Turso event store with optimistic concurrency                     |
 | `go-cqrs-lite/middleware`     | v1.0.0  | EventLogging middleware                                                  |
 | `go-branded-id`               | v0.1.0  | Branded phantom-type IDs for compile-time safety                         |
+| `go-error-family`            | v0.1.1  | Structured error classification (Rejection, Transient, Infrastructure)  |
 | `go-github/v69`               | v69.2.0 | GitHub API client                                                        |
 | `turso.tech/database/tursogo` | v0.6.0  | Turso Go client — local + remote sync                                    |
 | `charm.land/log/v2`           | v2.0.0  | Structured logging                                                       |
@@ -175,7 +176,7 @@ Two tables managed by the CQRS stack:
 | Projection     | `event.InMemoryRunner` + `cqrsmemory.CheckpointStore`       | Checkpoint-tracked projection with event type filtering |
 | Snapshots      | `cqrsmemory.MemorySnapshotStore` + `event.EveryNEvents(10)` | Caps replay cost for frequently-synced items            |
 | Logging        | `middleware.EventLogging` via charm log adapter             | Structured logging of all domain events                 |
-| Error taxonomy | `event.RegisterClassification` + `event.IsRetryable`        | Smart retry classification for provider errors          |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`        | Smart retry classification for provider errors          |
 | Version        | `event.Version` with `Increment()`, `Add()`                 | Phantom type safety — no `int()` casts                  |
 
 ### Not Yet Adopted
@@ -201,7 +202,12 @@ All anti-patterns from the previous audit have been resolved:
 - ✅ `event.InMemoryRunner` with checkpointing — events tracked on restart
 - ✅ `event.JSONCodec` + `DecodePayload[T]` + `NewEvents` — no manual json.Marshal/Unmarshal
 - ✅ `aggregate_id.go` uses `hex.EncodeToString` — no ULID dependency in this file
-- ✅ Error taxonomy wired — `RegisterClassification` + `IsRetryable` in GitHub client
+- ✅ Error taxonomy wired — `go-error-family` constructors with intrinsic classification (no `init()`, no `RegisterClassification`)
+- ✅ `SyncItems` distinguishes `ActionCreated` vs `ActionUpdated` via `state.IsNew()`
+- ✅ `HasChanged()` checks `RepoURL` in addition to UpdatedAt/Type/ActorLogin/RepoName
+- ✅ DRY: `itemKey` helper consolidates `source+":"sourceID` pattern (4→1)
+- ✅ DRY: `initSchema` consolidates `initTursoSyncDB`/`initTursoDB` via `dbExecContext` interface
+- ✅ `classifyAction` helper reduces nesting complexity in `SyncItems`
 - ✅ Snapshot support with `EveryNEvents(10)` — caps replay cost
 - ✅ `middleware.EventLogging` — structured logging of all domain events
 - ✅ `Projector` implements `event.Projection` directly — no Handle/HandleEvent duplication
