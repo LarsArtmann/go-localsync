@@ -24,7 +24,7 @@ func (m *MemoryReadModel) Get(_ context.Context, source, sourceID string) (*prov
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	return m.items[source+":"+sourceID], nil
+	return m.items[itemKey(source, sourceID)], nil
 }
 
 func (m *MemoryReadModel) List(_ context.Context, filter ItemFilter) ([]*provider.Item, error) {
@@ -86,7 +86,7 @@ func (m *MemoryReadModel) Upsert(_ context.Context, item *provider.Item) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.items[item.Source.Get()+":"+item.ExternalID.Get()] = item
+	m.items[itemKey(item.Source.Get(), item.ExternalID.Get())] = item
 
 	return nil
 }
@@ -95,7 +95,7 @@ func (m *MemoryReadModel) Delete(_ context.Context, source, sourceID string) err
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	delete(m.items, source+":"+sourceID)
+	delete(m.items, itemKey(source, sourceID))
 
 	return nil
 }

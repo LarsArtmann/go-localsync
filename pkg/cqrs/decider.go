@@ -223,7 +223,8 @@ func HasChanged(local, remote *provider.Item) bool {
 	return !local.UpdatedAt.Equal(remote.UpdatedAt) ||
 		local.Type.Get() != remote.Type.Get() ||
 		local.ActorLogin.Get() != remote.ActorLogin.Get() ||
-		local.RepoName.Get() != remote.RepoName.Get()
+		local.RepoName.Get() != remote.RepoName.Get() ||
+		local.RepoURL != remote.RepoURL
 }
 
 func parseItemID(s string) types.ItemID {

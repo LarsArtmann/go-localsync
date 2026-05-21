@@ -6,5 +6,6 @@ use (
 	../go-branded-id
 	../go-cqrs-lite/core
 	../go-cqrs-lite/memory
+	../go-cqrs-lite/middleware
 	../go-cqrs-lite/storage
 )

@@ -3,6 +3,8 @@ package errors
 import (
 	"errors"
 	"testing"
+
+	"github.com/larsartmann/go-cqrs-lite/core/event"
 )
 
 func TestSentinelErrors(t *testing.T) {
@@ -71,5 +73,57 @@ func TestWrap(t *testing.T) {
 
 	if !errors.Is(err, ErrSyncFailed) {
 		t.Error("expected err to match ErrSyncFailed via errors.Is")
+	}
+}
+
+func TestErrorClassification(t *testing.T) {
+	t.Parallel()
+
+	classifications := []struct {
+		err      error
+		family   event.Family
+		retryable bool
+	}{
+		{ErrNotFound, event.Rejection, false},
+		{ErrRateLimited, event.Transient, true},
+		{ErrInvalidToken, event.Rejection, false},
+		{ErrUserNotFound, event.Rejection, false},
+		{ErrSyncFailed, event.Transient, true},
+		{ErrDatabase, event.Infrastructure, false},
+		{ErrInvalidInput, event.Rejection, false},
+		{ErrUnknownBackend, event.Rejection, false},
+		{ErrDBNil, event.Rejection, false},
+	}
+
+	for _, tc := range classifications {
+		t.Run(tc.err.Error(), func(t *testing.T) {
+			t.Parallel()
+
+			if got := event.Classify(tc.err); got != tc.family {
+				t.Errorf("Classify(%v) = %v, want %v", tc.err, got, tc.family)
+			}
+
+			if got := event.IsRetryable(tc.err); got != tc.retryable {
+				t.Errorf("IsRetryable(%v) = %v, want %v", tc.err, got, tc.retryable)
+			}
+		})
+	}
+}
+
+func TestErrorClassification_ThroughWrapping(t *testing.T) {
+	t.Parallel()
+
+	wrapped := WithDetail(ErrNotFound, "resource=events")
+	if got := event.Classify(wrapped); got != event.Rejection {
+		t.Errorf("Classify(wrapped ErrNotFound) = %v, want Rejection", got)
+	}
+
+	wrappedSync := Wrapf(ErrSyncFailed, "attempt %d", 3)
+	if got := event.Classify(wrappedSync); got != event.Transient {
+		t.Errorf("Classify(wrapped ErrSyncFailed) = %v, want Transient", got)
+	}
+
+	if !event.IsRetryable(wrappedSync) {
+		t.Error("IsRetryable(wrapped ErrSyncFailed) = false, want true")
 	}
 }

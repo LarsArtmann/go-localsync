@@ -185,15 +185,17 @@ func (s *CQRSStack) SyncItems(
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
 		var eventCount int
+		var wasNew bool
 
 		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
+			wasNew = state.IsNew()
+
 			events, err := DecideSync(item)(state, ver)
 			if err != nil {
 				return nil, fmt.Errorf(
-					"decide sync for %s/%s (eventCount=%d): %w",
+					"decide sync for %s/%s: %w",
 					item.Source.Get(),
 					item.ExternalID.Get(),
-					eventCount,
 					err,
 				)
 			}
@@ -220,7 +222,12 @@ func (s *CQRSStack) SyncItems(
 			summary.Synced++
 			summary.Conflicts++
 		} else if eventCount == 1 {
-			result.Action = ActionCreated
+			if wasNew {
+				result.Action = ActionCreated
+			} else {
+				result.Action = ActionUpdated
+			}
+
 			summary.Synced++
 		} else {
 			result.Action = ActionUnchanged
@@ -282,6 +289,10 @@ func createTursoStore(cfg CQRSConfig) (event.Store, event.Bus, *cqrsstorage.Turs
 	return createTursoLocalStore(cfg)
 }
 
+type dbExecContext interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+}
+
 //nolint:ireturn
 func createTursoRemoteStore(
 	cfg CQRSConfig,
@@ -293,7 +304,7 @@ func createTursoRemoteStore(
 		return nil, nil, nil, fmt.Errorf("open turso sync database: %w", err)
 	}
 
-	if err := initTursoSyncDB(ctx, syncDB); err != nil {
+	if err := initSchema(ctx, syncDB); err != nil {
 		_ = syncDB.Close()
 
 		return nil, nil, nil, err
@@ -325,7 +336,7 @@ func createTursoLocalStore(
 
 	ctx := context.Background()
 
-	if err := initTursoDB(ctx, db); err != nil {
+	if err := initSchema(ctx, db); err != nil {
 		_ = db.Close()
 
 		return nil, nil, nil, err
@@ -341,16 +352,7 @@ func createTursoLocalStore(
 	return store, cqrsmemory.NewMemoryBus(), nil, nil
 }
 
-func initTursoSyncDB(ctx context.Context, syncDB *cqrsstorage.TursoSyncDB) error {
-	_, err := syncDB.ExecContext(ctx, cqrsstorage.SQLiteSchema())
-	if err != nil {
-		return fmt.Errorf("create event store schema: %w", err)
-	}
-
-	return nil
-}
-
-func initTursoDB(ctx context.Context, db *sql.DB) error {
+func initSchema(ctx context.Context, db dbExecContext) error {
 	_, err := db.ExecContext(ctx, cqrsstorage.SQLiteSchema())
 	if err != nil {
 		return fmt.Errorf("create event store schema: %w", err)
