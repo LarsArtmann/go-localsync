@@ -211,34 +211,47 @@ func (s *CQRSStack) SyncItems(
 
 		result := ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
-			Action:   ActionUnchanged,
-			Error:    nil,
+			Action:   classifyAction(err, eventCount, wasNew),
+			Error:    err,
 		}
 
-		if err != nil {
-			result.Action = ActionError
-			result.Error = err
+		switch result.Action {
+		case ActionError:
 			summary.Errors++
-		} else if eventCount > 1 {
-			result.Action = ActionConflictRemote
+		case ActionCreated, ActionUpdated, ActionConflictRemote:
 			summary.Synced++
-			summary.Conflicts++
-		} else if eventCount == 1 {
-			if wasNew {
-				result.Action = ActionCreated
-			} else {
-				result.Action = ActionUpdated
-			}
 
-			summary.Synced++
-		} else {
-			result.Action = ActionUnchanged
+			if result.Action == ActionConflictRemote {
+				summary.Conflicts++
+			}
+		default:
+			// ActionUnchanged: no counters
 		}
 
 		summary.Results = append(summary.Results, result)
 	}
 
 	return summary
+}
+
+func classifyAction(err error, eventCount int, wasNew bool) SyncAction {
+	if err != nil {
+		return ActionError
+	}
+
+	if eventCount > 1 {
+		return ActionConflictRemote
+	}
+
+	if eventCount == 1 && wasNew {
+		return ActionCreated
+	}
+
+	if eventCount == 1 {
+		return ActionUpdated
+	}
+
+	return ActionUnchanged
 }
 
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {

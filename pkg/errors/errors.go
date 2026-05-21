@@ -1,7 +1,7 @@
 package errors
 
 import (
-		stderrors "errors"
+	stderrors "errors"
 	"fmt"
 
 	errorfamily "github.com/larsartmann/go-error-family"
