@@ -56,15 +56,10 @@ func TestTursoReadModel_UpsertAndGet(t *testing.T) {
 
 	item := tursoTestItem(t, "github", "123", "PushEvent", "alice", "org/repo")
 
-	err := rm.Upsert(ctx, item)
-	if err != nil {
-		t.Fatalf("Upsert: %v", err)
-	}
+	mustNoError(t, rm.Upsert(ctx, item))
 
 	got, err := rm.Get(ctx, "github", "123")
-	if err != nil {
-		t.Fatalf("Get: %v", err)
-	}
+	mustNoError(t, err)
 
 	if got == nil {
 		t.Fatal("Get returned nil")
@@ -74,13 +69,9 @@ func TestTursoReadModel_UpsertAndGet(t *testing.T) {
 		t.Errorf("ID = %q, want %q (ItemID not preserved)", got.ID.String(), item.ID.String())
 	}
 
-	if got.ExternalID.Get() != "123" {
-		t.Errorf("ExternalID = %q, want 123", got.ExternalID.Get())
-	}
+	assertExternalID(t, got, "123")
 
-	if got.Type.Get() != "PushEvent" {
-		t.Errorf("Type = %q, want PushEvent", got.Type.Get())
-	}
+	assertItemType(t, got, "PushEvent")
 }
 
 func TestTursoReadModel_Get_NotFound(t *testing.T) {
@@ -115,9 +106,7 @@ func TestTursoReadModel_List(t *testing.T) {
 	_ = rm.Upsert(ctx, item2)
 
 	items, err := rm.List(ctx, ItemFilter{})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 
 	if len(items) != 2 {
 		t.Fatalf("expected 2 items, got %d", len(items))
@@ -143,9 +132,7 @@ func TestTursoReadModel_List_FilterByType(t *testing.T) {
 		t.Fatalf("expected 1 PushEvent, got %d", len(items))
 	}
 
-	if items[0].Type.Get() != "PushEvent" {
-		t.Errorf("Type = %q, want PushEvent", items[0].Type.Get())
-	}
+	assertItemType(t, items[0], "PushEvent")
 }
 
 func TestTursoReadModel_Count(t *testing.T) {
@@ -158,9 +145,7 @@ func TestTursoReadModel_Count(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
 
 	count, err := rm.Count(ctx, ItemFilter{})
-	if err != nil {
-		t.Fatalf("Count: %v", err)
-	}
+	mustNoError(t, err)
 
 	if count != 2 {
 		t.Errorf("Count = %d, want 2", count)
@@ -168,9 +153,7 @@ func TestTursoReadModel_Count(t *testing.T) {
 
 	pushType := types.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, ItemFilter{Type: &pushType})
-	if err != nil {
-		t.Fatalf("Count filtered: %v", err)
-	}
+	mustNoError(t, err)
 
 	if count != 1 {
 		t.Errorf("filtered Count = %d, want 1", count)
@@ -188,9 +171,7 @@ func TestTursoReadModel_GetTypes(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "PushEvent", "charlie", "org/repo2"))
 
 	types, err := rm.GetTypes(ctx)
-	if err != nil {
-		t.Fatalf("GetTypes: %v", err)
-	}
+	mustNoError(t, err)
 
 	if len(types) != 2 {
 		t.Fatalf("expected 2 types, got %d: %v", len(types), types)
@@ -206,9 +187,7 @@ func TestTursoReadModel_Delete(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 
 	err := rm.Delete(ctx, "github", "1")
-	if err != nil {
-		t.Fatalf("Delete: %v", err)
-	}
+	mustNoError(t, err)
 
 	got, _ := rm.Get(ctx, "github", "1")
 	if got != nil {
@@ -229,9 +208,7 @@ func TestTursoReadModel_Upsert_Idempotent(t *testing.T) {
 	_ = rm.Upsert(ctx, item2)
 
 	got, _ := rm.Get(ctx, "github", "1")
-	if got.Type.Get() != "IssueEvent" {
-		t.Errorf("after second upsert, Type = %q, want IssueEvent", got.Type.Get())
-	}
+	assertItemType(t, got, "IssueEvent")
 
 	count, _ := rm.Count(ctx, ItemFilter{})
 	if count != 1 {
@@ -251,17 +228,13 @@ func TestTursoReadModel_List_FilterByActorLogin(t *testing.T) {
 
 	actor := types.NewActorID("alice")
 	items, err := rm.List(ctx, ItemFilter{ActorLogin: &actor})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items for alice, got %d", len(items))
 	}
 
 	count, err := rm.Count(ctx, ItemFilter{ActorLogin: &actor})
-	if err != nil {
-		t.Fatalf("Count: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 2 {
 		t.Errorf("expected count=2 for alice, got %d", count)
 	}
@@ -279,9 +252,7 @@ func TestTursoReadModel_List_FilterByRepoName(t *testing.T) {
 
 	repo := types.NewRepoID("org/repo-a")
 	items, err := rm.List(ctx, ItemFilter{RepoName: &repo})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items for org/repo-a, got %d", len(items))
 	}
@@ -298,9 +269,7 @@ func TestTursoReadModel_List_FilterBySource(t *testing.T) {
 
 	source := types.NewProviderID("github")
 	items, err := rm.List(ctx, ItemFilter{Source: &source})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 item for github source, got %d", len(items))
 	}
@@ -328,20 +297,14 @@ func TestTursoReadModel_List_FilterBySince(t *testing.T) {
 
 	since := time.Now().Add(-24 * time.Hour)
 	items, err := rm.List(ctx, ItemFilter{Since: &since})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 item after Since cutoff, got %d", len(items))
 	}
-	if items[0].ExternalID.Get() != "2" {
-		t.Errorf("expected item 2 (newer), got %s", items[0].ExternalID.Get())
-	}
+	assertExternalID(t, items[0], "2")
 
 	count, err := rm.Count(ctx, ItemFilter{Since: &since})
-	if err != nil {
-		t.Fatalf("Count: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after Since cutoff, got %d", count)
 	}
@@ -369,17 +332,13 @@ func TestTursoReadModel_List_Pagination(t *testing.T) {
 	}
 
 	items, err = rm.List(ctx, ItemFilter{Limit: 2, Offset: 2})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items with Limit=2 Offset=2, got %d", len(items))
 	}
 
 	items, err = rm.List(ctx, ItemFilter{Limit: 2, Offset: 4})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 item with Limit=2 Offset=4, got %d", len(items))
 	}
@@ -398,15 +357,11 @@ func TestTursoReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	pushType := types.NewEventTypeID("PushEvent")
 	actor := types.NewActorID("alice")
 	items, err := rm.List(ctx, ItemFilter{Type: &pushType, ActorLogin: &actor})
-	if err != nil {
-		t.Fatalf("List: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 PushEvent by alice, got %d", len(items))
 	}
-	if items[0].ExternalID.Get() != "1" {
-		t.Errorf("expected item 1, got %s", items[0].ExternalID.Get())
-	}
+	assertExternalID(t, items[0], "1")
 }
 
 func TestTursoReadModel_List_ZeroResults(t *testing.T) {

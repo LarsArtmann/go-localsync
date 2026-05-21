@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
-	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
@@ -14,10 +13,9 @@ import (
 func TestAggregateID_Deterministic(t *testing.T) {
 	t.Parallel()
 
-	a := AggregateID("github", "123")
-	b := AggregateID("github", "123")
+	id := AggregateID("github", "123")
 
-	if a != b {
+	if id != AggregateID("github", "123") {
 		t.Error("same inputs must produce same AggregateID")
 	}
 }
@@ -25,10 +23,7 @@ func TestAggregateID_Deterministic(t *testing.T) {
 func TestAggregateID_DifferentInputs(t *testing.T) {
 	t.Parallel()
 
-	a := AggregateID("github", "123")
-	b := AggregateID("github", "456")
-
-	if a == b {
+	if AggregateID("github", "123") == AggregateID("github", "456") {
 		t.Error("different inputs must produce different AggregateIDs")
 	}
 }
@@ -36,32 +31,18 @@ func TestAggregateID_DifferentInputs(t *testing.T) {
 func TestFold_ItemSynced(t *testing.T) {
 	t.Parallel()
 
-	payload := ItemSyncedPayload{
-		Source:    "github",
-		SourceID:  "123",
-		Type:      "PushEvent",
-		CreatedAt: time.Now().UnixNano(),
-		UpdatedAt: time.Now().UnixNano(),
-	}
+	payload := testSyncedPayload("123", "PushEvent")
 
 	evt := mustNewTestEvent(EventItemSynced, payload)
 
 	state, err := Fold(InitialState, evt)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if state.Item == nil {
 		t.Fatal("expected non-nil Item")
 	}
-	if state.Item.Source.Get() != "github" {
-		t.Errorf("expected Source=github, got %s", state.Item.Source.Get())
-	}
-	if state.Item.ExternalID.Get() != "123" {
-		t.Errorf("expected ExternalID=123, got %s", state.Item.ExternalID.Get())
-	}
-	if state.Item.Type.Get() != "PushEvent" {
-		t.Errorf("expected Type=PushEvent, got %s", state.Item.Type.Get())
-	}
+	assertEqual(t, state.Item.Source.Get(), "github", "Source")
+	assertExternalID(t, state.Item, "123")
+	assertItemType(t, state.Item, "PushEvent")
 	if state.Deleted {
 		t.Error("expected Deleted=false")
 	}
@@ -70,32 +51,16 @@ func TestFold_ItemSynced(t *testing.T) {
 func TestFold_ItemSyncedOverwritesState(t *testing.T) {
 	t.Parallel()
 
-	existing := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: types.NewExternalID("123"),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID("PushEvent"),
-		},
-	}
+	existing := testActiveState("123", "PushEvent")
 
-	updatedPayload := ItemSyncedPayload{
-		Source:    "github",
-		SourceID:  "123",
-		Type:      "IssueEvent",
-		CreatedAt: time.Now().UnixNano(),
-		UpdatedAt: time.Now().UnixNano(),
-	}
+	updatedPayload := testSyncedPayload("123", "IssueEvent")
 
 	evt := mustNewTestEvent(EventItemSynced, updatedPayload)
 
 	state, err := Fold(existing, evt)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 
-	if state.Item.Type.Get() != "IssueEvent" {
-		t.Errorf("expected Type=IssueEvent, got %s", state.Item.Type.Get())
-	}
+	assertItemType(t, state.Item, "IssueEvent")
 }
 
 func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
@@ -106,9 +71,7 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	originalID := item.ID.String()
 
 	events, err := DecideSync(item)(InitialState, 0)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
 	}
@@ -122,9 +85,7 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	}
 
 	state, err := Fold(InitialState, events[0])
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if state.Item == nil {
 		t.Fatal("expected non-nil Item")
 	}
@@ -136,19 +97,12 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 func TestFold_ItemDeleted(t *testing.T) {
 	t.Parallel()
 
-	existing := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: types.NewExternalID("123"),
-			Source:     types.NewProviderID("github"),
-		},
-	}
+	existing := testActiveState("123", "")
 
 	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
 	state, err := Fold(existing, evt)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 
 	if !state.Deleted {
 		t.Error("expected Deleted=true")
@@ -161,26 +115,16 @@ func TestFold_ItemDeleted(t *testing.T) {
 func TestFold_ItemConflictFound(t *testing.T) {
 	t.Parallel()
 
-	existing := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: types.NewExternalID("123"),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID("PushEvent"),
-		},
-	}
+	existing := testActiveState("123", "PushEvent")
 
 	evt := mustNewTestEvent(EventItemConflictFound, ItemConflictFoundPayload{
 		Source: "github", SourceID: "123", Winner: "remote",
 	})
 
 	state, err := Fold(existing, evt)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 
-	if state.Item.Type.Get() != "PushEvent" {
-		t.Errorf("conflict event should not change state, got Type=%s", state.Item.Type.Get())
-	}
+	assertItemType(t, state.Item, "PushEvent")
 }
 
 func TestFold_UnknownEventType(t *testing.T) {
@@ -200,15 +144,11 @@ func TestDecideSync_NewItem(t *testing.T) {
 	item := testItem("123", "PushEvent")
 
 	events, err := DecideSync(item)(InitialState, 0)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
 	}
-	if events[0].Type() != EventItemSynced {
-		t.Errorf("expected type=%s, got %s", EventItemSynced, events[0].Type())
-	}
+	assertEventType(t, events[0], EventItemSynced)
 }
 
 func TestDecideSync_UnchangedItem(t *testing.T) {
@@ -230,9 +170,7 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 	}
 
 	events, err := DecideSync(item)(state, 1)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("unchanged item produces no events, got %d", len(events))
 	}
@@ -254,18 +192,12 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 	}
 
 	events, err := DecideSync(item)(state, 1)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
-	if events[0].Type() != EventItemConflictFound {
-		t.Errorf("expected type=%s, got %s", EventItemConflictFound, events[0].Type())
-	}
-	if events[1].Type() != EventItemSynced {
-		t.Errorf("expected type=%s, got %s", EventItemSynced, events[1].Type())
-	}
+	assertEventType(t, events[0], EventItemConflictFound)
+	assertEventType(t, events[1], EventItemSynced)
 }
 
 func TestDecideSync_ConflictTimestamps(t *testing.T) {
@@ -287,9 +219,7 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 	}
 
 	events, err := DecideSync(item)(state, 1)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
@@ -315,57 +245,36 @@ func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 
 	item := testItem("123", "PushEvent")
 
-	state := SyncItemState{
-		Item:    &provider.Item{ExternalID: types.NewExternalID("123")},
-		Deleted: true,
-	}
+	state := testDeletedState("123")
 
 	events, err := DecideSync(item)(state, 2)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
 	}
-	if events[0].Type() != EventItemSynced {
-		t.Errorf("expected type=%s, got %s", EventItemSynced, events[0].Type())
-	}
+	assertEventType(t, events[0], EventItemSynced)
 }
 
 func TestDecideDelete_ActiveItem(t *testing.T) {
 	t.Parallel()
 
-	state := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: types.NewExternalID("123"),
-			Source:     types.NewProviderID("github"),
-		},
-	}
+	state := testActiveState("123", "")
 
 	events, err := DecideDelete("github", "123")(state, 1)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
 	}
-	if events[0].Type() != EventItemDeleted {
-		t.Errorf("expected type=%s, got %s", EventItemDeleted, events[0].Type())
-	}
+	assertEventType(t, events[0], EventItemDeleted)
 }
 
 func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 	t.Parallel()
 
-	state := SyncItemState{
-		Item:    &provider.Item{ExternalID: types.NewExternalID("123")},
-		Deleted: true,
-	}
+	state := testDeletedState("123")
 
 	events, err := DecideDelete("github", "123")(state, 1)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
 	}
@@ -375,9 +284,7 @@ func TestDecideDelete_NewItem(t *testing.T) {
 	t.Parallel()
 
 	events, err := DecideDelete("github", "123")(InitialState, 0)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
 	}
@@ -393,34 +300,5 @@ func TestSyncItemState_IsNew(t *testing.T) {
 	existing := SyncItemState{Item: &provider.Item{}}
 	if existing.IsNew() {
 		t.Error("expected existing state to not be new")
-	}
-}
-
-func mustNewTestEvent(eventType event.Type, payload any) *event.Core {
-	data, err := json.Marshal(payload)
-	if err != nil {
-		panic(err)
-	}
-
-	aggID := id.NewAggregateID()
-
-	evt, err := event.NewEvent(eventType, aggID, aggregateType, 1, data)
-	if err != nil {
-		panic(err)
-	}
-
-	return evt
-}
-
-func testItem(sourceID, itemType string) *provider.Item {
-	return &provider.Item{
-		ExternalID: types.NewExternalID(sourceID),
-		Source:     types.NewProviderID("github"),
-		Type:       types.NewEventTypeID(itemType),
-		ActorLogin: types.NewActorID("testuser"),
-		RepoName:   types.NewRepoID("owner/repo"),
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		RawJSON:    json.RawMessage(`{"test":true}`),
 	}
 }

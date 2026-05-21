@@ -253,8 +253,8 @@ func (si *scannedItem) toItem() *provider.Item {
 	}
 }
 
-func scanItem(row *sql.Row) (*provider.Item, error) {
-	si := &scannedItem{
+func newScannedItem() *scannedItem {
+	return &scannedItem{
 		itemIDStr:      "",
 		source:         "",
 		sourceID:       "",
@@ -267,6 +267,10 @@ func scanItem(row *sql.Row) (*provider.Item, error) {
 		createdAt:      time.Time{},
 		updatedAt:      time.Time{},
 	}
+}
+
+func scanItem(row *sql.Row) (*provider.Item, error) {
+	si := newScannedItem()
 
 	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.actorLogin,
 		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt, &si.rawJSON)
@@ -281,19 +285,7 @@ func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 	var items []*provider.Item
 
 	for rows.Next() {
-		si := &scannedItem{
-			itemIDStr:      "",
-			source:         "",
-			sourceID:       "",
-			eventType:      "",
-			actorLogin:     "",
-			actorAvatarURL: "",
-			repoName:       "",
-			repoURL:        "",
-			rawJSON:        nil,
-			createdAt:      time.Time{},
-			updatedAt:      time.Time{},
-		}
+		si := newScannedItem()
 
 		err := rows.Scan(
 			&si.itemIDStr,

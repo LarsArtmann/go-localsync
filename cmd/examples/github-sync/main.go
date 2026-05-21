@@ -181,8 +181,7 @@ func main() {
 
 		cr, err := cas.SyncWithConflictDetection(ctx, opts)
 		if err != nil {
-			logger.Error("Conflict-aware sync failed", "error", err)
-			os.Exit(exitCodeForError(err))
+			logFatalAndExit(logger, "Conflict-aware sync failed", err)
 		}
 
 		fmt.Printf(
@@ -201,8 +200,7 @@ func main() {
 	}
 
 	if err != nil {
-		logger.Error("Sync failed", "error", err)
-		os.Exit(exitCodeForError(err))
+		logFatalAndExit(logger, "Sync failed", err)
 	}
 
 	fmt.Printf(
@@ -219,6 +217,11 @@ func main() {
 			logger.Info("Pushed local changes to remote")
 		}
 	}
+}
+
+func logFatalAndExit(logger *log.Logger, msg string, err error) {
+	logger.Error(msg, "error", err)
+	os.Exit(exitCodeForError(err))
 }
 
 func exitCodeForError(err error) int {

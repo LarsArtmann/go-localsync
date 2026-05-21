@@ -9,6 +9,24 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
+func upsertTestItem(
+	t *testing.T,
+	rm ReadModel,
+	ctx context.Context,
+	source, extID, eventType, actor, repo string,
+) {
+	t.Helper()
+
+	mustNoError(t, rm.Upsert(ctx, &provider.Item{
+		ExternalID: types.NewExternalID(extID),
+		Source:     types.NewProviderID(source),
+		Type:       types.NewEventTypeID(eventType),
+		ActorLogin: types.NewActorID(actor),
+		RepoName:   types.NewRepoID(repo),
+		CreatedAt:  time.Now(),
+	}))
+}
+
 func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 	t.Parallel()
 
@@ -21,20 +39,14 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 		Type:       types.NewEventTypeID("PushEvent"),
 	}
 
-	if err := rm.Upsert(ctx, item); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, rm.Upsert(ctx, item))
 
 	got, err := rm.Get(ctx, "github", "123")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if got == nil {
 		t.Fatal("expected non-nil item")
 	}
-	if got.Type.Get() != "PushEvent" {
-		t.Errorf("expected Type=PushEvent, got %s", got.Type.Get())
-	}
+	assertItemType(t, got, "PushEvent")
 }
 
 func TestMemoryReadModel_GetNotFound(t *testing.T) {
@@ -44,9 +56,7 @@ func TestMemoryReadModel_GetNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	got, err := rm.Get(ctx, "github", "nonexistent")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if got != nil {
 		t.Error("expected nil for nonexistent item")
 	}
@@ -63,17 +73,11 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 		Source:     types.NewProviderID("github"),
 	}
 
-	if err := rm.Upsert(ctx, item); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := rm.Delete(ctx, "github", "123"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, rm.Upsert(ctx, item))
+	mustNoError(t, rm.Delete(ctx, "github", "123"))
 
 	got, err := rm.Get(ctx, "github", "123")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if got != nil {
 		t.Error("expected nil after delete")
 	}
@@ -85,70 +89,39 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	pushType := "PushEvent"
-	issueType := "IssueEvent"
+	upsertTestItem(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo1")
+	upsertTestItem(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo2")
+	upsertTestItem(t, rm, ctx, "gitlab", "3", "PushEvent", "alice", "org/repo3")
 
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("1"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID(pushType), ActorLogin: types.NewActorID("alice"),
-		RepoName: types.NewRepoID("org/repo1"), CreatedAt: time.Now().Add(-2 * time.Hour),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("2"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID(issueType), ActorLogin: types.NewActorID("bob"),
-		RepoName: types.NewRepoID("org/repo2"), CreatedAt: time.Now().Add(-time.Hour),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("3"), Source: types.NewProviderID("gitlab"),
-		Type: types.NewEventTypeID(pushType), ActorLogin: types.NewActorID("alice"),
-		RepoName: types.NewRepoID("org/repo3"), CreatedAt: time.Now(),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	pushTypeFilter := types.NewEventTypeID(pushType)
+	pushTypeFilter := types.NewEventTypeID("PushEvent")
 	items, err := rm.List(ctx, ItemFilter{Type: &pushTypeFilter})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
 	sourceFilter := types.NewProviderID("github")
 	items, err = rm.List(ctx, ItemFilter{Source: &sourceFilter})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
 	actorFilter := types.NewActorID("alice")
 	items, err = rm.List(ctx, ItemFilter{ActorLogin: &actorFilter})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
 	items, err = rm.List(ctx, ItemFilter{Limit: 2})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
 	items, err = rm.List(ctx, ItemFilter{Offset: 10})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if items != nil {
 		t.Errorf("expected nil for out-of-range offset, got %d items", len(items))
 	}
@@ -160,32 +133,18 @@ func TestMemoryReadModel_Count(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("1"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID("PushEvent"),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("2"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID("IssueEvent"),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	upsertTestItem(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	upsertTestItem(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
 	count, err := rm.Count(ctx, ItemFilter{})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 2 {
 		t.Errorf("expected count=2, got %d", count)
 	}
 
 	pushTypeFilter := types.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, ItemFilter{Type: &pushTypeFilter})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
@@ -197,29 +156,12 @@ func TestMemoryReadModel_GetTypes(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("1"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID("PushEvent"),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("2"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID("IssueEvent"),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("3"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID("PushEvent"),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	upsertTestItem(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	upsertTestItem(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
+	upsertTestItem(t, rm, ctx, "github", "3", "PushEvent", "charlie", "org/repo2")
 
 	result, err := rm.GetTypes(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(result) != 2 {
 		t.Fatalf("expected 2 types, got %d", len(result))
 	}
@@ -234,31 +176,19 @@ func TestProjector_ItemSynced(t *testing.T) {
 	rm := NewMemoryReadModel()
 	proj := NewProjector(rm)
 
-	payload := ItemSyncedPayload{
-		Source:    "github",
-		SourceID:  "123",
-		Type:      "PushEvent",
-		CreatedAt: time.Now().UnixNano(),
-		UpdatedAt: time.Now().UnixNano(),
-	}
+	payload := testSyncedPayload("123", "PushEvent")
 
 	evt := mustNewTestEvent(EventItemSynced, payload)
 
-	if err := proj.Handle(context.Background(), evt); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, proj.Handle(context.Background(), evt))
 
 	if rm.Len() != 1 {
 		t.Errorf("expected Len=1, got %d", rm.Len())
 	}
 
 	got, err := rm.Get(context.Background(), "github", "123")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if got.Type.Get() != "PushEvent" {
-		t.Errorf("expected Type=PushEvent, got %s", got.Type.Get())
-	}
+	mustNoError(t, err)
+	assertItemType(t, got, "PushEvent")
 }
 
 func TestProjector_ItemDeleted(t *testing.T) {
@@ -267,20 +197,13 @@ func TestProjector_ItemDeleted(t *testing.T) {
 	ctx := context.Background()
 	rm := NewMemoryReadModel()
 
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("123"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID("PushEvent"),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	upsertTestItem(t, rm, ctx, "github", "123", "PushEvent", "alice", "org/repo")
 
 	proj := NewProjector(rm)
 
 	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
-	if err := proj.Handle(ctx, evt); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, proj.Handle(ctx, evt))
 
 	if rm.Len() != 0 {
 		t.Errorf("expected Len=0, got %d", rm.Len())
@@ -293,12 +216,7 @@ func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
 	ctx := context.Background()
 	rm := NewMemoryReadModel()
 
-	if err := rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID("123"), Source: types.NewProviderID("github"),
-		Type: types.NewEventTypeID("PushEvent"),
-	}); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	upsertTestItem(t, rm, ctx, "github", "123", "PushEvent", "alice", "org/repo")
 
 	proj := NewProjector(rm)
 
@@ -306,9 +224,7 @@ func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
 		Source: "github", SourceID: "123", Winner: "remote",
 	})
 
-	if err := proj.Handle(ctx, evt); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, proj.Handle(ctx, evt))
 
 	if rm.Len() != 1 {
 		t.Errorf("expected Len=1, got %d", rm.Len())
@@ -326,23 +242,17 @@ func TestReadModel_Integration(t *testing.T) {
 
 	decide := DecideSync(item)
 	events, err := decide(InitialState, 0)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
 	}
 
 	for _, evt := range events {
-		if err := proj.Handle(ctx, evt); err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
+		mustNoError(t, proj.Handle(ctx, evt))
 	}
 
 	got, err := rm.Get(ctx, "github", "123")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if got.Type.Get() != "PushEvent" {
 		t.Errorf("expected Type=PushEvent, got %s", got.Type.Get())
 	}
@@ -351,9 +261,7 @@ func TestReadModel_Integration(t *testing.T) {
 	}
 
 	count, err := rm.Count(ctx, ItemFilter{})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}

@@ -34,6 +34,10 @@ func (m *mockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo,
 	return &provider.RateLimitInfo{Limit: 5000, Remaining: 4999}, nil
 }
 
+func testSyncOpts() *SyncOptions {
+	return &SyncOptions{Source: "testuser", MaxPages: 10}
+}
+
 func newTestSyncer(items []*provider.Item) (*Syncer, *cqrs.CQRSStack) {
 	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
 	p := &mockProvider{items: items}
@@ -70,7 +74,7 @@ func TestSyncer_Sync(t *testing.T) {
 	defer func() { _ = syncer.Close() }()
 
 	ctx := context.Background()
-	result, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := syncer.Sync(ctx, testSyncOpts())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -91,7 +95,7 @@ func TestSyncer_Sync_EmptyResult(t *testing.T) {
 	defer func() { _ = syncer.Close() }()
 
 	ctx := context.Background()
-	result, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := syncer.Sync(ctx, testSyncOpts())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -114,7 +118,7 @@ func TestSyncer_Sync_InvalidItem(t *testing.T) {
 	defer func() { _ = syncer.Close() }()
 
 	ctx := context.Background()
-	result, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := syncer.Sync(ctx, testSyncOpts())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -147,7 +151,7 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 	defer func() { _ = syncer.Close() }()
 
 	ctx := context.Background()
-	result, err := syncer.SyncIncremental(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := syncer.SyncIncremental(ctx, testSyncOpts())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -174,7 +178,7 @@ func TestSyncer_GetStats(t *testing.T) {
 	defer func() { _ = syncer.Close() }()
 
 	ctx := context.Background()
-	_, err := syncer.Sync(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	_, err := syncer.Sync(ctx, testSyncOpts())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -221,7 +225,7 @@ func TestConflictAwareSyncer_NewItems(t *testing.T) {
 	ctx := context.Background()
 	result, err := cas.SyncWithConflictDetection(
 		ctx,
-		&SyncOptions{Source: "testuser", MaxPages: 10},
+		testSyncOpts(),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -264,7 +268,7 @@ func TestConflictAwareSyncer_NoChange_Skipped(t *testing.T) {
 	syncer.provider = &mockProvider{items: []*provider.Item{item}}
 	result, err := cas.SyncWithConflictDetection(
 		ctx,
-		&SyncOptions{Source: "testuser", MaxPages: 10},
+		testSyncOpts(),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -303,7 +307,7 @@ func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
 	syncer.provider = &mockProvider{items: []*provider.Item{newItem}}
 	result, err := cas.SyncWithConflictDetection(
 		ctx,
-		&SyncOptions{Source: "testuser", MaxPages: 10},
+		testSyncOpts(),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -342,7 +346,7 @@ func TestConflictAwareSyncer_RemoteWinsAlways(t *testing.T) {
 	syncer.provider = &mockProvider{items: []*provider.Item{oldRemote}}
 	result, err := cas.SyncWithConflictDetection(
 		ctx,
-		&SyncOptions{Source: "testuser", MaxPages: 10},
+		testSyncOpts(),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -404,7 +408,7 @@ func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	result, err := syncer.SyncIncremental(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	result, err := syncer.SyncIncremental(ctx, testSyncOpts())
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -512,7 +516,7 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 
 	result, err := cas.SyncWithConflictDetection(
 		context.Background(),
-		&SyncOptions{Source: "testuser", MaxPages: 10},
+		testSyncOpts(),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -544,7 +548,7 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 
 	result, err := cas.SyncWithConflictDetection(
 		context.Background(),
-		&SyncOptions{Source: "testuser", MaxPages: 10},
+		testSyncOpts(),
 	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)

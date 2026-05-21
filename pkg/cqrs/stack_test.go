@@ -4,65 +4,32 @@ import (
 	"context"
 	"errors"
 	"path/filepath"
-	"sync"
 	"testing"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/core/event"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
-func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected int64) {
-	t.Helper()
-
-	deadline := time.Now().Add(time.Second)
-
-	for time.Now().Before(deadline) {
-		count, err := stack.Count(ctx)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-
-		if count == expected {
-			return
-		}
-
-		time.Sleep(time.Millisecond)
-	}
-
-	count, _ := stack.Count(ctx)
-	t.Fatalf("timed out waiting for count=%d, got %d", expected, count)
-}
-
 func TestCQRSStack_SyncNewItem(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	if err := stack.SyncItem(ctx, item); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, item))
 
 	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
 
 	resultTypes, err := stack.GetTypes(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(resultTypes) != 1 || resultTypes[0] != "PushEvent" {
 		t.Errorf("expected [PushEvent], got %v", resultTypes)
 	}
@@ -71,10 +38,7 @@ func TestCQRSStack_SyncNewItem(t *testing.T) {
 func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -96,17 +60,13 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	}
 
 	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 3 {
 		t.Errorf("expected count=3, got %d", count)
 	}
 
 	resultTypes, err := stack.GetTypes(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(resultTypes) != 2 {
 		t.Errorf("expected 2 types, got %v", resultTypes)
 	}
@@ -115,26 +75,17 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	if err := stack.SyncItem(ctx, item); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := stack.SyncItem(ctx, item); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, item))
+	mustNoError(t, stack.SyncItem(ctx, item))
 
 	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("same item synced twice should still have count 1 — idempotent, got %d", count)
 	}
@@ -143,34 +94,23 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 func TestCQRSStack_DeleteItem(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
-	if err := stack.SyncItem(ctx, testItem("123", "PushEvent")); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
 
 	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
 
-	if err := stack.DeleteItem(ctx, "github", "123"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.DeleteItem(ctx, "github", "123"))
 
 	count, err = stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 0 {
 		t.Errorf("item should be deleted from read model, got count=%d", count)
 	}
@@ -179,29 +119,20 @@ func TestCQRSStack_DeleteItem(t *testing.T) {
 func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
-	if err := stack.SyncItem(ctx, testItem("123", "PushEvent")); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := stack.DeleteItem(ctx, "github", "123"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
+	mustNoError(t, stack.DeleteItem(ctx, "github", "123"))
 
 	count, _ := stack.Count(ctx)
 	if count != 0 {
 		t.Errorf("expected count=0, got %d", count)
 	}
 
-	if err := stack.SyncItem(ctx, testItem("123", "IssueEvent")); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, testItem("123", "IssueEvent")))
 
 	count, _ = stack.Count(ctx)
 	if count != 1 {
@@ -209,9 +140,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 	}
 
 	got, err := stack.ReadModel.Get(ctx, "github", "123")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if got.Type.Get() != "IssueEvent" {
 		t.Errorf("resurrected item should have updated type, got %s", got.Type.Get())
 	}
@@ -220,10 +149,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 func TestCQRSStack_ConflictDetection(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -262,10 +188,7 @@ func TestCQRSStack_ConflictDetection(t *testing.T) {
 func TestCQRSStack_FilterByType(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -282,9 +205,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 
 	pushType := types.NewEventTypeID("PushEvent")
 	results, err := stack.ReadModel.List(ctx, ItemFilter{Type: &pushType})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(results) != 2 {
 		t.Errorf("expected 2 results, got %d", len(results))
 	}
@@ -293,23 +214,14 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 func TestCQRSStack_Close(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if err := stack.Close(); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
+	mustNoError(t, stack.Close())
 }
 
 func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newTursoMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -331,9 +243,7 @@ func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 2)
 
-	if err := stack.DeleteItem(ctx, "github", "1"); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.DeleteItem(ctx, "github", "1"))
 
 	waitForCount(t, stack, ctx, 1)
 }
@@ -361,23 +271,16 @@ func TestCQRSStack_DeterministicAggregateID_Matches(t *testing.T) {
 func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	if err := stack.SyncItem(ctx, item); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, item))
 
 	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after sync, got %d", count)
 	}
@@ -386,27 +289,18 @@ func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
 func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newTursoMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
-	if err := stack.SyncItem(ctx, testItem("1", "PushEvent")); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if err := stack.SyncItem(ctx, testItem("2", "IssueEvent")); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, testItem("1", "PushEvent")))
+	mustNoError(t, stack.SyncItem(ctx, testItem("2", "IssueEvent")))
 
 	waitForCount(t, stack, ctx, 2)
 
 	items, err := stack.ReadModel.List(ctx, ItemFilter{})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
@@ -488,10 +382,7 @@ func TestClassifyAction(t *testing.T) {
 func TestCQRSStack_SyncItems_SameItem_Twice(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -539,10 +430,7 @@ func TestCQRSStack_SyncItems_SameItem_Twice(t *testing.T) {
 func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -579,24 +467,17 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 func TestCQRSStack_OutboxPoller_PublishesEvents(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newTursoMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
 
-	if err := stack.SyncItem(ctx, testItem("outbox-1", "PushEvent")); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, stack.SyncItem(ctx, testItem("outbox-1", "PushEvent")))
 
 	waitForCount(t, stack, ctx, 1)
 
 	count, err := stack.Count(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after outbox poller, got %d", count)
 	}
@@ -609,35 +490,23 @@ func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
 	ctx := context.Background()
 
 	stack1, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
-	if err != nil {
-		t.Fatalf("stack1: unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 
-	if err := stack1.SyncItem(ctx, testItem("replay-1", "PushEvent")); err != nil {
-		t.Fatalf("stack1 sync: unexpected error: %v", err)
-	}
-	if err := stack1.SyncItem(ctx, testItem("replay-2", "IssueEvent")); err != nil {
-		t.Fatalf("stack1 sync: unexpected error: %v", err)
-	}
+	mustNoError(t, stack1.SyncItem(ctx, testItem("replay-1", "PushEvent")))
+	mustNoError(t, stack1.SyncItem(ctx, testItem("replay-2", "IssueEvent")))
 
 	waitForCount(t, stack1, ctx, 2)
 
-	if err := stack1.Close(); err != nil {
-		t.Fatalf("stack1 close: unexpected error: %v", err)
-	}
+	mustNoError(t, stack1.Close())
 
 	stack2, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
-	if err != nil {
-		t.Fatalf("stack2: unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	defer func() { _ = stack2.Close() }()
 
 	waitForCount(t, stack2, ctx, 2)
 
 	count, err := stack2.Count(ctx)
-	if err != nil {
-		t.Fatalf("stack2 count: unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if count != 2 {
 		t.Errorf("expected count=2 after replay, got %d", count)
 	}
@@ -646,26 +515,10 @@ func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
 func TestCQRSStack_CorrelationID_Propagated(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
-	var capturedEvents []event.Event
-	var mu sync.Mutex
-
-	handler := func(_ context.Context, evt event.Event) error {
-		mu.Lock()
-		capturedEvents = append(capturedEvents, evt)
-		mu.Unlock()
-
-		return nil
-	}
-
-	if subErr := stack.Bus.SubscribeAll(handler); subErr != nil {
-		t.Fatalf("subscribe: unexpected error: %v", subErr)
-	}
+	waitFor := subscribeAll(t, stack)
 
 	ctx := context.Background()
 	items := []*provider.Item{
@@ -675,20 +528,7 @@ func TestCQRSStack_CorrelationID_Propagated(t *testing.T) {
 
 	_ = stack.SyncItems(ctx, items)
 
-	deadline := time.Now().Add(time.Second)
-	for time.Now().Before(deadline) {
-		mu.Lock()
-		if len(capturedEvents) >= 2 {
-			mu.Unlock()
-			break
-		}
-		mu.Unlock()
-		time.Sleep(time.Millisecond)
-	}
-
-	mu.Lock()
-	evts := capturedEvents
-	mu.Unlock()
+	evts := waitFor(2)
 
 	if len(evts) < 2 {
 		t.Fatalf("expected at least 2 events, got %d", len(evts))
@@ -710,46 +550,17 @@ func TestCQRSStack_CorrelationID_Propagated(t *testing.T) {
 func TestCQRSStack_CorrelationID_UniquePerSyncRun(t *testing.T) {
 	t.Parallel()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
-	var capturedEvents []event.Event
-	var mu sync.Mutex
-
-	handler := func(_ context.Context, evt event.Event) error {
-		mu.Lock()
-		capturedEvents = append(capturedEvents, evt)
-		mu.Unlock()
-
-		return nil
-	}
-
-	if subErr := stack.Bus.SubscribeAll(handler); subErr != nil {
-		t.Fatalf("subscribe: unexpected error: %v", subErr)
-	}
+	waitFor := subscribeAll(t, stack)
 
 	ctx := context.Background()
 
 	_ = stack.SyncItems(ctx, []*provider.Item{testItem("run-1", "PushEvent")})
 	_ = stack.SyncItems(ctx, []*provider.Item{testItem("run-2", "IssueEvent")})
 
-	deadline := time.Now().Add(time.Second)
-	for time.Now().Before(deadline) {
-		mu.Lock()
-		if len(capturedEvents) >= 2 {
-			mu.Unlock()
-			break
-		}
-		mu.Unlock()
-		time.Sleep(time.Millisecond)
-	}
-
-	mu.Lock()
-	evts := capturedEvents
-	mu.Unlock()
+	evts := waitFor(2)
 
 	if len(evts) < 2 {
 		t.Fatalf("expected at least 2 events, got %d", len(evts))

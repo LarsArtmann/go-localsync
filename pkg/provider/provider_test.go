@@ -9,6 +9,14 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
+func assertValidationError(t *testing.T, item *Item) {
+	t.Helper()
+
+	if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
+		t.Error("expected ErrInvalidInput")
+	}
+}
+
 func TestItem_Validate(t *testing.T) {
 	validItem := &Item{
 		ID:         types.NewItemID(),
@@ -28,32 +36,24 @@ func TestItem_Validate(t *testing.T) {
 	t.Run("rejects zero ExternalID", func(t *testing.T) {
 		item := *validItem
 		item.ExternalID = types.ExternalID{}
-		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
-			t.Error("expected ErrInvalidInput")
-		}
+		assertValidationError(t, &item)
 	})
 
 	t.Run("rejects zero Source", func(t *testing.T) {
 		item := *validItem
 		item.Source = types.ProviderID{}
-		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
-			t.Error("expected ErrInvalidInput")
-		}
+		assertValidationError(t, &item)
 	})
 
 	t.Run("rejects zero Type", func(t *testing.T) {
 		item := *validItem
 		item.Type = types.EventTypeID{}
-		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
-			t.Error("expected ErrInvalidInput")
-		}
+		assertValidationError(t, &item)
 	})
 
 	t.Run("rejects zero CreatedAt", func(t *testing.T) {
 		item := *validItem
 		item.CreatedAt = time.Time{}
-		if !errors.Is(item.Validate(), pkgerrors.ErrInvalidInput) {
-			t.Error("expected ErrInvalidInput")
-		}
+		assertValidationError(t, &item)
 	})
 }

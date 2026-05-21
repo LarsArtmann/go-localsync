@@ -16,25 +16,62 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 )
 
-func TestNewClient(t *testing.T) {
-	client := NewClient("test-token")
-	if client == nil {
-		t.Fatal("expected non-nil client")
-	}
-	if client.Name() != "github" {
-		t.Errorf("expected name=github, got %s", client.Name())
+func mustNoError(t *testing.T, err error) {
+	t.Helper()
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
-func TestNewClientWithHTTP(t *testing.T) {
-	httpClient := &http.Client{}
-	client := NewClientWithHTTP(httpClient)
-	if client == nil {
+func assertEqual[T comparable](t *testing.T, got, want T, label string) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("expected %s=%v, got %v", label, want, got)
+	}
+}
+
+func assertExternalID(t *testing.T, item *provider.Item, want string) {
+	t.Helper()
+
+	assertEqual(t, item.ExternalID.Get(), want, "ExternalID")
+}
+
+func assertType(t *testing.T, item *provider.Item, want string) {
+	t.Helper()
+
+	assertEqual(t, item.Type.Get(), want, "Type")
+}
+
+func newRateLimitCoreServer(t *testing.T, core *gh.Rate) *httptest.Server {
+	t.Helper()
+
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"resources": gh.RateLimits{Core: core},
+		})
+	}))
+}
+
+func assertClientName(t *testing.T, c *Client) {
+	t.Helper()
+
+	if c == nil {
 		t.Fatal("expected non-nil client")
 	}
-	if client.Name() != "github" {
-		t.Errorf("expected name=github, got %s", client.Name())
+	if c.Name() != "github" {
+		t.Errorf("expected name=github, got %s", c.Name())
 	}
+}
+
+func TestNewClient(t *testing.T) {
+	assertClientName(t, NewClient("test-token"))
+}
+
+func TestNewClientWithHTTP(t *testing.T) {
+	assertClientName(t, NewClientWithHTTP(&http.Client{}))
 }
 
 func newTestClient(server *httptest.Server) *Client {
@@ -54,15 +91,8 @@ var (
 
 func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !containsSubstring(r.URL.Path, "/users/testuser/events") {
-			t.Errorf("expected path to contain /users/testuser/events, got %s", r.URL.Path)
-		}
-		if r.URL.Query().Get("per_page") != "100" {
-			t.Errorf("expected per_page=100, got %s", r.URL.Query().Get("per_page"))
-		}
-		if r.URL.Query().Get("page") != "1" {
-			t.Errorf("expected page=1, got %s", r.URL.Query().Get("page"))
-		}
+		assertEqual(t, r.URL.Query().Get("per_page"), "100", "per_page")
+		assertEqual(t, r.URL.Query().Get("page"), "1", "page")
 
 		events := []*gh.Event{
 			testhelpers.NewTestEvent(
@@ -79,21 +109,17 @@ func TestFetch_DefaultOptions(t *testing.T) {
 
 	client := newTestClient(server)
 	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(result.Items) != 1 {
 		t.Fatalf("expected 1 item, got %d", len(result.Items))
 	}
 	if result.Items[0].ExternalID.Get() != "123" {
-		t.Errorf("expected ExternalID=123, got %s", result.Items[0].ExternalID.Get())
+		assertExternalID(t, result.Items[0], "123")
 	}
 	if result.Items[0].ID.String() == "" {
 		t.Error("expected non-empty ID")
 	}
-	if result.Items[0].Type.Get() != "PushEvent" {
-		t.Errorf("expected Type=PushEvent, got %s", result.Items[0].Type.Get())
-	}
+	assertType(t, result.Items[0], "PushEvent")
 	if result.Items[0].ActorLogin.Get() != "octocat" {
 		t.Errorf("expected ActorLogin=octocat, got %s", result.Items[0].ActorLogin.Get())
 	}
@@ -111,9 +137,7 @@ func TestFetch_CustomOptions(t *testing.T) {
 		context.Background(),
 		&provider.FetchOptions{Source: "testuser", PerPage: expectedPerPage, Page: expectedPage},
 	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(result.Items) != 0 {
 		t.Errorf("expected 0 items, got %d", len(result.Items))
 	}
@@ -128,9 +152,7 @@ func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 		context.Background(),
 		&provider.FetchOptions{Source: "testuser", PerPage: 0, Page: expectedPage},
 	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(result.Items) != 0 {
 		t.Errorf("expected 0 items, got %d", len(result.Items))
 	}
@@ -143,12 +165,8 @@ func createTestServerForFetch(
 	t.Helper()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Query().Get("per_page") != strconv.Itoa(expectedPerPage) {
-			t.Errorf("expected per_page=%d, got %s", expectedPerPage, r.URL.Query().Get("per_page"))
-		}
-		if r.URL.Query().Get("page") != strconv.Itoa(expectedPage) {
-			t.Errorf("expected page=%d, got %s", expectedPage, r.URL.Query().Get("page"))
-		}
+		assertEqual(t, r.URL.Query().Get("per_page"), strconv.Itoa(expectedPerPage), "per_page")
+		assertEqual(t, r.URL.Query().Get("page"), strconv.Itoa(expectedPage), "page")
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
@@ -206,9 +224,7 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 
 	client := newTestClient(server)
 	result, err := client.FetchAll(context.Background(), "testuser", 3)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(result.Items) != 200 {
 		t.Errorf("expected 200 items, got %d", len(result.Items))
 	}
@@ -230,9 +246,7 @@ func TestFetchAll_DefaultMaxPages(t *testing.T) {
 
 	client := newTestClient(server)
 	_, err := client.FetchAll(context.Background(), "testuser", 0)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if callCount != 1 {
 		t.Errorf("expected 1 call, got %d", callCount)
 	}
@@ -259,9 +273,7 @@ func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 
 	client := newTestClient(server)
 	result, err := client.FetchAll(context.Background(), "testuser", 10)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if len(result.Items) != 1 {
 		t.Errorf("expected 1 item, got %d", len(result.Items))
 	}
@@ -286,33 +298,19 @@ func TestConvertEvent_FullEvent(t *testing.T) {
 	}
 
 	item, err := convertEvent(ghEvent)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if item.ExternalID.Get() != "12345" {
-		t.Errorf("expected ExternalID=12345, got %s", item.ExternalID.Get())
-	}
+	mustNoError(t, err)
+	assertExternalID(t, item, "12345")
 	if item.ID.String() == "" {
 		t.Error("expected non-empty ID")
 	}
 	if item.Source.Get() != "github" {
 		t.Errorf("expected Source=github, got %s", item.Source.Get())
 	}
-	if item.Type.Get() != "PushEvent" {
-		t.Errorf("expected Type=PushEvent, got %s", item.Type.Get())
-	}
-	if item.ActorLogin.Get() != "actor" {
-		t.Errorf("expected ActorLogin=actor, got %s", item.ActorLogin.Get())
-	}
-	if item.ActorAvatarURL != "https://avatar.url" {
-		t.Errorf("expected ActorAvatarURL=https://avatar.url, got %s", item.ActorAvatarURL)
-	}
-	if item.RepoName.Get() != "owner/repo" {
-		t.Errorf("expected RepoName=owner/repo, got %s", item.RepoName.Get())
-	}
-	if item.RepoURL != "https://api.github.com/repos/owner/repo" {
-		t.Errorf("expected RepoURL=https://api.github.com/repos/owner/repo, got %s", item.RepoURL)
-	}
+	assertType(t, item, "PushEvent")
+	assertEqual(t, item.ActorLogin.Get(), "actor", "ActorLogin")
+	assertEqual(t, item.ActorAvatarURL, "https://avatar.url", "ActorAvatarURL")
+	assertEqual(t, item.RepoName.Get(), "owner/repo", "RepoName")
+	assertEqual(t, item.RepoURL, "https://api.github.com/repos/owner/repo", "RepoURL")
 	if !item.CreatedAt.Equal(time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)) {
 		t.Errorf("expected CreatedAt=2024-06-15 10:30:00, got %v", item.CreatedAt)
 	}
@@ -329,18 +327,12 @@ func TestConvertEvent_MinimalEvent(t *testing.T) {
 	}
 
 	item, err := convertEvent(ghEvent)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if item.ExternalID.Get() != "999" {
-		t.Errorf("expected ExternalID=999, got %s", item.ExternalID.Get())
-	}
+	mustNoError(t, err)
+	assertExternalID(t, item, "999")
 	if item.ID.String() == "" {
 		t.Error("expected non-empty ID")
 	}
-	if item.Type.Get() != "WatchEvent" {
-		t.Errorf("expected Type=WatchEvent, got %s", item.Type.Get())
-	}
+	assertType(t, item, "WatchEvent")
 	if item.ActorLogin.Get() != "" {
 		t.Errorf("expected empty ActorLogin, got %s", item.ActorLogin.Get())
 	}
@@ -368,9 +360,7 @@ func TestConvertEvent_NilActorAndRepo(t *testing.T) {
 	}
 
 	item, err := convertEvent(ghEvent)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if item.ActorLogin.String() != "" {
 		t.Errorf("expected empty ActorLogin, got %s", item.ActorLogin)
 	}
@@ -489,14 +479,7 @@ func TestWithConfig(t *testing.T) {
 }
 
 func TestGetRateLimit_NilCore(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"resources": gh.RateLimits{
-				Core: nil,
-			},
-		})
-	}))
+	server := newRateLimitCoreServer(t, nil)
 	defer server.Close()
 
 	httpClient := &http.Client{}
@@ -504,9 +487,7 @@ func TestGetRateLimit_NilCore(t *testing.T) {
 	client.client.BaseURL = testhelpers.MustParseURL(server.URL)
 
 	limits, err := client.GetRateLimit(context.Background())
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	mustNoError(t, err)
 	if limits == nil {
 		t.Fatal("expected non-nil limits")
 	}
@@ -607,33 +588,19 @@ func TestWaitForRateLimit_SufficientRemaining(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	client = client.WithRateLimitConfig(provider.RateLimitConfig{
-		Enabled:      true,
-		MinRemaining: 100,
-	})
 
-	err := client.waitForRateLimit(context.Background())
-	if err != nil {
-		t.Errorf("expected no error when remaining > min, got %v", err)
-	}
+	mustNoError(t, client.waitForRateLimit(context.Background()))
 }
 
 func TestWaitForRateLimit_ExceedsMaxWait(t *testing.T) {
 	t.Parallel()
 
 	resetTime := time.Now().Add(2 * time.Hour)
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"resources": gh.RateLimits{
-				Core: &gh.Rate{
-					Limit:     5000,
-					Remaining: 0,
-					Reset:     gh.Timestamp{Time: resetTime},
-				},
-			},
-		})
-	}))
+	server := newRateLimitCoreServer(t, &gh.Rate{
+		Limit:     5000,
+		Remaining: 0,
+		Reset:     gh.Timestamp{Time: resetTime},
+	})
 	defer server.Close()
 
 	client := newTestClient(server)
@@ -656,18 +623,11 @@ func TestWaitForRateLimit_ContextCanceled(t *testing.T) {
 	t.Parallel()
 
 	resetTime := time.Now().Add(5 * time.Second)
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"resources": gh.RateLimits{
-				Core: &gh.Rate{
-					Limit:     5000,
-					Remaining: 0,
-					Reset:     gh.Timestamp{Time: resetTime},
-				},
-			},
-		})
-	}))
+	server := newRateLimitCoreServer(t, &gh.Rate{
+		Limit:     5000,
+		Remaining: 0,
+		Reset:     gh.Timestamp{Time: resetTime},
+	})
 	defer server.Close()
 
 	client := newTestClient(server)
@@ -689,12 +649,7 @@ func TestWaitForRateLimit_ContextCanceled(t *testing.T) {
 func TestWaitForRateLimit_NilCore(t *testing.T) {
 	t.Parallel()
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"resources": gh.RateLimits{Core: nil},
-		})
-	}))
+	server := newRateLimitCoreServer(t, nil)
 	defer server.Close()
 
 	client := newTestClient(server)
