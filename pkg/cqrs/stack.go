@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/core/command"
@@ -13,11 +12,8 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/event"
 	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
 	"github.com/larsartmann/go-cqrs-lite/core/query"
-	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory"
 	"github.com/larsartmann/go-cqrs-lite/middleware"
-	cqrsprojection "github.com/larsartmann/go-cqrs-lite/projection"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
-	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
@@ -87,7 +83,10 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 	}
 
 	if sr.loader != nil {
-		cancelRunner = startProjectionRunner(sr, checkpointStore, proj)
+		cancelRunner, err = startProjectionRunner(sr, checkpointStore, proj)
+		if err != nil {
+			return nil, fmt.Errorf("start projection runner: %w", err)
+		}
 	} else {
 		if err := startInMemoryRunner(sr.bus, checkpointStore, proj); err != nil {
 			return nil, err
@@ -367,253 +366,5 @@ func (s *CQRSStack) Close() error {
 	return errors.Join(errs...)
 }
 
-func startOutboxPublisher(
-	outbox event.Outbox,
-	bus event.Bus,
-) (*event.OutboxPublisher, error) {
-	if outbox == nil {
-		return nil, nil //nolint:nilnil // intentional: nil publisher signals no outbox needed
-	}
 
-	publisher, err := event.NewOutboxPublisher(outbox, bus,
-		event.WithPollInterval(time.Second),
-		event.WithBatchSize(100),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("create outbox publisher: %w", err)
-	}
 
-	if startErr := publisher.Start(); startErr != nil {
-		return nil, fmt.Errorf("start outbox publisher: %w", startErr)
-	}
-
-	return publisher, nil
-}
-
-func startProjectionRunner(
-	sr storeResult,
-	checkpointStore event.CheckpointStore,
-	proj event.Projection,
-) context.CancelFunc {
-	runner, err := cqrsprojection.NewRunner(
-		sr.loader, sr.bus, checkpointStore,
-		cqrsprojection.WithRetry(3, 100*time.Millisecond),
-	)
-	if err != nil {
-		return nil
-	}
-
-	if regErr := runner.Register(proj); regErr != nil {
-		return nil
-	}
-
-	ctx, cancel := context.WithCancel(context.Background())
-
-	go func() {
-		_ = runner.Run(ctx)
-	}()
-
-	return cancel
-}
-
-func startInMemoryRunner(
-	bus event.Bus,
-	checkpointStore event.CheckpointStore,
-	proj event.Projection,
-) error {
-	runner, err := event.NewInMemoryRunner(checkpointStore)
-	if err != nil {
-		return fmt.Errorf("create in-memory projection runner: %w", err)
-	}
-
-	if regErr := runner.Register(proj); regErr != nil {
-		return fmt.Errorf("register projector: %w", regErr)
-	}
-
-	if subErr := bus.SubscribeAll(runner.Handle); subErr != nil {
-		return fmt.Errorf("subscribe projection runner: %w", subErr)
-	}
-
-	return nil
-}
-
-var errTursoRequiresDB = errors.New("turso backend requires database connection")
-
-type storeResult struct {
-	store  event.Store
-	bus    event.Bus
-	syncDB *cqrsstorage.TursoSyncDB
-	outbox event.Outbox
-	db     *sql.DB
-	loader event.GlobalLoader
-}
-
-func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
-	switch cfg.Backend {
-	case backendMemory, "":
-		return storeResult{
-			store:  cqrsmemory.NewMemoryStore(),
-			bus:    cqrsmemory.NewMemoryBus(),
-			syncDB: nil,
-			outbox: nil,
-			db:     nil,
-			loader: nil,
-		}, nil
-	case backendTurso:
-		return createTursoStore(cfg)
-	default:
-		return storeResult{}, fmt.Errorf(
-			"unknown backend: %s: %w",
-			cfg.Backend,
-			pkgerrors.ErrUnknownBackend,
-		)
-	}
-}
-
-func createTursoStore(cfg CQRSConfig) (storeResult, error) {
-	if cfg.RemoteURL != "" {
-		return createTursoRemoteStore(cfg)
-	}
-
-	return createTursoLocalStore(cfg)
-}
-
-func createTursoRemoteStore(
-	cfg CQRSConfig,
-) (storeResult, error) {
-	ctx := context.Background()
-
-	syncDB, err := cqrsstorage.OpenTursoSync(ctx, cfg.DBPath, cfg.RemoteURL, cfg.AuthToken)
-	if err != nil {
-		return storeResult{}, fmt.Errorf("open turso sync database: %w", err)
-	}
-
-	if err := cqrsstorage.SQLiteInitSchema(ctx, syncDB.DB); err != nil {
-		_ = syncDB.Close()
-
-		return storeResult{}, fmt.Errorf("init turso schema: %w", err)
-	}
-
-	store, err := cqrsstorage.NewSQLiteEventStore(syncDB.DB)
-	if err != nil {
-		_ = syncDB.Close()
-
-		return storeResult{}, fmt.Errorf("create turso event store: %w", err)
-	}
-
-	outbox, outboxErr := cqrsstorage.NewSQLiteOutbox(syncDB.DB)
-	if outboxErr != nil {
-		_ = syncDB.Close()
-
-		return storeResult{}, fmt.Errorf("create turso outbox: %w", outboxErr)
-	}
-
-	cqrsstorage.ConfigureTursoPool(syncDB.DB)
-
-	txStore, txErr := cqrsstorage.NewSQLTransactionalStore(store, outbox)
-	if txErr != nil {
-		_ = syncDB.Close()
-
-		return storeResult{}, fmt.Errorf("create turso transactional store: %w", txErr)
-	}
-
-	return storeResult{
-		store:  txStore,
-		bus:    cqrsmemory.NewMemoryBus(),
-		syncDB: syncDB,
-		outbox: outbox,
-		db:     syncDB.DB,
-		loader: store,
-	}, nil
-}
-
-func createTursoLocalStore(
-	cfg CQRSConfig,
-) (storeResult, error) {
-	dbPath := cfg.DBPath
-	if dbPath == "" {
-		dbPath = dbPathInMemory
-	}
-
-	db, err := cqrsstorage.OpenTurso(dbPath)
-	if err != nil {
-		return storeResult{}, fmt.Errorf("open turso database: %w", err)
-	}
-
-	ctx := context.Background()
-
-	if err := cqrsstorage.SQLiteInitSchema(ctx, db); err != nil {
-		_ = db.Close()
-
-		return storeResult{}, fmt.Errorf("init turso schema: %w", err)
-	}
-
-	store, storeErr := cqrsstorage.NewSQLiteEventStore(db)
-	if storeErr != nil {
-		_ = db.Close()
-
-		return storeResult{}, fmt.Errorf("create turso event store: %w", storeErr)
-	}
-
-	outbox, outboxErr := cqrsstorage.NewSQLiteOutbox(db)
-	if outboxErr != nil {
-		_ = db.Close()
-
-		return storeResult{}, fmt.Errorf("create turso outbox: %w", outboxErr)
-	}
-
-	cqrsstorage.ConfigureTursoPool(db)
-
-	txStore, txErr := cqrsstorage.NewSQLTransactionalStore(store, outbox)
-	if txErr != nil {
-		_ = db.Close()
-
-		return storeResult{}, fmt.Errorf("create turso transactional store: %w", txErr)
-	}
-
-	return storeResult{
-		store:  txStore,
-		bus:    cqrsmemory.NewMemoryBus(),
-		syncDB: nil,
-		outbox: outbox,
-		db:     db,
-		loader: store,
-	}, nil
-}
-
-//nolint:ireturn
-func createReadModel(cfg CQRSConfig, sr storeResult) (ReadModel, error) {
-	if cfg.Backend == backendTurso {
-		if sr.db != nil {
-			return NewTursoReadModel(sr.db)
-		}
-
-		return nil, fmt.Errorf("%w", errTursoRequiresDB)
-	}
-
-	return NewMemoryReadModel(), nil
-}
-
-//nolint:ireturn
-func createSnapshotStore(
-	cfg CQRSConfig,
-	db *sql.DB,
-) (event.SnapshotStore, error) {
-	if cfg.Backend != backendTurso || db == nil {
-		return cqrsmemory.NewMemorySnapshotStore(), nil
-	}
-
-	return cqrsstorage.NewSQLiteSnapshotStore(db)
-}
-
-//nolint:ireturn
-func createCheckpointStore(
-	cfg CQRSConfig,
-	db *sql.DB,
-) (event.CheckpointStore, error) {
-	if cfg.Backend != backendTurso || db == nil {
-		return cqrsmemory.NewCheckpointStore(), nil
-	}
-
-	return cqrsstorage.NewSQLiteCheckpointStore(db)
-}
