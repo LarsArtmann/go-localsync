@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-05-21 (session 2)
+**Updated:** 2026-05-21 (session 3)
 
 ## Project Overview
 
@@ -31,15 +31,18 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `readmodel.go` — `ReadModel` interface + `ItemFilter`, stores `*provider.Item` directly
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
 - `turso_readmodel.go` — SQLite/Turso-backed read model with DDL, filter/pagination
-- `projection.go` — `Projector` implements `event.Projection`, wired via `event.InMemoryRunner`
-- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+Runner, projection via InMemoryRunner with checkpointing, snapshot support, event logging middleware
+- `projection.go` — `Projector` implements `event.Projection`, wired via `event.InMemoryRunner` (memory) or `projection.Runner` (Turso)
+- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel, dual projection runner, outbox poller, SQL snapshots/checkpoints, event logging middleware, correlation IDs
 
 ### Key Properties
 
 - **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
 - **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
 - **Delete + resurrect**: deleted items reappear with updated state
-- **Conflict detection**: `DecideSync` compares fields and emits `ItemConflictFound` events
+- **Outbox pattern**: Turso backend uses `decider.WithOutbox` for atomic save+publish. Outbox poller goroutine publishes events to bus after save.
+- **Projection runner**: Turso uses `projection.Runner` with `GlobalLoader` replay + live subscription. Memory uses `InMemoryRunner`.
+- **SQL persistence**: Turso backend persists snapshots (`SQLiteSnapshotStore`), checkpoints (`SQLiteCheckpointStore`), and outbox to the same `*sql.DB`.
+- **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Remote wins**: on conflict, the incoming item always overwrites (remote-wins LWW)
 
 ### Conflict Flow
@@ -60,6 +63,8 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
        ../go-cqrs-lite/memory
        ../go-cqrs-lite/storage
        ../go-cqrs-lite/middleware
+       ../go-cqrs-lite/projection
+       ../go-error-family
    )
    ```
 2. Build: `go build ./...`
@@ -82,18 +87,18 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package                    | Tests | Coverage | Status                                                                                |
-| -------------------------- | ----- | -------- | ------------------------------------------------------------------------------------- |
-| `pkg/cqrs`                 | 69    | 83.8%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, classifyAction |
-| `pkg/providers/github`     | 46    | 85.4%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                              |
-| `pkg/sync`                 | 18    | 87.2%    | ✅ Syncer + ConflictAwareSyncer + Incremental + invalid item error counting           |
-| `pkg/types`                | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                            |
-| `pkg/errors`               | 28    | 100.0%   | ✅ Sentinel errors, wrapping, classification, fallback paths                          |
-| `pkg/provider`             | 6     | 100.0%   | ✅ Item validation                                                                    |
-| `cmd/examples/github-sync` | 11    | 10.5%    | ✅ exitCodeForError, LoadConfig, env defaults                                         |
-| `pkg/testhelpers`          | 0     | 0.0%     | ⬜ Helper package                                                                     |
+| Package                    | Tests | Coverage | Status                                                                                     |
+| -------------------------- | ----- | -------- | ------------------------------------------------------------------------------------------ |
+| `pkg/cqrs`                 | 73    | 82.5%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation |
+| `pkg/providers/github`     | 46    | 85.4%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                   |
+| `pkg/sync`                 | 18    | 87.2%    | ✅ Syncer + ConflictAwareSyncer + Incremental + invalid item error counting                |
+| `pkg/types`                | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
+| `pkg/errors`               | 28    | 100.0%   | ✅ Sentinel errors, wrapping, classification, fallback paths                               |
+| `pkg/provider`             | 6     | 100.0%   | ✅ Item validation                                                                         |
+| `cmd/examples/github-sync` | 11    | 10.5%    | ✅ exitCodeForError, LoadConfig, env defaults                                              |
+| `pkg/testhelpers`          | 0     | 0.0%     | ⬜ Helper package                                                                          |
 
-**193 total test functions** across 7 test packages. **73.7% overall coverage**.
+**197 total test functions** across 7 test packages. **73.7% overall coverage**.
 
 Run: `go test ./... -count=1`
 
@@ -148,8 +153,9 @@ Two tables managed by the CQRS stack:
 | ----------------------------- | ------- | ------------------------------------------------------------------------ |
 | `go-cqrs-lite/core`           | v1.4.0  | Decider, event types, branded IDs, error taxonomy, codec, InMemoryRunner |
 | `go-cqrs-lite/memory`         | v1.2.0  | In-memory event store + bus + checkpoint store + snapshot store          |
-| `go-cqrs-lite/storage`        | pseudo  | SQLite/Turso event store with optimistic concurrency                     |
+| `go-cqrs-lite/storage`        | pseudo  | SQLite/Turso event store, outbox, snapshot, checkpoint store             |
 | `go-cqrs-lite/middleware`     | v1.0.0  | EventLogging middleware                                                  |
+| `go-cqrs-lite/projection`     | v1.1.0  | Projection Runner with replay + live subscription                        |
 | `go-branded-id`               | v0.1.0  | Branded phantom-type IDs for compile-time safety                         |
 | `go-error-family`             | v0.1.1  | Structured error classification (Rejection, Transient, Infrastructure)   |
 | `go-github/v69`               | v69.2.0 | GitHub API client                                                        |
@@ -166,35 +172,35 @@ Two tables managed by the CQRS stack:
 
 ## go-cqrs-lite Integration
 
-| Area           | go-localsync                                                                    | go-cqrs-lite                                            |
-| -------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| IDs            | `id.ID[B, V]` via go-branded-id directly                                        | `id.Of[T]` — same memory layout                         |
-| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                               | `event.Store` + `event.Bus` via memory/storage modules  |
-| Conflict       | `DecideSync` produces ItemConflictFound events                                  | Error taxonomy with 5 families                          |
-| Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                     | Projected from events via InMemoryRunner                |
-| Codec          | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents`                            | Eliminates all manual json.Marshal/Unmarshal            |
-| Projection     | `event.InMemoryRunner` + `cqrsmemory.CheckpointStore`                           | Checkpoint-tracked projection with event type filtering |
-| Snapshots      | `cqrsmemory.MemorySnapshotStore` + `event.EveryNEvents(10)`                     | Caps replay cost for frequently-synced items            |
-| Logging        | `middleware.EventLogging` via charm log adapter                                 | Structured logging of all domain events                 |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable` | Smart retry classification for provider errors          |
-| Version        | `event.Version` with `Increment()`, `Add()`                                     | Phantom type safety — no `int()` casts                  |
+| Area           | go-localsync                                                                    | go-cqrs-lite                                           |
+| -------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| IDs            | `id.ID[B, V]` via go-branded-id directly                                        | `id.Of[T]` — same memory layout                        |
+| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                               | `event.Store` + `event.Bus` via memory/storage modules |
+| Conflict       | `DecideSync` produces ItemConflictFound events                                  | Error taxonomy with 5 families                         |
+| Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                     | Projected from events via InMemoryRunner               |
+| Codec          | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents`                            | Eliminates all manual json.Marshal/Unmarshal           |
+| Outbox         | `SQLTransactionalStore.SaveWithOutbox` for Turso, outbox poller goroutine       | Atomic save+publish, crash-safe event delivery         |
+| Projection     | `projection.Runner` (Turso) + `InMemoryRunner` (memory), SQL checkpoints        | Replay from store on restart + live subscription       |
+| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `EveryNEvents` | Caps replay cost, persists across restarts             |
+| Correlation    | `event.WithCorrelationID` in `SyncItems`                                        | Unique per sync run for debugging                      |
+| Logging        | `middleware.EventLogging` via charm log adapter                                 | Structured logging of all domain events                |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable` | Smart retry classification for provider errors         |
+| Version        | `event.Version` with `Increment()`, `Add()`                                     | Phantom type safety — no `int()` casts                 |
 
 ### Not Yet Adopted
 
-- `decider.WithOutbox` for Turso backend — **HIGH priority** (atomic save+publish)
-- `projection.Runner` (separate module) with replay from GlobalLoader — **MEDIUM** (full crash recovery)
 - `sync.LWWResolver[T]` + `sync.VectorClock` — **MEDIUM** (formalize conflict resolution)
-- `middleware.CommandRetry` for provider retry — **MEDIUM**
-- `command.Dispatcher` for typed command dispatch — **LOW**
-- `UpcasterRegistry` for schema evolution — **LOW**
+- `middleware.CommandRetry` for provider retry — **LOW** (API mismatch: wraps `command.Handler`, not `func() error`)
+- `command.Dispatcher` for typed command dispatch — **LOW** (no commands in system)
+- `UpcasterRegistry` for schema evolution — **LOW** (only 1 schema version)
 - `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW**
 
 ## go-cqrs-lite Adoption (as of 2026-05-21)
 
-**Adoption: 5/12 modules (42%). API surface of used modules: ~70%.**
+**Adoption: 7/12 modules (58%). API surface of used modules: ~75%.**
 
-Modules used: `core/event`, `core/decider`, `core/pkg/id`, `memory`, `storage`, `middleware`.
-Modules unused: `core/command`, `core/query`, `core/aggregate`, `projection` (separate module), `sync`, `catalog`, `testhelpers`.
+Modules used: `core/event`, `core/decider`, `core/pkg/id`, `memory`, `storage`, `middleware`, `projection`.
+Modules unused: `core/command`, `core/query`, `core/aggregate`, `sync`, `catalog`, `testhelpers`.
 
 All anti-patterns from the previous audit have been resolved:
 
@@ -211,6 +217,13 @@ All anti-patterns from the previous audit have been resolved:
 - ✅ Snapshot support with `EveryNEvents(10)` — caps replay cost
 - ✅ `middleware.EventLogging` — structured logging of all domain events
 - ✅ `Projector` implements `event.Projection` directly — no Handle/HandleEvent duplication
+- ✅ `decider.WithOutbox` for Turso — atomic save+publish via `SQLTransactionalStore`
+- ✅ `projection.Runner` for Turso — replay from `GlobalLoader` + live subscription + retry
+- ✅ `SQLiteSnapshotStore` + `SQLiteCheckpointStore` for Turso — persists across restarts
+- ✅ Single `*sql.DB` for Turso local — shared by event store, read model, snapshots, checkpoints
+- ✅ `SQLiteInitSchema` + `ConfigureTursoPool` — replaces hand-rolled schema/pool config
+- ✅ Correlation IDs via `event.WithCorrelationID` — unique per `SyncItems` run
+- ✅ `DecideSync`/`DecideDelete` accept `...event.Option` — extensible event metadata
 
 ## Lint Status
 

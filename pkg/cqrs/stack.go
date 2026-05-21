@@ -10,8 +10,10 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/event"
+	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory"
 	"github.com/larsartmann/go-cqrs-lite/middleware"
+	cqrsprojection "github.com/larsartmann/go-cqrs-lite/projection"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -47,11 +49,11 @@ type CQRSStack struct {
 	Bus          event.Bus
 	Repo         *decider.Repository[SyncItemState]
 	ReadModel    ReadModel
-	Runner       *event.InMemoryRunner
 	syncDB       *cqrsstorage.TursoSyncDB
 	outbox       event.Outbox
 	db           *sql.DB
 	cancelOutbox context.CancelFunc
+	cancelRunner context.CancelFunc
 }
 
 func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
@@ -72,14 +74,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, cpErr
 	}
 
-	runner, err := event.NewInMemoryRunner(checkpointStore)
-	if err != nil {
-		return nil, fmt.Errorf("create projection runner: %w", err)
-	}
-
-	if err := runner.Register(proj); err != nil {
-		return nil, fmt.Errorf("register projector: %w", err)
-	}
+	var cancelRunner context.CancelFunc
 
 	if mwErr := sr.bus.Use(
 		middleware.EventLogging(&charmLogAdapter{logger: log.Default()}),
@@ -87,9 +82,12 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, fmt.Errorf("wire event logging middleware: %w", mwErr)
 	}
 
-	err = sr.bus.SubscribeAll(runner.Handle)
-	if err != nil {
-		return nil, fmt.Errorf("subscribe projection runner: %w", err)
+	if sr.loader != nil {
+		cancelRunner = startProjectionRunner(sr, checkpointStore, proj)
+	} else {
+		if err := startInMemoryRunner(sr.bus, checkpointStore, proj); err != nil {
+			return nil, err
+		}
 	}
 
 	deciderSpec := decider.Decider[SyncItemState]{
@@ -132,11 +130,11 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		Bus:          sr.bus,
 		Repo:         repo,
 		ReadModel:    rm,
-		Runner:       runner,
 		syncDB:       sr.syncDB,
 		outbox:       sr.outbox,
 		db:           sr.db,
 		cancelOutbox: startOutboxPoller(sr.outbox, sr.bus),
+		cancelRunner: cancelRunner,
 	}, nil
 }
 
@@ -207,6 +205,9 @@ func (s *CQRSStack) SyncItems(
 		Errors:    0,
 	}
 
+	corrID := id.NewCorrelationID()
+	syncOpts := []event.Option{event.WithCorrelationID(corrID)}
+
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
@@ -218,7 +219,7 @@ func (s *CQRSStack) SyncItems(
 		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
 			wasNew = state.IsNew()
 
-			events, err := DecideSync(item)(state, ver)
+			events, err := DecideSync(item, syncOpts...)(state, ver)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"decide sync for %s/%s: %w",
@@ -303,6 +304,10 @@ func (s *CQRSStack) Close() error {
 		s.cancelOutbox()
 	}
 
+	if s.cancelRunner != nil {
+		s.cancelRunner()
+	}
+
 	if err := s.ReadModel.Close(); err != nil {
 		errs = append(errs, err)
 	}
@@ -355,6 +360,53 @@ func startOutboxPoller(outbox event.Outbox, bus event.Bus) context.CancelFunc {
 	return cancel
 }
 
+func startProjectionRunner(
+	sr storeResult,
+	checkpointStore event.CheckpointStore,
+	proj event.Projection,
+) context.CancelFunc {
+	runner, err := cqrsprojection.NewRunner(
+		sr.loader, sr.bus, checkpointStore,
+		cqrsprojection.WithRetry(3, 100*time.Millisecond),
+	)
+	if err != nil {
+		return nil
+	}
+
+	if regErr := runner.Register(proj); regErr != nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	go func() {
+		_ = runner.Run(ctx)
+	}()
+
+	return cancel
+}
+
+func startInMemoryRunner(
+	bus event.Bus,
+	checkpointStore event.CheckpointStore,
+	proj event.Projection,
+) error {
+	runner, err := event.NewInMemoryRunner(checkpointStore)
+	if err != nil {
+		return fmt.Errorf("create in-memory projection runner: %w", err)
+	}
+
+	if regErr := runner.Register(proj); regErr != nil {
+		return fmt.Errorf("register projector: %w", regErr)
+	}
+
+	if subErr := bus.SubscribeAll(runner.Handle); subErr != nil {
+		return fmt.Errorf("subscribe projection runner: %w", subErr)
+	}
+
+	return nil
+}
+
 var errTursoRequiresDB = errors.New("turso backend requires database connection")
 
 type storeResult struct {
@@ -363,6 +415,7 @@ type storeResult struct {
 	syncDB *cqrsstorage.TursoSyncDB
 	outbox event.Outbox
 	db     *sql.DB
+	loader event.GlobalLoader
 }
 
 func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
@@ -374,6 +427,7 @@ func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 			syncDB: nil,
 			outbox: nil,
 			db:     nil,
+			loader: nil,
 		}, nil
 	case backendTurso:
 		return createTursoStore(cfg)
@@ -439,6 +493,7 @@ func createTursoRemoteStore(
 		syncDB: syncDB,
 		outbox: outbox,
 		db:     syncDB.DB,
+		loader: store,
 	}, nil
 }
 
@@ -492,6 +547,7 @@ func createTursoLocalStore(
 		syncDB: nil,
 		outbox: outbox,
 		db:     db,
+		loader: store,
 	}, nil
 }
 

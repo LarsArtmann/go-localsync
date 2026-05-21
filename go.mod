@@ -10,6 +10,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/core v1.4.0
 	github.com/larsartmann/go-cqrs-lite/memory v1.2.0
 	github.com/larsartmann/go-cqrs-lite/middleware v1.0.0
+	github.com/larsartmann/go-cqrs-lite/projection v1.1.0
 	github.com/larsartmann/go-cqrs-lite/storage v0.0.0-20260518140447-46b2a16ce733
 	github.com/larsartmann/go-error-family v0.1.1
 	github.com/oklog/ulid/v2 v2.1.1

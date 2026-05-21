@@ -86,25 +86,27 @@ func itemFromPayload(payload ItemSyncedPayload) *provider.Item {
 // DecideSync returns a DecideFunc that syncs an incoming provider.Item.
 func DecideSync(
 	item *provider.Item,
+	opts ...event.Option,
 ) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
 		if state.Deleted || state.IsNew() {
-			return syncEvents(item, aggID, currentVersion, false, time.Time{})
+			return syncEvents(item, aggID, currentVersion, false, time.Time{}, opts...)
 		}
 
 		if !HasChanged(state.Item, item) {
 			return nil, nil
 		}
 
-		return syncEvents(item, aggID, currentVersion, true, state.Item.UpdatedAt)
+		return syncEvents(item, aggID, currentVersion, true, state.Item.UpdatedAt, opts...)
 	}
 }
 
 // DecideDelete returns a DecideFunc that marks an item as deleted.
 func DecideDelete(
 	source, sourceID string,
+	opts ...event.Option,
 ) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		if state.Deleted || state.IsNew() {
@@ -120,6 +122,7 @@ func DecideDelete(
 				Source:   source,
 				SourceID: sourceID,
 			}},
+			opts...,
 		)
 		if err != nil {
 			return nil, fmt.Errorf(
@@ -143,6 +146,7 @@ func syncEvents(
 	version event.Version,
 	isConflict bool,
 	localUpdatedAt time.Time,
+	opts ...event.Option,
 ) ([]event.Event, error) {
 	eventTypes := []event.Type{EventItemSynced}
 	payloads := []any{itemToPayload(item)}
@@ -161,7 +165,7 @@ func syncEvents(
 		}
 	}
 
-	evts, err := event.NewEvents(aggID, aggregateType, version, eventTypes, payloads)
+	evts, err := event.NewEvents(aggID, aggregateType, version, eventTypes, payloads, opts...)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"create events for %s/%s (version=%d, isConflict=%v, localUpdatedAt=%v): %w",

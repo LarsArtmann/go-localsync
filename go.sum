@@ -94,8 +94,10 @@ github.com/larsartmann/go-cqrs-lite/memory v1.2.0 h1:8wevS8yNTxGQvyHAAeiNaMvk5Tr
 github.com/larsartmann/go-cqrs-lite/memory v1.2.0/go.mod h1:HG+/2Wkew71LaeYLWCYUacIiuYfO7B7jcVrGLoidsJc=
 github.com/larsartmann/go-cqrs-lite/middleware v1.0.0 h1:1QOlZqGOXk2KyTZ4ytOyValZCY3P3gtuax5aJ42IybE=
 github.com/larsartmann/go-cqrs-lite/middleware v1.0.0/go.mod h1:Rdnar/ixvndzznTBjQCqFzFhSA3qyXGC0+60FhYIcOg=
-github.com/larsartmann/go-cqrs-lite/testhelpers v1.1.0 h1:9kIR5i4RXySzmGHWF0S3BCsPug+JsrGgxLItkepJq+M=
-github.com/larsartmann/go-cqrs-lite/testhelpers v1.1.0/go.mod h1:tmzWfqDyap1LuEVCyGwi2xBXB+tXXMzRoYddwPPDToA=
+github.com/larsartmann/go-cqrs-lite/projection v1.1.0 h1:jw7zNHSmSqyJ4vib27fxOB+kzopt/eIlSCrD+KqkezM=
+github.com/larsartmann/go-cqrs-lite/projection v1.1.0/go.mod h1:CYUxYN9UMnJMwUON3pTZSLFrsUoYdPiKgZhIf6fVtA4=
+github.com/larsartmann/go-cqrs-lite/testhelpers v1.2.0 h1:6Om1Hr1Eh8kOQ1E3h4YaU4sDueiiOeykcck23ws/3Xo=
+github.com/larsartmann/go-cqrs-lite/testhelpers v1.2.0/go.mod h1:g0xy7rpADAb3i+9yuTXLIkzWvnwKSdsNjLUp20t1uZ8=
 github.com/larsartmann/go-error-family v0.1.1 h1:/i7s/2okA2ROEhxoiuBJqzX4zSz/SQaYwfoVpsYJICc=
 github.com/larsartmann/go-error-family v0.1.1/go.mod h1:iUN9N/5VyaUZ8OkUQKnoiXioUdtAmcONNaxnzC3X4e8=
 github.com/lucasb-eyer/go-colorful v1.4.0 h1:UtrWVfLdarDgc44HcS7pYloGHJUjHV/4FwW4TvVgFr4=

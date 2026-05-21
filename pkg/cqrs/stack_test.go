@@ -3,9 +3,12 @@ package cqrs
 import (
 	"context"
 	"errors"
+	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-cqrs-lite/core/event"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
@@ -364,10 +367,6 @@ func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
 	}
 	defer func() { _ = stack.Close() }()
 
-	if stack.Runner == nil {
-		t.Fatal("expected Runner to be initialized")
-	}
-
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
@@ -574,5 +573,194 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 	}
 	if !foundConflict {
 		t.Error("expected ActionConflictRemote in results")
+	}
+}
+
+func TestCQRSStack_OutboxPoller_PublishesEvents(t *testing.T) {
+	t.Parallel()
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = stack.Close() }()
+
+	ctx := context.Background()
+
+	if err := stack.SyncItem(ctx, testItem("outbox-1", "PushEvent")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	waitForCount(t, stack, ctx, 1)
+
+	count, err := stack.Count(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("expected count=1 after outbox poller, got %d", count)
+	}
+}
+
+func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "replay-test.db")
+
+	ctx := context.Background()
+
+	stack1, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
+	if err != nil {
+		t.Fatalf("stack1: unexpected error: %v", err)
+	}
+
+	if err := stack1.SyncItem(ctx, testItem("replay-1", "PushEvent")); err != nil {
+		t.Fatalf("stack1 sync: unexpected error: %v", err)
+	}
+	if err := stack1.SyncItem(ctx, testItem("replay-2", "IssueEvent")); err != nil {
+		t.Fatalf("stack1 sync: unexpected error: %v", err)
+	}
+
+	waitForCount(t, stack1, ctx, 2)
+
+	if err := stack1.Close(); err != nil {
+		t.Fatalf("stack1 close: unexpected error: %v", err)
+	}
+
+	stack2, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
+	if err != nil {
+		t.Fatalf("stack2: unexpected error: %v", err)
+	}
+	defer func() { _ = stack2.Close() }()
+
+	waitForCount(t, stack2, ctx, 2)
+
+	count, err := stack2.Count(ctx)
+	if err != nil {
+		t.Fatalf("stack2 count: unexpected error: %v", err)
+	}
+	if count != 2 {
+		t.Errorf("expected count=2 after replay, got %d", count)
+	}
+}
+
+func TestCQRSStack_CorrelationID_Propagated(t *testing.T) {
+	t.Parallel()
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = stack.Close() }()
+
+	var capturedEvents []event.Event
+	var mu sync.Mutex
+
+	handler := func(_ context.Context, evt event.Event) error {
+		mu.Lock()
+		capturedEvents = append(capturedEvents, evt)
+		mu.Unlock()
+
+		return nil
+	}
+
+	if subErr := stack.Bus.SubscribeAll(handler); subErr != nil {
+		t.Fatalf("subscribe: unexpected error: %v", subErr)
+	}
+
+	ctx := context.Background()
+	items := []*provider.Item{
+		testItem("corr-1", "PushEvent"),
+		testItem("corr-2", "IssueEvent"),
+	}
+
+	_ = stack.SyncItems(ctx, items)
+
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		mu.Lock()
+		if len(capturedEvents) >= 2 {
+			mu.Unlock()
+			break
+		}
+		mu.Unlock()
+		time.Sleep(time.Millisecond)
+	}
+
+	mu.Lock()
+	evts := capturedEvents
+	mu.Unlock()
+
+	if len(evts) < 2 {
+		t.Fatalf("expected at least 2 events, got %d", len(evts))
+	}
+
+	firstCorrID := evts[0].Metadata().CorrelationID
+	if firstCorrID.String() == "" {
+		t.Error("expected correlation ID on first event, got empty")
+	}
+
+	for i, evt := range evts {
+		corrID := evt.Metadata().CorrelationID
+		if corrID != firstCorrID {
+			t.Errorf("event %d: expected same correlation ID %s, got %s", i, firstCorrID, corrID)
+		}
+	}
+}
+
+func TestCQRSStack_CorrelationID_UniquePerSyncRun(t *testing.T) {
+	t.Parallel()
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = stack.Close() }()
+
+	var capturedEvents []event.Event
+	var mu sync.Mutex
+
+	handler := func(_ context.Context, evt event.Event) error {
+		mu.Lock()
+		capturedEvents = append(capturedEvents, evt)
+		mu.Unlock()
+
+		return nil
+	}
+
+	if subErr := stack.Bus.SubscribeAll(handler); subErr != nil {
+		t.Fatalf("subscribe: unexpected error: %v", subErr)
+	}
+
+	ctx := context.Background()
+
+	_ = stack.SyncItems(ctx, []*provider.Item{testItem("run-1", "PushEvent")})
+	_ = stack.SyncItems(ctx, []*provider.Item{testItem("run-2", "IssueEvent")})
+
+	deadline := time.Now().Add(time.Second)
+	for time.Now().Before(deadline) {
+		mu.Lock()
+		if len(capturedEvents) >= 2 {
+			mu.Unlock()
+			break
+		}
+		mu.Unlock()
+		time.Sleep(time.Millisecond)
+	}
+
+	mu.Lock()
+	evts := capturedEvents
+	mu.Unlock()
+
+	if len(evts) < 2 {
+		t.Fatalf("expected at least 2 events, got %d", len(evts))
+	}
+
+	corrID1 := evts[0].Metadata().CorrelationID
+	corrID2 := evts[1].Metadata().CorrelationID
+	if corrID1.String() == "" || corrID2.String() == "" {
+		t.Fatal("expected non-empty correlation IDs")
+	}
+	if corrID1 == corrID2 {
+		t.Error("expected different correlation IDs for different sync runs")
 	}
 }
