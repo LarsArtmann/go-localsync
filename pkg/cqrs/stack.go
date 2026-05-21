@@ -67,7 +67,12 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 
 	proj := NewProjector(rm)
 
-	runner, err := event.NewInMemoryRunner(cqrsmemory.NewCheckpointStore())
+	checkpointStore, cpErr := createCheckpointStore(cfg, sr.db)
+	if cpErr != nil {
+		return nil, cpErr
+	}
+
+	runner, err := event.NewInMemoryRunner(checkpointStore)
 	if err != nil {
 		return nil, fmt.Errorf("create projection runner: %w", err)
 	}
@@ -104,7 +109,8 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 
 	var repoOpts []decider.RepositoryOption[SyncItemState]
 
-	repoOpts = append(repoOpts,
+	repoOpts = append(
+		repoOpts,
 		decider.WithSnapshotStore[SyncItemState](snapshotStore),
 		decider.WithCodec[SyncItemState](event.JSONCodec{}),
 		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
@@ -512,4 +518,16 @@ func createSnapshotStore(
 	}
 
 	return cqrsstorage.NewSQLiteSnapshotStore(db)
+}
+
+//nolint:ireturn
+func createCheckpointStore(
+	cfg CQRSConfig,
+	db *sql.DB,
+) (event.CheckpointStore, error) {
+	if cfg.Backend != backendTurso || db == nil {
+		return cqrsmemory.NewCheckpointStore(), nil
+	}
+
+	return cqrsstorage.NewSQLiteCheckpointStore(db)
 }
