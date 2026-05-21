@@ -8,16 +8,16 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## Architecture
 
-| Package                     | Purpose                                                                                                         |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                    |
-| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                           |
-| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                        |
-| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (delegates to CQRSStack conflict detection)                             |
-| `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`) |
-| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification                               |
-| `pkg/testhelpers/`          | Shared test mocks and factories                                                                                 |
-| `cmd/examples/github-sync/` | Example CLI entry point                                                                                         |
+| Package                     | Purpose                                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                              |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                     |
+| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                  |
+| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (delegates to CQRSStack conflict detection)                                       |
+| `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)           |
+| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification |
+| `pkg/testhelpers/`          | Shared test mocks and factories                                                                                           |
+| `cmd/examples/github-sync/` | Example CLI entry point                                                                                                   |
 
 ## CQRS Architecture
 
@@ -151,7 +151,7 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/storage`        | pseudo  | SQLite/Turso event store with optimistic concurrency                     |
 | `go-cqrs-lite/middleware`     | v1.0.0  | EventLogging middleware                                                  |
 | `go-branded-id`               | v0.1.0  | Branded phantom-type IDs for compile-time safety                         |
-| `go-error-family`            | v0.1.1  | Structured error classification (Rejection, Transient, Infrastructure)  |
+| `go-error-family`             | v0.1.1  | Structured error classification (Rejection, Transient, Infrastructure)   |
 | `go-github/v69`               | v69.2.0 | GitHub API client                                                        |
 | `turso.tech/database/tursogo` | v0.6.0  | Turso Go client — local + remote sync                                    |
 | `charm.land/log/v2`           | v2.0.0  | Structured logging                                                       |
@@ -166,18 +166,18 @@ Two tables managed by the CQRS stack:
 
 ## go-cqrs-lite Integration
 
-| Area           | go-localsync                                                | go-cqrs-lite                                            |
-| -------------- | ----------------------------------------------------------- | ------------------------------------------------------- |
-| IDs            | `id.ID[B, V]` via go-branded-id directly                    | `id.Of[T]` — same memory layout                         |
-| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`           | `event.Store` + `event.Bus` via memory/storage modules  |
-| Conflict       | `DecideSync` produces ItemConflictFound events              | Error taxonomy with 5 families                          |
-| Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination | Projected from events via InMemoryRunner                |
-| Codec          | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents`        | Eliminates all manual json.Marshal/Unmarshal            |
-| Projection     | `event.InMemoryRunner` + `cqrsmemory.CheckpointStore`       | Checkpoint-tracked projection with event type filtering |
-| Snapshots      | `cqrsmemory.MemorySnapshotStore` + `event.EveryNEvents(10)` | Caps replay cost for frequently-synced items            |
-| Logging        | `middleware.EventLogging` via charm log adapter             | Structured logging of all domain events                 |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`        | Smart retry classification for provider errors          |
-| Version        | `event.Version` with `Increment()`, `Add()`                 | Phantom type safety — no `int()` casts                  |
+| Area           | go-localsync                                                                    | go-cqrs-lite                                            |
+| -------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| IDs            | `id.ID[B, V]` via go-branded-id directly                                        | `id.Of[T]` — same memory layout                         |
+| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                               | `event.Store` + `event.Bus` via memory/storage modules  |
+| Conflict       | `DecideSync` produces ItemConflictFound events                                  | Error taxonomy with 5 families                          |
+| Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                     | Projected from events via InMemoryRunner                |
+| Codec          | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents`                            | Eliminates all manual json.Marshal/Unmarshal            |
+| Projection     | `event.InMemoryRunner` + `cqrsmemory.CheckpointStore`                           | Checkpoint-tracked projection with event type filtering |
+| Snapshots      | `cqrsmemory.MemorySnapshotStore` + `event.EveryNEvents(10)`                     | Caps replay cost for frequently-synced items            |
+| Logging        | `middleware.EventLogging` via charm log adapter                                 | Structured logging of all domain events                 |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable` | Smart retry classification for provider errors          |
+| Version        | `event.Version` with `Increment()`, `Add()`                                     | Phantom type safety — no `int()` casts                  |
 
 ### Not Yet Adopted
 
