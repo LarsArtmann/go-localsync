@@ -190,9 +190,10 @@ func (s *CQRSStack) SyncItems(
 			events, err := DecideSync(item)(state, ver)
 			if err != nil {
 				return nil, fmt.Errorf(
-					"decide sync for %s/%s: %w",
+					"decide sync for %s/%s (eventCount=%d): %w",
 					item.Source.Get(),
 					item.ExternalID.Get(),
+					eventCount,
 					err,
 				)
 			}

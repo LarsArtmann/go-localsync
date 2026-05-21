@@ -159,11 +159,12 @@ func syncEvents(
 	evts, err := event.NewEvents(aggID, aggregateType, version, eventTypes, payloads)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"create events for %s/%s (version=%d, isConflict=%v): %w",
+			"create events for %s/%s (version=%d, isConflict=%v, localUpdatedAt=%v): %w",
 			aggID,
 			item.ExternalID.Get(),
 			version,
 			isConflict,
+			localUpdatedAt,
 			err,
 		)
 	}
