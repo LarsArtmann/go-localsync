@@ -119,13 +119,13 @@ type Item struct {
 
 The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite). There is no legacy CRUD path.
 
-| Component        | Description                                                                             |
-| ---------------- | --------------------------------------------------------------------------------------- |
-| **Decider**      | Pure Fold/DecideSync/DecideDelete — single authority for state transitions              |
-| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemDeleted`                                        |
-| **Projection**   | Subscribes to event bus, updates read model via InMemoryRunner or projection.Runner     |
-| **Read Model**   | In-memory or Turso-backed with filter/pagination                                        |
-| **Aggregate ID** | Deterministic SHA256→hex from (source, sourceID) for idempotency                        |
+| Component        | Description                                                                         |
+| ---------------- | ----------------------------------------------------------------------------------- |
+| **Decider**      | Pure Fold/DecideSync/DecideDelete — single authority for state transitions          |
+| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemDeleted`                                    |
+| **Projection**   | Subscribes to event bus, updates read model via InMemoryRunner or projection.Runner |
+| **Read Model**   | In-memory or Turso-backed with filter/pagination                                    |
+| **Aggregate ID** | Deterministic SHA256→hex from (source, sourceID) for idempotency                    |
 
 ### Key Properties
 
@@ -207,24 +207,24 @@ gh-sync -stats
 
 ## Features
 
-| Feature            | Status  | Description                                                      |
-| ------------------ | ------- | ---------------------------------------------------------------- |
-| CQRS Stack         | ✅ Done | Event store, bus, decider repository, read model, projection     |
-| Decider Pattern    | ✅ Done | Pure Fold/DecideSync/DecideDelete with SyncItemState             |
-| Incremental Sync   | ✅ Done | Only fetch new items since last sync — no duplicate data         |
-| Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation                       |
-| Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution               |
-| Branded IDs        | ✅ Done | Compile-time type-safe identifiers                               |
-| Turso Backend      | ✅ Done | SQLite/Turso event store + read model + Push/Pull sync           |
-| No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                       |
-| Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow                  |
-| Retry Logic        | ✅ Done | Exponential backoff retry with configurable limits               |
-| GitHub Provider    | ✅ Done | Full implementation with pagination, rate limiting, retry        |
-| Outbox Pattern     | ✅ Done | Atomic save+publish for crash-safe event delivery (Turso)        |
-| Snapshots          | ✅ Done | Aggregate state persistence caps replay cost across restarts     |
-| Correlation IDs    | ✅ Done | Unique per sync run for cross-event tracing and debugging        |
-| Event Logging      | ✅ Done | Structured logging of all domain events via middleware            |
-| Delete + Resurrect | ✅ Done | Deleted items reappear with updated state when synced again      |
+| Feature            | Status  | Description                                                  |
+| ------------------ | ------- | ------------------------------------------------------------ |
+| CQRS Stack         | ✅ Done | Event store, bus, decider repository, read model, projection |
+| Decider Pattern    | ✅ Done | Pure Fold/DecideSync/DecideDelete with SyncItemState         |
+| Incremental Sync   | ✅ Done | Only fetch new items since last sync — no duplicate data     |
+| Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation                   |
+| Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution           |
+| Branded IDs        | ✅ Done | Compile-time type-safe identifiers                           |
+| Turso Backend      | ✅ Done | SQLite/Turso event store + read model + Push/Pull sync       |
+| No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                   |
+| Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow              |
+| Retry Logic        | ✅ Done | Exponential backoff retry with configurable limits           |
+| GitHub Provider    | ✅ Done | Full implementation with pagination, rate limiting, retry    |
+| Outbox Pattern     | ✅ Done | Atomic save+publish for crash-safe event delivery (Turso)    |
+| Snapshots          | ✅ Done | Aggregate state persistence caps replay cost across restarts |
+| Correlation IDs    | ✅ Done | Unique per sync run for cross-event tracing and debugging    |
+| Event Logging      | ✅ Done | Structured logging of all domain events via middleware       |
+| Delete + Resurrect | ✅ Done | Deleted items reappear with updated state when synced again  |
 
 ## Development
 
@@ -257,15 +257,15 @@ cmd/examples/github-sync/   # Example CLI application
 
 197 test cases across 7 test packages, 73.7% overall coverage:
 
-| Package                    | Tests | Coverage | Description                                                     |
-| -------------------------- | ----- | -------- | --------------------------------------------------------------- |
-| `pkg/cqrs`                 | 73    | 82.5%    | Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull     |
-| `pkg/providers/github`     | 46    | 85.4%    | Client, fetch, retry, error handling, rate limit, BDD           |
-| `pkg/sync`                 | 18    | 87.2%    | Syncer + ConflictAwareSyncer + Incremental sync                 |
-| `pkg/types`                | 15    | 100.0%   | Branded ID construction, roundtrip, zero, equal                 |
-| `pkg/errors`               | 28    | 100.0%   | Sentinel errors, wrapping, classification, fallback paths       |
-| `pkg/provider`             | 6     | 100.0%   | Item validation                                                 |
-| `cmd/examples/github-sync` | 11    | 10.5%    | exitCodeForError, LoadConfig, env defaults                      |
+| Package                    | Tests | Coverage | Description                                                |
+| -------------------------- | ----- | -------- | ---------------------------------------------------------- |
+| `pkg/cqrs`                 | 73    | 82.5%    | Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull |
+| `pkg/providers/github`     | 46    | 85.4%    | Client, fetch, retry, error handling, rate limit, BDD      |
+| `pkg/sync`                 | 18    | 87.2%    | Syncer + ConflictAwareSyncer + Incremental sync            |
+| `pkg/types`                | 15    | 100.0%   | Branded ID construction, roundtrip, zero, equal            |
+| `pkg/errors`               | 28    | 100.0%   | Sentinel errors, wrapping, classification, fallback paths  |
+| `pkg/provider`             | 6     | 100.0%   | Item validation                                            |
+| `cmd/examples/github-sync` | 11    | 10.5%    | exitCodeForError, LoadConfig, env defaults                 |
 
 ## Related Projects
 

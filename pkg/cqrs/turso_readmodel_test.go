@@ -316,7 +316,7 @@ func TestTursoReadModel_List_Pagination(t *testing.T) {
 	rm := newTursoTestDB(t)
 	ctx := context.Background()
 
-	for i := 0; i < 5; i++ {
+	for i := range 5 {
 		_ = rm.Upsert(
 			ctx,
 			tursoTestItem(t, "github", string(rune('A'+i)), "PushEvent", "alice", "org/repo"),
