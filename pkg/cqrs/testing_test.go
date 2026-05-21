@@ -124,7 +124,7 @@ func testItem(sourceID, itemType string) *provider.Item {
 func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected int64) {
 	t.Helper()
 
-	deadline := time.Now().Add(time.Second)
+	deadline := time.Now().Add(5 * time.Second)
 
 	for time.Now().Before(deadline) {
 		count, err := stack.Count(ctx)
@@ -160,7 +160,7 @@ func subscribeAll(t *testing.T, stack *CQRSStack) func(minCount int) []event.Eve
 	return func(minCount int) []event.Event {
 		t.Helper()
 
-		deadline := time.Now().Add(time.Second)
+		deadline := time.Now().Add(5 * time.Second)
 		for time.Now().Before(deadline) {
 			mu.Lock()
 			if len(captured) >= minCount {

@@ -219,12 +219,12 @@ To be fair, these areas have solid library integration:
 
 ## 4. Recommended Fix Priority
 
-| #   | Fix                                                                 | Type     | Severity | Effort | Impact                           |
-| --- | ------------------------------------------------------------------- | -------- | -------- | ------ | -------------------------------- |
-| 1   | Replace `startOutboxPoller` with `event.OutboxPublisher`            | Bug fix  | **HIGH** | 30min  | Fixes silent event loss          |
-| 2   | Return domain result from `DecideFunc` (eliminate `countingDecide`) | Refactor | Medium   | 1h     | Proper domain semantics          |
-| 3   | Wire `command.Dispatcher` with `SyncItems`/`DeleteItem` commands    | Feature  | Medium   | 4h     | Enables middleware pipeline      |
-| 4   | Wire `query.Dispatcher` for read model queries                      | Feature  | Low      | 2h     | Standard pagination + middleware |
+| #   | Fix                                                                 | Type     | Severity | Effort | Impact                           | Status   |
+| --- | ------------------------------------------------------------------- | -------- | -------- | ------ | -------------------------------- | -------- |
+| 1   | Replace `startOutboxPoller` with `event.OutboxPublisher`            | Bug fix  | **HIGH** | 30min  | Fixes silent event loss          | **DONE** |
+| 2   | Return domain result from `DecideFunc` (eliminate `countingDecide`) | Refactor | Medium   | 1h     | Proper domain semantics          | Open     |
+| 3   | Wire `command.Dispatcher` with `SyncItems`/`DeleteItem` commands    | Feature  | Medium   | 4h     | Enables middleware pipeline      | **DONE** |
+| 4   | Wire `query.Dispatcher` for read model queries                      | Feature  | Low      | 2h     | Standard pagination + middleware | **DONE** |
 
 ---
 

@@ -8,9 +8,11 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-cqrs-lite/core/command"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/event"
 	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	"github.com/larsartmann/go-cqrs-lite/core/query"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory"
 	"github.com/larsartmann/go-cqrs-lite/middleware"
 	cqrsprojection "github.com/larsartmann/go-cqrs-lite/projection"
@@ -45,15 +47,17 @@ type CQRSConfig struct {
 }
 
 type CQRSStack struct {
-	Store        event.Store
-	Bus          event.Bus
-	Repo         *decider.Repository[SyncItemState]
-	ReadModel    ReadModel
-	syncDB       *cqrsstorage.TursoSyncDB
-	outbox       event.Outbox
-	db           *sql.DB
-	cancelOutbox context.CancelFunc
-	cancelRunner context.CancelFunc
+	Store             event.Store
+	Bus               event.Bus
+	Repo              *decider.Repository[SyncItemState]
+	ReadModel         ReadModel
+	CommandDispatcher *command.Dispatcher
+	QueryDispatcher   *query.Dispatcher
+	syncDB            *cqrsstorage.TursoSyncDB
+	outbox            event.Outbox
+	outboxPublisher   *event.OutboxPublisher
+	db                *sql.DB
+	cancelRunner      context.CancelFunc
 }
 
 func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
@@ -125,16 +129,33 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, fmt.Errorf("create decider repository: %w", err)
 	}
 
+	outboxPublisher, err := startOutboxPublisher(sr.outbox, sr.bus)
+	if err != nil {
+		return nil, fmt.Errorf("start outbox publisher: %w", err)
+	}
+
+	commandDispatcher, err := wireCommandDispatcher(repo)
+	if err != nil {
+		return nil, fmt.Errorf("wire command dispatcher: %w", err)
+	}
+
+	queryDispatcher, err := wireQueryDispatcher(rm)
+	if err != nil {
+		return nil, fmt.Errorf("wire query dispatcher: %w", err)
+	}
+
 	return &CQRSStack{
-		Store:        sr.store,
-		Bus:          sr.bus,
-		Repo:         repo,
-		ReadModel:    rm,
-		syncDB:       sr.syncDB,
-		outbox:       sr.outbox,
-		db:           sr.db,
-		cancelOutbox: startOutboxPoller(sr.outbox, sr.bus),
-		cancelRunner: cancelRunner,
+		Store:             sr.store,
+		Bus:               sr.bus,
+		Repo:              repo,
+		ReadModel:         rm,
+		CommandDispatcher: commandDispatcher,
+		QueryDispatcher:   queryDispatcher,
+		syncDB:            sr.syncDB,
+		outbox:            sr.outbox,
+		outboxPublisher:   outboxPublisher,
+		db:                sr.db,
+		cancelRunner:      cancelRunner,
 	}, nil
 }
 
@@ -162,13 +183,20 @@ func (s *CQRSStack) Pull(ctx context.Context) (bool, error) {
 func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
-	return s.Repo.Execute(ctx, aggID, aggregateType, DecideSync(item))
+	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
+		Core: *command.MustNew(commandTypeSyncItem, aggID),
+		Item: item,
+	})
 }
 
 func (s *CQRSStack) DeleteItem(ctx context.Context, source, sourceID string) error {
 	aggID := AggregateID(source, sourceID)
 
-	return s.Repo.Execute(ctx, aggID, aggregateType, DecideDelete(source, sourceID))
+	return s.CommandDispatcher.Dispatch(ctx, &DeleteItemCommand{
+		Core:     *command.MustNew(commandTypeDeleteItem, aggID),
+		Source:   source,
+		SourceID: sourceID,
+	})
 }
 
 type SyncAction string
@@ -300,8 +328,22 @@ func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 func (s *CQRSStack) Close() error {
 	var errs []error
 
-	if s.cancelOutbox != nil {
-		s.cancelOutbox()
+	if s.CommandDispatcher != nil {
+		if err := s.CommandDispatcher.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if s.QueryDispatcher != nil {
+		if err := s.QueryDispatcher.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if s.outboxPublisher != nil {
+		if err := s.outboxPublisher.Close(); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
 	if s.cancelRunner != nil {
@@ -325,39 +367,27 @@ func (s *CQRSStack) Close() error {
 	return errors.Join(errs...)
 }
 
-func startOutboxPoller(outbox event.Outbox, bus event.Bus) context.CancelFunc {
+func startOutboxPublisher(
+	outbox event.Outbox,
+	bus event.Bus,
+) (*event.OutboxPublisher, error) {
 	if outbox == nil {
-		return nil
+		return nil, nil //nolint:nilnil // intentional: nil publisher signals no outbox needed
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	publisher, err := event.NewOutboxPublisher(outbox, bus,
+		event.WithPollInterval(time.Second),
+		event.WithBatchSize(100),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create outbox publisher: %w", err)
+	}
 
-	go func() {
-		ticker := time.NewTicker(time.Millisecond)
-		defer ticker.Stop()
+	if startErr := publisher.Start(); startErr != nil {
+		return nil, fmt.Errorf("start outbox publisher: %w", startErr)
+	}
 
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				entries, err := outbox.PollPending(ctx, 100)
-				if err != nil {
-					continue
-				}
-
-				for _, entry := range entries {
-					for _, evt := range entry.Events {
-						_ = bus.Publish(ctx, evt)
-					}
-
-					_ = outbox.Ack(ctx, []event.OutboxID{entry.ID})
-				}
-			}
-		}
-	}()
-
-	return cancel
+	return publisher, nil
 }
 
 func startProjectionRunner(

@@ -32,17 +32,20 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
 - `turso_readmodel.go` — SQLite/Turso-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `event.Projection`, wired via `event.InMemoryRunner` (memory) or `projection.Runner` (Turso)
-- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel, dual projection runner, outbox poller, SQL snapshots/checkpoints, event logging middleware, correlation IDs
+- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, dual projection runner, `event.OutboxPublisher`, SQL snapshots/checkpoints, event logging middleware, correlation IDs
+- `commands_queries.go` — typed `SyncItemCommand`/`DeleteItemCommand` via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
 
 ### Key Properties
 
 - **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
 - **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
 - **Delete + resurrect**: deleted items reappear with updated state
-- **Outbox pattern**: Turso backend uses `decider.WithOutbox` for atomic save+publish. Outbox poller goroutine publishes events to bus after save.
+- **Outbox pattern**: Turso backend uses `decider.WithOutbox` for atomic save+publish. `event.OutboxPublisher` polls outbox and publishes events to bus (1s interval, configurable, with graceful shutdown, panic recovery, partial-batch safety).
 - **Projection runner**: Turso uses `projection.Runner` with `GlobalLoader` replay + live subscription. Memory uses `InMemoryRunner`.
 - **SQL persistence**: Turso backend persists snapshots (`SQLiteSnapshotStore`), checkpoints (`SQLiteCheckpointStore`), and outbox to the same `*sql.DB`.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
+- **Command dispatch**: `SyncItem`/`DeleteItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
+- **Query dispatch**: Read model queries dispatched through `query.Dispatcher` with typed queries. Enables logging, metrics middleware.
 - **Remote wins**: on conflict, the incoming item always overwrites (remote-wins LWW)
 
 ### Conflict Flow
@@ -191,16 +194,16 @@ Two tables managed by the CQRS stack:
 
 - `sync.LWWResolver[T]` + `sync.VectorClock` — **MEDIUM** (formalize conflict resolution)
 - `middleware.CommandRetry` for provider retry — **LOW** (API mismatch: wraps `command.Handler`, not `func() error`)
-- `command.Dispatcher` for typed command dispatch — **LOW** (no commands in system)
 - `UpcasterRegistry` for schema evolution — **LOW** (only 1 schema version)
 - `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW**
+- `core/aggregate` — **LOW** (we use `decider.Decider` directly — correct, no benefit)
 
-## go-cqrs-lite Adoption (as of 2026-05-21)
+## go-cqrs-lite Adoption (as of 2026-05-22)
 
-**Adoption: 7/12 modules (58%). API surface of used modules: ~75%.**
+**Adoption: 9/12 modules (75%). API surface of used modules: ~85%.**
 
-Modules used: `core/event`, `core/decider`, `core/pkg/id`, `memory`, `storage`, `middleware`, `projection`.
-Modules unused: `core/command`, `core/query`, `core/aggregate`, `sync`, `catalog`, `testhelpers`.
+Modules used: `core/event`, `core/decider`, `core/command`, `core/query`, `core/pkg/id`, `memory`, `storage`, `middleware`, `projection`.
+Modules unused: `core/aggregate`, `sync`, `catalog`.
 
 All anti-patterns from the previous audit have been resolved:
 
@@ -224,6 +227,11 @@ All anti-patterns from the previous audit have been resolved:
 - ✅ `SQLiteInitSchema` + `ConfigureTursoPool` — replaces hand-rolled schema/pool config
 - ✅ Correlation IDs via `event.WithCorrelationID` — unique per `SyncItems` run
 - ✅ `DecideSync`/`DecideDelete` accept `...event.Option` — extensible event metadata
+- ✅ `event.OutboxPublisher` replaces hand-rolled `startOutboxPoller` — graceful shutdown, panic recovery, partial-batch safety, 1s configurable poll interval
+- ✅ `command.Dispatcher` with `SyncItemCommand`/`DeleteItemCommand` — typed command dispatch, enables middleware pipeline
+- ✅ `query.Dispatcher` with typed queries — `ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery` dispatched through query pipeline
+- ✅ `event.NewOutboxPublisher` exported from go-cqrs-lite — was previously unexported `outboxPublisher`
+- ✅ `event.NewEvents`/`event.MustNewEvents`/`event.DecodePayloads` exported from go-cqrs-lite — were previously unexported
 
 ## Lint Status
 
