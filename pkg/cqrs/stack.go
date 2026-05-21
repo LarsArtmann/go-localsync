@@ -365,6 +365,3 @@ func (s *CQRSStack) Close() error {
 
 	return errors.Join(errs...)
 }
-
-
-

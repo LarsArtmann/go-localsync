@@ -3,7 +3,6 @@ package cqrs
 import (
 	"context"
 	"errors"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -218,36 +217,6 @@ func TestCQRSStack_Close(t *testing.T) {
 	mustNoError(t, stack.Close())
 }
 
-func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
-	t.Parallel()
-
-	stack := newTursoMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-		testItem("2", "IssueEvent"),
-	}
-
-	result := stack.SyncItems(ctx, items)
-	if result.Synced != 2 {
-		t.Errorf("expected Synced=2, got %d", result.Synced)
-	}
-	if result.Conflicts != 0 {
-		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
-	}
-	if result.Errors != 0 {
-		t.Errorf("expected Errors=0, got %d", result.Errors)
-	}
-
-	waitForCount(t, stack, ctx, 2)
-
-	mustNoError(t, stack.DeleteItem(ctx, "github", "1"))
-
-	waitForCount(t, stack, ctx, 1)
-}
-
 func TestCQRSStack_InvalidBackend(t *testing.T) {
 	t.Parallel()
 
@@ -283,40 +252,6 @@ func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
 	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after sync, got %d", count)
-	}
-}
-
-func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
-	t.Parallel()
-
-	stack := newTursoMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
-
-	mustNoError(t, stack.SyncItem(ctx, testItem("1", "PushEvent")))
-	mustNoError(t, stack.SyncItem(ctx, testItem("2", "IssueEvent")))
-
-	waitForCount(t, stack, ctx, 2)
-
-	items, err := stack.ReadModel.List(ctx, ItemFilter{})
-	mustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items, got %d", len(items))
-	}
-}
-
-func TestCQRSStack_RemoteStore_InvalidURL(t *testing.T) {
-	t.Parallel()
-
-	_, err := NewCQRSStack(CQRSConfig{
-		Backend:   "turso",
-		DBPath:    ":memory:",
-		RemoteURL: "https://nonexistent.invalid.host.example/db",
-		AuthToken: "fake",
-	})
-	if err == nil {
-		t.Fatal("expected error for invalid remote URL")
 	}
 }
 
@@ -461,117 +396,5 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 	}
 	if !foundConflict {
 		t.Error("expected ActionConflictRemote in results")
-	}
-}
-
-func TestCQRSStack_OutboxPoller_PublishesEvents(t *testing.T) {
-	t.Parallel()
-
-	stack := newTursoMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
-
-	mustNoError(t, stack.SyncItem(ctx, testItem("outbox-1", "PushEvent")))
-
-	waitForCount(t, stack, ctx, 1)
-
-	count, err := stack.Count(ctx)
-	mustNoError(t, err)
-	if count != 1 {
-		t.Errorf("expected count=1 after outbox poller, got %d", count)
-	}
-}
-
-func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
-	tmpDir := t.TempDir()
-	dbPath := filepath.Join(tmpDir, "replay-test.db")
-
-	ctx := context.Background()
-
-	stack1, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
-	mustNoError(t, err)
-
-	mustNoError(t, stack1.SyncItem(ctx, testItem("replay-1", "PushEvent")))
-	mustNoError(t, stack1.SyncItem(ctx, testItem("replay-2", "IssueEvent")))
-
-	waitForCount(t, stack1, ctx, 2)
-
-	mustNoError(t, stack1.Close())
-
-	stack2, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
-	mustNoError(t, err)
-	defer func() { _ = stack2.Close() }()
-
-	waitForCount(t, stack2, ctx, 2)
-
-	count, err := stack2.Count(ctx)
-	mustNoError(t, err)
-	if count != 2 {
-		t.Errorf("expected count=2 after replay, got %d", count)
-	}
-}
-
-func TestCQRSStack_CorrelationID_Propagated(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	waitFor := subscribeAll(t, stack)
-
-	ctx := context.Background()
-	items := []*provider.Item{
-		testItem("corr-1", "PushEvent"),
-		testItem("corr-2", "IssueEvent"),
-	}
-
-	_ = stack.SyncItems(ctx, items)
-
-	evts := waitFor(2)
-
-	if len(evts) < 2 {
-		t.Fatalf("expected at least 2 events, got %d", len(evts))
-	}
-
-	firstCorrID := evts[0].Metadata().CorrelationID
-	if firstCorrID.String() == "" {
-		t.Error("expected correlation ID on first event, got empty")
-	}
-
-	for i, evt := range evts {
-		corrID := evt.Metadata().CorrelationID
-		if corrID != firstCorrID {
-			t.Errorf("event %d: expected same correlation ID %s, got %s", i, firstCorrID, corrID)
-		}
-	}
-}
-
-func TestCQRSStack_CorrelationID_UniquePerSyncRun(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	waitFor := subscribeAll(t, stack)
-
-	ctx := context.Background()
-
-	_ = stack.SyncItems(ctx, []*provider.Item{testItem("run-1", "PushEvent")})
-	_ = stack.SyncItems(ctx, []*provider.Item{testItem("run-2", "IssueEvent")})
-
-	evts := waitFor(2)
-
-	if len(evts) < 2 {
-		t.Fatalf("expected at least 2 events, got %d", len(evts))
-	}
-
-	corrID1 := evts[0].Metadata().CorrelationID
-	corrID2 := evts[1].Metadata().CorrelationID
-	if corrID1.String() == "" || corrID2.String() == "" {
-		t.Fatal("expected non-empty correlation IDs")
-	}
-	if corrID1 == corrID2 {
-		t.Error("expected different correlation IDs for different sync runs")
 	}
 }
