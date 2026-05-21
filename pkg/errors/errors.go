@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"errors"
 	"fmt"
 
 	errorfamily "github.com/larsartmann/go-error-family"
@@ -21,7 +22,9 @@ var (
 // WithDetail wraps err with a detail string for debugging context.
 // Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func WithDetail(err error, detail string) error {
-	if e, ok := err.(*errorfamily.Error); ok {
+	var e *errorfamily.Error
+
+	if errors.As(err, &e) {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), detail)
 	}
 
@@ -31,8 +34,10 @@ func WithDetail(err error, detail string) error {
 // WithUserDetail is a convenience function to add username context.
 // Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func WithUserDetail(err error, username string) error {
-	if e, ok := err.(*errorfamily.Error); ok {
-		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), fmt.Sprintf("username=%s", username))
+	var e *errorfamily.Error
+
+	if errors.As(err, &e) {
+		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), "username="+username)
 	}
 
 	return fmt.Errorf("username=%s: %w", username, err)
@@ -41,7 +46,9 @@ func WithUserDetail(err error, username string) error {
 // Wrap wraps an error with additional context.
 // Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func Wrap(err error, message string) error {
-	if e, ok := err.(*errorfamily.Error); ok {
+	var e *errorfamily.Error
+
+	if errors.As(err, &e) {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), message)
 	}
 
@@ -53,7 +60,9 @@ func Wrap(err error, message string) error {
 func Wrapf(err error, format string, args ...any) error {
 	msg := fmt.Sprintf(format, args...)
 
-	if e, ok := err.(*errorfamily.Error); ok {
+	var e *errorfamily.Error
+
+	if errors.As(err, &e) {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), msg)
 	}
 

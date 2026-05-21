@@ -184,8 +184,10 @@ func (s *CQRSStack) SyncItems(
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
 
-		var eventCount int
-		var wasNew bool
+		var (
+			eventCount int
+			wasNew     bool
+		)
 
 		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
 			wasNew = state.IsNew()

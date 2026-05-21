@@ -80,8 +80,8 @@ func TestErrorClassification(t *testing.T) {
 	t.Parallel()
 
 	classifications := []struct {
-		err      error
-		family   event.Family
+		err       error
+		family    event.Family
 		retryable bool
 	}{
 		{ErrNotFound, event.Rejection, false},
