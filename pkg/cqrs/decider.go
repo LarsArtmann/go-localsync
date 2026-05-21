@@ -1,7 +1,6 @@
 package cqrs
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -53,12 +52,10 @@ func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 }
 
 func foldItemSynced(evt event.Event) (SyncItemState, error) {
-	var payload ItemSyncedPayload
-
-	err := json.Unmarshal(evt.Payload(), &payload)
+	payload, err := event.DecodePayload[ItemSyncedPayload](evt, event.JSONCodec{})
 	if err != nil {
 		return SyncItemState{}, fmt.Errorf(
-			"unmarshal ItemSyncedPayload for event %s: %w",
+			"decode ItemSyncedPayload for event %s: %w",
 			evt.ID(),
 			err,
 		)
@@ -116,10 +113,15 @@ func DecideDelete(
 
 		aggID := AggregateID(source, sourceID)
 
-		evt, err := newEvent(EventItemDeleted, aggID, int(currentVersion)+1, ItemDeletedPayload{
-			Source:   source,
-			SourceID: sourceID,
-		})
+		evt, err := newEvent(
+			EventItemDeleted,
+			aggID,
+			currentVersion.Increment(),
+			ItemDeletedPayload{
+				Source:   source,
+				SourceID: sourceID,
+			},
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -127,8 +129,6 @@ func DecideDelete(
 		return []event.Event{evt}, nil
 	}
 }
-
-const syncEventsInitialCap = 2
 
 const conflictWinnerRemote = "remote"
 
@@ -139,59 +139,45 @@ func syncEvents(
 	isConflict bool,
 	localUpdatedAt time.Time,
 ) ([]event.Event, error) {
-	events := make([]event.Event, 0, syncEventsInitialCap)
-	ver := int(version)
+	eventTypes := []event.Type{EventItemSynced}
+	payloads := []any{itemToPayload(item)}
 
 	if isConflict {
-		evt, err := newEvent(EventItemConflictFound, aggID, ver+1, ItemConflictFoundPayload{
-			Source:          item.Source.Get(),
-			SourceID:        item.ExternalID.Get(),
-			LocalUpdatedAt:  unixNano(localUpdatedAt),
-			RemoteUpdatedAt: unixNano(item.UpdatedAt),
-			Winner:          conflictWinnerRemote,
-		})
-		if err != nil {
-			return nil, fmt.Errorf(
-				"create conflict event for %s/%s (version=%d, localUpdatedAt=%s): %w",
-				aggID,
-				item.ExternalID.Get(),
-				ver+1,
-				localUpdatedAt.Format(time.RFC3339Nano),
-				err,
-			)
+		eventTypes = []event.Type{EventItemConflictFound, EventItemSynced}
+		payloads = []any{
+			ItemConflictFoundPayload{
+				Source:          item.Source.Get(),
+				SourceID:        item.ExternalID.Get(),
+				LocalUpdatedAt:  unixNano(localUpdatedAt),
+				RemoteUpdatedAt: unixNano(item.UpdatedAt),
+				Winner:          conflictWinnerRemote,
+			},
+			itemToPayload(item),
 		}
-
-		events = append(events, evt)
 	}
 
-	evt, err := newEvent(
-		EventItemSynced,
-		aggID,
-		ver+len(events)+1,
-		itemToPayload(item),
-	)
+	evts, err := event.NewEvents(aggID, aggregateType, version, eventTypes, payloads)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"create sync event for %s/%s (version=%d): %w",
+			"create events for %s/%s (version=%d, isConflict=%v): %w",
 			aggID,
 			item.ExternalID.Get(),
-			ver+len(events)+1,
+			version,
+			isConflict,
 			err,
 		)
 	}
 
-	events = append(events, evt)
-
-	return events, nil
+	return evts, nil
 }
 
 func newEvent(
 	eventType event.Type,
 	aggID id.AggregateID,
-	version int,
+	version event.Version,
 	payload any,
 ) (*event.Core, error) {
-	data, err := json.Marshal(payload)
+	data, err := event.JSONCodec{}.Encode(payload)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"marshal %s payload for aggregate %s (version=%d): %w",
@@ -202,7 +188,7 @@ func newEvent(
 		)
 	}
 
-	core, err := event.NewEvent(eventType, aggID, aggregateType, event.Version(version), data)
+	core, err := event.NewEvent(eventType, aggID, aggregateType, version, data)
 	if err != nil {
 		return nil, fmt.Errorf(
 			"create %s event for aggregate %s (version=%d): %w",

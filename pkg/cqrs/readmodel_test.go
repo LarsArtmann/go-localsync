@@ -244,7 +244,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 
 	evt := mustNewTestEvent(EventItemSynced, payload)
 
-	if err := proj.HandleEvent(context.Background(), evt); err != nil {
+	if err := proj.Handle(context.Background(), evt); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -278,7 +278,7 @@ func TestProjector_ItemDeleted(t *testing.T) {
 
 	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
-	if err := proj.HandleEvent(ctx, evt); err != nil {
+	if err := proj.Handle(ctx, evt); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -306,7 +306,7 @@ func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
 		Source: "github", SourceID: "123", Winner: "remote",
 	})
 
-	if err := proj.HandleEvent(ctx, evt); err != nil {
+	if err := proj.Handle(ctx, evt); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
@@ -334,7 +334,7 @@ func TestReadModel_Integration(t *testing.T) {
 	}
 
 	for _, evt := range events {
-		if err := proj.HandleEvent(ctx, evt); err != nil {
+		if err := proj.Handle(ctx, evt); err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 	}

@@ -5,13 +5,27 @@ import (
 	"database/sql"
 	"fmt"
 
+	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/event"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory"
+	"github.com/larsartmann/go-cqrs-lite/middleware"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
+
+type charmLogAdapter struct {
+	logger *log.Logger
+}
+
+func (a *charmLogAdapter) Info(msg string, keyvals ...any) {
+	a.logger.Info(msg, keyvals...)
+}
+
+func (a *charmLogAdapter) Error(msg string, keyvals ...any) {
+	a.logger.Error(msg, keyvals...)
+}
 
 const (
 	backendMemory  = "memory"
@@ -31,6 +45,7 @@ type CQRSStack struct {
 	Bus       event.Bus
 	Repo      *decider.Repository[SyncItemState]
 	ReadModel ReadModel
+	Runner    *event.InMemoryRunner
 	syncDB    *cqrsstorage.TursoSyncDB
 }
 
@@ -47,17 +62,44 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 
 	proj := NewProjector(rm)
 
-	err = bus.SubscribeAll(proj.HandleEvent)
+	runner, err := event.NewInMemoryRunner(cqrsmemory.NewCheckpointStore())
 	if err != nil {
-		return nil, fmt.Errorf("subscribe projector: %w", err)
+		return nil, fmt.Errorf("create projection runner: %w", err)
 	}
 
-	d := decider.Decider[SyncItemState]{
+	if err := runner.Register(proj); err != nil {
+		return nil, fmt.Errorf("register projector: %w", err)
+	}
+
+	err = bus.SubscribeAll(runner.Handle)
+	if err != nil {
+		return nil, fmt.Errorf("subscribe projection runner: %w", err)
+	}
+
+	if mwErr := bus.Use(
+		middleware.EventLogging(&charmLogAdapter{logger: log.Default()}),
+	); mwErr != nil {
+		return nil, fmt.Errorf("wire event logging middleware: %w", mwErr)
+	}
+
+	deciderSpec := decider.Decider[SyncItemState]{
 		Initial: InitialState,
 		Fold:    Fold,
 	}
 
-	repo, err := decider.NewRepository[SyncItemState](store, bus, d)
+	snapshotStore := cqrsmemory.NewMemorySnapshotStore()
+
+	snapshotStrategy, stratErr := event.EveryNEvents(10)
+	if stratErr != nil {
+		return nil, fmt.Errorf("create snapshot strategy: %w", stratErr)
+	}
+
+	repo, err := decider.NewRepository[SyncItemState](
+		store, bus, deciderSpec,
+		decider.WithSnapshotStore[SyncItemState](snapshotStore),
+		decider.WithCodec[SyncItemState](event.JSONCodec{}),
+		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("create decider repository: %w", err)
 	}
@@ -67,6 +109,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		Bus:       bus,
 		Repo:      repo,
 		ReadModel: rm,
+		Runner:    runner,
 		syncDB:    syncDB,
 	}, nil
 }

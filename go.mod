@@ -7,8 +7,9 @@ require (
 	github.com/caarlos0/env/v11 v11.4.1
 	github.com/google/go-github/v69 v69.2.0
 	github.com/larsartmann/go-branded-id v0.1.0
-	github.com/larsartmann/go-cqrs-lite/core v1.3.0
-	github.com/larsartmann/go-cqrs-lite/memory v1.1.0
+	github.com/larsartmann/go-cqrs-lite/core v1.4.0
+	github.com/larsartmann/go-cqrs-lite/memory v1.2.0
+	github.com/larsartmann/go-cqrs-lite/middleware v1.0.0
 	github.com/larsartmann/go-cqrs-lite/storage v0.0.0-20260518140447-46b2a16ce733
 	github.com/oklog/ulid/v2 v2.1.1
 	golang.org/x/oauth2 v0.36.0
@@ -57,6 +58,8 @@ require (
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/tursodatabase/turso-go-platform-libs v0.6.0 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
+	go.opentelemetry.io/otel v1.43.0 // indirect
+	go.opentelemetry.io/otel/trace v1.43.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a // indirect
 	golang.org/x/net v0.54.0 // indirect

@@ -3,6 +3,8 @@ package errors
 import (
 	"errors"
 	"fmt"
+
+	"github.com/larsartmann/go-cqrs-lite/core/event"
 )
 
 var (
@@ -16,6 +18,18 @@ var (
 	ErrUnknownBackend = errors.New("unknown backend")
 	ErrDBNil          = errors.New("database is nil")
 )
+
+func init() { //nolint:gochecknoinits // required to register error classifications before use
+	event.RegisterClassification(ErrNotFound, event.Rejection)
+	event.RegisterClassification(ErrRateLimited, event.Transient)
+	event.RegisterClassification(ErrInvalidToken, event.Rejection)
+	event.RegisterClassification(ErrUserNotFound, event.Rejection)
+	event.RegisterClassification(ErrSyncFailed, event.Transient)
+	event.RegisterClassification(ErrDatabase, event.Infrastructure)
+	event.RegisterClassification(ErrInvalidInput, event.Rejection)
+	event.RegisterClassification(ErrUnknownBackend, event.Rejection)
+	event.RegisterClassification(ErrDBNil, event.Rejection)
+}
 
 // WithDetail wraps err with a detail string for debugging context.
 func WithDetail(err error, detail string) error {

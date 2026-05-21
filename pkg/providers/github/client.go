@@ -13,6 +13,7 @@ import (
 
 	"charm.land/log/v2"
 	gh "github.com/google/go-github/v69/github"
+	"github.com/larsartmann/go-cqrs-lite/core/event"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
@@ -366,7 +367,7 @@ func isRetryableError(err error) bool {
 		return statusCode >= 500 || statusCode == 429
 	}
 
-	return false
+	return event.IsRetryable(err)
 }
 
 // wrapGitHubError converts GitHub API errors into typed errors.

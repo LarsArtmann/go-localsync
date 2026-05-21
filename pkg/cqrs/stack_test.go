@@ -343,3 +343,73 @@ func TestCQRSStack_DeterministicAggregateID_Matches(t *testing.T) {
 		t.Error("deterministic IDs must be equal for same inputs")
 	}
 }
+
+func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
+	t.Parallel()
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = stack.Close() }()
+
+	if stack.Runner == nil {
+		t.Fatal("expected Runner to be initialized")
+	}
+
+	ctx := context.Background()
+	item := testItem("123", "PushEvent")
+
+	if err := stack.SyncItem(ctx, item); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	count, err := stack.Count(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if count != 1 {
+		t.Errorf("expected count=1 after sync, got %d", count)
+	}
+}
+
+func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
+	t.Parallel()
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer func() { _ = stack.Close() }()
+
+	ctx := context.Background()
+
+	if err := stack.SyncItem(ctx, testItem("1", "PushEvent")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := stack.SyncItem(ctx, testItem("2", "IssueEvent")); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	items, err := stack.ReadModel.List(ctx, ItemFilter{})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(items) != 2 {
+		t.Errorf("expected 2 items, got %d", len(items))
+	}
+}
+
+func TestCQRSStack_RemoteStore_InvalidURL(t *testing.T) {
+	t.Parallel()
+
+	_, err := NewCQRSStack(CQRSConfig{
+		Backend:   "turso",
+		DBPath:    ":memory:",
+		RemoteURL: "https://nonexistent.invalid.host.example/db",
+		AuthToken: "fake",
+	})
+	if err == nil {
+		t.Fatal("expected error for invalid remote URL")
+	}
+}

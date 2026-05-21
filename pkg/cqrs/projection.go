@@ -2,7 +2,6 @@ package cqrs
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
@@ -25,10 +24,6 @@ func (p *Projector) EventTypes() []event.Type {
 }
 
 func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
-	return p.HandleEvent(ctx, evt)
-}
-
-func (p *Projector) HandleEvent(ctx context.Context, evt event.Event) error {
 	switch evt.Type() {
 	case EventItemSynced:
 		return p.handleItemSynced(ctx, evt)
@@ -42,22 +37,18 @@ func (p *Projector) HandleEvent(ctx context.Context, evt event.Event) error {
 }
 
 func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error {
-	var payload ItemSyncedPayload
-
-	err := json.Unmarshal(evt.Payload(), &payload)
+	payload, err := event.DecodePayload[ItemSyncedPayload](evt, event.JSONCodec{})
 	if err != nil {
-		return fmt.Errorf("unmarshal ItemSyncedPayload for event %s: %w", evt.ID(), err)
+		return fmt.Errorf("decode ItemSyncedPayload for event %s: %w", evt.ID(), err)
 	}
 
 	return p.readModel.Upsert(ctx, itemFromPayload(payload))
 }
 
 func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) error {
-	var payload ItemDeletedPayload
-
-	err := json.Unmarshal(evt.Payload(), &payload)
+	payload, err := event.DecodePayload[ItemDeletedPayload](evt, event.JSONCodec{})
 	if err != nil {
-		return fmt.Errorf("unmarshal ItemDeletedPayload for event %s: %w", evt.ID(), err)
+		return fmt.Errorf("decode ItemDeletedPayload for event %s: %w", evt.ID(), err)
 	}
 
 	return p.readModel.Delete(ctx, payload.Source, payload.SourceID)

@@ -380,3 +380,118 @@ func TestSyncOptions_Validate(t *testing.T) {
 		t.Errorf("expected error to contain 'required', got %v", err)
 	}
 }
+
+func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
+	t.Parallel()
+
+	oldItem := testSyncItem("1", "PushEvent")
+	oldItem.CreatedAt = time.Now().Add(-2 * time.Hour)
+	oldItem.UpdatedAt = time.Now().Add(-2 * time.Hour)
+
+	newItem := testSyncItem("2", "IssueEvent")
+	newItem.CreatedAt = time.Now()
+	newItem.UpdatedAt = time.Now()
+
+	mockProv := &mockProvider{items: []*provider.Item{newItem}}
+	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	defer func() { _ = stack.Close() }()
+
+	ctx := context.Background()
+	syncer := NewSyncer(mockProv, stack, log.Default())
+
+	err := stack.SyncItem(ctx, oldItem)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	result, err := syncer.SyncIncremental(ctx, &SyncOptions{Source: "testuser", MaxPages: 10})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 1 {
+		t.Errorf("expected Fetched=1, got %d", result.Fetched)
+	}
+}
+
+func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
+	t.Parallel()
+
+	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	defer func() { _ = stack.Close() }()
+
+	mockProv := &mockProvider{items: nil}
+	syncer := NewSyncer(mockProv, stack, log.Default())
+
+	latestItem := testSyncItem("latest", "PushEvent")
+	latestItem.CreatedAt = time.Now()
+
+	oldItem := testSyncItem("old", "PushEvent")
+	oldItem.CreatedAt = time.Now().Add(-5 * time.Hour)
+
+	newItem := testSyncItem("new", "IssueEvent")
+	newItem.CreatedAt = time.Now().Add(1 * time.Hour)
+
+	result := syncer.processIncrementalItems(
+		context.Background(),
+		latestItem,
+		[]*provider.Item{oldItem, newItem},
+	)
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Skipped != 1 {
+		t.Errorf("expected Skipped=1 (old item), got %d", result.Skipped)
+	}
+}
+
+func TestSyncer_processIncrementalItems_AllNewItems(t *testing.T) {
+	t.Parallel()
+
+	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	defer func() { _ = stack.Close() }()
+
+	mockProv := &mockProvider{items: nil}
+	syncer := NewSyncer(mockProv, stack, log.Default())
+
+	items := []*provider.Item{
+		testSyncItem("1", "PushEvent"),
+		testSyncItem("2", "IssueEvent"),
+	}
+
+	result := syncer.processIncrementalItems(
+		context.Background(),
+		nil,
+		items,
+	)
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Skipped != 0 {
+		t.Errorf("expected Skipped=0, got %d", result.Skipped)
+	}
+}
+
+func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
+	t.Parallel()
+
+	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	defer func() { _ = stack.Close() }()
+
+	mockProv := &mockProvider{items: nil}
+	syncer := NewSyncer(mockProv, stack, log.Default())
+
+	invalidItem := &provider.Item{ID: types.NewItemID()}
+	validItem := testSyncItem("1", "PushEvent")
+
+	result := syncer.processIncrementalItems(
+		context.Background(),
+		nil,
+		[]*provider.Item{invalidItem, validItem},
+	)
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Errors != 1 {
+		t.Errorf("expected Errors=1 (invalid item), got %d", result.Errors)
+	}
+}

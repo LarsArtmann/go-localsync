@@ -584,3 +584,124 @@ func containsSubstringHelper(s, sub string) bool {
 
 	return false
 }
+
+func TestWaitForRateLimit_Disabled(t *testing.T) {
+	t.Parallel()
+
+	client := NewClient("test-token")
+	client = client.WithRateLimitConfig(provider.RateLimitConfig{Enabled: false})
+
+	err := client.waitForRateLimit(context.Background())
+	if err != nil {
+		t.Errorf("expected no error when rate limiting disabled, got %v", err)
+	}
+}
+
+func TestWaitForRateLimit_SufficientRemaining(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(testhelpers.RateLimitResponse(4999))
+	}))
+	defer server.Close()
+
+	client := newTestClient(server)
+	client = client.WithRateLimitConfig(provider.RateLimitConfig{
+		Enabled:      true,
+		MinRemaining: 100,
+	})
+
+	err := client.waitForRateLimit(context.Background())
+	if err != nil {
+		t.Errorf("expected no error when remaining > min, got %v", err)
+	}
+}
+
+func TestWaitForRateLimit_ExceedsMaxWait(t *testing.T) {
+	t.Parallel()
+
+	resetTime := time.Now().Add(2 * time.Hour)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"resources": gh.RateLimits{
+				Core: &gh.Rate{
+					Limit:     5000,
+					Remaining: 0,
+					Reset:     gh.Timestamp{Time: resetTime},
+				},
+			},
+		})
+	}))
+	defer server.Close()
+
+	client := newTestClient(server)
+	client = client.WithRateLimitConfig(provider.RateLimitConfig{
+		Enabled:      true,
+		MinRemaining: 100,
+		MaxWait:      1 * time.Minute,
+	})
+
+	err := client.waitForRateLimit(context.Background())
+	if err == nil {
+		t.Fatal("expected error when wait exceeds max wait")
+	}
+	if !errors.Is(err, pkgerrors.ErrRateLimited) {
+		t.Errorf("expected ErrRateLimited, got %v", err)
+	}
+}
+
+func TestWaitForRateLimit_ContextCanceled(t *testing.T) {
+	t.Parallel()
+
+	resetTime := time.Now().Add(5 * time.Second)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"resources": gh.RateLimits{
+				Core: &gh.Rate{
+					Limit:     5000,
+					Remaining: 0,
+					Reset:     gh.Timestamp{Time: resetTime},
+				},
+			},
+		})
+	}))
+	defer server.Close()
+
+	client := newTestClient(server)
+	client = client.WithRateLimitConfig(provider.RateLimitConfig{
+		Enabled:      true,
+		MinRemaining: 100,
+		MaxWait:      10 * time.Second,
+	})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	err := client.waitForRateLimit(ctx)
+	if err == nil {
+		t.Fatal("expected error when context is canceled")
+	}
+}
+
+func TestWaitForRateLimit_NilCore(t *testing.T) {
+	t.Parallel()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"resources": gh.RateLimits{Core: nil},
+		})
+	}))
+	defer server.Close()
+
+	client := newTestClient(server)
+	client = client.WithRateLimitConfig(provider.RateLimitConfig{Enabled: true})
+
+	err := client.waitForRateLimit(context.Background())
+	if err != nil {
+		t.Errorf("expected no error when core is nil, got %v", err)
+	}
+}
