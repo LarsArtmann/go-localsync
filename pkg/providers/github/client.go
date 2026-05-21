@@ -168,7 +168,8 @@ func (c *Client) FetchAll(
 			Page:    page,
 		})
 		if err != nil {
-			return nil, pkgerrors.Wrapf(err,
+			return nil, pkgerrors.Wrapf(
+				err,
 				"fetch page %d/%d for %s failed (fetched %d items)",
 				page,
 				maxPages,

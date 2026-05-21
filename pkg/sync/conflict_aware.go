@@ -68,7 +68,8 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		}
 	}
 
-	s.logger.Info("Conflict-aware sync completed",
+	s.logger.Info(
+		"Conflict-aware sync completed",
 		"fetched", cr.Fetched,
 		"upserted", cr.Upserted,
 		"conflicts", cr.Conflicts,

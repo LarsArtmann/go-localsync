@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-05-17
+**Updated:** 2026-05-21
 
 ## Project Overview
 
@@ -92,7 +92,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `cmd/examples/github-sync` | 6     | ✅ exitCodeForError, LoadConfig, env defaults                 |
 | `pkg/testhelpers`          | 0     | ⬜ Helper package                                             |
 
-**118 total test cases** across 7 test packages. Test:Code ratio >1.0:1.
+**~110 total test cases** across 7 test packages. Test:Code ratio 1.13:1. Overall coverage: 64.8%.
 
 Run: `go test ./... -count=1`
 
@@ -145,9 +145,9 @@ Two tables managed by the CQRS stack:
 
 | Dependency                    | Purpose                                              |
 | ----------------------------- | ---------------------------------------------------- |
-| `go-cqrs-lite/core`           | Decider, event types, branded IDs, error taxonomy    |
-| `go-cqrs-lite/memory`         | In-memory event store + bus                          |
-| `go-cqrs-lite/storage`        | SQLite/Turso event store with optimistic concurrency |
+| `go-cqrs-lite/core` | v1.3.0 | Decider, event types, branded IDs, error taxonomy (latest: v1.4.0) |
+| `go-cqrs-lite/memory` | v1.1.0 | In-memory event store + bus (latest: v1.2.0) |
+| `go-cqrs-lite/storage` | pseudo | SQLite/Turso event store with optimistic concurrency (latest: v0.2.0) |
 | `go-branded-id`               | Branded phantom-type IDs for compile-time safety     |
 | `go-github/v69`               | GitHub API client                                    |
 | `turso.tech/database/tursogo` | Turso Go client — local + remote sync                |
@@ -174,11 +174,32 @@ Two tables managed by the CQRS stack:
 
 ### Not Yet Adopted
 
-- `projection.Runner` with replay + checkpointing
-- `command.Dispatcher` for typed command dispatch
-- Error taxonomy wiring for proper exit codes
-- `middleware.CommandRetry` for provider retry
+- `projection.Runner` with replay + checkpointing — **HIGH priority** (no crash recovery for read model)
+- Error taxonomy wiring (`event.Classify`, `event.IsRetryable`) — **HIGH priority** (smart retry + exit codes)
+- `decider.WithOutbox` for Turso backend — **HIGH priority** (atomic save+publish)
+- `sync.LWWResolver[T]` + `sync.VectorClock` — **MEDIUM** (replace split-brain conflict detection)
+- `event.JSONCodec` + `DecodePayload[T]` + `NewEvents` — **MEDIUM** (eliminate boilerplate)
+- `middleware.CommandRetry` for provider retry — **MEDIUM**
+- `command.Dispatcher` for typed command dispatch — **LOW**
+- `UpcasterRegistry` for schema evolution — **LOW**
+- `SnapshotStore` + `EveryNEvents` — **LOW**
+- `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW**
+
+## go-cqrs-lite Adoption Gap (as of 2026-05-21)
+
+**Adoption: 3/12 modules (25%). API surface of used modules: ~40%.**
+
+Modules used: `core/event`, `core/decider`, `core/pkg/id`, `memory`, `storage`.
+Modules unused: `core/command`, `core/query`, `core/aggregate`, `projection`, `middleware`, `sync`, `catalog`, `testhelpers`.
+
+Key anti-patterns:
+- `event.Version` cast to `int()` in 3 places (`decider.go:119,143,170`) — bypasses phantom type safety
+- `bus.SubscribeAll` without replay/checkpoint (`stack.go:50`) — events lost on restart
+- Manual `json.Marshal`/`json.Unmarshal` everywhere vs `event.JSONCodec` + `DecodePayload[T]`
+- `aggregate_id.go` SHA256→ULID→string round-trip unnecessary (AggregateID is string-backed)
+
+Full audit: `docs/status/2026-05-21_01-30_COMPREHENSIVE_STATUS_AND_CQRS_AUDIT.md`
 
 ## Lint Status
 
-golangci-lint v2.11.4 reports **0 issues**. Config is strict with 125+ linters enabled.
+golangci-lint v2 reports **0 issues**. Config is strict with 125+ linters enabled.

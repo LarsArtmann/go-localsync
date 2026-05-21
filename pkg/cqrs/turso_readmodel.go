@@ -141,7 +141,8 @@ func (m *TursoReadModel) Upsert(ctx context.Context, item *provider.Item) error 
 		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	_, err := m.db.ExecContext(ctx, query,
+	_, err := m.db.ExecContext(
+		ctx, query,
 		item.ID.String(), item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
 		item.ActorLogin.Get(), item.ActorAvatarURL, item.RepoName.Get(),
 		item.RepoURL, item.CreatedAt, item.UpdatedAt, item.RawJSON,
