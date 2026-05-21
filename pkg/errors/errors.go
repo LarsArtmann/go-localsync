@@ -1,52 +1,61 @@
 package errors
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/larsartmann/go-cqrs-lite/core/event"
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 var (
-	ErrNotFound       = errors.New("not found")
-	ErrRateLimited    = errors.New("rate limited")
-	ErrInvalidToken   = errors.New("invalid token")
-	ErrUserNotFound   = errors.New("user not found")
-	ErrSyncFailed     = errors.New("sync failed")
-	ErrDatabase       = errors.New("database error")
-	ErrInvalidInput   = errors.New("invalid input")
-	ErrUnknownBackend = errors.New("unknown backend")
-	ErrDBNil          = errors.New("database is nil")
+	ErrNotFound       = errorfamily.NewRejection("not_found", "not found")
+	ErrRateLimited    = errorfamily.NewTransient("rate_limited", "rate limited")
+	ErrInvalidToken   = errorfamily.NewRejection("invalid_token", "invalid token")
+	ErrUserNotFound   = errorfamily.NewRejection("user_not_found", "user not found")
+	ErrSyncFailed     = errorfamily.NewTransient("sync_failed", "sync failed")
+	ErrDatabase       = errorfamily.NewInfrastructure("database", "database error")
+	ErrInvalidInput   = errorfamily.NewRejection("invalid_input", "invalid input")
+	ErrUnknownBackend = errorfamily.NewRejection("unknown_backend", "unknown backend")
+	ErrDBNil          = errorfamily.NewRejection("db_nil", "database is nil")
 )
 
-func init() { //nolint:gochecknoinits // required to register error classifications before use
-	event.RegisterClassification(ErrNotFound, event.Rejection)
-	event.RegisterClassification(ErrRateLimited, event.Transient)
-	event.RegisterClassification(ErrInvalidToken, event.Rejection)
-	event.RegisterClassification(ErrUserNotFound, event.Rejection)
-	event.RegisterClassification(ErrSyncFailed, event.Transient)
-	event.RegisterClassification(ErrDatabase, event.Infrastructure)
-	event.RegisterClassification(ErrInvalidInput, event.Rejection)
-	event.RegisterClassification(ErrUnknownBackend, event.Rejection)
-	event.RegisterClassification(ErrDBNil, event.Rejection)
-}
-
 // WithDetail wraps err with a detail string for debugging context.
+// Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func WithDetail(err error, detail string) error {
+	if e, ok := err.(*errorfamily.Error); ok {
+		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), detail)
+	}
+
 	return fmt.Errorf("%s: %w", detail, err)
 }
 
 // WithUserDetail is a convenience function to add username context.
+// Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func WithUserDetail(err error, username string) error {
+	if e, ok := err.(*errorfamily.Error); ok {
+		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), fmt.Sprintf("username=%s", username))
+	}
+
 	return fmt.Errorf("username=%s: %w", username, err)
 }
 
 // Wrap wraps an error with additional context.
+// Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func Wrap(err error, message string) error {
+	if e, ok := err.(*errorfamily.Error); ok {
+		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), message)
+	}
+
 	return fmt.Errorf("%s: %w", message, err)
 }
 
 // Wrapf wraps an error with a formatted message.
+// Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func Wrapf(err error, format string, args ...any) error {
-	return fmt.Errorf("%s: %w", fmt.Sprintf(format, args...), err)
+	msg := fmt.Sprintf(format, args...)
+
+	if e, ok := err.(*errorfamily.Error); ok {
+		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), msg)
+	}
+
+	return fmt.Errorf("%s: %w", msg, err)
 }

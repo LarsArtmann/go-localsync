@@ -15,15 +15,15 @@ func TestSentinelErrors(t *testing.T) {
 		err  error
 		msg  string
 	}{
-		{"ErrNotFound", ErrNotFound, "not found"},
-		{"ErrRateLimited", ErrRateLimited, "rate limited"},
-		{"ErrInvalidToken", ErrInvalidToken, "invalid token"},
-		{"ErrUserNotFound", ErrUserNotFound, "user not found"},
-		{"ErrSyncFailed", ErrSyncFailed, "sync failed"},
-		{"ErrDatabase", ErrDatabase, "database error"},
-		{"ErrInvalidInput", ErrInvalidInput, "invalid input"},
-		{"ErrUnknownBackend", ErrUnknownBackend, "unknown backend"},
-		{"ErrDBNil", ErrDBNil, "database is nil"},
+		{"ErrNotFound", ErrNotFound, "[rejection:not_found] not found"},
+		{"ErrRateLimited", ErrRateLimited, "[transient:rate_limited] rate limited"},
+		{"ErrInvalidToken", ErrInvalidToken, "[rejection:invalid_token] invalid token"},
+		{"ErrUserNotFound", ErrUserNotFound, "[rejection:user_not_found] user not found"},
+		{"ErrSyncFailed", ErrSyncFailed, "[transient:sync_failed] sync failed"},
+		{"ErrDatabase", ErrDatabase, "[infrastructure:database] database error"},
+		{"ErrInvalidInput", ErrInvalidInput, "[rejection:invalid_input] invalid input"},
+		{"ErrUnknownBackend", ErrUnknownBackend, "[rejection:unknown_backend] unknown backend"},
+		{"ErrDBNil", ErrDBNil, "[rejection:db_nil] database is nil"},
 	}
 
 	for _, s := range sentinels {

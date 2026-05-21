@@ -11,6 +11,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/memory v1.2.0
 	github.com/larsartmann/go-cqrs-lite/middleware v1.0.0
 	github.com/larsartmann/go-cqrs-lite/storage v0.0.0-20260518140447-46b2a16ce733
+	github.com/larsartmann/go-error-family v0.1.1
 	github.com/oklog/ulid/v2 v2.1.1
 	golang.org/x/oauth2 v0.36.0
 )
@@ -44,7 +45,6 @@ require (
 	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/larsartmann/go-error-family v0.1.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
