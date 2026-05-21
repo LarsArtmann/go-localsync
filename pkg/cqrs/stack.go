@@ -224,8 +224,8 @@ func (s *CQRSStack) SyncItems(
 			if result.Action == ActionConflictRemote {
 				summary.Conflicts++
 			}
-		default:
-			// ActionUnchanged: no counters
+		case ActionUnchanged:
+			// No counters
 		}
 
 		summary.Results = append(summary.Results, result)
