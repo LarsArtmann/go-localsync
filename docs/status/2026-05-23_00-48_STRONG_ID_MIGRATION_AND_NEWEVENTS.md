@@ -21,22 +21,22 @@ The `branching-flow strong-id` tool originally reported **16 violations** where 
 **Before:** 16 violations
 **After:** 6 violations (62.5% reduction)
 
-| Area | Change | Files |
-|------|--------|-------|
-| `AggregateID()` signature | `string` → `types.ExternalID` | `aggregate_id.go` |
-| `itemKey()` signature | `string` → `types.ExternalID` | `aggregate_id.go` |
-| `DecideDelete()` signature | `string` → `types.ExternalID` | `decider.go` |
-| `ReadModel.Get()` interface | `string` → `types.ExternalID` | `readmodel.go` |
-| `ReadModel.Delete()` interface | `string` → `types.ExternalID` | `readmodel.go` |
-| `MemoryReadModel` impl | Updated to match interface | `memory_readmodel.go` |
-| `TursoReadModel` impl | Updated to match interface | `turso_readmodel.go` |
-| `DeleteItemCommand.SourceID` | `string` → `types.ExternalID` | `commands_queries.go` |
-| `GetItemQuery.SourceID` | `string` → `types.ExternalID` | `commands_queries.go` |
-| `CQRSStack.DeleteItem()` | `string` → `types.ExternalID` | `stack.go` |
-| `CQRSStack.SyncItem()` | Pass `item.ExternalID` directly | `stack.go` |
-| `handleSyncItem()` | Pass `item.ExternalID` directly | `commands_queries.go` |
-| `Projector.Handle()` delete | Wrap with `types.NewExternalID()` | `projection.go` |
-| All test files | Wrap string literals with `types.NewExternalID()` | 7 test files |
+| Area                           | Change                                            | Files                 |
+| ------------------------------ | ------------------------------------------------- | --------------------- |
+| `AggregateID()` signature      | `string` → `types.ExternalID`                     | `aggregate_id.go`     |
+| `itemKey()` signature          | `string` → `types.ExternalID`                     | `aggregate_id.go`     |
+| `DecideDelete()` signature     | `string` → `types.ExternalID`                     | `decider.go`          |
+| `ReadModel.Get()` interface    | `string` → `types.ExternalID`                     | `readmodel.go`        |
+| `ReadModel.Delete()` interface | `string` → `types.ExternalID`                     | `readmodel.go`        |
+| `MemoryReadModel` impl         | Updated to match interface                        | `memory_readmodel.go` |
+| `TursoReadModel` impl          | Updated to match interface                        | `turso_readmodel.go`  |
+| `DeleteItemCommand.SourceID`   | `string` → `types.ExternalID`                     | `commands_queries.go` |
+| `GetItemQuery.SourceID`        | `string` → `types.ExternalID`                     | `commands_queries.go` |
+| `CQRSStack.DeleteItem()`       | `string` → `types.ExternalID`                     | `stack.go`            |
+| `CQRSStack.SyncItem()`         | Pass `item.ExternalID` directly                   | `stack.go`            |
+| `handleSyncItem()`             | Pass `item.ExternalID` directly                   | `commands_queries.go` |
+| `Projector.Handle()` delete    | Wrap with `types.NewExternalID()`                 | `projection.go`       |
+| All test files                 | Wrap string literals with `types.NewExternalID()` | 7 test files          |
 
 ### 3. All Tests Green
 
@@ -60,16 +60,17 @@ ok  github.com/larsartmann/go-localsync/pkg/types                  0.002s
 
 The remaining 6 violations are in **event payloads** and **internal scan structs**:
 
-| # | Location | Field | Issue |
-|---|----------|-------|-------|
-| 1 | `events.go:19` | `ItemSyncedPayload.ItemID` | `string` → should be branded |
-| 2 | `events.go:21` | `ItemSyncedPayload.SourceID` | `string` → should be branded |
-| 3 | `events.go:34` | `ItemConflictFoundPayload.SourceID` | `string` → should be branded |
-| 4 | `events.go:42` | `ItemDeletedPayload.SourceID` | `string` → should be branded |
-| 5 | `stack.go:213` | `ItemSyncResult.SourceID` | `string` → should be branded |
-| 6 | `turso_readmodel.go:235` | `scannedItem.sourceID` | `string` → internal scan struct |
+| #   | Location                 | Field                               | Issue                           |
+| --- | ------------------------ | ----------------------------------- | ------------------------------- |
+| 1   | `events.go:19`           | `ItemSyncedPayload.ItemID`          | `string` → should be branded    |
+| 2   | `events.go:21`           | `ItemSyncedPayload.SourceID`        | `string` → should be branded    |
+| 3   | `events.go:34`           | `ItemConflictFoundPayload.SourceID` | `string` → should be branded    |
+| 4   | `events.go:42`           | `ItemDeletedPayload.SourceID`       | `string` → should be branded    |
+| 5   | `stack.go:213`           | `ItemSyncResult.SourceID`           | `string` → should be branded    |
+| 6   | `turso_readmodel.go:235` | `scannedItem.sourceID`              | `string` → internal scan struct |
 
 **Why not done:** These are JSON-serialized event payload structs. Changing them requires careful consideration of:
+
 - JSON tag compatibility (the serialized form must stay `string`)
 - go-cqrs-lite codec integration (`event.JSONCodec` must still work)
 - Backward compatibility with stored events
@@ -113,43 +114,43 @@ We added `SourceBrand` / `SourceID` / `NewSourceID` to `pkg/types/ids.go` but en
 
 ### High Priority (Type Safety & Correctness)
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 1 | Remove dead `SourceID` brand from `ids.go` | Cleanup | 5min |
-| 2 | Decide: branded types in event payloads vs raw strings | Architecture | 30min |
-| 3 | If branded payloads: add `MarshalJSON`/`UnmarshalJSON` to branded types | Type safety | 1hr |
-| 4 | If branded payloads: update all 3 payload structs | Type safety | 1hr |
-| 5 | Tag go-cqrs-lite `core/v1.5.0` with `NewEvents` + `MustNewEvents` | Release | 15min |
-| 6 | Update `go.mod` to use tagged version, remove `go.work` replace | CI fix | 10min |
-| 7 | Update AGENTS.md with ExternalID parameter changes | Docs | 15min |
-| 8 | Update FEATURES.md branded IDs row (6→7 types, +ExternalID params) | Docs | 10min |
+| #   | Task                                                                    | Impact       | Effort |
+| --- | ----------------------------------------------------------------------- | ------------ | ------ |
+| 1   | Remove dead `SourceID` brand from `ids.go`                              | Cleanup      | 5min   |
+| 2   | Decide: branded types in event payloads vs raw strings                  | Architecture | 30min  |
+| 3   | If branded payloads: add `MarshalJSON`/`UnmarshalJSON` to branded types | Type safety  | 1hr    |
+| 4   | If branded payloads: update all 3 payload structs                       | Type safety  | 1hr    |
+| 5   | Tag go-cqrs-lite `core/v1.5.0` with `NewEvents` + `MustNewEvents`       | Release      | 15min  |
+| 6   | Update `go.mod` to use tagged version, remove `go.work` replace         | CI fix       | 10min  |
+| 7   | Update AGENTS.md with ExternalID parameter changes                      | Docs         | 15min  |
+| 8   | Update FEATURES.md branded IDs row (6→7 types, +ExternalID params)      | Docs         | 10min  |
 
 ### Medium Priority (Architecture & DX)
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 9 | Adopt `sync.LWWResolver[T]` from go-cqrs-lite for conflict resolution | Formalize | 2hr |
-| 10 | Adopt `sync.VectorClock` for conflict detection | Correctness | 2hr |
-| 11 | Add `middleware.CommandRetry` for transient provider errors | Resilience | 1hr |
-| 12 | Add Prometheus metrics middleware for command/query dispatch | Observability | 1hr |
-| 13 | Add circuit breaker for provider API calls | Resilience | 2hr |
-| 14 | Write BDD tests for sync conflict flows using ginkgo | Confidence | 2hr |
-| 15 | Add `UpcasterRegistry` for schema evolution (prepare for v2 payloads) | Future-proof | 1hr |
+| #   | Task                                                                  | Impact        | Effort |
+| --- | --------------------------------------------------------------------- | ------------- | ------ |
+| 9   | Adopt `sync.LWWResolver[T]` from go-cqrs-lite for conflict resolution | Formalize     | 2hr    |
+| 10  | Adopt `sync.VectorClock` for conflict detection                       | Correctness   | 2hr    |
+| 11  | Add `middleware.CommandRetry` for transient provider errors           | Resilience    | 1hr    |
+| 12  | Add Prometheus metrics middleware for command/query dispatch          | Observability | 1hr    |
+| 13  | Add circuit breaker for provider API calls                            | Resilience    | 2hr    |
+| 14  | Write BDD tests for sync conflict flows using ginkgo                  | Confidence    | 2hr    |
+| 15  | Add `UpcasterRegistry` for schema evolution (prepare for v2 payloads) | Future-proof  | 1hr    |
 
 ### Lower Priority (Polish & Scale)
 
-| # | Task | Impact | Effort |
-|---|------|--------|--------|
-| 16 | Generate D2 architecture diagrams via `catalog/` module | Docs | 1hr |
-| 17 | Add provider interface versioning (v2 with context, v1 compat) | Extensibility | 2hr |
-| 18 | Write integration test with real Turso remote (not just local SQLite) | Confidence | 1hr |
-| 19 | Add benchmark suite for event store operations | Performance | 2hr |
-| 20 | Add snapshot strategy benchmark (EveryNEvents tuning) | Performance | 1hr |
-| 21 | Add `cmd/examples/` for GitLab provider | DX | 3hr |
-| 22 | Add graceful shutdown with drain for `SyncItems` in progress | Production | 2hr |
-| 23 | Add structured error codes to sync results (machine-readable) | API | 1hr |
-| 24 | Add `ItemSyncResult` to include `AggregateID` for debugging | Debugging | 15min |
-| 25 | Write CONTRIBUTING.md with provider development guide | OSS | 1hr |
+| #   | Task                                                                  | Impact        | Effort |
+| --- | --------------------------------------------------------------------- | ------------- | ------ |
+| 16  | Generate D2 architecture diagrams via `catalog/` module               | Docs          | 1hr    |
+| 17  | Add provider interface versioning (v2 with context, v1 compat)        | Extensibility | 2hr    |
+| 18  | Write integration test with real Turso remote (not just local SQLite) | Confidence    | 1hr    |
+| 19  | Add benchmark suite for event store operations                        | Performance   | 2hr    |
+| 20  | Add snapshot strategy benchmark (EveryNEvents tuning)                 | Performance   | 1hr    |
+| 21  | Add `cmd/examples/` for GitLab provider                               | DX            | 3hr    |
+| 22  | Add graceful shutdown with drain for `SyncItems` in progress          | Production    | 2hr    |
+| 23  | Add structured error codes to sync results (machine-readable)         | API           | 1hr    |
+| 24  | Add `ItemSyncResult` to include `AggregateID` for debugging           | Debugging     | 15min  |
+| 25  | Write CONTRIBUTING.md with provider development guide                 | OSS           | 1hr    |
 
 ---
 
@@ -171,25 +172,25 @@ The remaining 4 strong-id violations are in event payload structs (`ItemSyncedPa
 
 ### go-localsync (15 files, +67 -54 lines)
 
-| File | Change |
-|------|--------|
-| `pkg/types/ids.go` | Added `SourceBrand`/`SourceID`/`NewSourceID` (dead code — should remove) |
-| `pkg/cqrs/aggregate_id.go` | `itemKey()` + `AggregateID()` now take `types.ExternalID` |
+| File                           | Change                                                                      |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| `pkg/types/ids.go`             | Added `SourceBrand`/`SourceID`/`NewSourceID` (dead code — should remove)    |
+| `pkg/cqrs/aggregate_id.go`     | `itemKey()` + `AggregateID()` now take `types.ExternalID`                   |
 | `pkg/cqrs/commands_queries.go` | `DeleteItemCommand.SourceID` + `GetItemQuery.SourceID` → `types.ExternalID` |
-| `pkg/cqrs/decider.go` | `DecideDelete()` takes `types.ExternalID` |
-| `pkg/cqrs/readmodel.go` | `ReadModel.Get()` + `Delete()` take `types.ExternalID` |
-| `pkg/cqrs/memory_readmodel.go` | Updated impl to match interface |
-| `pkg/cqrs/turso_readmodel.go` | Updated impl to match interface |
-| `pkg/cqrs/projection.go` | Wraps `payload.SourceID` with `types.NewExternalID()` |
-| `pkg/cqrs/stack.go` | `DeleteItem()` + `SyncItem()` + `SyncItems()` use `types.ExternalID` |
-| 7 test files | Updated string literals to `types.NewExternalID()` |
+| `pkg/cqrs/decider.go`          | `DecideDelete()` takes `types.ExternalID`                                   |
+| `pkg/cqrs/readmodel.go`        | `ReadModel.Get()` + `Delete()` take `types.ExternalID`                      |
+| `pkg/cqrs/memory_readmodel.go` | Updated impl to match interface                                             |
+| `pkg/cqrs/turso_readmodel.go`  | Updated impl to match interface                                             |
+| `pkg/cqrs/projection.go`       | Wraps `payload.SourceID` with `types.NewExternalID()`                       |
+| `pkg/cqrs/stack.go`            | `DeleteItem()` + `SyncItem()` + `SyncItems()` use `types.ExternalID`        |
+| 7 test files                   | Updated string literals to `types.NewExternalID()`                          |
 
 ### go-cqrs-lite (2 files, new)
 
-| File | Change |
-|------|--------|
-| `core/event/batch.go` | New: `NewEvents()` + `MustNewEvents()` batch event creation |
-| `core/event/errors.go` | Added `ErrMismatchedEventCount` sentinel |
+| File                   | Change                                                      |
+| ---------------------- | ----------------------------------------------------------- |
+| `core/event/batch.go`  | New: `NewEvents()` + `MustNewEvents()` batch event creation |
+| `core/event/errors.go` | Added `ErrMismatchedEventCount` sentinel                    |
 
 ---
 

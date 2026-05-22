@@ -23,7 +23,13 @@ func TestAggregateID_Deterministic(t *testing.T) {
 func TestAggregateID_DifferentInputs(t *testing.T) {
 	t.Parallel()
 
-	if AggregateID("github", types.NewExternalID("123")) == AggregateID("github", types.NewExternalID("456")) {
+	if AggregateID(
+		"github",
+		types.NewExternalID("123"),
+	) == AggregateID(
+		"github",
+		types.NewExternalID("456"),
+	) {
 		t.Error("different inputs must produce different AggregateIDs")
 	}
 }

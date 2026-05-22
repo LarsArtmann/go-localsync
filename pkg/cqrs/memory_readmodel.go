@@ -21,7 +21,11 @@ func NewMemoryReadModel() *MemoryReadModel {
 	}
 }
 
-func (m *MemoryReadModel) Get(_ context.Context, source string, sourceID types.ExternalID) (*provider.Item, error) {
+func (m *MemoryReadModel) Get(
+	_ context.Context,
+	source string,
+	sourceID types.ExternalID,
+) (*provider.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -92,7 +96,11 @@ func (m *MemoryReadModel) Upsert(_ context.Context, item *provider.Item) error {
 	return nil
 }
 
-func (m *MemoryReadModel) Delete(_ context.Context, source string, sourceID types.ExternalID) error {
+func (m *MemoryReadModel) Delete(
+	_ context.Context,
+	source string,
+	sourceID types.ExternalID,
+) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

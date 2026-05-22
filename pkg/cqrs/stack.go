@@ -189,7 +189,11 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	})
 }
 
-func (s *CQRSStack) DeleteItem(ctx context.Context, source string, sourceID types.ExternalID) error {
+func (s *CQRSStack) DeleteItem(
+	ctx context.Context,
+	source string,
+	sourceID types.ExternalID,
+) error {
 	aggID := AggregateID(source, sourceID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &DeleteItemCommand{
