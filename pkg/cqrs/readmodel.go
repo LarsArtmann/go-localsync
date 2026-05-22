@@ -9,12 +9,12 @@ import (
 )
 
 type ReadModel interface {
-	Get(ctx context.Context, source, sourceID string) (*provider.Item, error)
+	Get(ctx context.Context, source string, sourceID types.ExternalID) (*provider.Item, error)
 	List(ctx context.Context, filter ItemFilter) ([]*provider.Item, error)
 	Count(ctx context.Context, filter ItemFilter) (int64, error)
 	GetTypes(ctx context.Context) ([]string, error)
 	Upsert(ctx context.Context, item *provider.Item) error
-	Delete(ctx context.Context, source, sourceID string) error
+	Delete(ctx context.Context, source string, sourceID types.ExternalID) error
 	Close() error
 }
 

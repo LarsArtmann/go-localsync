@@ -56,11 +56,11 @@ func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 	return &TursoReadModel{db: db}, nil
 }
 
-func (m *TursoReadModel) Get(ctx context.Context, source, sourceID string) (*provider.Item, error) {
+func (m *TursoReadModel) Get(ctx context.Context, source string, sourceID types.ExternalID) (*provider.Item, error) {
 	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
 		FROM sync_items WHERE source = ? AND source_id = ?`
 
-	row := m.db.QueryRowContext(ctx, query, source, sourceID)
+	row := m.db.QueryRowContext(ctx, query, source, sourceID.Get())
 
 	item, err := scanItem(row)
 	if err != nil {
@@ -154,12 +154,12 @@ func (m *TursoReadModel) Upsert(ctx context.Context, item *provider.Item) error 
 	return nil
 }
 
-func (m *TursoReadModel) Delete(ctx context.Context, source, sourceID string) error {
+func (m *TursoReadModel) Delete(ctx context.Context, source string, sourceID types.ExternalID) error {
 	_, err := m.db.ExecContext(
 		ctx,
 		"DELETE FROM sync_items WHERE source = ? AND source_id = ?",
 		source,
-		sourceID,
+		sourceID.Get(),
 	)
 	if err != nil {
 		return fmt.Errorf("delete item %s/%s: %w", source, sourceID, err)

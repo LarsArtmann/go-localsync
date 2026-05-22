@@ -41,7 +41,7 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 
 	mustNoError(t, rm.Upsert(ctx, item))
 
-	got, err := rm.Get(ctx, "github", "123")
+	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
 	mustNoError(t, err)
 	if got == nil {
 		t.Fatal("expected non-nil item")
@@ -55,7 +55,7 @@ func TestMemoryReadModel_GetNotFound(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	got, err := rm.Get(ctx, "github", "nonexistent")
+	got, err := rm.Get(ctx, "github", types.NewExternalID("nonexistent"))
 	mustNoError(t, err)
 	if got != nil {
 		t.Error("expected nil for nonexistent item")
@@ -74,9 +74,9 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 	}
 
 	mustNoError(t, rm.Upsert(ctx, item))
-	mustNoError(t, rm.Delete(ctx, "github", "123"))
+	mustNoError(t, rm.Delete(ctx, "github", types.NewExternalID("123")))
 
-	got, err := rm.Get(ctx, "github", "123")
+	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
 	mustNoError(t, err)
 	if got != nil {
 		t.Error("expected nil after delete")
@@ -186,7 +186,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 		t.Errorf("expected Len=1, got %d", rm.Len())
 	}
 
-	got, err := rm.Get(context.Background(), "github", "123")
+	got, err := rm.Get(context.Background(), "github", types.NewExternalID("123"))
 	mustNoError(t, err)
 	assertItemType(t, got, "PushEvent")
 }
@@ -251,7 +251,7 @@ func TestReadModel_Integration(t *testing.T) {
 		mustNoError(t, proj.Handle(ctx, evt))
 	}
 
-	got, err := rm.Get(ctx, "github", "123")
+	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
 	mustNoError(t, err)
 	if got.Type.Get() != "PushEvent" {
 		t.Errorf("expected Type=PushEvent, got %s", got.Type.Get())

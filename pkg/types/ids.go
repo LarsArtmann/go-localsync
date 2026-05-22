@@ -28,6 +28,8 @@ type (
 	RepoBrand struct{}
 	// EventTypeBrand distinguishes EventTypeID from other identifier types.
 	EventTypeBrand struct{}
+	// SourceBrand distinguishes SourceID from other identifier types.
+	SourceBrand struct{}
 )
 
 type (
@@ -49,6 +51,8 @@ type (
 	// EventTypeID identifies the type of event.
 	// Example: "PushEvent", "CreateEvent".
 	EventTypeID = id.ID[EventTypeBrand, string]
+	// SourceID identifies the source and sourceID combination for aggregate ID generation.
+	SourceID = id.ID[SourceBrand, string]
 )
 
 // NewItemID creates a new ItemID with a freshly generated ULID.
@@ -75,3 +79,6 @@ func NewRepoID(v string) RepoID { return id.NewID[RepoBrand](v) }
 
 // NewEventTypeID creates a new EventTypeID from a string value.
 func NewEventTypeID(v string) EventTypeID { return id.NewID[EventTypeBrand](v) }
+
+// NewSourceID creates a new SourceID from a string value.
+func NewSourceID(v string) SourceID { return id.NewID[SourceBrand](v) }

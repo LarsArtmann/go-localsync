@@ -89,7 +89,7 @@ func DecideSync(
 	opts ...event.Option,
 ) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
-		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
+		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 		if state.Deleted || state.IsNew() {
 			return syncEvents(item, aggID, currentVersion, false, time.Time{}, opts...)
@@ -105,7 +105,7 @@ func DecideSync(
 
 // DecideDelete returns a DecideFunc that marks an item as deleted.
 func DecideDelete(
-	source, sourceID string,
+	source string, sourceID types.ExternalID,
 	opts ...event.Option,
 ) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
@@ -120,7 +120,7 @@ func DecideDelete(
 			[]event.Type{EventItemDeleted},
 			[]any{ItemDeletedPayload{
 				Source:   source,
-				SourceID: sourceID,
+				SourceID: sourceID.Get(),
 			}},
 			opts...,
 		)

@@ -11,6 +11,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/query"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // commandLoggingMiddleware logs command dispatches.
@@ -124,7 +125,7 @@ type DeleteItemCommand struct {
 	command.Core
 
 	Source   string
-	SourceID string
+	SourceID types.ExternalID
 }
 
 type ListItemsQuery struct {
@@ -137,7 +138,7 @@ type GetItemQuery struct {
 	query.Core
 
 	Source   string
-	SourceID string
+	SourceID types.ExternalID
 }
 
 type CountItemsQuery struct {
@@ -176,7 +177,7 @@ func handleSyncItem(repo *decider.Repository[SyncItemState]) command.Handler {
 			return fmt.Errorf("expected *SyncItemCommand, got %T: %w", cmd, errCommandTypeMismatch)
 		}
 
-		aggID := AggregateID(syncCmd.Item.Source.Get(), syncCmd.Item.ExternalID.Get())
+		aggID := AggregateID(syncCmd.Item.Source.Get(), syncCmd.Item.ExternalID)
 
 		return repo.Execute(ctx, aggID, aggregateType, DecideSync(syncCmd.Item))
 	}

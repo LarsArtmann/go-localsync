@@ -58,7 +58,7 @@ func TestTursoReadModel_UpsertAndGet(t *testing.T) {
 
 	mustNoError(t, rm.Upsert(ctx, item))
 
-	got, err := rm.Get(ctx, "github", "123")
+	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
 	mustNoError(t, err)
 
 	if got == nil {
@@ -80,7 +80,7 @@ func TestTursoReadModel_Get_NotFound(t *testing.T) {
 	rm := newTursoTestDB(t)
 	ctx := context.Background()
 
-	got, err := rm.Get(ctx, "github", "nonexistent")
+	got, err := rm.Get(ctx, "github", types.NewExternalID("nonexistent"))
 	if err == nil {
 		t.Fatal("expected ErrNotFound, got nil")
 	}
@@ -186,10 +186,10 @@ func TestTursoReadModel_Delete(t *testing.T) {
 
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 
-	err := rm.Delete(ctx, "github", "1")
+	err := rm.Delete(ctx, "github", types.NewExternalID("1"))
 	mustNoError(t, err)
 
-	got, _ := rm.Get(ctx, "github", "1")
+	got, _ := rm.Get(ctx, "github", types.NewExternalID("1"))
 	if got != nil {
 		t.Fatal("item should be nil after delete")
 	}
@@ -207,7 +207,7 @@ func TestTursoReadModel_Upsert_Idempotent(t *testing.T) {
 	item2 := tursoTestItem(t, "github", "1", "IssueEvent", "bob", "org/repo")
 	_ = rm.Upsert(ctx, item2)
 
-	got, _ := rm.Get(ctx, "github", "1")
+	got, _ := rm.Get(ctx, "github", types.NewExternalID("1"))
 	assertItemType(t, got, "IssueEvent")
 
 	count, _ := rm.Count(ctx, ItemFilter{})

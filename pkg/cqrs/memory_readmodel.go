@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type MemoryReadModel struct {
@@ -20,7 +21,7 @@ func NewMemoryReadModel() *MemoryReadModel {
 	}
 }
 
-func (m *MemoryReadModel) Get(_ context.Context, source, sourceID string) (*provider.Item, error) {
+func (m *MemoryReadModel) Get(_ context.Context, source string, sourceID types.ExternalID) (*provider.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -86,12 +87,12 @@ func (m *MemoryReadModel) Upsert(_ context.Context, item *provider.Item) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.items[itemKey(item.Source.Get(), item.ExternalID.Get())] = item
+	m.items[itemKey(item.Source.Get(), item.ExternalID)] = item
 
 	return nil
 }
 
-func (m *MemoryReadModel) Delete(_ context.Context, source, sourceID string) error {
+func (m *MemoryReadModel) Delete(_ context.Context, source string, sourceID types.ExternalID) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 

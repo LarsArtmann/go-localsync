@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // aggIDCache stores computed AggregateIDs to avoid repeated SHA256 hashing.
@@ -14,16 +15,16 @@ import (
 //nolint:gochecknoglobals
 var aggIDCache sync.Map
 
-// itemKey returns the composite key for a source+sourceID pair.
+// itemKey returns the composite key for a source+externalID pair.
 // Used for map lookups and aggregate ID generation.
-func itemKey(source, sourceID string) string {
-	return source + ":" + sourceID
+func itemKey(source string, externalID types.ExternalID) string {
+	return source + ":" + externalID.Get()
 }
 
-// AggregateID returns a deterministic AggregateID derived from (source, sourceID).
+// AggregateID returns a deterministic AggregateID derived from (source, externalID).
 // Same inputs always produce the same ID. Thread-safe with sync.Map caching.
-func AggregateID(source, sourceID string) id.AggregateID {
-	key := itemKey(source, sourceID)
+func AggregateID(source string, externalID types.ExternalID) id.AggregateID {
+	key := itemKey(source, externalID)
 
 	if cached, ok := aggIDCache.Load(key); ok {
 		return cached.(id.AggregateID) //nolint:forcetypeassert // sync.Map stores our exact type

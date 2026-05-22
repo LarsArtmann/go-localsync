@@ -38,7 +38,7 @@ func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
 	ctx := context.Background()
 
 	mustNoError(t, stack.SyncItem(ctx, testItem("dispatch-2", "PushEvent")))
-	mustNoError(t, stack.DeleteItem(ctx, "github", "dispatch-2"))
+	mustNoError(t, stack.DeleteItem(ctx, "github", types.NewExternalID("dispatch-2")))
 
 	count, err := stack.Count(ctx)
 	mustNoError(t, err)
@@ -57,7 +57,7 @@ func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
 
 	// Send a raw SyncItemCommand with wrong type by using the dispatcher directly
 	// This tests the type assertion path in handleSyncItem
-	aggID := AggregateID("github", "wrong-type-test")
+	aggID := AggregateID("github", types.NewExternalID("wrong-type-test"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		Core: *command.MustNew(commandTypeSyncItem, aggID),
 		Item: testItem("wrong-type-test", "PushEvent"),
@@ -74,7 +74,7 @@ func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
 	ctx := context.Background()
 
 	// Try to dispatch an unregistered command type
-	aggID := AggregateID("github", "unknown")
+	aggID := AggregateID("github", types.NewExternalID("unknown"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		Core: *command.MustNew(command.Type("unknown.command"), aggID),
 		Item: testItem("unknown", "PushEvent"),
@@ -91,7 +91,7 @@ func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	aggID := AggregateID("github", "nil-item")
+	aggID := AggregateID("github", types.NewExternalID("nil-item"))
 
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		Core: *command.MustNew(commandTypeSyncItem, aggID),
@@ -112,7 +112,7 @@ func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
 	item := testItem("empty-source", "PushEvent")
 	item.Source = types.NewProviderID("") // empty source
 
-	aggID := AggregateID("", "empty-source")
+	aggID := AggregateID("", types.NewExternalID("empty-source"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		Core: *command.MustNew(commandTypeSyncItem, aggID),
 		Item: item,
@@ -158,7 +158,7 @@ func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetItemQuery{
 		Core:     *query.MustNew(queryTypeGetItem),
 		Source:   "github",
-		SourceID: "q-2",
+		SourceID: types.NewExternalID("q-2"),
 	})
 	mustNoError(t, err)
 

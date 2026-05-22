@@ -15,6 +15,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/middleware"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type charmLogAdapter struct {
@@ -180,7 +181,7 @@ func (s *CQRSStack) Pull(ctx context.Context) (bool, error) {
 }
 
 func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
-	aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
+	aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		Core: *command.MustNew(commandTypeSyncItem, aggID),
@@ -188,7 +189,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	})
 }
 
-func (s *CQRSStack) DeleteItem(ctx context.Context, source, sourceID string) error {
+func (s *CQRSStack) DeleteItem(ctx context.Context, source string, sourceID types.ExternalID) error {
 	aggID := AggregateID(source, sourceID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &DeleteItemCommand{
@@ -236,7 +237,7 @@ func (s *CQRSStack) SyncItems(
 	syncOpts := []event.Option{event.WithCorrelationID(corrID)}
 
 	for _, item := range items {
-		aggID := AggregateID(item.Source.Get(), item.ExternalID.Get())
+		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 		var (
 			eventCount int

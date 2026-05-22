@@ -13,9 +13,9 @@ import (
 func TestAggregateID_Deterministic(t *testing.T) {
 	t.Parallel()
 
-	id := AggregateID("github", "123")
+	id := AggregateID("github", types.NewExternalID("123"))
 
-	if id != AggregateID("github", "123") {
+	if id != AggregateID("github", types.NewExternalID("123")) {
 		t.Error("same inputs must produce same AggregateID")
 	}
 }
@@ -23,7 +23,7 @@ func TestAggregateID_Deterministic(t *testing.T) {
 func TestAggregateID_DifferentInputs(t *testing.T) {
 	t.Parallel()
 
-	if AggregateID("github", "123") == AggregateID("github", "456") {
+	if AggregateID("github", types.NewExternalID("123")) == AggregateID("github", types.NewExternalID("456")) {
 		t.Error("different inputs must produce different AggregateIDs")
 	}
 }
@@ -260,7 +260,7 @@ func TestDecideDelete_ActiveItem(t *testing.T) {
 
 	state := testActiveState("123", "")
 
-	events, err := DecideDelete("github", "123")(state, 1)
+	events, err := DecideDelete("github", types.NewExternalID("123"))(state, 1)
 	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -273,7 +273,7 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 
 	state := testDeletedState("123")
 
-	events, err := DecideDelete("github", "123")(state, 1)
+	events, err := DecideDelete("github", types.NewExternalID("123"))(state, 1)
 	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
@@ -283,7 +283,7 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 func TestDecideDelete_NewItem(t *testing.T) {
 	t.Parallel()
 
-	events, err := DecideDelete("github", "123")(InitialState, 0)
+	events, err := DecideDelete("github", types.NewExternalID("123"))(InitialState, 0)
 	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
