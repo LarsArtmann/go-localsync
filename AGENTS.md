@@ -10,6 +10,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 | Package                     | Purpose                                                                                                                   |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `pkg/localsync/`            | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] (extracted from go-cqrs-lite/sync)  |
 | `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                              |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                     |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                  |

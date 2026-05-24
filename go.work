@@ -1,6 +1,9 @@
 go 1.26.2
 
-use .
+use (
+	.
+	./pkg/localsync
+)
 
 use (
 	../go-branded-id
