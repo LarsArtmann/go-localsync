@@ -35,11 +35,9 @@ type SyncSummary struct {
 
 type SyncStore interface {
 	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
-	SyncItem(ctx context.Context, item *provider.Item) error
 	ListItems(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error)
 	CountItems(ctx context.Context, filter provider.ItemFilter) (int64, error)
 	GetItemTypes(ctx context.Context) ([]string, error)
-	Count(ctx context.Context) (int64, error)
 	Close() error
 }
 

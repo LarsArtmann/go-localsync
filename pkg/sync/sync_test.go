@@ -53,12 +53,6 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 	return summary
 }
 
-func (m *mockSyncStore) SyncItem(_ context.Context, item *provider.Item) error {
-	m.synced = append(m.synced, item)
-
-	return nil
-}
-
 func (m *mockSyncStore) ListItems(_ context.Context, _ provider.ItemFilter) ([]*provider.Item, error) {
 	return m.items, nil
 }
@@ -81,10 +75,6 @@ func (m *mockSyncStore) GetItemTypes(_ context.Context) ([]string, error) {
 	}
 
 	return types, nil
-}
-
-func (m *mockSyncStore) Count(_ context.Context) (int64, error) {
-	return int64(len(m.synced)), nil
 }
 
 func (m *mockSyncStore) Close() error { return nil }
@@ -137,7 +127,7 @@ func TestSyncer_Sync(t *testing.T) {
 		t.Errorf("expected Fetched=2, got %d", result.Fetched)
 	}
 
-	count, _ := store.Count(ctx)
+	count, _ := store.CountItems(ctx, provider.ItemFilter{})
 	if count != 2 {
 		t.Errorf("expected count=2, got %d", count)
 	}
@@ -214,7 +204,7 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 		t.Errorf("expected Fetched=1, got %d", result.Fetched)
 	}
 
-	count, _ := store.Count(ctx)
+	count, _ := store.CountItems(ctx, provider.ItemFilter{})
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
