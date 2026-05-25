@@ -36,21 +36,11 @@ type SyncSummary struct {
 type SyncStore interface {
 	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
 	SyncItem(ctx context.Context, item *provider.Item) error
-	ListItems(ctx context.Context, filter ItemFilter) ([]*provider.Item, error)
-	CountItems(ctx context.Context, filter ItemFilter) (int64, error)
+	ListItems(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error)
+	CountItems(ctx context.Context, filter provider.ItemFilter) (int64, error)
 	GetItemTypes(ctx context.Context) ([]string, error)
 	Count(ctx context.Context) (int64, error)
 	Close() error
-}
-
-type ItemFilter struct {
-	Type       *types.EventTypeID
-	ActorLogin *types.ActorID
-	RepoName   *types.RepoID
-	Source     *types.ProviderID
-	Since      *time.Time
-	Limit      int
-	Offset     int
 }
 
 type Syncer struct {
@@ -153,14 +143,8 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 	items, err := s.store.ListItems(
 		ctx,
-		ItemFilter{
-			Type:       nil,
-			ActorLogin: nil,
-			RepoName:   nil,
-			Source:     nil,
-			Since:      nil,
-			Limit:      1,
-			Offset:     0,
+		provider.ItemFilter{
+			Limit: 1,
 		},
 	)
 	if err != nil {
@@ -196,15 +180,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 }
 
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
-	count, err := s.store.CountItems(ctx, ItemFilter{
-		Type:       nil,
-		ActorLogin: nil,
-		RepoName:   nil,
-		Source:     nil,
-		Since:      nil,
-		Limit:      0,
-		Offset:     0,
-	})
+	count, err := s.store.CountItems(ctx, provider.ItemFilter{})
 	if err != nil {
 		return nil, err
 	}
@@ -221,15 +197,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 
 		count, err := s.store.CountItems(
 			ctx,
-			ItemFilter{
-				Type:       &eventType,
-				ActorLogin: nil,
-				RepoName:   nil,
-				Source:     nil,
-				Since:      nil,
-				Limit:      0,
-				Offset:     0,
-			},
+			provider.ItemFilter{Type: &eventType},
 		)
 		if err != nil {
 			s.logger.Warn("Failed to count items by type", "type", t, "error", err)

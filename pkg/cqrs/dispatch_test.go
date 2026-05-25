@@ -133,7 +133,7 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
 		BasicQuery: *query.MustNew(queryTypeListItem),
-		Filter:     ItemFilter{},
+		Filter:     provider.ItemFilter{},
 	})
 	mustNoError(t, err)
 
@@ -182,7 +182,7 @@ func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
 		BasicQuery: *query.MustNew(queryTypeCountItem),
-		Filter:     ItemFilter{},
+		Filter:     provider.ItemFilter{},
 	})
 	mustNoError(t, err)
 

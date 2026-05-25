@@ -32,7 +32,7 @@ func (m *MemoryReadModel) Get(
 	return m.items[itemKey(source, sourceID)], nil
 }
 
-func (m *MemoryReadModel) List(_ context.Context, filter ItemFilter) ([]*provider.Item, error) {
+func (m *MemoryReadModel) List(_ context.Context, filter provider.ItemFilter) ([]*provider.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -51,7 +51,7 @@ func (m *MemoryReadModel) List(_ context.Context, filter ItemFilter) ([]*provide
 	return paginate(all, filter.Limit, filter.Offset), nil
 }
 
-func (m *MemoryReadModel) Count(_ context.Context, filter ItemFilter) (int64, error) {
+func (m *MemoryReadModel) Count(_ context.Context, filter provider.ItemFilter) (int64, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -118,7 +118,7 @@ func (m *MemoryReadModel) Len() int {
 	return len(m.items)
 }
 
-func matchesFilter(item *provider.Item, filter ItemFilter) bool {
+func matchesFilter(item *provider.Item, filter provider.ItemFilter) bool {
 	if filter.Type != nil && item.Type.Get() != filter.Type.Get() {
 		return false
 	}

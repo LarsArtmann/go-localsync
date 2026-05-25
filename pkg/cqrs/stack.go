@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"charm.land/log/v2"
-	"log/slog"
 	"github.com/larsartmann/go-cqrs-lite/core/command"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/event"
@@ -285,15 +285,7 @@ func classifyAction(err error, eventCount int, wasNew bool) synclib.SyncAction {
 }
 
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
-	return s.ReadModel.Count(ctx, ItemFilter{
-		Type:       nil,
-		ActorLogin: nil,
-		RepoName:   nil,
-		Source:     nil,
-		Since:      nil,
-		Limit:      0,
-		Offset:     0,
-	})
+	return s.ReadModel.Count(ctx, provider.ItemFilter{})
 }
 
 func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
@@ -302,32 +294,20 @@ func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 
 func (s *CQRSStack) ListItems(
 	ctx context.Context,
-	filter synclib.ItemFilter,
+	filter provider.ItemFilter,
 ) ([]*provider.Item, error) {
-	return s.ReadModel.List(ctx, toItemFilter(filter))
+	return s.ReadModel.List(ctx, filter)
 }
 
 func (s *CQRSStack) CountItems(
 	ctx context.Context,
-	filter synclib.ItemFilter,
+	filter provider.ItemFilter,
 ) (int64, error) {
-	return s.ReadModel.Count(ctx, toItemFilter(filter))
+	return s.ReadModel.Count(ctx, filter)
 }
 
 func (s *CQRSStack) GetItemTypes(ctx context.Context) ([]string, error) {
 	return s.ReadModel.GetTypes(ctx)
-}
-
-func toItemFilter(filter synclib.ItemFilter) ItemFilter {
-	return ItemFilter{
-		Type:       filter.Type,
-		ActorLogin: filter.ActorLogin,
-		RepoName:   filter.RepoName,
-		Source:     filter.Source,
-		Since:      filter.Since,
-		Limit:      filter.Limit,
-		Offset:     filter.Offset,
-	}
 }
 
 func (s *CQRSStack) Close() error {

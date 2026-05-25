@@ -59,11 +59,11 @@ func (m *mockSyncStore) SyncItem(_ context.Context, item *provider.Item) error {
 	return nil
 }
 
-func (m *mockSyncStore) ListItems(_ context.Context, _ ItemFilter) ([]*provider.Item, error) {
+func (m *mockSyncStore) ListItems(_ context.Context, _ provider.ItemFilter) ([]*provider.Item, error) {
 	return m.items, nil
 }
 
-func (m *mockSyncStore) CountItems(_ context.Context, _ ItemFilter) (int64, error) {
+func (m *mockSyncStore) CountItems(_ context.Context, _ provider.ItemFilter) (int64, error) {
 	return int64(len(m.synced)), nil
 }
 

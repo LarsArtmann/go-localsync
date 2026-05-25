@@ -94,33 +94,33 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	upsertTestItem(t, rm, ctx, "gitlab", "3", "PushEvent", "alice", "org/repo3")
 
 	pushTypeFilter := types.NewEventTypeID("PushEvent")
-	items, err := rm.List(ctx, ItemFilter{Type: &pushTypeFilter})
+	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushTypeFilter})
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
 	sourceFilter := types.NewProviderID("github")
-	items, err = rm.List(ctx, ItemFilter{Source: &sourceFilter})
+	items, err = rm.List(ctx, provider.ItemFilter{Source: &sourceFilter})
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
 	actorFilter := types.NewActorID("alice")
-	items, err = rm.List(ctx, ItemFilter{ActorLogin: &actorFilter})
+	items, err = rm.List(ctx, provider.ItemFilter{ActorLogin: &actorFilter})
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
-	items, err = rm.List(ctx, ItemFilter{Limit: 2})
+	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2})
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
-	items, err = rm.List(ctx, ItemFilter{Offset: 10})
+	items, err = rm.List(ctx, provider.ItemFilter{Offset: 10})
 	mustNoError(t, err)
 	if items != nil {
 		t.Errorf("expected nil for out-of-range offset, got %d items", len(items))
@@ -136,14 +136,14 @@ func TestMemoryReadModel_Count(t *testing.T) {
 	upsertTestItem(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 	upsertTestItem(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
-	count, err := rm.Count(ctx, ItemFilter{})
+	count, err := rm.Count(ctx, provider.ItemFilter{})
 	mustNoError(t, err)
 	if count != 2 {
 		t.Errorf("expected count=2, got %d", count)
 	}
 
 	pushTypeFilter := types.NewEventTypeID("PushEvent")
-	count, err = rm.Count(ctx, ItemFilter{Type: &pushTypeFilter})
+	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushTypeFilter})
 	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
@@ -260,7 +260,7 @@ func TestReadModel_Integration(t *testing.T) {
 		t.Errorf("expected ActorLogin=testuser, got %s", got.ActorLogin.Get())
 	}
 
-	count, err := rm.Count(ctx, ItemFilter{})
+	count, err := rm.Count(ctx, provider.ItemFilter{})
 	mustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)

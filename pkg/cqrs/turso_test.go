@@ -52,7 +52,7 @@ func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 2)
 
-	items, err := stack.ReadModel.List(ctx, ItemFilter{})
+	items, err := stack.ReadModel.List(ctx, provider.ItemFilter{})
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))

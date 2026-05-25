@@ -78,7 +78,7 @@ func (m *TursoReadModel) Get(
 	return item, nil
 }
 
-func (m *TursoReadModel) List(ctx context.Context, filter ItemFilter) ([]*provider.Item, error) {
+func (m *TursoReadModel) List(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error) {
 	query, args := buildListQuery(filter)
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
@@ -91,7 +91,7 @@ func (m *TursoReadModel) List(ctx context.Context, filter ItemFilter) ([]*provid
 	return scanItems(rows)
 }
 
-func (m *TursoReadModel) Count(ctx context.Context, filter ItemFilter) (int64, error) {
+func (m *TursoReadModel) Count(ctx context.Context, filter provider.ItemFilter) (int64, error) {
 	query := "SELECT COUNT(*) FROM sync_items WHERE 1=1"
 	args := appendFilterArgs(&query, filter)
 
@@ -180,7 +180,7 @@ func (m *TursoReadModel) Close() error {
 	return m.db.Close()
 }
 
-func buildListQuery(filter ItemFilter) (string, []any) {
+func buildListQuery(filter provider.ItemFilter) (string, []any) {
 	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
 		FROM sync_items WHERE 1=1`
 
@@ -203,7 +203,7 @@ func buildListQuery(filter ItemFilter) (string, []any) {
 	return query, args
 }
 
-func appendFilterArgs(query *string, filter ItemFilter) []any {
+func appendFilterArgs(query *string, filter provider.ItemFilter) []any {
 	var args []any
 
 	if filter.Type != nil {

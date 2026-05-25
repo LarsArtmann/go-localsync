@@ -131,7 +131,7 @@ type DeleteItemCommand struct {
 type ListItemsQuery struct {
 	query.BasicQuery
 
-	Filter ItemFilter
+	Filter provider.ItemFilter
 }
 
 type GetItemQuery struct {
@@ -144,7 +144,7 @@ type GetItemQuery struct {
 type CountItemsQuery struct {
 	query.BasicQuery
 
-	Filter ItemFilter
+	Filter provider.ItemFilter
 }
 
 type GetTypesQuery struct {

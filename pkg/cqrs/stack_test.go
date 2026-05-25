@@ -204,7 +204,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 	}
 
 	pushType := types.NewEventTypeID("PushEvent")
-	results, err := stack.ReadModel.List(ctx, ItemFilter{Type: &pushType})
+	results, err := stack.ReadModel.List(ctx, provider.ItemFilter{Type: &pushType})
 	mustNoError(t, err)
 	if len(results) != 2 {
 		t.Errorf("expected 2 results, got %d", len(results))
