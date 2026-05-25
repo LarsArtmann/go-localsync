@@ -12,7 +12,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/localsync/`            | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] (extracted from go-cqrs-lite/sync)                  |
 | `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                                             |
-| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                                    |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`) |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                 |
 | `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary` |
 | `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                          |
@@ -70,7 +70,23 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 
 ### Conflict Flow
 
-`ConflictAwareSyncer` delegates entirely to `SyncStore.SyncItems()` (which `CQRSStack` implements). The decider (`DecideSync`) is the single authority for conflict detection, producing `ItemSyncResult` with `SyncAction` classification. `ConflictAwareSyncer` iterates `summary.Results` using `sync.ActionCreated`/`sync.ActionConflictRemote` etc. constants. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
+`ConflictAwareSyncer` delegates entirely to `SyncStore.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and emits `ItemConflictFound` + `ItemSynced` events. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
+
+### SyncStore Interface
+
+`pkg/sync/` defines the `SyncStore` interface — the architectural boundary between sync logic and storage. `*cqrs.CQRSStack` satisfies it implicitly.
+
+```go
+type SyncStore interface {
+    SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
+    ListItems(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error)
+    CountItems(ctx context.Context, filter provider.ItemFilter) (int64, error)
+    GetItemTypes(ctx context.Context) ([]string, error)
+    Close() error
+}
+```
+
+Dependency flows one way: `cqrs → sync → provider/types/errors`. No import cycles.
 
 ## Development Workflow
 
