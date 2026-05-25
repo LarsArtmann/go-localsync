@@ -59,8 +59,8 @@ func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
 	// This tests the type assertion path in handleSyncItem
 	aggID := AggregateID("github", types.NewExternalID("wrong-type-test"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		Core: *command.MustNew(commandTypeSyncItem, aggID),
-		Item: testItem("wrong-type-test", "PushEvent"),
+		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		Item:         testItem("wrong-type-test", "PushEvent"),
 	})
 	mustNoError(t, err)
 }
@@ -76,8 +76,8 @@ func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
 	// Try to dispatch an unregistered command type
 	aggID := AggregateID("github", types.NewExternalID("unknown"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		Core: *command.MustNew(command.Type("unknown.command"), aggID),
-		Item: testItem("unknown", "PushEvent"),
+		BasicCommand: *command.MustNew(command.Type("unknown.command"), aggID),
+		Item:         testItem("unknown", "PushEvent"),
 	})
 	if err == nil {
 		t.Error("expected error for unregistered command type")
@@ -94,8 +94,8 @@ func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
 	aggID := AggregateID("github", types.NewExternalID("nil-item"))
 
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		Core: *command.MustNew(commandTypeSyncItem, aggID),
-		Item: nil,
+		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		Item:         nil,
 	})
 	if err == nil {
 		t.Error("expected validation error for nil item")
@@ -114,8 +114,8 @@ func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
 
 	aggID := AggregateID("", types.NewExternalID("empty-source"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		Core: *command.MustNew(commandTypeSyncItem, aggID),
-		Item: item,
+		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		Item:         item,
 	})
 	if err == nil {
 		t.Error("expected validation error for empty source")
@@ -132,8 +132,8 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 	mustNoError(t, stack.SyncItem(ctx, testItem("q-1", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
-		Core:   *query.MustNew(queryTypeListItem),
-		Filter: ItemFilter{},
+		BasicQuery: *query.MustNew(queryTypeListItem),
+		Filter:     ItemFilter{},
 	})
 	mustNoError(t, err)
 
@@ -156,9 +156,9 @@ func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
 	mustNoError(t, stack.SyncItem(ctx, testItem("q-2", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetItemQuery{
-		Core:     *query.MustNew(queryTypeGetItem),
-		Source:   "github",
-		SourceID: types.NewExternalID("q-2"),
+		BasicQuery: *query.MustNew(queryTypeGetItem),
+		Source:     "github",
+		SourceID:   types.NewExternalID("q-2"),
 	})
 	mustNoError(t, err)
 
@@ -181,8 +181,8 @@ func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
 	mustNoError(t, stack.SyncItem(ctx, testItem("q-3", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
-		Core:   *query.MustNew(queryTypeCountItem),
-		Filter: ItemFilter{},
+		BasicQuery: *query.MustNew(queryTypeCountItem),
+		Filter:     ItemFilter{},
 	})
 	mustNoError(t, err)
 
@@ -205,7 +205,7 @@ func TestQueryDispatcher_GetTypes_ThroughDispatcher(t *testing.T) {
 	mustNoError(t, stack.SyncItem(ctx, testItem("q-4", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
-		Core: *query.MustNew(queryTypeGetTypes),
+		BasicQuery: *query.MustNew(queryTypeGetTypes),
 	})
 	mustNoError(t, err)
 
@@ -227,7 +227,7 @@ func TestQueryDispatcher_UnknownQueryType(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
-		Core: *query.MustNew(query.Type("unknown.query")),
+		BasicQuery: *query.MustNew(query.Type("unknown.query")),
 	})
 	if err == nil {
 		t.Error("expected error for unregistered query type")

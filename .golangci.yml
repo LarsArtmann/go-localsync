@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.2
+  go: 1.26.3
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -134,6 +134,8 @@ linters:
           deny:
             - desc: use github.com/charmbracelet/log
               pkg: log
+          allow:
+            - log/slog
           list-mode: lax
     exhaustruct:
       exclude:
@@ -152,6 +154,8 @@ linters:
         - ifElseChain
         - octalLiteral
         - whyNoLint
+    gomoddirectives:
+      replace-local: true
     ireturn:
       allow:
         - error
@@ -279,14 +283,26 @@ linters:
           - gocheckcompilerdirectives
           - forcetypeassert
           - inamedparam
+      - path: _test\.go
+        text: unused
+        linters:
+          - unused
     paths:
+      - \.gen\.go$
+      - _templ\.go$
       - go.mod
+      - vendor/
 formatters:
   enable:
     - gci
     - goimports
     - gofumpt
     - golines
+  settings:
+    golines:
+      max-len: 120
   exclusions:
     generated: lax
+    paths:
+      - _templ\.go$
 issues: {}

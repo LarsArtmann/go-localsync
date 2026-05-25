@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
@@ -263,42 +264,42 @@ func TestClassifyAction(t *testing.T) {
 		err        error
 		eventCount int
 		wasNew     bool
-		want       SyncAction
+		want       synclib.SyncAction
 	}{
 		{
 			name:       "error_returns_action_error",
 			err:        errors.New("some error"),
 			eventCount: 0,
 			wasNew:     false,
-			want:       ActionError,
+			want:       synclib.ActionError,
 		},
 		{
 			name:       "multiple_events_conflict_remote",
 			err:        nil,
 			eventCount: 2,
 			wasNew:     false,
-			want:       ActionConflictRemote,
+			want:       synclib.ActionConflictRemote,
 		},
 		{
 			name:       "one_event_new_item_created",
 			err:        nil,
 			eventCount: 1,
 			wasNew:     true,
-			want:       ActionCreated,
+			want:       synclib.ActionCreated,
 		},
 		{
 			name:       "one_event_existing_item_updated",
 			err:        nil,
 			eventCount: 1,
 			wasNew:     false,
-			want:       ActionUpdated,
+			want:       synclib.ActionUpdated,
 		},
 		{
 			name:       "zero_events_unchanged",
 			err:        nil,
 			eventCount: 0,
 			wasNew:     false,
-			want:       ActionUnchanged,
+			want:       synclib.ActionUnchanged,
 		},
 	}
 
@@ -334,7 +335,7 @@ func TestCQRSStack_SyncItems_SameItem_Twice(t *testing.T) {
 	var foundCreated bool
 
 	for _, r := range first.Results {
-		if r.Action == ActionCreated {
+		if r.Action == synclib.ActionCreated {
 			foundCreated = true
 		}
 	}
@@ -353,7 +354,7 @@ func TestCQRSStack_SyncItems_SameItem_Twice(t *testing.T) {
 	var foundUnchanged bool
 
 	for _, r := range second.Results {
-		if r.Action == ActionUnchanged {
+		if r.Action == synclib.ActionUnchanged {
 			foundUnchanged = true
 		}
 	}
@@ -390,7 +391,7 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 	var foundConflict bool
 
 	for _, r := range second.Results {
-		if r.Action == ActionConflictRemote {
+		if r.Action == synclib.ActionConflictRemote {
 			foundConflict = true
 		}
 	}

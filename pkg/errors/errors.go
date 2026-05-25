@@ -19,6 +19,12 @@ var (
 	ErrDBNil          = errorfamily.NewRejection("db_nil", "database is nil")
 )
 
+// IsRetryable reports whether the error is worth retrying.
+// Delegates to errorfamily's intrinsic classification.
+func IsRetryable(err error) bool {
+	return errorfamily.IsRetryable(err)
+}
+
 // WithDetail wraps err with a detail string for debugging context.
 // Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func WithDetail(err error, detail string) error {

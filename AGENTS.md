@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-05-21 (session 3)
+**Updated:** 2026-05-25 (session 4)
 
 ## Project Overview
 
@@ -8,17 +8,36 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## Architecture
 
-| Package                     | Purpose                                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/localsync/`            | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] (extracted from go-cqrs-lite/sync)  |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                              |
-| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                     |
-| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                  |
-| `pkg/sync/`                 | `Syncer` (basic), `ConflictAwareSyncer` (delegates to CQRSStack conflict detection)                                       |
-| `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)           |
-| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification |
-| `pkg/testhelpers/`          | Shared test mocks and factories                                                                                           |
-| `cmd/examples/github-sync/` | Example CLI entry point                                                                                                   |
+| Package                     | Purpose                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `pkg/localsync/`            | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] (extracted from go-cqrs-lite/sync)                  |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                                             |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                                    |
+| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                 |
+| `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary` |
+| `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                          |
+| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable` |
+| `cmd/examples/github-sync/` | Example CLI entry point                                                                                                                  |
+
+### SyncStore Interface Seam
+
+`pkg/sync/` defines `SyncStore` — a minimal interface that decouples the sync logic from concrete CQRS infrastructure:
+
+```go
+type SyncStore interface {
+    SyncItems(ctx, items) *SyncSummary
+    SyncItem(ctx, item) error
+    ListItems(ctx, ItemFilter) ([]*provider.Item, error)
+    CountItems(ctx, ItemFilter) (int64, error)
+    GetItemTypes(ctx) ([]string, error)
+    Count(ctx) (int64, error)
+    Close() error
+}
+```
+
+`*cqrs.CQRSStack` implements `SyncStore` via adapter methods (`ListItems`, `CountItems`, `GetItemTypes`) that convert `sync.ItemFilter` → `cqrs.ItemFilter` and delegate to the read model. The sync package has **zero imports on `pkg/cqrs`** — the dependency flows one way: `cqrs → sync`.
+
+`SyncAction` constants (`ActionCreated`, `ActionUpdated`, `ActionConflictRemote`, `ActionUnchanged`, `ActionError`) and `ItemSyncResult` live in `pkg/sync/` — the architectural seam — not in `pkg/cqrs/`.
 
 ## CQRS Architecture
 
@@ -51,7 +70,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 
 ### Conflict Flow
 
-`ConflictAwareSyncer` delegates entirely to `CQRSStack.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and emits `ItemConflictFound` + `ItemSynced` events. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
+`ConflictAwareSyncer` delegates entirely to `SyncStore.SyncItems()` (which `CQRSStack` implements). The decider (`DecideSync`) is the single authority for conflict detection, producing `ItemSyncResult` with `SyncAction` classification. `ConflictAwareSyncer` iterates `summary.Results` using `sync.ActionCreated`/`sync.ActionConflictRemote` etc. constants. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
 
 ## Development Workflow
 
@@ -95,14 +114,14 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | -------------------------- | ----- | -------- | ------------------------------------------------------------------------------------------ |
 | `pkg/cqrs`                 | 73    | 82.5%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation |
 | `pkg/providers/github`     | 46    | 85.4%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                   |
-| `pkg/sync`                 | 18    | 87.2%    | ✅ Syncer + ConflictAwareSyncer + Incremental + invalid item error counting                |
+| `pkg/sync`                 | 14    | ~85%     | ✅ Syncer + ConflictAwareSyncer + invalid item error counting (mock SyncStore)             |
 | `pkg/types`                | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
 | `pkg/errors`               | 28    | 100.0%   | ✅ Sentinel errors, wrapping, classification, fallback paths                               |
 | `pkg/provider`             | 6     | 100.0%   | ✅ Item validation                                                                         |
 | `cmd/examples/github-sync` | 11    | 10.5%    | ✅ exitCodeForError, LoadConfig, env defaults                                              |
-| `pkg/testhelpers`          | 0     | 0.0%     | ⬜ Helper package                                                                          |
+| `pkg/testhelpers`          | —     | —        | ⬜ Deleted — helpers moved to `pkg/providers/github/testhelpers_test.go`                   |
 
-**197 total test functions** across 7 test packages. **73.7% overall coverage**.
+**153 total test functions** across 6 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -176,20 +195,22 @@ Two tables managed by the CQRS stack:
 
 ## go-cqrs-lite Integration
 
-| Area           | go-localsync                                                                    | go-cqrs-lite                                           |
-| -------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| IDs            | `id.ID[B, V]` via go-branded-id directly                                        | `id.Of[T]` — same memory layout                        |
-| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                               | `event.Store` + `event.Bus` via memory/storage modules |
-| Conflict       | `DecideSync` produces ItemConflictFound events                                  | Error taxonomy with 5 families                         |
-| Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                     | Projected from events via InMemoryRunner               |
-| Codec          | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents`                            | Eliminates all manual json.Marshal/Unmarshal           |
-| Outbox         | `SQLTransactionalStore.SaveWithOutbox` for Turso, outbox poller goroutine       | Atomic save+publish, crash-safe event delivery         |
-| Projection     | `projection.Runner` (Turso) + `InMemoryRunner` (memory), SQL checkpoints        | Replay from store on restart + live subscription       |
-| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `EveryNEvents` | Caps replay cost, persists across restarts             |
-| Correlation    | `event.WithCorrelationID` in `SyncItems`                                        | Unique per sync run for debugging                      |
-| Logging        | `middleware.EventLogging` via charm log adapter                                 | Structured logging of all domain events                |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable` | Smart retry classification for provider errors         |
-| Version        | `event.Version` with `Increment()`, `Add()`                                     | Phantom type safety — no `int()` casts                 |
+| Area           | go-localsync                                                                                            | go-cqrs-lite                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                | `id.Of[T]` — same memory layout                        |
+| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                       | `event.Store` + `event.Bus` via memory/storage modules |
+| Conflict       | `DecideSync` produces ItemConflictFound events                                                          | Error taxonomy with 5 families                         |
+| Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                                             | Projected from events via InMemoryRunner               |
+| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`ListItems`, `CountItems`, `GetItemTypes`) | `sync.SyncStore` interface defined in consumer package |
+| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                   | Types defined in `pkg/sync/`, not `pkg/cqrs/`          |
+| Codec          | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents`                                                    | Eliminates all manual json.Marshal/Unmarshal           |
+| Outbox         | `SQLTransactionalStore.SaveWithOutbox` for Turso, outbox poller goroutine                               | Atomic save+publish, crash-safe event delivery         |
+| Projection     | `projection.Runner` (Turso) + `InMemoryRunner` (memory), SQL checkpoints                                | Replay from store on restart + live subscription       |
+| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `EveryNEvents`                         | Caps replay cost, persists across restarts             |
+| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                | Unique per sync run for debugging                      |
+| Logging        | `middleware.EventLogging` via charm log adapter                                                         | Structured logging of all domain events                |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                         | Smart retry classification for provider errors         |
+| Version        | `event.Version` with `Increment()`, `Add()`                                                             | Phantom type safety — no `int()` casts                 |
 
 ### Not Yet Adopted
 
@@ -233,6 +254,17 @@ All anti-patterns from the previous audit have been resolved:
 - ✅ `query.Dispatcher` with typed queries — `ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery` dispatched through query pipeline
 - ✅ `event.NewOutboxPublisher` exported from go-cqrs-lite — was previously unexported `outboxPublisher`
 - ✅ `event.NewEvents`/`event.MustNewEvents`/`event.DecodePayloads` exported from go-cqrs-lite — were previously unexported
+
+## Unix-Style Modularity (Session 4 — 2026-05-25)
+
+### Completed Improvements
+
+- ✅ **`SyncStore` interface seam**: `pkg/sync/` defines `SyncStore` interface; `*cqrs.CQRSStack` implements it via adapter methods. `pkg/sync/` has **zero imports on `pkg/cqrs/`**.
+- ✅ **`SyncAction`/`ItemSyncResult` moved to seam**: These types now live in `pkg/sync/` (the architectural boundary), not `pkg/cqrs/`. The `classifyAction` function in `cqrs` returns `synclib.SyncAction`.
+- ✅ **`IsRetryable` moved to `pkg/errors/`**: Retry-classification is a generic concern, not event-sourcing. Delegates to `errorfamily.IsRetryable()`.
+- ✅ **`pkg/testhelpers/` deleted**: Only used by github provider tests. Helpers moved to `pkg/providers/github/testhelpers_test.go` as unexported test helpers.
+- ✅ **`sync_test.go` uses mock `SyncStore`**: No import cycle — sync tests use a `mockSyncStore` struct, not `*cqrs.CQRSStack`. Integration tests for conflict-aware sync live in `pkg/cqrs/`.
+- ✅ **go-cqrs-lite API drift fixed**: `command.Core→BasicCommand`, `query.Core→BasicQuery`, `event.Core→ImmutableEvent`, `NewCheckpointStore→NewMemoryCheckpointStore`.
 
 ## Lint Status
 

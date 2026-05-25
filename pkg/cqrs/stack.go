@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"charm.land/log/v2"
+	"log/slog"
 	"github.com/larsartmann/go-cqrs-lite/core/command"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/event"
@@ -15,19 +16,12 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/middleware"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
-type charmLogAdapter struct {
-	logger *log.Logger
-}
-
-func (a *charmLogAdapter) Info(msg string, keyvals ...any) {
-	a.logger.Info(msg, keyvals...)
-}
-
-func (a *charmLogAdapter) Error(msg string, keyvals ...any) {
-	a.logger.Error(msg, keyvals...)
+func newSlogLogger() *slog.Logger {
+	return slog.New(log.Default())
 }
 
 const (
@@ -77,10 +71,10 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 
 	var cancelRunner context.CancelFunc
 
-	if mwErr := sr.bus.Use(
-		middleware.EventLogging(&charmLogAdapter{logger: log.Default()}),
-	); mwErr != nil {
-		return nil, fmt.Errorf("wire event logging middleware: %w", mwErr)
+	if err := sr.bus.Use(
+		middleware.EventLogging(newSlogLogger()),
+	); err != nil {
+		return nil, fmt.Errorf("wire event logging middleware: %w", err)
 	}
 
 	if sr.loader != nil {
@@ -184,8 +178,8 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		Core: *command.MustNew(commandTypeSyncItem, aggID),
-		Item: item,
+		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		Item:         item,
 	})
 }
 
@@ -197,41 +191,18 @@ func (s *CQRSStack) DeleteItem(
 	aggID := AggregateID(source, sourceID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &DeleteItemCommand{
-		Core:     *command.MustNew(commandTypeDeleteItem, aggID),
-		Source:   source,
-		SourceID: sourceID,
+		BasicCommand: *command.MustNew(commandTypeDeleteItem, aggID),
+		Source:       source,
+		SourceID:     sourceID,
 	})
-}
-
-type SyncAction string
-
-const (
-	ActionCreated        SyncAction = "created"
-	ActionUpdated        SyncAction = "updated"
-	ActionConflictRemote SyncAction = "conflict_remote"
-	ActionUnchanged      SyncAction = "unchanged"
-	ActionError          SyncAction = "error"
-)
-
-type ItemSyncResult struct {
-	SourceID string
-	Action   SyncAction
-	Error    error
-}
-
-type SyncSummary struct {
-	Synced    int
-	Conflicts int
-	Errors    int
-	Results   []ItemSyncResult
 }
 
 func (s *CQRSStack) SyncItems(
 	ctx context.Context,
 	items []*provider.Item,
-) *SyncSummary {
-	summary := &SyncSummary{
-		Results:   make([]ItemSyncResult, 0, len(items)),
+) *synclib.SyncSummary {
+	summary := &synclib.SyncSummary{
+		Results:   make([]synclib.ItemSyncResult, 0, len(items)),
 		Synced:    0,
 		Conflicts: 0,
 		Errors:    0,
@@ -268,22 +239,22 @@ func (s *CQRSStack) SyncItems(
 
 		err := s.Repo.Execute(ctx, aggID, aggregateType, countingDecide)
 
-		result := ItemSyncResult{
+		result := synclib.ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
 			Action:   classifyAction(err, eventCount, wasNew),
 			Error:    err,
 		}
 
 		switch result.Action {
-		case ActionError:
+		case synclib.ActionError:
 			summary.Errors++
-		case ActionCreated, ActionUpdated, ActionConflictRemote:
+		case synclib.ActionCreated, synclib.ActionUpdated, synclib.ActionConflictRemote:
 			summary.Synced++
 
-			if result.Action == ActionConflictRemote {
+			if result.Action == synclib.ActionConflictRemote {
 				summary.Conflicts++
 			}
-		case ActionUnchanged:
+		case synclib.ActionUnchanged:
 			// No counters
 		}
 
@@ -293,24 +264,24 @@ func (s *CQRSStack) SyncItems(
 	return summary
 }
 
-func classifyAction(err error, eventCount int, wasNew bool) SyncAction {
+func classifyAction(err error, eventCount int, wasNew bool) synclib.SyncAction {
 	if err != nil {
-		return ActionError
+		return synclib.ActionError
 	}
 
 	if eventCount > 1 {
-		return ActionConflictRemote
+		return synclib.ActionConflictRemote
 	}
 
 	if eventCount == 1 && wasNew {
-		return ActionCreated
+		return synclib.ActionCreated
 	}
 
 	if eventCount == 1 {
-		return ActionUpdated
+		return synclib.ActionUpdated
 	}
 
-	return ActionUnchanged
+	return synclib.ActionUnchanged
 }
 
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
@@ -327,6 +298,36 @@ func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
 
 func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 	return s.ReadModel.GetTypes(ctx)
+}
+
+func (s *CQRSStack) ListItems(
+	ctx context.Context,
+	filter synclib.ItemFilter,
+) ([]*provider.Item, error) {
+	return s.ReadModel.List(ctx, toItemFilter(filter))
+}
+
+func (s *CQRSStack) CountItems(
+	ctx context.Context,
+	filter synclib.ItemFilter,
+) (int64, error) {
+	return s.ReadModel.Count(ctx, toItemFilter(filter))
+}
+
+func (s *CQRSStack) GetItemTypes(ctx context.Context) ([]string, error) {
+	return s.ReadModel.GetTypes(ctx)
+}
+
+func toItemFilter(filter synclib.ItemFilter) ItemFilter {
+	return ItemFilter{
+		Type:       filter.Type,
+		ActorLogin: filter.ActorLogin,
+		RepoName:   filter.RepoName,
+		Source:     filter.Source,
+		Since:      filter.Since,
+		Limit:      filter.Limit,
+		Offset:     filter.Offset,
+	}
 }
 
 func (s *CQRSStack) Close() error {

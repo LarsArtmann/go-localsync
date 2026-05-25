@@ -5,26 +5,68 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
+type SyncAction string
+
+const (
+	ActionCreated        SyncAction = "created"
+	ActionUpdated        SyncAction = "updated"
+	ActionConflictRemote SyncAction = "conflict_remote"
+	ActionUnchanged      SyncAction = "unchanged"
+	ActionError          SyncAction = "error"
+)
+
+type ItemSyncResult struct {
+	SourceID string
+	Action   SyncAction
+	Error    error
+}
+
+type SyncSummary struct {
+	Synced    int
+	Conflicts int
+	Errors    int
+	Results   []ItemSyncResult
+}
+
+type SyncStore interface {
+	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
+	SyncItem(ctx context.Context, item *provider.Item) error
+	ListItems(ctx context.Context, filter ItemFilter) ([]*provider.Item, error)
+	CountItems(ctx context.Context, filter ItemFilter) (int64, error)
+	GetItemTypes(ctx context.Context) ([]string, error)
+	Count(ctx context.Context) (int64, error)
+	Close() error
+}
+
+type ItemFilter struct {
+	Type       *types.EventTypeID
+	ActorLogin *types.ActorID
+	RepoName   *types.RepoID
+	Source     *types.ProviderID
+	Since      *time.Time
+	Limit      int
+	Offset     int
+}
+
 type Syncer struct {
 	provider provider.Provider
-	stack    *cqrs.CQRSStack
+	store    SyncStore
 	logger   *log.Logger
 }
 
-func NewSyncer(p provider.Provider, stack *cqrs.CQRSStack, logger *log.Logger) *Syncer {
+func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer {
 	if logger == nil {
 		logger = log.Default()
 	}
 
 	return &Syncer{
 		provider: p,
-		stack:    stack,
+		store:    store,
 		logger:   logger,
 	}
 }
@@ -84,7 +126,7 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		return syncResult, nil
 	}
 
-	summary := s.stack.SyncItems(ctx, valid)
+	summary := s.store.SyncItems(ctx, valid)
 	syncResult.Errors += summary.Errors
 	syncResult.Skipped = len(valid) - summary.Synced - summary.Errors
 
@@ -109,9 +151,9 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 		return nil, err
 	}
 
-	items, err := s.stack.ReadModel.List(
+	items, err := s.store.ListItems(
 		ctx,
-		cqrs.ItemFilter{
+		ItemFilter{
 			Type:       nil,
 			ActorLogin: nil,
 			RepoName:   nil,
@@ -154,12 +196,20 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 }
 
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
-	count, err := s.stack.Count(ctx)
+	count, err := s.store.CountItems(ctx, ItemFilter{
+		Type:       nil,
+		ActorLogin: nil,
+		RepoName:   nil,
+		Source:     nil,
+		Since:      nil,
+		Limit:      0,
+		Offset:     0,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	eventTypes, err := s.stack.GetTypes(ctx)
+	eventTypes, err := s.store.GetItemTypes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -169,9 +219,9 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	for _, t := range eventTypes {
 		eventType := types.NewEventTypeID(t)
 
-		count, err := s.stack.ReadModel.Count(
+		count, err := s.store.CountItems(
 			ctx,
-			cqrs.ItemFilter{
+			ItemFilter{
 				Type:       &eventType,
 				ActorLogin: nil,
 				RepoName:   nil,
@@ -198,7 +248,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 }
 
 func (s *Syncer) Close() error {
-	return s.stack.Close()
+	return s.store.Close()
 }
 
 func (s *Syncer) processIncrementalItems(
@@ -228,7 +278,7 @@ func (s *Syncer) processIncrementalItems(
 	toSync := s.filterValidItems(filtered, syncResult)
 
 	if len(toSync) > 0 {
-		summary := s.stack.SyncItems(ctx, toSync)
+		summary := s.store.SyncItems(ctx, toSync)
 		syncResult.Errors += summary.Errors
 		syncResult.Skipped += len(toSync) - summary.Synced - summary.Errors
 	}

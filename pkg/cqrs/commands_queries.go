@@ -116,39 +116,39 @@ const (
 )
 
 type SyncItemCommand struct {
-	command.Core
+	command.BasicCommand
 
 	Item *provider.Item
 }
 
 type DeleteItemCommand struct {
-	command.Core
+	command.BasicCommand
 
 	Source   string
 	SourceID types.ExternalID
 }
 
 type ListItemsQuery struct {
-	query.Core
+	query.BasicQuery
 
 	Filter ItemFilter
 }
 
 type GetItemQuery struct {
-	query.Core
+	query.BasicQuery
 
 	Source   string
 	SourceID types.ExternalID
 }
 
 type CountItemsQuery struct {
-	query.Core
+	query.BasicQuery
 
 	Filter ItemFilter
 }
 
 type GetTypesQuery struct {
-	query.Core
+	query.BasicQuery
 }
 
 func wireCommandDispatcher(

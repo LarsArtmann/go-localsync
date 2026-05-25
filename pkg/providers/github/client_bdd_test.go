@@ -1,4 +1,4 @@
-package github_test
+package github
 
 import (
 	"context"
@@ -12,14 +12,12 @@ import (
 
 	gh "github.com/google/go-github/v69/github"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/providers/github"
-	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 )
 
 type githubTestWorld struct {
 	ctx       context.Context
 	server    *httptest.Server
-	client    *github.Client
+	client    *Client
 	result    *provider.FetchResult
 	rateLimit *provider.RateLimitInfo
 	err       error
@@ -31,12 +29,12 @@ func (w *githubTestWorld) fetchFor(source string) {
 }
 
 func (w *githubTestWorld) withRetryConfig() {
-	w.client = w.client.WithRetryConfig(testhelpers.TestRetryConfig())
+	w.client = w.client.WithRetryConfig(testRetryConfig())
 }
 
-func newGitHubTestClient(server *httptest.Server) *github.Client {
+func newGitHubTestClient(server *httptest.Server) *Client {
 	httpClient := &http.Client{}
-	client := github.NewClientWithHTTP(httpClient)
+	client := NewClientWithHTTP(httpClient)
 	c, err := client.WithBaseURL(server.URL + "/")
 	if err != nil {
 		panic(fmt.Sprintf("WithBaseURL failed: %v", err))
@@ -45,7 +43,7 @@ func newGitHubTestClient(server *httptest.Server) *github.Client {
 	return c
 }
 
-func newGitHubTestClientWithoutRateLimit(server *httptest.Server) *github.Client {
+func newGitHubTestClientWithoutRateLimit(server *httptest.Server) *Client {
 	return newGitHubTestClient(server).WithRateLimitConfig(provider.RateLimitConfig{Enabled: false})
 }
 
@@ -60,12 +58,12 @@ func TestBDD_FetchValidUser(t *testing.T) {
 			}
 
 			events := []*gh.Event{
-				testhelpers.NewTestEvent(
+				newTestEvent(
 					"event-123",
 					"PushEvent",
 					time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC),
 				),
-				testhelpers.NewTestEvent(
+				newTestEvent(
 					"event-456",
 					"IssuesEvent",
 					time.Date(2024, 1, 15, 11, 0, 0, 0, time.UTC),
@@ -179,7 +177,7 @@ func TestBDD_FetchAllPaginated(t *testing.T) {
 
 func TestBDD_UserNotFound(t *testing.T) {
 	world := githubTestWorld{ctx: context.Background()}
-	world.server = testhelpers.NewErrorTestServer(http.StatusNotFound, "Not Found")
+	world.server = newErrorTestServer(http.StatusNotFound, "Not Found")
 	defer world.server.Close()
 
 	world.client = newGitHubTestClientWithoutRateLimit(world.server)
@@ -200,7 +198,7 @@ func TestBDD_RateLimitInfo(t *testing.T) {
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/rate_limit/" || r.URL.Path == "/rate_limit" {
 				w.Header().Set("Content-Type", "application/json")
-				_ = json.NewEncoder(w).Encode(testhelpers.RateLimitResponse(5))
+				_ = json.NewEncoder(w).Encode(rateLimitResponse(5))
 
 				return
 			}
@@ -231,7 +229,7 @@ func TestBDD_RateLimitInfo(t *testing.T) {
 func TestBDD_RetryOnServerError(t *testing.T) {
 	world := githubTestWorld{ctx: context.Background()}
 	var retryCountPtr *int
-	world.server, retryCountPtr = testhelpers.NewFailingThenSucceedingTestServer(3)
+	world.server, retryCountPtr = newFailingThenSucceedingTestServer(3)
 	defer world.server.Close()
 
 	world.client = newGitHubTestClientWithoutRateLimit(world.server)
@@ -248,7 +246,7 @@ func TestBDD_RetryOnServerError(t *testing.T) {
 
 func TestBDD_NoRetryOnClientError(t *testing.T) {
 	world := githubTestWorld{ctx: context.Background()}
-	world.server = testhelpers.NewErrorTestServer(http.StatusBadRequest, "Bad Request")
+	world.server = newErrorTestServer(http.StatusBadRequest, "Bad Request")
 	defer world.server.Close()
 
 	world.client = newGitHubTestClientWithoutRateLimit(world.server)
@@ -261,7 +259,7 @@ func TestBDD_NoRetryOnClientError(t *testing.T) {
 }
 
 func TestBDD_ClientCreation(t *testing.T) {
-	client := github.NewClient("ghp_test_token_12345")
+	client := NewClient("ghp_test_token_12345")
 	if client == nil {
 		t.Fatal("expected non-nil client")
 	}
@@ -271,7 +269,7 @@ func TestBDD_ClientCreation(t *testing.T) {
 }
 
 func TestBDD_Configuration(t *testing.T) {
-	client := github.NewClient("test-token")
+	client := NewClient("test-token")
 
 	t.Run("custom rate limit config", func(t *testing.T) {
 		cfg := provider.RateLimitConfig{

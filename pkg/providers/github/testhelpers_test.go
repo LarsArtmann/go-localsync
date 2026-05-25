@@ -1,4 +1,4 @@
-package testhelpers
+package github
 
 import (
 	"encoding/json"
@@ -11,8 +11,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-// mustParseURL parses a URL and adds trailing slash (required by go-github).
-func MustParseURL(rawURL string) *url.URL {
+func mustParseURL(rawURL string) *url.URL {
 	u, err := url.Parse(rawURL)
 	if err != nil {
 		panic(err)
@@ -23,8 +22,7 @@ func MustParseURL(rawURL string) *url.URL {
 	return u
 }
 
-// NewTestEvent creates a test GitHub event with the specified parameters.
-func NewTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
+func newTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
 	return &gh.Event{
 		ID:   new(id),
 		Type: new(eventType),
@@ -40,8 +38,7 @@ func NewTestEvent(id, eventType string, createdAt time.Time) *gh.Event {
 	}
 }
 
-// NewErrorTestServer creates an httptest.Server that returns a JSON error response.
-func NewErrorTestServer(statusCode int, message string) *httptest.Server {
+func newErrorTestServer(statusCode int, message string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(statusCode)
 		w.Header().Set("Content-Type", "application/json")
@@ -49,10 +46,7 @@ func NewErrorTestServer(statusCode int, message string) *httptest.Server {
 	}))
 }
 
-// NewFailingThenSucceedingTestServer creates a test server that fails with
-// http.StatusInternalServerError for the first (attempts-1) requests and succeeds
-// on the final attempt by returning an empty event list.
-func NewFailingThenSucceedingTestServer(attempts int) (*httptest.Server, *int) {
+func newFailingThenSucceedingTestServer(attempts int) (*httptest.Server, *int) {
 	callCount := 0
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
@@ -69,8 +63,7 @@ func NewFailingThenSucceedingTestServer(attempts int) (*httptest.Server, *int) {
 	return server, &callCount
 }
 
-// TestRetryConfig returns a retry config suitable for unit tests with fast backoff.
-func TestRetryConfig() provider.RetryConfig {
+func testRetryConfig() provider.RetryConfig {
 	return provider.RetryConfig{
 		Enabled:        true,
 		MaxRetries:     3,
@@ -79,15 +72,13 @@ func TestRetryConfig() provider.RetryConfig {
 	}
 }
 
-// DefaultGitHubRateLimit is the standard GitHub API rate limit for authenticated requests.
-const DefaultGitHubRateLimit = 5000
+const defaultGitHubRateLimit = 5000
 
-// RateLimitResponse returns a JSON payload for GitHub rate limit responses.
-func RateLimitResponse(remaining int) map[string]any {
+func rateLimitResponse(remaining int) map[string]any {
 	return map[string]any{
 		"resources": gh.RateLimits{
 			Core: &gh.Rate{
-				Limit:     DefaultGitHubRateLimit,
+				Limit:     defaultGitHubRateLimit,
 				Remaining: remaining,
 				Reset:     gh.Timestamp{Time: time.Now().Add(1 * time.Hour)},
 			},

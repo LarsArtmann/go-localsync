@@ -13,7 +13,6 @@ import (
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/testhelpers"
 )
 
 func mustNoError(t *testing.T, err error) {
@@ -77,17 +76,11 @@ func TestNewClientWithHTTP(t *testing.T) {
 func newTestClient(server *httptest.Server) *Client {
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = testhelpers.MustParseURL(server.URL)
+	client.client.BaseURL = mustParseURL(server.URL)
 	client = client.WithRateLimitConfig(provider.RateLimitConfig{Enabled: false})
 
 	return client
 }
-
-var (
-	newErrorTestServer                 = testhelpers.NewErrorTestServer
-	testRetryConfig                    = testhelpers.TestRetryConfig
-	newFailingThenSucceedingTestServer = testhelpers.NewFailingThenSucceedingTestServer
-)
 
 func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +88,7 @@ func TestFetch_DefaultOptions(t *testing.T) {
 		assertEqual(t, r.URL.Query().Get("page"), "1", "page")
 
 		events := []*gh.Event{
-			testhelpers.NewTestEvent(
+			newTestEvent(
 				"123",
 				"PushEvent",
 				time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC),
@@ -375,13 +368,13 @@ func TestGetRateLimit(t *testing.T) {
 			t.Errorf("expected path to contain /rate_limit, got %s", r.URL.Path)
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(testhelpers.RateLimitResponse(4999))
+		_ = json.NewEncoder(w).Encode(rateLimitResponse(4999))
 	}))
 	defer server.Close()
 
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = testhelpers.MustParseURL(server.URL)
+	client.client.BaseURL = mustParseURL(server.URL)
 
 	limits, err := client.GetRateLimit(context.Background())
 	if err != nil {
@@ -484,7 +477,7 @@ func TestGetRateLimit_NilCore(t *testing.T) {
 
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)
-	client.client.BaseURL = testhelpers.MustParseURL(server.URL)
+	client.client.BaseURL = mustParseURL(server.URL)
 
 	limits, err := client.GetRateLimit(context.Background())
 	mustNoError(t, err)
@@ -583,7 +576,7 @@ func TestWaitForRateLimit_SufficientRemaining(t *testing.T) {
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(testhelpers.RateLimitResponse(4999))
+		_ = json.NewEncoder(w).Encode(rateLimitResponse(4999))
 	}))
 	defer server.Close()
 

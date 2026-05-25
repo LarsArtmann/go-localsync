@@ -92,7 +92,7 @@ func testDeletedState(sourceID string) SyncItemState {
 	}
 }
 
-func mustNewTestEvent(eventType event.Type, payload any) *event.Core {
+func mustNewTestEvent(eventType event.Type, payload any) *event.ImmutableEvent {
 	data, err := json.Marshal(payload)
 	if err != nil {
 		panic(err)

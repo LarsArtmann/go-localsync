@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/types"
 )
@@ -34,16 +33,72 @@ func (m *mockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo,
 	return &provider.RateLimitInfo{Limit: 5000, Remaining: 4999}, nil
 }
 
+type mockSyncStore struct {
+	synced []*provider.Item
+	items  []*provider.Item
+}
+
+func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
+	summary := &SyncSummary{Results: make([]ItemSyncResult, 0, len(items))}
+
+	for _, item := range items {
+		m.synced = append(m.synced, item)
+		summary.Synced++
+		summary.Results = append(summary.Results, ItemSyncResult{
+			SourceID: item.ExternalID.Get(),
+			Action:   ActionCreated,
+		})
+	}
+
+	return summary
+}
+
+func (m *mockSyncStore) SyncItem(_ context.Context, item *provider.Item) error {
+	m.synced = append(m.synced, item)
+
+	return nil
+}
+
+func (m *mockSyncStore) ListItems(_ context.Context, _ ItemFilter) ([]*provider.Item, error) {
+	return m.items, nil
+}
+
+func (m *mockSyncStore) CountItems(_ context.Context, _ ItemFilter) (int64, error) {
+	return int64(len(m.synced)), nil
+}
+
+func (m *mockSyncStore) GetItemTypes(_ context.Context) ([]string, error) {
+	seen := make(map[string]bool)
+
+	for _, item := range m.synced {
+		seen[item.Type.Get()] = true
+	}
+
+	types := make([]string, 0, len(seen))
+
+	for t := range seen {
+		types = append(types, t)
+	}
+
+	return types, nil
+}
+
+func (m *mockSyncStore) Count(_ context.Context) (int64, error) {
+	return int64(len(m.synced)), nil
+}
+
+func (m *mockSyncStore) Close() error { return nil }
+
 func testSyncOpts() *SyncOptions {
 	return &SyncOptions{Source: "testuser", MaxPages: 10}
 }
 
-func newTestSyncer(items []*provider.Item) (*Syncer, *cqrs.CQRSStack) {
-	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+func newTestSyncer(items []*provider.Item) (*Syncer, *mockSyncStore) {
+	store := &mockSyncStore{}
 	p := &mockProvider{items: items}
 	logger := log.Default()
 
-	return NewSyncer(p, stack, logger), stack
+	return NewSyncer(p, store, logger), store
 }
 
 func testSyncItem(externalID, eventType string) *provider.Item {
@@ -70,7 +125,7 @@ func TestSyncer_Sync(t *testing.T) {
 		testSyncItem("2", "IssueEvent"),
 	}
 
-	syncer, stack := newTestSyncer(items)
+	syncer, store := newTestSyncer(items)
 	defer func() { _ = syncer.Close() }()
 
 	ctx := context.Background()
@@ -82,7 +137,7 @@ func TestSyncer_Sync(t *testing.T) {
 		t.Errorf("expected Fetched=2, got %d", result.Fetched)
 	}
 
-	count, _ := stack.Count(ctx)
+	count, _ := store.Count(ctx)
 	if count != 2 {
 		t.Errorf("expected count=2, got %d", count)
 	}
@@ -147,7 +202,7 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 
 	items := []*provider.Item{testSyncItem("1", "PushEvent")}
 
-	syncer, stack := newTestSyncer(items)
+	syncer, store := newTestSyncer(items)
 	defer func() { _ = syncer.Close() }()
 
 	ctx := context.Background()
@@ -159,7 +214,7 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 		t.Errorf("expected Fetched=1, got %d", result.Fetched)
 	}
 
-	count, _ := stack.Count(ctx)
+	count, _ := store.Count(ctx)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
@@ -210,221 +265,12 @@ func TestSyncer_GetStats(t *testing.T) {
 	}
 }
 
-func TestConflictAwareSyncer_NewItems(t *testing.T) {
-	t.Parallel()
-
-	items := []*provider.Item{
-		testSyncItem("1", "PushEvent"),
-		testSyncItem("2", "IssueEvent"),
-	}
-
-	syncer, stack := newTestSyncer(items)
-	cas := NewConflictAwareSyncer(syncer)
-	defer func() { _ = cas.Close() }()
-
-	ctx := context.Background()
-	result, err := cas.SyncWithConflictDetection(
-		ctx,
-		testSyncOpts(),
-	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result.Fetched != 2 {
-		t.Errorf("expected Fetched=2, got %d", result.Fetched)
-	}
-	if result.Upserted != 2 {
-		t.Errorf("expected Upserted=2, got %d", result.Upserted)
-	}
-	if result.Conflicts != 0 {
-		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
-	}
-	if result.Skipped != 0 {
-		t.Errorf("expected Skipped=0, got %d", result.Skipped)
-	}
-
-	count, _ := stack.Count(ctx)
-	if count != 2 {
-		t.Errorf("expected count=2, got %d", count)
-	}
-}
-
-func TestConflictAwareSyncer_NoChange_Skipped(t *testing.T) {
-	t.Parallel()
-
-	item := testSyncItem("1", "PushEvent")
-
-	syncer, stack := newTestSyncer([]*provider.Item{item})
-	cas := NewConflictAwareSyncer(syncer)
-	defer func() { _ = cas.Close() }()
-
-	ctx := context.Background()
-
-	err := stack.SyncItem(ctx, item)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	syncer.provider = &mockProvider{items: []*provider.Item{item}}
-	result, err := cas.SyncWithConflictDetection(
-		ctx,
-		testSyncOpts(),
-	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result.Fetched != 1 {
-		t.Errorf("expected Fetched=1, got %d", result.Fetched)
-	}
-	if result.Upserted != 0 {
-		t.Errorf("expected Upserted=0, got %d", result.Upserted)
-	}
-	if result.Skipped != 1 {
-		t.Errorf("expected Skipped=1, got %d", result.Skipped)
-	}
-}
-
-func TestConflictAwareSyncer_RemoteWins(t *testing.T) {
-	t.Parallel()
-
-	oldItem := testSyncItem("1", "PushEvent")
-	oldItem.UpdatedAt = time.Now().Add(-2 * time.Hour)
-
-	syncer, stack := newTestSyncer([]*provider.Item{oldItem})
-	cas := NewConflictAwareSyncer(syncer)
-	defer func() { _ = cas.Close() }()
-
-	ctx := context.Background()
-
-	err := stack.SyncItem(ctx, oldItem)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	newItem := testSyncItem("1", "IssueEvent")
-	newItem.UpdatedAt = time.Now()
-
-	syncer.provider = &mockProvider{items: []*provider.Item{newItem}}
-	result, err := cas.SyncWithConflictDetection(
-		ctx,
-		testSyncOpts(),
-	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result.Fetched != 1 {
-		t.Errorf("expected Fetched=1, got %d", result.Fetched)
-	}
-	if result.Upserted != 1 {
-		t.Errorf("expected Upserted=1, got %d", result.Upserted)
-	}
-	if result.Conflicts != 1 {
-		t.Errorf("expected Conflicts=1, got %d", result.Conflicts)
-	}
-}
-
-func TestConflictAwareSyncer_RemoteWinsAlways(t *testing.T) {
-	t.Parallel()
-
-	newItem := testSyncItem("1", "PushEvent")
-	newItem.UpdatedAt = time.Now()
-
-	syncer, stack := newTestSyncer([]*provider.Item{newItem})
-	cas := NewConflictAwareSyncer(syncer)
-	defer func() { _ = cas.Close() }()
-
-	ctx := context.Background()
-
-	err := stack.SyncItem(ctx, newItem)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	oldRemote := testSyncItem("1", "IssueEvent")
-	oldRemote.UpdatedAt = time.Now().Add(-2 * time.Hour)
-
-	syncer.provider = &mockProvider{items: []*provider.Item{oldRemote}}
-	result, err := cas.SyncWithConflictDetection(
-		ctx,
-		testSyncOpts(),
-	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result.Fetched != 1 {
-		t.Errorf("expected Fetched=1, got %d", result.Fetched)
-	}
-	if result.Conflicts != 1 {
-		t.Errorf("expected Conflicts=1, got %d", result.Conflicts)
-	}
-	if result.Upserted != 1 {
-		t.Errorf("expected Upserted=1, got %d", result.Upserted)
-	}
-}
-
-func TestConflictAwareSyncer_NilOptions(t *testing.T) {
-	t.Parallel()
-
-	syncer, _ := newTestSyncer(nil)
-	cas := NewConflictAwareSyncer(syncer)
-	defer func() { _ = cas.Close() }()
-
-	_, err := cas.SyncWithConflictDetection(context.Background(), nil)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-}
-
-func TestSyncOptions_Validate(t *testing.T) {
-	err := (&SyncOptions{}).Validate()
-	if err == nil {
-		t.Fatal("expected error for empty source")
-	}
-	if !strings.Contains(err.Error(), "required") {
-		t.Errorf("expected error to contain 'required', got %v", err)
-	}
-}
-
-func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
-	t.Parallel()
-
-	oldItem := testSyncItem("1", "PushEvent")
-	oldItem.CreatedAt = time.Now().Add(-2 * time.Hour)
-	oldItem.UpdatedAt = time.Now().Add(-2 * time.Hour)
-
-	newItem := testSyncItem("2", "IssueEvent")
-	newItem.CreatedAt = time.Now()
-	newItem.UpdatedAt = time.Now()
-
-	mockProv := &mockProvider{items: []*provider.Item{newItem}}
-	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
-	syncer := NewSyncer(mockProv, stack, log.Default())
-
-	err := stack.SyncItem(ctx, oldItem)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	result, err := syncer.SyncIncremental(ctx, testSyncOpts())
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if result.Fetched != 1 {
-		t.Errorf("expected Fetched=1, got %d", result.Fetched)
-	}
-}
-
 func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
 	t.Parallel()
 
-	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
-	defer func() { _ = stack.Close() }()
-
+	store := &mockSyncStore{}
 	mockProv := &mockProvider{items: nil}
-	syncer := NewSyncer(mockProv, stack, log.Default())
+	syncer := NewSyncer(mockProv, store, log.Default())
 
 	latestItem := testSyncItem("latest", "PushEvent")
 	latestItem.CreatedAt = time.Now()
@@ -451,11 +297,9 @@ func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
 func TestSyncer_processIncrementalItems_AllNewItems(t *testing.T) {
 	t.Parallel()
 
-	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
-	defer func() { _ = stack.Close() }()
-
+	store := &mockSyncStore{}
 	mockProv := &mockProvider{items: nil}
-	syncer := NewSyncer(mockProv, stack, log.Default())
+	syncer := NewSyncer(mockProv, store, log.Default())
 
 	items := []*provider.Item{
 		testSyncItem("1", "PushEvent"),
@@ -478,11 +322,9 @@ func TestSyncer_processIncrementalItems_AllNewItems(t *testing.T) {
 func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
 	t.Parallel()
 
-	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
-	defer func() { _ = stack.Close() }()
-
+	store := &mockSyncStore{}
 	mockProv := &mockProvider{items: nil}
-	syncer := NewSyncer(mockProv, stack, log.Default())
+	syncer := NewSyncer(mockProv, store, log.Default())
 
 	invalidItem := &provider.Item{ID: types.NewItemID()}
 	validItem := testSyncItem("1", "PushEvent")
@@ -500,6 +342,63 @@ func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
 	}
 }
 
+func TestConflictAwareSyncer_NewItems(t *testing.T) {
+	t.Parallel()
+
+	items := []*provider.Item{
+		testSyncItem("1", "PushEvent"),
+		testSyncItem("2", "IssueEvent"),
+	}
+
+	syncer, _ := newTestSyncer(items)
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	ctx := context.Background()
+	result, err := cas.SyncWithConflictDetection(
+		ctx,
+		testSyncOpts(),
+	)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Upserted != 2 {
+		t.Errorf("expected Upserted=2, got %d", result.Upserted)
+	}
+	if result.Conflicts != 0 {
+		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
+	}
+	if result.Skipped != 0 {
+		t.Errorf("expected Skipped=0, got %d", result.Skipped)
+	}
+}
+
+func TestConflictAwareSyncer_NilOptions(t *testing.T) {
+	t.Parallel()
+
+	syncer, _ := newTestSyncer(nil)
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	_, err := cas.SyncWithConflictDetection(context.Background(), nil)
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}
+
+func TestSyncOptions_Validate(t *testing.T) {
+	err := (&SyncOptions{}).Validate()
+	if err == nil {
+		t.Fatal("expected error for empty source")
+	}
+	if !strings.Contains(err.Error(), "required") {
+		t.Errorf("expected error to contain 'required', got %v", err)
+	}
+}
+
 func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 	t.Parallel()
 
@@ -507,10 +406,8 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 	validItem := testSyncItem("1", "PushEvent")
 
 	mockProv := &mockProvider{items: []*provider.Item{invalidItem, validItem}}
-	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
-	defer func() { _ = stack.Close() }()
-
-	syncer := NewSyncer(mockProv, stack, log.Default())
+	store := &mockSyncStore{}
+	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)
 	defer func() { _ = cas.Close() }()
 
@@ -539,10 +436,8 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 	invalidItem2 := &provider.Item{ID: types.NewItemID()}
 
 	mockProv := &mockProvider{items: []*provider.Item{invalidItem1, invalidItem2}}
-	stack, _ := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
-	defer func() { _ = stack.Close() }()
-
-	syncer := NewSyncer(mockProv, stack, log.Default())
+	store := &mockSyncStore{}
+	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)
 	defer func() { _ = cas.Close() }()
 

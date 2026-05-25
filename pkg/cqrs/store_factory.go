@@ -187,7 +187,7 @@ func createCheckpointStore(
 	db *sql.DB,
 ) (event.CheckpointStore, error) {
 	if cfg.Backend != backendTurso || db == nil {
-		return cqrsmemory.NewCheckpointStore(), nil
+		return cqrsmemory.NewMemoryCheckpointStore(), nil
 	}
 
 	return cqrsstorage.NewSQLiteCheckpointStore(db)

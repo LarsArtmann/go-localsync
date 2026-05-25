@@ -2,8 +2,6 @@ package sync
 
 import (
 	"context"
-
-	"github.com/larsartmann/go-localsync/pkg/cqrs"
 )
 
 type ConflictAwareSyncer struct {
@@ -48,22 +46,22 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		return cr, nil
 	}
 
-	summary := s.stack.SyncItems(ctx, valid)
+	summary := s.store.SyncItems(ctx, valid)
 
 	for _, r := range summary.Results {
 		switch r.Action {
-		case cqrs.ActionCreated:
+		case ActionCreated:
 			cr.Upserted++
-		case cqrs.ActionUpdated:
+		case ActionUpdated:
 			cr.Upserted++
-		case cqrs.ActionConflictRemote:
+		case ActionConflictRemote:
 			cr.Conflicts++
 			cr.Upserted++
 
 			s.logger.Debug("Resolved conflict: remote wins", "sourceID", r.SourceID)
-		case cqrs.ActionUnchanged:
+		case ActionUnchanged:
 			cr.Skipped++
-		case cqrs.ActionError:
+		case ActionError:
 			cr.Errors++
 
 			s.logger.Warn("Failed to sync item", "sourceID", r.SourceID, "error", r.Error)
