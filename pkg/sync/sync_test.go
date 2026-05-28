@@ -687,3 +687,58 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 		t.Errorf("expected Upserted=0, got %d", result.Upserted)
 	}
 }
+
+func TestSyncer_reportProgress(t *testing.T) {
+	t.Parallel()
+
+	var called bool
+
+	opts := &SyncOptions{
+		Source:   "test",
+		MaxPages: 1,
+		OnProgress: func(fetched, skipped, errors int) {
+			called = true
+
+			if fetched != 1 {
+				t.Errorf("expected fetched=1, got %d", fetched)
+			}
+
+			if skipped != 0 {
+				t.Errorf("expected skipped=0, got %d", skipped)
+			}
+
+			if errors != 0 {
+				t.Errorf("expected errors=0, got %d", errors)
+			}
+		},
+	}
+
+	syncer, _ := newTestSyncer([]*provider.Item{testSyncItem("1", "PushEvent")})
+	defer func() { _ = syncer.Close() }()
+
+	_, err := syncer.Sync(context.Background(), opts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !called {
+		t.Error("expected OnProgress to be called")
+	}
+}
+
+func TestSyncer_reportProgress_NilCallback(t *testing.T) {
+	t.Parallel()
+
+	opts := &SyncOptions{
+		Source:   "test",
+		MaxPages: 1,
+	}
+
+	syncer, _ := newTestSyncer([]*provider.Item{testSyncItem("1", "PushEvent")})
+	defer func() { _ = syncer.Close() }()
+
+	_, err := syncer.Sync(context.Background(), opts)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}

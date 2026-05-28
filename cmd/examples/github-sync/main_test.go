@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
 func TestExitCodeForError(t *testing.T) {
@@ -236,5 +237,28 @@ func TestPrintVersion(t *testing.T) {
 	}
 	if !strings.Contains(out, "built:") {
 		t.Errorf("expected build date info, got %q", out)
+	}
+}
+
+func TestPrintSyncResultJSON(t *testing.T) {
+	var buf bytes.Buffer
+
+	result := &synclib.SyncResult{
+		Fetched: 10,
+		Skipped: 2,
+		Errors:  1,
+	}
+
+	printSyncResultJSONToWriter(result, &buf)
+
+	out := buf.String()
+	if !strings.Contains(out, `"fetched": 10`) {
+		t.Errorf("expected fetched=10 in output, got %q", out)
+	}
+	if !strings.Contains(out, `"skipped": 2`) {
+		t.Errorf("expected skipped=2 in output, got %q", out)
+	}
+	if !strings.Contains(out, `"errors": 1`) {
+		t.Errorf("expected errors=1 in output, got %q", out)
 	}
 }

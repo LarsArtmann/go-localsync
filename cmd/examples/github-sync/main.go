@@ -296,8 +296,12 @@ func runConflictAwareSync(
 }
 
 func printSyncResultJSON(result *synclib.SyncResult) {
+	printSyncResultJSONToWriter(result, os.Stdout)
+}
+
+func printSyncResultJSONToWriter(result *synclib.SyncResult, w io.Writer) {
 	out := syncResultOutput{Fetched: result.Fetched, Skipped: result.Skipped, Errors: result.Errors}
-	enc := json.NewEncoder(os.Stdout)
+	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 
 	if err := enc.Encode(out); err != nil {
