@@ -11,7 +11,8 @@ go.work.sum
 # Dependencies
 node_modules/
 # Test coverage
-/coverage
+coverage/*
+!coverage/.gitkeep
 # Build artifacts
 /go-localsync
 Copy/paste detection report
