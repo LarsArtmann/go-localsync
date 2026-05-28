@@ -158,8 +158,13 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	items, err := s.store.ListItems(
 		ctx,
 		provider.ItemFilter{
-			Source: &source,
-			Limit:  1,
+			Source:     &source,
+			Type:       nil,
+			ActorLogin: nil,
+			RepoName:   nil,
+			Since:      nil,
+			Limit:      1,
+			Offset:     0,
 		},
 	)
 	if err != nil {
@@ -340,4 +345,3 @@ func (s *Syncer) validateOpts(opts *SyncOptions) error {
 
 	return opts.Validate()
 }
-
