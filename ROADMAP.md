@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync  
-**Last Updated:** 2026-05-18
+**Last Updated:** 2026-05-25
 
 ## Overview
 
@@ -19,6 +19,10 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [x] **Turso backend** — SQLite/Turso event store + read model with remote Push/Pull sync.
 - [x] **cockroachdb/errors removal** — Replaced with stdlib `fmt.Errorf` + `%w`.
 - [x] **Database migration system** — Replaced by go-cqrs-lite/storage schema management.
+- [x] **Zero lint issues** — golangci-lint v2 with 125+ linters, 0 issues.
+- [x] **Dead code removal** — `types.SourceID` (unused), `AggregateID` sync.Map cache.
+- [x] **AggregateID double-computation eliminated** — Uses `cmd.AggregateID()` from command metadata.
+- [x] **Domain language documented** — `docs/DOMAIN_LANGUAGE.md` with full glossary.
 
 ---
 
@@ -55,22 +59,22 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 ### Architecture
 
-- [ ] **Adopt projection.Runner**  
-       Replace custom `Projector` with go-cqrs-lite's `projection.Runner` for replay + checkpointing.
+- [x] **Adopt projection.Runner** (Completed)  
+       Replaced custom `Projector` with go-cqrs-lite's `projection.Runner` for replay + checkpointing.
 
-- [ ] **Wire error taxonomy**  
-       Use go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes instead of generic 1.
+- [x] **Wire error taxonomy** (Completed)  
+       Uses go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes.
 
-- [ ] **Adopt command.Dispatcher**  
-       Use typed command dispatch from go-cqrs-lite instead of raw `SyncItems` method.
+- [x] **Adopt command.Dispatcher** (Completed)  
+       Typed command dispatch via `SyncItemCommand`/`DeleteItemCommand` through `command.Dispatcher`.
 
 ### Code Quality
 
 - [ ] **Unify test framework**  
        1 file uses Ginkgo, 6 files use testify. Standardize on one approach (stdlib recommended).
 
-- [ ] **CLI tests**  
-       Zero test coverage for 240-line `main.go` — flag parsing, signal handling, exit codes.
+- [x] **CLI tests** (Completed)  
+       `main_test.go` covers exitCodeForError, LoadConfig, env defaults.
 
 - [ ] **Push/Pull tests**  
        `CQRSStack.Push()` and `Pull()` untested.

@@ -1,7 +1,7 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-05-18
+**Last Updated:** 2026-05-25
 **Status:** Active Development
 
 ## Overview
@@ -14,7 +14,7 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 
 ### Testing & Quality
 
-- [ ] **Add CLI tests**
+- [x] **Add CLI tests** (Completed 2026-05-25)
       **Source:** `cmd/examples/github-sync/main.go`
       **Description:** Test exitCodeForError, LoadConfig, flag parsing.
       **Context:** 240-line main.go has zero test coverage. Highest-impact testing gap.
@@ -26,12 +26,12 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 
 ### Architecture
 
-- [ ] **Wire error taxonomy**
+- [x] **Wire error taxonomy** (Completed 2026-05-25)
       **Source:** `pkg/cqrs/`, `cmd/examples/github-sync/main.go`
       **Description:** Use go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes.
       **Context:** Users get generic exit codes instead of domain-specific ones.
 
-- [ ] **Adopt projection.Runner**
+- [x] **Adopt projection.Runner** (Completed 2026-05-25)
       **Source:** `pkg/cqrs/projection.go`
       **Description:** Replace custom Projector with go-cqrs-lite's `projection.Runner` for replay + checkpointing.
       **Context:** Custom projector doesn't support replay.
