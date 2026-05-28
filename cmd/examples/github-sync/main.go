@@ -37,6 +37,8 @@ var (
 )
 
 func main() {
+	pkgerrors.RegisterErrorTemplates()
+
 	envCfg, err := LoadConfig()
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failed to load config: %v\n", err)

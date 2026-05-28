@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 func TestSentinelErrors(t *testing.T) {
@@ -205,6 +206,39 @@ func TestIsRetryable(t *testing.T) {
 
 			if got := IsRetryable(tc.err); got != tc.retryable {
 				t.Errorf("IsRetryable(%v) = %v, want %v", tc.err, got, tc.retryable)
+			}
+		})
+	}
+}
+
+func TestRegisteredTemplates(t *testing.T) {
+	t.Parallel()
+
+	RegisterErrorTemplates()
+
+	codes := []string{
+		"not_found",
+		"rate_limited",
+		"invalid_token",
+		"user_not_found",
+		"sync_failed",
+		"database",
+		"invalid_input",
+		"unknown_backend",
+		"db_nil",
+	}
+
+	for _, code := range codes {
+		t.Run(code, func(t *testing.T) {
+			t.Parallel()
+
+			result := errorfamily.HandleErrorDetailed(errorfamily.NewRejection(code, "test"))
+			if result == nil {
+				t.Fatal("expected non-nil HandleResult")
+			}
+
+			if result.Message == "" {
+				t.Errorf("expected non-empty Message for code %q", code)
 			}
 		})
 	}

@@ -19,6 +19,65 @@ var (
 	ErrDBNil          = errorfamily.NewRejection("db_nil", "database is nil")
 )
 
+// RegisterErrorTemplates registers user-facing message templates for all error codes.
+// Call once at application startup.
+func RegisterErrorTemplates() {
+	errorfamily.RegisterTemplate("not_found", errorfamily.MessageTemplate{
+		What:   "The requested resource was not found.",
+		Why:    "The item or resource you requested does not exist in the system.",
+		Fix:    "Verify the identifier and try again.",
+		WayOut: "Check the logs for the exact resource path.",
+	})
+	errorfamily.RegisterTemplate("rate_limited", errorfamily.MessageTemplate{
+		What:   "Too many requests — rate limit exceeded.",
+		Why:    "The external API has received too many requests from this client.",
+		Fix:    "Wait for the rate limit window to reset and retry.",
+		WayOut: "Use --verbose to see the reset time.",
+	})
+	errorfamily.RegisterTemplate("invalid_token", errorfamily.MessageTemplate{
+		What:   "The provided authentication token is invalid.",
+		Why:    "The token is missing, expired, or does not have the required permissions.",
+		Fix:    "Set a valid token via GITHUB_TOKEN or the -token flag.",
+		WayOut: "Generate a new personal access token on GitHub.",
+	})
+	errorfamily.RegisterTemplate("user_not_found", errorfamily.MessageTemplate{
+		What:   "The specified user was not found.",
+		Why:    "The username does not exist on the provider platform.",
+		Fix:    "Double-check the username spelling.",
+		WayOut: "Try a different username or verify the account exists.",
+	})
+	errorfamily.RegisterTemplate("sync_failed", errorfamily.MessageTemplate{
+		What:   "The synchronization operation failed.",
+		Why:    "An unexpected error occurred while fetching or storing items.",
+		Fix:    "Check network connectivity and provider status.",
+		WayOut: "Run with --verbose for detailed error information.",
+	})
+	errorfamily.RegisterTemplate("database", errorfamily.MessageTemplate{
+		What:   "A database error occurred.",
+		Why:    "The storage backend returned an error during read or write.",
+		Fix:    "Check the database path and permissions.",
+		WayOut: "Verify the backend configuration and disk space.",
+	})
+	errorfamily.RegisterTemplate("invalid_input", errorfamily.MessageTemplate{
+		What:   "The input provided is invalid.",
+		Why:    "A required field is missing or has an unacceptable value.",
+		Fix:    "Review the input and ensure all required fields are set.",
+		WayOut: "See the error detail for the specific missing field.",
+	})
+	errorfamily.RegisterTemplate("unknown_backend", errorfamily.MessageTemplate{
+		What:   "The specified storage backend is not supported.",
+		Why:    "Only 'memory' and 'turso' backends are currently supported.",
+		Fix:    "Use --backend memory or --backend turso.",
+		WayOut: "Check the documentation for supported backends.",
+	})
+	errorfamily.RegisterTemplate("db_nil", errorfamily.MessageTemplate{
+		What:   "The database connection is nil.",
+		Why:    "The Turso backend was selected but no database path was provided.",
+		Fix:    "Set a database path via --db or DB_PATH.",
+		WayOut: "Use --backend memory if you do not need persistence.",
+	})
+}
+
 // IsRetryable reports whether the error is worth retrying.
 // Delegates to errorfamily's intrinsic classification.
 func IsRetryable(err error) bool {
