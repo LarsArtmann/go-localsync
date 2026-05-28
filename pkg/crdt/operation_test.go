@@ -141,7 +141,9 @@ func TestOperation_Serialize_Deserialize(t *testing.T) {
 	}
 
 	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
+
+	err = json.Unmarshal(data, &raw)
+	if err != nil {
 		t.Fatalf("serialized data is not valid JSON: %v", err)
 	}
 

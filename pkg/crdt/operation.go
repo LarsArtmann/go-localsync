@@ -91,7 +91,7 @@ func MustNewOperation[T any](
 
 // Serialize converts the operation to JSON bytes.
 func (op *Operation[T]) Serialize() ([]byte, error) {
-	return json.Marshal(op) //nolint:wrapcheck // implementing standard serialization
+	return json.Marshal(op)
 }
 
 // DeserializeOperation parses JSON bytes into an Operation[T].
