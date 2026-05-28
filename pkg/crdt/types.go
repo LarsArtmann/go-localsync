@@ -1,4 +1,4 @@
-package localsync
+package crdt
 
 // NodeID identifies a node in the distributed sync system.
 // Using a named type prevents accidental mixing with arbitrary strings.

@@ -1,4 +1,4 @@
-module github.com/larsartmann/go-localsync/pkg/localsync
+module github.com/larsartmann/go-localsync/pkg/crdt
 
 go 1.26.3
 

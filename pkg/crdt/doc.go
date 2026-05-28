@@ -1,4 +1,4 @@
-// Package localsync provides generic synchronization primitives for building
+// Package crdt provides generic synchronization primitives for building
 // local-first and distributed applications with event sourcing.
 //
 // This package offers transport-agnostic building blocks:
@@ -12,19 +12,19 @@
 //
 // # Quick Start
 //
-//	import "github.com/larsartmann/go-localsync/pkg/localsync"
+//	import "github.com/larsartmann/go-localsync/pkg/crdt"
 //
-//	vc := localsync.NewVectorClock()
-//	vc.Increment(localsync.NodeID("node-1"))
-//	vc.Increment(localsync.NodeID("node-2"))
+//	vc := crdt.NewVectorClock()
+//	vc.Increment(crdt.NodeID("node-1"))
+//	vc.Increment(crdt.NodeID("node-2"))
 //	vc.Clone()
 //	vc.Cmp(otherVC)
 //
-//	resolver, err := localsync.NewLWWResolver[*MyEntity](func(e *MyEntity) time.Time {
+//	resolver, err := crdt.NewLWWResolver[*MyEntity](func(e *MyEntity) time.Time {
 //	    return e.UpdatedAt
 //	})
 //	if err != nil {
 //	    return err
 //	}
-//	winner, err := resolver.Resolve(&localsync.Conflict[*MyEntity]{...})
-package localsync
+//	winner, err := resolver.Resolve(&crdt.Conflict[*MyEntity]{...})
+package crdt

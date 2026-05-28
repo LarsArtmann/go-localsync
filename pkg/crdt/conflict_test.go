@@ -1,4 +1,4 @@
-package localsync
+package crdt
 
 import (
 	"encoding/json"
