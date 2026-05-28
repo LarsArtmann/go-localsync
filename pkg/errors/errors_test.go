@@ -183,3 +183,29 @@ func TestWrapf_NonErrorFamily(t *testing.T) {
 		t.Errorf("expected 'attempt 3: base error', got %q", wrapped.Error())
 	}
 }
+
+func TestIsRetryable(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name      string
+		err       error
+		retryable bool
+	}{
+		{"transient error", ErrRateLimited, true},
+		{"rejection error", ErrNotFound, false},
+		{"infrastructure error", ErrDatabase, false},
+		{"wrapped transient", Wrap(ErrSyncFailed, "context"), true},
+		{"wrapped rejection", WithDetail(ErrInvalidToken, "detail"), false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := IsRetryable(tc.err); got != tc.retryable {
+				t.Errorf("IsRetryable(%v) = %v, want %v", tc.err, got, tc.retryable)
+			}
+		})
+	}
+}
