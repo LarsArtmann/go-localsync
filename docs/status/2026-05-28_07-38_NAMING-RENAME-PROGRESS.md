@@ -19,12 +19,12 @@
 
 ## What Was Done (Since Last Report)
 
-| # | Task | Status | Files |
-|---|------|--------|-------|
-| 1 | `pkg/types` → `pkg/id` rename | ✅ DONE | 25 files changed, 526 insertions, 194 deletions |
-| 2 | Fixed `go-cqrs-lite/core/pkg/id` alias conflicts | ✅ DONE | `pkg/cqrs/aggregate_id.go`, `decider.go`, `stack.go`, `testing_test.go`, `decider_test.go` |
-| 3 | Fixed import ordering (gci) | ✅ DONE | All affected files via `goimports` |
-| 4 | Verified build + tests + lint | ✅ DONE | 0 lint issues, all 7 packages pass |
+| #   | Task                                             | Status  | Files                                                                                      |
+| --- | ------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------ |
+| 1   | `pkg/types` → `pkg/id` rename                    | ✅ DONE | 25 files changed, 526 insertions, 194 deletions                                            |
+| 2   | Fixed `go-cqrs-lite/core/pkg/id` alias conflicts | ✅ DONE | `pkg/cqrs/aggregate_id.go`, `decider.go`, `stack.go`, `testing_test.go`, `decider_test.go` |
+| 3   | Fixed import ordering (gci)                      | ✅ DONE | All affected files via `goimports`                                                         |
+| 4   | Verified build + tests + lint                    | ✅ DONE | 0 lint issues, all 7 packages pass                                                         |
 
 ---
 
@@ -32,40 +32,40 @@
 
 ### Package Renames (In Progress)
 
-| Current | Target | Complexity | Files Affected |
-|---------|--------|-----------|----------------|
-| `pkg/provider` | `pkg/item` + `pkg/source` | HIGH | 20 files import `pkg/provider` |
-| `pkg/localsync` | `pkg/crdt` | LOW | Not imported by any production code |
-| `pkg/sync` | `pkg/engine` | MEDIUM | 2 files import it |
-| `pkg/cqrs` | `pkg/store` | HIGH | 1 file imports it + many internal refs |
+| Current         | Target                    | Complexity | Files Affected                         |
+| --------------- | ------------------------- | ---------- | -------------------------------------- |
+| `pkg/provider`  | `pkg/item` + `pkg/source` | HIGH       | 20 files import `pkg/provider`         |
+| `pkg/localsync` | `pkg/crdt`                | LOW        | Not imported by any production code    |
+| `pkg/sync`      | `pkg/engine`              | MEDIUM     | 2 files import it                      |
+| `pkg/cqrs`      | `pkg/store`               | HIGH       | 1 file imports it + many internal refs |
 
 ### Testing (Not Started)
 
-| Task | Target Coverage | Current |
-|------|----------------|---------|
-| CLI tests | ≥ 50% | 10.5% |
-| `pkg/sync` tests | ≥ 85% | 77.8% |
-| `SyncIncremental` | ≥ 90% | 37.5% |
+| Task              | Target Coverage | Current |
+| ----------------- | --------------- | ------- |
+| CLI tests         | ≥ 50%           | 10.5%   |
+| `pkg/sync` tests  | ≥ 85%           | 77.8%   |
+| `SyncIncremental` | ≥ 90%           | 37.5%   |
 
 ### Features (Not Started)
 
-| Task | Status |
-|------|--------|
-| `-json` flag | Not started |
-| ItemFilter builder | Not started |
+| Task                  | Status      |
+| --------------------- | ----------- |
+| `-json` flag          | Not started |
+| ItemFilter builder    | Not started |
 | Error wrapping helper | Not started |
 
 ---
 
 ## What's Totally Fucked Up
 
-| # | Issue | Severity |
-|---|-------|----------|
-| 1 | **Uncommitted test additions** | `main_test.go` has new tests but they're not committed |
-| 2 | **Doc formatting-only changes** | DOMAIN_LANGUAGE.md, UPSTREAM-SUGGESTIONS.md have whitespace changes sitting uncommitted |
-| 3 | **LSP stale cache** | Still shows errors for deleted `aggregate_id_test.go` and old `pkg/types` paths |
-| 4 | **Planning doc bloat** | `2026-05-28_06-25_COMPREHENSIVE-EXECUTION-PLAN.md` is 221 lines but hasn't been updated since the rename decision changed (pkg/localsync stays) |
-| 5 | **go-mod-tidy failure in pre-commit** | Saga module version mismatch — pre-existing, not my fault |
+| #   | Issue                                 | Severity                                                                                                                                        |
+| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Uncommitted test additions**        | `main_test.go` has new tests but they're not committed                                                                                          |
+| 2   | **Doc formatting-only changes**       | DOMAIN_LANGUAGE.md, UPSTREAM-SUGGESTIONS.md have whitespace changes sitting uncommitted                                                         |
+| 3   | **LSP stale cache**                   | Still shows errors for deleted `aggregate_id_test.go` and old `pkg/types` paths                                                                 |
+| 4   | **Planning doc bloat**                | `2026-05-28_06-25_COMPREHENSIVE-EXECUTION-PLAN.md` is 221 lines but hasn't been updated since the rename decision changed (pkg/localsync stays) |
+| 5   | **go-mod-tidy failure in pre-commit** | Saga module version mismatch — pre-existing, not my fault                                                                                       |
 
 ---
 
@@ -74,6 +74,7 @@
 **Should I continue with the remaining 4 package renames in this session, or commit the current state and ask for confirmation on each rename?**
 
 The renames are:
+
 1. `pkg/provider` → `pkg/item` + `pkg/source` (requires splitting `provider.go` into two packages)
 2. `pkg/localsync` → `pkg/crdt` (simple directory rename, not imported by production code)
 3. `pkg/sync` → `pkg/engine` (2 importers, but shadows stdlib `sync`)
@@ -82,6 +83,7 @@ The renames are:
 Each rename is a breaking change for SDK consumers. Doing all 4 at once creates a massive migration burden. But doing them one at a time means 4 separate breaking changes.
 
 **What does the project owner want?**
+
 - All renames in one big v0.2.0 release?
 - One rename at a time with deprecation periods?
 - Skip some renames and focus on features/tests instead?
@@ -90,14 +92,14 @@ Each rename is a breaking change for SDK consumers. Doing all 4 at once creates 
 
 ## Current State
 
-| Metric | Value |
-|--------|-------|
-| Build | ✅ Pass |
-| Tests | ✅ 7/7 packages pass |
-| Lint | ✅ 0 issues |
-| Uncommitted changes | 4 files (docs + tests) |
-| Last commit | 394725b `refactor!: rename pkg/types to pkg/id` |
-| Go version | 1.26.2 |
+| Metric              | Value                                           |
+| ------------------- | ----------------------------------------------- |
+| Build               | ✅ Pass                                         |
+| Tests               | ✅ 7/7 packages pass                            |
+| Lint                | ✅ 0 issues                                     |
+| Uncommitted changes | 4 files (docs + tests)                          |
+| Last commit         | 394725b `refactor!: rename pkg/types to pkg/id` |
+| Go version          | 1.26.2                                          |
 
 ---
 
