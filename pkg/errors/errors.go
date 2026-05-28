@@ -87,9 +87,8 @@ func IsRetryable(err error) bool {
 // WithDetail wraps err with a detail string for debugging context.
 // Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func WithDetail(err error, detail string) error {
-	var e *errorfamily.Error
-
-	if stderrors.As(err, &e) {
+	e, ok := stderrors.AsType[*errorfamily.Error](err)
+	if ok {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), detail)
 	}
 
@@ -99,9 +98,8 @@ func WithDetail(err error, detail string) error {
 // WithUserDetail is a convenience function to add username context.
 // Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func WithUserDetail(err error, username string) error {
-	var e *errorfamily.Error
-
-	if stderrors.As(err, &e) {
+	e, ok := stderrors.AsType[*errorfamily.Error](err)
+	if ok {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), "username="+username)
 	}
 
@@ -111,9 +109,8 @@ func WithUserDetail(err error, username string) error {
 // Wrap wraps an error with additional context.
 // Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func Wrap(err error, message string) error {
-	var e *errorfamily.Error
-
-	if stderrors.As(err, &e) {
+	e, ok := stderrors.AsType[*errorfamily.Error](err)
+	if ok {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), message)
 	}
 
@@ -125,9 +122,8 @@ func Wrap(err error, message string) error {
 func Wrapf(err error, format string, args ...any) error {
 	msg := fmt.Sprintf(format, args...)
 
-	var e *errorfamily.Error
-
-	if stderrors.As(err, &e) {
+	e, ok := stderrors.AsType[*errorfamily.Error](err)
+	if ok {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), msg)
 	}
 
