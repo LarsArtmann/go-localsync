@@ -10,6 +10,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
+// SyncAction classifies the outcome of syncing a single item.
 type SyncAction string
 
 const (
@@ -20,12 +21,14 @@ const (
 	ActionError          SyncAction = "error"
 )
 
+// ItemSyncResult holds the result of syncing a single item.
 type ItemSyncResult struct {
 	SourceID string
 	Action   SyncAction
 	Error    error
 }
 
+// SyncSummary aggregates results from a batch SyncItems call.
 type SyncSummary struct {
 	Synced    int
 	Conflicts int
@@ -33,6 +36,8 @@ type SyncSummary struct {
 	Results   []ItemSyncResult
 }
 
+// SyncStore is the minimal interface that decouples sync logic from concrete storage.
+// *cqrs.CQRSStack implements this interface via adapter methods.
 type SyncStore interface {
 	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
 	ListItems(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error)
@@ -41,12 +46,14 @@ type SyncStore interface {
 	Close() error
 }
 
+// Syncer orchestrates fetching items from a provider and persisting them via a SyncStore.
 type Syncer struct {
 	provider provider.Provider
 	store    SyncStore
 	logger   *log.Logger
 }
 
+// NewSyncer creates a Syncer with the given provider, store, and optional logger.
 func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer {
 	if logger == nil {
 		logger = log.Default()
@@ -59,14 +66,17 @@ func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer
 	}
 }
 
+// SyncProgressFunc is called after each sync batch to report progress.
 type SyncProgressFunc func(fetched, skipped, errors int)
 
+// SyncOptions configures a sync operation.
 type SyncOptions struct {
 	Source     string
 	MaxPages   int
 	OnProgress SyncProgressFunc
 }
 
+// Validate checks that required fields are set.
 func (o *SyncOptions) Validate() error {
 	if o.Source == "" {
 		return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "SyncOptions.Source is required")
@@ -75,18 +85,21 @@ func (o *SyncOptions) Validate() error {
 	return nil
 }
 
+// SyncResult holds the result of a sync operation.
 type SyncResult struct {
 	Fetched int
 	Skipped int
 	Errors  int
 }
 
+// Stats holds aggregate statistics about synced items.
 type Stats struct {
 	TotalItems int64
 	ItemTypes  []string
 	TypeCounts map[string]int64
 }
 
+// Sync fetches all items from the provider and persists them.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	err := s.validateOpts(opts)
 	if err != nil {
@@ -133,22 +146,20 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	return syncResult, nil
 }
 
+// SyncIncremental fetches items and skips those already present based on the latest item timestamp.
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	err := s.validateOpts(opts)
 	if err != nil {
 		return nil, err
 	}
 
+	source := id.NewProviderID(opts.Source)
+
 	items, err := s.store.ListItems(
 		ctx,
 		provider.ItemFilter{
-			Type:       nil,
-			ActorLogin: nil,
-			RepoName:   nil,
-			Source:     nil,
-			Since:      nil,
-			Limit:      1,
-			Offset:     0,
+			Source: &source,
+			Limit:  1,
 		},
 	)
 	if err != nil {
@@ -183,6 +194,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	return syncResult, nil
 }
 
+// GetStats returns aggregate statistics including per-type counts.
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	count, err := s.store.CountItems(ctx, provider.ItemFilter{
 		Type:       nil,
@@ -328,3 +340,4 @@ func (s *Syncer) validateOpts(opts *SyncOptions) error {
 
 	return opts.Validate()
 }
+
