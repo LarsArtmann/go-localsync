@@ -142,7 +142,13 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	items, err := s.store.ListItems(
 		ctx,
 		provider.ItemFilter{
-			Limit: 1,
+			Type:       nil,
+			ActorLogin: nil,
+			RepoName:   nil,
+			Source:     nil,
+			Since:      nil,
+			Limit:      1,
+			Offset:     0,
 		},
 	)
 	if err != nil {
@@ -178,7 +184,15 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 }
 
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
-	count, err := s.store.CountItems(ctx, provider.ItemFilter{})
+	count, err := s.store.CountItems(ctx, provider.ItemFilter{
+		Type:       nil,
+		ActorLogin: nil,
+		RepoName:   nil,
+		Source:     nil,
+		Since:      nil,
+		Limit:      0,
+		Offset:     0,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +209,15 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 
 		count, err := s.store.CountItems(
 			ctx,
-			provider.ItemFilter{Type: &eventType},
+			provider.ItemFilter{
+				Type:       &eventType,
+				ActorLogin: nil,
+				RepoName:   nil,
+				Source:     nil,
+				Since:      nil,
+				Limit:      0,
+				Offset:     0,
+			},
 		)
 		if err != nil {
 			s.logger.Warn("Failed to count items by type", "type", t, "error", err)

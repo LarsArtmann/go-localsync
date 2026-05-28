@@ -7,8 +7,8 @@
 //   - [Operation] for representing typed sync operations with generic payloads
 //   - [ConflictResolver] and [LWWResolver] for pluggable conflict resolution
 //
-// The types in this package are domain-agnostic and have zero external dependencies
-// beyond the Go standard library.
+// The types in this package are domain-agnostic with minimal external dependencies
+// (only github.com/larsartmann/go-error-family for error classification).
 //
 // # Quick Start
 //

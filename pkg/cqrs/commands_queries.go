@@ -177,9 +177,7 @@ func handleSyncItem(repo *decider.Repository[SyncItemState]) command.Handler {
 			return fmt.Errorf("expected *SyncItemCommand, got %T: %w", cmd, errCommandTypeMismatch)
 		}
 
-		aggID := AggregateID(syncCmd.Item.Source.Get(), syncCmd.Item.ExternalID)
-
-		return repo.Execute(ctx, aggID, aggregateType, DecideSync(syncCmd.Item))
+		return repo.Execute(ctx, syncCmd.AggregateID(), aggregateType, DecideSync(syncCmd.Item))
 	}
 }
 
@@ -192,9 +190,7 @@ func handleDeleteItem(repo *decider.Repository[SyncItemState]) command.Handler {
 			)
 		}
 
-		aggID := AggregateID(delCmd.Source, delCmd.SourceID)
-
-		return repo.Execute(ctx, aggID, aggregateType, DecideDelete(delCmd.Source, delCmd.SourceID))
+		return repo.Execute(ctx, delCmd.AggregateID(), aggregateType, DecideDelete(delCmd.Source, delCmd.SourceID))
 	}
 }
 
