@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"errors"
+	"strings"
 	"testing"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -206,5 +208,33 @@ func TestLoadConfig_Verbose(t *testing.T) {
 	}
 	if !cfg.Verbose {
 		t.Error("expected Verbose=true")
+	}
+}
+
+func TestLoadConfig_JSONOutput(t *testing.T) {
+	t.Setenv("JSON_OUTPUT", "true")
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !cfg.JSONOutput {
+		t.Error("expected JSONOutput=true")
+	}
+}
+
+func TestPrintVersion(t *testing.T) {
+	var buf bytes.Buffer
+	printVersion(&buf)
+
+	out := buf.String()
+	if !strings.HasPrefix(out, "gh-sync ") {
+		t.Errorf("expected version prefix, got %q", out)
+	}
+	if !strings.Contains(out, "commit:") {
+		t.Errorf("expected commit info, got %q", out)
+	}
+	if !strings.Contains(out, "built:") {
+		t.Errorf("expected build date info, got %q", out)
 	}
 }

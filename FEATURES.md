@@ -1,6 +1,6 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-05-23
+**Updated:** 2026-05-28
 
 ## Legend
 
@@ -65,12 +65,12 @@
 
 ## Read Model
 
-| #   | Feature                 | Status           | Package    | Description                                                                                                                 |
-| --- | ----------------------- | ---------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 26  | In-Memory Read Model    | FULLY_FUNCTIONAL | `pkg/cqrs` | `MemoryReadModel` with concurrent-safe `sync.RWMutex`. Filter by type, actor, repo, source, since. Pagination support.      |
-| 27  | Turso/SQLite Read Model | FULLY_FUNCTIONAL | `pkg/cqrs` | `TursoReadModel` with parameterized queries, indexes (type, created_at, actor_login). Same filter/pagination API as memory. |
-| 28  | Read Model Interface    | FULLY_FUNCTIONAL | `pkg/cqrs` | `ReadModel` interface: `Get`, `List`, `Count`, `GetTypes`, `Upsert`, `Delete`, `Close`. Both backends implement it.         |
-| 29  | Item Filtering          | FULLY_FUNCTIONAL | `pkg/cqrs` | `ItemFilter` with Type, ActorLogin, RepoName, Source, Since, Limit, Offset. Applied consistently in both backends.          |
+| #   | Feature                 | Status           | Package    | Description                                                                                                                   |
+| --- | ----------------------- | ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 26  | In-Memory Read Model    | FULLY_FUNCTIONAL | `pkg/cqrs` | `MemoryReadModel` with concurrent-safe `sync.RWMutex`. Filter by type, actor, repo, source, since. Pagination support.        |
+| 27  | Turso/SQLite Read Model | FULLY_FUNCTIONAL | `pkg/cqrs` | `TursoReadModel` with parameterized queries, indexes (type, created_at, actor_login). Same filter/pagination API as memory.   |
+| 28  | Read Model Interface    | FULLY_FUNCTIONAL | `pkg/cqrs` | `ReadModel` interface: `Get`, `List`, `Count`, `GetTypes`, `Upsert`, `Delete`, `Close`. Both backends implement it.           |
+| 29  | Item Filtering          | FULLY_FUNCTIONAL | `pkg/cqrs` | `ItemFilter` with Type, ActorLogin, RepoName, Source, Since, Limit, Offset. Builder pattern via `WithType`, `WithLimit`, etc. |
 
 ## Command & Query Dispatch
 
@@ -102,16 +102,17 @@
 
 ## CLI / Example Application
 
-| #   | Feature            | Status           | Package                    | Description                                                                                                          |
-| --- | ------------------ | ---------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 43  | Example CLI        | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | Complete CLI with flag parsing, signal handling, graceful shutdown, domain-specific exit codes.                      |
-| 44  | Environment Config | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `AppConfig` via `caarlos0/env/v11`. All flags overridable by env vars. Defaults for backend, max pages, incremental. |
-| 45  | Exit Code Mapping  | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | BSD-style exit codes mapped from error taxonomy: rate-limited→75, invalid-token→64, not-found→65, etc.               |
-| 46  | Version Info       | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-version` flag prints version, commit, build date (injected via ldflags).                                           |
-| 47  | Stats Display      | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-stats` flag shows total items and distinct event types, then exits.                                                |
-| 48  | Verbose Logging    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-verbose` flag enables debug-level logging via `charm.land/log/v2`.                                                 |
-| 49  | Signal Handling    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | Catches SIGINT/SIGTERM, cancels context, logs shutdown.                                                              |
-| 50  | Push/Pull Flags    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-push` and `-pull` flags trigger Turso remote sync before/after local sync.                                         |
+| #   | Feature            | Status           | Package                    | Description                                                                                                             |
+| --- | ------------------ | ---------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 43  | Example CLI        | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | Complete CLI with flag parsing, signal handling, graceful shutdown, domain-specific exit codes.                         |
+| 44  | Environment Config | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `AppConfig` via `caarlos0/env/v11`. All flags overridable by env vars. Defaults for backend, max pages, incremental.    |
+| 45  | Exit Code Mapping  | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | BSD-style exit codes mapped from error taxonomy: rate-limited→75, invalid-token→64, not-found→65, etc.                  |
+| 46  | Version Info       | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-version` flag prints version, commit, build date (injected via ldflags).                                              |
+| 47  | Stats Display      | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-stats` flag shows total items and distinct event types, then exits.                                                   |
+| 48  | Verbose Logging    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-verbose` flag enables debug-level logging via `charm.land/log/v2`.                                                    |
+| 49  | Signal Handling    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | Catches SIGINT/SIGTERM, cancels context, logs shutdown.                                                                 |
+| 50  | Push/Pull Flags    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-push` and `-pull` flags trigger Turso remote sync before/after local sync.                                            |
+| 51  | JSON Output        | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-json` flag outputs stats and sync results as structured JSON. Supports `-stats`, `-conflict-aware`, and regular sync. |
 
 ## CI/CD
 
@@ -125,7 +126,7 @@
 
 | #   | Feature      | Status           | Package           | Description                                                                                                                       |
 | --- | ------------ | ---------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 54  | Test Suite   | FULLY_FUNCTIONAL | all               | 197 test functions across 7 packages, 73.7% overall coverage.                                                                     |
+| 54  | Test Suite   | FULLY_FUNCTIONAL | all               | 221 test functions across 7 packages, 74.5% overall coverage.                                                                     |
 | 55  | Test Helpers | FULLY_FUNCTIONAL | `pkg/testhelpers` | Shared mocks: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`, `RateLimitResponse`. |
 
 ## Quality

@@ -20,6 +20,9 @@ import (
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
+// newSlogLogger creates an slog.Logger backed by charm.land/log/v2.
+// Used by middleware.EventLogging to bridge charm's structured logger
+// to the slog interface expected by go-cqrs-lite middleware.
 func newSlogLogger() *slog.Logger {
 	return slog.New(log.Default())
 }

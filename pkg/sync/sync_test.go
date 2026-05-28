@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -34,8 +35,12 @@ func (m *mockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo,
 }
 
 type mockSyncStore struct {
-	synced []*provider.Item
-	items  []*provider.Item
+	synced       []*provider.Item
+	items        []*provider.Item
+	listErr      error
+	countErr     error
+	typeCountErr error
+	closeErr     error
 }
 
 func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
@@ -54,10 +59,22 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 }
 
 func (m *mockSyncStore) ListItems(_ context.Context, _ provider.ItemFilter) ([]*provider.Item, error) {
+	if m.listErr != nil {
+		return nil, m.listErr
+	}
+
 	return m.items, nil
 }
 
-func (m *mockSyncStore) CountItems(_ context.Context, _ provider.ItemFilter) (int64, error) {
+func (m *mockSyncStore) CountItems(_ context.Context, filter provider.ItemFilter) (int64, error) {
+	if m.countErr != nil {
+		return 0, m.countErr
+	}
+
+	if filter.Type != nil && m.typeCountErr != nil {
+		return 0, m.typeCountErr
+	}
+
 	return int64(len(m.synced)), nil
 }
 
@@ -77,7 +94,7 @@ func (m *mockSyncStore) GetItemTypes(_ context.Context) ([]string, error) {
 	return types, nil
 }
 
-func (m *mockSyncStore) Close() error { return nil }
+func (m *mockSyncStore) Close() error { return m.closeErr }
 
 func testSyncOpts() *SyncOptions {
 	return &SyncOptions{Source: "testuser", MaxPages: 10}
@@ -416,6 +433,228 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 	}
 	if result.Upserted != 1 {
 		t.Errorf("expected Upserted=1 (valid item), got %d", result.Upserted)
+	}
+}
+
+func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now()
+	existingItem := testSyncItem("existing", "PushEvent")
+	existingItem.CreatedAt = now.Add(-1 * time.Hour)
+
+	newItem := testSyncItem("new", "PushEvent")
+	newItem.CreatedAt = now.Add(1 * time.Hour)
+
+	oldItem := testSyncItem("old", "PushEvent")
+	oldItem.CreatedAt = now.Add(-2 * time.Hour)
+
+	store := &mockSyncStore{items: []*provider.Item{existingItem}}
+	mockProv := &mockProvider{items: []*provider.Item{newItem, oldItem}}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	defer func() { _ = syncer.Close() }()
+
+	ctx := context.Background()
+	result, err := syncer.SyncIncremental(ctx, testSyncOpts())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Skipped != 1 {
+		t.Errorf("expected Skipped=1 (old item before cutoff), got %d", result.Skipped)
+	}
+	if result.Errors != 0 {
+		t.Errorf("expected Errors=0, got %d", result.Errors)
+	}
+}
+
+func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now()
+	existingItem := testSyncItem("existing", "PushEvent")
+	existingItem.CreatedAt = now
+
+	oldItem := testSyncItem("old", "PushEvent")
+	oldItem.CreatedAt = now.Add(-1 * time.Hour)
+
+	store := &mockSyncStore{items: []*provider.Item{existingItem}}
+	mockProv := &mockProvider{items: []*provider.Item{oldItem}}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	defer func() { _ = syncer.Close() }()
+
+	ctx := context.Background()
+	result, err := syncer.SyncIncremental(ctx, testSyncOpts())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 1 {
+		t.Errorf("expected Fetched=1, got %d", result.Fetched)
+	}
+	if result.Skipped != 1 {
+		t.Errorf("expected Skipped=1, got %d", result.Skipped)
+	}
+}
+
+func TestSyncer_SyncIncremental_ListItemsError(t *testing.T) {
+	t.Parallel()
+
+	store := &mockSyncStore{listErr: errors.New("list failed")}
+	mockProv := &mockProvider{items: nil}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	defer func() { _ = syncer.Close() }()
+
+	_, err := syncer.SyncIncremental(context.Background(), testSyncOpts())
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}
+
+func TestSyncer_GetStats_CountError(t *testing.T) {
+	t.Parallel()
+
+	store := &mockSyncStore{countErr: errors.New("count failed")}
+	mockProv := &mockProvider{items: nil}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	defer func() { _ = syncer.Close() }()
+
+	_, err := syncer.GetStats(context.Background())
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}
+
+func TestSyncer_GetStats_TypeCountError(t *testing.T) {
+	t.Parallel()
+
+	items := []*provider.Item{testSyncItem("1", "PushEvent")}
+	store := &mockSyncStore{}
+	mockProv := &mockProvider{items: items}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	defer func() { _ = syncer.Close() }()
+
+	ctx := context.Background()
+	_, _ = syncer.Sync(ctx, testSyncOpts())
+
+	store.typeCountErr = errors.New("type count failed")
+
+	stats, err := syncer.GetStats(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if stats.TotalItems != 1 {
+		t.Errorf("expected TotalItems=1, got %d", stats.TotalItems)
+	}
+	if len(stats.TypeCounts) != 0 {
+		t.Errorf("expected empty TypeCounts on error, got %v", stats.TypeCounts)
+	}
+}
+
+func TestSyncer_Close(t *testing.T) {
+	t.Parallel()
+
+	store := &mockSyncStore{closeErr: errors.New("close failed")}
+	syncer := NewSyncer(&mockProvider{}, store, log.Default())
+
+	err := syncer.Close()
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+}
+
+type actionMockSyncStore struct {
+	mockSyncStore
+
+	actions []SyncAction
+	errIdx  int
+}
+
+func (m *actionMockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
+	summary := &SyncSummary{Results: make([]ItemSyncResult, 0, len(items))}
+
+	for range items {
+		action := ActionCreated
+		if m.errIdx < len(m.actions) {
+			action = m.actions[m.errIdx]
+			m.errIdx++
+		}
+
+		summary.Results = append(summary.Results, ItemSyncResult{Action: action})
+		switch action {
+		case ActionCreated, ActionUpdated, ActionConflictRemote:
+			summary.Synced++
+		case ActionError:
+			summary.Errors++
+		case ActionUnchanged:
+			// intentionally no-op
+		}
+	}
+
+	return summary
+}
+
+func TestConflictAwareSyncer_Conflicts(t *testing.T) {
+	t.Parallel()
+
+	items := []*provider.Item{
+		testSyncItem("1", "PushEvent"),
+		testSyncItem("2", "IssueEvent"),
+	}
+
+	store := &actionMockSyncStore{actions: []SyncAction{ActionConflictRemote, ActionUnchanged}}
+	mockProv := &mockProvider{items: items}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	ctx := context.Background()
+	result, err := cas.SyncWithConflictDetection(ctx, testSyncOpts())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Conflicts != 1 {
+		t.Errorf("expected Conflicts=1, got %d", result.Conflicts)
+	}
+	if result.Upserted != 1 {
+		t.Errorf("expected Upserted=1, got %d", result.Upserted)
+	}
+	if result.Skipped != 1 {
+		t.Errorf("expected Skipped=1, got %d", result.Skipped)
+	}
+}
+
+func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
+	t.Parallel()
+
+	items := []*provider.Item{
+		testSyncItem("1", "PushEvent"),
+		testSyncItem("2", "IssueEvent"),
+	}
+
+	store := &actionMockSyncStore{actions: []SyncAction{ActionCreated, ActionError}}
+	mockProv := &mockProvider{items: items}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	ctx := context.Background()
+	result, err := cas.SyncWithConflictDetection(ctx, testSyncOpts())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if result.Fetched != 2 {
+		t.Errorf("expected Fetched=2, got %d", result.Fetched)
+	}
+	if result.Upserted != 1 {
+		t.Errorf("expected Upserted=1, got %d", result.Upserted)
+	}
+	if result.Errors != 1 {
+		t.Errorf("expected Errors=1, got %d", result.Errors)
 	}
 }
 

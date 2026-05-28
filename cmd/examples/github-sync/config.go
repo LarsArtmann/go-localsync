@@ -32,6 +32,8 @@ type AppConfig struct {
 	ShowStats bool `env:"SHOW_STATS" envDefault:"false"`
 	// Verbose enables debug-level logging.
 	Verbose bool `env:"VERBOSE" envDefault:"false"`
+	// JSONOutput outputs results as JSON.
+	JSONOutput bool `env:"JSON_OUTPUT" envDefault:"false"`
 }
 
 // LoadConfig parses environment variables into AppConfig.
