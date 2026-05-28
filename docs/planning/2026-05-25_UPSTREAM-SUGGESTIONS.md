@@ -17,6 +17,7 @@ go-localsync is the deepest consumer of go-cqrs-lite, using 5 of 12 modules at ~
 **Problem:** Every consumer writes the same boilerplate to wire store + bus + outbox + snapshot + checkpoint.
 
 **Current consumer code (~200 LOC in go-localsync):**
+
 ```go
 func createStoreAndBus(cfg Config) (storeResult, error) {
     switch cfg.Backend {
@@ -35,6 +36,7 @@ func createStoreAndBus(cfg Config) (storeResult, error) {
 ```
 
 **Suggestion:** Provide a `storage.NewStack(cfg)` or `storage.Builder` that returns a pre-wired struct:
+
 ```go
 type Stack struct {
     Store     event.Store
@@ -54,6 +56,7 @@ type Stack struct {
 **Problem:** Starting projection runners, outbox publishers, and in-memory runners requires copy-pasted goroutine management.
 
 **Current consumer code (~80 LOC in go-localsync):**
+
 ```go
 func startProjectionRunner(loader, bus, checkpointStore, proj) (cancelFunc, error) {
     runner, err := projection.NewRunner(loader, bus, checkpointStore)
@@ -67,6 +70,7 @@ func startOutboxPublisher(outbox, bus) (*event.OutboxPublisher, error) {
 ```
 
 **Suggestion:** Add package-level helpers:
+
 ```go
 // projection.StartRunner(ctx, loader, bus, cp, proj) → cancel, error
 // event.StartOutboxPublisher(outbox, bus) → *OutboxPublisher, error
@@ -82,6 +86,7 @@ func startOutboxPublisher(outbox, bus) (*event.OutboxPublisher, error) {
 **Problem:** Unix-nanosecond serialization of `time.Time` in event payloads is universal. Every consumer reinvents it.
 
 **Current consumer code (go-localsync):**
+
 ```go
 func unixNano(t time.Time) int64 {
     if t.IsZero() { return 0 }
@@ -94,6 +99,7 @@ func fromUnixNano(n int64) time.Time {
 ```
 
 **Suggestion:** Add to `core/event/`:
+
 ```go
 func TimestampNano(t time.Time) int64
 func FromTimestampNano(n int64) time.Time
@@ -108,6 +114,7 @@ func FromTimestampNano(n int64) time.Time
 **Problem:** Consumers using `charm.land/log/v2` need an adapter for `middleware.Logger`.
 
 **Current consumer code:**
+
 ```go
 type charmLogAdapter struct{ logger *log.Logger }
 func (a *charmLogAdapter) Info(msg string, keyvals ...any) { ... }
@@ -125,6 +132,7 @@ func (a *charmLogAdapter) Error(msg string, keyvals ...any) { ... }
 **Problem:** `ireturn` linter flags factory functions that legitimately return interfaces. Consumers must add `//nolint:ireturn`.
 
 **Current consumer code:**
+
 ```go
 //nolint:ireturn
 func createReadModel(cfg Config, sr storeResult) (ReadModel, error) {
@@ -138,10 +146,10 @@ func createReadModel(cfg Config, sr storeResult) (ReadModel, error) {
 
 ## Summary
 
-| # | Suggestion | Priority | Effort |
-|---|-----------|----------|--------|
-| 1 | `StorageStack` factory | HIGH | Medium |
-| 2 | Runner wiring helpers | HIGH | Low |
-| 3 | `TimestampNano` helpers | LOW | Trivial |
-| 4 | `CharmLogAdapter` | LOW | Low |
-| 5 | `ireturn` factory guidance | LOW | Documentation |
+| #   | Suggestion                 | Priority | Effort        |
+| --- | -------------------------- | -------- | ------------- |
+| 1   | `StorageStack` factory     | HIGH     | Medium        |
+| 2   | Runner wiring helpers      | HIGH     | Low           |
+| 3   | `TimestampNano` helpers    | LOW      | Trivial       |
+| 4   | `CharmLogAdapter`          | LOW      | Low           |
+| 5   | `ireturn` factory guidance | LOW      | Documentation |
