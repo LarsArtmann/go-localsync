@@ -2,12 +2,14 @@ package api
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
 	"charm.land/log/v2"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -233,7 +235,7 @@ func (s *Server) triggerSync(ctx context.Context, input *SyncInput) (*SyncOutput
 
 	result, err := s.syncer.Sync(ctx, &opts)
 	if err != nil {
-		return nil, err
+		return nil, mapSyncError(err)
 	}
 
 	var resp SyncOutput
@@ -258,4 +260,21 @@ func (s *Server) healthCheck(_ context.Context, _ *struct{}) (*HealthOutput, err
 	resp.Body.Status = "healthy"
 
 	return &resp, nil
+}
+
+func mapSyncError(err error) error {
+	switch {
+	case errors.Is(err, pkgerrors.ErrRateLimited):
+		return huma.Error429TooManyRequests("rate limited", err)
+	case errors.Is(err, pkgerrors.ErrInvalidToken):
+		return huma.Error401Unauthorized("invalid token", err)
+	case errors.Is(err, pkgerrors.ErrUserNotFound):
+		return huma.Error404NotFound("user not found", err)
+	case errors.Is(err, pkgerrors.ErrDatabase):
+		return huma.Error500InternalServerError("database error", err)
+	case errors.Is(err, pkgerrors.ErrInvalidInput):
+		return huma.Error400BadRequest("invalid input", err)
+	default:
+		return huma.Error503ServiceUnavailable("sync failed", err)
+	}
 }
