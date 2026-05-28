@@ -47,12 +47,12 @@ func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 
 	_, err := db.ExecContext(ctx, syncItemsDDL)
 	if err != nil {
-		return nil, fmt.Errorf("create sync_items table: %w", err)
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items table: %v", err))
 	}
 
 	_, err = db.ExecContext(ctx, syncItemsIndexes)
 	if err != nil {
-		return nil, fmt.Errorf("create sync_items indexes: %w", err)
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items indexes: %v", err))
 	}
 
 	return &TursoReadModel{db: db}, nil
@@ -74,7 +74,7 @@ func (m *TursoReadModel) Get(
 			return nil, pkgerrors.ErrNotFound
 		}
 
-		return nil, fmt.Errorf("get item %s/%s: %w", source, sourceID, err)
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("get item %s/%s: %v", source, sourceID, err))
 	}
 
 	return item, nil
@@ -85,7 +85,7 @@ func (m *TursoReadModel) List(ctx context.Context, filter provider.ItemFilter) (
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, fmt.Errorf("list items with filter %+v: %w", filter, err)
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("list items: %v", err))
 	}
 
 	defer func() { _ = rows.Close() }()
@@ -101,7 +101,7 @@ func (m *TursoReadModel) Count(ctx context.Context, filter provider.ItemFilter) 
 
 	err := m.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
-		return count, fmt.Errorf("count items with filter %+v: %w", filter, err)
+		return count, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("count items: %v", err))
 	}
 
 	return count, nil
@@ -112,7 +112,7 @@ func (m *TursoReadModel) GetTypes(ctx context.Context) ([]string, error) {
 
 	rows, err := m.db.QueryContext(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("get types: %w", err)
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("get types: %v", err))
 	}
 
 	defer func() { _ = rows.Close() }()
@@ -124,7 +124,7 @@ func (m *TursoReadModel) GetTypes(ctx context.Context) ([]string, error) {
 
 		err := rows.Scan(&t)
 		if err != nil {
-			return nil, fmt.Errorf("scan type: %w", err)
+			return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("scan type: %v", err))
 		}
 
 		types = append(types, t)
@@ -132,7 +132,7 @@ func (m *TursoReadModel) GetTypes(ctx context.Context) ([]string, error) {
 
 	err = rows.Err()
 	if err != nil {
-		return nil, fmt.Errorf("iterate types: %w", err)
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("iterate types: %v", err))
 	}
 
 	if types == nil {
@@ -154,7 +154,7 @@ func (m *TursoReadModel) Upsert(ctx context.Context, item *provider.Item) error 
 		item.RepoURL, item.CreatedAt, item.UpdatedAt, item.RawJSON,
 	)
 	if err != nil {
-		return fmt.Errorf("upsert item: %w", err)
+		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("upsert item: %v", err))
 	}
 
 	return nil
@@ -172,7 +172,7 @@ func (m *TursoReadModel) Delete(
 		sourceID.Get(),
 	)
 	if err != nil {
-		return fmt.Errorf("delete item %s/%s: %w", source, sourceID, err)
+		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("delete item %s/%s: %v", source, sourceID, err))
 	}
 
 	return nil
