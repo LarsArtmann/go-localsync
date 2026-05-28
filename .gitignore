@@ -18,3 +18,5 @@ coverage/*
 Copy/paste detection report
 /report/jscpd-report.json
 reports/
+# Nix build output
+/result
