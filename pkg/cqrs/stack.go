@@ -33,6 +33,7 @@ const (
 	dbPathInMemory = ":memory:"
 )
 
+// CQRSConfig configures the CQRS stack's storage backend.
 type CQRSConfig struct {
 	Backend   string
 	DBPath    string
@@ -40,6 +41,8 @@ type CQRSConfig struct {
 	AuthToken string
 }
 
+// CQRSStack wires together the event store, bus, decider repository, read model,
+// command/query dispatchers, outbox publisher, and projection runner.
 type CQRSStack struct {
 	Store             event.Store
 	Bus               event.Bus
@@ -54,6 +57,7 @@ type CQRSStack struct {
 	cancelRunner      context.CancelFunc
 }
 
+// NewCQRSStack creates a fully wired CQRS stack based on the given config.
 func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 	sr, err := createStoreAndBus(cfg)
 	if err != nil {
@@ -156,6 +160,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 	}, nil
 }
 
+// Push syncs local changes to the remote Turso database.
 func (s *CQRSStack) Push(ctx context.Context) error {
 	if s.syncDB == nil {
 		return nil
@@ -164,6 +169,7 @@ func (s *CQRSStack) Push(ctx context.Context) error {
 	return fmt.Errorf("push: %w", s.syncDB.Push(ctx))
 }
 
+// Pull syncs remote changes from the Turso database.
 func (s *CQRSStack) Pull(ctx context.Context) (bool, error) {
 	if s.syncDB == nil {
 		return false, nil
@@ -177,6 +183,7 @@ func (s *CQRSStack) Pull(ctx context.Context) (bool, error) {
 	return ok, nil
 }
 
+// SyncItem dispatches a SyncItemCommand for a single item.
 func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
@@ -186,6 +193,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	})
 }
 
+// DeleteItem dispatches a DeleteItemCommand for the given source/externalID.
 func (s *CQRSStack) DeleteItem(
 	ctx context.Context,
 	source string,
@@ -200,6 +208,7 @@ func (s *CQRSStack) DeleteItem(
 	})
 }
 
+// SyncItems syncs a batch of items, returning a summary with per-item results.
 func (s *CQRSStack) SyncItems(
 	ctx context.Context,
 	items []*provider.Item,
@@ -287,6 +296,7 @@ func classifyAction(err error, eventCount int, wasNew bool) synclib.SyncAction {
 	return synclib.ActionUnchanged
 }
 
+// Count returns the total number of items in the read model.
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
 	return s.ReadModel.Count(ctx, provider.ItemFilter{
 		Type:       nil,
@@ -299,10 +309,12 @@ func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
 	})
 }
 
+// GetTypes returns all distinct item types in the read model.
 func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 	return s.ReadModel.GetTypes(ctx)
 }
 
+// ListItems delegates to the read model's List method.
 func (s *CQRSStack) ListItems(
 	ctx context.Context,
 	filter provider.ItemFilter,
@@ -310,6 +322,7 @@ func (s *CQRSStack) ListItems(
 	return s.ReadModel.List(ctx, filter)
 }
 
+// CountItems delegates to the read model's Count method.
 func (s *CQRSStack) CountItems(
 	ctx context.Context,
 	filter provider.ItemFilter,
@@ -317,10 +330,13 @@ func (s *CQRSStack) CountItems(
 	return s.ReadModel.Count(ctx, filter)
 }
 
+// GetItemTypes delegates to the read model's GetTypes method.
 func (s *CQRSStack) GetItemTypes(ctx context.Context) ([]string, error) {
 	return s.ReadModel.GetTypes(ctx)
 }
 
+// Close gracefully shuts down all components: dispatchers, outbox publisher,
+// projection runner, read model, outbox, and event store.
 func (s *CQRSStack) Close() error {
 	var errs []error
 

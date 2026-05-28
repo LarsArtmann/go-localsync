@@ -9,11 +9,13 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
+// MemoryReadModel is a concurrent-safe in-memory implementation of ReadModel.
 type MemoryReadModel struct {
 	mu    sync.RWMutex
 	items map[string]*provider.Item
 }
 
+// NewMemoryReadModel creates a new empty MemoryReadModel.
 func NewMemoryReadModel() *MemoryReadModel {
 	return &MemoryReadModel{
 		mu:    sync.RWMutex{},
@@ -111,6 +113,7 @@ func (m *MemoryReadModel) Delete(
 
 func (m *MemoryReadModel) Close() error { return nil }
 
+// Len returns the number of items in the read model.
 func (m *MemoryReadModel) Len() int {
 	m.mu.RLock()
 	defer m.mu.RUnlock()

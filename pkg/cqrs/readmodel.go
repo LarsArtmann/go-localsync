@@ -7,6 +7,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
+// ReadModel is the CQRS read model interface for querying projected items.
 type ReadModel interface {
 	Get(ctx context.Context, source string, sourceID id.ExternalID) (*provider.Item, error)
 	List(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error)

@@ -10,11 +10,15 @@ import (
 const aggregateType event.AggregateType = "sync_item"
 
 const (
+	// EventItemSynced is emitted when an item is created or updated.
 	EventItemSynced        event.Type = "sync_item.synced"
+	// EventItemConflictFound is emitted when a conflict is detected (remote wins).
 	EventItemConflictFound event.Type = "sync_item.conflict_found"
+	// EventItemDeleted is emitted when an item is soft-deleted.
 	EventItemDeleted       event.Type = "sync_item.deleted"
 )
 
+// ItemSyncedPayload is the event payload for ItemSynced events.
 type ItemSyncedPayload struct {
 	ItemID         string          `json:"itemId"`
 	Source         string          `json:"source"`
@@ -29,6 +33,7 @@ type ItemSyncedPayload struct {
 	RawJSON        json.RawMessage `json:"rawJson,omitempty"`
 }
 
+// ItemConflictFoundPayload is the event payload for ItemConflictFound events.
 type ItemConflictFoundPayload struct {
 	Source          string `json:"source"`
 	SourceID        string `json:"sourceId"`
@@ -37,6 +42,7 @@ type ItemConflictFoundPayload struct {
 	Winner          string `json:"winner"`
 }
 
+// ItemDeletedPayload is the event payload for ItemDeleted events.
 type ItemDeletedPayload struct {
 	Source   string `json:"source"`
 	SourceID string `json:"sourceId"`

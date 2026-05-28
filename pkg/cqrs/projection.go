@@ -8,22 +8,27 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
+// Projector projects domain events onto the ReadModel.
 type Projector struct {
 	readModel ReadModel
 }
 
+// NewProjector creates a Projector for the given ReadModel.
 func NewProjector(rm ReadModel) *Projector {
 	return &Projector{readModel: rm}
 }
 
+// Name returns the projection name.
 func (p *Projector) Name() string {
 	return "sync_item_projection"
 }
 
+// EventTypes returns the event types this projector handles.
 func (p *Projector) EventTypes() []event.Type {
 	return []event.Type{EventItemSynced, EventItemDeleted, EventItemConflictFound}
 }
 
+// Handle processes a single event, updating the read model.
 func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
 	switch evt.Type() {
 	case EventItemSynced:

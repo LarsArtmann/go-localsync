@@ -115,12 +115,14 @@ const (
 	queryTypeGetTypes  query.Type = "sync_item.get_types"
 )
 
+// SyncItemCommand dispatches a sync operation for a single item.
 type SyncItemCommand struct {
 	command.BasicCommand
 
 	Item *provider.Item
 }
 
+// DeleteItemCommand dispatches a delete operation for a single item.
 type DeleteItemCommand struct {
 	command.BasicCommand
 
@@ -128,12 +130,14 @@ type DeleteItemCommand struct {
 	SourceID id.ExternalID
 }
 
+// ListItemsQuery queries items matching a filter.
 type ListItemsQuery struct {
 	query.BasicQuery
 
 	Filter provider.ItemFilter
 }
 
+// GetItemQuery queries a single item by source and external ID.
 type GetItemQuery struct {
 	query.BasicQuery
 
@@ -141,12 +145,14 @@ type GetItemQuery struct {
 	SourceID id.ExternalID
 }
 
+// CountItemsQuery counts items matching a filter.
 type CountItemsQuery struct {
 	query.BasicQuery
 
 	Filter provider.ItemFilter
 }
 
+// GetTypesQuery returns all distinct item types.
 type GetTypesQuery struct {
 	query.BasicQuery
 }

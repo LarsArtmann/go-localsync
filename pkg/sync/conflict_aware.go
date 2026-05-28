@@ -4,16 +4,19 @@ import (
 	"context"
 )
 
+// ConflictAwareSyncer wraps a Syncer to add per-item conflict detection via the CQRS decider.
 type ConflictAwareSyncer struct {
 	*Syncer
 }
 
+// NewConflictAwareSyncer creates a ConflictAwareSyncer that delegates to the base Syncer.
 func NewConflictAwareSyncer(base *Syncer) *ConflictAwareSyncer {
 	return &ConflictAwareSyncer{
 		Syncer: base,
 	}
 }
 
+// ConflictResult holds the result of a conflict-aware sync operation.
 type ConflictResult struct {
 	Fetched   int
 	Upserted  int
@@ -22,6 +25,7 @@ type ConflictResult struct {
 	Errors    int
 }
 
+// SyncWithConflictDetection fetches items and syncs them, tracking conflicts separately.
 func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	ctx context.Context,
 	opts *SyncOptions,

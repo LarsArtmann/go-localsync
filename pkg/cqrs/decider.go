@@ -197,6 +197,8 @@ func itemToPayload(item *provider.Item) ItemSyncedPayload {
 	}
 }
 
+// HasChanged returns true if the remote item differs from the local item
+// in any tracked field (UpdatedAt, Type, ActorLogin, RepoName, RepoURL).
 func HasChanged(local, remote *provider.Item) bool {
 	return !local.UpdatedAt.Equal(remote.UpdatedAt) ||
 		local.Type.Get() != remote.Type.Get() ||

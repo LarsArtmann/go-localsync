@@ -32,10 +32,12 @@ CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
 CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login)`
 
+// TursoReadModel is a SQLite/Turso-backed implementation of ReadModel.
 type TursoReadModel struct {
 	db *sql.DB
 }
 
+// NewTursoReadModel creates a TursoReadModel, initializing the schema.
 func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 	if db == nil {
 		return nil, fmt.Errorf("turso read model: %w", pkgerrors.ErrDBNil)

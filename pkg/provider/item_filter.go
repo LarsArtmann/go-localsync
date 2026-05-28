@@ -6,6 +6,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
+// ItemFilter defines optional filters for querying items. Nil fields are ignored.
 type ItemFilter struct {
 	Type       *id.EventTypeID
 	ActorLogin *id.ActorID
