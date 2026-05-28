@@ -71,7 +71,7 @@ Actionable tasks for the next 2-4 weeks. Items are organized by priority.
 Before Phase 2 (Production Ready):
 
 - [ ] All HIGH priority items complete
-- [x] Test coverage for `pkg/cqrs`, `pkg/providers/github`, `pkg/sync`, `pkg/types`, `pkg/errors`
+- [x] Test coverage for `pkg/cqrs`, `pkg/providers/github`, `pkg/sync`, `pkg/id`, `pkg/errors`
 - [x] CI/CD pipeline configured
 - [x] go.mod properly formatted (no replace directives)
 - [x] Architecture decoupling (domain types, branded IDs) complete

@@ -99,7 +99,7 @@ Read-side operations against the read model.
 | **Sync Engine** | Orchestrates fetching from providers and dispatching to CQRS stack (`pkg/sync`) |
 | **CQRS Core**   | Event sourcing, command/query dispatch, projections (`pkg/cqrs`)                |
 | **Provider**    | External API integration, rate limiting, retry logic (`pkg/providers/github`)   |
-| **Types**       | Branded identifier types for compile-time safety (`pkg/types`)                  |
+| **Types**       | Branded identifier types for compile-time safety (`pkg/id`)                  |
 
 ---
 

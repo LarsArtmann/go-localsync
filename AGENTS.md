@@ -15,7 +15,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`)                                      |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                 |
 | `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary` |
-| `pkg/types/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                          |
+| `pkg/id/`                | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                          |
 | `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable` |
 | `cmd/examples/github-sync/` | Example CLI entry point                                                                                                                  |
 
@@ -131,7 +131,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/cqrs`                 | 73    | 82.5%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation |
 | `pkg/providers/github`     | 46    | 85.4%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                   |
 | `pkg/sync`                 | 14    | ~85%     | ✅ Syncer + ConflictAwareSyncer + invalid item error counting (mock SyncStore)             |
-| `pkg/types`                | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
+| `pkg/id`                | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
 | `pkg/errors`               | 28    | 100.0%   | ✅ Sentinel errors, wrapping, classification, fallback paths                               |
 | `pkg/provider`             | 6     | 100.0%   | ✅ Item validation                                                                         |
 | `cmd/examples/github-sync` | 11    | 10.5%    | ✅ exitCodeForError, LoadConfig, env defaults                                              |
@@ -165,7 +165,7 @@ go run ./cmd/examples/github-sync --backend turso --db ./data.db --remote-url ht
 When adding new providers:
 
 1. Implement the `provider.Provider` interface (`Name`, `Fetch`, `FetchAll`, `GetRateLimit`)
-2. Convert provider-specific data to `provider.Item` using branded types from `pkg/types/`
+2. Convert provider-specific data to `provider.Item` using branded types from `pkg/id/`
 3. Add provider-specific tests
 4. Update documentation with provider configuration
 5. Add example in `cmd/examples/`

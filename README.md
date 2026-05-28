@@ -262,7 +262,7 @@ cmd/examples/github-sync/   # Example CLI application
 | `pkg/cqrs`                 | 73    | 82.5%    | Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull |
 | `pkg/providers/github`     | 46    | 85.4%    | Client, fetch, retry, error handling, rate limit, BDD      |
 | `pkg/sync`                 | 18    | 87.2%    | Syncer + ConflictAwareSyncer + Incremental sync            |
-| `pkg/types`                | 15    | 100.0%   | Branded ID construction, roundtrip, zero, equal            |
+| `pkg/id`                | 15    | 100.0%   | Branded ID construction, roundtrip, zero, equal            |
 | `pkg/errors`               | 28    | 100.0%   | Sentinel errors, wrapping, classification, fallback paths  |
 | `pkg/provider`             | 6     | 100.0%   | Item validation                                            |
 | `cmd/examples/github-sync` | 11    | 10.5%    | exitCodeForError, LoadConfig, env defaults                 |
