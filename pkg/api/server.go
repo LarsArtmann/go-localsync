@@ -51,8 +51,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) registerRoutes() {
-	register(s.api, "list-items", http.MethodGet, "/items", "List synced items", []string{"Items"}, s.listItems)
-	register(s.api, "get-stats", http.MethodGet, "/stats", "Get sync statistics", []string{"Stats"}, s.getStats)
+	register(
+		s.api,
+		"list-items",
+		http.MethodGet,
+		"/items",
+		"List synced items",
+		[]string{"Items"},
+		s.listItems,
+	)
+	register(
+		s.api,
+		"get-stats",
+		http.MethodGet,
+		"/stats",
+		"Get sync statistics",
+		[]string{"Stats"},
+		s.getStats,
+	)
 	register(
 		s.api,
 		"trigger-sync",
@@ -62,7 +78,15 @@ func (s *Server) registerRoutes() {
 		[]string{"Sync"},
 		s.triggerSync,
 	)
-	register(s.api, "health-check", http.MethodGet, "/health", "Health check", []string{"Health"}, s.healthCheck)
+	register(
+		s.api,
+		"health-check",
+		http.MethodGet,
+		"/health",
+		"Health check",
+		[]string{"Health"},
+		s.healthCheck,
+	)
 }
 
 //nolint:exhaustruct
@@ -82,6 +106,8 @@ func register[I, O any](
 }
 
 // ListItemsInput defines the query parameters for listing items.
+//
+//nolint:tagalign
 type ListItemsInput struct {
 	Type       string    `doc:"Filter by event type"                           example:"PushEvent"                query:"type"`
 	ActorLogin string    `doc:"Filter by actor login"                          example:"larsartmann"              query:"actor"`
