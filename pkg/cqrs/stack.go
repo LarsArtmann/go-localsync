@@ -11,13 +11,13 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/command"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/event"
-	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/core/pkg/id"
 	"github.com/larsartmann/go-cqrs-lite/core/query"
 	"github.com/larsartmann/go-cqrs-lite/middleware"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 func newSlogLogger() *slog.Logger {
@@ -186,7 +186,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 func (s *CQRSStack) DeleteItem(
 	ctx context.Context,
 	source string,
-	sourceID types.ExternalID,
+	sourceID id.ExternalID,
 ) error {
 	aggID := AggregateID(source, sourceID)
 
@@ -208,7 +208,7 @@ func (s *CQRSStack) SyncItems(
 		Errors:    0,
 	}
 
-	corrID := id.NewCorrelationID()
+	corrID := cqrsid.NewCorrelationID()
 	syncOpts := []event.Option{event.WithCorrelationID(corrID)}
 
 	for _, item := range items {

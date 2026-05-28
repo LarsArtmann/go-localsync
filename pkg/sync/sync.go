@@ -6,8 +6,8 @@ import (
 
 	"charm.land/log/v2"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type SyncAction string
@@ -205,7 +205,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	typeCounts := make(map[string]int64)
 
 	for _, t := range eventTypes {
-		eventType := types.NewEventTypeID(t)
+		eventType := id.NewEventTypeID(t)
 
 		count, err := s.store.CountItems(
 			ctx,

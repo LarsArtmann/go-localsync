@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
@@ -34,7 +34,7 @@ func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 2)
 
-	mustNoError(t, stack.DeleteItem(ctx, "github", types.NewExternalID("1")))
+	mustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("1")))
 
 	waitForCount(t, stack, ctx, 1)
 }

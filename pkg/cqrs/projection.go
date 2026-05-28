@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
-	"github.com/larsartmann/go-localsync/pkg/types"
+	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
 type Projector struct {
@@ -52,7 +52,7 @@ func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) erro
 		return fmt.Errorf("decode ItemDeletedPayload for event %s: %w", evt.ID(), err)
 	}
 
-	return p.readModel.Delete(ctx, payload.Source, types.NewExternalID(payload.SourceID))
+	return p.readModel.Delete(ctx, payload.Source, id.NewExternalID(payload.SourceID))
 }
 
 var _ event.Projection = (*Projector)(nil)

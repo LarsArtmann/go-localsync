@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 type mockProvider struct {
@@ -95,12 +95,12 @@ func testSyncItem(externalID, eventType string) *provider.Item {
 	now := time.Now()
 
 	return &provider.Item{
-		ID:         types.NewItemID(),
-		ExternalID: types.NewExternalID(externalID),
-		Source:     types.NewProviderID("github"),
-		Type:       types.NewEventTypeID(eventType),
-		ActorLogin: types.NewActorID("testuser"),
-		RepoName:   types.NewRepoID("test/repo"),
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID(externalID),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID(eventType),
+		ActorLogin: id.NewActorID("testuser"),
+		RepoName:   id.NewRepoID("test/repo"),
 		CreatedAt:  now,
 		UpdatedAt:  now,
 		RawJSON:    []byte(`{}`),
@@ -156,7 +156,7 @@ func TestSyncer_Sync_InvalidItem(t *testing.T) {
 	t.Parallel()
 
 	invalidItem := &provider.Item{
-		ID: types.NewItemID(),
+		ID: id.NewItemID(),
 	}
 
 	syncer, _ := newTestSyncer([]*provider.Item{invalidItem})
@@ -316,7 +316,7 @@ func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
 	mockProv := &mockProvider{items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 
-	invalidItem := &provider.Item{ID: types.NewItemID()}
+	invalidItem := &provider.Item{ID: id.NewItemID()}
 	validItem := testSyncItem("1", "PushEvent")
 
 	result := syncer.processIncrementalItems(
@@ -392,7 +392,7 @@ func TestSyncOptions_Validate(t *testing.T) {
 func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 	t.Parallel()
 
-	invalidItem := &provider.Item{ID: types.NewItemID()}
+	invalidItem := &provider.Item{ID: id.NewItemID()}
 	validItem := testSyncItem("1", "PushEvent")
 
 	mockProv := &mockProvider{items: []*provider.Item{invalidItem, validItem}}
@@ -422,8 +422,8 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 	t.Parallel()
 
-	invalidItem1 := &provider.Item{ID: types.NewItemID()}
-	invalidItem2 := &provider.Item{ID: types.NewItemID()}
+	invalidItem1 := &provider.Item{ID: id.NewItemID()}
+	invalidItem2 := &provider.Item{ID: id.NewItemID()}
 
 	mockProv := &mockProvider{items: []*provider.Item{invalidItem1, invalidItem2}}
 	store := &mockSyncStore{}

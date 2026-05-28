@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 func TestAggregateID_Deterministic(t *testing.T) {
 	t.Parallel()
 
-	id := AggregateID("github", types.NewExternalID("123"))
+	aggID := AggregateID("github", id.NewExternalID("123"))
 
-	if id != AggregateID("github", types.NewExternalID("123")) {
+	if aggID != AggregateID("github", id.NewExternalID("123")) {
 		t.Error("same inputs must produce same AggregateID")
 	}
 }
@@ -25,10 +25,10 @@ func TestAggregateID_DifferentInputs(t *testing.T) {
 
 	if AggregateID(
 		"github",
-		types.NewExternalID("123"),
+		id.NewExternalID("123"),
 	) == AggregateID(
 		"github",
-		types.NewExternalID("456"),
+		id.NewExternalID("456"),
 	) {
 		t.Error("different inputs must produce different AggregateIDs")
 	}
@@ -73,7 +73,7 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	t.Parallel()
 
 	item := testItem("123", "PushEvent")
-	item.ID = types.NewItemID()
+	item.ID = id.NewItemID()
 	originalID := item.ID.String()
 
 	events, err := DecideSync(item)(InitialState, 0)
@@ -166,11 +166,11 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 
 	state := SyncItemState{
 		Item: &provider.Item{
-			ExternalID: types.NewExternalID("123"),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID("PushEvent"),
-			ActorLogin: types.NewActorID("testuser"),
-			RepoName:   types.NewRepoID("owner/repo"),
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
+			ActorLogin: id.NewActorID("testuser"),
+			RepoName:   id.NewRepoID("owner/repo"),
 			UpdatedAt:  now,
 		},
 	}
@@ -190,9 +190,9 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 
 	state := SyncItemState{
 		Item: &provider.Item{
-			ExternalID: types.NewExternalID("123"),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID("PushEvent"),
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
 			UpdatedAt:  time.Now(),
 		},
 	}
@@ -217,9 +217,9 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 
 	state := SyncItemState{
 		Item: &provider.Item{
-			ExternalID: types.NewExternalID("123"),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID("PushEvent"),
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
 			UpdatedAt:  localTime,
 		},
 	}
@@ -266,7 +266,7 @@ func TestDecideDelete_ActiveItem(t *testing.T) {
 
 	state := testActiveState("123", "")
 
-	events, err := DecideDelete("github", types.NewExternalID("123"))(state, 1)
+	events, err := DecideDelete("github", id.NewExternalID("123"))(state, 1)
 	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -279,7 +279,7 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 
 	state := testDeletedState("123")
 
-	events, err := DecideDelete("github", types.NewExternalID("123"))(state, 1)
+	events, err := DecideDelete("github", id.NewExternalID("123"))(state, 1)
 	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
@@ -289,7 +289,7 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 func TestDecideDelete_NewItem(t *testing.T) {
 	t.Parallel()
 
-	events, err := DecideDelete("github", types.NewExternalID("123"))(InitialState, 0)
+	events, err := DecideDelete("github", id.NewExternalID("123"))(InitialState, 0)
 	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))

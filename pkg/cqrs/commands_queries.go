@@ -10,8 +10,8 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/command"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/query"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // commandLoggingMiddleware logs command dispatches.
@@ -125,7 +125,7 @@ type DeleteItemCommand struct {
 	command.BasicCommand
 
 	Source   string
-	SourceID types.ExternalID
+	SourceID id.ExternalID
 }
 
 type ListItemsQuery struct {
@@ -138,7 +138,7 @@ type GetItemQuery struct {
 	query.BasicQuery
 
 	Source   string
-	SourceID types.ExternalID
+	SourceID id.ExternalID
 }
 
 type CountItemsQuery struct {

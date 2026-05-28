@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
-	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 // SyncItemState is the aggregate state for a single sync item, reconstructed from events.
@@ -70,12 +70,12 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 func itemFromPayload(payload ItemSyncedPayload) *provider.Item {
 	return &provider.Item{
 		ID:             parseItemID(payload.ItemID),
-		ExternalID:     types.NewExternalID(payload.SourceID),
-		Source:         types.NewProviderID(payload.Source),
-		Type:           types.NewEventTypeID(payload.Type),
-		ActorLogin:     types.NewActorID(payload.ActorLogin),
+		ExternalID:     id.NewExternalID(payload.SourceID),
+		Source:         id.NewProviderID(payload.Source),
+		Type:           id.NewEventTypeID(payload.Type),
+		ActorLogin:     id.NewActorID(payload.ActorLogin),
 		ActorAvatarURL: payload.ActorAvatarURL,
-		RepoName:       types.NewRepoID(payload.RepoName),
+		RepoName:       id.NewRepoID(payload.RepoName),
 		RepoURL:        payload.RepoURL,
 		CreatedAt:      fromUnixNano(payload.CreatedAt),
 		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
@@ -105,7 +105,7 @@ func DecideSync(
 
 // DecideDelete returns a DecideFunc that marks an item as deleted.
 func DecideDelete(
-	source string, sourceID types.ExternalID,
+	source string, sourceID id.ExternalID,
 	opts ...event.Option,
 ) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
@@ -142,7 +142,7 @@ const conflictWinnerRemote = "remote"
 
 func syncEvents(
 	item *provider.Item,
-	aggID id.AggregateID,
+	aggID cqrsid.AggregateID,
 	version event.Version,
 	isConflict bool,
 	localUpdatedAt time.Time,
@@ -205,10 +205,10 @@ func HasChanged(local, remote *provider.Item) bool {
 		local.RepoURL != remote.RepoURL
 }
 
-func parseItemID(s string) types.ItemID {
+func parseItemID(s string) id.ItemID {
 	if s == "" {
-		return types.NewItemID()
+		return id.NewItemID()
 	}
 
-	return types.MustParseItemID(s)
+	return id.MustParseItemID(s)
 }

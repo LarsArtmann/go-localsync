@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 func TestCQRSStack_SyncNewItem(t *testing.T) {
@@ -107,7 +107,7 @@ func TestCQRSStack_DeleteItem(t *testing.T) {
 		t.Errorf("expected count=1, got %d", count)
 	}
 
-	mustNoError(t, stack.DeleteItem(ctx, "github", types.NewExternalID("123")))
+	mustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
 	count, err = stack.Count(ctx)
 	mustNoError(t, err)
@@ -125,7 +125,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 	ctx := context.Background()
 
 	mustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
-	mustNoError(t, stack.DeleteItem(ctx, "github", types.NewExternalID("123")))
+	mustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
 	count, _ := stack.Count(ctx)
 	if count != 0 {
@@ -139,7 +139,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 		t.Errorf("resurrected item should reappear in read model, got count=%d", count)
 	}
 
-	got, err := stack.ReadModel.Get(ctx, "github", types.NewExternalID("123"))
+	got, err := stack.ReadModel.Get(ctx, "github", id.NewExternalID("123"))
 	mustNoError(t, err)
 	if got.Type.Get() != "IssueEvent" {
 		t.Errorf("resurrected item should have updated type, got %s", got.Type.Get())
@@ -203,7 +203,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 		t.Errorf("expected Synced=3, got %d", result.Synced)
 	}
 
-	pushType := types.NewEventTypeID("PushEvent")
+	pushType := id.NewEventTypeID("PushEvent")
 	results, err := stack.ReadModel.List(ctx, provider.ItemFilter{Type: &pushType})
 	mustNoError(t, err)
 	if len(results) != 2 {
@@ -230,8 +230,8 @@ func TestCQRSStack_InvalidBackend(t *testing.T) {
 func TestCQRSStack_DeterministicAggregateID_Matches(t *testing.T) {
 	t.Parallel()
 
-	id1 := AggregateID("github", types.NewExternalID("123"))
-	id2 := AggregateID("github", types.NewExternalID("123"))
+	id1 := AggregateID("github", id.NewExternalID("123"))
+	id2 := AggregateID("github", id.NewExternalID("123"))
 
 	if id1 != id2 {
 		t.Error("deterministic IDs must be equal for same inputs")

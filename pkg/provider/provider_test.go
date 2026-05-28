@@ -6,7 +6,7 @@ import (
 	"time"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
-	"github.com/larsartmann/go-localsync/pkg/types"
+	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
 func assertValidationError(t *testing.T, item *Item) {
@@ -19,10 +19,10 @@ func assertValidationError(t *testing.T, item *Item) {
 
 func TestItem_Validate(t *testing.T) {
 	validItem := &Item{
-		ID:         types.NewItemID(),
-		ExternalID: types.NewExternalID("123"),
-		Source:     types.NewProviderID("github"),
-		Type:       types.NewEventTypeID("PushEvent"),
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID("123"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
 		CreatedAt:  time.Now(),
 	}
 
@@ -35,19 +35,19 @@ func TestItem_Validate(t *testing.T) {
 
 	t.Run("rejects zero ExternalID", func(t *testing.T) {
 		item := *validItem
-		item.ExternalID = types.ExternalID{}
+		item.ExternalID = id.ExternalID{}
 		assertValidationError(t, &item)
 	})
 
 	t.Run("rejects zero Source", func(t *testing.T) {
 		item := *validItem
-		item.Source = types.ProviderID{}
+		item.Source = id.ProviderID{}
 		assertValidationError(t, &item)
 	})
 
 	t.Run("rejects zero Type", func(t *testing.T) {
 		item := *validItem
-		item.Type = types.EventTypeID{}
+		item.Type = id.EventTypeID{}
 		assertValidationError(t, &item)
 	})
 

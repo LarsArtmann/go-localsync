@@ -14,8 +14,8 @@ import (
 	"charm.land/log/v2"
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 	"golang.org/x/oauth2"
 )
 
@@ -256,13 +256,13 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 	}
 
 	return &provider.Item{
-		ID:             types.NewItemID(),
-		ExternalID:     types.NewExternalID(e.GetID()),
-		Source:         types.NewProviderID(providerName),
-		Type:           types.NewEventTypeID(e.GetType()),
-		ActorLogin:     types.NewActorID(actorLogin),
+		ID:             id.NewItemID(),
+		ExternalID:     id.NewExternalID(e.GetID()),
+		Source:         id.NewProviderID(providerName),
+		Type:           id.NewEventTypeID(e.GetType()),
+		ActorLogin:     id.NewActorID(actorLogin),
 		ActorAvatarURL: actorAvatarURL,
-		RepoName:       types.NewRepoID(repoName),
+		RepoName:       id.NewRepoID(repoName),
 		RepoURL:        repoURL,
 		CreatedAt:      createdAt,
 		UpdatedAt:      createdAt,

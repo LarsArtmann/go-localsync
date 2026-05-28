@@ -8,27 +8,27 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/errors"
-	"github.com/larsartmann/go-localsync/pkg/types"
+	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
 // Item represents a single syncable item from any provider.
 type Item struct {
 	// ID is the internal ULID-based identifier for this item.
 	// Generated on first insert and stable thereafter.
-	ID types.ItemID `json:"id"`
+	ID id.ItemID `json:"id"`
 	// ExternalID is the original identifier from the source system (e.g., GitHub event "1234567890").
 	// Used for upsert conflict detection against the source.
-	ExternalID types.ExternalID `json:"externalId"`
+	ExternalID id.ExternalID `json:"externalId"`
 	// Source identifies which provider this item came from (e.g., "github", "gitlab").
-	Source types.ProviderID `json:"source"`
+	Source id.ProviderID `json:"source"`
 	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
-	Type types.EventTypeID `json:"type"`
+	Type id.EventTypeID `json:"type"`
 	// ActorLogin is the username of the entity that triggered the item.
-	ActorLogin types.ActorID `json:"actorLogin"`
+	ActorLogin id.ActorID `json:"actorLogin"`
 	// ActorAvatarURL is the avatar URL of the actor.
 	ActorAvatarURL string `json:"actorAvatarUrl,omitempty"`
 	// RepoName is the repository name (e.g., "owner/repo").
-	RepoName types.RepoID `json:"repoName"`
+	RepoName id.RepoID `json:"repoName"`
 	// RepoURL is the repository URL.
 	RepoURL string `json:"repoUrl,omitempty"`
 	// CreatedAt is when the item was created.

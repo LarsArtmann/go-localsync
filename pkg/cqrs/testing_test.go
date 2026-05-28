@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
-	"github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 func mustNoError(t *testing.T, err error) {
@@ -78,16 +78,16 @@ func testSyncedPayload(sourceID, eventType string) ItemSyncedPayload {
 func testActiveState(sourceID, eventType string) SyncItemState {
 	return SyncItemState{
 		Item: &provider.Item{
-			ExternalID: types.NewExternalID(sourceID),
-			Source:     types.NewProviderID("github"),
-			Type:       types.NewEventTypeID(eventType),
+			ExternalID: id.NewExternalID(sourceID),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID(eventType),
 		},
 	}
 }
 
 func testDeletedState(sourceID string) SyncItemState {
 	return SyncItemState{
-		Item:    &provider.Item{ExternalID: types.NewExternalID(sourceID)},
+		Item:    &provider.Item{ExternalID: id.NewExternalID(sourceID)},
 		Deleted: true,
 	}
 }
@@ -98,7 +98,7 @@ func mustNewTestEvent(eventType event.Type, payload any) *event.ImmutableEvent {
 		panic(err)
 	}
 
-	aggID := id.NewAggregateID()
+	aggID := cqrsid.NewAggregateID()
 
 	evt, err := event.NewEvent(eventType, aggID, aggregateType, 1, data)
 	if err != nil {
@@ -110,11 +110,11 @@ func mustNewTestEvent(eventType event.Type, payload any) *event.ImmutableEvent {
 
 func testItem(sourceID, itemType string) *provider.Item {
 	return &provider.Item{
-		ExternalID: types.NewExternalID(sourceID),
-		Source:     types.NewProviderID("github"),
-		Type:       types.NewEventTypeID(itemType),
-		ActorLogin: types.NewActorID("testuser"),
-		RepoName:   types.NewRepoID("owner/repo"),
+		ExternalID: id.NewExternalID(sourceID),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID(itemType),
+		ActorLogin: id.NewActorID("testuser"),
+		RepoName:   id.NewRepoID("owner/repo"),
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 		RawJSON:    json.RawMessage(`{"test":true}`),

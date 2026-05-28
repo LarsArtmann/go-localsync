@@ -1,4 +1,4 @@
-package types
+package id
 
 import (
 	"strings"
@@ -128,8 +128,8 @@ func TestItemIDEqual(t *testing.T) {
 func TestIDString(t *testing.T) {
 	t.Parallel()
 
-	id := NewExternalID("test-id")
-	s := id.String()
+	testID := NewExternalID("test-id")
+	s := testID.String()
 	if s == "" {
 		t.Error("expected non-empty string representation")
 	}
@@ -138,15 +138,15 @@ func TestIDString(t *testing.T) {
 func TestItemIDStringRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	id := NewItemID()
-	s := id.String()
+	testID := NewItemID()
+	s := testID.String()
 
 	if !strings.HasPrefix(s, "0") {
 		t.Errorf("ULID should start with '0' in this millennium, got: %s", s)
 	}
 
 	parsed := MustParseItemID(s)
-	if !id.Equal(parsed) {
-		t.Errorf("round-trip failed: %s != %s", id.String(), parsed.String())
+	if !testID.Equal(parsed) {
+		t.Errorf("round-trip failed: %s != %s", testID.String(), parsed.String())
 	}
 }

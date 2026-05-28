@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 func upsertTestItem(
@@ -18,11 +18,11 @@ func upsertTestItem(
 	t.Helper()
 
 	mustNoError(t, rm.Upsert(ctx, &provider.Item{
-		ExternalID: types.NewExternalID(extID),
-		Source:     types.NewProviderID(source),
-		Type:       types.NewEventTypeID(eventType),
-		ActorLogin: types.NewActorID(actor),
-		RepoName:   types.NewRepoID(repo),
+		ExternalID: id.NewExternalID(extID),
+		Source:     id.NewProviderID(source),
+		Type:       id.NewEventTypeID(eventType),
+		ActorLogin: id.NewActorID(actor),
+		RepoName:   id.NewRepoID(repo),
 		CreatedAt:  time.Now(),
 	}))
 }
@@ -34,14 +34,14 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 	ctx := context.Background()
 
 	item := &provider.Item{
-		ExternalID: types.NewExternalID("123"),
-		Source:     types.NewProviderID("github"),
-		Type:       types.NewEventTypeID("PushEvent"),
+		ExternalID: id.NewExternalID("123"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
 	}
 
 	mustNoError(t, rm.Upsert(ctx, item))
 
-	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
 	mustNoError(t, err)
 	if got == nil {
 		t.Fatal("expected non-nil item")
@@ -55,7 +55,7 @@ func TestMemoryReadModel_GetNotFound(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	got, err := rm.Get(ctx, "github", types.NewExternalID("nonexistent"))
+	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
 	mustNoError(t, err)
 	if got != nil {
 		t.Error("expected nil for nonexistent item")
@@ -69,14 +69,14 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 	ctx := context.Background()
 
 	item := &provider.Item{
-		ExternalID: types.NewExternalID("123"),
-		Source:     types.NewProviderID("github"),
+		ExternalID: id.NewExternalID("123"),
+		Source:     id.NewProviderID("github"),
 	}
 
 	mustNoError(t, rm.Upsert(ctx, item))
-	mustNoError(t, rm.Delete(ctx, "github", types.NewExternalID("123")))
+	mustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("123")))
 
-	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
 	mustNoError(t, err)
 	if got != nil {
 		t.Error("expected nil after delete")
@@ -93,21 +93,21 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	upsertTestItem(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo2")
 	upsertTestItem(t, rm, ctx, "gitlab", "3", "PushEvent", "alice", "org/repo3")
 
-	pushTypeFilter := types.NewEventTypeID("PushEvent")
+	pushTypeFilter := id.NewEventTypeID("PushEvent")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushTypeFilter})
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
-	sourceFilter := types.NewProviderID("github")
+	sourceFilter := id.NewProviderID("github")
 	items, err = rm.List(ctx, provider.ItemFilter{Source: &sourceFilter})
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
 	}
 
-	actorFilter := types.NewActorID("alice")
+	actorFilter := id.NewActorID("alice")
 	items, err = rm.List(ctx, provider.ItemFilter{ActorLogin: &actorFilter})
 	mustNoError(t, err)
 	if len(items) != 2 {
@@ -142,7 +142,7 @@ func TestMemoryReadModel_Count(t *testing.T) {
 		t.Errorf("expected count=2, got %d", count)
 	}
 
-	pushTypeFilter := types.NewEventTypeID("PushEvent")
+	pushTypeFilter := id.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushTypeFilter})
 	mustNoError(t, err)
 	if count != 1 {
@@ -186,7 +186,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 		t.Errorf("expected Len=1, got %d", rm.Len())
 	}
 
-	got, err := rm.Get(context.Background(), "github", types.NewExternalID("123"))
+	got, err := rm.Get(context.Background(), "github", id.NewExternalID("123"))
 	mustNoError(t, err)
 	assertItemType(t, got, "PushEvent")
 }
@@ -251,7 +251,7 @@ func TestReadModel_Integration(t *testing.T) {
 		mustNoError(t, proj.Handle(ctx, evt))
 	}
 
-	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
 	mustNoError(t, err)
 	if got.Type.Get() != "PushEvent" {
 		t.Errorf("expected Type=PushEvent, got %s", got.Type.Get())

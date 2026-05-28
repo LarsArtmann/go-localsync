@@ -8,8 +8,8 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/storage"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 func newTursoTestDB(t *testing.T) *TursoReadModel {
@@ -34,13 +34,13 @@ func tursoTestItem(t *testing.T, source, extID, eventType, actor, repo string) *
 	t.Helper()
 
 	return &provider.Item{
-		ID:             types.NewItemID(),
-		ExternalID:     types.NewExternalID(extID),
-		Source:         types.NewProviderID(source),
-		Type:           types.NewEventTypeID(eventType),
-		ActorLogin:     types.NewActorID(actor),
+		ID:             id.NewItemID(),
+		ExternalID:     id.NewExternalID(extID),
+		Source:         id.NewProviderID(source),
+		Type:           id.NewEventTypeID(eventType),
+		ActorLogin:     id.NewActorID(actor),
 		ActorAvatarURL: "https://avatar.example.com/" + actor,
-		RepoName:       types.NewRepoID(repo),
+		RepoName:       id.NewRepoID(repo),
 		RepoURL:        "https://github.com/" + repo,
 		CreatedAt:      time.Now().Truncate(time.Microsecond),
 		UpdatedAt:      time.Now().Truncate(time.Microsecond),
@@ -58,7 +58,7 @@ func TestTursoReadModel_UpsertAndGet(t *testing.T) {
 
 	mustNoError(t, rm.Upsert(ctx, item))
 
-	got, err := rm.Get(ctx, "github", types.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
 	mustNoError(t, err)
 
 	if got == nil {
@@ -80,7 +80,7 @@ func TestTursoReadModel_Get_NotFound(t *testing.T) {
 	rm := newTursoTestDB(t)
 	ctx := context.Background()
 
-	got, err := rm.Get(ctx, "github", types.NewExternalID("nonexistent"))
+	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
 	if err == nil {
 		t.Fatal("expected ErrNotFound, got nil")
 	}
@@ -122,7 +122,7 @@ func TestTursoReadModel_List_FilterByType(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
 
-	pushType := types.NewEventTypeID("PushEvent")
+	pushType := id.NewEventTypeID("PushEvent")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("List: %v", err)
@@ -151,7 +151,7 @@ func TestTursoReadModel_Count(t *testing.T) {
 		t.Errorf("Count = %d, want 2", count)
 	}
 
-	pushType := types.NewEventTypeID("PushEvent")
+	pushType := id.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushType})
 	mustNoError(t, err)
 
@@ -186,10 +186,10 @@ func TestTursoReadModel_Delete(t *testing.T) {
 
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 
-	err := rm.Delete(ctx, "github", types.NewExternalID("1"))
+	err := rm.Delete(ctx, "github", id.NewExternalID("1"))
 	mustNoError(t, err)
 
-	got, _ := rm.Get(ctx, "github", types.NewExternalID("1"))
+	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
 	if got != nil {
 		t.Fatal("item should be nil after delete")
 	}
@@ -207,7 +207,7 @@ func TestTursoReadModel_Upsert_Idempotent(t *testing.T) {
 	item2 := tursoTestItem(t, "github", "1", "IssueEvent", "bob", "org/repo")
 	_ = rm.Upsert(ctx, item2)
 
-	got, _ := rm.Get(ctx, "github", types.NewExternalID("1"))
+	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
 	assertItemType(t, got, "IssueEvent")
 
 	count, _ := rm.Count(ctx, provider.ItemFilter{})
@@ -226,7 +226,7 @@ func TestTursoReadModel_List_FilterByActorLogin(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
 
-	actor := types.NewActorID("alice")
+	actor := id.NewActorID("alice")
 	items, err := rm.List(ctx, provider.ItemFilter{ActorLogin: &actor})
 	mustNoError(t, err)
 	if len(items) != 2 {
@@ -250,7 +250,7 @@ func TestTursoReadModel_List_FilterByRepoName(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo-b"))
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "charlie", "org/repo-a"))
 
-	repo := types.NewRepoID("org/repo-a")
+	repo := id.NewRepoID("org/repo-a")
 	items, err := rm.List(ctx, provider.ItemFilter{RepoName: &repo})
 	mustNoError(t, err)
 	if len(items) != 2 {
@@ -267,7 +267,7 @@ func TestTursoReadModel_List_FilterBySource(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 	_ = rm.Upsert(ctx, tursoTestItem(t, "gitlab", "2", "PushEvent", "bob", "org/repo"))
 
-	source := types.NewProviderID("github")
+	source := id.NewProviderID("github")
 	items, err := rm.List(ctx, provider.ItemFilter{Source: &source})
 	mustNoError(t, err)
 	if len(items) != 1 {
@@ -354,8 +354,8 @@ func TestTursoReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
 
-	pushType := types.NewEventTypeID("PushEvent")
-	actor := types.NewActorID("alice")
+	pushType := id.NewEventTypeID("PushEvent")
+	actor := id.NewActorID("alice")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType, ActorLogin: &actor})
 	mustNoError(t, err)
 	if len(items) != 1 {
@@ -372,7 +372,7 @@ func TestTursoReadModel_List_ZeroResults(t *testing.T) {
 
 	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 
-	pushType := types.NewEventTypeID("NonExistentType")
+	pushType := id.NewEventTypeID("NonExistentType")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("List: %v", err)

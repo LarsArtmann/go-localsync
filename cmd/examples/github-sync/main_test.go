@@ -104,3 +104,107 @@ func TestAppConfig_Defaults(t *testing.T) {
 		t.Errorf("expected 0 MaxPages before parsing")
 	}
 }
+
+func TestLogFatalAndExit_ExtractsCode(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		err  error
+		want int
+	}{
+		{"rate limited", pkgerrors.ErrRateLimited, exitTempFail},
+		{"invalid token", pkgerrors.ErrInvalidToken, exitUsage},
+		{"database error", pkgerrors.ErrDatabase, exitNoInput},
+		{"sync failed", pkgerrors.ErrSyncFailed, exitSoftware},
+		{"unknown error", errors.New("something"), exitUnavailable},
+	}
+
+	for _, tt := range tests {
+		tc := tt
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			got := exitCodeForError(tc.err)
+			if got != tc.want {
+				t.Errorf("exitCodeForError(%v) = %d, want %d", tc.err, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestLoadConfig_InvalidMaxPages(t *testing.T) {
+	t.Setenv("MAX_PAGES", "not-a-number")
+
+	_, err := LoadConfig()
+	if err == nil {
+		t.Error("expected error for invalid MAX_PAGES")
+	}
+}
+
+func TestLoadConfig_InvalidBackend(t *testing.T) {
+	t.Setenv("BACKEND", "invalid")
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Backend != "invalid" {
+		t.Errorf("expected Backend=invalid, got %s", cfg.Backend)
+	}
+}
+
+func TestLoadConfig_Empty(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "")
+	t.Setenv("GITHUB_USER", "")
+	t.Setenv("BACKEND", "")
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Backend != "memory" {
+		t.Errorf("expected default Backend=memory, got %s", cfg.Backend)
+	}
+	if cfg.MaxPages != 10 {
+		t.Errorf("expected default MaxPages=10, got %d", cfg.MaxPages)
+	}
+	if !cfg.Incremental {
+		t.Error("expected default Incremental=true")
+	}
+}
+
+func TestLoadConfig_ConflictAware(t *testing.T) {
+	t.Setenv("CONFLICT_AWARE", "true")
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !cfg.ConflictAware {
+		t.Error("expected ConflictAware=true")
+	}
+}
+
+func TestLoadConfig_ShowStats(t *testing.T) {
+	t.Setenv("SHOW_STATS", "true")
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !cfg.ShowStats {
+		t.Error("expected ShowStats=true")
+	}
+}
+
+func TestLoadConfig_Verbose(t *testing.T) {
+	t.Setenv("VERBOSE", "true")
+
+	cfg, err := LoadConfig()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !cfg.Verbose {
+		t.Error("expected Verbose=true")
+	}
+}

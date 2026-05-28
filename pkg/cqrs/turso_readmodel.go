@@ -8,8 +8,8 @@ import (
 	"time"
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"github.com/larsartmann/go-localsync/pkg/types"
 )
 
 const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
@@ -59,7 +59,7 @@ func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 func (m *TursoReadModel) Get(
 	ctx context.Context,
 	source string,
-	sourceID types.ExternalID,
+	sourceID id.ExternalID,
 ) (*provider.Item, error) {
 	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
 		FROM sync_items WHERE source = ? AND source_id = ?`
@@ -161,7 +161,7 @@ func (m *TursoReadModel) Upsert(ctx context.Context, item *provider.Item) error 
 func (m *TursoReadModel) Delete(
 	ctx context.Context,
 	source string,
-	sourceID types.ExternalID,
+	sourceID id.ExternalID,
 ) error {
 	_, err := m.db.ExecContext(
 		ctx,
@@ -248,12 +248,12 @@ type scannedItem struct {
 func (si *scannedItem) toItem() *provider.Item {
 	return &provider.Item{
 		ID:             parseItemID(si.itemIDStr),
-		ExternalID:     types.NewExternalID(si.sourceID),
-		Source:         types.NewProviderID(si.source),
-		Type:           types.NewEventTypeID(si.eventType),
-		ActorLogin:     types.NewActorID(si.actorLogin),
+		ExternalID:     id.NewExternalID(si.sourceID),
+		Source:         id.NewProviderID(si.source),
+		Type:           id.NewEventTypeID(si.eventType),
+		ActorLogin:     id.NewActorID(si.actorLogin),
 		ActorAvatarURL: si.actorAvatarURL,
-		RepoName:       types.NewRepoID(si.repoName),
+		RepoName:       id.NewRepoID(si.repoName),
 		RepoURL:        si.repoURL,
 		CreatedAt:      si.createdAt,
 		UpdatedAt:      si.updatedAt,
