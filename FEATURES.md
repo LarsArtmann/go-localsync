@@ -1,6 +1,6 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-05-28
+**Updated:** 2026-05-28 (session 5)
 
 ## Legend
 
@@ -113,6 +113,17 @@
 | 49  | Signal Handling    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | Catches SIGINT/SIGTERM, cancels context, logs shutdown.                                                                 |
 | 50  | Push/Pull Flags    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-push` and `-pull` flags trigger Turso remote sync before/after local sync.                                            |
 | 51  | JSON Output        | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-json` flag outputs stats and sync results as structured JSON. Supports `-stats`, `-conflict-aware`, and regular sync. |
+| 52  | HTTP Server Mode   | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-server` flag runs HTTP API instead of one-off sync. `-port` configures listen address (default 8080).                |
+
+## HTTP API
+
+| #   | Feature           | Status           | Package    | Description                                                                                                              |
+| --- | ----------------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 53  | API Server        | FULLY_FUNCTIONAL | `pkg/api`  | Huma v2 with `humago` stdlib adapter. Auto-generated OpenAPI 3 spec.                                                     |
+| 54  | GET /items        | FULLY_FUNCTIONAL | `pkg/api`  | Filterable list with query params: `type`, `actor`, `repo`, `source`, `since`, `limit`, `offset`. Returns JSON array.    |
+| 55  | GET /stats        | FULLY_FUNCTIONAL | `pkg/api`  | Returns total count, distinct types, and per-type breakdown.                                                             |
+| 56  | POST /sync        | FULLY_FUNCTIONAL | `pkg/api`  | Triggers a sync run. Supports `user`, `pages`, `incremental` body params. Returns `SyncSummary`.                         |
+| 57  | GET /health       | FULLY_FUNCTIONAL | `pkg/api`  | Health check endpoint. Returns 200 with `status: "ok"`.                                                                  |
 
 ## CI/CD
 
@@ -126,8 +137,8 @@
 
 | #   | Feature      | Status           | Package           | Description                                                                                                                       |
 | --- | ------------ | ---------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 54  | Test Suite   | FULLY_FUNCTIONAL | all               | 221 test functions across 7 packages, 74.5% overall coverage.                                                                     |
-| 55  | Test Helpers | FULLY_FUNCTIONAL | `pkg/testhelpers` | Shared mocks: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`, `RateLimitResponse`. |
+| 54  | Test Suite   | FULLY_FUNCTIONAL | all               | 222 test functions across 8 packages, ~82% overall coverage.                                                                      |
+| 55  | Test Helpers | FULLY_FUNCTIONAL | `pkg/providers/github` | Unexported test helpers: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`.        |
 
 ## Quality
 
@@ -148,7 +159,7 @@
 - Error taxonomy gives meaningful CLI exit codes and smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
 - Outbox pattern with atomic save+publish for crash-safe Turso persistence
-- 197 tests with good coverage across all packages
+- 222 tests with good coverage across all packages
 
 ### Known Gaps
 
@@ -158,7 +169,6 @@
 | Single provider   | Only GitHub exists. No GitLab, Jira, etc.                                                 | SDK is generic but only one real provider                      |
 | Multi-user sync   | CLI accepts one `-user` flag. No multi-user support.                                      | Cannot sync events for multiple users in one run               |
 | Push/Pull testing | `CQRSStack.Push()` and `Pull()` have tests but no integration test with real Turso remote | Remote sync correctness relies on go-cqrs-lite's tests         |
-| No HTTP API       | No REST/gRPC endpoint for querying stored events                                          | Users must use the Go SDK or CLI directly                      |
 | No daemon mode    | No cron/systemd integration for periodic sync                                             | Must run manually or wrap in external scheduler                |
 | No data export    | No JSON/CSV export of stored events                                                       | Cannot export for analysis in external tools                   |
 | Domain Language   | `docs/DOMAIN_LANGUAGE.md` is a template with no actual terms defined                      | New contributors lack domain vocabulary                        |

@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-05-25 (session 4)
+**Updated:** 2026-05-28 (session 5)
 
 ## Project Overview
 
@@ -10,14 +10,15 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 | Package                     | Purpose                                                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/localsync/`            | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] (extracted from go-cqrs-lite/sync)                  |
+| `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] (extracted from go-cqrs-lite/sync)                  |
+| `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`)                                          |
 | `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                                             |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`)                                      |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                 |
 | `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary` |
 | `pkg/id/`                   | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                          |
 | `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable` |
-| `cmd/examples/github-sync/` | Example CLI entry point                                                                                                                  |
+| `cmd/examples/github-sync/` | Example CLI entry point (sync mode + HTTP server mode via `-server`)                                                                     |
 
 ### SyncStore Interface Seam
 
@@ -128,16 +129,17 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package                    | Tests | Coverage | Status                                                                                     |
 | -------------------------- | ----- | -------- | ------------------------------------------------------------------------------------------ |
-| `pkg/cqrs`                 | 73    | 82.5%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation |
-| `pkg/providers/github`     | 46    | 85.4%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                   |
-| `pkg/sync`                 | 14    | ~85%     | ✅ Syncer + ConflictAwareSyncer + invalid item error counting (mock SyncStore)             |
-| `pkg/id`                   | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
-| `pkg/errors`               | 28    | 100.0%   | ✅ Sentinel errors, wrapping, classification, fallback paths                               |
-| `pkg/provider`             | 6     | 100.0%   | ✅ Item validation                                                                         |
-| `cmd/examples/github-sync` | 11    | 10.5%    | ✅ exitCodeForError, LoadConfig, env defaults                                              |
-| `pkg/testhelpers`          | —     | —        | ⬜ Deleted — helpers moved to `pkg/providers/github/testhelpers_test.go`                   |
+| `pkg/cqrs`                 | 79    | 80.5%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation |
+| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                   |
+| `pkg/sync`                 | 22    | 92.3%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting             |
+| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
+| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates            |
+| `pkg/provider`             | 2     | 100.0%   | ✅ Item validation                                                                         |
+| `pkg/api`                  | 8     | ~90%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints                             |
+| `pkg/crdt`                 | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage roundtrip                    |
+| `cmd/examples/github-sync` | 14    | 10.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON           |
 
-**153 total test functions** across 6 test packages.
+**222 total test functions** across 8 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -158,6 +160,7 @@ Event store + read model use the same backend. Turso backend adds remote sync vi
 go run ./cmd/examples/github-sync --backend memory
 go run ./cmd/examples/github-sync --backend turso --db ./data.db
 go run ./cmd/examples/github-sync --backend turso --db ./data.db --remote-url https://... --auth-token ...
+go run ./cmd/examples/github-sync --server --port 8080
 ```
 
 ## Provider Development
@@ -196,11 +199,12 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/middleware`     | v1.0.0  | EventLogging middleware                                                  |
 | `go-cqrs-lite/projection`     | v1.1.0  | Projection Runner with replay + live subscription                        |
 | `go-branded-id`               | v0.1.0  | Branded phantom-type IDs for compile-time safety                         |
-| `go-error-family`             | v0.1.1  | Structured error classification (Rejection, Transient, Infrastructure)   |
+| `go-error-family`             | v0.2.0  | Structured error classification + user-facing message templates            |
 | `go-github/v69`               | v69.2.0 | GitHub API client                                                        |
 | `turso.tech/database/tursogo` | v0.6.0  | Turso Go client — local + remote sync                                    |
 | `charm.land/log/v2`           | v2.0.0  | Structured logging                                                       |
 | `caarlos0/env/v11`            | v11.4.1 | Environment variable config                                              |
+| `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter            |
 
 ### Test Dependencies
 
@@ -208,6 +212,12 @@ Two tables managed by the CQRS stack:
 | ---------------- | -------------------------------------- |
 | `onsi/ginkgo/v2` | Indirect only (via go-cqrs-lite tests) |
 | `onsi/gomega`    | Indirect only (via go-cqrs-lite tests) |
+
+### Build System
+
+| File        | Purpose                          |
+| ----------- | -------------------------------- |
+| `flake.nix` | Nix flake with Go devShell + buildGoModule package |
 
 ## go-cqrs-lite Integration
 
@@ -230,46 +240,29 @@ Two tables managed by the CQRS stack:
 
 ### Not Yet Adopted
 
-- `sync.LWWResolver[T]` + `sync.VectorClock` — **MEDIUM** (formalize conflict resolution)
+- `sync.LWWResolver[T]` + `sync.VectorClock` — **SKIPPED** (timestamp-based LWW in CQRS decider is sufficient for one-way provider sync)
 - `middleware.CommandRetry` for provider retry — **LOW** (API mismatch: wraps `command.Handler`, not `func() error`)
 - `UpcasterRegistry` for schema evolution — **LOW** (only 1 schema version)
 - `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW**
 - `core/aggregate` — **LOW** (we use `decider.Decider` directly — correct, no benefit)
 
-## go-cqrs-lite Adoption (as of 2026-05-22)
+## Session 5 — 2026-05-28: HTTP API + Error Templates + Build System
 
-**Adoption: 9/12 modules (75%). API surface of used modules: ~85%.**
+### Completed Improvements
 
-Modules used: `core/event`, `core/decider`, `core/command`, `core/query`, `core/pkg/id`, `memory`, `storage`, `middleware`, `projection`.
-Modules unused: `core/aggregate`, `sync`, `catalog`.
+- ✅ **`pkg/api/` HTTP API server**: Huma v2 with `humago` stdlib adapter. Four endpoints: `GET /items` (filterable), `GET /stats`, `POST /sync`, `GET /health`. OpenAPI 3 spec auto-generated.
+- ✅ **API tests**: 8 tests covering all endpoints including error paths (store errors, invalid sync options).
+- ✅ **CLI server mode**: `github-sync` supports `-server -port 8080` to run the HTTP API instead of one-off sync.
+- ✅ **Error templates**: `RegisterErrorTemplates()` registers `MessageTemplate{What,Why,Fix,WayOut}` for all 9 error codes. Called at CLI startup.
+- ✅ **`flake.nix`**: Basic Nix flake with `buildGoModule` package and devShell (Go 1.26, golangci-lint, ginkgo, gofumpt).
+- ✅ **`coverage/` + `internal/` directories**: coverage artifacts organized; placeholder for non-public code.
+- ✅ **Missing tests added**: `TestSyncer_reportProgress`, `TestSyncer_reportProgress_NilCallback`, `TestPrintSyncResultJSON`.
+- ✅ **CRDT integration explicitly skipped**: Timestamp-based LWW in the CQRS decider is sufficient for one-way provider sync. VectorClock integration would be architecture astronautics with no real benefit.
 
-All anti-patterns from the previous audit have been resolved:
+### Decisions
 
-- ✅ `event.Version` uses `.Increment()` / `.Add()` — no `int()` casts
-- ✅ `event.InMemoryRunner` with checkpointing — events tracked on restart
-- ✅ `event.JSONCodec` + `DecodePayload[T]` + `NewEvents` — no manual json.Marshal/Unmarshal
-- ✅ `aggregate_id.go` uses `hex.EncodeToString` — no ULID dependency in this file
-- ✅ Error taxonomy wired — `go-error-family` constructors with intrinsic classification (no `init()`, no `RegisterClassification`)
-- ✅ `SyncItems` distinguishes `ActionCreated` vs `ActionUpdated` via `state.IsNew()`
-- ✅ `HasChanged()` checks `RepoURL` in addition to UpdatedAt/Type/ActorLogin/RepoName
-- ✅ DRY: `itemKey` helper consolidates `source+":"sourceID` pattern (4→1)
-- ✅ DRY: `initSchema` consolidates `initTursoSyncDB`/`initTursoDB` via `dbExecContext` interface
-- ✅ `classifyAction` helper reduces nesting complexity in `SyncItems`
-- ✅ Snapshot support with `EveryNEvents(10)` — caps replay cost
-- ✅ `middleware.EventLogging` — structured logging of all domain events
-- ✅ `Projector` implements `event.Projection` directly — no Handle/HandleEvent duplication
-- ✅ `decider.WithOutbox` for Turso — atomic save+publish via `SQLTransactionalStore`
-- ✅ `projection.Runner` for Turso — replay from `GlobalLoader` + live subscription + retry
-- ✅ `SQLiteSnapshotStore` + `SQLiteCheckpointStore` for Turso — persists across restarts
-- ✅ Single `*sql.DB` for Turso local — shared by event store, read model, snapshots, checkpoints
-- ✅ `SQLiteInitSchema` + `ConfigureTursoPool` — replaces hand-rolled schema/pool config
-- ✅ Correlation IDs via `event.WithCorrelationID` — unique per `SyncItems` run
-- ✅ `DecideSync`/`DecideDelete` accept `...event.Option` — extensible event metadata
-- ✅ `event.OutboxPublisher` replaces hand-rolled `startOutboxPoller` — graceful shutdown, panic recovery, partial-batch safety, 1s configurable poll interval
-- ✅ `command.Dispatcher` with `SyncItemCommand`/`DeleteItemCommand` — typed command dispatch, enables middleware pipeline
-- ✅ `query.Dispatcher` with typed queries — `ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery` dispatched through query pipeline
-- ✅ `event.NewOutboxPublisher` exported from go-cqrs-lite — was previously unexported `outboxPublisher`
-- ✅ `event.NewEvents`/`event.MustNewEvents`/`event.DecodePayloads` exported from go-cqrs-lite — were previously unexported
+- **CRDTs remain in `pkg/crdt/` but are NOT wired into sync path**: The package is well-tested (97.6% coverage) but the current CQRS decider's `UpdatedAt`-based LWW is the right abstraction for one-way external-provider sync.
+- **OpenTelemetry deferred**: `go.opentelemetry.io/otel` is already an indirect dependency. Full instrumentation (Syncer, CQRSStack, HTTP middleware) is planned for a future session.
 
 ## Unix-Style Modularity (Session 4 — 2026-05-25)
 
@@ -284,4 +277,4 @@ All anti-patterns from the previous audit have been resolved:
 
 ## Lint Status
 
-golangci-lint v2 reports **0 issues**. Config is strict with 125+ linters enabled.
+golangci-lint v2 reports **0 issues** across all 9 packages. Config is strict with 125+ linters enabled.
