@@ -5,6 +5,7 @@ go 1.26.3
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/caarlos0/env/v11 v11.4.1
+	github.com/danielgtaylor/huma/v2 v2.38.0
 	github.com/google/go-github/v69 v69.2.0
 	github.com/larsartmann/go-branded-id v0.3.0
 	github.com/larsartmann/go-cqrs-lite/core v1.6.0
@@ -45,7 +46,7 @@ require (
 	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/saga v1.0.0 // indirect
+	github.com/larsartmann/go-cqrs-lite/saga v1.6.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
@@ -71,3 +72,5 @@ require (
 )
 
 replace github.com/larsartmann/go-cqrs-lite/storage => ../go-cqrs-lite/storage
+
+replace github.com/larsartmann/go-cqrs-lite/saga => ../go-cqrs-lite/saga
