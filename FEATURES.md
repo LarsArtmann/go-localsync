@@ -113,17 +113,17 @@
 | 49  | Signal Handling    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | Catches SIGINT/SIGTERM, cancels context, logs shutdown.                                                                 |
 | 50  | Push/Pull Flags    | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-push` and `-pull` flags trigger Turso remote sync before/after local sync.                                            |
 | 51  | JSON Output        | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-json` flag outputs stats and sync results as structured JSON. Supports `-stats`, `-conflict-aware`, and regular sync. |
-| 52  | HTTP Server Mode   | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-server` flag runs HTTP API instead of one-off sync. `-port` configures listen address (default 8080).                |
+| 52  | HTTP Server Mode   | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-server` flag runs HTTP API instead of one-off sync. `-port` configures listen address (default 8080).                 |
 
 ## HTTP API
 
-| #   | Feature           | Status           | Package    | Description                                                                                                              |
-| --- | ----------------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 53  | API Server        | FULLY_FUNCTIONAL | `pkg/api`  | Huma v2 with `humago` stdlib adapter. Auto-generated OpenAPI 3 spec.                                                     |
-| 54  | GET /items        | FULLY_FUNCTIONAL | `pkg/api`  | Filterable list with query params: `type`, `actor`, `repo`, `source`, `since`, `limit`, `offset`. Returns JSON array.    |
-| 55  | GET /stats        | FULLY_FUNCTIONAL | `pkg/api`  | Returns total count, distinct types, and per-type breakdown.                                                             |
-| 56  | POST /sync        | FULLY_FUNCTIONAL | `pkg/api`  | Triggers a sync run. Supports `user`, `pages`, `incremental` body params. Returns `SyncSummary`.                         |
-| 57  | GET /health       | FULLY_FUNCTIONAL | `pkg/api`  | Health check endpoint. Returns 200 with `status: "ok"`.                                                                  |
+| #   | Feature     | Status           | Package   | Description                                                                                                           |
+| --- | ----------- | ---------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| 53  | API Server  | FULLY_FUNCTIONAL | `pkg/api` | Huma v2 with `humago` stdlib adapter. Auto-generated OpenAPI 3 spec.                                                  |
+| 54  | GET /items  | FULLY_FUNCTIONAL | `pkg/api` | Filterable list with query params: `type`, `actor`, `repo`, `source`, `since`, `limit`, `offset`. Returns JSON array. |
+| 55  | GET /stats  | FULLY_FUNCTIONAL | `pkg/api` | Returns total count, distinct types, and per-type breakdown.                                                          |
+| 56  | POST /sync  | FULLY_FUNCTIONAL | `pkg/api` | Triggers a sync run. Supports `user`, `pages`, `incremental` body params. Returns `SyncSummary`.                      |
+| 57  | GET /health | FULLY_FUNCTIONAL | `pkg/api` | Health check endpoint. Returns 200 with `status: "ok"`.                                                               |
 
 ## CI/CD
 
@@ -135,10 +135,10 @@
 
 ## Testing
 
-| #   | Feature      | Status           | Package           | Description                                                                                                                       |
-| --- | ------------ | ---------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 54  | Test Suite   | FULLY_FUNCTIONAL | all               | 222 test functions across 8 packages, ~82% overall coverage.                                                                      |
-| 55  | Test Helpers | FULLY_FUNCTIONAL | `pkg/providers/github` | Unexported test helpers: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`.        |
+| #   | Feature      | Status           | Package                | Description                                                                                                             |
+| --- | ------------ | ---------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 54  | Test Suite   | FULLY_FUNCTIONAL | all                    | 222 test functions across 8 packages, ~82% overall coverage.                                                            |
+| 55  | Test Helpers | FULLY_FUNCTIONAL | `pkg/providers/github` | Unexported test helpers: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`. |
 
 ## Quality
 

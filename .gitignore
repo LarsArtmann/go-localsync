@@ -20,3 +20,5 @@ Copy/paste detection report
 reports/
 # Nix build output
 /result
+# Test coverage
+/coverage

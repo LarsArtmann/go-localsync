@@ -191,19 +191,19 @@ Two tables managed by the CQRS stack:
 
 ## Dependencies
 
-| Dependency                    | Version | Purpose                                                                  |
-| ----------------------------- | ------- | ------------------------------------------------------------------------ |
-| `go-cqrs-lite/core`           | v1.4.0  | Decider, event types, branded IDs, error taxonomy, codec, InMemoryRunner |
-| `go-cqrs-lite/memory`         | v1.2.0  | In-memory event store + bus + checkpoint store + snapshot store          |
-| `go-cqrs-lite/storage`        | pseudo  | SQLite/Turso event store, outbox, snapshot, checkpoint store             |
-| `go-cqrs-lite/middleware`     | v1.0.0  | EventLogging middleware                                                  |
-| `go-cqrs-lite/projection`     | v1.1.0  | Projection Runner with replay + live subscription                        |
-| `go-branded-id`               | v0.1.0  | Branded phantom-type IDs for compile-time safety                         |
-| `go-error-family`             | v0.2.0  | Structured error classification + user-facing message templates            |
-| `go-github/v69`               | v69.2.0 | GitHub API client                                                        |
-| `turso.tech/database/tursogo` | v0.6.0  | Turso Go client — local + remote sync                                    |
-| `charm.land/log/v2`           | v2.0.0  | Structured logging                                                       |
-| `caarlos0/env/v11`            | v11.4.1 | Environment variable config                                              |
+| Dependency                         | Version | Purpose                                                                  |
+| ---------------------------------- | ------- | ------------------------------------------------------------------------ |
+| `go-cqrs-lite/core`                | v1.4.0  | Decider, event types, branded IDs, error taxonomy, codec, InMemoryRunner |
+| `go-cqrs-lite/memory`              | v1.2.0  | In-memory event store + bus + checkpoint store + snapshot store          |
+| `go-cqrs-lite/storage`             | pseudo  | SQLite/Turso event store, outbox, snapshot, checkpoint store             |
+| `go-cqrs-lite/middleware`          | v1.0.0  | EventLogging middleware                                                  |
+| `go-cqrs-lite/projection`          | v1.1.0  | Projection Runner with replay + live subscription                        |
+| `go-branded-id`                    | v0.1.0  | Branded phantom-type IDs for compile-time safety                         |
+| `go-error-family`                  | v0.2.0  | Structured error classification + user-facing message templates          |
+| `go-github/v69`                    | v69.2.0 | GitHub API client                                                        |
+| `turso.tech/database/tursogo`      | v0.6.0  | Turso Go client — local + remote sync                                    |
+| `charm.land/log/v2`                | v2.0.0  | Structured logging                                                       |
+| `caarlos0/env/v11`                 | v11.4.1 | Environment variable config                                              |
 | `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter            |
 
 ### Test Dependencies
@@ -215,8 +215,8 @@ Two tables managed by the CQRS stack:
 
 ### Build System
 
-| File        | Purpose                          |
-| ----------- | -------------------------------- |
+| File        | Purpose                                            |
+| ----------- | -------------------------------------------------- |
 | `flake.nix` | Nix flake with Go devShell + buildGoModule package |
 
 ## go-cqrs-lite Integration
