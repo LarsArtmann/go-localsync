@@ -7,12 +7,14 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/api"
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/providers/github"
@@ -72,6 +74,8 @@ func main() {
 		syncPull    = flag.Bool("pull", false, "Pull remote changes from Turso before sync")
 		verbose     = flag.Bool("verbose", envCfg.Verbose, "Enable verbose logging")
 		jsonOutput  = flag.Bool("json", false, "Output results as JSON")
+		serverMode  = flag.Bool("server", false, "Start HTTP API server")
+		serverPort  = flag.Int("port", 8080, "HTTP server port (only with -server)")
 	)
 
 	flag.Parse()
@@ -137,6 +141,10 @@ func main() {
 
 	ghProvider := github.NewClient(*token)
 	baseSyncer := synclib.NewSyncer(ghProvider, stack, logger)
+
+	if *serverMode {
+		runAPIServer(baseSyncer, stack, *serverPort, logger)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -320,5 +328,22 @@ func exitCodeForError(err error) int {
 		return exitSoftware
 	default:
 		return exitUnavailable
+	}
+}
+
+func runAPIServer(
+	syncer *synclib.Syncer,
+	store synclib.SyncStore,
+	port int,
+	logger *log.Logger,
+) {
+	server := api.NewServer(syncer, store, logger)
+	addr := fmt.Sprintf(":%d", port)
+
+	logger.Info("Starting API server", "address", addr)
+
+	if err := http.ListenAndServe(addr, server); err != nil {
+		logger.Error("API server error", "error", err)
+		os.Exit(exitSoftware)
 	}
 }
