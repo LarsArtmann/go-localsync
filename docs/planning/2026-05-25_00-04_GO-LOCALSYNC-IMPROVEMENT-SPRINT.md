@@ -10,30 +10,30 @@
 
 ### 1% → 51% Impact (Highest ROI)
 
-| # | Task | Impact | Effort | File(s) |
-|---|------|--------|--------|---------|
-| 1 | Fix `exhaustruct` lint (4 locations) | Eliminates all lint issues | 10 min | `pkg/cqrs/stack.go`, `pkg/sync/sync.go` |
-| 2 | Remove dead `types.SourceID` | Dead code removal | 5 min | `pkg/types/ids.go` |
-| 3 | Fix `pkg/localsync/doc.go` lie | Doc accuracy | 5 min | `pkg/localsync/doc.go` |
-| 4 | Simplify `AggregateID` — remove cache | Remove 2 nolints, simplify code | 15 min | `pkg/cqrs/aggregate_id.go` |
-| 5 | Fill `DOMAIN_LANGUAGE.md` | Project documentation | 15 min | `docs/DOMAIN_LANGUAGE.md` |
+| #   | Task                                  | Impact                          | Effort | File(s)                                 |
+| --- | ------------------------------------- | ------------------------------- | ------ | --------------------------------------- |
+| 1   | Fix `exhaustruct` lint (4 locations)  | Eliminates all lint issues      | 10 min | `pkg/cqrs/stack.go`, `pkg/sync/sync.go` |
+| 2   | Remove dead `types.SourceID`          | Dead code removal               | 5 min  | `pkg/types/ids.go`                      |
+| 3   | Fix `pkg/localsync/doc.go` lie        | Doc accuracy                    | 5 min  | `pkg/localsync/doc.go`                  |
+| 4   | Simplify `AggregateID` — remove cache | Remove 2 nolints, simplify code | 15 min | `pkg/cqrs/aggregate_id.go`              |
+| 5   | Fill `DOMAIN_LANGUAGE.md`             | Project documentation           | 15 min | `docs/DOMAIN_LANGUAGE.md`               |
 
 ### 4% → 64% Impact
 
-| # | Task | Impact | Effort | File(s) |
-|---|------|--------|--------|---------|
-| 6 | Eliminate `AggregateID` double-computation | Performance + clarity | 20 min | `pkg/cqrs/stack.go`, `pkg/cqrs/commands_queries.go` |
-| 7 | Create upstream suggestions doc | Cross-project value | 20 min | `docs/planning/2026-05-25_UPSTREAM-SUGGESTIONS.md` |
-| 8 | Clean `nolint:ireturn` in store_factory | Code quality | 10 min | `pkg/cqrs/store_factory.go` |
-| 9 | Add `AggregateID` tests | Test coverage | 15 min | `pkg/cqrs/aggregate_id_test.go` |
+| #   | Task                                       | Impact                | Effort | File(s)                                             |
+| --- | ------------------------------------------ | --------------------- | ------ | --------------------------------------------------- |
+| 6   | Eliminate `AggregateID` double-computation | Performance + clarity | 20 min | `pkg/cqrs/stack.go`, `pkg/cqrs/commands_queries.go` |
+| 7   | Create upstream suggestions doc            | Cross-project value   | 20 min | `docs/planning/2026-05-25_UPSTREAM-SUGGESTIONS.md`  |
+| 8   | Clean `nolint:ireturn` in store_factory    | Code quality          | 10 min | `pkg/cqrs/store_factory.go`                         |
+| 9   | Add `AggregateID` tests                    | Test coverage         | 15 min | `pkg/cqrs/aggregate_id_test.go`                     |
 
 ### 20% → 80% Impact
 
-| # | Task | Impact | Effort | File(s) |
-|---|------|--------|--------|---------|
-| 10 | Update `TODO_LIST.md` | Doc accuracy | 10 min | `TODO_LIST.md` |
-| 11 | Update `ROADMAP.md` | Doc accuracy | 10 min | `ROADMAP.md` |
-| 12 | Final test + lint verification | Quality gate | 10 min | All |
+| #   | Task                           | Impact       | Effort | File(s)        |
+| --- | ------------------------------ | ------------ | ------ | -------------- |
+| 10  | Update `TODO_LIST.md`          | Doc accuracy | 10 min | `TODO_LIST.md` |
+| 11  | Update `ROADMAP.md`            | Doc accuracy | 10 min | `ROADMAP.md`   |
+| 12  | Final test + lint verification | Quality gate | 10 min | All            |
 
 ---
 
@@ -77,6 +77,7 @@ flowchart TD
 **Problem:** `provider.ItemFilter{}` with missing fields triggers `exhaustruct` linter.
 
 **Locations:**
+
 - `pkg/cqrs/stack.go:288` — `Count(ctx, provider.ItemFilter{})`
 - `pkg/sync/sync.go:144` — `provider.ItemFilter{}` in `SyncIncremental`
 - `pkg/sync/sync.go:181` — `CountItems(ctx, provider.ItemFilter{})`
