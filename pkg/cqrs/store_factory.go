@@ -20,7 +20,7 @@ type storeResult struct {
 	syncDB *cqrsstorage.TursoSyncDB
 	outbox event.Outbox
 	db     *sql.DB
-	loader event.GlobalLoader
+	loader event.Journal
 }
 
 func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
