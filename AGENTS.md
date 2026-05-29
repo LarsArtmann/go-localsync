@@ -1,16 +1,16 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-05-28 (session 5)
+**Updated:** 2026-05-29 (session 6)
 
 ## Project Overview
 
-Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It uses event-sourced CQRS via go-cqrs-lite for state management, timestamp-based conflict detection, and branded IDs from go-branded-id for compile-time type safety.
+Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It uses event-sourced CQRS via go-cqrs-lite for state management, pluggable conflict resolution via CRDT (`pkg/crdt/`), and branded IDs from go-branded-id for compile-time type safety.
 
 ## Architecture
 
 | Package                     | Purpose                                                                                                                                  |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] (extracted from go-cqrs-lite/sync)                  |
+| `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy** |
 | `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`)                                          |
 | `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                                             |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`)                                      |
@@ -67,11 +67,18 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Command dispatch**: `SyncItem`/`DeleteItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
 - **Query dispatch**: Read model queries dispatched through `query.Dispatcher` with typed queries. Enables logging, metrics middleware.
-- **Remote wins**: on conflict, the incoming item always overwrites (remote-wins LWW)
+- **Remote wins (default)**: on conflict with no resolver configured, the incoming item always overwrites (remote-wins LWW)
+- **Pluggable conflict resolution**: `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*provider.Item]` — `LWWResolver`, custom merge, etc.
 
 ### Conflict Flow
 
-`ConflictAwareSyncer` delegates entirely to `SyncStore.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and emits `ItemConflictFound` + `ItemSynced` events. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
+`ConflictAwareSyncer` delegates entirely to `SyncStore.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and:
+
+1. If no resolver configured (nil): emits `ItemConflictFound{Winner: "remote"}` + `ItemSynced` with the incoming item (default remote-wins)
+2. If resolver configured: calls `resolver.Resolve(&Conflict{Local, Remote, ...})` and uses the winner for `ItemSynced`. `ItemConflictFound{Winner}` records which side won ("remote" or "local")
+3. On resolver error: falls back to remote-wins
+
+The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `ActionConflictLocal`. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
 
 ### SyncStore Interface
 
@@ -129,7 +136,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package                    | Tests | Coverage | Status                                                                                     |
 | -------------------------- | ----- | -------- | ------------------------------------------------------------------------------------------ |
-| `pkg/cqrs`                 | 79    | 80.5%    | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation |
+| `pkg/cqrs`                 | 92    | ~83%     | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation, CRDT Resolver |
 | `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                   |
 | `pkg/sync`                 | 22    | 92.3%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting             |
 | `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
@@ -139,7 +146,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/crdt`                 | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage roundtrip                    |
 | `cmd/examples/github-sync` | 14    | 10.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON           |
 
-**222 total test functions** across 8 test packages.
+**235 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -240,7 +247,6 @@ Two tables managed by the CQRS stack:
 
 ### Not Yet Adopted
 
-- `sync.LWWResolver[T]` + `sync.VectorClock` — **SKIPPED** (timestamp-based LWW in CQRS decider is sufficient for one-way provider sync)
 - `middleware.CommandRetry` for provider retry — **LOW** (API mismatch: wraps `command.Handler`, not `func() error`)
 - `UpcasterRegistry` for schema evolution — **LOW** (only 1 schema version)
 - `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW**
@@ -263,6 +269,47 @@ Two tables managed by the CQRS stack:
 
 - **CRDTs remain in `pkg/crdt/` but are NOT wired into sync path**: The package is well-tested (97.6% coverage) but the current CQRS decider's `UpdatedAt`-based LWW is the right abstraction for one-way external-provider sync.
 - **OpenTelemetry deferred**: `go.opentelemetry.io/otel` is already an indirect dependency. Full instrumentation (Syncer, CQRSStack, HTTP middleware) is planned for a future session.
+
+## Session 6 — 2026-05-29: CRDT Conflict Resolution Integration
+
+### Completed Improvements
+
+- ✅ **CRDT wired as pluggable conflict resolution strategy**: `crdt.ConflictResolver[*provider.Item]` is now injected into `DecideSync` via `CQRSConfig.ConflictResolver`. Default (nil) = remote-wins = backward compatible.
+- ✅ **`ActionConflictLocal` added**: New `SyncAction` for when the resolver picks the local item over the remote. `ConflictAwareSyncer` handles both `ActionConflictRemote` and `ActionConflictLocal`.
+- ✅ **`resolveConflict` helper**: Extracts conflict resolution logic from `DecideSync`. Creates `crdt.Conflict` with empty vector clocks (falls through to timestamp comparison in `LWWResolver`). Falls back to remote-wins on resolver error.
+- ✅ **`conflictMeta` struct**: Replaces the boolean `isConflict` + `localUpdatedAt` parameters in `syncEvents` with a clean struct carrying `localUpdatedAt`, `remoteUpdatedAt`, and `winner`.
+- ✅ **`classifyAction` updated**: Now accepts `conflictWinner string` to distinguish `ActionConflictLocal` from `ActionConflictRemote`.
+- ✅ **`wireCommandDispatcher` passes resolver**: `handleSyncItem` closure captures the resolver and passes it to `DecideSync`.
+- ✅ **13 new tests**: 5 decider-level tests (custom resolver remote/local/error, LWWResolver remote/local newer), 2 stack-level integration tests (LWW with local newer / remote newer), 1 classifyAction test (conflict_local case).
+- ✅ **Backward compatible**: All existing callers pass `nil` resolver, which preserves the current remote-wins behavior.
+
+### Architecture
+
+```
+CQRSConfig.ConflictResolver (nil = remote-wins default)
+    ↓
+CQRSStack.conflictResolver
+    ↓
+DecideSync(item, resolver, opts...)
+    ↓ HasChanged(state.Item, item) = true
+resolveConflict(resolver, state.Item, item)
+    ↓ crdt.ConflictResolver[*provider.Item].Resolve()
+syncEvents(winner, ..., conflictMeta{winner: "local"|"remote"}, ...)
+    ↓
+classifyAction(err, count, wasNew, conflictWinner)
+    ↓
+ActionConflictLocal | ActionConflictRemote
+```
+
+### Dependency Flow
+
+```
+cqrs → crdt (for ConflictResolver[T], Conflict[T], VectorClock)
+cqrs → sync (for SyncAction, SyncSummary)
+crdt → go-error-family (for error types only)
+```
+
+No circular dependencies. The CRDT package is now a real dependency of the CQRS layer.
 
 ## Unix-Style Modularity (Session 4 — 2026-05-25)
 
