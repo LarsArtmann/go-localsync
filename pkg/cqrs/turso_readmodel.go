@@ -101,7 +101,7 @@ func (m *TursoReadModel) Count(ctx context.Context, filter provider.ItemFilter) 
 
 	err := m.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
-		return count, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("count items: %v", err))
+		return count, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("count items (count=%d): %v", count, err))
 	}
 
 	return count, nil

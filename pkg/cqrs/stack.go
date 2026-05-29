@@ -263,6 +263,10 @@ func (s *CQRSStack) SyncItems(
 		}
 
 		err := s.Repo.Execute(ctx, aggID, aggregateType, countingDecide)
+		if err != nil {
+			err = fmt.Errorf("sync %s/%s (events=%d, winner=%q): %w",
+				item.Source.Get(), item.ExternalID.Get(), eventCount, conflictWinner, err)
+		}
 
 		result := synclib.ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
