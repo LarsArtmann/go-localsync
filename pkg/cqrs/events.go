@@ -11,11 +11,11 @@ const aggregateType event.AggregateType = "sync_item"
 
 const (
 	// EventItemSynced is emitted when an item is created or updated.
-	EventItemSynced        event.Type = "sync_item.synced"
+	EventItemSynced event.Type = "sync_item.synced"
 	// EventItemConflictFound is emitted when a conflict is detected (remote wins).
 	EventItemConflictFound event.Type = "sync_item.conflict_found"
 	// EventItemDeleted is emitted when an item is soft-deleted.
-	EventItemDeleted       event.Type = "sync_item.deleted"
+	EventItemDeleted event.Type = "sync_item.deleted"
 )
 
 // ItemSyncedPayload is the event payload for ItemSynced events.
