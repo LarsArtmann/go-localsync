@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log/slog"
 
@@ -291,111 +290,4 @@ func (s *CQRSStack) SyncItems(
 	}
 
 	return summary
-}
-
-func classifyAction(err error, eventCount int, wasNew bool, conflictWinner string) synclib.SyncAction {
-	if err != nil {
-		return synclib.ActionError
-	}
-
-	if eventCount > 1 {
-		if conflictWinner == conflictWinnerLocal {
-			return synclib.ActionConflictLocal
-		}
-
-		return synclib.ActionConflictRemote
-	}
-
-	if eventCount == 1 && wasNew {
-		return synclib.ActionCreated
-	}
-
-	if eventCount == 1 {
-		return synclib.ActionUpdated
-	}
-
-	return synclib.ActionUnchanged
-}
-
-// Count returns the total number of items in the read model.
-func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
-	return s.ReadModel.Count(ctx, provider.ItemFilter{
-		Type:       nil,
-		ActorLogin: nil,
-		RepoName:   nil,
-		Source:     nil,
-		Since:      nil,
-		Limit:      0,
-		Offset:     0,
-	})
-}
-
-// GetTypes returns all distinct item types in the read model.
-func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
-	return s.ReadModel.GetTypes(ctx)
-}
-
-// ListItems delegates to the read model's List method.
-func (s *CQRSStack) ListItems(
-	ctx context.Context,
-	filter provider.ItemFilter,
-) ([]*provider.Item, error) {
-	return s.ReadModel.List(ctx, filter)
-}
-
-// CountItems delegates to the read model's Count method.
-func (s *CQRSStack) CountItems(
-	ctx context.Context,
-	filter provider.ItemFilter,
-) (int64, error) {
-	return s.ReadModel.Count(ctx, filter)
-}
-
-// GetItemTypes delegates to the read model's GetTypes method.
-func (s *CQRSStack) GetItemTypes(ctx context.Context) ([]string, error) {
-	return s.ReadModel.GetTypes(ctx)
-}
-
-// Close gracefully shuts down all components: dispatchers, outbox publisher,
-// projection runner, read model, outbox, and event store.
-func (s *CQRSStack) Close() error {
-	var errs []error
-
-	if s.CommandDispatcher != nil {
-		if err := s.CommandDispatcher.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if s.QueryDispatcher != nil {
-		if err := s.QueryDispatcher.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if s.outboxPublisher != nil {
-		if err := s.outboxPublisher.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if s.cancelRunner != nil {
-		s.cancelRunner()
-	}
-
-	if err := s.ReadModel.Close(); err != nil {
-		errs = append(errs, err)
-	}
-
-	if s.outbox != nil {
-		if err := s.outbox.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if err := s.Store.Close(); err != nil {
-		errs = append(errs, err)
-	}
-
-	return errors.Join(errs...)
 }
