@@ -17,6 +17,7 @@ const (
 	ActionCreated        SyncAction = "created"
 	ActionUpdated        SyncAction = "updated"
 	ActionConflictRemote SyncAction = "conflict_remote"
+	ActionConflictLocal  SyncAction = "conflict_local"
 	ActionUnchanged      SyncAction = "unchanged"
 	ActionError          SyncAction = "error"
 )

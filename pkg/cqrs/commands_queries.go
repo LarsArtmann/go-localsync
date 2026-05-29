@@ -10,6 +10,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/command"
 	"github.com/larsartmann/go-cqrs-lite/core/decider"
 	"github.com/larsartmann/go-cqrs-lite/core/query"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -159,13 +160,14 @@ type GetTypesQuery struct {
 
 func wireCommandDispatcher(
 	repo *decider.Repository[SyncItemState],
+	resolver crdt.ConflictResolver[*provider.Item],
 ) (*command.Dispatcher, error) {
 	dispatcher := command.NewDispatcher()
 
 	dispatcher.Use(commandLoggingMiddleware(log.Default()))
 	dispatcher.Use(commandValidationMiddleware())
 
-	if err := dispatcher.Register(commandTypeSyncItem, handleSyncItem(repo)); err != nil {
+	if err := dispatcher.Register(commandTypeSyncItem, handleSyncItem(repo, resolver)); err != nil {
 		return nil, fmt.Errorf("register sync item command: %w", err)
 	}
 
@@ -176,14 +178,17 @@ func wireCommandDispatcher(
 	return dispatcher, nil
 }
 
-func handleSyncItem(repo *decider.Repository[SyncItemState]) command.Handler {
+func handleSyncItem(
+	repo *decider.Repository[SyncItemState],
+	resolver crdt.ConflictResolver[*provider.Item],
+) command.Handler {
 	return func(ctx context.Context, cmd command.Command) error {
 		syncCmd, ok := cmd.(*SyncItemCommand)
 		if !ok {
 			return fmt.Errorf("expected *SyncItemCommand, got %T: %w", cmd, errCommandTypeMismatch)
 		}
 
-		return repo.Execute(ctx, syncCmd.AggregateID(), aggregateType, DecideSync(syncCmd.Item))
+		return repo.Execute(ctx, syncCmd.AggregateID(), aggregateType, DecideSync(syncCmd.Item, resolver))
 	}
 }
 

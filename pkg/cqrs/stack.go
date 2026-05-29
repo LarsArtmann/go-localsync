@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -15,6 +16,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/core/query"
 	"github.com/larsartmann/go-cqrs-lite/middleware"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -33,12 +35,13 @@ const (
 	dbPathInMemory = ":memory:"
 )
 
-// CQRSConfig configures the CQRS stack's storage backend.
+// CQRSConfig configures the CQRS stack's storage backend and conflict resolution.
 type CQRSConfig struct {
-	Backend   string
-	DBPath    string
-	RemoteURL string
-	AuthToken string
+	Backend          string
+	DBPath           string
+	RemoteURL        string
+	AuthToken        string
+	ConflictResolver crdt.ConflictResolver[*provider.Item]
 }
 
 // CQRSStack wires together the event store, bus, decider repository, read model,
@@ -50,6 +53,7 @@ type CQRSStack struct {
 	ReadModel         ReadModel
 	CommandDispatcher *command.Dispatcher
 	QueryDispatcher   *query.Dispatcher
+	conflictResolver  crdt.ConflictResolver[*provider.Item]
 	syncDB            *cqrsstorage.TursoSyncDB
 	outbox            event.Outbox
 	outboxPublisher   *event.OutboxPublisher
@@ -135,7 +139,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, fmt.Errorf("start outbox publisher: %w", err)
 	}
 
-	commandDispatcher, err := wireCommandDispatcher(repo)
+	commandDispatcher, err := wireCommandDispatcher(repo, cfg.ConflictResolver)
 	if err != nil {
 		return nil, fmt.Errorf("wire command dispatcher: %w", err)
 	}
@@ -152,6 +156,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		ReadModel:         rm,
 		CommandDispatcher: commandDispatcher,
 		QueryDispatcher:   queryDispatcher,
+		conflictResolver:  cfg.ConflictResolver,
 		syncDB:            sr.syncDB,
 		outbox:            sr.outbox,
 		outboxPublisher:   outboxPublisher,
@@ -227,14 +232,15 @@ func (s *CQRSStack) SyncItems(
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 		var (
-			eventCount int
-			wasNew     bool
+			eventCount    int
+			wasNew         bool
+			conflictWinner string
 		)
 
 		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
 			wasNew = state.IsNew()
 
-			events, err := DecideSync(item, syncOpts...)(state, ver)
+			events, err := DecideSync(item, s.conflictResolver, syncOpts...)(state, ver)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"decide sync for %s/%s: %w",
@@ -246,6 +252,12 @@ func (s *CQRSStack) SyncItems(
 
 			eventCount = len(events)
 
+			if eventCount > 1 {
+				var cp ItemConflictFoundPayload
+				_ = json.Unmarshal(events[0].Payload(), &cp)
+				conflictWinner = cp.Winner
+			}
+
 			return events, nil
 		}
 
@@ -253,17 +265,17 @@ func (s *CQRSStack) SyncItems(
 
 		result := synclib.ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
-			Action:   classifyAction(err, eventCount, wasNew),
+			Action:   classifyAction(err, eventCount, wasNew, conflictWinner),
 			Error:    err,
 		}
 
 		switch result.Action {
 		case synclib.ActionError:
 			summary.Errors++
-		case synclib.ActionCreated, synclib.ActionUpdated, synclib.ActionConflictRemote:
+		case synclib.ActionCreated, synclib.ActionUpdated, synclib.ActionConflictRemote, synclib.ActionConflictLocal:
 			summary.Synced++
 
-			if result.Action == synclib.ActionConflictRemote {
+			if result.Action == synclib.ActionConflictRemote || result.Action == synclib.ActionConflictLocal {
 				summary.Conflicts++
 			}
 		case synclib.ActionUnchanged:
@@ -276,12 +288,16 @@ func (s *CQRSStack) SyncItems(
 	return summary
 }
 
-func classifyAction(err error, eventCount int, wasNew bool) synclib.SyncAction {
+func classifyAction(err error, eventCount int, wasNew bool, conflictWinner string) synclib.SyncAction {
 	if err != nil {
 		return synclib.ActionError
 	}
 
 	if eventCount > 1 {
+		if conflictWinner == conflictWinnerLocal {
+			return synclib.ActionConflictLocal
+		}
+
 		return synclib.ActionConflictRemote
 	}
 

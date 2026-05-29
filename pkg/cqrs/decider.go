@@ -6,6 +6,7 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -84,22 +85,30 @@ func itemFromPayload(payload ItemSyncedPayload) *provider.Item {
 }
 
 // DecideSync returns a DecideFunc that syncs an incoming provider.Item.
+// If resolver is nil, remote-wins is used as the default strategy.
 func DecideSync(
 	item *provider.Item,
+	resolver crdt.ConflictResolver[*provider.Item],
 	opts ...event.Option,
 ) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 		if state.Deleted || state.IsNew() {
-			return syncEvents(item, aggID, currentVersion, false, time.Time{}, opts...)
+			return syncEvents(item, aggID, currentVersion, nil, opts...)
 		}
 
 		if !HasChanged(state.Item, item) {
 			return nil, nil
 		}
 
-		return syncEvents(item, aggID, currentVersion, true, state.Item.UpdatedAt, opts...)
+		winner, winnerLabel := resolveConflict(resolver, state.Item, item)
+
+		return syncEvents(winner, aggID, currentVersion, &conflictMeta{
+			localUpdatedAt:  state.Item.UpdatedAt,
+			remoteUpdatedAt: item.UpdatedAt,
+			winner:          winnerLabel,
+		}, opts...)
 	}
 }
 
@@ -138,28 +147,66 @@ func DecideDelete(
 	}
 }
 
-const conflictWinnerRemote = "remote"
+const (
+	conflictWinnerRemote = "remote"
+	conflictWinnerLocal  = "local"
+)
+
+// conflictMeta carries conflict-specific metadata for event construction.
+type conflictMeta struct {
+	localUpdatedAt  time.Time
+	remoteUpdatedAt time.Time
+	winner          string
+}
+
+// resolveConflict delegates conflict resolution to the resolver, or defaults to remote-wins.
+func resolveConflict(
+	resolver crdt.ConflictResolver[*provider.Item],
+	local, remote *provider.Item,
+) (*provider.Item, string) {
+	if resolver == nil {
+		return remote, conflictWinnerRemote
+	}
+
+	conflict := &crdt.Conflict[*provider.Item]{
+		Local:     local,
+		Remote:    remote,
+		LocalVC:   crdt.NewVectorClock(),
+		RemoteVC:  crdt.NewVectorClock(),
+		Timestamp: time.Now(),
+	}
+
+	winner, err := resolver.Resolve(conflict)
+	if err != nil {
+		return remote, conflictWinnerRemote
+	}
+
+	if winner == local {
+		return local, conflictWinnerLocal
+	}
+
+	return remote, conflictWinnerRemote
+}
 
 func syncEvents(
 	item *provider.Item,
 	aggID cqrsid.AggregateID,
 	version event.Version,
-	isConflict bool,
-	localUpdatedAt time.Time,
+	conflict *conflictMeta,
 	opts ...event.Option,
 ) ([]event.Event, error) {
 	eventTypes := []event.Type{EventItemSynced}
 	payloads := []any{itemToPayload(item)}
 
-	if isConflict {
+	if conflict != nil {
 		eventTypes = []event.Type{EventItemConflictFound, EventItemSynced}
 		payloads = []any{
 			ItemConflictFoundPayload{
 				Source:          item.Source.Get(),
 				SourceID:        item.ExternalID.Get(),
-				LocalUpdatedAt:  unixNano(localUpdatedAt),
-				RemoteUpdatedAt: unixNano(item.UpdatedAt),
-				Winner:          conflictWinnerRemote,
+				LocalUpdatedAt:  unixNano(conflict.localUpdatedAt),
+				RemoteUpdatedAt: unixNano(conflict.remoteUpdatedAt),
+				Winner:          conflict.winner,
 			},
 			itemToPayload(item),
 		}
@@ -168,12 +215,11 @@ func syncEvents(
 	evts, err := event.NewEvents(aggID, aggregateType, version, eventTypes, payloads, opts...)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"create events for %s/%s (version=%d, isConflict=%v, localUpdatedAt=%v): %w",
+			"create events for %s/%s (version=%d, conflict=%v): %w",
 			aggID,
 			item.ExternalID.Get(),
 			version,
-			isConflict,
-			localUpdatedAt,
+			conflict,
 			err,
 		)
 	}

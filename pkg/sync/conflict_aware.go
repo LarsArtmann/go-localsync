@@ -63,6 +63,10 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 			cr.Upserted++
 
 			s.logger.Debug("Resolved conflict: remote wins", "sourceID", r.SourceID)
+		case ActionConflictLocal:
+			cr.Conflicts++
+
+			s.logger.Debug("Resolved conflict: local wins", "sourceID", r.SourceID)
 		case ActionUnchanged:
 			cr.Skipped++
 		case ActionError:

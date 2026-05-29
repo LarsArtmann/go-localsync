@@ -2,10 +2,12 @@ package cqrs
 
 import (
 	"encoding/json"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/core/event"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -76,7 +78,7 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	item.ID = id.NewItemID()
 	originalID := item.ID.String()
 
-	events, err := DecideSync(item)(InitialState, 0)
+	events, err := DecideSync(item, nil)(InitialState, 0)
 	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -149,7 +151,7 @@ func TestDecideSync_NewItem(t *testing.T) {
 
 	item := testItem("123", "PushEvent")
 
-	events, err := DecideSync(item)(InitialState, 0)
+	events, err := DecideSync(item, nil)(InitialState, 0)
 	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -175,7 +177,7 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 		},
 	}
 
-	events, err := DecideSync(item)(state, 1)
+	events, err := DecideSync(item, nil)(state, 1)
 	mustNoError(t, err)
 	if events != nil {
 		t.Errorf("unchanged item produces no events, got %d", len(events))
@@ -197,7 +199,7 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 		},
 	}
 
-	events, err := DecideSync(item)(state, 1)
+	events, err := DecideSync(item, nil)(state, 1)
 	mustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -224,7 +226,7 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 		},
 	}
 
-	events, err := DecideSync(item)(state, 1)
+	events, err := DecideSync(item, nil)(state, 1)
 	mustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -253,7 +255,7 @@ func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 
 	state := testDeletedState("123")
 
-	events, err := DecideSync(item)(state, 2)
+	events, err := DecideSync(item, nil)(state, 2)
 	mustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -306,5 +308,244 @@ func TestSyncItemState_IsNew(t *testing.T) {
 	existing := SyncItemState{Item: &provider.Item{}}
 	if existing.IsNew() {
 		t.Error("expected existing state to not be new")
+	}
+}
+
+// localWinsResolver is a test resolver that always picks the local item.
+type localWinsResolver struct{}
+
+func (localWinsResolver) Resolve(c *crdt.Conflict[*provider.Item]) (*provider.Item, error) {
+	return c.Local, nil
+}
+
+// remoteWinsResolver is a test resolver that always picks the remote item.
+type remoteWinsResolver struct{}
+
+func (remoteWinsResolver) Resolve(c *crdt.Conflict[*provider.Item]) (*provider.Item, error) {
+	return c.Remote, nil
+}
+
+// errorResolver always returns an error.
+type errorResolver struct{}
+
+func (errorResolver) Resolve(_ *crdt.Conflict[*provider.Item]) (*provider.Item, error) {
+	return nil, errors.New("resolver failed")
+}
+
+func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
+	t.Parallel()
+
+	localTime := time.Now().Truncate(time.Millisecond)
+	remoteTime := localTime.Add(2 * time.Hour)
+
+	remoteItem := testItem("123", "PushEvent")
+	remoteItem.UpdatedAt = remoteTime
+
+	state := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
+			UpdatedAt:  localTime,
+		},
+	}
+
+	events, err := DecideSync(remoteItem, new(remoteWinsResolver))(state, 1)
+	mustNoError(t, err)
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events, got %d", len(events))
+	}
+
+	assertEventType(t, events[0], EventItemConflictFound)
+	assertEventType(t, events[1], EventItemSynced)
+
+	var conflictPayload ItemConflictFoundPayload
+	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
+		t.Fatalf("unexpected error: %v", unmarshalErr)
+	}
+
+	if conflictPayload.Winner != "remote" {
+		t.Errorf("expected winner=remote, got %s", conflictPayload.Winner)
+	}
+
+	if conflictPayload.RemoteUpdatedAt != remoteTime.UnixNano() {
+		t.Errorf("expected remote timestamp from original remote item")
+	}
+
+	var syncedPayload ItemSyncedPayload
+	if unmarshalErr := json.Unmarshal(events[1].Payload(), &syncedPayload); unmarshalErr != nil {
+		t.Fatalf("unexpected error: %v", unmarshalErr)
+	}
+
+	if syncedPayload.UpdatedAt != remoteTime.UnixNano() {
+		t.Errorf("expected synced payload to contain remote item data")
+	}
+}
+
+func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
+	t.Parallel()
+
+	localTime := time.Now().Truncate(time.Millisecond)
+	remoteTime := localTime.Add(2 * time.Hour)
+
+	localItem := &provider.Item{
+		ExternalID: id.NewExternalID("123"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
+		UpdatedAt:  localTime,
+	}
+
+	remoteItem := testItem("123", "IssueEvent")
+	remoteItem.UpdatedAt = remoteTime
+
+	state := SyncItemState{Item: localItem}
+
+	events, err := DecideSync(remoteItem, new(localWinsResolver))(state, 1)
+	mustNoError(t, err)
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events, got %d", len(events))
+	}
+
+	assertEventType(t, events[0], EventItemConflictFound)
+
+	var conflictPayload ItemConflictFoundPayload
+	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
+		t.Fatalf("unexpected error: %v", unmarshalErr)
+	}
+
+	if conflictPayload.Winner != "local" {
+		t.Errorf("expected winner=local, got %s", conflictPayload.Winner)
+	}
+
+	if conflictPayload.LocalUpdatedAt != localTime.UnixNano() {
+		t.Errorf("expected local timestamp from existing state")
+	}
+
+	if conflictPayload.RemoteUpdatedAt != remoteTime.UnixNano() {
+		t.Errorf("expected remote timestamp from incoming item")
+	}
+
+	assertEventType(t, events[1], EventItemSynced)
+
+	var syncedPayload ItemSyncedPayload
+	if unmarshalErr := json.Unmarshal(events[1].Payload(), &syncedPayload); unmarshalErr != nil {
+		t.Fatalf("unexpected error: %v", unmarshalErr)
+	}
+
+	if syncedPayload.UpdatedAt != localTime.UnixNano() {
+		t.Errorf("expected synced payload to contain local item data")
+	}
+}
+
+func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
+	t.Parallel()
+
+	remoteItem := testItem("123", "PushEvent")
+	remoteItem.UpdatedAt = time.Now().Add(time.Hour)
+
+	state := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
+			UpdatedAt:  time.Now(),
+		},
+	}
+
+	events, err := DecideSync(remoteItem, new(errorResolver))(state, 1)
+	mustNoError(t, err)
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events, got %d", len(events))
+	}
+
+	var conflictPayload ItemConflictFoundPayload
+	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
+		t.Fatalf("unexpected error: %v", unmarshalErr)
+	}
+
+	if conflictPayload.Winner != "remote" {
+		t.Errorf("expected fallback to remote on resolver error, got %s", conflictPayload.Winner)
+	}
+}
+
+func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
+	t.Parallel()
+
+	resolver, resErr := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
+		return item.UpdatedAt
+	})
+	if resErr != nil {
+		t.Fatalf("unexpected error: %v", resErr)
+	}
+
+	localTime := time.Now().Truncate(time.Millisecond)
+	remoteTime := localTime.Add(2 * time.Hour)
+
+	remoteItem := testItem("123", "PushEvent")
+	remoteItem.UpdatedAt = remoteTime
+
+	state := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
+			UpdatedAt:  localTime,
+		},
+	}
+
+	events, err := DecideSync(remoteItem, resolver)(state, 1)
+	mustNoError(t, err)
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events, got %d", len(events))
+	}
+
+	var conflictPayload ItemConflictFoundPayload
+	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
+		t.Fatalf("unexpected error: %v", unmarshalErr)
+	}
+
+	if conflictPayload.Winner != "remote" {
+		t.Errorf("LWW with newer remote should pick remote, got %s", conflictPayload.Winner)
+	}
+}
+
+func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
+	t.Parallel()
+
+	resolver, resErr := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
+		return item.UpdatedAt
+	})
+	if resErr != nil {
+		t.Fatalf("unexpected error: %v", resErr)
+	}
+
+	localTime := time.Now().Truncate(time.Millisecond).Add(3 * time.Hour)
+	remoteTime := time.Now().Truncate(time.Millisecond)
+
+	remoteItem := testItem("123", "PushEvent")
+	remoteItem.UpdatedAt = remoteTime
+
+	state := SyncItemState{
+		Item: &provider.Item{
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
+			UpdatedAt:  localTime,
+		},
+	}
+
+	events, err := DecideSync(remoteItem, resolver)(state, 1)
+	mustNoError(t, err)
+	if len(events) != 2 {
+		t.Fatalf("expected 2 events, got %d", len(events))
+	}
+
+	var conflictPayload ItemConflictFoundPayload
+	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
+		t.Fatalf("unexpected error: %v", unmarshalErr)
+	}
+
+	if conflictPayload.Winner != "local" {
+		t.Errorf("LWW with newer local should pick local, got %s", conflictPayload.Winner)
 	}
 }

@@ -240,7 +240,7 @@ func TestReadModel_Integration(t *testing.T) {
 
 	item := testItem("123", "PushEvent")
 
-	decide := DecideSync(item)
+	decide := DecideSync(item, nil)
 	events, err := decide(InitialState, 0)
 	mustNoError(t, err)
 	if len(events) != 1 {
