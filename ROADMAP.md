@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync  
-**Last Updated:** 2026-05-25
+**Last Updated:** 2026-05-29
 
 ## Overview
 
@@ -22,7 +22,17 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [x] **Zero lint issues** — golangci-lint v2 with 125+ linters, 0 issues.
 - [x] **Dead code removal** — `types.SourceID` (unused), `AggregateID` sync.Map cache.
 - [x] **AggregateID double-computation eliminated** — Uses `cmd.AggregateID()` from command metadata.
-- [x] **Domain language documented** — `docs/DOMAIN_LANGUAGE.md` with full glossary.
+- [x] **HTTP API** — Huma v2 with 4 endpoints (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`). OpenAPI 3 spec auto-generated.
+- [x] **JSON output** — `-json` flag for structured CLI output.
+- [x] **CLI server mode** — `-server` flag runs HTTP API.
+- [x] **Error templates** — `RegisterErrorTemplates()` for all 9 error codes with What/Why/Fix/WayOut.
+- [x] **Nix flake** — `flake.nix` with devShell + `buildGoModule`.
+- [x] **CRDT conflict resolution** — `crdt.ConflictResolver[T]` wired into `DecideSync`. `LWWResolver` default. `ActionConflictLocal` support.
+- [x] **Pluggable conflict strategy** — `CQRSConfig.ConflictResolver` accepts any resolver. Default nil = remote-wins.
+- [x] **Push/Pull tests** — 5 tests covering no-DB, local-DB, and sync-after-push-pull scenarios.
+- [x] **CLI helpers extracted** — `helpers.go` with `runStats`, `runAPIServer`, `printSyncResultJSON`, `printVersion`, etc.
+- [x] **conflict_aware.go extracted** — `ConflictAwareSyncer` in own file, decoupled from `sync.go`.
+- [x] **241 tests passing** — 9 packages, 0 lint issues.
 
 ---
 
@@ -43,15 +53,11 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 ### Data & Export
 
-- [ ] **Create HTTP API endpoint**  
-       REST API for querying events (GET /events, /stats, /types).  
-       Would use cqrs-htmx library. Effort: ~4h.
-
-- [ ] **Add export to JSON/CSV**  
+- [ ] **Add export to JSON/CSV**
        Export stored events to file formats (`-export json` or `-export csv`).
 
-- [x] **Conflict detection consolidation** — Decider is single authority; `ConflictAwareSyncer` delegates to `SyncItems` results.
-- [x] **HasChanged time comparison fix** — Fixed `!=` to `.Equal()` — was causing false conflict detections.
+- [ ] **Conflict resolution per-sync override** — `SyncOptions.ConflictResolver` for per-sync strategy.
+- [ ] **Real-time sync protocol** — `SyncRequest`/`SyncResponse` from `pkg/crdt/` for live multi-node sync.
 
 ---
 
@@ -76,8 +82,8 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [x] **CLI tests** (Completed)  
        `main_test.go` covers exitCodeForError, LoadConfig, env defaults.
 
-- [ ] **Push/Pull tests**  
-       `CQRSStack.Push()` and `Pull()` untested.
+- [x] **Push/Pull tests** (Completed)
+       `CQRSStack.Push()` and `Pull()` tested with 5 tests: no-DB, local-DB, sync-after-push-pull.
 
 ---
 
@@ -86,4 +92,4 @@ Aspirational features and improvements with no fixed timeline. These are planned
 1. **End-to-end testing** — Do we need a real GitHub PAT for CI integration tests, or are mocks sufficient?
 2. **Multi-user sync** — Should the read model track which user each event belongs to?
 3. **Event retention/TTL** — Automatic cleanup of old events? Configurable?
-4. **Conflict resolution policy** — Currently hard-coded to "remote wins". Should this be configurable (local-wins, manual resolution)?
+4. **Conflict resolution policy** — Configurable via `CQRSConfig.ConflictResolver`. CLI flag (`--conflict-strategy`) pending.
