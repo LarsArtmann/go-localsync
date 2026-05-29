@@ -8,17 +8,17 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## Architecture
 
-| Package                     | Purpose                                                                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Package                     | Purpose                                                                                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy** |
-| `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`)                                          |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                                             |
-| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`)                                      |
-| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                 |
-| `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary` |
-| `pkg/id/`                   | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                          |
-| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable` |
-| `cmd/examples/github-sync/` | Example CLI entry point (sync mode + HTTP server mode via `-server`)                                                                     |
+| `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`)                                                 |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                                                    |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`)                                             |
+| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                        |
+| `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`        |
+| `pkg/id/`                   | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                                 |
+| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`        |
+| `cmd/examples/github-sync/` | Example CLI entry point (sync mode + HTTP server mode via `-server`)                                                                            |
 
 ### SyncStore Interface Seam
 
@@ -134,17 +134,17 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package                    | Tests | Coverage | Status                                                                                     |
-| -------------------------- | ----- | -------- | ------------------------------------------------------------------------------------------ |
+| Package                    | Tests | Coverage | Status                                                                                                    |
+| -------------------------- | ----- | -------- | --------------------------------------------------------------------------------------------------------- |
 | `pkg/cqrs`                 | 92    | ~83%     | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation, CRDT Resolver |
-| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                   |
-| `pkg/sync`                 | 22    | 92.3%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting             |
-| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                 |
-| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates            |
-| `pkg/provider`             | 2     | 100.0%   | ✅ Item validation                                                                         |
-| `pkg/api`                  | 8     | ~90%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints                             |
-| `pkg/crdt`                 | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage roundtrip                    |
-| `cmd/examples/github-sync` | 14    | 10.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON           |
+| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                                  |
+| `pkg/sync`                 | 22    | 92.3%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                            |
+| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                |
+| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                           |
+| `pkg/provider`             | 2     | 100.0%   | ✅ Item validation                                                                                        |
+| `pkg/api`                  | 8     | ~90%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints                                            |
+| `pkg/crdt`                 | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage roundtrip                                   |
+| `cmd/examples/github-sync` | 14    | 10.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON                          |
 
 **235 total test functions** across 9 test packages.
 

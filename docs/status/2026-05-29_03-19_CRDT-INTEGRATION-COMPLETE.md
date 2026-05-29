@@ -19,53 +19,53 @@ The project is in **strong shape**: 86.9% overall coverage, 0 lint issues, clean
 
 ### Architecture & Core
 
-| Item | Details |
-|---|---|
-| **CRDT conflict resolution wired** | `crdt.ConflictResolver[*provider.Item]` injectable via `CQRSConfig.ConflictResolver`. Default (nil) = remote-wins. `LWWResolver`, custom merge, or any strategy works. |
-| **`ActionConflictLocal` added** | New `SyncAction` for when resolver picks local over remote. `ConflictAwareSyncer` handles both directions. |
-| **`resolveConflict` helper** | Extracts conflict resolution from decider. Creates `crdt.Conflict` with empty vector clocks → `LWWResolver` falls through to timestamp comparison. Falls back to remote-wins on error. |
-| **`conflictMeta` struct** | Replaces boolean `isConflict` + `time.Time` params in `syncEvents` with clean struct: `{localUpdatedAt, remoteUpdatedAt, winner}`. |
-| **`classifyAction` updated** | Now accepts `conflictWinner` param to distinguish `ActionConflictLocal` vs `ActionConflictRemote`. |
-| **Command dispatcher wired** | `handleSyncItem` closure captures resolver, passes to `DecideSync`. |
-| **Backward compatible** | All existing callers pass `nil` → same remote-wins behavior as before. |
+| Item                               | Details                                                                                                                                                                                |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **CRDT conflict resolution wired** | `crdt.ConflictResolver[*provider.Item]` injectable via `CQRSConfig.ConflictResolver`. Default (nil) = remote-wins. `LWWResolver`, custom merge, or any strategy works.                 |
+| **`ActionConflictLocal` added**    | New `SyncAction` for when resolver picks local over remote. `ConflictAwareSyncer` handles both directions.                                                                             |
+| **`resolveConflict` helper**       | Extracts conflict resolution from decider. Creates `crdt.Conflict` with empty vector clocks → `LWWResolver` falls through to timestamp comparison. Falls back to remote-wins on error. |
+| **`conflictMeta` struct**          | Replaces boolean `isConflict` + `time.Time` params in `syncEvents` with clean struct: `{localUpdatedAt, remoteUpdatedAt, winner}`.                                                     |
+| **`classifyAction` updated**       | Now accepts `conflictWinner` param to distinguish `ActionConflictLocal` vs `ActionConflictRemote`.                                                                                     |
+| **Command dispatcher wired**       | `handleSyncItem` closure captures resolver, passes to `DecideSync`.                                                                                                                    |
+| **Backward compatible**            | All existing callers pass `nil` → same remote-wins behavior as before.                                                                                                                 |
 
 ### Session 6 Sprint (committed earlier)
 
-| Item | Details |
-|---|---|
-| **SyncIncremental source filter bug fix** | Was fetching globally latest item instead of per-source. Now filters by `Source` correctly. |
-| **Turso store factory consolidation** | Merged `createTursoRemoteStore` + `createTursoLocalStore` into single `createTursoStore`. ~50 lines removed. |
-| **Go 1.26 `errors.AsType`** | Modernized 4 instances of `errors.As` → `errors.AsType[*errorfamily.Error]`. |
-| **HTTP error mapping** | `mapSyncError()` in API server: `ErrRateLimited→429`, `ErrInvalidToken→401`, `ErrUserNotFound→404`, `ErrDatabase→500`, `ErrInvalidInput→400`, default→503. |
-| **`ErrDatabase` wired** | Turso read model now uses `pkgerrors.Wrap(ErrDatabase, ...)` for all 9 DB operations. |
-| **Doc comments** | All exported symbols in `pkg/cqrs/`, `pkg/sync/`, `pkg/provider/` documented. |
+| Item                                      | Details                                                                                                                                                    |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SyncIncremental source filter bug fix** | Was fetching globally latest item instead of per-source. Now filters by `Source` correctly.                                                                |
+| **Turso store factory consolidation**     | Merged `createTursoRemoteStore` + `createTursoLocalStore` into single `createTursoStore`. ~50 lines removed.                                               |
+| **Go 1.26 `errors.AsType`**               | Modernized 4 instances of `errors.As` → `errors.AsType[*errorfamily.Error]`.                                                                               |
+| **HTTP error mapping**                    | `mapSyncError()` in API server: `ErrRateLimited→429`, `ErrInvalidToken→401`, `ErrUserNotFound→404`, `ErrDatabase→500`, `ErrInvalidInput→400`, default→503. |
+| **`ErrDatabase` wired**                   | Turso read model now uses `pkgerrors.Wrap(ErrDatabase, ...)` for all 9 DB operations.                                                                      |
+| **Doc comments**                          | All exported symbols in `pkg/cqrs/`, `pkg/sync/`, `pkg/provider/` documented.                                                                              |
 
 ### Testing
 
-| Item | Details |
-|---|---|
+| Item                              | Details                                                                                                                                                                                                     |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **13 new CRDT integration tests** | 5 decider-level (custom resolver remote/local/error, LWWResolver remote/local newer), 2 stack-level (LWW with local/remote newer), 1 classifyAction (conflict_local), 5 existing tests updated for new API. |
-| **235 total tests** | Up from 222. All passing. |
-| **86.9% overall coverage** | `errors`: 100%, `id`: 100%, `provider`: 100%, `crdt`: 97.6%, `sync`: 91.7%, `cqrs`: 83.8%, `providers/github`: 84.6%, `api`: 76.3%. |
+| **235 total tests**               | Up from 222. All passing.                                                                                                                                                                                   |
+| **86.9% overall coverage**        | `errors`: 100%, `id`: 100%, `provider`: 100%, `crdt`: 97.6%, `sync`: 91.7%, `cqrs`: 83.8%, `providers/github`: 84.6%, `api`: 76.3%.                                                                         |
 
 ### Documentation
 
-| Item | Details |
-|---|---|
+| Item                  | Details                                                                                                                                 |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **AGENTS.md updated** | Session 6 section with CRDT integration architecture, dependency flow, decisions. Conflict Flow section rewritten. Test counts updated. |
-| **Status reports** | Two comprehensive reports this session. |
+| **Status reports**    | Two comprehensive reports this session.                                                                                                 |
 
 ---
 
 ## B) PARTIALLY DONE 🔶
 
-| Item | Status | What's Missing |
-|---|---|---|
-| **`pkg/cqrs/stack.go` splitting** | Identified, not started | 396 lines. Should split into `stack.go`, `sync_items.go`, `remote.go`, `query_helpers.go`. Pre-existing. |
+| Item                                           | Status                  | What's Missing                                                                                              |
+| ---------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **`pkg/cqrs/stack.go` splitting**              | Identified, not started | 396 lines. Should split into `stack.go`, `sync_items.go`, `remote.go`, `query_helpers.go`. Pre-existing.    |
 | **`pkg/providers/github/client.go` splitting** | Identified, not started | 387 lines. Should split into `client.go`, `options.go`, `fetch.go`, `convert.go`, `retry.go`. Pre-existing. |
-| **Doc comments for `pkg/id/`** | Identified, not started | `ItemID`, `ExternalID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID` + constructors all undocumented. |
-| **Doc comments for `pkg/errors/` sentinels** | Identified, not started | 7 sentinel vars missing doc comments. |
-| **`cmd/examples/github-sync` build** | Blocked upstream | Fails due to go-cqrs-lite/storage uncommitted WIP (unused otel import). All `pkg/` tests pass. |
+| **Doc comments for `pkg/id/`**                 | Identified, not started | `ItemID`, `ExternalID`, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID` + constructors all undocumented.   |
+| **Doc comments for `pkg/errors/` sentinels**   | Identified, not started | 7 sentinel vars missing doc comments.                                                                       |
+| **`cmd/examples/github-sync` build**           | Blocked upstream        | Fails due to go-cqrs-lite/storage uncommitted WIP (unused otel import). All `pkg/` tests pass.              |
 
 ---
 
@@ -88,11 +88,11 @@ The project is in **strong shape**: 86.9% overall coverage, 0 lint issues, clean
 
 ## D) TOTALLY FUCKED UP 💥
 
-| Item | Severity | Details |
-|---|---|---|
-| **go-cqrs-lite uncommitted WIP** | 🔴 HIGH | `core/event/store.go` has renaming WIP (`Sink→EventSink`, `Source→EventSource`) + new `Source string` type in `types.go` that collides with `provider.Source`. When applied, go-localsync fails to build. When stashed, all tests pass. This blocks any go-cqrs-lite version upgrade and the `cmd/examples/` build. |
-| **`stack.go` at 396 lines** | 🟡 MEDIUM | Exceeds the 350-line pre-commit hook limit. Pre-existing. Should be split but hasn't been because the hook is skipped. |
-| **`client.go` at 387 lines** | 🟡 MEDIUM | Same issue. GitHub provider client is a monolith. |
+| Item                             | Severity  | Details                                                                                                                                                                                                                                                                                                             |
+| -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **go-cqrs-lite uncommitted WIP** | 🔴 HIGH   | `core/event/store.go` has renaming WIP (`Sink→EventSink`, `Source→EventSource`) + new `Source string` type in `types.go` that collides with `provider.Source`. When applied, go-localsync fails to build. When stashed, all tests pass. This blocks any go-cqrs-lite version upgrade and the `cmd/examples/` build. |
+| **`stack.go` at 396 lines**      | 🟡 MEDIUM | Exceeds the 350-line pre-commit hook limit. Pre-existing. Should be split but hasn't been because the hook is skipped.                                                                                                                                                                                              |
+| **`client.go` at 387 lines**     | 🟡 MEDIUM | Same issue. GitHub provider client is a monolith.                                                                                                                                                                                                                                                                   |
 
 ---
 
@@ -126,53 +126,53 @@ The project is in **strong shape**: 86.9% overall coverage, 0 lint issues, clean
 
 ### Priority 1 — Quick Wins (under 30 min each)
 
-| # | Item | Impact | Effort | Risk |
-|---|---|---|---|---|
-| 1 | Remove `CQRSStack.GetTypes` duplicate method | Clean | 5 min | None |
-| 2 | Add doc comments to `pkg/id/ids.go` exports | Docs | 10 min | None |
-| 3 | Add doc comments to `pkg/errors/errors.go` sentinels | Docs | 10 min | None |
-| 4 | Test `mapSyncError()` — table-driven, all 6 mappings | Coverage | 15 min | None |
-| 5 | Test SyncIncremental source filter in mock | Verification | 15 min | None |
-| 6 | Add `NewItemFilter()` constructor with sensible defaults | DX | 10 min | None |
-| 7 | Verify `ConflictAwareSyncer` handles `ActionConflictLocal` correctly in integration test | Coverage | 15 min | None |
+| #   | Item                                                                                     | Impact       | Effort | Risk |
+| --- | ---------------------------------------------------------------------------------------- | ------------ | ------ | ---- |
+| 1   | Remove `CQRSStack.GetTypes` duplicate method                                             | Clean        | 5 min  | None |
+| 2   | Add doc comments to `pkg/id/ids.go` exports                                              | Docs         | 10 min | None |
+| 3   | Add doc comments to `pkg/errors/errors.go` sentinels                                     | Docs         | 10 min | None |
+| 4   | Test `mapSyncError()` — table-driven, all 6 mappings                                     | Coverage     | 15 min | None |
+| 5   | Test SyncIncremental source filter in mock                                               | Verification | 15 min | None |
+| 6   | Add `NewItemFilter()` constructor with sensible defaults                                 | DX           | 10 min | None |
+| 7   | Verify `ConflictAwareSyncer` handles `ActionConflictLocal` correctly in integration test | Coverage     | 15 min | None |
 
 ### Priority 2 — Code Quality (1-2 hours each)
 
-| # | Item | Impact | Effort | Risk |
-|---|---|---|---|---|
-| 8 | Split `pkg/cqrs/stack.go` (396→~150 lines per file) | Maintainability | 1 hr | Low |
-| 9 | Split `pkg/providers/github/client.go` (387→~80 lines per file) | Maintainability | 1 hr | Low |
-| 10 | Extract shared `testutil` package with `TestItem()` | DRY | 45 min | Low |
-| 11 | Add `--conflict-strategy` CLI flag to `github-sync` | UX | 1 hr | Low |
-| 12 | Add integration test: stack with custom resolver → read model state | Confidence | 30 min | None |
+| #   | Item                                                                | Impact          | Effort | Risk |
+| --- | ------------------------------------------------------------------- | --------------- | ------ | ---- |
+| 8   | Split `pkg/cqrs/stack.go` (396→~150 lines per file)                 | Maintainability | 1 hr   | Low  |
+| 9   | Split `pkg/providers/github/client.go` (387→~80 lines per file)     | Maintainability | 1 hr   | Low  |
+| 10  | Extract shared `testutil` package with `TestItem()`                 | DRY             | 45 min | Low  |
+| 11  | Add `--conflict-strategy` CLI flag to `github-sync`                 | UX              | 1 hr   | Low  |
+| 12  | Add integration test: stack with custom resolver → read model state | Confidence      | 30 min | None |
 
 ### Priority 3 — Strategic Unblocking (2-4 hours)
 
-| # | Item | Impact | Effort | Risk |
-|---|---|---|---|---|
-| 13 | Resolve go-cqrs-lite upstream WIP (commit or stash) | **Unblocks everything** | 2-4 hr | Medium |
-| 14 | Wire vector clocks into `Conflict` from aggregate state | Correctness | 3 hr | Medium |
-| 15 | Add `ConflictResolver` to `SyncOptions` (per-sync override) | Flexibility | 2 hr | Low |
-| 16 | Document CRDT integration in `doc.go` with usage examples | DX | 1 hr | None |
-| 17 | Add `pkg/crdt/example_test.go` showing LWWResolver with `*provider.Item` | DX | 30 min | None |
+| #   | Item                                                                     | Impact                  | Effort | Risk   |
+| --- | ------------------------------------------------------------------------ | ----------------------- | ------ | ------ |
+| 13  | Resolve go-cqrs-lite upstream WIP (commit or stash)                      | **Unblocks everything** | 2-4 hr | Medium |
+| 14  | Wire vector clocks into `Conflict` from aggregate state                  | Correctness             | 3 hr   | Medium |
+| 15  | Add `ConflictResolver` to `SyncOptions` (per-sync override)              | Flexibility             | 2 hr   | Low    |
+| 16  | Document CRDT integration in `doc.go` with usage examples                | DX                      | 1 hr   | None   |
+| 17  | Add `pkg/crdt/example_test.go` showing LWWResolver with `*provider.Item` | DX                      | 30 min | None   |
 
 ### Priority 4 — Feature Development (1+ days)
 
-| # | Item | Impact | Effort | Risk |
-|---|---|---|---|---|
-| 18 | Implement second provider (GitLab or file-system) to validate interface | Architecture | 2-3 days | Medium |
-| 19 | Branch lifecycle projection (`event.Projection` from `ItemSynced`) | Integration | 1-2 days | Low |
-| 20 | github-local-sync Phase 2 migration to CQRS | Product | 3-5 days | High |
-| 21 | OpenTelemetry instrumentation (Syncer, CQRSStack, HTTP middleware) | Observability | 2-3 days | Low |
-| 22 | Real-time sync protocol using `SyncRequest`/`SyncResponse` from `pkg/crdt/` | Feature | 3-5 days | High |
+| #   | Item                                                                        | Impact        | Effort   | Risk   |
+| --- | --------------------------------------------------------------------------- | ------------- | -------- | ------ |
+| 18  | Implement second provider (GitLab or file-system) to validate interface     | Architecture  | 2-3 days | Medium |
+| 19  | Branch lifecycle projection (`event.Projection` from `ItemSynced`)          | Integration   | 1-2 days | Low    |
+| 20  | github-local-sync Phase 2 migration to CQRS                                 | Product       | 3-5 days | High   |
+| 21  | OpenTelemetry instrumentation (Syncer, CQRSStack, HTTP middleware)          | Observability | 2-3 days | Low    |
+| 22  | Real-time sync protocol using `SyncRequest`/`SyncResponse` from `pkg/crdt/` | Feature       | 3-5 days | High   |
 
 ### Priority 5 — Polish & Production
 
-| # | Item | Impact | Effort | Risk |
-|---|---|---|---|---|
-| 23 | CI pipeline: build + test + lint + coverage gate | Quality | 4 hr | Low |
-| 24 | Performance benchmarks for sync with 10k+ items | Confidence | 2 hr | None |
-| 25 | API authentication middleware (API key or JWT) | Security | 1 day | Low |
+| #   | Item                                             | Impact     | Effort | Risk |
+| --- | ------------------------------------------------ | ---------- | ------ | ---- |
+| 23  | CI pipeline: build + test + lint + coverage gate | Quality    | 4 hr   | Low  |
+| 24  | Performance benchmarks for sync with 10k+ items  | Confidence | 2 hr   | None |
+| 25  | API authentication middleware (API key or JWT)   | Security   | 1 day  | Low  |
 
 ---
 
@@ -192,39 +192,39 @@ This matters because it determines whether we invest in the projection-based bra
 
 ## Test Coverage Summary
 
-| Package | Tests | Coverage | Status |
-|---|---|---|---|
-| `pkg/errors` | 11 | 100.0% | ✅ |
-| `pkg/id` | 10 | 100.0% | ✅ |
-| `pkg/provider` | 2 | 100.0% | ✅ |
-| `pkg/crdt` | 52 | 97.6% | ✅ |
-| `pkg/sync` | 22 | 91.7% | ✅ |
-| `pkg/providers/github` | 32 | 84.6% | ✅ |
-| `pkg/cqrs` | 92 | 83.8% | ✅ |
-| `pkg/api` | 8 | 76.3% | ✅ |
-| `cmd/examples` | 14 | ~10% | ⚠️ Blocked by upstream |
-| **Total** | **235** | **86.9%** | ✅ |
+| Package                | Tests   | Coverage  | Status                 |
+| ---------------------- | ------- | --------- | ---------------------- |
+| `pkg/errors`           | 11      | 100.0%    | ✅                     |
+| `pkg/id`               | 10      | 100.0%    | ✅                     |
+| `pkg/provider`         | 2       | 100.0%    | ✅                     |
+| `pkg/crdt`             | 52      | 97.6%     | ✅                     |
+| `pkg/sync`             | 22      | 91.7%     | ✅                     |
+| `pkg/providers/github` | 32      | 84.6%     | ✅                     |
+| `pkg/cqrs`             | 92      | 83.8%     | ✅                     |
+| `pkg/api`              | 8       | 76.3%     | ✅                     |
+| `cmd/examples`         | 14      | ~10%      | ⚠️ Blocked by upstream |
+| **Total**              | **235** | **86.9%** | ✅                     |
 
 ## File Size Watch
 
-| File | Lines | Status |
-|---|---|---|
-| `pkg/cqrs/stack.go` | 396 | ⚠️ Over 350 limit |
-| `pkg/providers/github/client.go` | 387 | ⚠️ Over 350 limit |
-| `pkg/sync/sync.go` | 348 | ✅ Under limit |
-| `pkg/api/server.go` | 280 | ✅ |
-| `pkg/cqrs/decider.go` | 262 | ✅ |
+| File                             | Lines | Status            |
+| -------------------------------- | ----- | ----------------- |
+| `pkg/cqrs/stack.go`              | 396   | ⚠️ Over 350 limit |
+| `pkg/providers/github/client.go` | 387   | ⚠️ Over 350 limit |
+| `pkg/sync/sync.go`               | 348   | ✅ Under limit    |
+| `pkg/api/server.go`              | 280   | ✅                |
+| `pkg/cqrs/decider.go`            | 262   | ✅                |
 
 ## Dependency Health
 
-| Dependency | Version | Status |
-|---|---|---|
-| `go-cqrs-lite/core` | v1.4.0 | ✅ (but local WIP is dirty) |
-| `go-cqrs-lite/memory` | v1.2.0 | ✅ |
-| `go-cqrs-lite/storage` | pseudo | ⚠️ Uncommitted WIP blocks cmd/ build |
-| `go-cqrs-lite/middleware` | v1.0.0 | ✅ |
-| `go-cqrs-lite/projection` | v1.1.0 | ✅ |
-| `go-branded-id` | v0.1.0 | ✅ |
-| `go-error-family` | v0.2.0 | ✅ |
-| `go-github/v69` | v69.2.0 | ✅ |
-| `huma/v2` | v2.38.0 | ✅ |
+| Dependency                | Version | Status                               |
+| ------------------------- | ------- | ------------------------------------ |
+| `go-cqrs-lite/core`       | v1.4.0  | ✅ (but local WIP is dirty)          |
+| `go-cqrs-lite/memory`     | v1.2.0  | ✅                                   |
+| `go-cqrs-lite/storage`    | pseudo  | ⚠️ Uncommitted WIP blocks cmd/ build |
+| `go-cqrs-lite/middleware` | v1.0.0  | ✅                                   |
+| `go-cqrs-lite/projection` | v1.1.0  | ✅                                   |
+| `go-branded-id`           | v0.1.0  | ✅                                   |
+| `go-error-family`         | v0.2.0  | ✅                                   |
+| `go-github/v69`           | v69.2.0 | ✅                                   |
+| `huma/v2`                 | v2.38.0 | ✅                                   |

@@ -232,7 +232,7 @@ func (s *CQRSStack) SyncItems(
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 		var (
-			eventCount    int
+			eventCount     int
 			wasNew         bool
 			conflictWinner string
 		)
@@ -254,6 +254,7 @@ func (s *CQRSStack) SyncItems(
 
 			if eventCount > 1 {
 				var cp ItemConflictFoundPayload
+
 				_ = json.Unmarshal(events[0].Payload(), &cp)
 				conflictWinner = cp.Winner
 			}
