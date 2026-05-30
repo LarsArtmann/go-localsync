@@ -54,7 +54,7 @@ Aspirational features and improvements with no fixed timeline. These are planned
 ### Data & Export
 
 - [ ] **Add export to JSON/CSV**
-       Export stored events to file formats (`-export json` or `-export csv`).
+      Export stored events to file formats (`-export json` or `-export csv`).
 
 - [ ] **Conflict resolution per-sync override** — `SyncOptions.ConflictResolver` for per-sync strategy.
 - [ ] **Real-time sync protocol** — `SyncRequest`/`SyncResponse` from `pkg/crdt/` for live multi-node sync.
@@ -83,7 +83,7 @@ Aspirational features and improvements with no fixed timeline. These are planned
        `main_test.go` covers exitCodeForError, LoadConfig, env defaults.
 
 - [x] **Push/Pull tests** (Completed)
-       `CQRSStack.Push()` and `Pull()` tested with 5 tests: no-DB, local-DB, sync-after-push-pull.
+      `CQRSStack.Push()` and `Pull()` tested with 5 tests: no-DB, local-DB, sync-after-push-pull.
 
 ---
 

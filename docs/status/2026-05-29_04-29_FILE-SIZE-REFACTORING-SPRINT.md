@@ -16,33 +16,33 @@ All 10 files that exceeded the 350-line limit have been split into focused, sing
 
 ### File Size Compliance — 10/10 files split
 
-| Original File | Before | Split Into | After |
-|---|---|---|---|
-| `pkg/sync/sync_test.go` | 744 🚨 | `sync_test.go` + `sync_incremental_test.go` + `sync_conflict_test.go` | 295 + 260 + 210 |
-| `pkg/providers/github/client_test.go` | 655 🚨 | `client_test.go` + `client_convert_test.go` + `client_ratelimit_test.go` | 333 + 95 + 250 |
-| `pkg/cqrs/decider_test.go` | 551 🚨 | `decider_test.go` + `decider_resolver_test.go` | 310 + 248 |
-| `pkg/cqrs/stack_test.go` | 528 🚨 | `stack_test.go` + `stack_classify_test.go` | 255 + 283 |
-| `pkg/crdt/conflict_test.go` | 404 ⚠️ | `conflict_test.go` + `conflict_sync_test.go` | 280 + 131 |
-| `pkg/crdt/vectorclock_test.go` | 404 ⚠️ | `vectorclock_test.go` + `vectorclock_compare_test.go` | 168 + 241 |
-| `pkg/cqrs/stack.go` | 402 ℹ️ | `stack.go` + `stack_adapters.go` | 293 + 109 |
-| `pkg/cqrs/turso_readmodel_test.go` | 383 ℹ️ | `turso_readmodel_test.go` + `turso_readmodel_filter_test.go` | 217 + 176 |
-| `pkg/providers/github/client.go` | 387 ℹ️ | `client.go` + `client_retry.go` | 270 + 123 |
-| `cmd/examples/github-sync/main.go` | 355 ℹ️ | `main.go` + `helpers.go` | 209 + 159 |
+| Original File                         | Before | Split Into                                                               | After           |
+| ------------------------------------- | ------ | ------------------------------------------------------------------------ | --------------- |
+| `pkg/sync/sync_test.go`               | 744 🚨 | `sync_test.go` + `sync_incremental_test.go` + `sync_conflict_test.go`    | 295 + 260 + 210 |
+| `pkg/providers/github/client_test.go` | 655 🚨 | `client_test.go` + `client_convert_test.go` + `client_ratelimit_test.go` | 333 + 95 + 250  |
+| `pkg/cqrs/decider_test.go`            | 551 🚨 | `decider_test.go` + `decider_resolver_test.go`                           | 310 + 248       |
+| `pkg/cqrs/stack_test.go`              | 528 🚨 | `stack_test.go` + `stack_classify_test.go`                               | 255 + 283       |
+| `pkg/crdt/conflict_test.go`           | 404 ⚠️ | `conflict_test.go` + `conflict_sync_test.go`                             | 280 + 131       |
+| `pkg/crdt/vectorclock_test.go`        | 404 ⚠️ | `vectorclock_test.go` + `vectorclock_compare_test.go`                    | 168 + 241       |
+| `pkg/cqrs/stack.go`                   | 402 ℹ️ | `stack.go` + `stack_adapters.go`                                         | 293 + 109       |
+| `pkg/cqrs/turso_readmodel_test.go`    | 383 ℹ️ | `turso_readmodel_test.go` + `turso_readmodel_filter_test.go`             | 217 + 176       |
+| `pkg/providers/github/client.go`      | 387 ℹ️ | `client.go` + `client_retry.go`                                          | 270 + 123       |
+| `cmd/examples/github-sync/main.go`    | 355 ℹ️ | `main.go` + `helpers.go`                                                 | 209 + 159       |
 
 ### Split Strategy Per File
 
-| File | Strategy |
-|---|---|
-| `sync_test.go` | Mock helpers + core Syncer tests → incremental tests → conflict-aware tests |
-| `client_test.go` | Helpers + Fetch/FetchAll → convertEvent tests → rate limit/retry/wait tests |
-| `decider_test.go` | Fold/DecideSync core → CRDT resolver tests (localWins, remoteWins, error, LWW) |
-| `stack_test.go` | Core CQRS stack tests → classifyAction + conflict integration tests |
-| `conflict_test.go` | LWW resolver + Conflict/MergeResult → SyncMessage/SyncRequest/SyncResponse JSON |
-| `vectorclock_test.go` | New/Increment/Get/Merge → Cmp/Equal/Clone/String |
-| `stack.go` | Constructor + SyncItems → classifyAction + adapter methods (Count, ListItems, Close) |
-| `turso_readmodel_test.go` | Helpers + CRUD tests → filter/pagination tests |
-| `client.go` | Client struct + Fetch/FetchAll/convertEvent → waitForRateLimit + withRetry + error helpers |
-| `main.go` | main() + flag parsing → output types + runStats + runConflictAwareSync + exitCodeForError |
+| File                      | Strategy                                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------------------ |
+| `sync_test.go`            | Mock helpers + core Syncer tests → incremental tests → conflict-aware tests                |
+| `client_test.go`          | Helpers + Fetch/FetchAll → convertEvent tests → rate limit/retry/wait tests                |
+| `decider_test.go`         | Fold/DecideSync core → CRDT resolver tests (localWins, remoteWins, error, LWW)             |
+| `stack_test.go`           | Core CQRS stack tests → classifyAction + conflict integration tests                        |
+| `conflict_test.go`        | LWW resolver + Conflict/MergeResult → SyncMessage/SyncRequest/SyncResponse JSON            |
+| `vectorclock_test.go`     | New/Increment/Get/Merge → Cmp/Equal/Clone/String                                           |
+| `stack.go`                | Constructor + SyncItems → classifyAction + adapter methods (Count, ListItems, Close)       |
+| `turso_readmodel_test.go` | Helpers + CRUD tests → filter/pagination tests                                             |
+| `client.go`               | Client struct + Fetch/FetchAll/convertEvent → waitForRateLimit + withRetry + error helpers |
+| `main.go`                 | main() + flag parsing → output types + runStats + runConflictAwareSync + exitCodeForError  |
 
 ### Pre-existing lint issues fixed during split
 
@@ -134,38 +134,39 @@ It's 2 lines under the limit. Adding any new feature (e.g., new SyncOption field
 
 ## Metrics Snapshot
 
-| Metric | Value |
-|---|---|
-| Total Go files | 66 |
-| Files over 350 lines | **0** ✅ |
-| Largest file | `pkg/sync/sync.go` (348) |
-| Total lines of Go code | 11,152 |
-| Total test functions | 241 |
-| Packages | 9 |
-| Test pass rate | 100% (9/9) |
-| Lint issues | 0 |
-| Coverage (avg) | ~84% |
-| Coverage range | 12.6%–100% |
+| Metric                 | Value                    |
+| ---------------------- | ------------------------ |
+| Total Go files         | 66                       |
+| Files over 350 lines   | **0** ✅                 |
+| Largest file           | `pkg/sync/sync.go` (348) |
+| Total lines of Go code | 11,152                   |
+| Total test functions   | 241                      |
+| Packages               | 9                        |
+| Test pass rate         | 100% (9/9)               |
+| Lint issues            | 0                        |
+| Coverage (avg)         | ~84%                     |
+| Coverage range         | 12.6%–100%               |
 
 ### Coverage Per Package
 
-| Package | Coverage |
-|---|---|
-| `pkg/errors` | 100.0% |
-| `pkg/id` | 100.0% |
-| `pkg/provider` | 100.0% |
-| `pkg/crdt` | 97.6% |
-| `pkg/sync` | 91.7% |
-| `pkg/providers/github` | 84.7% |
-| `pkg/cqrs` | 83.6% |
-| `pkg/api` | 76.3% |
-| `cmd/examples/github-sync` | 12.6% |
+| Package                    | Coverage |
+| -------------------------- | -------- |
+| `pkg/errors`               | 100.0%   |
+| `pkg/id`                   | 100.0%   |
+| `pkg/provider`             | 100.0%   |
+| `pkg/crdt`                 | 97.6%    |
+| `pkg/sync`                 | 91.7%    |
+| `pkg/providers/github`     | 84.7%    |
+| `pkg/cqrs`                 | 83.6%    |
+| `pkg/api`                  | 76.3%    |
+| `cmd/examples/github-sync` | 12.6%    |
 
 ---
 
 ## Files Changed This Session
 
 ### Modified (10)
+
 - `cmd/examples/github-sync/main.go` — extracted helpers to `helpers.go`
 - `pkg/cqrs/decider_test.go` — extracted CRDT resolver tests
 - `pkg/cqrs/stack.go` — extracted adapter methods + classifyAction
@@ -178,6 +179,7 @@ It's 2 lines under the limit. Adding any new feature (e.g., new SyncOption field
 - `pkg/sync/sync_test.go` — extracted incremental + conflict tests
 
 ### Created (12)
+
 - `cmd/examples/github-sync/helpers.go` — output types, runStats, runConflictAwareSync, exitCodeForError, runAPIServer
 - `pkg/cqrs/decider_resolver_test.go` — localWins, remoteWins, error, LWW resolver tests
 - `pkg/cqrs/stack_adapters.go` — classifyAction, Count, GetTypes, ListItems, CountItems, GetItemTypes, Close

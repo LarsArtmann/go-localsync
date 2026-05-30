@@ -163,31 +163,31 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 
 ## ✅ COMPLETED (Sessions 3–7)
 
-| Item | Session | Date |
-|------|---------|------|
-| CLI tests (`exitCodeForError`, `LoadConfig`, env defaults) | 3 | 2026-05-25 |
-| Wire error taxonomy via `event.RegisterClassification` | 3 | 2026-05-25 |
-| Adopt `projection.Runner` from go-cqrs-lite | 3 | 2026-05-25 |
-| Adopt `command.Dispatcher` with typed commands | 3 | 2026-05-25 |
-| HTTP API server (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`) | 5 | 2026-05-28 |
-| CLI server mode (`-server`, `-port`) | 5 | 2026-05-28 |
-| Error templates (`RegisterErrorTemplates` for all 9 codes) | 5 | 2026-05-28 |
-| JSON output flag (`-json`) | 5 | 2026-05-28 |
-| `flake.nix` with devShell + buildGoModule | 5 | 2026-05-28 |
-| `reportProgress` callback test | 5 | 2026-05-28 |
-| `printSyncResultJSON` test | 5 | 2026-05-28 |
-| API server tests (8 tests, all endpoints) | 5 | 2026-05-28 |
-| CRDT wired as pluggable conflict resolution strategy | 6 | 2026-05-29 |
-| `ActionConflictLocal` SyncAction | 6 | 2026-05-29 |
-| `resolveConflict` helper + `conflictMeta` struct | 6 | 2026-05-29 |
-| `CQRSConfig.ConflictResolver` field + wiring | 6 | 2026-05-29 |
-| 13 new CRDT/conflict tests (decider + stack + classify) | 6 | 2026-05-29 |
-| `CONTRIBUTING.md` (basic) | 6 | 2026-05-29 |
-| Push/Pull tests (5 tests: no-DB, local-DB, sync-after) | 7 | 2026-05-29 |
-| `conflict_aware.go` extracted from `sync.go` | 7 | 2026-05-29 |
-| CLI helpers extracted to `helpers.go` | 7 | 2026-05-29 |
-| Fix `exhaustruct` warnings (ItemFilter builder) | 7 | 2026-05-29 |
-| Domain language documented (`docs/DOMAIN_LANGUAGE.md`) | 7 | 2026-05-29 |
+| Item                                                                      | Session | Date       |
+| ------------------------------------------------------------------------- | ------- | ---------- |
+| CLI tests (`exitCodeForError`, `LoadConfig`, env defaults)                | 3       | 2026-05-25 |
+| Wire error taxonomy via `event.RegisterClassification`                    | 3       | 2026-05-25 |
+| Adopt `projection.Runner` from go-cqrs-lite                               | 3       | 2026-05-25 |
+| Adopt `command.Dispatcher` with typed commands                            | 3       | 2026-05-25 |
+| HTTP API server (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`) | 5       | 2026-05-28 |
+| CLI server mode (`-server`, `-port`)                                      | 5       | 2026-05-28 |
+| Error templates (`RegisterErrorTemplates` for all 9 codes)                | 5       | 2026-05-28 |
+| JSON output flag (`-json`)                                                | 5       | 2026-05-28 |
+| `flake.nix` with devShell + buildGoModule                                 | 5       | 2026-05-28 |
+| `reportProgress` callback test                                            | 5       | 2026-05-28 |
+| `printSyncResultJSON` test                                                | 5       | 2026-05-28 |
+| API server tests (8 tests, all endpoints)                                 | 5       | 2026-05-28 |
+| CRDT wired as pluggable conflict resolution strategy                      | 6       | 2026-05-29 |
+| `ActionConflictLocal` SyncAction                                          | 6       | 2026-05-29 |
+| `resolveConflict` helper + `conflictMeta` struct                          | 6       | 2026-05-29 |
+| `CQRSConfig.ConflictResolver` field + wiring                              | 6       | 2026-05-29 |
+| 13 new CRDT/conflict tests (decider + stack + classify)                   | 6       | 2026-05-29 |
+| `CONTRIBUTING.md` (basic)                                                 | 6       | 2026-05-29 |
+| Push/Pull tests (5 tests: no-DB, local-DB, sync-after)                    | 7       | 2026-05-29 |
+| `conflict_aware.go` extracted from `sync.go`                              | 7       | 2026-05-29 |
+| CLI helpers extracted to `helpers.go`                                     | 7       | 2026-05-29 |
+| Fix `exhaustruct` warnings (ItemFilter builder)                           | 7       | 2026-05-29 |
+| Domain language documented (`docs/DOMAIN_LANGUAGE.md`)                    | 7       | 2026-05-29 |
 
 ---
 
