@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 
-	cqrsid "github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 

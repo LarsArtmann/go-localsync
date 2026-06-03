@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/core/event"
-	cqrsid "github.com/larsartmann/go-cqrs-lite/core/pkg/id"
+	"github.com/larsartmann/go-cqrs-lite/codec/v2"
+	"github.com/larsartmann/go-cqrs-lite/event/v2"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -53,7 +54,7 @@ func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 }
 
 func foldItemSynced(evt event.Event) (SyncItemState, error) {
-	payload, err := event.DecodePayload[ItemSyncedPayload](evt, event.JSONCodec{})
+	payload, err := event.DecodePayload[ItemSyncedPayload](evt, codec.JSONCodec{})
 	if err != nil {
 		return SyncItemState{}, fmt.Errorf(
 			"decode ItemSyncedPayload for event %s: %w",

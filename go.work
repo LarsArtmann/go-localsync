@@ -6,11 +6,16 @@ use (
 
 use (
 	../go-branded-id
-	../go-cqrs-lite/core
+	../go-cqrs-lite/codec
+	../go-cqrs-lite/command
+	../go-cqrs-lite/decider
+	../go-cqrs-lite/dispatcher
+	../go-cqrs-lite/event
+	../go-cqrs-lite/id
 	../go-cqrs-lite/memory
 	../go-cqrs-lite/middleware
 	../go-cqrs-lite/projection
-	../go-cqrs-lite/saga
+	../go-cqrs-lite/snapshot
 	../go-cqrs-lite/storage
 	../go-error-family
 )

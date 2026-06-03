@@ -81,24 +81,12 @@ func (s *CQRSStack) Close() error {
 		}
 	}
 
-	if s.outboxPublisher != nil {
-		if err := s.outboxPublisher.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
 	if s.cancelRunner != nil {
 		s.cancelRunner()
 	}
 
 	if err := s.ReadModel.Close(); err != nil {
 		errs = append(errs, err)
-	}
-
-	if s.outbox != nil {
-		if err := s.outbox.Close(); err != nil {
-			errs = append(errs, err)
-		}
 	}
 
 	if err := s.Store.Close(); err != nil {

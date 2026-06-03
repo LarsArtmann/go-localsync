@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	_ "modernc.org/sqlite"
+
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -56,20 +58,6 @@ func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
 	mustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
-	}
-}
-
-func TestCQRSStack_RemoteStore_InvalidURL(t *testing.T) {
-	t.Parallel()
-
-	_, err := NewCQRSStack(CQRSConfig{
-		Backend:   "turso",
-		DBPath:    ":memory:",
-		RemoteURL: "https://nonexistent.invalid.host.example/db",
-		AuthToken: "fake",
-	})
-	if err == nil {
-		t.Fatal("expected error for invalid remote URL")
 	}
 }
 

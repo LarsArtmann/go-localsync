@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/larsartmann/go-cqrs-lite/core/event"
+	"github.com/larsartmann/go-cqrs-lite/codec/v2"
+	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -43,7 +44,7 @@ func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
 }
 
 func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error {
-	payload, err := event.DecodePayload[ItemSyncedPayload](evt, event.JSONCodec{})
+	payload, err := event.DecodePayload[ItemSyncedPayload](evt, codec.JSONCodec{})
 	if err != nil {
 		return fmt.Errorf("decode ItemSyncedPayload for event %s: %w", evt.ID(), err)
 	}
@@ -52,7 +53,7 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 }
 
 func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) error {
-	payload, err := event.DecodePayload[ItemDeletedPayload](evt, event.JSONCodec{})
+	payload, err := event.DecodePayload[ItemDeletedPayload](evt, codec.JSONCodec{})
 	if err != nil {
 		return fmt.Errorf("decode ItemDeletedPayload for event %s: %w", evt.ID(), err)
 	}

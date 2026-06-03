@@ -67,8 +67,6 @@ func main() {
 		)
 		showStats   = flag.Bool("stats", envCfg.ShowStats, "Show database statistics and exit")
 		showVersion = flag.Bool("version", false, "Show version information and exit")
-		syncPush    = flag.Bool("push", false, "Push local changes to remote Turso after sync")
-		syncPull    = flag.Bool("pull", false, "Pull remote changes from Turso before sync")
 		verbose     = flag.Bool("verbose", envCfg.Verbose, "Enable verbose logging")
 		jsonOutput  = flag.Bool("json", false, "Output results as JSON")
 		serverMode  = flag.Bool("server", false, "Start HTTP API server")
@@ -164,15 +162,6 @@ func main() {
 		},
 	}
 
-	if *syncPull {
-		changed, err := stack.Pull(ctx)
-		if err != nil {
-			logger.Warn("Pull failed (non-fatal)", "error", err)
-		} else if changed {
-			logger.Info("Pulled remote changes")
-		}
-	}
-
 	if *conflictAware {
 		runConflictAwareSync(ctx, baseSyncer, opts, *jsonOutput, logger)
 	}
@@ -197,13 +186,5 @@ func main() {
 			result.Skipped,
 			result.Errors,
 		)
-	}
-
-	if *syncPush {
-		if err := stack.Push(ctx); err != nil {
-			logger.Warn("Push failed (non-fatal)", "error", err)
-		} else {
-			logger.Info("Pushed local changes to remote")
-		}
 	}
 }

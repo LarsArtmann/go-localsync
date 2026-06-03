@@ -6,7 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/storage"
+	_ "modernc.org/sqlite"
+
+	"github.com/larsartmann/go-cqrs-lite/storage/v2"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -15,7 +17,7 @@ import (
 func newTursoTestDB(t *testing.T) *TursoReadModel {
 	t.Helper()
 
-	db, err := storage.OpenTurso(":memory:")
+	db, err := storage.OpenSQLite(":memory:")
 	if err != nil {
 		t.Fatalf("open turso: %v", err)
 	}

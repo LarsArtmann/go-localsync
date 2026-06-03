@@ -8,13 +8,14 @@ import (
 	"log/slog"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-cqrs-lite/core/command"
-	"github.com/larsartmann/go-cqrs-lite/core/decider"
-	"github.com/larsartmann/go-cqrs-lite/core/event"
-	cqrsid "github.com/larsartmann/go-cqrs-lite/core/pkg/id"
-	"github.com/larsartmann/go-cqrs-lite/core/query"
-	"github.com/larsartmann/go-cqrs-lite/middleware"
-	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
+	"github.com/larsartmann/go-cqrs-lite/codec/v2"
+	"github.com/larsartmann/go-cqrs-lite/command/v2"
+	"github.com/larsartmann/go-cqrs-lite/decider/v2"
+	"github.com/larsartmann/go-cqrs-lite/event/v2"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
+	"github.com/larsartmann/go-cqrs-lite/middleware/v2"
+	"github.com/larsartmann/go-cqrs-lite/query/v2"
+	"github.com/larsartmann/go-cqrs-lite/snapshot/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -44,7 +45,7 @@ type CQRSConfig struct {
 }
 
 // CQRSStack wires together the event store, bus, decider repository, read model,
-// command/query dispatchers, outbox publisher, and projection runner.
+// command/query dispatchers, and projection runner.
 type CQRSStack struct {
 	Store             event.Store
 	Bus               event.Bus
@@ -53,9 +54,6 @@ type CQRSStack struct {
 	CommandDispatcher *command.Dispatcher
 	QueryDispatcher   *query.Dispatcher
 	conflictResolver  crdt.ConflictResolver[*provider.Item]
-	syncDB            *cqrsstorage.TursoSyncDB
-	outbox            event.Outbox
-	outboxPublisher   *event.OutboxPublisher
 	db                *sql.DB
 	cancelRunner      context.CancelFunc
 }
@@ -79,23 +77,15 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, cpErr
 	}
 
-	var cancelRunner context.CancelFunc
-
 	if err := sr.bus.Use(
 		middleware.EventLogging(newSlogLogger()),
 	); err != nil {
 		return nil, fmt.Errorf("wire event logging middleware: %w", err)
 	}
 
-	if sr.loader != nil {
-		cancelRunner, err = startProjectionRunner(sr, checkpointStore, proj)
-		if err != nil {
-			return nil, fmt.Errorf("start projection runner: %w", err)
-		}
-	} else {
-		if err := startInMemoryRunner(sr.bus, checkpointStore, proj); err != nil {
-			return nil, err
-		}
+	cancelRunner, err := startProjectionRunner(sr, checkpointStore, proj)
+	if err != nil {
+		return nil, fmt.Errorf("start projection runner: %w", err)
 	}
 
 	deciderSpec := decider.Decider[SyncItemState]{
@@ -108,34 +98,19 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, stratStoreErr
 	}
 
-	snapshotStrategy, stratErr := event.EveryNEvents(10)
+	snapshotStrategy, stratErr := snapshot.EveryNEvents(10)
 	if stratErr != nil {
 		return nil, fmt.Errorf("create snapshot strategy: %w", stratErr)
 	}
 
-	var repoOpts []decider.RepositoryOption[SyncItemState]
-
-	repoOpts = append(
-		repoOpts,
-		decider.WithSnapshotStore[SyncItemState](snapshotStore),
-		decider.WithCodec[SyncItemState](event.JSONCodec{}),
-		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
-	)
-
-	if sr.outbox != nil {
-		repoOpts = append(repoOpts, decider.WithOutbox[SyncItemState](sr.outbox))
-	}
-
 	repo, err := decider.NewRepository[SyncItemState](
-		sr.store, sr.bus, deciderSpec, repoOpts...,
+		sr.store, sr.bus, deciderSpec,
+		decider.WithSnapshotStore[SyncItemState](snapshotStore),
+		decider.WithCodec[SyncItemState](codec.JSONCodec{}),
+		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create decider repository: %w", err)
-	}
-
-	outboxPublisher, err := startOutboxPublisher(sr.outbox, sr.bus)
-	if err != nil {
-		return nil, fmt.Errorf("start outbox publisher: %w", err)
 	}
 
 	commandDispatcher, err := wireCommandDispatcher(repo, cfg.ConflictResolver)
@@ -156,35 +131,9 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		CommandDispatcher: commandDispatcher,
 		QueryDispatcher:   queryDispatcher,
 		conflictResolver:  cfg.ConflictResolver,
-		syncDB:            sr.syncDB,
-		outbox:            sr.outbox,
-		outboxPublisher:   outboxPublisher,
 		db:                sr.db,
 		cancelRunner:      cancelRunner,
 	}, nil
-}
-
-// Push syncs local changes to the remote Turso database.
-func (s *CQRSStack) Push(ctx context.Context) error {
-	if s.syncDB == nil {
-		return nil
-	}
-
-	return fmt.Errorf("push: %w", s.syncDB.Push(ctx))
-}
-
-// Pull syncs remote changes from the Turso database.
-func (s *CQRSStack) Pull(ctx context.Context) (bool, error) {
-	if s.syncDB == nil {
-		return false, nil
-	}
-
-	ok, err := s.syncDB.Pull(ctx)
-	if err != nil {
-		return false, fmt.Errorf("pull: %w", err)
-	}
-
-	return ok, nil
 }
 
 // SyncItem dispatches a SyncItemCommand for a single item.

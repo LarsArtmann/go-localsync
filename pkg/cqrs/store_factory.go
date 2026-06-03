@@ -6,9 +6,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/larsartmann/go-cqrs-lite/core/event"
-	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory"
-	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage"
+	"github.com/larsartmann/go-cqrs-lite/event/v2"
+	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory/v2"
+	"github.com/larsartmann/go-cqrs-lite/snapshot/v2"
+	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage/v2"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
@@ -17,8 +18,6 @@ var errTursoRequiresDB = errors.New("turso backend requires database connection"
 type storeResult struct {
 	store  event.Store
 	bus    event.Bus
-	syncDB *cqrsstorage.TursoSyncDB
-	outbox event.Outbox
 	db     *sql.DB
 	loader event.Journal
 }
@@ -29,8 +28,6 @@ func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 		return storeResult{
 			store:  cqrsmemory.NewMemoryStore(),
 			bus:    cqrsmemory.NewMemoryBus(),
-			syncDB: nil,
-			outbox: nil,
 			db:     nil,
 			loader: nil,
 		}, nil
@@ -48,65 +45,34 @@ func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 func createTursoStore(cfg CQRSConfig) (storeResult, error) {
 	ctx := context.Background()
 
-	var (
-		db     *sql.DB
-		syncDB *cqrsstorage.TursoSyncDB
-		err    error
-	)
+	dbPath := cfg.DBPath
+	if dbPath == "" {
+		dbPath = dbPathInMemory
+	}
 
-	if cfg.RemoteURL != "" {
-		syncDB, err = cqrsstorage.OpenTursoSync(ctx, cfg.DBPath, cfg.RemoteURL, cfg.AuthToken)
-		if err != nil {
-			return storeResult{}, fmt.Errorf("open turso sync database: %w", err)
-		}
-
-		db = syncDB.DB
-	} else {
-		dbPath := cfg.DBPath
-		if dbPath == "" {
-			dbPath = dbPathInMemory
-		}
-
-		db, err = cqrsstorage.OpenTurso(dbPath)
-		if err != nil {
-			return storeResult{}, fmt.Errorf("open turso database: %w", err)
-		}
+	db, err := cqrsstorage.OpenSQLite(dbPath)
+	if err != nil {
+		return storeResult{}, fmt.Errorf("open sqlite database: %w", err)
 	}
 
 	if err := cqrsstorage.SQLiteInitSchema(ctx, db); err != nil {
 		_ = db.Close()
 
-		return storeResult{}, fmt.Errorf("init turso schema: %w", err)
+		return storeResult{}, fmt.Errorf("init schema: %w", err)
 	}
 
 	store, storeErr := cqrsstorage.NewSQLiteEventStore(db)
 	if storeErr != nil {
 		_ = db.Close()
 
-		return storeResult{}, fmt.Errorf("create turso event store: %w", storeErr)
-	}
-
-	outbox, outboxErr := cqrsstorage.NewSQLiteOutbox(db)
-	if outboxErr != nil {
-		_ = db.Close()
-
-		return storeResult{}, fmt.Errorf("create turso outbox: %w", outboxErr)
+		return storeResult{}, fmt.Errorf("create event store: %w", storeErr)
 	}
 
 	cqrsstorage.ConfigureTursoPool(db)
 
-	txStore, txErr := cqrsstorage.NewSQLTransactionalStore(store, outbox)
-	if txErr != nil {
-		_ = db.Close()
-
-		return storeResult{}, fmt.Errorf("create turso transactional store: %w", txErr)
-	}
-
 	return storeResult{
-		store:  txStore,
+		store:  store,
 		bus:    cqrsmemory.NewMemoryBus(),
-		syncDB: syncDB,
-		outbox: outbox,
 		db:     db,
 		loader: store,
 	}, nil
@@ -129,7 +95,7 @@ func createReadModel(cfg CQRSConfig, sr storeResult) (ReadModel, error) {
 func createSnapshotStore(
 	cfg CQRSConfig,
 	db *sql.DB,
-) (event.SnapshotStore, error) {
+) (snapshot.SnapshotStore, error) {
 	if cfg.Backend != backendTurso || db == nil {
 		return cqrsmemory.NewMemorySnapshotStore(), nil
 	}

@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-05-29 (session 6)
+**Updated:** 2026-06-03 (session 8 — v2 dependency upgrade)
 
 ## Project Overview
 
@@ -12,7 +12,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy** |
 | `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`)                                                 |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite (Decider, ReadModel, Projector, CQRSStack, Runner)                                                    |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2** (Decider, ReadModel, Projector, CQRSStack, Runner)                                        |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`)                                             |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                        |
 | `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`        |
@@ -51,9 +51,10 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`
 - `readmodel.go` — `ReadModel` interface + `ItemFilter`, stores `*provider.Item` directly
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
-- `turso_readmodel.go` — SQLite/Turso-backed read model with DDL, filter/pagination
-- `projection.go` — `Projector` implements `event.Projection`, wired via `event.InMemoryRunner` (memory) or `projection.Runner` (Turso)
-- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, dual projection runner, `event.OutboxPublisher`, SQL snapshots/checkpoints, event logging middleware, correlation IDs
+- `turso_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
+- `projection.go` — `Projector` implements `event.Projection`, wired via direct bus subscription + `projection.Runner` for replay
+- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, dual projection runner, SQL snapshots/checkpoints, event logging middleware, correlation IDs
+- `runner.go` — Unified projection subscription: direct `bus.SubscribeAll` for synchronous event delivery, plus `projection.Runner` for journal replay (Turso backend)
 - `commands_queries.go` — typed `SyncItemCommand`/`DeleteItemCommand` via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
 
 ### Key Properties
@@ -61,9 +62,8 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
 - **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
 - **Delete + resurrect**: deleted items reappear with updated state
-- **Outbox pattern**: Turso backend uses `decider.WithOutbox` for atomic save+publish. `event.OutboxPublisher` polls outbox and publishes events to bus (1s interval, configurable, with graceful shutdown, panic recovery, partial-batch safety).
-- **Projection runner**: Turso uses `projection.Runner` with `GlobalLoader` replay + live subscription. Memory uses `InMemoryRunner`.
-- **SQL persistence**: Turso backend persists snapshots (`SQLiteSnapshotStore`), checkpoints (`SQLiteCheckpointStore`), and outbox to the same `*sql.DB`.
+- **Projection runner**: Turso uses `projection.Runner` with global replay + live subscription. Memory uses direct `bus.SubscribeAll`. Both paths subscribe synchronously to avoid race conditions.
+- **SQL persistence**: Turso backend persists snapshots (`SQLSnapshotStore`), checkpoints (`SQLCheckpointStore`) via `snapshot/v2` and `storage/v2` modules.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Command dispatch**: `SyncItem`/`DeleteItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
 - **Query dispatch**: Read model queries dispatched through `query.Dispatcher` with typed queries. Enables logging, metrics middleware.
@@ -102,15 +102,21 @@ Dependency flows one way: `cqrs → sync → provider/types/errors`. No import c
 
 1. Create `go.work` in project root (already in `.gitignore`):
    ```
-   go 1.26.2
+   go 1.26.3
    use .
    use (
        ../go-branded-id
-       ../go-cqrs-lite/core
+       ../go-cqrs-lite/codec
+       ../go-cqrs-lite/command
+       ../go-cqrs-lite/decider
+       ../go-cqrs-lite/dispatcher
+       ../go-cqrs-lite/event
+       ../go-cqrs-lite/id
        ../go-cqrs-lite/memory
-       ../go-cqrs-lite/storage
        ../go-cqrs-lite/middleware
        ../go-cqrs-lite/projection
+       ../go-cqrs-lite/snapshot
+       ../go-cqrs-lite/storage
        ../go-error-family
    )
    ```
@@ -136,7 +142,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package                    | Tests | Coverage | Status                                                                                                    |
 | -------------------------- | ----- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`                 | 92    | ~83%     | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull, Runner, Outbox, Correlation, CRDT Resolver |
+| `pkg/cqrs`                 | ~80   | ~83%     | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Runner, Correlation, CRDT Resolver |
 | `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                                  |
 | `pkg/sync`                 | 22    | 92.3%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                            |
 | `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                |
@@ -146,7 +152,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/crdt`                 | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage roundtrip                                   |
 | `cmd/examples/github-sync` | 14    | 10.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON                          |
 
-**235 total test functions** across 9 test packages.
+**220+ total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -159,15 +165,13 @@ Storage backends are selected via `CQRSConfig.Backend` in `cqrs.NewCQRSStack()`.
 | `memory` | `--backend memory` | Testing, development (default)          |
 | `turso`  | `--backend turso`  | Local SQLite/Turso file or remote Turso |
 
-Event store + read model use the same backend. Turso backend adds remote sync via `Push()`/`Pull()`.
+Event store + read model use the same backend.
 
 ### CLI Usage
 
 ```bash
 go run ./cmd/examples/github-sync --backend memory
 go run ./cmd/examples/github-sync --backend turso --db ./data.db
-go run ./cmd/examples/github-sync --backend turso --db ./data.db --remote-url https://... --auth-token ...
-go run ./cmd/examples/github-sync --server --port 8080
 ```
 
 ## Provider Development
@@ -200,15 +204,21 @@ Two tables managed by the CQRS stack:
 
 | Dependency                         | Version | Purpose                                                                  |
 | ---------------------------------- | ------- | ------------------------------------------------------------------------ |
-| `go-cqrs-lite/core`                | v1.4.0  | Decider, event types, branded IDs, error taxonomy, codec, InMemoryRunner |
-| `go-cqrs-lite/memory`              | v1.2.0  | In-memory event store + bus + checkpoint store + snapshot store          |
-| `go-cqrs-lite/storage`             | pseudo  | SQLite/Turso event store, outbox, snapshot, checkpoint store             |
-| `go-cqrs-lite/middleware`          | v1.0.0  | EventLogging middleware                                                  |
-| `go-cqrs-lite/projection`          | v1.1.0  | Projection Runner with replay + live subscription                        |
-| `go-branded-id`                    | v0.1.0  | Branded phantom-type IDs for compile-time safety                         |
-| `go-error-family`                  | v0.2.0  | Structured error classification + user-facing message templates          |
+| `go-cqrs-lite/event/v2`            | v2.0.0  | Event types, Store, Bus, Journal, CheckpointStore, Codec, Projection     |
+| `go-cqrs-lite/command/v2`          | v2.0.0  | Command types, Dispatcher, typed commands                                |
+| `go-cqrs-lite/query/v2`            | v2.0.0  | Query types, Dispatcher, typed queries                                   |
+| `go-cqrs-lite/decider/v2`          | v2.0.0  | Decider, Repository, snapshot/codec options                              |
+| `go-cqrs-lite/id/v2`               | v2.0.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)              |
+| `go-cqrs-lite/codec/v2`            | v2.0.0  | Codec interface, JSONCodec                                               |
+| `go-cqrs-lite/snapshot/v2`         | v2.0.0  | SnapshotStore, EveryNEvents strategy                                     |
+| `go-cqrs-lite/memory/v2`           | v2.0.0  | In-memory event store + bus + checkpoint store + snapshot store           |
+| `go-cqrs-lite/middleware/v2`        | v2.0.0  | EventLogging middleware                                                  |
+| `go-cqrs-lite/projection/v2`       | v2.0.0  | Projection Runner with replay + live subscription                        |
+| `go-cqrs-lite/storage/v2`          | v2.0.0  | SQLite event store, snapshot, checkpoint store (modernc.org/sqlite)       |
+| `go-branded-id`                    | v0.3.0  | Branded phantom-type IDs for compile-time safety                         |
+| `go-error-family`                  | v0.3.0  | Structured error classification + user-facing message templates           |
 | `go-github/v69`                    | v69.2.0 | GitHub API client                                                        |
-| `turso.tech/database/tursogo`      | v0.6.0  | Turso Go client — local + remote sync                                    |
+| `modernc.org/sqlite`               | v1.51.0 | Pure-Go SQLite driver (replaces tursogo for local SQLite)                |
 | `charm.land/log/v2`                | v2.0.0  | Structured logging                                                       |
 | `caarlos0/env/v11`                 | v11.4.1 | Environment variable config                                              |
 | `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter            |
@@ -236,10 +246,9 @@ Two tables managed by the CQRS stack:
 | Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                                             | Projected from events via InMemoryRunner               |
 | SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`ListItems`, `CountItems`, `GetItemTypes`) | `sync.SyncStore` interface defined in consumer package |
 | SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                   | Types defined in `pkg/sync/`, not `pkg/cqrs/`          |
-| Codec          | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents`                                                    | Eliminates all manual json.Marshal/Unmarshal           |
-| Outbox         | `SQLTransactionalStore.SaveWithOutbox` for Turso, outbox poller goroutine                               | Atomic save+publish, crash-safe event delivery         |
-| Projection     | `projection.Runner` (Turso) + `InMemoryRunner` (memory), SQL checkpoints                                | Replay from store on restart + live subscription       |
-| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `EveryNEvents`                         | Caps replay cost, persists across restarts             |
+| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                         | Eliminates all manual json.Marshal/Unmarshal           |
+| Projection     | Direct `bus.SubscribeAll` (sync) + `projection.Runner` (Turso replay), SQL checkpoints                     | Replay from store on restart + live subscription       |
+| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                    | Caps replay cost, persists across restarts             |
 | Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                | Unique per sync run for debugging                      |
 | Logging        | `middleware.EventLogging` via charm log adapter                                                         | Structured logging of all domain events                |
 | Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                         | Smart retry classification for provider errors         |
@@ -249,8 +258,47 @@ Two tables managed by the CQRS stack:
 
 - `middleware.CommandRetry` for provider retry — **LOW** (API mismatch: wraps `command.Handler`, not `func() error`)
 - `UpcasterRegistry` for schema evolution — **LOW** (only 1 schema version)
-- `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW**
-- `core/aggregate` — **LOW** (we use `decider.Decider` directly — correct, no benefit)
+- `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW`
+
+## Session 8 — 2026-06-03: go-cqrs-lite v2 Migration
+
+### Completed
+
+- ✅ **go-cqrs-lite v2 migration**: All 11 module imports updated from v1 (`core/*`, `memory`, etc.) to v2 sub-modules (`event/v2`, `command/v2`, `decider/v2`, etc.)
+- ✅ **go-error-family v0.2.0 → v0.3.0**: Required by go-cqrs-lite v2
+- ✅ **go-branded-id v0.1.0 → v0.3.0**: Already at latest, now explicitly tracked
+- ✅ **Outbox pattern removed**: `event.OutboxPublisher`, `decider.WithOutbox`, `cqrsstorage.NewSQLiteOutbox`, `cqrsstorage.NewSQLTransactionalStore` all removed — go-cqrs-lite v2 removed outbox support
+- ✅ **Turso sync removed**: `cqrsstorage.OpenTursoSync`, `cqrsstorage.TursoSyncDB`, `Push()`/`Pull()` methods removed — remote sync is no longer in go-cqrs-lite storage
+- ✅ **SQLite driver migrated**: `turso.tech/database/tursogo` → `modernc.org/sqlite` (pure-Go, no CGo)
+- ✅ **`event.JSONCodec` → `codec.JSONCodec`**: Codec type moved to dedicated `codec/v2` module
+- ✅ **`event.EveryNEvents` → `snapshot.EveryNEvents`**: Snapshot strategy moved to `snapshot/v2` module
+- ✅ **`cqrsstorage.OpenTurso` → `cqrsstorage.OpenSQLite`**: Renamed in v2 storage module
+- ✅ **`event.InMemoryRunner` removed**: Unified projection — direct `bus.SubscribeAll` for synchronous event delivery + `projection.Runner` for journal replay
+- ✅ **CLI flags cleaned**: `--push` and `--pull` flags removed from github-sync example
+- ✅ **Tests migrated**: All test files updated, `pushpull_test.go` removed, `RemoteStore_InvalidURL` test removed
+- ✅ **go.work updated**: Removed `core` and `saga` entries, added all v2 sub-modules (`event`, `command`, `decider`, `query`, `id`, `dispatcher`, `snapshot`, `codec`, `storage`, `memory`, `middleware`, `projection`)
+- ✅ **All 9 packages passing**: 220+ tests green
+
+### Breaking Changes Summary
+
+| Removed                      | Replacement                                                               |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| `core/event`                  | `event/v2`                                                                |
+| `core/command`                | `command/v2`                                                              |
+| `core/decider`                | `decider/v2`                                                              |
+| `core/query`                  | `query/v2`                                                                |
+| `core/pkg/id`                 | `id/v2`                                                                   |
+| `event.JSONCodec`             | `codec/v2.JSONCodec`                                                      |
+| `event.EveryNEvents`          | `snapshot/v2.EveryNEvents`                                                |
+| `event.OutboxPublisher`       | Removed (outbox pattern removed in v2)                                    |
+| `event.NewInMemoryRunner`     | Direct `bus.SubscribeAll(proj.Handle)`                                    |
+| `decider.WithOutbox`          | Removed                                                                   |
+| `cqrsstorage.OpenTurso`       | `cqrsstorage.OpenSQLite`                                                  |
+| `cqrsstorage.OpenTursoSync`   | Removed                                                                   |
+| `cqrsstorage.TursoSyncDB`     | Removed                                                                   |
+| `cqrsstorage.NewSQLiteOutbox` | Removed                                                                   |
+| `CQRSStack.Push/Pull`         | Removed                                                                   |
+| `turso.tech/database/tursogo` | `modernc.org/sqlite`                                                      |
 
 ## Session 5 — 2026-05-28: HTTP API + Error Templates + Build System
 
