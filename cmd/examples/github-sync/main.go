@@ -56,7 +56,7 @@ func main() {
 		backend = flag.String(
 			"backend",
 			envCfg.Backend,
-			"Storage backend: memory, turso",
+			"Storage backend: memory, sqlite",
 		)
 		maxPages      = flag.Int("pages", envCfg.MaxPages, "Maximum number of pages to fetch")
 		incremental   = flag.Bool("incremental", envCfg.Incremental, "Only sync new events")
@@ -102,10 +102,8 @@ func main() {
 
 	//nolint:exhaustruct // ConflictResolver intentionally omitted (uses default)
 	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
-		Backend:   *backend,
-		DBPath:    *dbPath,
-		RemoteURL: envCfg.RemoteURL,
-		AuthToken: envCfg.AuthToken,
+		Backend: *backend,
+		DBPath:  *dbPath,
 	})
 	if err != nil {
 		logger.Error("Failed to create CQRS stack", "error", err)

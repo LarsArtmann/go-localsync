@@ -13,25 +13,25 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func newTursoTestDB(t *testing.T) *TursoReadModel {
+func newSQLiteTestDB(t *testing.T) *SQLiteReadModel {
 	t.Helper()
 
 	db, err := storage.OpenSQLite(":memory:")
 	if err != nil {
-		t.Fatalf("open turso: %v", err)
+		t.Fatalf("open sqlite: %v", err)
 	}
 
 	t.Cleanup(func() { _ = db.Close() })
 
-	rm, err := NewTursoReadModel(db)
+	rm, err := NewSQLiteReadModel(db)
 	if err != nil {
-		t.Fatalf("NewTursoReadModel: %v", err)
+		t.Fatalf("NewSQLiteReadModel: %v", err)
 	}
 
 	return rm
 }
 
-func tursoTestItem(t *testing.T, source, extID, eventType, actor, repo string) *provider.Item {
+func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) *provider.Item {
 	t.Helper()
 
 	return &provider.Item{
@@ -49,13 +49,13 @@ func tursoTestItem(t *testing.T, source, extID, eventType, actor, repo string) *
 	}
 }
 
-func TestTursoReadModel_UpsertAndGet(t *testing.T) {
+func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	item := tursoTestItem(t, "github", "123", "PushEvent", "alice", "org/repo")
+	item := sqliteTestItem(t, "github", "123", "PushEvent", "alice", "org/repo")
 
 	mustNoError(t, rm.Upsert(ctx, item))
 
@@ -75,10 +75,10 @@ func TestTursoReadModel_UpsertAndGet(t *testing.T) {
 	assertItemType(t, got, "PushEvent")
 }
 
-func TestTursoReadModel_Get_NotFound(t *testing.T) {
+func TestSQLiteReadModel_Get_NotFound(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
@@ -94,14 +94,14 @@ func TestTursoReadModel_Get_NotFound(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_List(t *testing.T) {
+func TestSQLiteReadModel_List(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	item1 := tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
-	item2 := tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo")
+	item1 := sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
+	item2 := sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo")
 
 	_ = rm.Upsert(ctx, item1)
 	_ = rm.Upsert(ctx, item2)
@@ -114,14 +114,14 @@ func TestTursoReadModel_List(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_List_FilterByType(t *testing.T) {
+func TestSQLiteReadModel_List_FilterByType(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
 
 	pushType := id.NewEventTypeID("PushEvent")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})
@@ -136,14 +136,14 @@ func TestTursoReadModel_List_FilterByType(t *testing.T) {
 	assertItemType(t, items[0], "PushEvent")
 }
 
-func TestTursoReadModel_Count(t *testing.T) {
+func TestSQLiteReadModel_Count(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
 
 	count, err := rm.Count(ctx, provider.ItemFilter{})
 	mustNoError(t, err)
@@ -161,15 +161,15 @@ func TestTursoReadModel_Count(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_GetTypes(t *testing.T) {
+func TestSQLiteReadModel_GetTypes(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "PushEvent", "charlie", "org/repo2"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "PushEvent", "charlie", "org/repo2"))
 
 	types, err := rm.GetTypes(ctx)
 	mustNoError(t, err)
@@ -179,13 +179,13 @@ func TestTursoReadModel_GetTypes(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_Delete(t *testing.T) {
+func TestSQLiteReadModel_Delete(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 
 	err := rm.Delete(ctx, "github", id.NewExternalID("1"))
 	mustNoError(t, err)
@@ -196,16 +196,16 @@ func TestTursoReadModel_Delete(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_Upsert_Idempotent(t *testing.T) {
+func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	item1 := tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
+	item1 := sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
 	_ = rm.Upsert(ctx, item1)
 
-	item2 := tursoTestItem(t, "github", "1", "IssueEvent", "bob", "org/repo")
+	item2 := sqliteTestItem(t, "github", "1", "IssueEvent", "bob", "org/repo")
 	_ = rm.Upsert(ctx, item2)
 
 	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))

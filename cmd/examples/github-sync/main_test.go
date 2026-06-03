@@ -75,7 +75,7 @@ func TestLoadConfig(t *testing.T) {
 func TestLoadConfig_FromEnv(t *testing.T) {
 	t.Setenv("GITHUB_TOKEN", "test-token-123")
 	t.Setenv("GITHUB_USER", "testuser")
-	t.Setenv("BACKEND", "turso")
+	t.Setenv("BACKEND", "sqlite")
 	t.Setenv("MAX_PAGES", "5")
 
 	cfg, err := LoadConfig()
@@ -88,8 +88,8 @@ func TestLoadConfig_FromEnv(t *testing.T) {
 	if cfg.Username != "testuser" {
 		t.Errorf("expected Username=testuser, got %s", cfg.Username)
 	}
-	if cfg.Backend != "turso" {
-		t.Errorf("expected Backend=turso, got %s", cfg.Backend)
+	if cfg.Backend != "sqlite" {
+		t.Errorf("expected Backend=sqlite, got %s", cfg.Backend)
 	}
 	if cfg.MaxPages != 5 {
 		t.Errorf("expected MaxPages=5, got %d", cfg.MaxPages)

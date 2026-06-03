@@ -13,7 +13,7 @@ import (
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
-var errTursoRequiresDB = errors.New("turso backend requires database connection")
+var errSQLiteRequiresDB = errors.New("sqlite backend requires database connection")
 
 type storeResult struct {
 	store  event.Store
@@ -31,8 +31,8 @@ func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 			db:     nil,
 			loader: nil,
 		}, nil
-	case backendTurso:
-		return createTursoStore(cfg)
+	case backendSQLite:
+		return createSQLiteStore(cfg)
 	default:
 		return storeResult{}, fmt.Errorf(
 			"unknown backend: %s: %w",
@@ -42,7 +42,7 @@ func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 	}
 }
 
-func createTursoStore(cfg CQRSConfig) (storeResult, error) {
+func createSQLiteStore(cfg CQRSConfig) (storeResult, error) {
 	ctx := context.Background()
 
 	dbPath := cfg.DBPath
@@ -80,12 +80,12 @@ func createTursoStore(cfg CQRSConfig) (storeResult, error) {
 
 //nolint:ireturn
 func createReadModel(cfg CQRSConfig, sr storeResult) (ReadModel, error) {
-	if cfg.Backend == backendTurso {
+	if cfg.Backend == backendSQLite {
 		if sr.db != nil {
-			return NewTursoReadModel(sr.db)
+			return NewSQLiteReadModel(sr.db)
 		}
 
-		return nil, fmt.Errorf("%w", errTursoRequiresDB)
+		return nil, fmt.Errorf("%w", errSQLiteRequiresDB)
 	}
 
 	return NewMemoryReadModel(), nil
@@ -96,7 +96,7 @@ func createSnapshotStore(
 	cfg CQRSConfig,
 	db *sql.DB,
 ) (snapshot.SnapshotStore, error) {
-	if cfg.Backend != backendTurso || db == nil {
+	if cfg.Backend != backendSQLite || db == nil {
 		return cqrsmemory.NewMemorySnapshotStore(), nil
 	}
 
@@ -108,7 +108,7 @@ func createCheckpointStore(
 	cfg CQRSConfig,
 	db *sql.DB,
 ) (event.CheckpointStore, error) {
-	if cfg.Backend != backendTurso || db == nil {
+	if cfg.Backend != backendSQLite || db == nil {
 		return cqrsmemory.NewMemoryCheckpointStore(), nil
 	}
 

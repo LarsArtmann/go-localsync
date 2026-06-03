@@ -32,15 +32,15 @@ CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
 CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login)`
 
-// TursoReadModel is a SQLite/Turso-backed implementation of ReadModel.
-type TursoReadModel struct {
+// SQLiteReadModel is a SQLite-backed implementation of ReadModel.
+type SQLiteReadModel struct {
 	db *sql.DB
 }
 
-// NewTursoReadModel creates a TursoReadModel, initializing the schema.
-func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
+// NewSQLiteReadModel creates a SQLiteReadModel, initializing the schema.
+func NewSQLiteReadModel(db *sql.DB) (*SQLiteReadModel, error) {
 	if db == nil {
-		return nil, fmt.Errorf("turso read model: %w", pkgerrors.ErrDBNil)
+		return nil, fmt.Errorf("sqlite read model: %w", pkgerrors.ErrDBNil)
 	}
 
 	ctx := context.Background()
@@ -55,10 +55,10 @@ func NewTursoReadModel(db *sql.DB) (*TursoReadModel, error) {
 		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items indexes: %v", err))
 	}
 
-	return &TursoReadModel{db: db}, nil
+	return &SQLiteReadModel{db: db}, nil
 }
 
-func (m *TursoReadModel) Get(
+func (m *SQLiteReadModel) Get(
 	ctx context.Context,
 	source string,
 	sourceID id.ExternalID,
@@ -80,7 +80,7 @@ func (m *TursoReadModel) Get(
 	return item, nil
 }
 
-func (m *TursoReadModel) List(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error) {
+func (m *SQLiteReadModel) List(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error) {
 	query, args := buildListQuery(filter)
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
@@ -93,7 +93,7 @@ func (m *TursoReadModel) List(ctx context.Context, filter provider.ItemFilter) (
 	return scanItems(rows)
 }
 
-func (m *TursoReadModel) Count(ctx context.Context, filter provider.ItemFilter) (int64, error) {
+func (m *SQLiteReadModel) Count(ctx context.Context, filter provider.ItemFilter) (int64, error) {
 	query := "SELECT COUNT(*) FROM sync_items WHERE 1=1"
 	args := appendFilterArgs(&query, filter)
 
@@ -107,7 +107,7 @@ func (m *TursoReadModel) Count(ctx context.Context, filter provider.ItemFilter) 
 	return count, nil
 }
 
-func (m *TursoReadModel) GetTypes(ctx context.Context) ([]string, error) {
+func (m *SQLiteReadModel) GetTypes(ctx context.Context) ([]string, error) {
 	query := "SELECT DISTINCT type FROM sync_items ORDER BY type"
 
 	rows, err := m.db.QueryContext(ctx, query)
@@ -142,7 +142,7 @@ func (m *TursoReadModel) GetTypes(ctx context.Context) ([]string, error) {
 	return types, nil
 }
 
-func (m *TursoReadModel) Upsert(ctx context.Context, item *provider.Item) error {
+func (m *SQLiteReadModel) Upsert(ctx context.Context, item *provider.Item) error {
 	query := `INSERT OR REPLACE INTO sync_items
 		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -160,7 +160,7 @@ func (m *TursoReadModel) Upsert(ctx context.Context, item *provider.Item) error 
 	return nil
 }
 
-func (m *TursoReadModel) Delete(
+func (m *SQLiteReadModel) Delete(
 	ctx context.Context,
 	source string,
 	sourceID id.ExternalID,
@@ -178,7 +178,7 @@ func (m *TursoReadModel) Delete(
 	return nil
 }
 
-func (m *TursoReadModel) Close() error {
+func (m *SQLiteReadModel) Close() error {
 	return m.db.Close()
 }
 
@@ -320,5 +320,5 @@ func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 	return items, nil
 }
 
-// Ensure TursoReadModel implements ReadModel.
-var _ ReadModel = (*TursoReadModel)(nil)
+// Ensure SQLiteReadModel implements ReadModel.
+var _ ReadModel = (*SQLiteReadModel)(nil)

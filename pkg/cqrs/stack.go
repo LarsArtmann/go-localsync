@@ -31,7 +31,7 @@ func newSlogLogger() *slog.Logger {
 
 const (
 	backendMemory  = "memory"
-	backendTurso   = "turso"
+	backendSQLite  = "sqlite"
 	dbPathInMemory = ":memory:"
 )
 
@@ -39,8 +39,6 @@ const (
 type CQRSConfig struct {
 	Backend          string
 	DBPath           string
-	RemoteURL        string
-	AuthToken        string
 	ConflictResolver crdt.ConflictResolver[*provider.Item]
 }
 

@@ -9,15 +9,15 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-func TestTursoReadModel_List_FilterByActorLogin(t *testing.T) {
+func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
 
 	actor := id.NewActorID("alice")
 	items, err := rm.List(ctx, provider.ItemFilter{ActorLogin: &actor})
@@ -33,15 +33,15 @@ func TestTursoReadModel_List_FilterByActorLogin(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_List_FilterByRepoName(t *testing.T) {
+func TestSQLiteReadModel_List_FilterByRepoName(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo-a"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo-b"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "charlie", "org/repo-a"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo-a"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "PushEvent", "bob", "org/repo-b"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "IssueEvent", "charlie", "org/repo-a"))
 
 	repo := id.NewRepoID("org/repo-a")
 	items, err := rm.List(ctx, provider.ItemFilter{RepoName: &repo})
@@ -51,14 +51,14 @@ func TestTursoReadModel_List_FilterByRepoName(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_List_FilterBySource(t *testing.T) {
+func TestSQLiteReadModel_List_FilterBySource(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "gitlab", "2", "PushEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "gitlab", "2", "PushEvent", "bob", "org/repo"))
 
 	source := id.NewProviderID("github")
 	items, err := rm.List(ctx, provider.ItemFilter{Source: &source})
@@ -71,17 +71,17 @@ func TestTursoReadModel_List_FilterBySource(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_List_FilterBySince(t *testing.T) {
+func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	oldItem := tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
+	oldItem := sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
 	oldItem.CreatedAt = time.Now().Add(-48 * time.Hour).Truncate(time.Microsecond)
 	oldItem.UpdatedAt = oldItem.CreatedAt
 
-	newItem := tursoTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo")
+	newItem := sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo")
 	newItem.CreatedAt = time.Now().Truncate(time.Microsecond)
 	newItem.UpdatedAt = newItem.CreatedAt
 
@@ -103,16 +103,16 @@ func TestTursoReadModel_List_FilterBySince(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_List_Pagination(t *testing.T) {
+func TestSQLiteReadModel_List_Pagination(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
 	for i := range 5 {
 		_ = rm.Upsert(
 			ctx,
-			tursoTestItem(t, "github", string(rune('A'+i)), "PushEvent", "alice", "org/repo"),
+			sqliteTestItem(t, "github", string(rune('A'+i)), "PushEvent", "alice", "org/repo"),
 		)
 	}
 
@@ -137,15 +137,15 @@ func TestTursoReadModel_List_Pagination(t *testing.T) {
 	}
 }
 
-func TestTursoReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
+func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
 
 	pushType := id.NewEventTypeID("PushEvent")
 	actor := id.NewActorID("alice")
@@ -157,13 +157,13 @@ func TestTursoReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	assertExternalID(t, items[0], "1")
 }
 
-func TestTursoReadModel_List_ZeroResults(t *testing.T) {
+func TestSQLiteReadModel_List_ZeroResults(t *testing.T) {
 	t.Parallel()
 
-	rm := newTursoTestDB(t)
+	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, tursoTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 
 	pushType := id.NewEventTypeID("NonExistentType")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})

@@ -66,13 +66,13 @@ func RegisterErrorTemplates() {
 	})
 	errorfamily.RegisterTemplate("unknown_backend", errorfamily.MessageTemplate{
 		What:   "The specified storage backend is not supported.",
-		Why:    "Only 'memory' and 'turso' backends are currently supported.",
-		Fix:    "Use --backend memory or --backend turso.",
+		Why:    "Only 'memory' and 'sqlite' backends are currently supported.",
+		Fix:    "Use --backend memory or --backend sqlite.",
 		WayOut: "Check the documentation for supported backends.",
 	})
 	errorfamily.RegisterTemplate("db_nil", errorfamily.MessageTemplate{
 		What:   "The database connection is nil.",
-		Why:    "The Turso backend was selected but no database path was provided.",
+		Why:    "The SQLite backend was selected but no database path was provided.",
 		Fix:    "Set a database path via --db or DB_PATH.",
 		WayOut: "Use --backend memory if you do not need persistence.",
 	})

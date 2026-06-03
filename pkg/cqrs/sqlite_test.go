@@ -10,10 +10,10 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
+func TestCQRSStack_SQLiteBackend_SyncAndDelete(t *testing.T) {
 	t.Parallel()
 
-	stack := newTursoMemoryStack(t)
+	stack := newSQLiteMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -40,10 +40,10 @@ func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
 	waitForCount(t, stack, ctx, 1)
 }
 
-func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
+func TestCQRSStack_SQLiteLocalStore_SyncAndReadModel(t *testing.T) {
 	t.Parallel()
 
-	stack := newTursoMemoryStack(t)
+	stack := newSQLiteMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -60,10 +60,10 @@ func TestCQRSStack_TursoLocalStore_SyncAndReadModel(t *testing.T) {
 	}
 }
 
-func TestCQRSStack_OutboxPoller_PublishesEvents(t *testing.T) {
+func TestCQRSStack_Projection_SubscribesEvents(t *testing.T) {
 	t.Parallel()
 
-	stack := newTursoMemoryStack(t)
+	stack := newSQLiteMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -85,7 +85,7 @@ func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
 
 	ctx := context.Background()
 
-	stack1, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
+	stack1, err := NewCQRSStack(CQRSConfig{Backend: "sqlite", DBPath: dbPath})
 	mustNoError(t, err)
 
 	mustNoError(t, stack1.SyncItem(ctx, testItem("replay-1", "PushEvent")))
@@ -95,7 +95,7 @@ func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
 
 	mustNoError(t, stack1.Close())
 
-	stack2, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: dbPath})
+	stack2, err := NewCQRSStack(CQRSConfig{Backend: "sqlite", DBPath: dbPath})
 	mustNoError(t, err)
 	defer func() { _ = stack2.Close() }()
 

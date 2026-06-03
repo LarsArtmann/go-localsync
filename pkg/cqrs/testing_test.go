@@ -56,10 +56,10 @@ func newMemoryStack(t *testing.T) *CQRSStack {
 	return stack
 }
 
-func newTursoMemoryStack(t *testing.T) *CQRSStack {
+func newSQLiteMemoryStack(t *testing.T) *CQRSStack {
 	t.Helper()
 
-	stack, err := NewCQRSStack(CQRSConfig{Backend: "turso", DBPath: ":memory:"})
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "sqlite", DBPath: ":memory:"})
 	mustNoError(t, err)
 
 	return stack
