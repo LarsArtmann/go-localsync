@@ -231,6 +231,47 @@ func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
 	}
 }
 
+func TestProjector_ItemSynced_InvalidItemID(t *testing.T) {
+	t.Parallel()
+
+	rm := NewMemoryReadModel()
+	proj := NewProjector(rm)
+
+	payload := ItemSyncedPayload{
+		ItemID:   "not-a-valid-ulid",
+		Source:   "github",
+		SourceID: "123",
+		Type:     "PushEvent",
+	}
+
+	evt := mustNewTestEvent(EventItemSynced, payload)
+
+	err := proj.Handle(context.Background(), evt)
+	if err == nil {
+		t.Error("expected error for invalid ItemID")
+	}
+}
+
+func TestProjector_ItemSynced_MissingRequiredFields(t *testing.T) {
+	t.Parallel()
+
+	rm := NewMemoryReadModel()
+	proj := NewProjector(rm)
+
+	payload := ItemSyncedPayload{
+		Source:   "github",
+		SourceID: "",
+		Type:     "PushEvent",
+	}
+
+	evt := mustNewTestEvent(EventItemSynced, payload)
+
+	err := proj.Handle(context.Background(), evt)
+	if err == nil {
+		t.Error("expected error for missing SourceID")
+	}
+}
+
 func TestReadModel_Integration(t *testing.T) {
 	t.Parallel()
 
