@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-06-03 (session 8 — v2 dependency upgrade)
+**Updated:** 2026-06-03 (session 9 — correctness fixes)
 
 ## Project Overview
 
@@ -281,57 +281,34 @@ Two tables managed by the CQRS stack:
 - ✅ **Docs updated**: README, FEATURES, ROADMAP all reflect v2 migration and sqlite rename. Removed Outbox, Push/Pull, Turso references.
 - ✅ **go-error-family v0.3 reviewed**: New `Compose`, `HandleErrorWithContext`, `HandleErrorDetailedWithConfig` APIs available. No breaking changes — our usage is forward-compatible.
 
-### Assessed but Not Adopted
+### Not Yet Adopted
 
 | Module | Reason |
 |--------|--------|
-| `otel/v2` | Module only has `Name` constant — no real API to wire up |
-| `signing/v2` | Ed25519 event integrity is good for production but local-first sync doesn't need it yet |
-| `schema/v2` | Only 1 schema version — no evolution to manage |
-| `catalog/v2` | AsyncAPI/OpenAPI/D2 generation is nice but not critical |
-| `pebble/v2` | Alternative storage backend — significant new code, no immediate need |
-| `watermill/v2` | Message broker — significant new code, no immediate need |
-| `event.AggregateRef` | Nice type but our separate type+id pattern is already clear |
-| `SyncItemState option type` | Current `nil *provider.Item` + `IsNew()` is clean and idiomatic Go |
+| `otel/v2` | Only `Name` constant — no real API |
+| `signing/v2` | Local-first sync doesn't need Ed25519 yet |
+| `schema/v2` | Only 1 schema version |
+| `catalog/v2` | AsyncAPI/D2 generation not critical |
+| `pebble/v2` | Alternative storage — no immediate need |
+| `watermill/v2` | Message broker — no immediate need |
+| `event.AggregateRef` | Our type+id pattern is already clear |
+| `SyncItemState option` | `nil *provider.Item` + `IsNew()` is idiomatic |
 
-### Breaking Changes Summary
+### Breaking Changes
 
-| Removed                      | Replacement                                                               |
-| ----------------------------- | ------------------------------------------------------------------------- |
-| `core/event`                  | `event/v2`                                                                |
-| `core/command`                | `command/v2`                                                              |
-| `core/decider`                | `decider/v2`                                                              |
-| `core/query`                  | `query/v2`                                                                |
-| `core/pkg/id`                 | `id/v2`                                                                   |
-| `event.JSONCodec`             | `codec/v2.JSONCodec`                                                      |
-| `event.EveryNEvents`          | `snapshot/v2.EveryNEvents`                                                |
-| `event.OutboxPublisher`       | Removed (outbox pattern removed in v2)                                    |
-| `event.NewInMemoryRunner`     | Direct `bus.SubscribeAll(proj.Handle)`                                    |
-| `decider.WithOutbox`          | Removed                                                                   |
-| `cqrsstorage.OpenTurso`       | `cqrsstorage.OpenSQLite`                                                  |
-| `cqrsstorage.OpenTursoSync`   | Removed                                                                   |
-| `cqrsstorage.TursoSyncDB`     | Removed                                                                   |
-| `cqrsstorage.NewSQLiteOutbox` | Removed                                                                   |
-| `CQRSStack.Push/Pull`         | Removed                                                                   |
-| `turso.tech/database/tursogo` | `modernc.org/sqlite`                                                      |
+`core/*` → `*/v2` sub-modules. `event.JSONCodec` → `codec/v2`. `event.EveryNEvents` → `snapshot/v2`. `InMemoryRunner` → direct `bus.SubscribeAll`. `OutboxPublisher` removed. `OpenTurso` → `OpenSQLite`. `tursogo` → `modernc.org/sqlite`. `Push/Pull` removed.
 
-## Session 5 — 2026-05-28: HTTP API + Error Templates + Build System
+## Session 9 — 2026-06-03: Correctness Improvements
 
-### Completed Improvements
-
-- ✅ **`pkg/api/` HTTP API server**: Huma v2 with `humago` stdlib adapter. Four endpoints: `GET /items` (filterable), `GET /stats`, `POST /sync`, `GET /health`. OpenAPI 3 spec auto-generated.
-- ✅ **API tests**: 8 tests covering all endpoints including error paths (store errors, invalid sync options).
-- ✅ **CLI server mode**: `github-sync` supports `-server -port 8080` to run the HTTP API instead of one-off sync.
-- ✅ **Error templates**: `RegisterErrorTemplates()` registers `MessageTemplate{What,Why,Fix,WayOut}` for all 9 error codes. Called at CLI startup.
-- ✅ **`flake.nix`**: Basic Nix flake with `buildGoModule` package and devShell (Go 1.26, golangci-lint, ginkgo, gofumpt).
-- ✅ **`coverage/` + `internal/` directories**: coverage artifacts organized; placeholder for non-public code.
-- ✅ **Missing tests added**: `TestSyncer_reportProgress`, `TestSyncer_reportProgress_NilCallback`, `TestPrintSyncResultJSON`.
-- ✅ **CRDT integration explicitly skipped**: Timestamp-based LWW in the CQRS decider is sufficient for one-way provider sync. VectorClock integration would be architecture astronautics with no real benefit.
-
-### Decisions
-
-- **CRDTs remain in `pkg/crdt/` but are NOT wired into sync path**: The package is well-tested (97.6% coverage) but the current CQRS decider's `UpdatedAt`-based LWW is the right abstraction for one-way external-provider sync.
-- **OpenTelemetry deferred**: `go.opentelemetry.io/otel` is already an indirect dependency. Full instrumentation (Syncer, CQRSStack, HTTP middleware) is planned for a future session.
+- ✅ **`scanItems` rows.Err() check**: Could silently return partial results
+- ✅ **`Fold(ItemDeleted)` nils Item**: Prevents stale data reads from deleted aggregates
+- ✅ **SQLite indexes**: `idx_sync_items_repo_name`, `idx_sync_items_type_created` composite
+- ✅ **`parseItemID` panic→error**: `id.ParseItemID` replaces `MustParseItemID` in event replay
+- ✅ **`itemFromPayload` validation**: Calls `Item.Validate()` on reconstructed items
+- ✅ **`Item.String()`**: `fmt.Stringer` for structured logging
+- ✅ **Projector error-path tests**: Corrupt ItemID, missing required fields
+- ✅ **`TestItem_JSONRoundTrip`**: All fields through marshal/unmarshal
+- ✅ **`id.ParseItemID` tests**: Success + error cases
 
 ## Session 6 — 2026-05-29: CRDT Conflict Resolution Integration
 
