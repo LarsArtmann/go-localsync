@@ -64,15 +64,22 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 		)
 	}
 
-	return SyncItemState{
-		Item:    itemFromPayload(payload),
-		Deleted: false,
-	}, nil
+	item, err := itemFromPayload(payload)
+	if err != nil {
+		return SyncItemState{}, fmt.Errorf("reconstruct item from payload: %w", err)
+	}
+
+	return SyncItemState{Item: item, Deleted: false}, nil
 }
 
-func itemFromPayload(payload ItemSyncedPayload) *provider.Item {
+func itemFromPayload(payload ItemSyncedPayload) (*provider.Item, error) {
+	itemID, err := parseItemID(payload.ItemID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid item ID in payload: %w", err)
+	}
+
 	return &provider.Item{
-		ID:             parseItemID(payload.ItemID),
+		ID:             itemID,
 		ExternalID:     id.NewExternalID(payload.SourceID),
 		Source:         id.NewProviderID(payload.Source),
 		Type:           id.NewEventTypeID(payload.Type),
@@ -83,7 +90,7 @@ func itemFromPayload(payload ItemSyncedPayload) *provider.Item {
 		CreatedAt:      fromUnixNano(payload.CreatedAt),
 		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
 		RawJSON:        payload.RawJSON,
-	}
+	}, nil
 }
 
 // DecideSync returns a DecideFunc that syncs an incoming provider.Item.
@@ -255,10 +262,10 @@ func HasChanged(local, remote *provider.Item) bool {
 		local.RepoURL != remote.RepoURL
 }
 
-func parseItemID(s string) id.ItemID {
+func parseItemID(s string) (id.ItemID, error) {
 	if s == "" {
-		return id.NewItemID()
+		return id.NewItemID(), nil
 	}
 
-	return id.MustParseItemID(s)
+	return id.ParseItemID(s)
 }

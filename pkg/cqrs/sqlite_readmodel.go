@@ -249,9 +249,14 @@ type scannedItem struct {
 	createdAt, updatedAt                                                                  time.Time
 }
 
-func (si *scannedItem) toItem() *provider.Item {
+func (si *scannedItem) toItem() (*provider.Item, error) {
+	itemID, err := parseItemID(si.itemIDStr)
+	if err != nil {
+		return nil, fmt.Errorf("parse item ID from row: %w", err)
+	}
+
 	return &provider.Item{
-		ID:             parseItemID(si.itemIDStr),
+		ID:             itemID,
 		ExternalID:     id.NewExternalID(si.sourceID),
 		Source:         id.NewProviderID(si.source),
 		Type:           id.NewEventTypeID(si.eventType),
@@ -262,7 +267,7 @@ func (si *scannedItem) toItem() *provider.Item {
 		CreatedAt:      si.createdAt,
 		UpdatedAt:      si.updatedAt,
 		RawJSON:        si.rawJSON,
-	}
+	}, nil
 }
 
 func newScannedItem() *scannedItem {
@@ -290,7 +295,7 @@ func scanItem(row *sql.Row) (*provider.Item, error) {
 		return nil, err
 	}
 
-	return si.toItem(), nil
+	return si.toItem()
 }
 
 func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
@@ -316,7 +321,12 @@ func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 			return nil, fmt.Errorf("scan item: %w", err)
 		}
 
-		items = append(items, si.toItem())
+		item, err := si.toItem()
+		if err != nil {
+			return nil, fmt.Errorf("convert row to item: %w", err)
+		}
+
+		items = append(items, item)
 	}
 
 	if err := rows.Err(); err != nil {

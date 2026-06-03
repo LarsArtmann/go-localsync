@@ -68,6 +68,29 @@ func TestMustParseItemID_panics(t *testing.T) {
 	MustParseItemID("not-a-valid-ulid")
 }
 
+func TestParseItemID(t *testing.T) {
+	t.Parallel()
+
+	original := NewItemID()
+	parsed, err := ParseItemID(original.String())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if !original.Equal(parsed) {
+		t.Errorf("expected %s, got %s", original.String(), parsed.String())
+	}
+}
+
+func TestParseItemID_invalid(t *testing.T) {
+	t.Parallel()
+
+	_, err := ParseItemID("not-a-valid-ulid")
+	if err == nil {
+		t.Error("expected error for invalid ULID string")
+	}
+}
+
 func TestItemIDIsZero(t *testing.T) {
 	t.Parallel()
 

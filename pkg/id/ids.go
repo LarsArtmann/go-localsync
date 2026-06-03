@@ -9,6 +9,7 @@ package id
 
 import (
 	"crypto/rand"
+	"fmt"
 	"time"
 
 	brandid "github.com/larsartmann/go-branded-id"
@@ -59,6 +60,16 @@ func NewItemID() ItemID {
 // MustParseItemID parses a ULID string into an ItemID. Panics on invalid input.
 func MustParseItemID(s string) ItemID {
 	return brandid.NewID[ItemBrand](ulid.MustParse(s))
+}
+
+// ParseItemID parses a ULID string into an ItemID. Returns error on invalid input.
+func ParseItemID(s string) (ItemID, error) {
+	parsed, err := ulid.Parse(s)
+	if err != nil {
+		return ItemID{}, fmt.Errorf("parse item ID %q: %w", s, err)
+	}
+
+	return brandid.NewID[ItemBrand](parsed), nil
 }
 
 // NewExternalID creates a new ExternalID from a string value.
