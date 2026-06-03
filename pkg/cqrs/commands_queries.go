@@ -2,13 +2,14 @@ package cqrs
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
 	"fmt"
 	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/command/v2"
 	"github.com/larsartmann/go-cqrs-lite/decider/v2"
+	"github.com/larsartmann/go-cqrs-lite/middleware/v2"
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -102,8 +103,8 @@ func queryLoggingMiddleware(logger *log.Logger) query.Middleware {
 }
 
 var (
-	errCommandTypeMismatch = errors.New("command type mismatch")
-	errQueryTypeMismatch   = errors.New("query type mismatch")
+	errCommandTypeMismatch = stderrors.New("command type mismatch")
+	errQueryTypeMismatch   = stderrors.New("query type mismatch")
 )
 
 const (
@@ -166,6 +167,7 @@ func wireCommandDispatcher(
 
 	dispatcher.Use(commandLoggingMiddleware(log.Default()))
 	dispatcher.Use(commandValidationMiddleware())
+	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
 
 	if err := dispatcher.Register(commandTypeSyncItem, handleSyncItem(repo, resolver)); err != nil {
 		return nil, fmt.Errorf("register sync item command: %w", err)
