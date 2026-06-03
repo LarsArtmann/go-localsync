@@ -254,15 +254,9 @@ Two tables managed by the CQRS stack:
 | Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                         | Smart retry classification for provider errors         |
 | Version        | `event.Version` with `Increment()`, `Add()`                                                             | Phantom type safety — no `int()` casts                 |
 
-### Not Yet Adopted
-
-- `middleware.CommandRetry` for provider retry — **LOW** (API mismatch: wraps `command.Handler`, not `func() error`)
-- `UpcasterRegistry` for schema evolution — **LOW** (only 1 schema version)
-- `catalog/` for AsyncAPI/OpenAPI/D2 generation — **LOW`
-
 ## Session 8 — 2026-06-03: go-cqrs-lite v2 Migration
 
-### Completed
+### go-cqrs-lite v2 Migration
 
 - ✅ **go-cqrs-lite v2 migration**: All 11 module imports updated from v1 (`core/*`, `memory`, etc.) to v2 sub-modules (`event/v2`, `command/v2`, `decider/v2`, etc.)
 - ✅ **go-error-family v0.2.0 → v0.3.0**: Required by go-cqrs-lite v2
@@ -277,7 +271,28 @@ Two tables managed by the CQRS stack:
 - ✅ **CLI flags cleaned**: `--push` and `--pull` flags removed from github-sync example
 - ✅ **Tests migrated**: All test files updated, `pushpull_test.go` removed, `RemoteStore_InvalidURL` test removed
 - ✅ **go.work updated**: Removed `core` and `saga` entries, added all v2 sub-modules (`event`, `command`, `decider`, `query`, `id`, `dispatcher`, `snapshot`, `codec`, `storage`, `memory`, `middleware`, `projection`)
-- ✅ **All 9 packages passing**: 220+ tests green
+- ✅ **All 9 packages passing**: 235 tests green
+
+### Naming Cleanup (Session 8 continued)
+
+- ✅ **turso→sqlite rename**: All internal references renamed across 11 files. `TursoReadModel`→`SQLiteReadModel`, `backendTurso`→`backendSQLite`, all test names updated. Files renamed via `git mv`.
+- ✅ **Dead config removed**: `CQRSConfig.RemoteURL`/`AuthToken` fields removed. `AppConfig.RemoteURL`/`AuthToken` env vars removed. CLI wiring simplified.
+- ✅ **Error templates updated**: All error messages reference `sqlite` not `turso`.
+- ✅ **Docs updated**: README, FEATURES, ROADMAP all reflect v2 migration and sqlite rename. Removed Outbox, Push/Pull, Turso references.
+- ✅ **go-error-family v0.3 reviewed**: New `Compose`, `HandleErrorWithContext`, `HandleErrorDetailedWithConfig` APIs available. No breaking changes — our usage is forward-compatible.
+
+### Assessed but Not Adopted
+
+| Module | Reason |
+|--------|--------|
+| `otel/v2` | Module only has `Name` constant — no real API to wire up |
+| `signing/v2` | Ed25519 event integrity is good for production but local-first sync doesn't need it yet |
+| `schema/v2` | Only 1 schema version — no evolution to manage |
+| `catalog/v2` | AsyncAPI/OpenAPI/D2 generation is nice but not critical |
+| `pebble/v2` | Alternative storage backend — significant new code, no immediate need |
+| `watermill/v2` | Message broker — significant new code, no immediate need |
+| `event.AggregateRef` | Nice type but our separate type+id pattern is already clear |
+| `SyncItemState option type` | Current `nil *provider.Item` + `IsNew()` is clean and idiomatic Go |
 
 ### Breaking Changes Summary
 
