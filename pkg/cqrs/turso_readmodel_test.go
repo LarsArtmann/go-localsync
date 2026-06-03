@@ -6,12 +6,11 @@ import (
 	"testing"
 	"time"
 
-	_ "modernc.org/sqlite"
-
 	"github.com/larsartmann/go-cqrs-lite/storage/v2"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	_ "modernc.org/sqlite"
 )
 
 func newTursoTestDB(t *testing.T) *TursoReadModel {

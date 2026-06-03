@@ -1,8 +1,6 @@
 go 1.26.3
 
-use (
-	.
-)
+use .
 
 use (
 	../go-branded-id

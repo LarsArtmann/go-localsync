@@ -5,10 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	_ "modernc.org/sqlite"
-
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	_ "modernc.org/sqlite"
 )
 
 func TestCQRSStack_TursoBackend_SyncAndDelete(t *testing.T) {
