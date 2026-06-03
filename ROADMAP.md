@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync  
-**Last Updated:** 2026-05-29
+**Last Updated:** 2026-06-03
 
 ## Overview
 
@@ -16,7 +16,7 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [x] **Conflict-aware sync** — `DecideSync` detects conflicts and emits `ItemConflictFound` events.
 - [x] **Provider architecture** — Generic `Provider` interface with GitHub implementation.
 - [x] **Branded type IDs** — 6 phantom types for compile-time safety.
-- [x] **Turso backend** — SQLite/Turso event store + read model with remote Push/Pull sync.
+- [x] **SQLite backend** — SQLite event store + read model with snapshots and checkpoints. Pure-Go via `modernc.org/sqlite`.
 - [x] **cockroachdb/errors removal** — Replaced with stdlib `fmt.Errorf` + `%w`.
 - [x] **Database migration system** — Replaced by go-cqrs-lite/storage schema management.
 - [x] **Zero lint issues** — golangci-lint v2 with 125+ linters, 0 issues.
@@ -29,10 +29,12 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [x] **Nix flake** — `flake.nix` with devShell + `buildGoModule`.
 - [x] **CRDT conflict resolution** — `crdt.ConflictResolver[T]` wired into `DecideSync`. `LWWResolver` default. `ActionConflictLocal` support.
 - [x] **Pluggable conflict strategy** — `CQRSConfig.ConflictResolver` accepts any resolver. Default nil = remote-wins.
-- [x] **Push/Pull tests** — 5 tests covering no-DB, local-DB, and sync-after-push-pull scenarios.
+
 - [x] **CLI helpers extracted** — `helpers.go` with `runStats`, `runAPIServer`, `printSyncResultJSON`, `printVersion`, etc.
 - [x] **conflict_aware.go extracted** — `ConflictAwareSyncer` in own file, decoupled from `sync.go`.
-- [x] **241 tests passing** — 9 packages, 0 lint issues.
+- [x] **235 tests passing** — 9 packages, 0 lint issues.
+- [x] **go-cqrs-lite v2 migration** — Migrated 11 modules to v2 paths. Removed outbox, Turso sync. Adopted `modernc.org/sqlite`.
+- [x] **turso→sqlite rename** — All internal references renamed. Dead RemoteURL/AuthToken config removed.
 
 ---
 
@@ -66,7 +68,7 @@ Aspirational features and improvements with no fixed timeline. These are planned
 ### Architecture
 
 - [x] **Adopt projection.Runner** (Completed)  
-       Replaced custom `Projector` with go-cqrs-lite's `projection.Runner` for replay + checkpointing.
+       `projection.Runner` for replay + checkpointing. Direct `bus.SubscribeAll` for synchronous projection.
 
 - [x] **Wire error taxonomy** (Completed)  
        Uses go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes.
@@ -82,8 +84,7 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [x] **CLI tests** (Completed)  
        `main_test.go` covers exitCodeForError, LoadConfig, env defaults.
 
-- [x] **Push/Pull tests** (Completed)
-      `CQRSStack.Push()` and `Pull()` tested with 5 tests: no-DB, local-DB, sync-after-push-pull.
+
 
 ---
 

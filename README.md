@@ -16,7 +16,7 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 | **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                                             |
 | **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy, emitted as domain events                                      |
 | **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)                                            |
-| **Turso Backend**       | SQLite/Turso event store with outbox pattern, snapshots, and remote Push/Pull sync                                          |
+| **SQLite Backend**     | SQLite event store with snapshots, checkpoints, and pure-Go driver (no CGo)                |
 
 ## Who is this for?
 
@@ -134,7 +134,7 @@ The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/
 - **Delete + resurrect**: deleted items reappear with updated state when synced again
 - **Conflict detection**: `DecideSync` compares fields and emits `ItemConflictFound` events
 - **Remote wins**: on conflict, incoming item overwrites (remote-wins LWW)
-- **Outbox pattern**: Turso backend uses atomic save+publish for crash-safe event delivery
+- **Pluggable conflict resolution**: inject any `crdt.ConflictResolver[T]` for custom merge logic
 - **Projection runner**: replay from store on restart + live subscription + retry
 - **Snapshots**: caps replay cost by persisting aggregate state every N events
 - **Correlation IDs**: unique per sync run for cross-event tracing and debugging
@@ -153,23 +153,16 @@ result, err := conflictSyncer.SyncWithConflictDetection(ctx, &sync.SyncOptions{
 // result.Upserted / result.Skipped / result.Errors for totals
 ```
 
-## Turso Remote Sync
+## Pluggable Conflict Resolution
 
-Push and pull changes to/from a remote Turso database:
+Inject a custom `crdt.ConflictResolver[T]` for domain-specific merge logic:
 
 ```go
 stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
-    Backend:   "turso",
-    DBPath:    "/path/to/local.db",
-    RemoteURL: "libsql://your-db.turso.io",
-    AuthToken: "your-turso-token",
+    Backend:          "sqlite",
+    DBPath:           "/path/to/local.db",
+    ConflictResolver: crdt.NewLWWResolver[*provider.Item](),
 })
-
-// Pull remote changes before sync
-changed, err := stack.Pull(ctx)
-
-// Push local changes after sync
-err = stack.Push(ctx)
 ```
 
 ## Branded IDs
@@ -201,7 +194,7 @@ go build -o gh-sync ./cmd/examples/github-sync
 export GITHUB_TOKEN=your_token
 gh-sync -user octocat
 gh-sync -user octocat --conflict-aware
-gh-sync -user octocat --push --pull
+gh-sync -user octocat --backend sqlite --db ./data.db
 gh-sync -stats
 ```
 
@@ -215,12 +208,11 @@ gh-sync -stats
 | Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation                   |
 | Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution           |
 | Branded IDs        | ✅ Done | Compile-time type-safe identifiers                           |
-| Turso Backend      | ✅ Done | SQLite/Turso event store + read model + Push/Pull sync       |
+| SQLite Backend     | ✅ Done | SQLite event store + read model + snapshots + checkpoints    |
 | No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                   |
 | Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow              |
 | Retry Logic        | ✅ Done | Exponential backoff retry with configurable limits           |
 | GitHub Provider    | ✅ Done | Full implementation with pagination, rate limiting, retry    |
-| Outbox Pattern     | ✅ Done | Atomic save+publish for crash-safe event delivery (Turso)    |
 | Snapshots          | ✅ Done | Aggregate state persistence caps replay cost across restarts |
 | Correlation IDs    | ✅ Done | Unique per sync run for cross-event tracing and debugging    |
 | Event Logging      | ✅ Done | Structured logging of all domain events via middleware       |
@@ -230,7 +222,7 @@ gh-sync -stats
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (197 tests across 7 packages)
+go test ./... -count=1                # Run tests (235 tests across 9 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -246,26 +238,29 @@ pkg/
 ├── sync/
 │   ├── sync.go            # Syncer — basic full/incremental sync
 │   └── conflict_aware.go  # ConflictAwareSyncer — conflict-aware sync
-├── types/            # Branded ID types (go-branded-id)
-├── errors/           # Structured errors via go-error-family constructors
-└── testhelpers/      # Shared test mocks and factories
+├── id/               # Branded ID types (go-branded-id)
+├── crdt/              # CRDT primitives: VectorClock, LWWResolver, ConflictResolver
+├── errors/            # Structured errors via go-error-family constructors
+└── api/               # HTTP API server (Huma v2)
 
 cmd/examples/github-sync/   # Example CLI application
 ```
 
 ## Testing
 
-197 test cases across 7 test packages, 73.7% overall coverage:
+235 test cases across 9 packages:
 
 | Package                    | Tests | Coverage | Description                                                |
 | -------------------------- | ----- | -------- | ---------------------------------------------------------- |
-| `pkg/cqrs`                 | 73    | 82.5%    | Decider, ReadModel, Projection, Stack, Turso RM, Push/Pull |
-| `pkg/providers/github`     | 46    | 85.4%    | Client, fetch, retry, error handling, rate limit, BDD      |
-| `pkg/sync`                 | 18    | 87.2%    | Syncer + ConflictAwareSyncer + Incremental sync            |
-| `pkg/id`                   | 15    | 100.0%   | Branded ID construction, roundtrip, zero, equal            |
-| `pkg/errors`               | 28    | 100.0%   | Sentinel errors, wrapping, classification, fallback paths  |
-| `pkg/provider`             | 6     | 100.0%   | Item validation                                            |
-| `cmd/examples/github-sync` | 11    | 10.5%    | exitCodeForError, LoadConfig, env defaults                 |
+| `pkg/cqrs`                 | 92    | ~83%    | Decider, ReadModel, Projection, Stack, SQLite RM, CRDT Resolver |
+| `pkg/providers/github`     | 32    | 84.6%  | Client, fetch, retry, error handling, rate limit, BDD           |
+| `pkg/sync`                 | 22    | 92.3%  | Syncer + ConflictAwareSyncer + reportProgress                   |
+| `pkg/crdt`                 | 52    | 97.6%  | VectorClock, Operation, LWWResolver, Conflict, SyncMessage      |
+| `pkg/id`                   | 10    | 100.0% | ID construction, roundtrip, zero, equal                         |
+| `pkg/errors`               | 11    | 100.0% | Sentinel errors, wrapping, classification, IsRetryable          |
+| `pkg/provider`             | 2     | 100.0% | Item validation                                                 |
+| `pkg/api`                  | 8     | ~90%   | Server, routes, handlers, health/stats/items/sync endpoints     |
+| `cmd/examples/github-sync` | 14    | 10.3%  | exitCodeForError, LoadConfig, env defaults, printVersion        |
 
 ## Related Projects
 

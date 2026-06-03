@@ -1,6 +1,6 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-05-29 (session 7)
+**Updated:** 2026-06-03 (session 8)
 
 ## Legend
 
@@ -20,7 +20,7 @@
 || 1 | CQRS Stack | FULLY_FUNCTIONAL | `pkg/cqrs` | Full event-sourced architecture: event store, bus, decider repository, read model, projection. Wired via `NewCQRSStack` with backend selection. |
 || 2 | Decider Pattern | FULLY_FUNCTIONAL | `pkg/cqrs` | Pure `Fold`/`DecideSync`/`DecideDelete` with `SyncItemState`. Single authority for all state transitions. |
 || 3 | Event Sourcing | FULLY_FUNCTIONAL | `pkg/cqrs` | 3 domain events: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`. All state changes via events. No legacy CRUD. |
-|| 4 | Projection | FULLY_FUNCTIONAL | `pkg/cqrs` | `Projector` implements `event.Projection`. Updates read model from events. Dual runner: `InMemoryRunner` (memory) + `projection.Runner` (Turso) with replay + live subscription. |
+|| 4 | Projection | FULLY_FUNCTIONAL | `pkg/cqrs` | `Projector` implements `event.Projection`. Updates read model from events. `projection.Runner` for replay + live subscription. |
 || 5 | Deterministic Aggregate IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | SHA256→hex from (source, sourceID) with `sync.Map` cache. Same inputs always produce the same ID. |
 || 6 | JSON Codec | FULLY_FUNCTIONAL | `pkg/cqrs` | `event.JSONCodec` + `DecodePayload[T]` + `NewEvents` for type-safe event serialization. No manual json.Marshal/Unmarshal. |
 
@@ -29,9 +29,8 @@
 || # | Feature | Status | Package | Description |
 || --- | ---------------------------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
 || 7 | Memory Backend | FULLY_FUNCTIONAL | `pkg/cqrs` | In-memory event store, bus, read model, snapshot store, checkpoint store. Default for testing and development. |
-|| 8 | Turso/SQLite Backend (Local) | FULLY_FUNCTIONAL | `pkg/cqrs` | Local SQLite file via `go-cqrs-lite/storage`. Event store + read model + outbox + snapshots + checkpoints in single `*sql.DB`. |
-|| 9 | Turso Backend (Remote Sync) | FULLY_FUNCTIONAL | `pkg/cqrs` | Push/Pull to remote Turso database via `OpenTursoSync`. Multi-device sync with embedded replica pattern. |
-|| 10 | Backend Selection | FULLY_FUNCTIONAL | `pkg/cqrs` | `CQRSConfig.Backend` selects memory or turso at construction time. Factory pattern in `store_factory.go`. |
+|| 8 | SQLite Backend (Local) | FULLY_FUNCTIONAL | `pkg/cqrs` | Local SQLite file via `go-cqrs-lite/storage`. Event store + read model + snapshots + checkpoints in single `*sql.DB`. Pure-Go via `modernc.org/sqlite`. |
+|| 9 | Backend Selection | FULLY_FUNCTIONAL | `pkg/cqrs` | `CQRSConfig.Backend` selects memory or sqlite at construction time. Factory pattern in `store_factory.go`. |
 
 ## Sync Engine
 
@@ -73,7 +72,7 @@
 || # | Feature | Status | Package | Description |
 || --- | ----------------------- | ---------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------- |
 || 31 | In-Memory Read Model | FULLY_FUNCTIONAL | `pkg/cqrs` | `MemoryReadModel` with concurrent-safe `sync.RWMutex`. Filter by type, actor, repo, source, since. Pagination support. |
-|| 32 | Turso/SQLite Read Model | FULLY_FUNCTIONAL | `pkg/cqrs` | `TursoReadModel` with parameterized queries, indexes (type, created_at, actor_login). Same filter/pagination API as memory. |
+|| 32 | SQLite Read Model | FULLY_FUNCTIONAL | `pkg/cqrs` | `SQLiteReadModel` with parameterized queries, indexes (type, created_at, actor_login). Same filter/pagination API as memory. |
 || 33 | Read Model Interface | FULLY_FUNCTIONAL | `pkg/cqrs` | `ReadModel` interface: `Get`, `List`, `Count`, `GetTypes`, `Upsert`, `Delete`, `Close`. Both backends implement it. |
 || 34 | Item Filtering | FULLY_FUNCTIONAL | `pkg/cqrs` | `ItemFilter` with Type, ActorLogin, RepoName, Source, Since, Limit, Offset. Builder pattern via `WithType`, `WithLimit`, etc. |
 
@@ -91,11 +90,10 @@
 
 || # | Feature | Status | Package | Description |
 || --- | ------------------------ | ---------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|| 40 | Outbox Pattern | FULLY_FUNCTIONAL | `pkg/cqrs` | `decider.WithOutbox` for Turso backend. `SQLTransactionalStore` for atomic save+publish. `event.OutboxPublisher` polls at 1s interval with batch size 100. |
-|| 41 | Event Logging Middleware | FULLY_FUNCTIONAL | `pkg/cqrs` | `middleware.EventLogging` via `charmLogAdapter`. Structured logging of all domain events on the bus. |
-|| 42 | Correlation IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | `SyncItems()` generates unique `CorrelationID` per sync run via `event.WithCorrelationID`. Cross-event tracing. |
-|| 43 | Snapshots | FULLY_FUNCTIONAL | `pkg/cqrs` | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory). `EveryNEvents(10)` strategy. Caps replay cost. |
-|| 44 | Checkpoints | FULLY_FUNCTIONAL | `pkg/cqrs` | `SQLiteCheckpointStore` (Turso) + `MemoryCheckpointStore` (memory). Tracks projection position for replay. |
+|| 40 | Event Logging Middleware | FULLY_FUNCTIONAL | `pkg/cqrs` | `middleware.EventLogging` via `charmLogAdapter`. Structured logging of all domain events on the bus. |
+|| 41 | Correlation IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | `SyncItems()` generates unique `CorrelationID` per sync run via `event.WithCorrelationID`. Cross-event tracing. |
+|| 42 | Snapshots | FULLY_FUNCTIONAL | `pkg/cqrs` | `SQLiteSnapshotStore` (sqlite) + `MemorySnapshotStore` (memory). `EveryNEvents(10)` strategy. Caps replay cost. |
+|| 43 | Checkpoints | FULLY_FUNCTIONAL | `pkg/cqrs` | `SQLiteCheckpointStore` (sqlite) + `MemoryCheckpointStore` (memory). Tracks projection position for replay. |
 
 ## Type System
 
@@ -116,9 +114,8 @@
 || 52 | Stats Display | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-stats` flag shows total items and distinct event types, then exits. |
 || 53 | Verbose Logging | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-verbose` flag enables debug-level logging via `charm.land/log/v2`. |
 || 54 | Signal Handling | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | Catches SIGINT/SIGTERM, cancels context, logs shutdown. |
-|| 55 | Push/Pull Flags | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-push` and `-pull` flags trigger Turso remote sync before/after local sync. |
-|| 56 | JSON Output | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-json` flag outputs stats and sync results as structured JSON. Supports `-stats`, `-conflict-aware`, and regular sync. |
-|| 57 | HTTP Server Mode | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-server` flag runs HTTP API instead of one-off sync. `-port` configures listen address (default 8080). |
+|| 55 | JSON Output | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-json` flag outputs stats and sync results as structured JSON. Supports `-stats`, `-conflict-aware`, and regular sync. |
+|| 56 | HTTP Server Mode | FULLY_FUNCTIONAL | `cmd/examples/github-sync` | `-server` flag runs HTTP API instead of one-off sync. `-port` configures listen address (default 8080). |
 
 ## HTTP API
 
@@ -149,14 +146,14 @@
 
 || # | Feature | Status | Package | Description |
 || --- | ------------ | ---------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-|| 68 | Test Suite | FULLY_FUNCTIONAL | all | 241 test functions across 9 packages, all passing. |
-|| 69 | Test Helpers | FULLY_FUNCTIONAL | `pkg/providers/github` | Unexported test helpers: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`. |
+|| 67 | Test Suite | FULLY_FUNCTIONAL | all | 235 test functions across 9 packages, all passing. |
+|| 68 | Test Helpers | FULLY_FUNCTIONAL | `pkg/providers/github` | Unexported test helpers: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`. |
 
 ## Quality
 
 || # | Feature | Status | Package | Description |
 || --- | ------------------ | ---------------- | ------- | ------------------------------------------------------------------------------------ |
-|| 70 | Lint (Zero Issues) | FULLY_FUNCTIONAL | project | golangci-lint v2 with 125+ linters enabled, 0 issues. Strict `.golangci.yml` config. |
+|| 69 | Lint (Zero Issues) | FULLY_FUNCTIONAL | project | golangci-lint v2 with 125+ linters enabled, 0 issues. Strict `.golangci.yml` config. |
 
 ---
 
@@ -165,12 +162,12 @@
 ### What Works Well
 
 - CQRS architecture is clean and complete — no legacy CRUD, no split brains
-- Dual backend (memory/turso) with identical `ReadModel` API
+- Dual backend (memory/sqlite) with identical `ReadModel` API
 - Provider abstraction is genuinely pluggable — new providers only implement the interface
 - Error taxonomy gives meaningful CLI exit codes and smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
-- Outbox pattern with atomic save+publish for crash-safe Turso persistence
-- 241 tests with good coverage across all packages
+- Projection runner with replay + live subscription for crash-safe sqlite persistence
+- 235 tests with good coverage across all packages
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 
 ### Known Gaps
@@ -184,4 +181,4 @@
 | CLI coverage | `cmd/examples/github-sync` at 10.3% coverage | Main sync/stats/server flows untested |
 | No observability | No OpenTelemetry, no metrics, no tracing | Production debugging requires log spelunking |
 | API has no auth | HTTP API has no authentication middleware | Not safe to expose on a network |
-| go-cqrs-lite WIP | Upstream has pending breaking changes (Sink→EventSink rename) | Blocks dependency upgrades until upstream settles |
+| go-cqrs-lite WIP | Upstream v2 migration complete — modules restructured into independent versioned paths | May require further adjustments as upstream stabilizes |
