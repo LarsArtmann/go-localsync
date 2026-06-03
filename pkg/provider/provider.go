@@ -5,6 +5,7 @@ package provider
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/errors"
@@ -38,6 +39,15 @@ type Item struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 	// RawJSON contains the complete original payload for full fidelity.
 	RawJSON json.RawMessage `json:"rawJson"`
+}
+
+// String returns a human-readable summary of the Item for logging.
+func (item *Item) String() string {
+	return fmt.Sprintf(
+		"Item{Source:%s ExternalID:%s Type:%s Actor:%s Repo:%s}",
+		item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
+		item.ActorLogin.Get(), item.RepoName.Get(),
+	)
 }
 
 // Validate checks that the Item has all required fields set.
