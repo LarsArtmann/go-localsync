@@ -21,4 +21,4 @@ reports/
 # Nix build output
 /result
 # Test coverage
-/coverage
+/coveragego.sum
