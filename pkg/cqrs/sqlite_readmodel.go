@@ -30,7 +30,9 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 const syncItemsIndexes = `
 CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
 CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login)`
+CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login);
+CREATE INDEX IF NOT EXISTS idx_sync_items_repo_name ON sync_items(repo_name);
+CREATE INDEX IF NOT EXISTS idx_sync_items_type_created ON sync_items(type, created_at DESC)`
 
 // SQLiteReadModel is a SQLite-backed implementation of ReadModel.
 type SQLiteReadModel struct {
@@ -315,6 +317,10 @@ func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
 		}
 
 		items = append(items, si.toItem())
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate items: %w", err)
 	}
 
 	return items, nil

@@ -41,6 +41,7 @@ func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 		return state, nil
 	case EventItemDeleted:
 		state.Deleted = true
+		state.Item = nil
 
 		return state, nil
 	default:

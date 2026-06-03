@@ -113,8 +113,8 @@ func TestFold_ItemDeleted(t *testing.T) {
 	if !state.Deleted {
 		t.Error("expected Deleted=true")
 	}
-	if state.Item == nil {
-		t.Error("deleted state still holds the item for potential resurrection")
+	if state.Item != nil {
+		t.Error("deleted state should not hold stale item reference")
 	}
 }
 
