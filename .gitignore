@@ -22,3 +22,5 @@ reports/
 /result
 # Test coverage
 /coveragego.sum
+# Test coverage
+/coverage
