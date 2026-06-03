@@ -78,7 +78,7 @@ func itemFromPayload(payload ItemSyncedPayload) (*provider.Item, error) {
 		return nil, fmt.Errorf("invalid item ID in payload: %w", err)
 	}
 
-	return &provider.Item{
+	item := &provider.Item{
 		ID:             itemID,
 		ExternalID:     id.NewExternalID(payload.SourceID),
 		Source:         id.NewProviderID(payload.Source),
@@ -90,7 +90,13 @@ func itemFromPayload(payload ItemSyncedPayload) (*provider.Item, error) {
 		CreatedAt:      fromUnixNano(payload.CreatedAt),
 		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
 		RawJSON:        payload.RawJSON,
-	}, nil
+	}
+
+	if err := item.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid item from payload: %w", err)
+	}
+
+	return item, nil
 }
 
 // DecideSync returns a DecideFunc that syncs an incoming provider.Item.
