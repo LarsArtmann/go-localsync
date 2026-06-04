@@ -12,6 +12,7 @@ import (
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestFetch_RetryOnServerError(t *testing.T) {
@@ -89,7 +90,7 @@ func TestGetRateLimit_NilCore(t *testing.T) {
 	client.client.BaseURL = mustParseURL(server.URL)
 
 	limits, err := client.GetRateLimit(context.Background())
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if limits == nil {
 		t.Fatal("expected non-nil limits")
 	}
@@ -177,7 +178,7 @@ func TestWaitForRateLimit_SufficientRemaining(t *testing.T) {
 
 	client := newTestClient(server)
 
-	mustNoError(t, client.waitForRateLimit(context.Background()))
+	testutil.MustNoError(t, client.waitForRateLimit(context.Background()))
 }
 
 func TestWaitForRateLimit_ExceedsMaxWait(t *testing.T) {

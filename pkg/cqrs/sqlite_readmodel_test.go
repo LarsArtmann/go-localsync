@@ -10,6 +10,7 @@ import (
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 	_ "modernc.org/sqlite"
 )
 
@@ -57,10 +58,10 @@ func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 
 	item := sqliteTestItem(t, "github", "123", "PushEvent", "alice", "org/repo")
 
-	mustNoError(t, rm.Upsert(ctx, item))
+	testutil.MustNoError(t, rm.Upsert(ctx, item))
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	if got == nil {
 		t.Fatal("Get returned nil")
@@ -70,9 +71,9 @@ func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 		t.Errorf("ID = %q, want %q (ItemID not preserved)", got.ID.String(), item.ID.String())
 	}
 
-	assertExternalID(t, got, "123")
+	testutil.AssertExternalID(t, got, "123")
 
-	assertItemType(t, got, "PushEvent")
+	testutil.AssertType(t, got, "PushEvent")
 }
 
 func TestSQLiteReadModel_Get_NotFound(t *testing.T) {
@@ -107,7 +108,7 @@ func TestSQLiteReadModel_List(t *testing.T) {
 	_ = rm.Upsert(ctx, item2)
 
 	items, err := rm.List(ctx, provider.ItemFilter{})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	if len(items) != 2 {
 		t.Fatalf("expected 2 items, got %d", len(items))
@@ -133,7 +134,7 @@ func TestSQLiteReadModel_List_FilterByType(t *testing.T) {
 		t.Fatalf("expected 1 PushEvent, got %d", len(items))
 	}
 
-	assertItemType(t, items[0], "PushEvent")
+	testutil.AssertType(t, items[0], "PushEvent")
 }
 
 func TestSQLiteReadModel_Count(t *testing.T) {
@@ -146,7 +147,7 @@ func TestSQLiteReadModel_Count(t *testing.T) {
 	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
 
 	count, err := rm.Count(ctx, provider.ItemFilter{})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	if count != 2 {
 		t.Errorf("Count = %d, want 2", count)
@@ -154,7 +155,7 @@ func TestSQLiteReadModel_Count(t *testing.T) {
 
 	pushType := id.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushType})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	if count != 1 {
 		t.Errorf("filtered Count = %d, want 1", count)
@@ -172,7 +173,7 @@ func TestSQLiteReadModel_GetTypes(t *testing.T) {
 	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "PushEvent", "charlie", "org/repo2"))
 
 	types, err := rm.GetTypes(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	if len(types) != 2 {
 		t.Fatalf("expected 2 types, got %d: %v", len(types), types)
@@ -188,7 +189,7 @@ func TestSQLiteReadModel_Delete(t *testing.T) {
 	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
 
 	err := rm.Delete(ctx, "github", id.NewExternalID("1"))
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
 	if got != nil {
@@ -209,7 +210,7 @@ func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 	_ = rm.Upsert(ctx, item2)
 
 	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
-	assertItemType(t, got, "IssueEvent")
+	testutil.AssertType(t, got, "IssueEvent")
 
 	count, _ := rm.Count(ctx, provider.ItemFilter{})
 	if count != 1 {

@@ -7,6 +7,7 @@ import (
 
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
@@ -21,13 +22,13 @@ func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
 
 	actor := id.NewActorID("alice")
 	items, err := rm.List(ctx, provider.ItemFilter{ActorLogin: &actor})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items for alice, got %d", len(items))
 	}
 
 	count, err := rm.Count(ctx, provider.ItemFilter{ActorLogin: &actor})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 2 {
 		t.Errorf("expected count=2 for alice, got %d", count)
 	}
@@ -45,7 +46,7 @@ func TestSQLiteReadModel_List_FilterByRepoName(t *testing.T) {
 
 	repo := id.NewRepoID("org/repo-a")
 	items, err := rm.List(ctx, provider.ItemFilter{RepoName: &repo})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items for org/repo-a, got %d", len(items))
 	}
@@ -62,7 +63,7 @@ func TestSQLiteReadModel_List_FilterBySource(t *testing.T) {
 
 	source := id.NewProviderID("github")
 	items, err := rm.List(ctx, provider.ItemFilter{Source: &source})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 item for github source, got %d", len(items))
 	}
@@ -90,14 +91,14 @@ func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
 
 	since := time.Now().Add(-24 * time.Hour)
 	items, err := rm.List(ctx, provider.ItemFilter{Since: &since})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 item after Since cutoff, got %d", len(items))
 	}
-	assertExternalID(t, items[0], "2")
+	testutil.AssertExternalID(t, items[0], "2")
 
 	count, err := rm.Count(ctx, provider.ItemFilter{Since: &since})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after Since cutoff, got %d", count)
 	}
@@ -125,13 +126,13 @@ func TestSQLiteReadModel_List_Pagination(t *testing.T) {
 	}
 
 	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2, Offset: 2})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items with Limit=2 Offset=2, got %d", len(items))
 	}
 
 	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2, Offset: 4})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 item with Limit=2 Offset=4, got %d", len(items))
 	}
@@ -150,11 +151,11 @@ func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	pushType := id.NewEventTypeID("PushEvent")
 	actor := id.NewActorID("alice")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType, ActorLogin: &actor})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(items) != 1 {
 		t.Errorf("expected 1 PushEvent by alice, got %d", len(items))
 	}
-	assertExternalID(t, items[0], "1")
+	testutil.AssertExternalID(t, items[0], "1")
 }
 
 func TestSQLiteReadModel_List_ZeroResults(t *testing.T) {

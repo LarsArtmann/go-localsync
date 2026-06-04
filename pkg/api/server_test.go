@@ -14,6 +14,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 type mockProvider struct{}
@@ -38,8 +39,8 @@ func (m *mockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo,
 }
 
 type mockSyncStore struct {
-	items    []*provider.Item
-	listErr  error
+	testutil.SyncStoreListBehavior
+
 	countErr error
 	typesErr error
 	types    []string
@@ -59,20 +60,12 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *sy
 	return summary
 }
 
-func (m *mockSyncStore) ListItems(_ context.Context, _ provider.ItemFilter) ([]*provider.Item, error) {
-	if m.listErr != nil {
-		return nil, m.listErr
-	}
-
-	return m.items, nil
-}
-
 func (m *mockSyncStore) CountItems(_ context.Context, _ provider.ItemFilter) (int64, error) {
 	if m.countErr != nil {
 		return 0, m.countErr
 	}
 
-	return int64(len(m.items)), nil
+	return int64(len(m.Items)), nil
 }
 
 func (m *mockSyncStore) GetItemTypes(_ context.Context) ([]string, error) {
@@ -141,9 +134,11 @@ func TestGetStats(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{
-		items: []*provider.Item{
-			testItem("1", "PushEvent"),
-			testItem("2", "IssueEvent"),
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			Items: []*provider.Item{
+				testItem("1", "PushEvent"),
+				testItem("2", "IssueEvent"),
+			},
 		},
 		types: []string{"PushEvent", "IssueEvent"},
 	}
@@ -198,9 +193,11 @@ func TestListItems(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{
-		items: []*provider.Item{
-			testItem("1", "PushEvent"),
-			testItem("2", "IssueEvent"),
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			Items: []*provider.Item{
+				testItem("1", "PushEvent"),
+				testItem("2", "IssueEvent"),
+			},
 		},
 	}
 
@@ -238,9 +235,11 @@ func TestListItems_WithFilter(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{
-		items: []*provider.Item{
-			testItem("1", "PushEvent"),
-			testItem("2", "IssueEvent"),
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			Items: []*provider.Item{
+				testItem("1", "PushEvent"),
+				testItem("2", "IssueEvent"),
+			},
 		},
 	}
 
@@ -259,7 +258,7 @@ func TestListItems_WithFilter(t *testing.T) {
 func TestListItems_StoreError(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{listErr: errors.New("list failed")}
+	store := &mockSyncStore{SyncStoreListBehavior: testutil.SyncStoreListBehavior{ListErr: errors.New("list failed")}}
 	server := newTestServer(store)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items", nil)

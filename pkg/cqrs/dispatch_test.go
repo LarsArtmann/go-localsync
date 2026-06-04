@@ -8,6 +8,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestCommandDispatcher_SyncItem_ThroughDispatcher(t *testing.T) {
@@ -20,10 +21,10 @@ func TestCommandDispatcher_SyncItem_ThroughDispatcher(t *testing.T) {
 	item := testItem("dispatch-1", "PushEvent")
 
 	// SyncItem goes through CommandDispatcher
-	mustNoError(t, stack.SyncItem(ctx, item))
+	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
 	count, err := stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after SyncItem through dispatcher, got %d", count)
 	}
@@ -37,11 +38,11 @@ func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
 
 	ctx := context.Background()
 
-	mustNoError(t, stack.SyncItem(ctx, testItem("dispatch-2", "PushEvent")))
-	mustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("dispatch-2")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("dispatch-2", "PushEvent")))
+	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("dispatch-2")))
 
 	count, err := stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 0 {
 		t.Errorf("expected count=0 after DeleteItem through dispatcher, got %d", count)
 	}
@@ -62,7 +63,7 @@ func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
 		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
 		Item:         testItem("wrong-type-test", "PushEvent"),
 	})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 }
 
 func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
@@ -129,13 +130,13 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	mustNoError(t, stack.SyncItem(ctx, testItem("q-1", "PushEvent")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-1", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
 		BasicQuery: *query.MustNew(queryTypeListItem),
 		Filter:     provider.ItemFilter{},
 	})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	items, ok := result.([]*provider.Item)
 	if !ok {
@@ -153,14 +154,14 @@ func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	mustNoError(t, stack.SyncItem(ctx, testItem("q-2", "PushEvent")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-2", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetItemQuery{
 		BasicQuery: *query.MustNew(queryTypeGetItem),
 		Source:     "github",
 		SourceID:   id.NewExternalID("q-2"),
 	})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	item, ok := result.(*provider.Item)
 	if !ok {
@@ -178,13 +179,13 @@ func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	mustNoError(t, stack.SyncItem(ctx, testItem("q-3", "PushEvent")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-3", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
 		BasicQuery: *query.MustNew(queryTypeCountItem),
 		Filter:     provider.ItemFilter{},
 	})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	count, ok := result.(int64)
 	if !ok {
@@ -202,12 +203,12 @@ func TestQueryDispatcher_GetTypes_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	mustNoError(t, stack.SyncItem(ctx, testItem("q-4", "PushEvent")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-4", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
 		BasicQuery: *query.MustNew(queryTypeGetTypes),
 	})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	types, ok := result.([]string)
 	if !ok {

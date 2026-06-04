@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestClassifyAction(t *testing.T) {
@@ -169,18 +169,13 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 func TestCQRSStack_SyncItems_ConflictLocal_WithLWWResolver(t *testing.T) {
 	t.Parallel()
 
-	resolver, err := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
-		return item.UpdatedAt
-	})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	resolver := newUpdatedAtLWWResolver(t)
 
 	stack, stackErr := NewCQRSStack(CQRSConfig{
 		Backend:          "memory",
 		ConflictResolver: resolver,
 	})
-	mustNoError(t, stackErr)
+	testutil.MustNoError(t, stackErr)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -217,7 +212,7 @@ func TestCQRSStack_SyncItems_ConflictLocal_WithLWWResolver(t *testing.T) {
 	}
 
 	got, getErr := stack.ReadModel.Get(ctx, "github", id.NewExternalID("1"))
-	mustNoError(t, getErr)
+	testutil.MustNoError(t, getErr)
 
 	if got.Type.Get() != "PushEvent" {
 		t.Errorf("expected local item type preserved (PushEvent), got %s", got.Type.Get())
@@ -227,18 +222,13 @@ func TestCQRSStack_SyncItems_ConflictLocal_WithLWWResolver(t *testing.T) {
 func TestCQRSStack_SyncItems_ConflictRemote_WithLWWResolver(t *testing.T) {
 	t.Parallel()
 
-	resolver, err := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
-		return item.UpdatedAt
-	})
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	resolver := newUpdatedAtLWWResolver(t)
 
 	stack, stackErr := NewCQRSStack(CQRSConfig{
 		Backend:          "memory",
 		ConflictResolver: resolver,
 	})
-	mustNoError(t, stackErr)
+	testutil.MustNoError(t, stackErr)
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
@@ -275,7 +265,7 @@ func TestCQRSStack_SyncItems_ConflictRemote_WithLWWResolver(t *testing.T) {
 	}
 
 	got, getErr := stack.ReadModel.Get(ctx, "github", id.NewExternalID("1"))
-	mustNoError(t, getErr)
+	testutil.MustNoError(t, getErr)
 
 	if got.Type.Get() != "IssueEvent" {
 		t.Errorf("expected remote item type applied (IssueEvent), got %s", got.Type.Get())

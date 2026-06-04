@@ -9,6 +9,7 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
@@ -156,7 +157,9 @@ func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
 	oldItem := testSyncItem("old", "PushEvent")
 	oldItem.CreatedAt = now.Add(-2 * time.Hour)
 
-	store := &mockSyncStore{items: []*provider.Item{existingItem}}
+	store := &mockSyncStore{
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*provider.Item{existingItem}},
+	}
 	mockProv := &mockProvider{items: []*provider.Item{newItem, oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
@@ -187,7 +190,9 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 	oldItem := testSyncItem("old", "PushEvent")
 	oldItem.CreatedAt = now.Add(-1 * time.Hour)
 
-	store := &mockSyncStore{items: []*provider.Item{existingItem}}
+	store := &mockSyncStore{
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*provider.Item{existingItem}},
+	}
 	mockProv := &mockProvider{items: []*provider.Item{oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
@@ -208,7 +213,7 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 func TestSyncer_SyncIncremental_ListItemsError(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{listErr: errors.New("list failed")}
+	store := &mockSyncStore{SyncStoreListBehavior: testutil.SyncStoreListBehavior{ListErr: errors.New("list failed")}}
 	mockProv := &mockProvider{items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()

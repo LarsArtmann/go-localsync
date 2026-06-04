@@ -85,17 +85,21 @@ func TestBDD_FetchValidUser(t *testing.T) {
 	if len(world.result.Items) != 2 {
 		t.Fatalf("expected 2 items, got %d", len(world.result.Items))
 	}
-	if world.result.Items[0].ExternalID.Get() != "event-123" {
-		t.Errorf("expected ExternalID=event-123, got %s", world.result.Items[0].ExternalID.Get())
-	}
-	if world.result.Items[1].ExternalID.Get() != "event-456" {
-		t.Errorf("expected ExternalID=event-456, got %s", world.result.Items[1].ExternalID.Get())
-	}
-	if world.result.Items[0].Type.Get() != "PushEvent" {
-		t.Errorf("expected Type=PushEvent, got %s", world.result.Items[0].Type.Get())
-	}
-	if world.result.Items[1].Type.Get() != "IssuesEvent" {
-		t.Errorf("expected Type=IssuesEvent, got %s", world.result.Items[1].Type.Get())
+	for _, want := range []struct {
+		index     int
+		external  string
+		eventType string
+	}{
+		{0, "event-123", "PushEvent"},
+		{1, "event-456", "IssuesEvent"},
+	} {
+		got := world.result.Items[want.index]
+		if got.ExternalID.Get() != want.external {
+			t.Errorf("items[%d] ExternalID: got %s, want %s", want.index, got.ExternalID.Get(), want.external)
+		}
+		if got.Type.Get() != want.eventType {
+			t.Errorf("items[%d] Type: got %s, want %s", want.index, got.Type.Get(), want.eventType)
+		}
 	}
 	for _, item := range world.result.Items {
 		if item.ActorLogin.Get() != "octocat" {

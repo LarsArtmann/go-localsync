@@ -9,49 +9,23 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
-
-func mustNoError(t *testing.T, err error) {
-	t.Helper()
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func assertEqual[T comparable](t *testing.T, got, want T, label string) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("expected %s=%v, got %v", label, want, got)
-	}
-}
 
 func assertEventType(t *testing.T, evt event.Event, want event.Type) {
 	t.Helper()
 
-	assertEqual(t, evt.Type(), want, "type")
-}
-
-func assertItemType(t *testing.T, item *provider.Item, want string) {
-	t.Helper()
-
-	assertEqual(t, item.Type.Get(), want, "Type")
-}
-
-func assertExternalID(t *testing.T, item *provider.Item, want string) {
-	t.Helper()
-
-	assertEqual(t, item.ExternalID.Get(), want, "ExternalID")
+	testutil.AssertEqual(t, evt.Type(), want, "type")
 }
 
 func newMemoryStack(t *testing.T) *CQRSStack {
 	t.Helper()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	return stack
 }
@@ -60,7 +34,7 @@ func newSQLiteMemoryStack(t *testing.T) *CQRSStack {
 	t.Helper()
 
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "sqlite", DBPath: ":memory:"})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 
 	return stack
 }
@@ -81,6 +55,17 @@ func testActiveState(sourceID, eventType string) SyncItemState {
 			ExternalID: id.NewExternalID(sourceID),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID(eventType),
+		},
+	}
+}
+
+func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) SyncItemState {
+	return SyncItemState{
+		Item: &provider.Item{
+			ExternalID: id.NewExternalID(sourceID),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID(eventType),
+			UpdatedAt:  updatedAt,
 		},
 	}
 }
@@ -128,7 +113,7 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 
 	for time.Now().Before(deadline) {
 		count, err := stack.Count(ctx)
-		mustNoError(t, err)
+		testutil.MustNoError(t, err)
 
 		if count == expected {
 			return
@@ -139,6 +124,19 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 
 	count, _ := stack.Count(ctx)
 	t.Fatalf("timed out waiting for count=%d, got %d", expected, count)
+}
+
+func newUpdatedAtLWWResolver(t *testing.T) *crdt.LWWResolver[*provider.Item] {
+	t.Helper()
+
+	resolver, err := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
+		return item.UpdatedAt
+	})
+	if err != nil {
+		t.Fatalf("unexpected LWW resolver error: %v", err)
+	}
+
+	return resolver
 }
 
 func subscribeAll(t *testing.T, stack *CQRSStack) func(minCount int) []event.Event {
@@ -155,7 +153,7 @@ func subscribeAll(t *testing.T, stack *CQRSStack) func(minCount int) []event.Eve
 		return nil
 	}
 
-	mustNoError(t, stack.Bus.SubscribeAll(handler))
+	testutil.MustNoError(t, stack.Bus.SubscribeAll(handler))
 
 	return func(minCount int) []event.Event {
 		t.Helper()

@@ -10,6 +10,7 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 type mockProvider struct {
@@ -35,9 +36,9 @@ func (m *mockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo,
 }
 
 type mockSyncStore struct {
+	testutil.SyncStoreListBehavior
+
 	synced       []*provider.Item
-	items        []*provider.Item
-	listErr      error
 	countErr     error
 	typeCountErr error
 	closeErr     error
@@ -56,14 +57,6 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 	}
 
 	return summary
-}
-
-func (m *mockSyncStore) ListItems(_ context.Context, _ provider.ItemFilter) ([]*provider.Item, error) {
-	if m.listErr != nil {
-		return nil, m.listErr
-	}
-
-	return m.items, nil
 }
 
 func (m *mockSyncStore) CountItems(_ context.Context, filter provider.ItemFilter) (int64, error) {

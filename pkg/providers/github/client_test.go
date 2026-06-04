@@ -13,35 +13,8 @@ import (
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
-
-func mustNoError(t *testing.T, err error) {
-	t.Helper()
-
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-}
-
-func assertEqual[T comparable](t *testing.T, got, want T, label string) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("expected %s=%v, got %v", label, want, got)
-	}
-}
-
-func assertExternalID(t *testing.T, item *provider.Item, want string) {
-	t.Helper()
-
-	assertEqual(t, item.ExternalID.Get(), want, "ExternalID")
-}
-
-func assertType(t *testing.T, item *provider.Item, want string) {
-	t.Helper()
-
-	assertEqual(t, item.Type.Get(), want, "Type")
-}
 
 func assertClientName(t *testing.T, c *Client) {
 	t.Helper()
@@ -98,8 +71,8 @@ func TestNewClientWithHTTP(t *testing.T) {
 
 func TestFetch_DefaultOptions(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assertEqual(t, r.URL.Query().Get("per_page"), "100", "per_page")
-		assertEqual(t, r.URL.Query().Get("page"), "1", "page")
+		testutil.AssertEqual(t, r.URL.Query().Get("per_page"), "100", "per_page")
+		testutil.AssertEqual(t, r.URL.Query().Get("page"), "1", "page")
 
 		events := []*gh.Event{
 			newTestEvent(
@@ -116,17 +89,17 @@ func TestFetch_DefaultOptions(t *testing.T) {
 
 	client := newTestClient(server)
 	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(result.Items) != 1 {
 		t.Fatalf("expected 1 item, got %d", len(result.Items))
 	}
 	if result.Items[0].ExternalID.Get() != "123" {
-		assertExternalID(t, result.Items[0], "123")
+		testutil.AssertExternalID(t, result.Items[0], "123")
 	}
 	if result.Items[0].ID.String() == "" {
 		t.Error("expected non-empty ID")
 	}
-	assertType(t, result.Items[0], "PushEvent")
+	testutil.AssertType(t, result.Items[0], "PushEvent")
 	if result.Items[0].ActorLogin.Get() != "octocat" {
 		t.Errorf("expected ActorLogin=octocat, got %s", result.Items[0].ActorLogin.Get())
 	}
@@ -144,7 +117,7 @@ func TestFetch_CustomOptions(t *testing.T) {
 		context.Background(),
 		&provider.FetchOptions{Source: "testuser", PerPage: expectedPerPage, Page: expectedPage},
 	)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(result.Items) != 0 {
 		t.Errorf("expected 0 items, got %d", len(result.Items))
 	}
@@ -159,7 +132,7 @@ func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 		context.Background(),
 		&provider.FetchOptions{Source: "testuser", PerPage: 0, Page: expectedPage},
 	)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(result.Items) != 0 {
 		t.Errorf("expected 0 items, got %d", len(result.Items))
 	}
@@ -172,8 +145,8 @@ func createTestServerForFetch(
 	t.Helper()
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assertEqual(t, r.URL.Query().Get("per_page"), strconv.Itoa(expectedPerPage), "per_page")
-		assertEqual(t, r.URL.Query().Get("page"), strconv.Itoa(expectedPage), "page")
+		testutil.AssertEqual(t, r.URL.Query().Get("per_page"), strconv.Itoa(expectedPerPage), "per_page")
+		testutil.AssertEqual(t, r.URL.Query().Get("page"), strconv.Itoa(expectedPage), "page")
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode([]*gh.Event{})
 	}))
@@ -231,7 +204,7 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 
 	client := newTestClient(server)
 	result, err := client.FetchAll(context.Background(), "testuser", 3)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(result.Items) != 200 {
 		t.Errorf("expected 200 items, got %d", len(result.Items))
 	}
@@ -253,7 +226,7 @@ func TestFetchAll_DefaultMaxPages(t *testing.T) {
 
 	client := newTestClient(server)
 	_, err := client.FetchAll(context.Background(), "testuser", 0)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if callCount != 1 {
 		t.Errorf("expected 1 call, got %d", callCount)
 	}
@@ -280,7 +253,7 @@ func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 
 	client := newTestClient(server)
 	result, err := client.FetchAll(context.Background(), "testuser", 10)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(result.Items) != 1 {
 		t.Errorf("expected 1 item, got %d", len(result.Items))
 	}

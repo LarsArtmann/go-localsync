@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/crdt"
-	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 type localWinsResolver struct{}
@@ -38,17 +38,10 @@ func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
 	remoteItem := testItem("123", "PushEvent")
 	remoteItem.UpdatedAt = remoteTime
 
-	state := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: id.NewExternalID("123"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
-			UpdatedAt:  localTime,
-		},
-	}
+	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
 	events, err := DecideSync(remoteItem, new(remoteWinsResolver))(state, 1)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
@@ -85,12 +78,7 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 	localTime := time.Now().Truncate(time.Millisecond)
 	remoteTime := localTime.Add(2 * time.Hour)
 
-	localItem := &provider.Item{
-		ExternalID: id.NewExternalID("123"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
-		UpdatedAt:  localTime,
-	}
+	localItem := testStateWithTimestamp("123", "PushEvent", localTime).Item
 
 	remoteItem := testItem("123", "IssueEvent")
 	remoteItem.UpdatedAt = remoteTime
@@ -98,7 +86,7 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 	state := SyncItemState{Item: localItem}
 
 	events, err := DecideSync(remoteItem, new(localWinsResolver))(state, 1)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
@@ -140,17 +128,10 @@ func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
 	remoteItem := testItem("123", "PushEvent")
 	remoteItem.UpdatedAt = time.Now().Add(time.Hour)
 
-	state := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: id.NewExternalID("123"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
-			UpdatedAt:  time.Now(),
-		},
-	}
+	state := testStateWithTimestamp("123", "PushEvent", time.Now())
 
 	events, err := DecideSync(remoteItem, new(errorResolver))(state, 1)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
@@ -168,12 +149,7 @@ func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
 func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
 	t.Parallel()
 
-	resolver, resErr := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
-		return item.UpdatedAt
-	})
-	if resErr != nil {
-		t.Fatalf("unexpected error: %v", resErr)
-	}
+	resolver := newUpdatedAtLWWResolver(t)
 
 	localTime := time.Now().Truncate(time.Millisecond)
 	remoteTime := localTime.Add(2 * time.Hour)
@@ -181,17 +157,10 @@ func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
 	remoteItem := testItem("123", "PushEvent")
 	remoteItem.UpdatedAt = remoteTime
 
-	state := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: id.NewExternalID("123"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
-			UpdatedAt:  localTime,
-		},
-	}
+	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
 	events, err := DecideSync(remoteItem, resolver)(state, 1)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
@@ -209,12 +178,7 @@ func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
 func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
 	t.Parallel()
 
-	resolver, resErr := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
-		return item.UpdatedAt
-	})
-	if resErr != nil {
-		t.Fatalf("unexpected error: %v", resErr)
-	}
+	resolver := newUpdatedAtLWWResolver(t)
 
 	localTime := time.Now().Truncate(time.Millisecond).Add(3 * time.Hour)
 	remoteTime := time.Now().Truncate(time.Millisecond)
@@ -222,17 +186,10 @@ func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
 	remoteItem := testItem("123", "PushEvent")
 	remoteItem.UpdatedAt = remoteTime
 
-	state := SyncItemState{
-		Item: &provider.Item{
-			ExternalID: id.NewExternalID("123"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
-			UpdatedAt:  localTime,
-		},
-	}
+	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
 	events, err := DecideSync(remoteItem, resolver)(state, 1)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}

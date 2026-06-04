@@ -7,6 +7,7 @@ import (
 
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestCQRSStack_SyncNewItem(t *testing.T) {
@@ -18,16 +19,16 @@ func TestCQRSStack_SyncNewItem(t *testing.T) {
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	mustNoError(t, stack.SyncItem(ctx, item))
+	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
 	count, err := stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
 
 	resultTypes, err := stack.GetTypes(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(resultTypes) != 1 || resultTypes[0] != "PushEvent" {
 		t.Errorf("expected [PushEvent], got %v", resultTypes)
 	}
@@ -58,13 +59,13 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	}
 
 	count, err := stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 3 {
 		t.Errorf("expected count=3, got %d", count)
 	}
 
 	resultTypes, err := stack.GetTypes(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(resultTypes) != 2 {
 		t.Errorf("expected 2 types, got %v", resultTypes)
 	}
@@ -79,11 +80,11 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	mustNoError(t, stack.SyncItem(ctx, item))
-	mustNoError(t, stack.SyncItem(ctx, item))
+	testutil.MustNoError(t, stack.SyncItem(ctx, item))
+	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
 	count, err := stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("same item synced twice should still have count 1 — idempotent, got %d", count)
 	}
@@ -97,18 +98,18 @@ func TestCQRSStack_DeleteItem(t *testing.T) {
 
 	ctx := context.Background()
 
-	mustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
 
 	count, err := stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
 
-	mustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
+	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
 	count, err = stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 0 {
 		t.Errorf("item should be deleted from read model, got count=%d", count)
 	}
@@ -122,15 +123,15 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 
 	ctx := context.Background()
 
-	mustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
-	mustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
+	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
 	count, _ := stack.Count(ctx)
 	if count != 0 {
 		t.Errorf("expected count=0, got %d", count)
 	}
 
-	mustNoError(t, stack.SyncItem(ctx, testItem("123", "IssueEvent")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("123", "IssueEvent")))
 
 	count, _ = stack.Count(ctx)
 	if count != 1 {
@@ -138,7 +139,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 	}
 
 	got, err := stack.ReadModel.Get(ctx, "github", id.NewExternalID("123"))
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if got.Type.Get() != "IssueEvent" {
 		t.Errorf("resurrected item should have updated type, got %s", got.Type.Get())
 	}
@@ -203,7 +204,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 
 	pushType := id.NewEventTypeID("PushEvent")
 	results, err := stack.ReadModel.List(ctx, provider.ItemFilter{Type: &pushType})
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if len(results) != 2 {
 		t.Errorf("expected 2 results, got %d", len(results))
 	}
@@ -213,7 +214,7 @@ func TestCQRSStack_Close(t *testing.T) {
 	t.Parallel()
 
 	stack := newMemoryStack(t)
-	mustNoError(t, stack.Close())
+	testutil.MustNoError(t, stack.Close())
 }
 
 func TestCQRSStack_InvalidBackend(t *testing.T) {
@@ -245,10 +246,10 @@ func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
 	ctx := context.Background()
 	item := testItem("123", "PushEvent")
 
-	mustNoError(t, stack.SyncItem(ctx, item))
+	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
 	count, err := stack.Count(ctx)
-	mustNoError(t, err)
+	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after sync, got %d", count)
 	}

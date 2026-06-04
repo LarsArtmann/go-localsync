@@ -15,6 +15,24 @@ func itemTimestamp(item testItem) time.Time {
 	return item.UpdatedAt
 }
 
+func newVCTestConflict(local, remote testItem) *Conflict[testItem] {
+	return &Conflict[testItem]{
+		Local:    local,
+		Remote:   remote,
+		LocalVC:  VectorClock{NodeID("a"): 1, NodeID("b"): 2},
+		RemoteVC: VectorClock{NodeID("a"): 2, NodeID("b"): 1},
+	}
+}
+
+func newTiedVCTestConflict(local, remote testItem) *Conflict[testItem] {
+	return &Conflict[testItem]{
+		Local:    local,
+		Remote:   remote,
+		LocalVC:  VectorClock{NodeID("a"): 1},
+		RemoteVC: VectorClock{NodeID("a"): 1},
+	}
+}
+
 func TestLWWResolver_WinsByVectorClock(t *testing.T) {
 	t.Parallel()
 
@@ -75,14 +93,7 @@ func TestLWWResolver_LocalWinsByTimestamp(t *testing.T) {
 	local := testItem{Name: "local", UpdatedAt: now.Add(2 * time.Hour)}
 	remote := testItem{Name: "remote", UpdatedAt: now}
 
-	conflict := &Conflict[testItem]{
-		Local:    local,
-		Remote:   remote,
-		LocalVC:  VectorClock{NodeID("a"): 1, NodeID("b"): 2},
-		RemoteVC: VectorClock{NodeID("a"): 2, NodeID("b"): 1},
-	}
-
-	winner, err := resolver.Resolve(conflict)
+	winner, err := resolver.Resolve(newVCTestConflict(local, remote))
 	if err != nil {
 		t.Fatalf("Resolve() error: %v", err)
 	}
@@ -100,14 +111,7 @@ func TestLWWResolver_RemoteWinsByTimestamp(t *testing.T) {
 	local := testItem{Name: "local", UpdatedAt: now}
 	remote := testItem{Name: "remote", UpdatedAt: now.Add(2 * time.Hour)}
 
-	conflict := &Conflict[testItem]{
-		Local:    local,
-		Remote:   remote,
-		LocalVC:  VectorClock{NodeID("a"): 1, NodeID("b"): 2},
-		RemoteVC: VectorClock{NodeID("a"): 2, NodeID("b"): 1},
-	}
-
-	winner, err := resolver.Resolve(conflict)
+	winner, err := resolver.Resolve(newVCTestConflict(local, remote))
 	if err != nil {
 		t.Fatalf("Resolve() error: %v", err)
 	}
@@ -125,14 +129,7 @@ func TestLWWResolver_RemoteWinsOnTie_NoTiebreaker(t *testing.T) {
 	local := testItem{Name: "local", UpdatedAt: now}
 	remote := testItem{Name: "remote", UpdatedAt: now}
 
-	conflict := &Conflict[testItem]{
-		Local:    local,
-		Remote:   remote,
-		LocalVC:  VectorClock{NodeID("a"): 1},
-		RemoteVC: VectorClock{NodeID("a"): 1},
-	}
-
-	winner, err := resolver.Resolve(conflict)
+	winner, err := resolver.Resolve(newTiedVCTestConflict(local, remote))
 	if err != nil {
 		t.Fatalf("Resolve() error: %v", err)
 	}
@@ -169,14 +166,7 @@ func TestLWWResolver_Tiebreaker(t *testing.T) {
 			local := testItem{Name: tt.localName, UpdatedAt: now}
 			remote := testItem{Name: tt.remoteName, UpdatedAt: now}
 
-			conflict := &Conflict[testItem]{
-				Local:    local,
-				Remote:   remote,
-				LocalVC:  VectorClock{NodeID("a"): 1},
-				RemoteVC: VectorClock{NodeID("a"): 1},
-			}
-
-			winner, err := resolver.Resolve(conflict)
+			winner, err := resolver.Resolve(newTiedVCTestConflict(local, remote))
 			if err != nil {
 				t.Fatalf("Resolve() error: %v", err)
 			}
