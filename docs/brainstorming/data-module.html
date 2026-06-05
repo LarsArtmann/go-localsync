@@ -740,7 +740,216 @@
 
         <div class="separator"></div>
 
-        <h2 id="path-to-perfect">5. Path to Perfection</h2>
+        <h2 id="upstream-comparison">5. Comparison: go-cqrs-lite v2.1.0</h2>
+
+        <p class="lead">
+            This project already depends on <code>go-cqrs-lite</code> v2.1.0 for its CQRS stack.
+            A side-by-side comparison reveals that several weaknesses in <code>pkg/data/</code> are
+            problems that go-cqrs-lite solved more robustly. Rather than reinvent, we should adopt.
+        </p>
+
+        <h3>5.1 Pagination: Cursor-Based vs Limit/Offset</h3>
+
+        <div class="comparison">
+            <div>
+                <div class="comparison-label before">go-localsync (offset)</div>
+                <pre><code><span class="keyword">type</span> <span class="type">Page</span>[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    Items   []T
+    <span class="highlight">Total   int64</span>   <span class="comment">// expensive COUNT(*)</span>
+    <span class="highlight">Limit   int</span>     <span class="comment">// can be negative</span>
+    <span class="highlight">Offset  int</span>     <span class="comment">// O(offset) cost</span>
+    HasMore <span class="type">bool</span>
+}</code></pre>
+            </div>
+            <div class="arrow">→</div>
+            <div>
+                <div class="comparison-label after">go-cqrs-lite (cursor)</div>
+                <pre><code><span class="keyword">type</span> <span class="type">Page</span>[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    Items   []T
+    <span class="highlight">HasMore bool</span>  <span class="comment">// no Total — counts stale in append-only logs</span>
+}
+
+<span class="keyword">type</span> <span class="type">ListOptions</span> <span class="keyword">struct</span> {
+    Type  event.AggregateType
+    <span class="highlight">After id.AggregateID</span>  <span class="comment">// cursor: last ID from prev page</span>
+    Limit <span class="type">uint</span>
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="solution-box">
+            <h4>Why Cursor Pagination Wins for Event Sourcing</h4>
+            <p>
+                In an append-only event store, <code>COUNT(*)</code> is expensive and the result
+                is stale the moment it's computed. Cursor pagination (<code>After</code>) is O(1)
+                regardless of page depth. <code>uint</code> for <code>Limit</code> makes negative
+                values impossible at the type level. This is the correct design for CQRS read models.
+            </p>
+        </div>
+
+        <h3>5.2 Schema Versioning: Upcaster vs Decorative Constants</h3>
+
+        <div class="comparison">
+            <div>
+                <div class="comparison-label before">go-localsync (stub)</div>
+                <pre><code><span class="keyword">const</span> (
+    <span class="type">V1</span> Version = <span class="number">1</span>
+    <span class="type">V2</span> Version = <span class="number">2</span>
+)
+<span class="comment">// No Upcast function. No event integration.</span>
+<span class="comment">// ItemSyncedPayload lacks SchemaVersion field.</span></code></pre>
+            </div>
+            <div class="arrow">→</div>
+            <div>
+                <div class="comparison-label after">go-cqrs-lite (production)</div>
+                <pre><code><span class="keyword">type</span> <span class="type">Event</span> <span class="keyword">interface</span> {
+    <span class="func">SchemaVersion</span>() <span class="type">SchemaVersion</span>
+}
+
+<span class="keyword">type</span> <span class="type">Upcaster</span> <span class="keyword">interface</span> {
+    <span class="func">SourceType</span>() <span class="type">event</span>.Type
+    <span class="func">SourceVersion</span>() <span class="type">event</span>.SchemaVersion
+    <span class="func">Upcast</span>(<span class="type">event</span>.Event) (*<span class="type">event</span>.ImmutableEvent, <span class="type">error</span>)
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="solution-box">
+            <h4>Why Upcasters Are Non-Negotiable</h4>
+            <p>
+                Every event in go-cqrs-lite carries <code>SchemaVersion</code>. On replay, an
+                <code>Upcaster</span> transforms old payloads forward before the projection
+                applies them. This makes the event store forward-compatible without rewriting
+                history. go-localsync's <code>Version</code> type is decorative — it doesn't
+                plug into the event pipeline.
+            </p>
+        </div>
+
+        <h3>5.3 SQL Abstraction: Dialect Interface vs String Concat</h3>
+
+        <div class="comparison">
+            <div>
+                <div class="comparison-label before">go-localsync (strings)</div>
+                <pre><code><span class="comment">// Criterion.ToSQL returns raw strings</span>
+<span class="keyword">return</span> strings.<span class="func">Join</span>(clauses, <span class="string">" AND "</span>), args
+<span class="comment">// No dialect support. SQLite only.</span></code></pre>
+            </div>
+            <div class="arrow">→</div>
+            <div>
+                <div class="comparison-label after">go-cqrs-lite (typed)</div>
+                <pre><code><span class="keyword">type</span> <span class="type">Dialect</span> <span class="keyword">interface</span> {
+    <span class="func">Placeholder</span>(index <span class="type">int</span>) <span class="type">string</span>
+    <span class="func">FormatTime</span>(t time.Time) <span class="type">any</span>
+    <span class="func">ScanTimeDest</span>() <span class="type">any</span>
+    <span class="func">ParseTime</span>(src <span class="type">any</span>) (time.Time, <span class="type">error</span>)
+    <span class="func">EventSchema</span>() <span class="type">string</span>
+}
+
+<span class="comment">// PostgresDialect: "$1", time.Time</span>
+<span class="comment">// SQLiteDialect:  "?", RFC3339Nano</span></code></pre>
+            </div>
+        </div>
+
+        <div class="solution-box">
+            <h4>Why Dialect Abstraction Matters</h4>
+            <p>
+                go-cqrs-lite's <code>Dialect</code> interface handles placeholder syntax,
+                time serialization, and schema DDL differences. The same store implementation
+                works with SQLite (local dev), PostgreSQL (production), and any future backend.
+                go-localsync hardcodes <code>?</code> placeholders and <code>RFC3339Nano</code>
+                time formatting — it cannot run on PostgreSQL without rewriting every query.
+            </p>
+        </div>
+
+        <h3>5.4 Observability: MetricsRecorder vs No-Op</h3>
+
+        <div class="comparison">
+            <div>
+                <div class="comparison-label before">go-localsync (stub)</div>
+                <pre><code><span class="keyword">type</span> <span class="type">Observable</span>[T <span class="keyword">any</span>] <span class="keyword">struct</span> {
+    base Reader[T]  <span class="comment">// claims metrics, does nothing</span>
+}
+<span class="comment">// Get/List/Count: pure delegation, no timing</span></code></pre>
+            </div>
+            <div class="arrow">→</div>
+            <div>
+                <div class="comparison-label after">go-cqrs-lite (interface)</div>
+                <pre><code><span class="keyword">type</span> <span class="type">MetricsRecorder</span> <span class="keyword">interface</span> {
+    <span class="func">Observe</span>(
+        ctx context.Context,
+        name <span class="type">string</span>,
+        duration time.Duration,
+        labels ...<span class="type">string</span>,
+    )
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="solution-box">
+            <h4>Adopt the Interface, Implement the Decorator</h4>
+            <p>
+                go-cqrs-lite defines <code>MetricsRecorder</code> but doesn't force a metrics
+                backend — you bring your own (Prometheus, Datadog, etc.). go-localsync should
+                replace its no-op <code>Observable</code> with a real decorator that accepts
+                a <code>MetricsRecorder</code> and wraps every <code>Reader[T]</code> method.
+            </p>
+        </div>
+
+        <h3>5.5 What go-localsync Does Better</h3>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="badge badge-good">Unique Value</span>
+                Domain-Specific Types
+            </div>
+            <p>
+                go-cqrs-lite's <code>AggregateRef</code> is generic — it has no domain meaning.
+                go-localsync's <code>Item</code>, <code>ProviderItem</code>, and <code>ItemView</code>
+                are purpose-built for the sync domain. The composite <code>Key</code> type with
+                branded IDs is genuinely novel — go-cqrs-lite uses a bare string for <code>AggregateID</code>.
+            </p>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+            <div class="card-header">
+                <span class="badge badge-good">Unique Value</span>
+                Generic Criterion Combinators
+            </div>
+            <p>
+                go-cqrs-lite has no equivalent to <code>And[T]</code>, <code>Or[T]</code>, <code>Not[T]</code>.
+                Its <code>InMemoryAggregateReader</code> filters ad-hoc with hardcoded predicates.
+                go-localsync's dual-dispatch criteria (Match + ToSQL) are a real innovation for
+                backend-agnostic queries.
+            </p>
+        </div>
+
+        <div class="card" style="margin-top: 16px;">
+            <div class="card-header">
+                <span class="badge badge-good">Unique Value</span>
+                Mapper Composition Pipelines
+            </div>
+            <p>
+                go-cqrs-lite has no <code>Mapper[From,To]</code> abstraction or <code>Compose[A,B,C]</code>
+                combinator. go-localsync's transform layer is genuinely useful for any layered
+                architecture — it could be extracted into a standalone module.
+            </p>
+        </div>
+
+        <div class="insight-box">
+            <h4>The Honest Summary</h4>
+            <p>
+                Where problems overlap (pagination, schema migration, SQL dialects, observability),
+                go-cqrs-lite's solutions are strictly better. Where go-localsync innovates
+                (domain-specific types, composite keys, generic criteria, mapper pipelines), it
+                adds real value that go-cqrs-lite doesn't provide. The path forward is clear:
+                <strong>adopt go-cqrs-lite's proven patterns where they exist, and keep the
+                domain-specific innovations where they don't.</strong>
+            </p>
+        </div>
+
+        <div class="separator"></div>
+
+        <h2 id="path-to-perfect">6. Path to Perfection</h2>
 
         <div class="section-intro">
             <p class="lead">
@@ -750,7 +959,7 @@
             </p>
         </div>
 
-        <h3>5.1 Kill the Getter Methods — Use Struct Tags</h3>
+        <h3>6.1 Kill the Getter Methods — Use Struct Tags</h3>
 
         <div class="comparison">
             <div>
@@ -784,7 +993,7 @@
             </p>
         </div>
 
-        <h3>5.2 Replace SQL Strings with a Type-Safe AST</h3>
+        <h3>6.2 Replace SQL Strings with a Type-Safe AST</h3>
 
         <div class="comparison">
             <div>
@@ -823,7 +1032,7 @@
             </ul>
         </div>
 
-        <h3>5.3 Add Real Observability with Middleware</h3>
+        <h3>6.3 Add Real Observability with Middleware</h3>
 
         <div class="solution-box">
             <h4>The Pattern: Decorator Chain</h4>
@@ -846,7 +1055,7 @@
             </p>
         </div>
 
-        <h3>5.4 Add Transaction Support</h3>
+        <h3>6.4 Add Transaction Support</h3>
 
         <div class="solution-box">
             <h4>Unit of Work Pattern</h4>
@@ -866,7 +1075,7 @@
             </p>
         </div>
 
-        <h3>5.5 Implement Real Schema Migration</h3>
+        <h3>6.5 Implement Real Schema Migration</h3>
 
         <div class="solution-box">
             <h4>Versioned Migrations with Type Safety</h4>
@@ -893,7 +1102,7 @@
             </p>
         </div>
 
-        <h3>5.6 Add Batch Operations</h3>
+        <h3>6.6 Add Batch Operations</h3>
 
         <div class="solution-box">
             <h4>Batch Mapper for Sync Performance</h4>
@@ -920,7 +1129,7 @@
             </p>
         </div>
 
-        <h3>5.7 Add Connection Pool and Dialect Abstraction</h3>
+        <h3>6.7 Add Connection Pool and Dialect Abstraction</h3>
 
         <div class="solution-box">
             <h4>Database Handle with Dialect</h4>
@@ -945,7 +1154,7 @@
 
         <div class="separator"></div>
 
-        <h2 id="architecture">6. Target Architecture</h2>
+        <h2 id="architecture">7. Target Architecture</h2>
 
         <p class="lead">
             After all improvements, the data module would look like this:
@@ -962,10 +1171,10 @@
 │   ├── <span class="file">ast.go</span>           — Expr, Eq, And, Or (SQL AST)
 │   ├── <span class="file">query.go</span>         — Query[T], QueryBuilder[T]
 │   ├── <span class="file">page.go</span>          — Page[T], MapPage
-│   └── <span class="file">compiler.go</span>      — QueryCompiler with dialect support
+│   └── <span class="file">compiler.go</span>      — QueryCompiler using go-cqrs-lite/sql.Dialect
 ├── <span class="dir">schema/</span>
 │   ├── <span class="file">version.go</span>       — Version type, registry
-│   ├── <span class="file">migrate.go</span>       — Migration runner, forward-only
+│   ├── <span class="file">migrate.go</span>       — Migration runner (wraps go-cqrs-lite/schema.Upcaster)
 │   └── <span class="file">migrations.go</span>    — Concrete migrations V1→V2, V2→V3
 ├── <span class="dir">transform/</span>
 │   ├── <span class="file">mapper.go</span>        — Mapper[From,To], Compose
@@ -977,12 +1186,12 @@
 │   ├── <span class="file">repo.go</span>          — Reader[T], Writer[T], Repository[T]
 │   ├── <span class="file">decorator.go</span>     — Logging, Metrics, Cache decorators
 │   ├── <span class="file">uow.go</span>           — UnitOfWork for transactions
-│   └── <span class="file">dialect.go</span>       — Dialect interface, SQLite impl
+│   └── <span class="file">dialect.go</span>       — go-cqrs-lite/sql.Dialect adapter
 └── <span class="dir">internal/</span>
     └── <span class="file">gentags/</span>         — go:generate tool for struct tag codegen
         </div>
 
-        <h3>6.1 Dependency Graph</h3>
+        <h3>7.1 Dependency Graph</h3>
 
         <pre><code>┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
 │   Provider      │────▶│  data/transform │────▶│   data/model    │
@@ -1006,7 +1215,7 @@
 <span class="comment">// The Query[T] compiles to an AST, then to dialect-specific SQL.</span>
 <span class="comment">// The UnitOfWork coordinates writes across the event store and read model.</span></code></pre>
 
-        <h3>6.2 Key Metrics: Current vs Target</h3>
+        <h3>7.2 Key Metrics: Current vs Target</h3>
 
         <table>
             <thead>
@@ -1081,16 +1290,20 @@
                 getter methods.
             </p>
             <p>
-                The path to superb requires three big moves: (1) struct tags + code generation to
-                eliminate getters, (2) an SQL AST to make query compilation safe and optimizable,
-                and (3) a UnitOfWork pattern with real decorators for transactions and observability.
-                These are not cosmetic changes — they fundamentally change how the module compiles
-                queries, tracks performance, and guarantees consistency.
+                The path to superb requires <strong>four big moves</strong>: (1) struct tags + code
+                generation to eliminate getters, (2) adopt go-cqrs-lite's <code>Dialect</code>
+                interface and cursor pagination instead of reinventing SQL string generation,
+                (3) wire go-cqrs-lite's <code>Upcaster</code> pattern for real schema migration
+                on event replay, and (4) replace the no-op <code>Observable</code> with a
+                decorator chain using go-cqrs-lite's <code>MetricsRecorder</code> interface.
+                Where go-localsync innovates (composite keys, generic criteria, mapper pipelines),
+                keep it. Where go-cqrs-lite already solved the problem (dialects, upcasters, metrics),
+                adopt it. Don't reinvent what your upstream dependency already does better.
             </p>
         </div>
 
         <p style="color: var(--text-muted); margin-top: 40px; font-size: 0.9rem;">
-            Document generated 2026-06-05. This is a living document — update it as the module evolves.
+            Document generated 2026-06-05. Updated 2026-06-05 with go-cqrs-lite v2.1.0 comparison.
         </p>
     </div>
 </body>
