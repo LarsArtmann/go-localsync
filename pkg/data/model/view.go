@@ -47,6 +47,7 @@ type StatsView struct {
 // EmptyStatsView returns a zero-value StatsView with initialized maps.
 func EmptyStatsView() StatsView {
 	return StatsView{
+		TotalItems: 0,
 		ItemTypes:  []string{},
 		TypeCounts: make(map[string]int64),
 		Sources:    make(map[string]int64),

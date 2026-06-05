@@ -41,13 +41,13 @@ func (q Query[T]) Sort(items []T) {
 		return
 	}
 
-	slices.SortFunc(items, func(a, b T) int {
+	slices.SortFunc(items, func(first, second T) int {
 		for _, order := range q.OrderBy {
-			if order.Less(a, b) {
+			if order.Less(first, second) {
 				return -1
 			}
 
-			if order.Less(b, a) {
+			if order.Less(second, first) {
 				return 1
 			}
 		}
@@ -67,7 +67,12 @@ type QueryBuilder[T any] struct {
 
 // NewBuilder starts a new query builder.
 func NewBuilder[T any]() QueryBuilder[T] {
-	return QueryBuilder[T]{}
+	return QueryBuilder[T]{
+		criteria: nil,
+		orderBy:  nil,
+		limit:    0,
+		offset:   0,
+	}
 }
 
 // Where adds a criterion. The builder is returned for chaining.

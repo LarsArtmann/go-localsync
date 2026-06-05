@@ -328,7 +328,7 @@ func TestMapPage(t *testing.T) {
 
 	page := NewPage([]int{1, 2, 3}, 100, 10, 0)
 	mapped := MapPage(page, func(n int) string {
-		return string(rune('a' + n - 1))
+		return string(rune('a' + n - 1)) //nolint:gosec // test: n is always 1-3, no overflow possible
 	})
 
 	if len(mapped.Items) != 3 {

@@ -148,7 +148,8 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 	}
 
 	var decoded Item
-	if err := json.Unmarshal(data, &decoded); err != nil {
+	err = json.Unmarshal(data, &decoded)
+	if err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
 

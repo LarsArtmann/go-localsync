@@ -7,6 +7,7 @@ package transform
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
@@ -48,21 +49,21 @@ func Compose[A, B, C any](
 	bc Mapper[B, C],
 ) Mapper[A, C] {
 	return NewMapper[A, C](func(ctx context.Context, a A) (C, error) {
-		b, err := ab.Map(ctx, a)
+		mapped, err := ab.Map(ctx, a)
 		if err != nil {
 			var zero C
 
 			return zero, fmt.Errorf("compose A→B: %w", err)
 		}
 
-		c, err := bc.Map(ctx, b)
+		result, err := bc.Map(ctx, mapped)
 		if err != nil {
 			var zero C
 
 			return zero, fmt.Errorf("compose B→C: %w", err)
 		}
 
-		return c, nil
+		return result, nil
 	})
 }
 
@@ -78,52 +79,61 @@ func AndThen[A, B, C any](
 // Concrete Mappers for the sync domain.
 // ---------------------------------------------------------------------------
 
-// FromProviderItem maps a ProviderItem (provider DTO) to a domain Item.
+// NewFromProviderItem maps a ProviderItem (provider DTO) to a domain Item.
 // This is the boundary between the provider layer and the domain layer.
-var FromProviderItem Mapper[*model.ProviderItem, *model.Item] = NewMapper(
-	func(_ context.Context, p *model.ProviderItem) (*model.Item, error) {
-		if p == nil {
-			return nil, fmt.Errorf("from provider item: %w", errNilInput)
-		}
+func NewFromProviderItem() Mapper[*model.ProviderItem, *model.Item] {
+	return NewMapper(
+		func(_ context.Context, p *model.ProviderItem) (*model.Item, error) {
+			if p == nil {
+				return nil, fmt.Errorf("from provider item: %w", errNilInput)
+			}
 
-		err := p.Validate()
-		if err != nil {
-			return nil, fmt.Errorf("from provider item: invalid input: %w", err)
-		}
+			err := p.Validate()
+			if err != nil {
+				return nil, fmt.Errorf("from provider item: invalid input: %w", err)
+			}
 
-		return &model.Item{
-			ID:             id.NewItemID(),
-			ExternalID:     p.ExternalID,
-			Source:         p.Source,
-			Type:           p.Type,
-			ActorLogin:     p.ActorLogin,
-			ActorAvatarURL: p.ActorAvatarURL,
-			RepoName:       p.RepoName,
-			RepoURL:        p.RepoURL,
-			CreatedAt:      p.CreatedAt,
-			UpdatedAt:      p.UpdatedAt,
-			SchemaVersion:  schema.CurrentVersion(),
-		}, nil
-	},
-)
+			return &model.Item{
+				ID:             id.NewItemID(),
+				ExternalID:     p.ExternalID,
+				Source:         p.Source,
+				Type:           p.Type,
+				ActorLogin:     p.ActorLogin,
+				ActorAvatarURL: p.ActorAvatarURL,
+				RepoName:       p.RepoName,
+				RepoURL:        p.RepoURL,
+				CreatedAt:      p.CreatedAt,
+				UpdatedAt:      p.UpdatedAt,
+				SchemaVersion:  schema.CurrentVersion(),
+			}, nil
+		},
+	)
+}
 
-// ToItemView maps a domain Item to a read-model ItemView.
+// NewToItemView maps a domain Item to a read-model ItemView.
 // In production, this would accept sync metadata (counts, timestamps).
-var ToItemView Mapper[*model.Item, *model.ItemView] = NewMapper(
-	func(_ context.Context, item *model.Item) (*model.ItemView, error) {
-		if item == nil {
-			return nil, fmt.Errorf("to item view: %w", errNilInput)
-		}
+func NewToItemView() Mapper[*model.Item, *model.ItemView] {
+	return NewMapper(
+		func(_ context.Context, item *model.Item) (*model.ItemView, error) {
+			if item == nil {
+				return nil, fmt.Errorf("to item view: %w", errNilInput)
+			}
 
-		return &model.ItemView{
-			Item:      *item,
-			IsDeleted: false,
-		}, nil
-	},
-)
+			return &model.ItemView{
+				Item:          *item,
+				LastSyncedAt:  time.Time{},
+				SyncCount:     0,
+				ConflictCount: 0,
+				IsDeleted:     false,
+			}, nil
+		},
+	)
+}
 
-// ProviderToView composes the full provider → view pipeline.
-var ProviderToView Mapper[*model.ProviderItem, *model.ItemView] = Compose(
-	FromProviderItem,
-	ToItemView,
-)
+// NewProviderToView composes the full provider → view pipeline.
+func NewProviderToView() Mapper[*model.ProviderItem, *model.ItemView] {
+	return Compose(
+		NewFromProviderItem(),
+		NewToItemView(),
+	)
+}

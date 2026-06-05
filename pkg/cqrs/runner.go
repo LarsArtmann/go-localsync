@@ -19,7 +19,7 @@ func startProjectionRunner(
 	}
 
 	if sr.loader == nil {
-		return nil, nil
+		return func() {}, nil
 	}
 
 	runner, err := cqrsprojection.NewRunner(

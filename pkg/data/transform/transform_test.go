@@ -26,7 +26,7 @@ func TestFromProviderItem_Valid(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	item, err := FromProviderItem.Map(ctx, p)
+	item, err := NewFromProviderItem().Map(ctx, p)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -64,7 +64,7 @@ func TestFromProviderItem_Nil(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	_, err := FromProviderItem.Map(ctx, nil)
+	_, err := NewFromProviderItem().Map(ctx, nil)
 	if err == nil {
 		t.Error("expected error for nil input")
 	}
@@ -80,7 +80,7 @@ func TestFromProviderItem_Invalid(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	_, err := FromProviderItem.Map(ctx, p)
+	_, err := NewFromProviderItem().Map(ctx, p)
 	if err == nil {
 		t.Error("expected error for invalid input (missing ExternalID)")
 	}
@@ -97,7 +97,7 @@ func TestToItemView_Valid(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	view, err := ToItemView.Map(ctx, item)
+	view, err := NewToItemView().Map(ctx, item)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -115,7 +115,7 @@ func TestToItemView_Nil(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
-	_, err := ToItemView.Map(ctx, nil)
+	_, err := NewToItemView().Map(ctx, nil)
 	if err == nil {
 		t.Error("expected error for nil input")
 	}
@@ -126,7 +126,7 @@ func TestCompose(t *testing.T) {
 
 	// Create a simple A→B mapper
 	toString := NewMapper(func(_ context.Context, n int) (string, error) {
-		return string(rune('a' + n)), nil
+		return string(rune('a' + n)), nil //nolint:gosec // test: n is always 1-3, no overflow possible
 	})
 
 	// Create a simple B→C mapper
@@ -200,7 +200,7 @@ func TestProviderToView(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	view, err := ProviderToView.Map(ctx, p)
+	view, err := NewProviderToView().Map(ctx, p)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
