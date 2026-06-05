@@ -49,12 +49,12 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 		return fmt.Errorf("decode ItemSyncedPayload for event %s: %w", evt.ID(), err)
 	}
 
-	item, err := itemFromPayload(payload)
+	item, err := DataItemFromPayload(payload)
 	if err != nil {
 		return fmt.Errorf("reconstruct item from payload: %w", err)
 	}
 
-	return p.readModel.Upsert(ctx, item)
+	return p.readModel.Upsert(ctx, FromDataItem(item, payload.RawJSON))
 }
 
 func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) error {

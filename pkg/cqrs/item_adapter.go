@@ -1,6 +1,8 @@
 package cqrs
 
 import (
+	"fmt"
+
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -57,6 +59,7 @@ func ToItemView(item *model.Item, rawJSON []byte) *model.ItemView {
 		return nil
 	}
 
+	//nolint:exhaustruct // view fields populated by projection
 	return &model.ItemView{
 		Item:      *item,
 		IsDeleted: false,
@@ -75,7 +78,7 @@ func DataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 		schemaVer = schema.V1
 	}
 
-	return &model.Item{
+	item := &model.Item{
 		ID:             itemID,
 		ExternalID:     id.NewExternalID(payload.SourceID),
 		Source:         id.NewProviderID(payload.Source),
@@ -87,12 +90,19 @@ func DataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 		CreatedAt:      fromUnixNano(payload.CreatedAt),
 		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
 		SchemaVersion:  schemaVer,
-	}, nil
+	}
+
+	if err := item.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid item from payload: %w", err)
+	}
+
+	return item, nil
 }
 
 // DataItemToPayload serializes a data.Item into an event payload.
 func DataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 	if item == nil {
+		//nolint:exhaustruct // zero payload for nil item
 		return ItemSyncedPayload{}
 	}
 

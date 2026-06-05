@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -47,7 +48,7 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 	if got == nil {
 		t.Fatal("expected non-nil item")
 	}
-	testutil.AssertType(t, got, "PushEvent")
+	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 }
 
 func TestMemoryReadModel_GetNotFound(t *testing.T) {
@@ -69,12 +70,12 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	item := &provider.Item{
+	item := &model.Item{
 		ExternalID: id.NewExternalID("123"),
 		Source:     id.NewProviderID("github"),
 	}
 
-	testutil.MustNoError(t, rm.Upsert(ctx, item))
+	testutil.MustNoError(t, rm.Upsert(ctx, FromDataItem(item, nil)))
 	testutil.MustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("123")))
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
@@ -189,7 +190,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 
 	got, err := rm.Get(context.Background(), "github", id.NewExternalID("123"))
 	testutil.MustNoError(t, err)
-	testutil.AssertType(t, got, "PushEvent")
+	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 }
 
 func TestProjector_ItemDeleted(t *testing.T) {
@@ -282,7 +283,7 @@ func TestReadModel_Integration(t *testing.T) {
 
 	item := testItem("123", "PushEvent")
 
-	decide := DecideSync(item, nil)
+	decide := DecideSync(ToDataItem(item), nil, nil)
 	events, err := decide(InitialState, 0)
 	testutil.MustNoError(t, err)
 	if len(events) != 1 {

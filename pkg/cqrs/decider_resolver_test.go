@@ -7,25 +7,25 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/crdt"
-	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 type localWinsResolver struct{}
 
-func (localWinsResolver) Resolve(c *crdt.Conflict[*provider.Item]) (*provider.Item, error) {
+func (localWinsResolver) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
 	return c.Local, nil
 }
 
 type remoteWinsResolver struct{}
 
-func (remoteWinsResolver) Resolve(c *crdt.Conflict[*provider.Item]) (*provider.Item, error) {
+func (remoteWinsResolver) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
 	return c.Remote, nil
 }
 
 type errorResolver struct{}
 
-func (errorResolver) Resolve(_ *crdt.Conflict[*provider.Item]) (*provider.Item, error) {
+func (errorResolver) Resolve(_ *crdt.Conflict[*model.Item]) (*model.Item, error) {
 	return nil, errors.New("resolver failed")
 }
 
@@ -40,7 +40,7 @@ func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(remoteItem, new(remoteWinsResolver))(state, 1)
+	events, err := DecideSync(ToDataItem(remoteItem), nil, new(remoteWinsResolver))(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -85,7 +85,7 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 
 	state := SyncItemState{Item: localItem}
 
-	events, err := DecideSync(remoteItem, new(localWinsResolver))(state, 1)
+	events, err := DecideSync(ToDataItem(remoteItem), nil, new(localWinsResolver))(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -130,7 +130,7 @@ func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", time.Now())
 
-	events, err := DecideSync(remoteItem, new(errorResolver))(state, 1)
+	events, err := DecideSync(ToDataItem(remoteItem), nil, new(errorResolver))(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -159,7 +159,7 @@ func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(remoteItem, resolver)(state, 1)
+	events, err := DecideSync(ToDataItem(remoteItem), nil, resolver)(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -188,7 +188,7 @@ func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(remoteItem, resolver)(state, 1)
+	events, err := DecideSync(ToDataItem(remoteItem), nil, resolver)(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))

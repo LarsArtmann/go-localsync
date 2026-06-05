@@ -72,6 +72,27 @@ type ProviderItem struct {
 }
 
 // Validate checks that all required identity fields are present.
+func (item Item) Validate() error {
+	if item.ExternalID.IsZero() {
+		return errMissingExternalID
+	}
+
+	if item.Source.IsZero() {
+		return errMissingSource
+	}
+
+	if item.Type.IsZero() {
+		return errMissingType
+	}
+
+	if item.CreatedAt.IsZero() {
+		return errMissingCreatedAt
+	}
+
+	return nil
+}
+
+// Validate checks that all required identity fields are present.
 func (p ProviderItem) Validate() error {
 	if p.ExternalID.IsZero() {
 		return errMissingExternalID

@@ -6,7 +6,7 @@ package testutil
 import (
 	"testing"
 
-	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 )
 
 // MustNoError fails the test immediately if err is non-nil.
@@ -28,14 +28,14 @@ func AssertEqual[T comparable](t *testing.T, got, want T, label string) {
 }
 
 // AssertExternalID fails the test if the item's ExternalID does not match want.
-func AssertExternalID(t *testing.T, item *provider.Item, want string) {
+func AssertExternalID(t *testing.T, item *model.Item, want string) {
 	t.Helper()
 
 	AssertEqual(t, item.ExternalID.Get(), want, "ExternalID")
 }
 
 // AssertType fails the test if the item's Type does not match want.
-func AssertType(t *testing.T, item *provider.Item, want string) {
+func AssertType(t *testing.T, item *model.Item, want string) {
 	t.Helper()
 
 	AssertEqual(t, item.Type.Get(), want, "Type")

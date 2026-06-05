@@ -130,23 +130,39 @@ func TestProviderItemValidate(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:    "missing externalID",
-			item:    ProviderItem{Source: id.NewProviderID("github"), Type: id.NewEventTypeID("PushEvent"), CreatedAt: time.Now()},
+			name: "missing externalID",
+			item: ProviderItem{
+				Source:    id.NewProviderID("github"),
+				Type:      id.NewEventTypeID("PushEvent"),
+				CreatedAt: time.Now(),
+			},
 			wantErr: true,
 		},
 		{
-			name:    "missing source",
-			item:    ProviderItem{ExternalID: id.NewExternalID("123"), Type: id.NewEventTypeID("PushEvent"), CreatedAt: time.Now()},
+			name: "missing source",
+			item: ProviderItem{
+				ExternalID: id.NewExternalID("123"),
+				Type:       id.NewEventTypeID("PushEvent"),
+				CreatedAt:  time.Now(),
+			},
 			wantErr: true,
 		},
 		{
-			name:    "missing type",
-			item:    ProviderItem{ExternalID: id.NewExternalID("123"), Source: id.NewProviderID("github"), CreatedAt: time.Now()},
+			name: "missing type",
+			item: ProviderItem{
+				ExternalID: id.NewExternalID("123"),
+				Source:     id.NewProviderID("github"),
+				CreatedAt:  time.Now(),
+			},
 			wantErr: true,
 		},
 		{
-			name:    "missing createdAt",
-			item:    ProviderItem{ExternalID: id.NewExternalID("123"), Source: id.NewProviderID("github"), Type: id.NewEventTypeID("PushEvent")},
+			name: "missing createdAt",
+			item: ProviderItem{
+				ExternalID: id.NewExternalID("123"),
+				Source:     id.NewProviderID("github"),
+				Type:       id.NewEventTypeID("PushEvent"),
+			},
 			wantErr: true,
 		},
 	}

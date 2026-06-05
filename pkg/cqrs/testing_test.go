@@ -10,6 +10,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -51,7 +52,7 @@ func testSyncedPayload(sourceID, eventType string) ItemSyncedPayload {
 
 func testActiveState(sourceID, eventType string) SyncItemState {
 	return SyncItemState{
-		Item: &provider.Item{
+		Item: &model.Item{
 			ExternalID: id.NewExternalID(sourceID),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID(eventType),
@@ -61,7 +62,7 @@ func testActiveState(sourceID, eventType string) SyncItemState {
 
 func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) SyncItemState {
 	return SyncItemState{
-		Item: &provider.Item{
+		Item: &model.Item{
 			ExternalID: id.NewExternalID(sourceID),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID(eventType),
@@ -72,7 +73,7 @@ func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) Syn
 
 func testDeletedState(sourceID string) SyncItemState {
 	return SyncItemState{
-		Item:    &provider.Item{ExternalID: id.NewExternalID(sourceID)},
+		Item:    &model.Item{ExternalID: id.NewExternalID(sourceID)},
 		Deleted: true,
 	}
 }
@@ -106,6 +107,10 @@ func testItem(sourceID, itemType string) *provider.Item {
 	}
 }
 
+func testDataItem(sourceID, itemType string) *model.Item {
+	return ToDataItem(testItem(sourceID, itemType))
+}
+
 func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected int64) {
 	t.Helper()
 
@@ -126,10 +131,10 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 	t.Fatalf("timed out waiting for count=%d, got %d", expected, count)
 }
 
-func newUpdatedAtLWWResolver(t *testing.T) *crdt.LWWResolver[*provider.Item] {
+func newUpdatedAtLWWResolver(t *testing.T) *crdt.LWWResolver[*model.Item] {
 	t.Helper()
 
-	resolver, err := crdt.NewLWWResolver[*provider.Item](func(item *provider.Item) time.Time {
+	resolver, err := crdt.NewLWWResolver[*model.Item](func(item *model.Item) time.Time {
 		return item.UpdatedAt
 	})
 	if err != nil {

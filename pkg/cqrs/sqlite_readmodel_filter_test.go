@@ -95,7 +95,7 @@ func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
 	if len(items) != 1 {
 		t.Errorf("expected 1 item after Since cutoff, got %d", len(items))
 	}
-	testutil.AssertExternalID(t, items[0], "2")
+	testutil.AssertEqual(t, items[0].ExternalID.Get(), "2", "ExternalID")
 
 	count, err := rm.Count(ctx, provider.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
@@ -155,7 +155,7 @@ func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	if len(items) != 1 {
 		t.Errorf("expected 1 PushEvent by alice, got %d", len(items))
 	}
-	testutil.AssertExternalID(t, items[0], "1")
+	testutil.AssertEqual(t, items[0].ExternalID.Get(), "1", "ExternalID")
 }
 
 func TestSQLiteReadModel_List_ZeroResults(t *testing.T) {

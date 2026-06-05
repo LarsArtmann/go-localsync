@@ -17,6 +17,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -39,7 +40,7 @@ const (
 type CQRSConfig struct {
 	Backend          string
 	DBPath           string
-	ConflictResolver crdt.ConflictResolver[*provider.Item]
+	ConflictResolver crdt.ConflictResolver[*model.Item]
 }
 
 // CQRSStack wires together the event store, bus, decider repository, read model,
@@ -51,7 +52,7 @@ type CQRSStack struct {
 	ReadModel         ReadModel
 	CommandDispatcher *command.Dispatcher
 	QueryDispatcher   *query.Dispatcher
-	conflictResolver  crdt.ConflictResolver[*provider.Item]
+	conflictResolver  crdt.ConflictResolver[*model.Item]
 	db                *sql.DB
 	cancelRunner      context.CancelFunc
 }
@@ -140,7 +141,8 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 
 	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
-		Item:         item,
+		Item:         ToDataItem(item),
+		RawJSON:      item.RawJSON,
 	})
 }
 
@@ -176,6 +178,7 @@ func (s *CQRSStack) SyncItems(
 
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
+		dataItem := ToDataItem(item)
 
 		var (
 			eventCount     int
@@ -186,7 +189,7 @@ func (s *CQRSStack) SyncItems(
 		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
 			wasNew = state.IsNew()
 
-			events, err := DecideSync(item, s.conflictResolver, syncOpts...)(state, ver)
+			events, err := DecideSync(dataItem, item.RawJSON, s.conflictResolver, syncOpts...)(state, ver)
 			if err != nil {
 				return nil, fmt.Errorf(
 					"decide sync for %s/%s: %w",

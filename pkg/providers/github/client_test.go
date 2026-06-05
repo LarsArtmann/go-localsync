@@ -94,12 +94,12 @@ func TestFetch_DefaultOptions(t *testing.T) {
 		t.Fatalf("expected 1 item, got %d", len(result.Items))
 	}
 	if result.Items[0].ExternalID.Get() != "123" {
-		testutil.AssertExternalID(t, result.Items[0], "123")
+		testutil.AssertEqual(t, result.Items[0].ExternalID.Get(), "123", "ExternalID")
 	}
 	if result.Items[0].ID.String() == "" {
 		t.Error("expected non-empty ID")
 	}
-	testutil.AssertType(t, result.Items[0], "PushEvent")
+	testutil.AssertEqual(t, result.Items[0].Type.Get(), "PushEvent", "Type")
 	if result.Items[0].ActorLogin.Get() != "octocat" {
 		t.Errorf("expected ActorLogin=octocat, got %s", result.Items[0].ActorLogin.Get())
 	}

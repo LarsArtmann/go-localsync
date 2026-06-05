@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -73,11 +73,11 @@ func TestFold_ItemSyncedOverwritesState(t *testing.T) {
 func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	t.Parallel()
 
-	item := testItem("123", "PushEvent")
-	item.ID = id.NewItemID()
-	originalID := item.ID.String()
+	dataItem := testDataItem("123", "PushEvent")
+	dataItem.ID = id.NewItemID()
+	originalID := dataItem.ID.String()
 
-	events, err := DecideSync(item, nil)(InitialState, 0)
+	events, err := DecideSync(dataItem, nil, nil)(InitialState, 0)
 	testutil.MustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -148,9 +148,9 @@ func TestFold_UnknownEventType(t *testing.T) {
 func TestDecideSync_NewItem(t *testing.T) {
 	t.Parallel()
 
-	item := testItem("123", "PushEvent")
+	item := testDataItem("123", "PushEvent")
 
-	events, err := DecideSync(item, nil)(InitialState, 0)
+	events, err := DecideSync(item, nil, nil)(InitialState, 0)
 	testutil.MustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -166,7 +166,7 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 	item.UpdatedAt = now
 
 	state := SyncItemState{
-		Item: &provider.Item{
+		Item: &model.Item{
 			ExternalID: id.NewExternalID("123"),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
@@ -176,7 +176,7 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 		},
 	}
 
-	events, err := DecideSync(item, nil)(state, 1)
+	events, err := DecideSync(ToDataItem(item), nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("unchanged item produces no events, got %d", len(events))
@@ -186,12 +186,12 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 func TestDecideSync_ConflictResolution(t *testing.T) {
 	t.Parallel()
 
-	item := testItem("123", "PushEvent")
+	item := testDataItem("123", "PushEvent")
 	item.UpdatedAt = time.Now().Add(time.Hour)
 
 	state := testStateWithTimestamp("123", "PushEvent", time.Now())
 
-	events, err := DecideSync(item, nil)(state, 1)
+	events, err := DecideSync(item, nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -206,12 +206,12 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 	localTime := time.Now().Truncate(time.Millisecond)
 	remoteTime := localTime.Add(2 * time.Hour)
 
-	item := testItem("123", "PushEvent")
+	item := testDataItem("123", "PushEvent")
 	item.UpdatedAt = remoteTime
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(item, nil)(state, 1)
+	events, err := DecideSync(item, nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -236,11 +236,11 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 	t.Parallel()
 
-	item := testItem("123", "PushEvent")
+	item := testDataItem("123", "PushEvent")
 
 	state := testDeletedState("123")
 
-	events, err := DecideSync(item, nil)(state, 2)
+	events, err := DecideSync(item, nil, nil)(state, 2)
 	testutil.MustNoError(t, err)
 	if len(events) != 1 {
 		t.Fatalf("expected 1 event, got %d", len(events))
@@ -290,7 +290,7 @@ func TestSyncItemState_IsNew(t *testing.T) {
 		t.Error("expected initial state to be new")
 	}
 
-	existing := SyncItemState{Item: &provider.Item{}}
+	existing := SyncItemState{Item: &model.Item{}}
 	if existing.IsNew() {
 		t.Error("expected existing state to not be new")
 	}

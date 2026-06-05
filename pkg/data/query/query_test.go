@@ -9,20 +9,20 @@ import (
 
 // testItem is a minimal type that satisfies all criterion interface constraints.
 type testItem struct {
-	source     id.ProviderID
-	itemType   id.EventTypeID
-	actor      id.ActorID
-	repo       id.RepoID
-	createdAt  time.Time
-	updatedAt  time.Time
+	source    id.ProviderID
+	itemType  id.EventTypeID
+	actor     id.ActorID
+	repo      id.RepoID
+	createdAt time.Time
+	updatedAt time.Time
 }
 
-func (t testItem) GetSource() id.ProviderID     { return t.source }
-func (t testItem) GetType() id.EventTypeID      { return t.itemType }
-func (t testItem) GetActorLogin() id.ActorID    { return t.actor }
-func (t testItem) GetRepoName() id.RepoID       { return t.repo }
-func (t testItem) GetCreatedAt() time.Time      { return t.createdAt }
-func (t testItem) GetUpdatedAt() time.Time      { return t.updatedAt }
+func (t testItem) GetSource() id.ProviderID  { return t.source }
+func (t testItem) GetType() id.EventTypeID   { return t.itemType }
+func (t testItem) GetActorLogin() id.ActorID { return t.actor }
+func (t testItem) GetRepoName() id.RepoID    { return t.repo }
+func (t testItem) GetCreatedAt() time.Time   { return t.createdAt }
+func (t testItem) GetUpdatedAt() time.Time   { return t.updatedAt }
 
 func TestHasSource(t *testing.T) {
 	t.Parallel()

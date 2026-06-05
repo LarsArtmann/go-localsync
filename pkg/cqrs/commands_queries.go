@@ -12,6 +12,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/middleware/v2"
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -121,7 +122,8 @@ const (
 type SyncItemCommand struct {
 	command.BasicCommand
 
-	Item *provider.Item
+	Item    *model.Item
+	RawJSON []byte
 }
 
 // DeleteItemCommand dispatches a delete operation for a single item.
@@ -161,7 +163,7 @@ type GetTypesQuery struct {
 
 func wireCommandDispatcher(
 	repo *decider.Repository[SyncItemState],
-	resolver crdt.ConflictResolver[*provider.Item],
+	resolver crdt.ConflictResolver[*model.Item],
 ) (*command.Dispatcher, error) {
 	dispatcher := command.NewDispatcher()
 
@@ -182,7 +184,7 @@ func wireCommandDispatcher(
 
 func handleSyncItem(
 	repo *decider.Repository[SyncItemState],
-	resolver crdt.ConflictResolver[*provider.Item],
+	resolver crdt.ConflictResolver[*model.Item],
 ) command.Handler {
 	return func(ctx context.Context, cmd command.Command) error {
 		syncCmd, ok := cmd.(*SyncItemCommand)
@@ -190,7 +192,10 @@ func handleSyncItem(
 			return fmt.Errorf("expected *SyncItemCommand, got %T: %w", cmd, errCommandTypeMismatch)
 		}
 
-		return repo.Execute(ctx, syncCmd.AggregateID(), aggregateType, DecideSync(syncCmd.Item, resolver))
+		return repo.Execute(
+			ctx, syncCmd.AggregateID(), aggregateType,
+			DecideSync(syncCmd.Item, syncCmd.RawJSON, resolver),
+		)
 	}
 }
 

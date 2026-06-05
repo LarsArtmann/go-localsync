@@ -25,14 +25,14 @@ func TestConvertEvent_FullEvent(t *testing.T) {
 
 	item, err := convertEvent(ghEvent)
 	testutil.MustNoError(t, err)
-	testutil.AssertExternalID(t, item, "12345")
+	testutil.AssertEqual(t, item.ExternalID.Get(), "12345", "ExternalID")
 	if item.ID.String() == "" {
 		t.Error("expected non-empty ID")
 	}
 	if item.Source.Get() != "github" {
 		t.Errorf("expected Source=github, got %s", item.Source.Get())
 	}
-	testutil.AssertType(t, item, "PushEvent")
+	testutil.AssertEqual(t, item.Type.Get(), "PushEvent", "Type")
 	testutil.AssertEqual(t, item.ActorLogin.Get(), "actor", "ActorLogin")
 	testutil.AssertEqual(t, item.ActorAvatarURL, "https://avatar.url", "ActorAvatarURL")
 	testutil.AssertEqual(t, item.RepoName.Get(), "owner/repo", "RepoName")
@@ -54,11 +54,11 @@ func TestConvertEvent_MinimalEvent(t *testing.T) {
 
 	item, err := convertEvent(ghEvent)
 	testutil.MustNoError(t, err)
-	testutil.AssertExternalID(t, item, "999")
+	testutil.AssertEqual(t, item.ExternalID.Get(), "999", "ExternalID")
 	if item.ID.String() == "" {
 		t.Error("expected non-empty ID")
 	}
-	testutil.AssertType(t, item, "WatchEvent")
+	testutil.AssertEqual(t, item.Type.Get(), "WatchEvent", "Type")
 	if item.ActorLogin.Get() != "" {
 		t.Errorf("expected empty ActorLogin, got %s", item.ActorLogin.Get())
 	}

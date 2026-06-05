@@ -71,9 +71,9 @@ func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 		t.Errorf("ID = %q, want %q (ItemID not preserved)", got.ID.String(), item.ID.String())
 	}
 
-	testutil.AssertExternalID(t, got, "123")
+	testutil.AssertEqual(t, got.ExternalID.Get(), "123", "ExternalID")
 
-	testutil.AssertType(t, got, "PushEvent")
+	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 }
 
 func TestSQLiteReadModel_Get_NotFound(t *testing.T) {
@@ -134,7 +134,7 @@ func TestSQLiteReadModel_List_FilterByType(t *testing.T) {
 		t.Fatalf("expected 1 PushEvent, got %d", len(items))
 	}
 
-	testutil.AssertType(t, items[0], "PushEvent")
+	testutil.AssertEqual(t, items[0].Type.Get(), "PushEvent", "Type")
 }
 
 func TestSQLiteReadModel_Count(t *testing.T) {
@@ -210,7 +210,7 @@ func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 	_ = rm.Upsert(ctx, item2)
 
 	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
-	testutil.AssertType(t, got, "IssueEvent")
+	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type")
 
 	count, _ := rm.Count(ctx, provider.ItemFilter{})
 	if count != 1 {

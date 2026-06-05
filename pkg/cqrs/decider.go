@@ -8,14 +8,14 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 // SyncItemState is the aggregate state for a single sync item, reconstructed from events.
-// It wraps a *provider.Item (nil when no events applied) plus a Deleted flag.
+// It wraps a *model.Item (nil when no events applied) plus a Deleted flag.
 type SyncItemState struct {
-	Item    *provider.Item
+	Item    *model.Item
 	Deleted bool
 }
 
@@ -64,7 +64,7 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 		)
 	}
 
-	item, err := itemFromPayload(payload)
+	item, err := DataItemFromPayload(payload)
 	if err != nil {
 		return SyncItemState{}, fmt.Errorf("reconstruct item from payload: %w", err)
 	}
@@ -72,45 +72,20 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 	return SyncItemState{Item: item, Deleted: false}, nil
 }
 
-func itemFromPayload(payload ItemSyncedPayload) (*provider.Item, error) {
-	itemID, err := parseItemID(payload.ItemID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid item ID in payload: %w", err)
-	}
-
-	item := &provider.Item{
-		ID:             itemID,
-		ExternalID:     id.NewExternalID(payload.SourceID),
-		Source:         id.NewProviderID(payload.Source),
-		Type:           id.NewEventTypeID(payload.Type),
-		ActorLogin:     id.NewActorID(payload.ActorLogin),
-		ActorAvatarURL: payload.ActorAvatarURL,
-		RepoName:       id.NewRepoID(payload.RepoName),
-		RepoURL:        payload.RepoURL,
-		CreatedAt:      fromUnixNano(payload.CreatedAt),
-		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
-		RawJSON:        payload.RawJSON,
-	}
-
-	if err := item.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid item from payload: %w", err)
-	}
-
-	return item, nil
-}
-
-// DecideSync returns a DecideFunc that syncs an incoming provider.Item.
+// DecideSync returns a DecideFunc that syncs an incoming model.Item.
 // If resolver is nil, remote-wins is used as the default strategy.
+// rawJSON is the original provider payload, stored in the event for full-fidelity replay.
 func DecideSync(
-	item *provider.Item,
-	resolver crdt.ConflictResolver[*provider.Item],
+	item *model.Item,
+	rawJSON []byte,
+	resolver crdt.ConflictResolver[*model.Item],
 	opts ...event.Option,
 ) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 		if state.Deleted || state.IsNew() {
-			return syncEvents(item, aggID, currentVersion, nil, opts...)
+			return syncEvents(item, rawJSON, aggID, currentVersion, nil, opts...)
 		}
 
 		if !HasChanged(state.Item, item) {
@@ -119,7 +94,7 @@ func DecideSync(
 
 		winner, winnerLabel := resolveConflict(resolver, state.Item, item)
 
-		return syncEvents(winner, aggID, currentVersion, &conflictMeta{
+		return syncEvents(winner, rawJSON, aggID, currentVersion, &conflictMeta{
 			localUpdatedAt:  state.Item.UpdatedAt,
 			remoteUpdatedAt: item.UpdatedAt,
 			winner:          winnerLabel,
@@ -176,14 +151,14 @@ type conflictMeta struct {
 
 // resolveConflict delegates conflict resolution to the resolver, or defaults to remote-wins.
 func resolveConflict(
-	resolver crdt.ConflictResolver[*provider.Item],
-	local, remote *provider.Item,
-) (*provider.Item, string) {
+	resolver crdt.ConflictResolver[*model.Item],
+	local, remote *model.Item,
+) (*model.Item, string) {
 	if resolver == nil {
 		return remote, conflictWinnerRemote
 	}
 
-	conflict := &crdt.Conflict[*provider.Item]{
+	conflict := &crdt.Conflict[*model.Item]{
 		Local:     local,
 		Remote:    remote,
 		LocalVC:   crdt.NewVectorClock(),
@@ -204,14 +179,15 @@ func resolveConflict(
 }
 
 func syncEvents(
-	item *provider.Item,
+	item *model.Item,
+	rawJSON []byte,
 	aggID cqrsid.AggregateID,
 	version event.Version,
 	conflict *conflictMeta,
 	opts ...event.Option,
 ) ([]event.Event, error) {
 	eventTypes := []event.Type{EventItemSynced}
-	payloads := []any{itemToPayload(item)}
+	payloads := []any{DataItemToPayload(item, rawJSON)}
 
 	if conflict != nil {
 		eventTypes = []event.Type{EventItemConflictFound, EventItemSynced}
@@ -223,7 +199,7 @@ func syncEvents(
 				RemoteUpdatedAt: unixNano(conflict.remoteUpdatedAt),
 				Winner:          conflict.winner,
 			},
-			itemToPayload(item),
+			DataItemToPayload(item, rawJSON),
 		}
 	}
 
@@ -242,25 +218,9 @@ func syncEvents(
 	return evts, nil
 }
 
-func itemToPayload(item *provider.Item) ItemSyncedPayload {
-	return ItemSyncedPayload{
-		ItemID:         item.ID.String(),
-		Source:         item.Source.Get(),
-		SourceID:       item.ExternalID.Get(),
-		Type:           item.Type.Get(),
-		ActorLogin:     item.ActorLogin.Get(),
-		ActorAvatarURL: item.ActorAvatarURL,
-		RepoName:       item.RepoName.Get(),
-		RepoURL:        item.RepoURL,
-		CreatedAt:      unixNano(item.CreatedAt),
-		UpdatedAt:      unixNano(item.UpdatedAt),
-		RawJSON:        item.RawJSON,
-	}
-}
-
 // HasChanged returns true if the remote item differs from the local item
 // in any tracked field (UpdatedAt, Type, ActorLogin, RepoName, RepoURL).
-func HasChanged(local, remote *provider.Item) bool {
+func HasChanged(local, remote *model.Item) bool {
 	return !local.UpdatedAt.Equal(remote.UpdatedAt) ||
 		local.Type.Get() != remote.Type.Get() ||
 		local.ActorLogin.Get() != remote.ActorLogin.Get() ||
