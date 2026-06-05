@@ -31,6 +31,7 @@ type ItemSyncedPayload struct {
 	CreatedAt      int64           `json:"createdAt"`
 	UpdatedAt      int64           `json:"updatedAt"`
 	RawJSON        json.RawMessage `json:"rawJson,omitempty"`
+	SchemaVersion  int             `json:"schemaVersion,omitempty"`
 }
 
 // ItemConflictFoundPayload is the event payload for ItemConflictFound events.
