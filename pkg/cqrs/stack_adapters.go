@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
@@ -51,18 +52,8 @@ func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 func (s *CQRSStack) ListItems(
 	ctx context.Context,
 	filter provider.ItemFilter,
-) ([]*provider.Item, error) {
-	items, err := s.ReadModel.List(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]*provider.Item, len(items))
-	for i, item := range items {
-		result[i] = FromDataItem(item, nil)
-	}
-
-	return result, nil
+) ([]*model.Item, error) {
+	return s.ReadModel.List(ctx, filter)
 }
 
 func (s *CQRSStack) CountItems(

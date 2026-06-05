@@ -9,6 +9,7 @@ import (
 	"charm.land/log/v2"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -120,11 +121,44 @@ type ListItemsInput struct {
 	Offset     int       `doc:"Offset for pagination"                                                             query:"offset" default:"0"`
 }
 
+// ItemResponse is the API DTO for a synced item.
+type ItemResponse struct {
+	ID             string    `json:"id"`
+	ExternalID     string    `json:"externalId"`
+	Source         string    `json:"source"`
+	Type           string    `json:"type"`
+	ActorLogin     string    `json:"actorLogin"`
+	ActorAvatarURL string    `json:"actorAvatarUrl,omitempty"`
+	RepoName       string    `json:"repoName"`
+	RepoURL        string    `json:"repoUrl,omitempty"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt"`
+}
+
+func toItemResponse(item *model.Item) *ItemResponse {
+	if item == nil {
+		return nil
+	}
+
+	return &ItemResponse{
+		ID:             item.ID.String(),
+		ExternalID:     item.ExternalID.Get(),
+		Source:         item.Source.Get(),
+		Type:           item.Type.Get(),
+		ActorLogin:     item.ActorLogin.Get(),
+		ActorAvatarURL: item.ActorAvatarURL,
+		RepoName:       item.RepoName.Get(),
+		RepoURL:        item.RepoURL,
+		CreatedAt:      item.CreatedAt,
+		UpdatedAt:      item.UpdatedAt,
+	}
+}
+
 // ListItemsOutput defines the response for listing items.
 type ListItemsOutput struct {
 	Body struct {
-		Items []*provider.Item `doc:"List of sync items"                        json:"items"`
-		Total int64            `doc:"Total number of items matching the filter" json:"total"`
+		Items []*ItemResponse `doc:"List of sync items"                        json:"items"`
+		Total int64           `doc:"Total number of items matching the filter" json:"total"`
 	}
 }
 
@@ -170,7 +204,10 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 
 	var resp ListItemsOutput
 
-	resp.Body.Items = items
+	resp.Body.Items = make([]*ItemResponse, len(items))
+	for i, item := range items {
+		resp.Body.Items[i] = toItemResponse(item)
+	}
 	resp.Body.Total = total
 
 	return &resp, nil

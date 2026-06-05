@@ -3,6 +3,7 @@ package testutil
 import (
 	"context"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
@@ -15,7 +16,7 @@ import (
 //	    // additional fields
 //	}
 type SyncStoreListBehavior struct {
-	Items   []*provider.Item
+	Items   []*model.Item
 	ListErr error
 }
 
@@ -23,7 +24,7 @@ type SyncStoreListBehavior struct {
 func (b *SyncStoreListBehavior) ListItems(
 	_ context.Context,
 	_ provider.ItemFilter,
-) ([]*provider.Item, error) {
+) ([]*model.Item, error) {
 	if b.ListErr != nil {
 		return nil, b.ListErr
 	}

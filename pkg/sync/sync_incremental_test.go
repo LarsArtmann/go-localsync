@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -19,7 +20,7 @@ func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
 	mockProv := &mockProvider{items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 
-	latestItem := testSyncItem("latest", "PushEvent")
+	latestItem := testDataItem("latest", "PushEvent")
 	latestItem.CreatedAt = time.Now()
 
 	oldItem := testSyncItem("old", "PushEvent")
@@ -158,7 +159,7 @@ func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
 	oldItem.CreatedAt = now.Add(-2 * time.Hour)
 
 	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*provider.Item{existingItem}},
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*model.Item{testDataItem("existing", "PushEvent")}},
 	}
 	mockProv := &mockProvider{items: []*provider.Item{newItem, oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
@@ -191,7 +192,7 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 	oldItem.CreatedAt = now.Add(-1 * time.Hour)
 
 	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*provider.Item{existingItem}},
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*model.Item{testDataItem("existing", "PushEvent")}},
 	}
 	mockProv := &mockProvider{items: []*provider.Item{oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())

@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
+	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -78,19 +80,19 @@ func (m *mockSyncStore) GetItemTypes(_ context.Context) ([]string, error) {
 
 func (m *mockSyncStore) Close() error { return nil }
 
-func testItem(itemID, eventType string) *provider.Item {
+func testItem(itemID, eventType string) *model.Item {
 	now := time.Now()
 
-	return &provider.Item{
-		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID(itemID),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID(eventType),
-		ActorLogin: id.NewActorID("testuser"),
-		RepoName:   id.NewRepoID("test/repo"),
-		CreatedAt:  now,
-		UpdatedAt:  now,
-		RawJSON:    []byte(`{}`),
+	return &model.Item{
+		ID:            id.NewItemID(),
+		ExternalID:    id.NewExternalID(itemID),
+		Source:        id.NewProviderID("github"),
+		Type:          id.NewEventTypeID(eventType),
+		ActorLogin:    id.NewActorID("testuser"),
+		RepoName:      id.NewRepoID("test/repo"),
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		SchemaVersion: schema.CurrentVersion(),
 	}
 }
 
@@ -135,7 +137,7 @@ func TestGetStats(t *testing.T) {
 
 	store := &mockSyncStore{
 		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*provider.Item{
+			Items: []*model.Item{
 				testItem("1", "PushEvent"),
 				testItem("2", "IssueEvent"),
 			},
@@ -194,7 +196,7 @@ func TestListItems(t *testing.T) {
 
 	store := &mockSyncStore{
 		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*provider.Item{
+			Items: []*model.Item{
 				testItem("1", "PushEvent"),
 				testItem("2", "IssueEvent"),
 			},
@@ -213,8 +215,8 @@ func TestListItems(t *testing.T) {
 	}
 
 	var body struct {
-		Items []*provider.Item `json:"items"`
-		Total int64            `json:"total"`
+		Items []*ItemResponse `json:"items"`
+		Total int64           `json:"total"`
 	}
 
 	err := json.Unmarshal(rec.Body.Bytes(), &body)
@@ -236,7 +238,7 @@ func TestListItems_WithFilter(t *testing.T) {
 
 	store := &mockSyncStore{
 		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*provider.Item{
+			Items: []*model.Item{
 				testItem("1", "PushEvent"),
 				testItem("2", "IssueEvent"),
 			},

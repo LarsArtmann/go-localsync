@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
+	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -114,6 +116,22 @@ func testSyncItem(externalID, eventType string) *provider.Item {
 		CreatedAt:  now,
 		UpdatedAt:  now,
 		RawJSON:    []byte(`{}`),
+	}
+}
+
+func testDataItem(externalID, eventType string) *model.Item {
+	now := time.Now()
+
+	return &model.Item{
+		ID:            id.NewItemID(),
+		ExternalID:    id.NewExternalID(externalID),
+		Source:        id.NewProviderID("github"),
+		Type:          id.NewEventTypeID(eventType),
+		ActorLogin:    id.NewActorID("testuser"),
+		RepoName:      id.NewRepoID("test/repo"),
+		CreatedAt:     now,
+		UpdatedAt:     now,
+		SchemaVersion: schema.CurrentVersion(),
 	}
 }
 

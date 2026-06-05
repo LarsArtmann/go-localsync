@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -41,7 +42,7 @@ type SyncSummary struct {
 // *cqrs.CQRSStack implements this interface via adapter methods.
 type SyncStore interface {
 	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
-	ListItems(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error)
+	ListItems(ctx context.Context, filter provider.ItemFilter) ([]*model.Item, error)
 	CountItems(ctx context.Context, filter provider.ItemFilter) (int64, error)
 	GetItemTypes(ctx context.Context) ([]string, error)
 	Close() error
@@ -259,7 +260,7 @@ func (s *Syncer) Close() error {
 
 func (s *Syncer) processIncrementalItems(
 	ctx context.Context,
-	latestItem *provider.Item,
+	latestItem *model.Item,
 	items []*provider.Item,
 ) *SyncResult {
 	syncResult := &SyncResult{Fetched: len(items), Skipped: 0, Errors: 0}
