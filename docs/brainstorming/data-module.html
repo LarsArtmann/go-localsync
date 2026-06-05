@@ -424,8 +424,9 @@
                 <li><a href="#structure">2. Current Structure</a></li>
                 <li><a href="#scores">3. Quality Scores</a></li>
                 <li><a href="#deep-dive">4. Deep Dive: What's Right & Wrong</a></li>
-                <li><a href="#path-to-perfect">5. Path to Perfection</a></li>
-                <li><a href="#architecture">6. Target Architecture</a></li>
+                <li><a href="#upstream-comparison">5. Comparison: go-cqrs-lite v2.1.0</a></li>
+                <li><a href="#path-to-perfect">6. Path to Perfection</a></li>
+                <li><a href="#architecture">7. Target Architecture</a></li>
             </ul>
         </div>
 
@@ -436,6 +437,11 @@
             between providers, domain, views, and APIs using Go generics. It introduces layered data types
             (<code>ProviderItem</code> → <code>Item</code> → <code>ItemView</code>), a generic query DSL,
             composable transformers, and schema versioning. <strong>The intent is excellent. The execution is solid but not superb.</strong>
+            A detailed comparison against <code>go-cqrs-lite</code> v2.1.0 (the upstream CQRS
+            framework this project already depends on) reveals that several "innovations" in
+            this module are actually inferior reinventions of patterns go-cqrs-lite solved
+            more robustly — with real dialect abstraction, working schema upcasters, and
+            production-grade observability hooks.
         </p>
 
         <div class="insight-box">
