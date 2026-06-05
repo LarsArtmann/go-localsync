@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -64,7 +65,7 @@ func (m *SQLiteReadModel) Get(
 	ctx context.Context,
 	source string,
 	sourceID id.ExternalID,
-) (*provider.Item, error) {
+) (*model.Item, error) {
 	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
 		FROM sync_items WHERE source = ? AND source_id = ?`
 
@@ -82,7 +83,7 @@ func (m *SQLiteReadModel) Get(
 	return item, nil
 }
 
-func (m *SQLiteReadModel) List(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error) {
+func (m *SQLiteReadModel) List(ctx context.Context, filter provider.ItemFilter) ([]*model.Item, error) {
 	query, args := buildListQuery(filter)
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
@@ -144,7 +145,7 @@ func (m *SQLiteReadModel) GetTypes(ctx context.Context) ([]string, error) {
 	return types, nil
 }
 
-func (m *SQLiteReadModel) Upsert(ctx context.Context, item *provider.Item) error {
+func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 	query := `INSERT OR REPLACE INTO sync_items
 		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -153,7 +154,7 @@ func (m *SQLiteReadModel) Upsert(ctx context.Context, item *provider.Item) error
 		ctx, query,
 		item.ID.String(), item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
 		item.ActorLogin.Get(), item.ActorAvatarURL, item.RepoName.Get(),
-		item.RepoURL, item.CreatedAt, item.UpdatedAt, item.RawJSON,
+		item.RepoURL, item.CreatedAt, item.UpdatedAt, []byte{},
 	)
 	if err != nil {
 		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("upsert item: %v", err))
@@ -249,13 +250,14 @@ type scannedItem struct {
 	createdAt, updatedAt                                                                  time.Time
 }
 
-func (si *scannedItem) toItem() (*provider.Item, error) {
+//nolint:exhaustruct // SchemaVersion not stored in read model schema
+func (si *scannedItem) toItem() (*model.Item, error) {
 	itemID, err := parseItemID(si.itemIDStr)
 	if err != nil {
 		return nil, fmt.Errorf("parse item ID from row: %w", err)
 	}
 
-	return &provider.Item{
+	return &model.Item{
 		ID:             itemID,
 		ExternalID:     id.NewExternalID(si.sourceID),
 		Source:         id.NewProviderID(si.source),
@@ -266,7 +268,6 @@ func (si *scannedItem) toItem() (*provider.Item, error) {
 		RepoURL:        si.repoURL,
 		CreatedAt:      si.createdAt,
 		UpdatedAt:      si.updatedAt,
-		RawJSON:        si.rawJSON,
 	}, nil
 }
 
@@ -286,7 +287,7 @@ func newScannedItem() *scannedItem {
 	}
 }
 
-func scanItem(row *sql.Row) (*provider.Item, error) {
+func scanItem(row *sql.Row) (*model.Item, error) {
 	si := newScannedItem()
 
 	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.actorLogin,
@@ -298,8 +299,8 @@ func scanItem(row *sql.Row) (*provider.Item, error) {
 	return si.toItem()
 }
 
-func scanItems(rows *sql.Rows) ([]*provider.Item, error) {
-	var items []*provider.Item
+func scanItems(rows *sql.Rows) ([]*model.Item, error) {
+	var items []*model.Item
 
 	for rows.Next() {
 		si := newScannedItem()

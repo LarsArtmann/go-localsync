@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/storage/v2"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -32,10 +33,10 @@ func newSQLiteTestDB(t *testing.T) *SQLiteReadModel {
 	return rm
 }
 
-func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) *provider.Item {
+func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) *model.Item {
 	t.Helper()
 
-	return &provider.Item{
+	return &model.Item{
 		ID:             id.NewItemID(),
 		ExternalID:     id.NewExternalID(extID),
 		Source:         id.NewProviderID(source),
@@ -46,7 +47,6 @@ func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) 
 		RepoURL:        "https://github.com/" + repo,
 		CreatedAt:      time.Now().Truncate(time.Microsecond),
 		UpdatedAt:      time.Now().Truncate(time.Microsecond),
-		RawJSON:        []byte(`{"test":true}`),
 	}
 }
 

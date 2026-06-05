@@ -5,6 +5,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -12,14 +13,14 @@ import (
 // MemoryReadModel is a concurrent-safe in-memory implementation of ReadModel.
 type MemoryReadModel struct {
 	mu    sync.RWMutex
-	items map[string]*provider.Item
+	items map[string]*model.Item
 }
 
 // NewMemoryReadModel creates a new empty MemoryReadModel.
 func NewMemoryReadModel() *MemoryReadModel {
 	return &MemoryReadModel{
 		mu:    sync.RWMutex{},
-		items: make(map[string]*provider.Item),
+		items: make(map[string]*model.Item),
 	}
 }
 
@@ -27,18 +28,18 @@ func (m *MemoryReadModel) Get(
 	_ context.Context,
 	source string,
 	sourceID id.ExternalID,
-) (*provider.Item, error) {
+) (*model.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
 	return m.items[itemKey(source, sourceID)], nil
 }
 
-func (m *MemoryReadModel) List(_ context.Context, filter provider.ItemFilter) ([]*provider.Item, error) {
+func (m *MemoryReadModel) List(_ context.Context, filter provider.ItemFilter) ([]*model.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	all := make([]*provider.Item, 0, len(m.items))
+	all := make([]*model.Item, 0, len(m.items))
 
 	for _, item := range m.items {
 		if matchesFilter(item, filter) {
@@ -89,7 +90,7 @@ func (m *MemoryReadModel) GetTypes(_ context.Context) ([]string, error) {
 	return types, nil
 }
 
-func (m *MemoryReadModel) Upsert(_ context.Context, item *provider.Item) error {
+func (m *MemoryReadModel) Upsert(_ context.Context, item *model.Item) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -121,7 +122,7 @@ func (m *MemoryReadModel) Len() int {
 	return len(m.items)
 }
 
-func matchesFilter(item *provider.Item, filter provider.ItemFilter) bool {
+func matchesFilter(item *model.Item, filter provider.ItemFilter) bool {
 	if filter.Type != nil && item.Type.Get() != filter.Type.Get() {
 		return false
 	}
@@ -145,7 +146,7 @@ func matchesFilter(item *provider.Item, filter provider.ItemFilter) bool {
 	return true
 }
 
-func paginate(items []*provider.Item, limit, offset int) []*provider.Item {
+func paginate(items []*model.Item, limit, offset int) []*model.Item {
 	if offset >= len(items) {
 		return nil
 	}

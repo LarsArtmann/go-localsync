@@ -6,6 +6,7 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/command/v2"
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -138,9 +139,9 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 	})
 	testutil.MustNoError(t, err)
 
-	items, ok := result.([]*provider.Item)
+	items, ok := result.([]*model.Item)
 	if !ok {
-		t.Fatalf("expected []*provider.Item, got %T", result)
+		t.Fatalf("expected []*model.Item, got %T", result)
 	}
 	if len(items) != 1 {
 		t.Errorf("expected 1 item, got %d", len(items))
@@ -163,9 +164,9 @@ func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
 	})
 	testutil.MustNoError(t, err)
 
-	item, ok := result.(*provider.Item)
+	item, ok := result.(*model.Item)
 	if !ok {
-		t.Fatalf("expected *provider.Item, got %T", result)
+		t.Fatalf("expected *model.Item, got %T", result)
 	}
 	if item.ExternalID.Get() != "q-2" {
 		t.Errorf("expected item id q-2, got %s", item.ExternalID.Get())

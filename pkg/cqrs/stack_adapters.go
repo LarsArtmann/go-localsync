@@ -52,7 +52,17 @@ func (s *CQRSStack) ListItems(
 	ctx context.Context,
 	filter provider.ItemFilter,
 ) ([]*provider.Item, error) {
-	return s.ReadModel.List(ctx, filter)
+	items, err := s.ReadModel.List(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]*provider.Item, len(items))
+	for i, item := range items {
+		result[i] = FromDataItem(item, nil)
+	}
+
+	return result, nil
 }
 
 func (s *CQRSStack) CountItems(

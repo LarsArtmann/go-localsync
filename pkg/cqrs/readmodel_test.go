@@ -19,7 +19,7 @@ func upsertTestItem(
 ) {
 	t.Helper()
 
-	testutil.MustNoError(t, rm.Upsert(ctx, &provider.Item{
+	testutil.MustNoError(t, rm.Upsert(ctx, &model.Item{
 		ExternalID: id.NewExternalID(extID),
 		Source:     id.NewProviderID(source),
 		Type:       id.NewEventTypeID(eventType),
@@ -35,7 +35,7 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	item := &provider.Item{
+	item := &model.Item{
 		ExternalID: id.NewExternalID("123"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
@@ -75,7 +75,7 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 		Source:     id.NewProviderID("github"),
 	}
 
-	testutil.MustNoError(t, rm.Upsert(ctx, FromDataItem(item, nil)))
+	testutil.MustNoError(t, rm.Upsert(ctx, item))
 	testutil.MustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("123")))
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))

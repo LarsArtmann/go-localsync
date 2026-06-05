@@ -54,7 +54,7 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 		return fmt.Errorf("reconstruct item from payload: %w", err)
 	}
 
-	return p.readModel.Upsert(ctx, FromDataItem(item, payload.RawJSON))
+	return p.readModel.Upsert(ctx, item)
 }
 
 func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) error {
