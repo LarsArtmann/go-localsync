@@ -208,6 +208,7 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 	for i, item := range items {
 		resp.Body.Items[i] = toItemResponse(item)
 	}
+
 	resp.Body.Total = total
 
 	return &resp, nil

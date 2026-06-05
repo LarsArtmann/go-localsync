@@ -159,7 +159,9 @@ func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
 	oldItem.CreatedAt = now.Add(-2 * time.Hour)
 
 	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*model.Item{testDataItem("existing", "PushEvent")}},
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			Items: []*model.Item{testDataItem("existing", "PushEvent")},
+		},
 	}
 	mockProv := &mockProvider{items: []*provider.Item{newItem, oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
@@ -192,7 +194,9 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 	oldItem.CreatedAt = now.Add(-1 * time.Hour)
 
 	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: []*model.Item{testDataItem("existing", "PushEvent")}},
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			Items: []*model.Item{testDataItem("existing", "PushEvent")},
+		},
 	}
 	mockProv := &mockProvider{items: []*provider.Item{oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
