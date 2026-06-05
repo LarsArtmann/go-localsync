@@ -84,8 +84,6 @@ Aspirational features and improvements with no fixed timeline. These are planned
 - [x] **CLI tests** (Completed)  
        `main_test.go` covers exitCodeForError, LoadConfig, env defaults.
 
-
-
 ---
 
 ## ❓ OPEN QUESTIONS

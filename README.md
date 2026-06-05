@@ -16,7 +16,7 @@ _go-localsync is an SDK, not a CLI application._ Use it as a library to add data
 | **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                                             |
 | **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy, emitted as domain events                                      |
 | **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)                                            |
-| **SQLite Backend**     | SQLite event store with snapshots, checkpoints, and pure-Go driver (no CGo)                |
+| **SQLite Backend**      | SQLite event store with snapshots, checkpoints, and pure-Go driver (no CGo)                                                 |
 
 ## Who is this for?
 
@@ -250,17 +250,17 @@ cmd/examples/github-sync/   # Example CLI application
 
 235 test cases across 9 packages:
 
-| Package                    | Tests | Coverage | Description                                                |
-| -------------------------- | ----- | -------- | ---------------------------------------------------------- |
-| `pkg/cqrs`                 | 92    | ~83%    | Decider, ReadModel, Projection, Stack, SQLite RM, CRDT Resolver |
-| `pkg/providers/github`     | 32    | 84.6%  | Client, fetch, retry, error handling, rate limit, BDD           |
-| `pkg/sync`                 | 22    | 92.3%  | Syncer + ConflictAwareSyncer + reportProgress                   |
-| `pkg/crdt`                 | 52    | 97.6%  | VectorClock, Operation, LWWResolver, Conflict, SyncMessage      |
-| `pkg/id`                   | 10    | 100.0% | ID construction, roundtrip, zero, equal                         |
-| `pkg/errors`               | 11    | 100.0% | Sentinel errors, wrapping, classification, IsRetryable          |
-| `pkg/provider`             | 2     | 100.0% | Item validation                                                 |
-| `pkg/api`                  | 8     | ~90%   | Server, routes, handlers, health/stats/items/sync endpoints     |
-| `cmd/examples/github-sync` | 14    | 10.3%  | exitCodeForError, LoadConfig, env defaults, printVersion        |
+| Package                    | Tests | Coverage | Description                                                     |
+| -------------------------- | ----- | -------- | --------------------------------------------------------------- |
+| `pkg/cqrs`                 | 92    | ~83%     | Decider, ReadModel, Projection, Stack, SQLite RM, CRDT Resolver |
+| `pkg/providers/github`     | 32    | 84.6%    | Client, fetch, retry, error handling, rate limit, BDD           |
+| `pkg/sync`                 | 22    | 92.3%    | Syncer + ConflictAwareSyncer + reportProgress                   |
+| `pkg/crdt`                 | 52    | 97.6%    | VectorClock, Operation, LWWResolver, Conflict, SyncMessage      |
+| `pkg/id`                   | 10    | 100.0%   | ID construction, roundtrip, zero, equal                         |
+| `pkg/errors`               | 11    | 100.0%   | Sentinel errors, wrapping, classification, IsRetryable          |
+| `pkg/provider`             | 2     | 100.0%   | Item validation                                                 |
+| `pkg/api`                  | 8     | ~90%     | Server, routes, handlers, health/stats/items/sync endpoints     |
+| `cmd/examples/github-sync` | 14    | 10.3%    | exitCodeForError, LoadConfig, env defaults, printVersion        |
 
 ## Related Projects
 

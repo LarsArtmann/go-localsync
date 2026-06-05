@@ -12,7 +12,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy** |
 | `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`)                                                 |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2** (Decider, ReadModel, Projector, CQRSStack, Runner)                                        |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2** (Decider, ReadModel, Projector, CQRSStack, Runner)                                             |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `ItemFilter`)                                             |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                        |
 | `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`        |
@@ -140,17 +140,17 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package                    | Tests | Coverage | Status                                                                                                    |
-| -------------------------- | ----- | -------- | --------------------------------------------------------------------------------------------------------- |
+| Package                    | Tests | Coverage | Status                                                                                 |
+| -------------------------- | ----- | -------- | -------------------------------------------------------------------------------------- |
 | `pkg/cqrs`                 | ~80   | ~83%     | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Runner, Correlation, CRDT Resolver |
-| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                                  |
-| `pkg/sync`                 | 22    | 92.3%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                            |
-| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                |
-| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                           |
-| `pkg/provider`             | 2     | 100.0%   | ✅ Item validation                                                                                        |
-| `pkg/api`                  | 8     | ~90%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints                                            |
-| `pkg/crdt`                 | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage roundtrip                                   |
-| `cmd/examples/github-sync` | 14    | 10.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON                          |
+| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                               |
+| `pkg/sync`                 | 22    | 92.3%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting         |
+| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                             |
+| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates        |
+| `pkg/provider`             | 2     | 100.0%   | ✅ Item validation                                                                     |
+| `pkg/api`                  | 8     | ~90%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints                         |
+| `pkg/crdt`                 | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage roundtrip                |
+| `cmd/examples/github-sync` | 14    | 10.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON       |
 
 **220+ total test functions** across 9 test packages.
 
@@ -202,26 +202,26 @@ Two tables managed by the CQRS stack:
 
 ## Dependencies
 
-| Dependency                         | Version | Purpose                                                                  |
-| ---------------------------------- | ------- | ------------------------------------------------------------------------ |
-| `go-cqrs-lite/event/v2`            | v2.0.0  | Event types, Store, Bus, Journal, CheckpointStore, Codec, Projection     |
-| `go-cqrs-lite/command/v2`          | v2.0.0  | Command types, Dispatcher, typed commands                                |
-| `go-cqrs-lite/query/v2`            | v2.0.0  | Query types, Dispatcher, typed queries                                   |
-| `go-cqrs-lite/decider/v2`          | v2.0.0  | Decider, Repository, snapshot/codec options                              |
-| `go-cqrs-lite/id/v2`               | v2.0.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)              |
-| `go-cqrs-lite/codec/v2`            | v2.0.0  | Codec interface, JSONCodec                                               |
-| `go-cqrs-lite/snapshot/v2`         | v2.0.0  | SnapshotStore, EveryNEvents strategy                                     |
-| `go-cqrs-lite/memory/v2`           | v2.0.0  | In-memory event store + bus + checkpoint store + snapshot store           |
-| `go-cqrs-lite/middleware/v2`        | v2.0.0  | EventLogging middleware                                                  |
-| `go-cqrs-lite/projection/v2`       | v2.0.0  | Projection Runner with replay + live subscription                        |
-| `go-cqrs-lite/storage/v2`          | v2.0.0  | SQLite event store, snapshot, checkpoint store (modernc.org/sqlite)       |
-| `go-branded-id`                    | v0.3.0  | Branded phantom-type IDs for compile-time safety                         |
-| `go-error-family`                  | v0.3.0  | Structured error classification + user-facing message templates           |
-| `go-github/v69`                    | v69.2.0 | GitHub API client                                                        |
-| `modernc.org/sqlite`               | v1.51.0 | Pure-Go SQLite driver (replaces tursogo for local SQLite)                |
-| `charm.land/log/v2`                | v2.0.0  | Structured logging                                                       |
-| `caarlos0/env/v11`                 | v11.4.1 | Environment variable config                                              |
-| `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter            |
+| Dependency                         | Version | Purpose                                                              |
+| ---------------------------------- | ------- | -------------------------------------------------------------------- |
+| `go-cqrs-lite/event/v2`            | v2.0.0  | Event types, Store, Bus, Journal, CheckpointStore, Codec, Projection |
+| `go-cqrs-lite/command/v2`          | v2.0.0  | Command types, Dispatcher, typed commands                            |
+| `go-cqrs-lite/query/v2`            | v2.0.0  | Query types, Dispatcher, typed queries                               |
+| `go-cqrs-lite/decider/v2`          | v2.0.0  | Decider, Repository, snapshot/codec options                          |
+| `go-cqrs-lite/id/v2`               | v2.0.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)          |
+| `go-cqrs-lite/codec/v2`            | v2.0.0  | Codec interface, JSONCodec                                           |
+| `go-cqrs-lite/snapshot/v2`         | v2.0.0  | SnapshotStore, EveryNEvents strategy                                 |
+| `go-cqrs-lite/memory/v2`           | v2.0.0  | In-memory event store + bus + checkpoint store + snapshot store      |
+| `go-cqrs-lite/middleware/v2`       | v2.0.0  | EventLogging middleware                                              |
+| `go-cqrs-lite/projection/v2`       | v2.0.0  | Projection Runner with replay + live subscription                    |
+| `go-cqrs-lite/storage/v2`          | v2.0.0  | SQLite event store, snapshot, checkpoint store (modernc.org/sqlite)  |
+| `go-branded-id`                    | v0.3.0  | Branded phantom-type IDs for compile-time safety                     |
+| `go-error-family`                  | v0.3.0  | Structured error classification + user-facing message templates      |
+| `go-github/v69`                    | v69.2.0 | GitHub API client                                                    |
+| `modernc.org/sqlite`               | v1.51.0 | Pure-Go SQLite driver (replaces tursogo for local SQLite)            |
+| `charm.land/log/v2`                | v2.0.0  | Structured logging                                                   |
+| `caarlos0/env/v11`                 | v11.4.1 | Environment variable config                                          |
+| `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter        |
 
 ### Test Dependencies
 
@@ -246,9 +246,9 @@ Two tables managed by the CQRS stack:
 | Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                                             | Projected from events via InMemoryRunner               |
 | SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`ListItems`, `CountItems`, `GetItemTypes`) | `sync.SyncStore` interface defined in consumer package |
 | SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                   | Types defined in `pkg/sync/`, not `pkg/cqrs/`          |
-| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                         | Eliminates all manual json.Marshal/Unmarshal           |
-| Projection     | Direct `bus.SubscribeAll` (sync) + `projection.Runner` (Turso replay), SQL checkpoints                     | Replay from store on restart + live subscription       |
-| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                    | Caps replay cost, persists across restarts             |
+| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                        | Eliminates all manual json.Marshal/Unmarshal           |
+| Projection     | Direct `bus.SubscribeAll` (sync) + `projection.Runner` (Turso replay), SQL checkpoints                  | Replay from store on restart + live subscription       |
+| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                | Caps replay cost, persists across restarts             |
 | Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                | Unique per sync run for debugging                      |
 | Logging        | `middleware.EventLogging` via charm log adapter                                                         | Structured logging of all domain events                |
 | Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                         | Smart retry classification for provider errors         |
@@ -283,15 +283,15 @@ Two tables managed by the CQRS stack:
 
 ### Not Yet Adopted
 
-| Module | Reason |
-|--------|--------|
-| `otel/v2` | Only `Name` constant — no real API |
-| `signing/v2` | Local-first sync doesn't need Ed25519 yet |
-| `schema/v2` | Only 1 schema version |
-| `catalog/v2` | AsyncAPI/D2 generation not critical |
-| `pebble/v2` | Alternative storage — no immediate need |
-| `watermill/v2` | Message broker — no immediate need |
-| `event.AggregateRef` | Our type+id pattern is already clear |
+| Module                 | Reason                                        |
+| ---------------------- | --------------------------------------------- |
+| `otel/v2`              | Only `Name` constant — no real API            |
+| `signing/v2`           | Local-first sync doesn't need Ed25519 yet     |
+| `schema/v2`            | Only 1 schema version                         |
+| `catalog/v2`           | AsyncAPI/D2 generation not critical           |
+| `pebble/v2`            | Alternative storage — no immediate need       |
+| `watermill/v2`         | Message broker — no immediate need            |
+| `event.AggregateRef`   | Our type+id pattern is already clear          |
 | `SyncItemState option` | `nil *provider.Item` + `IsNew()` is idiomatic |
 
 ### Breaking Changes
