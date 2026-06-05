@@ -86,7 +86,8 @@ var FromProviderItem Mapper[*model.ProviderItem, *model.Item] = NewMapper(
 			return nil, fmt.Errorf("from provider item: %w", errNilInput)
 		}
 
-		if err := p.Validate(); err != nil {
+		err := p.Validate()
+		if err != nil {
 			return nil, fmt.Errorf("from provider item: invalid input: %w", err)
 		}
 

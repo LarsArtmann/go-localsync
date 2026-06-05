@@ -11,6 +11,7 @@ import (
 // only make sense in the query/read context.
 type ItemView struct {
 	Item
+
 	LastSyncedAt  time.Time
 	SyncCount     int64
 	ConflictCount int64
@@ -18,22 +19,22 @@ type ItemView struct {
 }
 
 // GetCreatedAt delegates to the embedded Item for criterion matching.
-func (v ItemView) GetCreatedAt() time.Time { return v.Item.CreatedAt }
+func (v ItemView) GetCreatedAt() time.Time { return v.CreatedAt }
 
 // GetUpdatedAt delegates to the embedded Item for criterion matching.
-func (v ItemView) GetUpdatedAt() time.Time { return v.Item.UpdatedAt }
+func (v ItemView) GetUpdatedAt() time.Time { return v.UpdatedAt }
 
 // GetSource delegates to the embedded Item for criterion matching.
-func (v ItemView) GetSource() id.ProviderID { return v.Item.Source }
+func (v ItemView) GetSource() id.ProviderID { return v.Source }
 
 // GetType delegates to the embedded Item for criterion matching.
-func (v ItemView) GetType() id.EventTypeID { return v.Item.Type }
+func (v ItemView) GetType() id.EventTypeID { return v.Type }
 
 // GetActorLogin delegates to the embedded Item for criterion matching.
-func (v ItemView) GetActorLogin() id.ActorID { return v.Item.ActorLogin }
+func (v ItemView) GetActorLogin() id.ActorID { return v.ActorLogin }
 
 // GetRepoName delegates to the embedded Item for criterion matching.
-func (v ItemView) GetRepoName() id.RepoID { return v.Item.RepoName }
+func (v ItemView) GetRepoName() id.RepoID { return v.RepoName }
 
 // StatsView is a denormalized aggregation for dashboard/API use.
 type StatsView struct {

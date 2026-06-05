@@ -31,6 +31,7 @@ func (q Query[T]) Match(value T) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -39,15 +40,18 @@ func (q Query[T]) Sort(items []T) {
 	if len(q.OrderBy) == 0 {
 		return
 	}
+
 	slices.SortFunc(items, func(a, b T) int {
 		for _, order := range q.OrderBy {
 			if order.Less(a, b) {
 				return -1
 			}
+
 			if order.Less(b, a) {
 				return 1
 			}
 		}
+
 		return 0
 	})
 }
@@ -69,24 +73,28 @@ func NewBuilder[T any]() QueryBuilder[T] {
 // Where adds a criterion. The builder is returned for chaining.
 func (qb QueryBuilder[T]) Where(c Criterion[T]) QueryBuilder[T] {
 	qb.criteria = append(qb.criteria, c)
+
 	return qb
 }
 
 // OrderBy adds a sort order. Multiple orders are applied lexicographically.
 func (qb QueryBuilder[T]) OrderBy(o Order[T]) QueryBuilder[T] {
 	qb.orderBy = append(qb.orderBy, o)
+
 	return qb
 }
 
 // Limit sets the max number of results.
 func (qb QueryBuilder[T]) Limit(n int) QueryBuilder[T] {
 	qb.limit = n
+
 	return qb
 }
 
 // Offset sets the skip count.
 func (qb QueryBuilder[T]) Offset(n int) QueryBuilder[T] {
 	qb.offset = n
+
 	return qb
 }
 
