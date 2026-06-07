@@ -24,6 +24,9 @@
 
       imports = [ inputs.treefmt-nix.flakeModule ];
 
+
+      checks.format = config.treefmt.build.check self;
+      checks.build = config.packages.default;
       perSystem =
         { config, pkgs, ... }:
         {
@@ -55,18 +58,23 @@
                 go_1_26
                 golangci-lint
               ];
-            };
-          };
+            };          };
 
           treefmt = {
             projectRootFile = "go.mod";
             programs = {
               gofumpt.enable = true;
+              goimports.enable = true;
               nixfmt.enable = true;
             };
           };
 
           formatter = config.treefmt.build.wrapper;
         };
+
+      flake.overlays.default = final: _prev: {
+        go-localsync = self.packages.${final.stdenv.system}.default;
+      };
+
     };
 }
