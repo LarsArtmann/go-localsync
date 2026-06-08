@@ -37,6 +37,7 @@
               description = "Generic synchronization SDK with CQRS";
               homepage = "https://github.com/larsartmann/go-localsync";
               license = licenses.mit;
+                mainProgram = "go-localsync";
             };
           };
 
