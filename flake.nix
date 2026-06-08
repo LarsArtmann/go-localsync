@@ -72,6 +72,7 @@
           checks = {
             format = config.treefmt.build.check self;
             build = config.packages.default;
+            test = config.packages.default.overrideAttrs (_: { doCheck = true; });
           };
         };
 
