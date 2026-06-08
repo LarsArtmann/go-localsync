@@ -25,8 +25,6 @@
       imports = [ inputs.treefmt-nix.flakeModule ];
 
 
-      checks.format = config.treefmt.build.check self;
-      checks.build = config.packages.default;
       perSystem =
         { config, pkgs, ... }:
         {
@@ -70,6 +68,11 @@
           };
 
           formatter = config.treefmt.build.wrapper;
+
+          checks = {
+            format = config.treefmt.build.check self;
+            build = config.packages.default;
+          };
         };
 
       flake.overlays.default = final: _prev: {
