@@ -40,6 +40,31 @@
             };
           };
 
+          apps = {
+            default = {
+              type = "app";
+              program = pkgs.lib.getExe(config.packages.default);
+            };
+
+            test = {
+              type = "app";
+              program = pkgs.writeShellApplication {
+                name = "run-test";
+                runtimeInputs = [ pkgs.go_1_26 ];
+                text = "go test -race -v -coverprofile=coverage.out ./...";
+              };
+            };
+
+            lint = {
+              type = "app";
+              program = pkgs.writeShellApplication {
+                name = "run-lint";
+                runtimeInputs = [ pkgs.go_1_26 pkgs.golangci-lint ];
+                text = "golangci-lint run ./...";
+              };
+            };
+          };
+
           devShells = {
             default = pkgs.mkShell {
               packages = with pkgs; [
