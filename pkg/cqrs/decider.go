@@ -33,6 +33,11 @@ func (s SyncItemState) IsNew() bool {
 	return s.Item == nil
 }
 
+// SkipDecision returns true if the state is deleted or new (no prior state to compare).
+func (s SyncItemState) SkipDecision() bool {
+	return s.Deleted || s.IsNew()
+}
+
 // Fold applies a single event to the SyncItemState, returning the new state.
 func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 	switch evt.Type() {
@@ -85,7 +90,7 @@ func DecideSync(
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
-		if state.Deleted || state.IsNew() {
+		if state.SkipDecision() {
 			return syncEvents(item, rawJSON, aggID, currentVersion, nil, opts...)
 		}
 
@@ -109,7 +114,7 @@ func DecideDelete(
 	opts ...event.Option,
 ) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
-		if state.Deleted || state.IsNew() {
+		if state.SkipDecision() {
 			return nil, nil
 		}
 

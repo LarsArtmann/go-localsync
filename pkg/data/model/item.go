@@ -85,42 +85,29 @@ type ItemReader interface {
 
 // Validate checks that all required identity fields are present.
 func (item Item) Validate() error {
-	if item.ExternalID.IsZero() {
-		return errMissingExternalID
-	}
-
-	if item.Source.IsZero() {
-		return errMissingSource
-	}
-
-	if item.Type.IsZero() {
-		return errMissingType
-	}
-
-	if item.CreatedAt.IsZero() {
-		return errMissingCreatedAt
-	}
-
-	return nil
+	return validateIdentity(item.ExternalID, item.Source, item.Type, item.CreatedAt)
 }
 
-// Validate checks that all required identity fields are present.
 func (p ProviderItem) Validate() error {
-	if p.ExternalID.IsZero() {
+	return validateIdentity(p.ExternalID, p.Source, p.Type, p.CreatedAt)
+}
+
+func validateIdentity(
+	externalID id.ExternalID,
+	source id.ProviderID,
+	eventType id.EventTypeID,
+	createdAt time.Time,
+) error {
+	switch {
+	case externalID.IsZero():
 		return errMissingExternalID
-	}
-
-	if p.Source.IsZero() {
+	case source.IsZero():
 		return errMissingSource
-	}
-
-	if p.Type.IsZero() {
+	case eventType.IsZero():
 		return errMissingType
-	}
-
-	if p.CreatedAt.IsZero() {
+	case createdAt.IsZero():
 		return errMissingCreatedAt
+	default:
+		return nil
 	}
-
-	return nil
 }

@@ -53,18 +53,22 @@ func Compose[A, B, C any](
 		if err != nil {
 			var zero C
 
-			return zero, fmt.Errorf("compose A→B: %w", err)
+			return zero, composeErr("A→B", err)
 		}
 
 		result, err := bc.Map(ctx, mapped)
 		if err != nil {
 			var zero C
 
-			return zero, fmt.Errorf("compose B→C: %w", err)
+			return zero, composeErr("B→C", err)
 		}
 
 		return result, nil
 	})
+}
+
+func composeErr(stage string, err error) error {
+	return fmt.Errorf("compose %s: %w", stage, err)
 }
 
 // AndThen is a fluent alias for Compose: m.AndThen(next) == Compose(m, next).

@@ -16,6 +16,14 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
+func waitForProjection(t *testing.T, ctx context.Context, stack *cqrs.CQRSStack, want int64) {
+	t.Helper()
+
+	testutil.WaitForCount(t, ctx, func(ctx context.Context) (int64, error) {
+		return stack.Count(ctx, provider.ItemFilter{})
+	}, want)
+}
+
 func mustParseTime(t *testing.T, s string) time.Time {
 	t.Helper()
 
@@ -62,12 +70,7 @@ func TestIntegration_APIListItemsRoundtrip(t *testing.T) {
 	stack.SyncItems(ctx, items)
 
 	// Wait for projection to catch up.
-	for {
-		count, _ := stack.Count(ctx, provider.ItemFilter{})
-		if count == 2 {
-			break
-		}
-	}
+	waitForProjection(t, ctx, stack, 2)
 
 	provider := &testutil.MockProvider{}
 	logger := log.Default()
@@ -124,12 +127,7 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 
 	stack.SyncItems(ctx, items)
 
-	for {
-		count, _ := stack.Count(ctx, provider.ItemFilter{})
-		if count == 1 {
-			break
-		}
-	}
+	waitForProjection(t, ctx, stack, 1)
 
 	provider := &testutil.MockProvider{}
 	logger := log.Default()
@@ -141,9 +139,7 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", rec.Code)
-	}
+	testutil.AssertStatusOK(t, rec)
 
 	var body struct {
 		TotalItems int64    `json:"totalItems"`

@@ -4,6 +4,7 @@
 package testutil
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -43,13 +44,20 @@ func AssertType(t *testing.T, item *model.Item, want string) {
 	AssertEqual(t, item.Type.Get(), want, "Type")
 }
 
+// AssertStatus fails the test if the recorder's HTTP status is not the expected code.
+func AssertStatus(t *testing.T, rec *httptest.ResponseRecorder, wantCode int) {
+	t.Helper()
+
+	if rec.Code != wantCode {
+		t.Fatalf("expected status %d, got %d: %s", wantCode, rec.Code, rec.Body.String())
+	}
+}
+
 // AssertStatusOK fails the test if the recorder's HTTP status is not 200.
 func AssertStatusOK(t *testing.T, rec *httptest.ResponseRecorder) {
 	t.Helper()
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d: %s", rec.Code, rec.Body.String())
-	}
+	AssertStatus(t, rec, http.StatusOK)
 }
 
 // AssertLen fails the test if len(got) != want.
@@ -58,6 +66,19 @@ func AssertLen[T any](t *testing.T, got []T, want int, label string) {
 
 	if len(got) != want {
 		t.Errorf("expected %s count=%d, got %d", label, want, len(got))
+	}
+}
+
+// WaitForCount polls counter until it returns the expected count.
+// counter is a function that returns the current count (e.g., stack.Count).
+func WaitForCount(t *testing.T, ctx context.Context, counter func(context.Context) (int64, error), want int64) {
+	t.Helper()
+
+	for {
+		got, _ := counter(ctx)
+		if got == want {
+			return
+		}
 	}
 }
 

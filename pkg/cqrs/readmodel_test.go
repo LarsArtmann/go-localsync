@@ -13,6 +13,25 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
+func assertLen(t *testing.T, rm *MemoryReadModel, want int) {
+	t.Helper()
+
+	if rm.Len() != want {
+		t.Errorf("expected Len=%d, got %d", want, rm.Len())
+	}
+}
+
+func assertNotFound(t *testing.T, err error, got *model.Item) {
+	t.Helper()
+
+	if !errors.Is(err, pkgerrors.ErrNotFound) {
+		t.Fatalf("expected ErrNotFound, got: %v", err)
+	}
+	if got != nil {
+		t.Error("expected nil item")
+	}
+}
+
 func upsertTestItem(
 	t *testing.T,
 	rm ReadModel,
@@ -60,12 +79,7 @@ func TestMemoryReadModel_GetNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
-	if !errors.Is(err, pkgerrors.ErrNotFound) {
-		t.Fatalf("expected ErrNotFound, got: %v", err)
-	}
-	if got != nil {
-		t.Error("expected nil for nonexistent item")
-	}
+	assertNotFound(t, err, got)
 }
 
 func TestMemoryReadModel_Delete(t *testing.T) {
@@ -83,12 +97,7 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 	testutil.MustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("123")))
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
-	if !errors.Is(err, pkgerrors.ErrNotFound) {
-		t.Fatalf("expected ErrNotFound after delete, got: %v", err)
-	}
-	if got != nil {
-		t.Error("expected nil after delete")
-	}
+	assertNotFound(t, err, got)
 }
 
 func TestMemoryReadModel_ListWithFilters(t *testing.T) {
@@ -190,9 +199,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 
 	testutil.MustNoError(t, proj.Handle(context.Background(), evt))
 
-	if rm.Len() != 1 {
-		t.Errorf("expected Len=1, got %d", rm.Len())
-	}
+	assertLen(t, rm, 1)
 
 	got, err := rm.Get(context.Background(), "github", id.NewExternalID("123"))
 	testutil.MustNoError(t, err)
@@ -213,9 +220,7 @@ func TestProjector_ItemDeleted(t *testing.T) {
 
 	testutil.MustNoError(t, proj.Handle(ctx, evt))
 
-	if rm.Len() != 0 {
-		t.Errorf("expected Len=0, got %d", rm.Len())
-	}
+	assertLen(t, rm, 0)
 }
 
 func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
@@ -234,9 +239,7 @@ func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
 
 	testutil.MustNoError(t, proj.Handle(ctx, evt))
 
-	if rm.Len() != 1 {
-		t.Errorf("expected Len=1, got %d", rm.Len())
-	}
+	assertLen(t, rm, 1)
 }
 
 func TestProjector_ItemSynced_InvalidItemID(t *testing.T) {

@@ -123,9 +123,7 @@ func TestHealthCheck(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", rec.Code)
-	}
+	testutil.AssertStatusOK(t, rec)
 
 	var body struct {
 		Status string `json:"status"`
@@ -161,9 +159,7 @@ func TestGetStats(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", rec.Code)
-	}
+	testutil.AssertStatusOK(t, rec)
 
 	var body struct {
 		TotalItems int64    `json:"totalItems"`
@@ -193,9 +189,7 @@ func TestGetStats_StoreError(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf("expected status 500, got %d", rec.Code)
-	}
+	testutil.AssertStatus(t, rec, http.StatusInternalServerError)
 }
 
 func TestListItems(t *testing.T) {
@@ -209,9 +203,7 @@ func TestListItems(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", rec.Code)
-	}
+	testutil.AssertStatusOK(t, rec)
 
 	var body struct {
 		Items []*ItemResponse `json:"items"`
@@ -243,9 +235,7 @@ func TestListItems_WithFilter(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", rec.Code)
-	}
+	testutil.AssertStatusOK(t, rec)
 }
 
 func TestListItems_StoreError(t *testing.T) {
@@ -259,9 +249,7 @@ func TestListItems_StoreError(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusInternalServerError {
-		t.Fatalf("expected status 500, got %d", rec.Code)
-	}
+	testutil.AssertStatus(t, rec, http.StatusInternalServerError)
 }
 
 func TestTriggerSync(t *testing.T) {
@@ -314,7 +302,5 @@ func TestTriggerSync_InvalidOptions(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusBadRequest {
-		t.Fatalf("expected status 400, got %d", rec.Code)
-	}
+	testutil.AssertStatus(t, rec, http.StatusBadRequest)
 }

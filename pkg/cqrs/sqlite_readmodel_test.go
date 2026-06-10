@@ -33,6 +33,20 @@ func newSQLiteTestDB(t *testing.T) *SQLiteReadModel {
 	return rm
 }
 
+func sqliteAssertNotFound(t *testing.T, err error, got *model.Item) {
+	t.Helper()
+
+	if err == nil {
+		t.Fatal("expected ErrNotFound, got nil")
+	}
+	if !errors.Is(err, pkgerrors.ErrNotFound) {
+		t.Fatalf("Get: got %v, want ErrNotFound", err)
+	}
+	if got != nil {
+		t.Fatal("expected nil for missing item")
+	}
+}
+
 func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) *model.Item {
 	t.Helper()
 
@@ -83,16 +97,7 @@ func TestSQLiteReadModel_Get_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
-	if err == nil {
-		t.Fatal("expected ErrNotFound, got nil")
-	}
-	if !errors.Is(err, pkgerrors.ErrNotFound) {
-		t.Fatalf("Get: got %v, want ErrNotFound", err)
-	}
-
-	if got != nil {
-		t.Fatal("expected nil for missing item")
-	}
+	sqliteAssertNotFound(t, err, got)
 }
 
 func TestSQLiteReadModel_List(t *testing.T) {

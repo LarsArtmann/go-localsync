@@ -16,19 +16,16 @@ type MockProvider struct {
 
 func (m *MockProvider) Name() string { return "mock" }
 
-func (m *MockProvider) Fetch(
-	_ context.Context,
-	_ *provider.FetchOptions,
-) (*provider.FetchResult, error) {
+func (m *MockProvider) fetchResult() (*provider.FetchResult, error) {
 	return &provider.FetchResult{Items: m.Items, HasMore: false}, m.Err
 }
 
-func (m *MockProvider) FetchAll(
-	_ context.Context,
-	_ string,
-	_ int,
-) (*provider.FetchResult, error) {
-	return &provider.FetchResult{Items: m.Items, HasMore: false}, m.Err
+func (m *MockProvider) Fetch(_ context.Context, _ *provider.FetchOptions) (*provider.FetchResult, error) {
+	return m.fetchResult()
+}
+
+func (m *MockProvider) FetchAll(_ context.Context, _ string, _ int) (*provider.FetchResult, error) {
+	return m.fetchResult()
 }
 
 func (m *MockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo, error) {
