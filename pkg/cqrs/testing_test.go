@@ -22,6 +22,28 @@ func assertEventType(t *testing.T, evt event.Event, want event.Type) {
 	testutil.AssertEqual(t, evt.Type(), want, "type")
 }
 
+func unmarshalConflictPayload(t *testing.T, evt event.Event) ItemConflictFoundPayload {
+	t.Helper()
+
+	var payload ItemConflictFoundPayload
+	if err := json.Unmarshal(evt.Payload(), &payload); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	return payload
+}
+
+func unmarshalSyncedPayload(t *testing.T, evt event.Event) ItemSyncedPayload {
+	t.Helper()
+
+	var payload ItemSyncedPayload
+	if err := json.Unmarshal(evt.Payload(), &payload); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	return payload
+}
+
 func newMemoryStack(t *testing.T) *CQRSStack {
 	t.Helper()
 

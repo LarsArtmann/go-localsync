@@ -104,6 +104,17 @@ func newTestServer(store synclib.SyncStore) *Server {
 	return NewServer(syncer, logger)
 }
 
+func newMockStoreWithItems() *mockSyncStore {
+	return &mockSyncStore{
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			Items: []*model.Item{
+				testItem("1", "PushEvent"),
+				testItem("2", "IssueEvent"),
+			},
+		},
+	}
+}
+
 func TestHealthCheck(t *testing.T) {
 	t.Parallel()
 
@@ -194,15 +205,7 @@ func TestGetStats_StoreError(t *testing.T) {
 func TestListItems(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*model.Item{
-				testItem("1", "PushEvent"),
-				testItem("2", "IssueEvent"),
-			},
-		},
-	}
-
+	store := newMockStoreWithItems()
 	server := newTestServer(store)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items?limit=10", nil)
@@ -236,15 +239,7 @@ func TestListItems(t *testing.T) {
 func TestListItems_WithFilter(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*model.Item{
-				testItem("1", "PushEvent"),
-				testItem("2", "IssueEvent"),
-			},
-		},
-	}
-
+	store := newMockStoreWithItems()
 	server := newTestServer(store)
 
 	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items?type=PushEvent", nil)

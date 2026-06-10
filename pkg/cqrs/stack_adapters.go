@@ -34,15 +34,7 @@ func classifyAction(err error, eventCount int, wasNew bool, conflictWinner strin
 }
 
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
-	return s.ReadModel.Count(ctx, provider.ItemFilter{
-		Type:       nil,
-		ActorLogin: nil,
-		RepoName:   nil,
-		Source:     nil,
-		Since:      nil,
-		Limit:      0,
-		Offset:     0,
-	})
+	return s.ReadModel.Count(ctx, provider.ItemFilter{})
 }
 
 func (s *CQRSStack) ListItems(

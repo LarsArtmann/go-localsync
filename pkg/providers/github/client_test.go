@@ -52,6 +52,16 @@ func newRateLimitCoreServer(t *testing.T, core *gh.Rate) *httptest.Server {
 	}))
 }
 
+// exhaustedRate returns a GitHub rate limit struct that is fully exhausted
+// and resets at the given time — used by wait-for-rate-limit tests.
+func exhaustedRate(resetAt time.Time) *gh.Rate {
+	return &gh.Rate{
+		Limit:     5000,
+		Remaining: 0,
+		Reset:     gh.Timestamp{Time: resetAt},
+	}
+}
+
 func newTestClient(server *httptest.Server) *Client {
 	httpClient := &http.Client{}
 	client := NewClientWithHTTP(httpClient)

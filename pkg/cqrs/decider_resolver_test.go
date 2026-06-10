@@ -1,7 +1,6 @@
 package cqrs
 
 import (
-	"encoding/json"
 	"errors"
 	"testing"
 	"time"
@@ -49,10 +48,7 @@ func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
 	assertEventType(t, events[0], EventItemConflictFound)
 	assertEventType(t, events[1], EventItemSynced)
 
-	var conflictPayload ItemConflictFoundPayload
-	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
-		t.Fatalf("unexpected error: %v", unmarshalErr)
-	}
+	conflictPayload := unmarshalConflictPayload(t, events[0])
 
 	if conflictPayload.Winner != "remote" {
 		t.Errorf("expected winner=remote, got %s", conflictPayload.Winner)
@@ -62,10 +58,7 @@ func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
 		t.Errorf("expected remote timestamp from original remote item")
 	}
 
-	var syncedPayload ItemSyncedPayload
-	if unmarshalErr := json.Unmarshal(events[1].Payload(), &syncedPayload); unmarshalErr != nil {
-		t.Fatalf("unexpected error: %v", unmarshalErr)
-	}
+	syncedPayload := unmarshalSyncedPayload(t, events[1])
 
 	if syncedPayload.UpdatedAt != remoteTime.UnixNano() {
 		t.Errorf("expected synced payload to contain remote item data")
@@ -93,10 +86,7 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 
 	assertEventType(t, events[0], EventItemConflictFound)
 
-	var conflictPayload ItemConflictFoundPayload
-	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
-		t.Fatalf("unexpected error: %v", unmarshalErr)
-	}
+	conflictPayload := unmarshalConflictPayload(t, events[0])
 
 	if conflictPayload.Winner != "local" {
 		t.Errorf("expected winner=local, got %s", conflictPayload.Winner)
@@ -112,10 +102,7 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 
 	assertEventType(t, events[1], EventItemSynced)
 
-	var syncedPayload ItemSyncedPayload
-	if unmarshalErr := json.Unmarshal(events[1].Payload(), &syncedPayload); unmarshalErr != nil {
-		t.Fatalf("unexpected error: %v", unmarshalErr)
-	}
+	syncedPayload := unmarshalSyncedPayload(t, events[1])
 
 	if syncedPayload.UpdatedAt != localTime.UnixNano() {
 		t.Errorf("expected synced payload to contain local item data")
@@ -136,10 +123,7 @@ func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
 
-	var conflictPayload ItemConflictFoundPayload
-	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
-		t.Fatalf("unexpected error: %v", unmarshalErr)
-	}
+	conflictPayload := unmarshalConflictPayload(t, events[0])
 
 	if conflictPayload.Winner != "remote" {
 		t.Errorf("expected fallback to remote on resolver error, got %s", conflictPayload.Winner)
@@ -165,10 +149,7 @@ func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
 
-	var conflictPayload ItemConflictFoundPayload
-	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
-		t.Fatalf("unexpected error: %v", unmarshalErr)
-	}
+	conflictPayload := unmarshalConflictPayload(t, events[0])
 
 	if conflictPayload.Winner != "remote" {
 		t.Errorf("LWW with newer remote should pick remote, got %s", conflictPayload.Winner)
@@ -194,10 +175,7 @@ func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
 		t.Fatalf("expected 2 events, got %d", len(events))
 	}
 
-	var conflictPayload ItemConflictFoundPayload
-	if unmarshalErr := json.Unmarshal(events[0].Payload(), &conflictPayload); unmarshalErr != nil {
-		t.Fatalf("unexpected error: %v", unmarshalErr)
-	}
+	conflictPayload := unmarshalConflictPayload(t, events[0])
 
 	if conflictPayload.Winner != "local" {
 		t.Errorf("LWW with newer local should pick local, got %s", conflictPayload.Winner)

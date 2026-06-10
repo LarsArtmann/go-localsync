@@ -92,6 +92,26 @@ func CreatedAfter[T interface{ GetCreatedAt() time.Time }](t time.Time) Criterio
 // Logical combinators — And, Or, Not — fully generic over T.
 // ---------------------------------------------------------------------------
 
+// joinSQL flattens sub-criteria into a single SQL clause joined by sep.
+// Returns emptySentinel if criteria is empty.
+func joinSQL[T any](criteria []Criterion[T], sep, emptySentinel string) (string, []any) {
+	if len(criteria) == 0 {
+		return emptySentinel, nil
+	}
+
+	clauses := make([]string, 0, len(criteria))
+
+	var args []any
+
+	for _, c := range criteria {
+		clause, cargs := c.ToSQL()
+		clauses = append(clauses, fmt.Sprintf("(%s)", clause))
+		args = append(args, cargs...)
+	}
+
+	return strings.Join(clauses, sep), args
+}
+
 // And returns a criterion that matches when ALL sub-criteria match.
 func And[T any](criteria ...Criterion[T]) Criterion[T] {
 	return NewCriterion(
@@ -105,21 +125,7 @@ func And[T any](criteria ...Criterion[T]) Criterion[T] {
 			return true
 		},
 		func() (string, []any) {
-			if len(criteria) == 0 {
-				return "1=1", nil
-			}
-
-			clauses := make([]string, 0, len(criteria))
-
-			var args []any
-
-			for _, c := range criteria {
-				clause, cargs := c.ToSQL()
-				clauses = append(clauses, fmt.Sprintf("(%s)", clause))
-				args = append(args, cargs...)
-			}
-
-			return strings.Join(clauses, " AND "), args
+			return joinSQL(criteria, " AND ", "1=1")
 		},
 	)
 }
@@ -137,21 +143,7 @@ func Or[T any](criteria ...Criterion[T]) Criterion[T] {
 			return false
 		},
 		func() (string, []any) {
-			if len(criteria) == 0 {
-				return "1=0", nil
-			}
-
-			clauses := make([]string, 0, len(criteria))
-
-			var args []any
-
-			for _, c := range criteria {
-				clause, cargs := c.ToSQL()
-				clauses = append(clauses, fmt.Sprintf("(%s)", clause))
-				args = append(args, cargs...)
-			}
-
-			return strings.Join(clauses, " OR "), args
+			return joinSQL(criteria, " OR ", "1=0")
 		},
 	)
 }

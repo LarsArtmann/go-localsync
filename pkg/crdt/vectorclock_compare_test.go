@@ -4,6 +4,12 @@ import (
 	"testing"
 )
 
+// concurrentClocks returns a pair of vector clocks that are concurrent to
+// each other (neither happened-before the other).
+func concurrentClocks() (VectorClock, VectorClock) {
+	return VectorClock{NodeID("a"): 3, NodeID("b"): 1}, VectorClock{NodeID("a"): 1, NodeID("b"): 3}
+}
+
 func TestVectorClock_Cmp_Table(t *testing.T) {
 	t.Parallel()
 
@@ -12,6 +18,8 @@ func TestVectorClock_Cmp_Table(t *testing.T) {
 	lessB := VectorClock{NodeID("a"): 3, NodeID("b"): 2}
 	superset := VectorClock{NodeID("a"): 3, NodeID("b"): 2}
 	subset := VectorClock{NodeID("a"): 3}
+
+	concurrentA, concurrentB := concurrentClocks()
 
 	tests := []struct {
 		name     string
@@ -28,12 +36,7 @@ func TestVectorClock_Cmp_Table(t *testing.T) {
 			OrderBefore,
 		},
 		{"a > b (happened after)", greaterA, lessB, OrderAfter},
-		{
-			"concurrent clocks",
-			VectorClock{NodeID("a"): 3, NodeID("b"): 1},
-			VectorClock{NodeID("a"): 1, NodeID("b"): 3},
-			OrderConcurrent,
-		},
+		{"concurrent clocks", concurrentA, concurrentB, OrderConcurrent},
 		{"one node vs empty", VectorClock{NodeID("a"): 1}, NewVectorClock(), OrderAfter},
 		{"empty vs one node", NewVectorClock(), VectorClock{NodeID("a"): 1}, OrderBefore},
 		{"superset clock is greater", superset, subset, OrderAfter},
@@ -145,6 +148,8 @@ func TestVectorClock_Equal_Symmetric(t *testing.T) {
 func TestVectorClock_Cmp(t *testing.T) {
 	t.Parallel()
 
+	concurrentA, concurrentB := concurrentClocks()
+
 	tests := []struct {
 		name     string
 		a        VectorClock
@@ -160,12 +165,7 @@ func TestVectorClock_Cmp(t *testing.T) {
 		},
 		{"before", VectorClock{NodeID("a"): 1}, VectorClock{NodeID("a"): 3}, OrderBefore},
 		{"after", VectorClock{NodeID("a"): 3}, VectorClock{NodeID("a"): 1}, OrderAfter},
-		{
-			"concurrent",
-			VectorClock{NodeID("a"): 3, NodeID("b"): 1},
-			VectorClock{NodeID("a"): 1, NodeID("b"): 3},
-			OrderConcurrent,
-		},
+		{"concurrent", concurrentA, concurrentB, OrderConcurrent},
 		{"empty vs non-empty", NewVectorClock(), VectorClock{NodeID("a"): 1}, OrderBefore},
 		{
 			"superset is after",

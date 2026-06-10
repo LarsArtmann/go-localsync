@@ -185,11 +185,7 @@ func TestWaitForRateLimit_ExceedsMaxWait(t *testing.T) {
 	t.Parallel()
 
 	resetTime := time.Now().Add(2 * time.Hour)
-	server := newRateLimitCoreServer(t, &gh.Rate{
-		Limit:     5000,
-		Remaining: 0,
-		Reset:     gh.Timestamp{Time: resetTime},
-	})
+	server := newRateLimitCoreServer(t, exhaustedRate(resetTime))
 	defer server.Close()
 
 	client := newTestClient(server)
@@ -212,11 +208,7 @@ func TestWaitForRateLimit_ContextCanceled(t *testing.T) {
 	t.Parallel()
 
 	resetTime := time.Now().Add(5 * time.Second)
-	server := newRateLimitCoreServer(t, &gh.Rate{
-		Limit:     5000,
-		Remaining: 0,
-		Reset:     gh.Timestamp{Time: resetTime},
-	})
+	server := newRateLimitCoreServer(t, exhaustedRate(resetTime))
 	defer server.Close()
 
 	client := newTestClient(server)

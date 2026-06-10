@@ -27,6 +27,23 @@ func mustParseTime(t *testing.T, s string) time.Time {
 	return v
 }
 
+func makeTestItem(t *testing.T, sourceID, eventType, date string) *provider.Item {
+	t.Helper()
+
+	ts := mustParseTime(t, date)
+
+	return &provider.Item{
+		ExternalID: id.NewExternalID(sourceID),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID(eventType),
+		ActorLogin: id.NewActorID("testuser"),
+		RepoName:   id.NewRepoID("test/repo"),
+		CreatedAt:  ts,
+		UpdatedAt:  ts,
+		RawJSON:    []byte(`{}`),
+	}
+}
+
 // TestIntegration_APIListItemsRoundtrip verifies that items synced through
 // the CQRS stack are correctly exposed via the HTTP API.
 func TestIntegration_APIListItemsRoundtrip(t *testing.T) {
@@ -38,26 +55,8 @@ func TestIntegration_APIListItemsRoundtrip(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	items := []*provider.Item{
-		{
-			ExternalID: id.NewExternalID("1"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorID("testuser"),
-			RepoName:   id.NewRepoID("test/repo"),
-			CreatedAt:  mustParseTime(t, "2024-01-01T00:00:00Z"),
-			UpdatedAt:  mustParseTime(t, "2024-01-01T00:00:00Z"),
-			RawJSON:    []byte(`{}`),
-		},
-		{
-			ExternalID: id.NewExternalID("2"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("IssueEvent"),
-			ActorLogin: id.NewActorID("testuser"),
-			RepoName:   id.NewRepoID("test/repo"),
-			CreatedAt:  mustParseTime(t, "2024-01-02T00:00:00Z"),
-			UpdatedAt:  mustParseTime(t, "2024-01-02T00:00:00Z"),
-			RawJSON:    []byte(`{}`),
-		},
+		makeTestItem(t, "1", "PushEvent", "2024-01-01T00:00:00Z"),
+		makeTestItem(t, "2", "IssueEvent", "2024-01-02T00:00:00Z"),
 	}
 
 	stack.SyncItems(ctx, items)
@@ -122,16 +121,7 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	items := []*provider.Item{
-		{
-			ExternalID: id.NewExternalID("1"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorID("testuser"),
-			RepoName:   id.NewRepoID("test/repo"),
-			CreatedAt:  mustParseTime(t, "2024-01-01T00:00:00Z"),
-			UpdatedAt:  mustParseTime(t, "2024-01-01T00:00:00Z"),
-			RawJSON:    []byte(`{}`),
-		},
+		makeTestItem(t, "1", "PushEvent", "2024-01-01T00:00:00Z"),
 	}
 
 	stack.SyncItems(ctx, items)

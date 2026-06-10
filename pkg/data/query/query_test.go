@@ -24,6 +24,15 @@ func (t testItem) GetRepoName() id.RepoID    { return t.repo }
 func (t testItem) GetCreatedAt() time.Time   { return t.createdAt }
 func (t testItem) GetUpdatedAt() time.Time   { return t.updatedAt }
 
+// assertNoMatch fails the test if c matches value.
+func assertNoMatch[T any](t *testing.T, c Criterion[T], value T, msg string) {
+	t.Helper()
+
+	if c.Match(value) {
+		t.Error(msg)
+	}
+}
+
 func TestHasSource(t *testing.T) {
 	t.Parallel()
 
@@ -115,13 +124,11 @@ func TestAndCriterion(t *testing.T) {
 		t.Error("expected match when both criteria match")
 	}
 
-	if and.Match(testItem{source: id.NewProviderID("github"), itemType: id.NewEventTypeID("IssueEvent")}) {
-		t.Error("expected no match when one criterion fails")
-	}
+	assertNoMatch(t, and, testItem{source: id.NewProviderID("github"), itemType: id.NewEventTypeID("IssueEvent")},
+		"expected no match when one criterion fails")
 
-	if and.Match(testItem{source: id.NewProviderID("gitlab"), itemType: id.NewEventTypeID("PushEvent")}) {
-		t.Error("expected no match when other criterion fails")
-	}
+	assertNoMatch(t, and, testItem{source: id.NewProviderID("gitlab"), itemType: id.NewEventTypeID("PushEvent")},
+		"expected no match when other criterion fails")
 
 	clause, args := and.ToSQL()
 	if clause != "(source = ?) AND (type = ?)" {
@@ -242,12 +249,19 @@ func TestQuerySort(t *testing.T) {
 
 	q.Sort(items)
 
-	if !items[0].createdAt.Equal(time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)) {
-		t.Error("expected first item to be latest")
+	sortExpectations := []struct {
+		index int
+		want  time.Time
+		label string
+	}{
+		{0, time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC), "first item to be latest"},
+		{2, time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC), "last item to be earliest"},
 	}
 
-	if !items[2].createdAt.Equal(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)) {
-		t.Error("expected last item to be earliest")
+	for _, exp := range sortExpectations {
+		if !items[exp.index].createdAt.Equal(exp.want) {
+			t.Errorf("expected %s", exp.label)
+		}
 	}
 }
 
