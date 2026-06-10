@@ -11,6 +11,14 @@ type testItem struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
+func assertWinner(t *testing.T, winner testItem, want, context string) {
+	t.Helper()
+
+	if winner.Name != want {
+		t.Errorf("expected %s to win%s, got %q", want, context, winner.Name)
+	}
+}
+
 func itemTimestamp(item testItem) time.Time {
 	return item.UpdatedAt
 }
@@ -78,16 +86,13 @@ func TestLWWResolver_WinsByVectorClock(t *testing.T) {
 				t.Fatalf("Resolve() error: %v", err)
 			}
 
-			if winner.Name != tt.expectWinner {
-				t.Errorf("expected %s to win, got %q", tt.expectWinner, winner.Name)
-			}
+			assertWinner(t, winner, tt.expectWinner, "")
 		})
 	}
 }
 
 func TestLWWResolver_LocalWinsByTimestamp(t *testing.T) {
 	t.Parallel()
-
 	resolver, _ := NewLWWResolver(itemTimestamp)
 	now := time.Now()
 	local := testItem{Name: "local", UpdatedAt: now.Add(2 * time.Hour)}
@@ -171,9 +176,7 @@ func TestLWWResolver_Tiebreaker(t *testing.T) {
 				t.Fatalf("Resolve() error: %v", err)
 			}
 
-			if winner.Name != tt.expectWinner {
-				t.Errorf("expected %s to win via tiebreaker, got %q", tt.expectWinner, winner.Name)
-			}
+			assertWinner(t, winner, tt.expectWinner, " via tiebreaker")
 		})
 	}
 }

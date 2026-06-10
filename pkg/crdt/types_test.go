@@ -2,6 +2,8 @@ package crdt
 
 import (
 	"testing"
+
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestParseOperationID(t *testing.T) {
@@ -62,13 +64,9 @@ func TestMustParseOperationID(t *testing.T) {
 	t.Run("empty string panics", func(t *testing.T) {
 		t.Parallel()
 
-		defer func() {
-			if r := recover(); r == nil {
-				t.Error("expected panic")
-			}
-		}()
-
-		MustParseOperationID("")
+		testutil.AssertPanics(t, func() {
+			MustParseOperationID("")
+		}, "MustParseOperationID with empty string")
 	})
 }
 
@@ -139,13 +137,9 @@ func TestMustParseNodeID(t *testing.T) {
 	t.Run("empty string panics", func(t *testing.T) {
 		t.Parallel()
 
-		defer func() {
-			if r := recover(); r == nil {
-				t.Error("expected panic")
-			}
-		}()
-
-		MustParseNodeID("")
+		testutil.AssertPanics(t, func() {
+			MustParseNodeID("")
+		}, "MustParseNodeID with empty string")
 	})
 }
 

@@ -128,9 +128,7 @@ func TestFetch_CustomOptions(t *testing.T) {
 		&provider.FetchOptions{Source: "testuser", PerPage: expectedPerPage, Page: expectedPage},
 	)
 	testutil.MustNoError(t, err)
-	if len(result.Items) != 0 {
-		t.Errorf("expected 0 items, got %d", len(result.Items))
-	}
+	testutil.AssertLen(t, result.Items, 0, "items")
 }
 
 func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
@@ -143,9 +141,7 @@ func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 		&provider.FetchOptions{Source: "testuser", PerPage: 0, Page: expectedPage},
 	)
 	testutil.MustNoError(t, err)
-	if len(result.Items) != 0 {
-		t.Errorf("expected 0 items, got %d", len(result.Items))
-	}
+	testutil.AssertLen(t, result.Items, 0, "items")
 }
 
 func createTestServerForFetch(
@@ -215,9 +211,7 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 	client := newTestClient(server)
 	result, err := client.FetchAll(context.Background(), "testuser", 3)
 	testutil.MustNoError(t, err)
-	if len(result.Items) != 200 {
-		t.Errorf("expected 200 items, got %d", len(result.Items))
-	}
+	testutil.AssertLen(t, result.Items, 200, "items")
 	if callCount != 3 {
 		t.Errorf("expected 3 calls, got %d", callCount)
 	}
@@ -264,9 +258,7 @@ func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 	client := newTestClient(server)
 	result, err := client.FetchAll(context.Background(), "testuser", 10)
 	testutil.MustNoError(t, err)
-	if len(result.Items) != 1 {
-		t.Errorf("expected 1 item, got %d", len(result.Items))
-	}
+	testutil.AssertLen(t, result.Items, 1, "items")
 	if callCount > 2 {
 		t.Errorf("expected at most 2 calls, got %d", callCount)
 	}

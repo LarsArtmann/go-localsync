@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 	"time"
+
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 func TestOperationType_Constants(t *testing.T) {
@@ -295,11 +297,7 @@ func TestNewOperation_InvalidType(t *testing.T) {
 func TestMustNewOperation_Panics(t *testing.T) {
 	t.Parallel()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("expected panic for empty ID")
-		}
-	}()
-
-	MustNewOperation(OperationID(""), OpCreate, MustParseNodeID("node-a"), "test")
+	testutil.AssertPanics(t, func() {
+		MustNewOperation(OperationID(""), OpCreate, MustParseNodeID("node-a"), "test")
+	}, "MustNewOperation with empty ID")
 }

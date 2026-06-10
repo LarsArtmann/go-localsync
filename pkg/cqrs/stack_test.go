@@ -41,11 +41,7 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-		testItem("2", "IssueEvent"),
-		testItem("3", "PushEvent"),
-	}
+	items := testItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	result := stack.SyncItems(ctx, items)
 	if result.Synced != 3 {
@@ -189,11 +185,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-		testItem("2", "IssueEvent"),
-		testItem("3", "PushEvent"),
-	}
+	items := testItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	result := stack.SyncItems(ctx, items)
 	if result.Synced != 3 {

@@ -180,7 +180,7 @@ func TestCQRSStack_SyncItems_ConflictLocal_WithLWWResolver(t *testing.T) {
 
 	ctx := context.Background()
 
-	localTime := time.Now().Truncate(time.Millisecond).Add(3 * time.Hour)
+	localTime := testFutureNow(3 * time.Hour)
 
 	first := testItem("1", "PushEvent")
 	first.UpdatedAt = localTime

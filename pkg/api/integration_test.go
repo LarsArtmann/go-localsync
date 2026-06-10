@@ -158,7 +158,5 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 	if body.TotalItems != 1 {
 		t.Errorf("expected totalItems=1, got %d", body.TotalItems)
 	}
-	if len(body.ItemTypes) != 1 {
-		t.Errorf("expected 1 item type, got %d", len(body.ItemTypes))
-	}
+	testutil.AssertLen(t, body.ItemTypes, 1, "item types")
 }

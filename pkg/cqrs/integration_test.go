@@ -139,11 +139,7 @@ func TestIntegration_ReadModelFilter(t *testing.T) {
 	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-		testItem("2", "IssueEvent"),
-		testItem("3", "PushEvent"),
-	}
+	items := testItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	stack.SyncItems(ctx, items)
 	waitForCount(t, stack, ctx, 3)

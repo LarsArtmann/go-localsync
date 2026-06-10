@@ -130,8 +130,30 @@ func testItem(sourceID, itemType string) *provider.Item {
 	}
 }
 
+// testItems constructs a slice of items from (id, type) pairs.
+//
+//	testItems("1", "PushEvent", "2", "IssueEvent")
+func testItems(pairs ...string) []*provider.Item {
+	if len(pairs)%2 != 0 {
+		panic("testItems requires an even number of arguments (id, type pairs)")
+	}
+
+	items := make([]*provider.Item, 0, len(pairs)/2)
+	for i := 0; i < len(pairs); i += 2 {
+		items = append(items, testItem(pairs[i], pairs[i+1]))
+	}
+
+	return items
+}
+
 func testDataItem(sourceID, itemType string) *model.Item {
 	return ToDataItem(testItem(sourceID, itemType))
+}
+
+// testFutureNow returns time.Now() truncated to milliseconds and offset by delta.
+// Used to construct test timestamps that are clearly in the future or past.
+func testFutureNow(delta time.Duration) time.Time {
+	return time.Now().Truncate(time.Millisecond).Add(delta)
 }
 
 func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected int64) {

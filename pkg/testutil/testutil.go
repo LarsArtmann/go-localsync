@@ -51,3 +51,25 @@ func AssertStatusOK(t *testing.T, rec *httptest.ResponseRecorder) {
 		t.Fatalf("expected status 200, got %d: %s", rec.Code, rec.Body.String())
 	}
 }
+
+// AssertLen fails the test if len(got) != want.
+func AssertLen[T any](t *testing.T, got []T, want int, label string) {
+	t.Helper()
+
+	if len(got) != want {
+		t.Errorf("expected %s count=%d, got %d", label, want, len(got))
+	}
+}
+
+// AssertPanics fails the test if fn does not panic.
+func AssertPanics(t *testing.T, fn func(), label string) {
+	t.Helper()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("expected panic for %s", label)
+		}
+	}()
+
+	fn()
+}

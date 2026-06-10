@@ -165,9 +165,7 @@ func TestGetStats(t *testing.T) {
 		t.Errorf("expected totalItems=2, got %d", body.TotalItems)
 	}
 
-	if len(body.ItemTypes) != 2 {
-		t.Errorf("expected 2 item types, got %d", len(body.ItemTypes))
-	}
+	testutil.AssertLen(t, body.ItemTypes, 2, "item types")
 }
 
 func TestGetStats_StoreError(t *testing.T) {

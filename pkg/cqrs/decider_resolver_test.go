@@ -161,7 +161,7 @@ func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
 
 	resolver := newUpdatedAtLWWResolver(t)
 
-	localTime := time.Now().Truncate(time.Millisecond).Add(3 * time.Hour)
+	localTime := testFutureNow(3 * time.Hour)
 	remoteTime := time.Now().Truncate(time.Millisecond)
 
 	remoteItem := testItem("123", "PushEvent")

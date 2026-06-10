@@ -13,6 +13,18 @@ func assertItemIDsEqual(t *testing.T, want, got ItemID, context string) {
 	}
 }
 
+func assertPanics(t *testing.T, fn func()) {
+	t.Helper()
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic")
+		}
+	}()
+
+	fn()
+}
+
 func TestNewExternalIDs(t *testing.T) {
 	t.Parallel()
 
@@ -65,13 +77,9 @@ func TestMustParseItemID(t *testing.T) {
 func TestMustParseItemID_panics(t *testing.T) {
 	t.Parallel()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("expected panic for invalid ULID string")
-		}
-	}()
-
-	MustParseItemID("not-a-valid-ulid")
+	assertPanics(t, func() {
+		MustParseItemID("not-a-valid-ulid")
+	})
 }
 
 func TestParseItemID(t *testing.T) {

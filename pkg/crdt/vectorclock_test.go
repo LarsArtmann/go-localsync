@@ -4,6 +4,14 @@ import (
 	"testing"
 )
 
+func assertClockGet(t *testing.T, clock VectorClock, node NodeID, want int64, label string) {
+	t.Helper()
+
+	if got := clock.Get(node); got != want {
+		t.Errorf("%s: got %d, want %d", label, got, want)
+	}
+}
+
 func TestNewVectorClock(t *testing.T) {
 	t.Parallel()
 
@@ -34,13 +42,8 @@ func TestNewVectorClockFromMap(t *testing.T) {
 		t.Fatalf("expected 2 entries, got %d", len(clock))
 	}
 
-	if clock.Get("node-a") != 3 {
-		t.Errorf("expected node-a=3, got %d", clock.Get("node-a"))
-	}
-
-	if clock.Get("node-b") != 1 {
-		t.Errorf("expected node-b=1, got %d", clock.Get("node-b"))
-	}
+	assertClockGet(t, clock, "node-a", 3, "node-a from map")
+	assertClockGet(t, clock, "node-b", 1, "node-b from map")
 }
 
 func TestNewVectorClockFromMap_Empty(t *testing.T) {
@@ -58,9 +61,7 @@ func TestNewVectorClockFromMap_Empty(t *testing.T) {
 	}
 
 	clock.Increment("node-a")
-	if clock.Get("node-a") != 1 {
-		t.Errorf("expected Increment to work on nil-input clock, got %d", clock.Get("node-a"))
-	}
+	assertClockGet(t, clock, "node-a", 1, "Increment on nil-input clock")
 }
 
 func TestNewVectorClockFromMap_NegativeCounter(t *testing.T) {
@@ -79,32 +80,22 @@ func TestVectorClock_Increment(t *testing.T) {
 	clock := NewVectorClock()
 
 	clock.Increment(NodeID("node-a"))
-	if got := clock.Get(NodeID("node-a")); got != 1 {
-		t.Errorf("first increment: got %d, want 1", got)
-	}
+	assertClockGet(t, clock, NodeID("node-a"), 1, "first increment")
 
 	clock.Increment(NodeID("node-a"))
-	if got := clock.Get(NodeID("node-a")); got != 2 {
-		t.Errorf("second increment: got %d, want 2", got)
-	}
+	assertClockGet(t, clock, NodeID("node-a"), 2, "second increment")
 
 	clock.Increment(NodeID("node-b"))
-	if got := clock.Get(NodeID("node-b")); got != 1 {
-		t.Errorf("new node: got %d, want 1", got)
-	}
+	assertClockGet(t, clock, NodeID("node-b"), 1, "new node")
 
-	if got := clock.Get(NodeID("node-a")); got != 2 {
-		t.Errorf("original unchanged: got %d, want 2", got)
-	}
+	assertClockGet(t, clock, NodeID("node-a"), 2, "original unchanged")
 }
 
 func TestVectorClock_Get_MissingNode(t *testing.T) {
 	t.Parallel()
 
 	clock := NewVectorClock()
-	if got := clock.Get(NodeID("nonexistent")); got != 0 {
-		t.Errorf("missing node: got %d, want 0", got)
-	}
+	assertClockGet(t, clock, NodeID("nonexistent"), 0, "missing node")
 }
 
 func TestVectorClock_Merge(t *testing.T) {

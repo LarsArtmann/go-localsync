@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/codec/v2"
+	"github.com/larsartmann/go-cqrs-lite/decider/v2"
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
@@ -72,7 +73,7 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 	return SyncItemState{Item: item, Deleted: false}, nil
 }
 
-// DecideSync returns a DecideFunc that syncs an incoming model.Item.
+// DecideSync returns a decider.DecideFunc that syncs an incoming model.Item.
 // If resolver is nil, remote-wins is used as the default strategy.
 // rawJSON is the original provider payload, stored in the event for full-fidelity replay.
 func DecideSync(
@@ -80,7 +81,7 @@ func DecideSync(
 	rawJSON []byte,
 	resolver crdt.ConflictResolver[*model.Item],
 	opts ...event.Option,
-) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
+) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
@@ -102,11 +103,11 @@ func DecideSync(
 	}
 }
 
-// DecideDelete returns a DecideFunc that marks an item as deleted.
+// DecideDelete returns a decider.DecideFunc that marks an item as deleted.
 func DecideDelete(
 	source string, sourceID id.ExternalID,
 	opts ...event.Option,
-) func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
+) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		if state.Deleted || state.IsNew() {
 			return nil, nil

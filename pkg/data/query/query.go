@@ -117,8 +117,17 @@ func (qb QueryBuilder[T]) Build() Query[T] {
 // Common sort orders — generic over any type with a time accessor.
 // ---------------------------------------------------------------------------
 
+// hasCreatedAt is satisfied by any type with a GetCreatedAt() method.
+type hasCreatedAt interface{ GetCreatedAt() time.Time }
+
+// hasUpdatedAt is satisfied by any type with a GetUpdatedAt() method.
+type hasUpdatedAt interface{ GetUpdatedAt() time.Time }
+
+// hasType is satisfied by any type with a GetType() method.
+type hasType interface{ GetType() id.EventTypeID }
+
 // ByCreatedAtDesc sorts by created_at descending.
-func ByCreatedAtDesc[T interface{ GetCreatedAt() time.Time }]() Order[T] {
+func ByCreatedAtDesc[T hasCreatedAt]() Order[T] {
 	return Order[T]{
 		Less:      func(a, b T) bool { return a.GetCreatedAt().After(b.GetCreatedAt()) },
 		FieldName: "created_at DESC",
@@ -126,7 +135,7 @@ func ByCreatedAtDesc[T interface{ GetCreatedAt() time.Time }]() Order[T] {
 }
 
 // ByCreatedAtAsc sorts by created_at ascending.
-func ByCreatedAtAsc[T interface{ GetCreatedAt() time.Time }]() Order[T] {
+func ByCreatedAtAsc[T hasCreatedAt]() Order[T] {
 	return Order[T]{
 		Less:      func(a, b T) bool { return a.GetCreatedAt().Before(b.GetCreatedAt()) },
 		FieldName: "created_at ASC",
@@ -134,7 +143,7 @@ func ByCreatedAtAsc[T interface{ GetCreatedAt() time.Time }]() Order[T] {
 }
 
 // ByUpdatedAtDesc sorts by updated_at descending.
-func ByUpdatedAtDesc[T interface{ GetUpdatedAt() time.Time }]() Order[T] {
+func ByUpdatedAtDesc[T hasUpdatedAt]() Order[T] {
 	return Order[T]{
 		Less:      func(a, b T) bool { return a.GetUpdatedAt().After(b.GetUpdatedAt()) },
 		FieldName: "updated_at DESC",
@@ -142,7 +151,7 @@ func ByUpdatedAtDesc[T interface{ GetUpdatedAt() time.Time }]() Order[T] {
 }
 
 // ByTypeAsc sorts by type ascending (lexicographic).
-func ByTypeAsc[T interface{ GetType() id.EventTypeID }]() Order[T] {
+func ByTypeAsc[T hasType]() Order[T] {
 	return Order[T]{
 		Less:      func(a, b T) bool { return a.GetType().Get() < b.GetType().Get() },
 		FieldName: "type ASC",
