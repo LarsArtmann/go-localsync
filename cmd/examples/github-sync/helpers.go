@@ -13,6 +13,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/api"
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
@@ -36,13 +37,12 @@ type syncResultOutput struct {
 }
 
 func runStats(stack *cqrs.CQRSStack, jsonOutput bool, logger *log.Logger) {
-	stats, err := stack.Count(context.Background())
+	stats, err := stack.Count(context.Background(), provider.ItemFilter{})
 	if err != nil {
-		logger.Error("Failed to get stats", "error", err)
-		os.Exit(exitSoftware)
+		logErrorAndExit(logger, "Failed to get stats", err, exitSoftware)
 	}
 
-	types, err := stack.GetItemTypes(context.Background())
+	types, err := stack.GetTypes(context.Background())
 	if err != nil {
 		logger.Error("Failed to get item types", "error", err)
 	}
@@ -123,6 +123,11 @@ func printVersion(w io.Writer) {
 func logFatalAndExit(logger *log.Logger, msg string, err error) {
 	logger.Error(msg, "error", err)
 	os.Exit(exitCodeForError(err))
+}
+
+func logErrorAndExit(logger *log.Logger, msg string, err error, code int) {
+	logger.Error(msg, "error", err)
+	os.Exit(code)
 }
 
 func exitCodeForError(err error) int {

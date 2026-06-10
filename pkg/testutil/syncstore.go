@@ -20,8 +20,8 @@ type SyncStoreListBehavior struct {
 	ListErr error
 }
 
-// ListItems returns the configured Items or ListErr.
-func (b *SyncStoreListBehavior) ListItems(
+// List returns the configured Items or ListErr.
+func (b *SyncStoreListBehavior) List(
 	_ context.Context,
 	_ provider.ItemFilter,
 ) ([]*model.Item, error) {

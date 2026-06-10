@@ -154,14 +154,7 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 		t.Errorf("expected Synced=1, got %d", second.Synced)
 	}
 
-	var foundConflict bool
-
-	for _, r := range second.Results {
-		if r.Action == synclib.ActionConflictRemote {
-			foundConflict = true
-		}
-	}
-	if !foundConflict {
+	if !hasAction(second, synclib.ActionConflictRemote) {
 		t.Error("expected ActionConflictRemote in results")
 	}
 }
@@ -199,19 +192,11 @@ func TestCQRSStack_SyncItems_ConflictLocal_WithLWWResolver(t *testing.T) {
 		t.Errorf("expected Conflicts=1, got %d", second.Conflicts)
 	}
 
-	var foundLocalConflict bool
-
-	for _, r := range second.Results {
-		if r.Action == synclib.ActionConflictLocal {
-			foundLocalConflict = true
-		}
-	}
-
-	if !foundLocalConflict {
+	if !hasAction(second, synclib.ActionConflictLocal) {
 		t.Error("expected ActionConflictLocal in results (local has newer timestamp)")
 	}
 
-	got, getErr := stack.ReadModel.Get(ctx, "github", id.NewExternalID("1"))
+	got, getErr := stack.Get(ctx, "github", id.NewExternalID("1"))
 	testutil.MustNoError(t, getErr)
 
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type (local preserved)")
@@ -250,20 +235,23 @@ func TestCQRSStack_SyncItems_ConflictRemote_WithLWWResolver(t *testing.T) {
 		t.Errorf("expected Conflicts=1, got %d", second.Conflicts)
 	}
 
-	var foundRemoteConflict bool
-
-	for _, r := range second.Results {
-		if r.Action == synclib.ActionConflictRemote {
-			foundRemoteConflict = true
-		}
-	}
-
-	if !foundRemoteConflict {
+	if !hasAction(second, synclib.ActionConflictRemote) {
 		t.Error("expected ActionConflictRemote in results (remote has newer timestamp)")
 	}
 
-	got, getErr := stack.ReadModel.Get(ctx, "github", id.NewExternalID("1"))
+	got, getErr := stack.Get(ctx, "github", id.NewExternalID("1"))
 	testutil.MustNoError(t, getErr)
 
 	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type (remote applied)")
+}
+
+// hasAction returns true if any result in summary has the given action.
+func hasAction(summary *synclib.SyncSummary, action synclib.SyncAction) bool {
+	for _, r := range summary.Results {
+		if r.Action == action {
+			return true
+		}
+	}
+
+	return false
 }

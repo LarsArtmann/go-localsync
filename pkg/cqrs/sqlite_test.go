@@ -54,7 +54,7 @@ func TestCQRSStack_SQLiteLocalStore_SyncAndReadModel(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 2)
 
-	items, err := stack.ReadModel.List(ctx, provider.ItemFilter{})
+	items, err := stack.List(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if len(items) != 2 {
 		t.Errorf("expected 2 items, got %d", len(items))
@@ -73,7 +73,7 @@ func TestCQRSStack_Projection_SubscribesEvents(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 1)
 
-	count, err := stack.Count(ctx)
+	count, err := stack.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after outbox poller, got %d", count)
@@ -102,7 +102,7 @@ func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
 
 	waitForCount(t, stack2, ctx, 2)
 
-	count, err := stack2.Count(ctx)
+	count, err := stack2.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 2 {
 		t.Errorf("expected count=2 after replay, got %d", count)

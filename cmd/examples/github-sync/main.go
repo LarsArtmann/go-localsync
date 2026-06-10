@@ -88,16 +88,14 @@ func main() {
 	if *dbPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			logger.Error("Failed to get home directory", "error", err)
-			os.Exit(exitNoInput)
+			logErrorAndExit(logger, "Failed to get home directory", err, exitNoInput)
 		}
 
 		*dbPath = filepath.Join(homeDir, ".local", "share", "go-localsync")
 	}
 
 	if err := os.MkdirAll(*dbPath, 0o755); err != nil {
-		logger.Error("Failed to create database directory", "error", err)
-		os.Exit(exitNoInput)
+		logErrorAndExit(logger, "Failed to create database directory", err, exitNoInput)
 	}
 
 	//nolint:exhaustruct // ConflictResolver intentionally omitted (uses default)
@@ -106,8 +104,7 @@ func main() {
 		DBPath:  *dbPath,
 	})
 	if err != nil {
-		logger.Error("Failed to create CQRS stack", "error", err)
-		os.Exit(exitNoInput)
+		logErrorAndExit(logger, "Failed to create CQRS stack", err, exitNoInput)
 	}
 
 	defer func() {

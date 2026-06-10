@@ -192,12 +192,12 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 		filter.Since = &input.Since
 	}
 
-	items, err := s.store.ListItems(ctx, filter)
+	items, err := s.store.List(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	total, err := s.store.CountItems(ctx, filter)
+	total, err := s.store.Count(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -225,12 +225,12 @@ type StatsOutput struct {
 func (s *Server) getStats(ctx context.Context, _ *struct{}) (*StatsOutput, error) {
 	var filter provider.ItemFilter
 
-	count, err := s.store.CountItems(ctx, filter)
+	count, err := s.store.Count(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
 
-	types, err := s.store.GetItemTypes(ctx)
+	types, err := s.store.GetTypes(ctx)
 	if err != nil {
 		return nil, err
 	}

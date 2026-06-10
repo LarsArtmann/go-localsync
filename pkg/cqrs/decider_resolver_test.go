@@ -10,15 +10,15 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
-type localWinsResolver struct{}
-
-func (localWinsResolver) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
-	return c.Local, nil
+type pickSideResolver struct {
+	pickSide string
 }
 
-type remoteWinsResolver struct{}
+func (r pickSideResolver) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
+	if r.pickSide == "local" {
+		return c.Local, nil
+	}
 
-func (remoteWinsResolver) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
 	return c.Remote, nil
 }
 
@@ -39,7 +39,7 @@ func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(ToDataItem(remoteItem), nil, new(remoteWinsResolver))(state, 1)
+	events, err := DecideSync(ToDataItem(remoteItem), nil, &pickSideResolver{pickSide: "remote"})(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))
@@ -78,7 +78,7 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 
 	state := SyncItemState{Item: localItem}
 
-	events, err := DecideSync(ToDataItem(remoteItem), nil, new(localWinsResolver))(state, 1)
+	events, err := DecideSync(ToDataItem(remoteItem), nil, &pickSideResolver{pickSide: "local"})(state, 1)
 	testutil.MustNoError(t, err)
 	if len(events) != 2 {
 		t.Fatalf("expected 2 events, got %d", len(events))

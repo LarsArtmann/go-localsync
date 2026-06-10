@@ -63,7 +63,7 @@ func TestIntegration_APIListItemsRoundtrip(t *testing.T) {
 
 	// Wait for projection to catch up.
 	for {
-		count, _ := stack.Count(ctx)
+		count, _ := stack.Count(ctx, provider.ItemFilter{})
 		if count == 2 {
 			break
 		}
@@ -125,7 +125,7 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 	stack.SyncItems(ctx, items)
 
 	for {
-		count, _ := stack.Count(ctx)
+		count, _ := stack.Count(ctx, provider.ItemFilter{})
 		if count == 1 {
 			break
 		}

@@ -44,11 +44,17 @@ type CQRSConfig struct {
 
 // CQRSStack wires together the event store, bus, decider repository, read model,
 // command/query dispatchers, and projection runner.
+//
+// ReadModel is embedded so the read-side methods (List, Count, GetTypes, Get, Upsert, Delete)
+// are promoted onto *CQRSStack. This lets *CQRSStack satisfy both the
+// internal ReadModel contract and the external sync.SyncStore contract
+// without duplicate wrapper methods.
 type CQRSStack struct {
-	Store             event.Store
-	Bus               event.Bus
+	event.Store
+	event.Bus
+	ReadModel
+
 	Repo              *decider.Repository[SyncItemState]
-	ReadModel         ReadModel
 	CommandDispatcher *command.Dispatcher
 	QueryDispatcher   *query.Dispatcher
 	conflictResolver  crdt.ConflictResolver[*model.Item]

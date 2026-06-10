@@ -24,7 +24,7 @@ func TestCommandDispatcher_SyncItem_ThroughDispatcher(t *testing.T) {
 	// SyncItem goes through CommandDispatcher
 	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
-	count, err := stack.Count(ctx)
+	count, err := stack.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after SyncItem through dispatcher, got %d", count)
@@ -42,7 +42,7 @@ func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
 	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("dispatch-2", "PushEvent")))
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("dispatch-2")))
 
-	count, err := stack.Count(ctx)
+	count, err := stack.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 0 {
 		t.Errorf("expected count=0 after DeleteItem through dispatcher, got %d", count)

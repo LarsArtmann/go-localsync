@@ -39,12 +39,11 @@ type SyncSummary struct {
 }
 
 // SyncStore is the minimal interface that decouples sync logic from concrete storage.
-// *cqrs.CQRSStack implements this interface via adapter methods.
+// *cqrs.CQRSStack implements this interface by embedding the cqrs ReadModel and
+// adding SyncItems + Close. The read-side methods come from model.ItemReader.
 type SyncStore interface {
 	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
-	ListItems(ctx context.Context, filter provider.ItemFilter) ([]*model.Item, error)
-	CountItems(ctx context.Context, filter provider.ItemFilter) (int64, error)
-	GetItemTypes(ctx context.Context) ([]string, error)
+	model.ItemReader
 	Close() error
 }
 
@@ -161,7 +160,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 	source := id.NewProviderID(opts.Source)
 
-	items, err := s.store.ListItems(
+	items, err := s.store.List(
 		ctx,
 		//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 		provider.ItemFilter{
@@ -204,12 +203,12 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 // GetStats returns aggregate statistics including per-type counts.
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
-	count, err := s.store.CountItems(ctx, provider.ItemFilter{})
+	count, err := s.store.Count(ctx, provider.ItemFilter{})
 	if err != nil {
 		return nil, err
 	}
 
-	eventTypes, err := s.store.GetItemTypes(ctx)
+	eventTypes, err := s.store.GetTypes(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +218,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	for _, t := range eventTypes {
 		eventType := id.NewEventTypeID(t)
 
-		count, err := s.store.CountItems(
+		count, err := s.store.Count(
 			ctx,
 			//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 			provider.ItemFilter{Type: &eventType},

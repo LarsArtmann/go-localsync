@@ -46,7 +46,7 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *sy
 	return summary
 }
 
-func (m *mockSyncStore) CountItems(_ context.Context, _ provider.ItemFilter) (int64, error) {
+func (m *mockSyncStore) Count(_ context.Context, _ provider.ItemFilter) (int64, error) {
 	if m.countErr != nil {
 		return 0, m.countErr
 	}
@@ -54,7 +54,7 @@ func (m *mockSyncStore) CountItems(_ context.Context, _ provider.ItemFilter) (in
 	return int64(len(m.Items)), nil
 }
 
-func (m *mockSyncStore) GetItemTypes(_ context.Context) ([]string, error) {
+func (m *mockSyncStore) GetTypes(_ context.Context) ([]string, error) {
 	if m.typesErr != nil {
 		return nil, m.typesErr
 	}
@@ -86,6 +86,20 @@ func newTestServer(store synclib.SyncStore) *Server {
 	syncer := synclib.NewSyncer(provider, store, logger)
 
 	return NewServer(syncer, logger)
+}
+
+func newJSONRequest(t *testing.T, method, path string, body any) *http.Request {
+	t.Helper()
+
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		t.Fatalf("failed to marshal request body: %v", err)
+	}
+
+	req := httptest.NewRequestWithContext(context.Background(), method, path, bytes.NewReader(bodyBytes))
+	req.Header.Set("Content-Type", "application/json")
+
+	return req
 }
 
 func newMockStoreWithItems() *mockSyncStore {
@@ -261,13 +275,7 @@ func TestTriggerSync(t *testing.T) {
 		MaxPages: 1,
 	}
 
-	bodyBytes, err := json.Marshal(payload)
-	if err != nil {
-		t.Fatalf("failed to marshal payload: %v", err)
-	}
-
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/sync", bytes.NewReader(bodyBytes))
-	req.Header.Set("Content-Type", "application/json")
+	req := newJSONRequest(t, http.MethodPost, "/sync", payload)
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
@@ -280,7 +288,7 @@ func TestTriggerSync(t *testing.T) {
 		Errors  int `json:"errors"`
 	}
 
-	err = json.Unmarshal(rec.Body.Bytes(), &body)
+	err := json.Unmarshal(rec.Body.Bytes(), &body)
 	if err != nil {
 		t.Fatalf("failed to unmarshal response: %v", err)
 	}
@@ -301,13 +309,7 @@ func TestTriggerSync_InvalidOptions(t *testing.T) {
 		MaxPages: 1,
 	}
 
-	bodyBytes, err := json.Marshal(payload)
-	if err != nil {
-		t.Fatalf("failed to marshal payload: %v", err)
-	}
-
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/sync", bytes.NewReader(bodyBytes))
-	req.Header.Set("Content-Type", "application/json")
+	req := newJSONRequest(t, http.MethodPost, "/sync", payload)
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)

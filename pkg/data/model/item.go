@@ -4,10 +4,12 @@
 package model
 
 import (
+	"context"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	"github.com/larsartmann/go-localsync/pkg/id"
+	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 // Item is the canonical domain entity for a synced item.
@@ -69,6 +71,16 @@ type ProviderItem struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	RawPayload     []byte
+}
+
+// ItemReader is the read-side contract for any storage backend that can
+// list, count, and enumerate item types. Both the CQRS ReadModel and the
+// sync.SyncStore embed this interface so the read-side method signatures
+// are declared exactly once in a shared, import-safe package.
+type ItemReader interface {
+	List(ctx context.Context, filter provider.ItemFilter) ([]*Item, error)
+	Count(ctx context.Context, filter provider.ItemFilter) (int64, error)
+	GetTypes(ctx context.Context) ([]string, error)
 }
 
 // Validate checks that all required identity fields are present.

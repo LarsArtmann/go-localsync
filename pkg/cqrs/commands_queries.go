@@ -192,22 +192,7 @@ func wireCommandDispatcher(
 	dispatcher.Use(commandValidationMiddleware())
 	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
 
-	if err := dispatcher.Register(commandTypeSyncItem, handleSyncItem(repo, resolver)); err != nil {
-		return nil, fmt.Errorf("register sync item command: %w", err)
-	}
-
-	if err := dispatcher.Register(commandTypeDeleteItem, handleDeleteItem(repo)); err != nil {
-		return nil, fmt.Errorf("register delete item command: %w", err)
-	}
-
-	return dispatcher, nil
-}
-
-func handleSyncItem(
-	repo *decider.Repository[SyncItemState],
-	resolver crdt.ConflictResolver[*model.Item],
-) command.Handler {
-	return func(ctx context.Context, cmd command.Command) error {
+	syncItemHandler := func(ctx context.Context, cmd command.Command) error {
 		syncCmd, ok := cmd.(*SyncItemCommand)
 		if !ok {
 			return fmt.Errorf("expected *SyncItemCommand, got %T: %w", cmd, errCommandTypeMismatch)
@@ -220,6 +205,16 @@ func handleSyncItem(
 			decideWithOutcome(syncCmd.Item, syncCmd.RawJSON, resolver, outcome, syncCmd.Options...),
 		)
 	}
+
+	if err := dispatcher.Register(commandTypeSyncItem, syncItemHandler); err != nil {
+		return nil, fmt.Errorf("register sync item command: %w", err)
+	}
+
+	if err := dispatcher.Register(commandTypeDeleteItem, handleDeleteItem(repo)); err != nil {
+		return nil, fmt.Errorf("register delete item command: %w", err)
+	}
+
+	return dispatcher, nil
 }
 
 func handleDeleteItem(repo *decider.Repository[SyncItemState]) command.Handler {

@@ -1,11 +1,8 @@
 package cqrs
 
 import (
-	"context"
 	"errors"
 
-	"github.com/larsartmann/go-localsync/pkg/data/model"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
@@ -33,29 +30,6 @@ func classifyAction(err error, eventCount int, wasNew bool, conflictWinner strin
 	return synclib.ActionUnchanged
 }
 
-func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
-	//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
-	return s.ReadModel.Count(ctx, provider.ItemFilter{})
-}
-
-func (s *CQRSStack) ListItems(
-	ctx context.Context,
-	filter provider.ItemFilter,
-) ([]*model.Item, error) {
-	return s.ReadModel.List(ctx, filter)
-}
-
-func (s *CQRSStack) CountItems(
-	ctx context.Context,
-	filter provider.ItemFilter,
-) (int64, error) {
-	return s.ReadModel.Count(ctx, filter)
-}
-
-func (s *CQRSStack) GetItemTypes(ctx context.Context) ([]string, error) {
-	return s.ReadModel.GetTypes(ctx)
-}
-
 func (s *CQRSStack) Close() error {
 	var errs []error
 
@@ -75,12 +49,16 @@ func (s *CQRSStack) Close() error {
 		s.cancelRunner()
 	}
 
-	if err := s.ReadModel.Close(); err != nil {
-		errs = append(errs, err)
+	if s.ReadModel != nil {
+		if err := s.ReadModel.Close(); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
-	if err := s.Store.Close(); err != nil {
-		errs = append(errs, err)
+	if s.Store != nil {
+		if err := s.Store.Close(); err != nil {
+			errs = append(errs, err)
+		}
 	}
 
 	return errors.Join(errs...)

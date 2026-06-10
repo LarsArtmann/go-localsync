@@ -162,7 +162,7 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 	deadline := time.Now().Add(5 * time.Second)
 
 	for time.Now().Before(deadline) {
-		count, err := stack.Count(ctx)
+		count, err := stack.Count(ctx, provider.ItemFilter{})
 		testutil.MustNoError(t, err)
 
 		if count == expected {
@@ -172,7 +172,7 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 		time.Sleep(time.Millisecond)
 	}
 
-	count, _ := stack.Count(ctx)
+	count, _ := stack.Count(ctx, provider.ItemFilter{})
 	t.Fatalf("timed out waiting for count=%d, got %d", expected, count)
 }
 
@@ -203,7 +203,7 @@ func subscribeAll(t *testing.T, stack *CQRSStack) func(minCount int) []event.Eve
 		return nil
 	}
 
-	testutil.MustNoError(t, stack.Bus.SubscribeAll(handler))
+	testutil.MustNoError(t, stack.SubscribeAll(handler))
 
 	return func(minCount int) []event.Event {
 		t.Helper()
