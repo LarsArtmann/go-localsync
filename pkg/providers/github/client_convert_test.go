@@ -59,15 +59,9 @@ func TestConvertEvent_MinimalEvent(t *testing.T) {
 		t.Error("expected non-empty ID")
 	}
 	testutil.AssertEqual(t, item.Type.Get(), "WatchEvent", "Type")
-	if item.ActorLogin.Get() != "" {
-		t.Errorf("expected empty ActorLogin, got %s", item.ActorLogin.Get())
-	}
-	if item.ActorAvatarURL != "" {
-		t.Errorf("expected empty ActorAvatarURL, got %s", item.ActorAvatarURL)
-	}
-	if item.RepoName.String() != "" {
-		t.Errorf("expected empty RepoName, got %s", item.RepoName)
-	}
+	testutil.AssertEqual(t, item.ActorLogin.Get(), "", "ActorLogin")
+	testutil.AssertEqual(t, item.ActorAvatarURL, "", "ActorAvatarURL")
+	testutil.AssertEqual(t, item.RepoName.Get(), "", "RepoName")
 	if item.RepoURL != "" {
 		t.Errorf("expected empty RepoURL, got %s", item.RepoURL)
 	}

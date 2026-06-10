@@ -13,6 +13,12 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
+func newMockStoreWithItems(items ...*model.Item) *mockSyncStore {
+	return &mockSyncStore{
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: items},
+	}
+}
+
 func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
 	t.Parallel()
 
@@ -158,11 +164,7 @@ func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
 	oldItem := testSyncItem("old", "PushEvent")
 	oldItem.CreatedAt = now.Add(-2 * time.Hour)
 
-	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*model.Item{testDataItem("existing", "PushEvent")},
-		},
-	}
+	store := newMockStoreWithItems(testDataItem("existing", "PushEvent"))
 	mockProv := &mockProvider{items: []*provider.Item{newItem, oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
@@ -193,11 +195,7 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 	oldItem := testSyncItem("old", "PushEvent")
 	oldItem.CreatedAt = now.Add(-1 * time.Hour)
 
-	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*model.Item{testDataItem("existing", "PushEvent")},
-		},
-	}
+	store := newMockStoreWithItems(testDataItem("existing", "PushEvent"))
 	mockProv := &mockProvider{items: []*provider.Item{oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()

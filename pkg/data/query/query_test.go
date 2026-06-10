@@ -23,6 +23,15 @@ func (t testItem) GetRepoName() id.RepoID    { return t.repo }
 func (t testItem) GetCreatedAt() time.Time   { return t.createdAt }
 func (t testItem) GetUpdatedAt() time.Time   { return t.updatedAt }
 
+// expectMatch asserts that c.Match(value) equals want.
+func expectMatch[T any](t *testing.T, c Criterion[T], value T, want bool, msg string) {
+	t.Helper()
+
+	if c.Match(value) != want {
+		t.Error(msg)
+	}
+}
+
 func TestFieldCriteria(t *testing.T) {
 	t.Parallel()
 
@@ -102,15 +111,13 @@ func TestAndCriterion(t *testing.T) {
 
 	and := And(HasSource[testItem](id.NewProviderID("github")), HasType[testItem](id.NewEventTypeID("PushEvent")))
 
-	if !and.Match(testItem{source: id.NewProviderID("github"), itemType: id.NewEventTypeID("PushEvent")}) {
-		t.Error("expected match when both criteria match")
-	}
-	if and.Match(testItem{source: id.NewProviderID("github"), itemType: id.NewEventTypeID("IssueEvent")}) {
-		t.Error("expected no match when one criterion fails")
-	}
-	if and.Match(testItem{source: id.NewProviderID("gitlab"), itemType: id.NewEventTypeID("PushEvent")}) {
-		t.Error("expected no match when other criterion fails")
-	}
+	bothMatch := testItem{source: id.NewProviderID("github"), itemType: id.NewEventTypeID("PushEvent")}
+	githubIssue := testItem{source: id.NewProviderID("github"), itemType: id.NewEventTypeID("IssueEvent")}
+	gitlabPush := testItem{source: id.NewProviderID("gitlab"), itemType: id.NewEventTypeID("PushEvent")}
+
+	expectMatch(t, and, bothMatch, true, "expected match when both criteria match")
+	expectMatch(t, and, githubIssue, false, "expected no match when one criterion fails")
+	expectMatch(t, and, gitlabPush, false, "expected no match when other criterion fails")
 
 	clause, args := and.ToSQL()
 	if clause != "(source = ?) AND (type = ?)" {
@@ -139,15 +146,9 @@ func TestOrCriterion(t *testing.T) {
 
 	or := Or(HasSource[testItem](id.NewProviderID("github")), HasSource[testItem](id.NewProviderID("gitlab")))
 
-	if !or.Match(testItem{source: id.NewProviderID("github")}) {
-		t.Error("expected match for first criterion")
-	}
-	if !or.Match(testItem{source: id.NewProviderID("gitlab")}) {
-		t.Error("expected match for second criterion")
-	}
-	if or.Match(testItem{source: id.NewProviderID("bitbucket")}) {
-		t.Error("expected no match for neither criterion")
-	}
+	expectMatch(t, or, testItem{source: id.NewProviderID("github")}, true, "expected match for first criterion")
+	expectMatch(t, or, testItem{source: id.NewProviderID("gitlab")}, true, "expected match for second criterion")
+	expectMatch(t, or, testItem{source: id.NewProviderID("bitbucket")}, false, "expected no match for neither criterion")
 
 	clause, _ := or.ToSQL()
 	if clause != "(source = ?) OR (source = ?)" {
@@ -215,11 +216,13 @@ func TestQuerySort(t *testing.T) {
 	q := Query[testItem]{OrderBy: []Order[testItem]{ByCreatedAtDesc[testItem]()}}
 	q.Sort(items)
 
-	if !items[0].createdAt.Equal(time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)) {
-		t.Error("expected first item to be latest")
+	firstDate := time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC)
+	lastDate := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	if !items[0].createdAt.Equal(firstDate) {
+		t.Errorf("expected first item to be %s, got %s", firstDate, items[0].createdAt)
 	}
-	if !items[2].createdAt.Equal(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)) {
-		t.Error("expected last item to be earliest")
+	if !items[2].createdAt.Equal(lastDate) {
+		t.Errorf("expected last item to be %s, got %s", lastDate, items[2].createdAt)
 	}
 }
 
@@ -284,7 +287,10 @@ func TestNewPage(t *testing.T) {
 	t.Run("map_preserves_metadata", func(t *testing.T) {
 		t.Parallel()
 		page := NewPage([]int{1, 2, 3}, 100, 10, 0)
-		mapped := MapPage(page, func(n int) string { return string(rune('a' + n - 1)) }) //nolint:gosec // test: n is 1-3
+		mapped := MapPage(
+			page,
+			func(n int) string { return string(rune('a' + n - 1)) },
+		)
 		if mapped.Items[0] != "a" || mapped.Items[2] != "c" {
 			t.Errorf("mapped = %v", mapped.Items)
 		}

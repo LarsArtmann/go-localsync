@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+func assertNodeID(t *testing.T, got NodeID, want string, context string) {
+	t.Helper()
+
+	if got.String() != want {
+		t.Errorf("%s node ID mismatch: got %q, want %q", context, got.String(), want)
+	}
+}
+
 func TestSyncMessage_JSON(t *testing.T) {
 	t.Parallel()
 
@@ -53,9 +61,7 @@ func TestSyncRequest_JSON(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	if decoded.NodeID.String() != "node-1" {
-		t.Errorf("node ID: got %q, want %q", decoded.NodeID.String(), "node-1")
-	}
+	assertNodeID(t, decoded.NodeID, "node-1", "first message")
 
 	if decoded.Clock.Get(NodeID("node-1")) != 5 {
 		t.Errorf("clock: got %d, want 5", decoded.Clock.Get(NodeID("node-1")))
@@ -91,9 +97,7 @@ func TestSyncResponse_JSON(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	if decoded.NodeID.String() != "node-2" {
-		t.Errorf("node ID: got %q, want %q", decoded.NodeID.String(), "node-2")
-	}
+	assertNodeID(t, decoded.NodeID, "node-2", "second message")
 
 	if len(decoded.Operations) != 1 {
 		t.Fatalf("operations: got %d, want 1", len(decoded.Operations))

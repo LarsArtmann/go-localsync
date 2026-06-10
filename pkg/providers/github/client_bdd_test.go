@@ -12,6 +12,7 @@ import (
 
 	gh "github.com/google/go-github/v69/github"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 type githubTestWorld struct {
@@ -102,18 +103,14 @@ func TestBDD_FetchValidUser(t *testing.T) {
 		}
 	}
 	for _, item := range world.result.Items {
-		if item.ActorLogin.Get() != "octocat" {
-			t.Errorf("expected ActorLogin=octocat, got %s", item.ActorLogin.Get())
-		}
+		testutil.AssertEqual(t, item.ActorLogin.Get(), "octocat", "ActorLogin")
 		if !strings.Contains(item.ActorAvatarURL, "avatars.githubusercontent.com") {
 			t.Errorf(
 				"expected avatar URL to contain avatars.githubusercontent.com, got %s",
 				item.ActorAvatarURL,
 			)
 		}
-		if item.RepoName.Get() != "octocat/Hello-World" {
-			t.Errorf("expected RepoName=octocat/Hello-World, got %s", item.RepoName.Get())
-		}
+		testutil.AssertEqual(t, item.RepoName.Get(), "octocat/Hello-World", "RepoName")
 		if !strings.Contains(item.RepoURL, "api.github.com/repos") {
 			t.Errorf("expected RepoURL to contain api.github.com/repos, got %s", item.RepoURL)
 		}

@@ -27,6 +27,7 @@ func RegisterErrorTemplates() {
 	}
 }
 
+//nolint:gochecknoglobals // Static template table; initialized once at startup.
 var errorTemplates = map[string]errorfamily.MessageTemplate{
 	"not_found": {
 		What:   "The requested resource was not found.",

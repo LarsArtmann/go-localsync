@@ -5,6 +5,14 @@ import (
 	"testing"
 )
 
+func assertItemIDsEqual(t *testing.T, want, got ItemID, context string) {
+	t.Helper()
+
+	if !want.Equal(got) {
+		t.Errorf("%s: expected %s, got %s", context, want.String(), got.String())
+	}
+}
+
 func TestNewExternalIDs(t *testing.T) {
 	t.Parallel()
 
@@ -51,9 +59,7 @@ func TestMustParseItemID(t *testing.T) {
 	original := NewItemID()
 	parsed := MustParseItemID(original.String())
 
-	if !original.Equal(parsed) {
-		t.Errorf("expected %s, got %s", original.String(), parsed.String())
-	}
+	assertItemIDsEqual(t, original, parsed, "MustParseItemID round-trip")
 }
 
 func TestMustParseItemID_panics(t *testing.T) {
@@ -77,9 +83,7 @@ func TestParseItemID(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if !original.Equal(parsed) {
-		t.Errorf("expected %s, got %s", original.String(), parsed.String())
-	}
+	assertItemIDsEqual(t, original, parsed, "ParseItemID round-trip")
 }
 
 func TestParseItemID_invalid(t *testing.T) {

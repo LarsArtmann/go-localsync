@@ -25,18 +25,19 @@ func assertEventType(t *testing.T, evt event.Event, want event.Type) {
 func unmarshalConflictPayload(t *testing.T, evt event.Event) ItemConflictFoundPayload {
 	t.Helper()
 
-	var payload ItemConflictFoundPayload
-	if err := json.Unmarshal(evt.Payload(), &payload); err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	return payload
+	return unmarshalTestPayload[ItemConflictFoundPayload](t, evt)
 }
 
 func unmarshalSyncedPayload(t *testing.T, evt event.Event) ItemSyncedPayload {
 	t.Helper()
 
-	var payload ItemSyncedPayload
+	return unmarshalTestPayload[ItemSyncedPayload](t, evt)
+}
+
+func unmarshalTestPayload[T any](t *testing.T, evt event.Event) T {
+	t.Helper()
+
+	var payload T
 	if err := json.Unmarshal(evt.Payload(), &payload); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -290,9 +290,7 @@ func TestTriggerSync(t *testing.T) {
 
 	server.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusOK {
-		t.Fatalf("expected status 200, got %d: %s", rec.Code, rec.Body.String())
-	}
+	testutil.AssertStatusOK(t, rec)
 
 	var body struct {
 		Fetched int `json:"fetched"`
