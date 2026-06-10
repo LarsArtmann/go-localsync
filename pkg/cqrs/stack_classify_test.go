@@ -214,9 +214,7 @@ func TestCQRSStack_SyncItems_ConflictLocal_WithLWWResolver(t *testing.T) {
 	got, getErr := stack.ReadModel.Get(ctx, "github", id.NewExternalID("1"))
 	testutil.MustNoError(t, getErr)
 
-	if got.Type.Get() != "PushEvent" {
-		t.Errorf("expected local item type preserved (PushEvent), got %s", got.Type.Get())
-	}
+	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type (local preserved)")
 }
 
 func TestCQRSStack_SyncItems_ConflictRemote_WithLWWResolver(t *testing.T) {
@@ -267,7 +265,5 @@ func TestCQRSStack_SyncItems_ConflictRemote_WithLWWResolver(t *testing.T) {
 	got, getErr := stack.ReadModel.Get(ctx, "github", id.NewExternalID("1"))
 	testutil.MustNoError(t, getErr)
 
-	if got.Type.Get() != "IssueEvent" {
-		t.Errorf("expected remote item type applied (IssueEvent), got %s", got.Type.Get())
-	}
+	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type (remote applied)")
 }

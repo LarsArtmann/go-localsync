@@ -163,6 +163,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 	items, err := s.store.ListItems(
 		ctx,
+		//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 		provider.ItemFilter{
 			Source: &source,
 			Limit:  1,
@@ -202,6 +203,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 // GetStats returns aggregate statistics including per-type counts.
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
+	//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 	count, err := s.store.CountItems(ctx, provider.ItemFilter{})
 	if err != nil {
 		return nil, err
@@ -219,6 +221,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 
 		count, err := s.store.CountItems(
 			ctx,
+			//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 			provider.ItemFilter{Type: &eventType},
 		)
 		if err != nil {

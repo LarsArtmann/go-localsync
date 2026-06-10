@@ -4,6 +4,8 @@
 package testutil
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
@@ -39,4 +41,13 @@ func AssertType(t *testing.T, item *model.Item, want string) {
 	t.Helper()
 
 	AssertEqual(t, item.Type.Get(), want, "Type")
+}
+
+// AssertStatusOK fails the test if the recorder's HTTP status is not 200.
+func AssertStatusOK(t *testing.T, rec *httptest.ResponseRecorder) {
+	t.Helper()
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d: %s", rec.Code, rec.Body.String())
+	}
 }

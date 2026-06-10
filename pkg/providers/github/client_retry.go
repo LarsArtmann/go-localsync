@@ -97,8 +97,7 @@ func (c *Client) withRetry(ctx context.Context, fn func() error) error {
 }
 
 func isRetryableError(err error) bool {
-	ghErr := &gh.ErrorResponse{} //nolint:exhaustruct // Intentionally empty for errors.As type assertion
-	if errors.As(err, &ghErr) {
+	if ghErr, ok := errors.AsType[*gh.ErrorResponse](err); ok {
 		statusCode := ghErr.Response.StatusCode
 
 		return statusCode >= 500 || statusCode == 429
@@ -108,8 +107,7 @@ func isRetryableError(err error) bool {
 }
 
 func wrapGitHubError(err error, username string) error {
-	ghErr := &gh.ErrorResponse{} //nolint:exhaustruct // Intentionally empty for errors.As type assertion
-	if errors.As(err, &ghErr) {
+	if ghErr, ok := errors.AsType[*gh.ErrorResponse](err); ok {
 		switch ghErr.Response.StatusCode {
 		case http.StatusUnauthorized:
 			return pkgerrors.WithUserDetail(pkgerrors.ErrInvalidToken, username)

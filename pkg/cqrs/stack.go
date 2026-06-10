@@ -200,6 +200,10 @@ func (s *CQRSStack) SyncItems(
 
 		action := classifyAction(err, outcome.EventCount, outcome.WasNew, outcome.ConflictWinner)
 
+		if err != nil {
+			err = fmt.Errorf("eventCount=%d, conflictWinner=%s: %w", outcome.EventCount, outcome.ConflictWinner, err)
+		}
+
 		result := synclib.ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
 			Action:   action,

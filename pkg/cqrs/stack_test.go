@@ -140,9 +140,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 
 	got, err := stack.ReadModel.Get(ctx, "github", id.NewExternalID("123"))
 	testutil.MustNoError(t, err)
-	if got.Type.Get() != "IssueEvent" {
-		t.Errorf("resurrected item should have updated type, got %s", got.Type.Get())
-	}
+	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "resurrected item type")
 }
 
 func TestCQRSStack_ConflictDetection(t *testing.T) {

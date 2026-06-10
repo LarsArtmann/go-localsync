@@ -302,9 +302,7 @@ func TestReadModel_Integration(t *testing.T) {
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
 	testutil.MustNoError(t, err)
-	if got.Type.Get() != "PushEvent" {
-		t.Errorf("expected Type=PushEvent, got %s", got.Type.Get())
-	}
+	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 	if got.ActorLogin.Get() != "testuser" {
 		t.Errorf("expected ActorLogin=testuser, got %s", got.ActorLogin.Get())
 	}

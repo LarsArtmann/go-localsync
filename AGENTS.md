@@ -22,23 +22,9 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ### SyncStore Interface Seam
 
-`pkg/sync/` defines `SyncStore` — a minimal interface that decouples the sync logic from concrete CQRS infrastructure:
+`pkg/sync/` defines `SyncStore` — a minimal interface decoupling sync logic from CQRS infrastructure. `*cqrs.CQRSStack` implements it via adapter methods. Dependency flows one way: `cqrs → sync → provider/types/errors`. No import cycles.
 
-```go
-type SyncStore interface {
-    SyncItems(ctx, items) *SyncSummary
-    SyncItem(ctx, item) error
-    ListItems(ctx, ItemFilter) ([]*provider.Item, error)
-    CountItems(ctx, ItemFilter) (int64, error)
-    GetItemTypes(ctx) ([]string, error)
-    Count(ctx) (int64, error)
-    Close() error
-}
-```
-
-`*cqrs.CQRSStack` implements `SyncStore` via adapter methods (`ListItems`, `CountItems`, `GetItemTypes`) that convert `sync.ItemFilter` → `cqrs.ItemFilter` and delegate to the read model. The sync package has **zero imports on `pkg/cqrs`** — the dependency flows one way: `cqrs → sync`.
-
-`SyncAction` constants (`ActionCreated`, `ActionUpdated`, `ActionConflictRemote`, `ActionUnchanged`, `ActionError`) and `ItemSyncResult` live in `pkg/sync/` — the architectural seam — not in `pkg/cqrs/`.
+`SyncAction` constants and `ItemSyncResult` live in `pkg/sync/` — the architectural seam — not in `pkg/cqrs/`.
 
 ## CQRS Architecture
 
@@ -79,22 +65,6 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 3. On resolver error: falls back to remote-wins
 
 The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `ActionConflictLocal`. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
-
-### SyncStore Interface
-
-`pkg/sync/` defines the `SyncStore` interface — the architectural boundary between sync logic and storage. `*cqrs.CQRSStack` satisfies it implicitly.
-
-```go
-type SyncStore interface {
-    SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
-    ListItems(ctx context.Context, filter provider.ItemFilter) ([]*provider.Item, error)
-    CountItems(ctx context.Context, filter provider.ItemFilter) (int64, error)
-    GetItemTypes(ctx context.Context) ([]string, error)
-    Close() error
-}
-```
-
-Dependency flows one way: `cqrs → sync → provider/types/errors`. No import cycles.
 
 ## Development Workflow
 
