@@ -148,7 +148,13 @@ func TestOrCriterion(t *testing.T) {
 
 	expectMatch(t, or, testItem{source: id.NewProviderID("github")}, true, "expected match for first criterion")
 	expectMatch(t, or, testItem{source: id.NewProviderID("gitlab")}, true, "expected match for second criterion")
-	expectMatch(t, or, testItem{source: id.NewProviderID("bitbucket")}, false, "expected no match for neither criterion")
+	expectMatch(
+		t,
+		or,
+		testItem{source: id.NewProviderID("bitbucket")},
+		false,
+		"expected no match for neither criterion",
+	)
 
 	clause, _ := or.ToSQL()
 	if clause != "(source = ?) OR (source = ?)" {

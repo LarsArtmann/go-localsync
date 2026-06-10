@@ -69,7 +69,7 @@ func TestIntegration_APIListItemsRoundtrip(t *testing.T) {
 		}
 	}
 
-	provider := &mockProvider{}
+	provider := &testutil.MockProvider{}
 	logger := log.Default()
 	syncer := synclib.NewSyncer(provider, stack, logger)
 	server := NewServer(syncer, logger)
@@ -131,7 +131,7 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 		}
 	}
 
-	provider := &mockProvider{}
+	provider := &testutil.MockProvider{}
 	logger := log.Default()
 	syncer := synclib.NewSyncer(provider, stack, logger)
 	server := NewServer(syncer, logger)

@@ -48,11 +48,7 @@ func runStats(stack *cqrs.CQRSStack, jsonOutput bool, logger *log.Logger) {
 	}
 
 	if jsonOutput {
-		out := statsOutput{TotalItems: stats, ItemTypes: types}
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "  ")
-
-		if err := enc.Encode(out); err != nil {
+		if err := encodeIndentedJSON(os.Stdout, statsOutput{TotalItems: stats, ItemTypes: types}); err != nil {
 			logger.Error("Failed to encode stats JSON", "error", err)
 		}
 	} else {
@@ -85,10 +81,8 @@ func runConflictAwareSync(
 			Skipped:   cr.Skipped,
 			Errors:    cr.Errors,
 		}
-		enc := json.NewEncoder(os.Stdout)
-		enc.SetIndent("", "  ")
 
-		if err := enc.Encode(out); err != nil {
+		if err := encodeIndentedJSON(os.Stdout, out); err != nil {
 			logger.Error("Failed to encode conflict result JSON", "error", err)
 		}
 	} else {
@@ -106,13 +100,20 @@ func printSyncResultJSON(result *synclib.SyncResult) {
 }
 
 func printSyncResultJSONToWriter(result *synclib.SyncResult, w io.Writer) {
-	out := syncResultOutput{Fetched: result.Fetched, Skipped: result.Skipped, Errors: result.Errors}
+	if err := encodeIndentedJSON(w, syncResultOutput{
+		Fetched: result.Fetched,
+		Skipped: result.Skipped,
+		Errors:  result.Errors,
+	}); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "failed to encode sync result JSON: %v\n", err)
+	}
+}
+
+func encodeIndentedJSON(w io.Writer, v any) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 
-	if err := enc.Encode(out); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed to encode sync result JSON: %v\n", err)
-	}
+	return enc.Encode(v)
 }
 
 func printVersion(w io.Writer) {

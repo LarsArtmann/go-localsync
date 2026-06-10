@@ -7,6 +7,7 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
 type actionMockSyncStore struct {
@@ -92,7 +93,7 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 	invalidItem := &provider.Item{ID: id.NewItemID()}
 	validItem := testSyncItem("1", "PushEvent")
 
-	mockProv := &mockProvider{items: []*provider.Item{invalidItem, validItem}}
+	mockProv := &testutil.MockProvider{Items: []*provider.Item{invalidItem, validItem}}
 	store := &mockSyncStore{}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)
@@ -125,7 +126,7 @@ func TestConflictAwareSyncer_Conflicts(t *testing.T) {
 	}
 
 	store := &actionMockSyncStore{actions: []SyncAction{ActionConflictRemote, ActionUnchanged}}
-	mockProv := &mockProvider{items: items}
+	mockProv := &testutil.MockProvider{Items: items}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)
 	defer func() { _ = cas.Close() }()
@@ -158,7 +159,7 @@ func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
 	}
 
 	store := &actionMockSyncStore{actions: []SyncAction{ActionCreated, ActionError}}
-	mockProv := &mockProvider{items: items}
+	mockProv := &testutil.MockProvider{Items: items}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)
 	defer func() { _ = cas.Close() }()
@@ -185,7 +186,7 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 	invalidItem1 := &provider.Item{ID: id.NewItemID()}
 	invalidItem2 := &provider.Item{ID: id.NewItemID()}
 
-	mockProv := &mockProvider{items: []*provider.Item{invalidItem1, invalidItem2}}
+	mockProv := &testutil.MockProvider{Items: []*provider.Item{invalidItem1, invalidItem2}}
 	store := &mockSyncStore{}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)

@@ -19,25 +19,9 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
-type mockProvider struct{}
-
 type syncInputBody struct {
 	Source   string `json:"source"`
 	MaxPages int    `json:"maxPages"`
-}
-
-func (m *mockProvider) Name() string { return "mock" }
-
-func (m *mockProvider) Fetch(_ context.Context, _ *provider.FetchOptions) (*provider.FetchResult, error) {
-	return &provider.FetchResult{Items: nil, HasMore: false}, nil
-}
-
-func (m *mockProvider) FetchAll(_ context.Context, _ string, _ int) (*provider.FetchResult, error) {
-	return &provider.FetchResult{Items: nil, HasMore: false}, nil
-}
-
-func (m *mockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo, error) {
-	return nil, errors.New("not implemented")
 }
 
 type mockSyncStore struct {
@@ -97,7 +81,7 @@ func testItem(itemID, eventType string) *model.Item {
 }
 
 func newTestServer(store synclib.SyncStore) *Server {
-	provider := &mockProvider{}
+	provider := &testutil.MockProvider{}
 	logger := log.Default()
 	syncer := synclib.NewSyncer(provider, store, logger)
 

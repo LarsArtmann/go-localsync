@@ -15,28 +15,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
-type mockProvider struct {
-	items []*provider.Item
-	err   error
-}
-
-func (m *mockProvider) Name() string { return "mock" }
-
-func (m *mockProvider) Fetch(
-	_ context.Context,
-	_ *provider.FetchOptions,
-) (*provider.FetchResult, error) {
-	return &provider.FetchResult{Items: m.items, HasMore: false}, m.err
-}
-
-func (m *mockProvider) FetchAll(_ context.Context, _ string, _ int) (*provider.FetchResult, error) {
-	return &provider.FetchResult{Items: m.items, HasMore: false}, m.err
-}
-
-func (m *mockProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo, error) {
-	return &provider.RateLimitInfo{Limit: 5000, Remaining: 4999}, nil
-}
-
 type mockSyncStore struct {
 	testutil.SyncStoreListBehavior
 
@@ -97,7 +75,7 @@ func testSyncOpts() *SyncOptions {
 
 func newTestSyncer(items []*provider.Item) (*Syncer, *mockSyncStore) {
 	store := &mockSyncStore{}
-	p := &mockProvider{items: items}
+	p := &testutil.MockProvider{Items: items}
 	logger := log.Default()
 
 	return NewSyncer(p, store, logger), store
@@ -287,7 +265,7 @@ func TestSyncer_Close(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{closeErr: errors.New("close failed")}
-	syncer := NewSyncer(&mockProvider{}, store, log.Default())
+	syncer := NewSyncer(&testutil.MockProvider{}, store, log.Default())
 
 	err := syncer.Close()
 	if err == nil {

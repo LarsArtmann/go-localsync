@@ -23,7 +23,7 @@ func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{}
-	mockProv := &mockProvider{items: nil}
+	mockProv := &testutil.MockProvider{Items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 
 	latestItem := testDataItem("latest", "PushEvent")
@@ -52,7 +52,7 @@ func TestSyncer_processIncrementalItems_AllNewItems(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{}
-	mockProv := &mockProvider{items: nil}
+	mockProv := &testutil.MockProvider{Items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 
 	items := []*provider.Item{
@@ -77,7 +77,7 @@ func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{}
-	mockProv := &mockProvider{items: nil}
+	mockProv := &testutil.MockProvider{Items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 
 	invalidItem := &provider.Item{ID: id.NewItemID()}
@@ -165,7 +165,7 @@ func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
 	oldItem.CreatedAt = now.Add(-2 * time.Hour)
 
 	store := newMockStoreWithItems(testDataItem("existing", "PushEvent"))
-	mockProv := &mockProvider{items: []*provider.Item{newItem, oldItem}}
+	mockProv := &testutil.MockProvider{Items: []*provider.Item{newItem, oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
@@ -196,7 +196,7 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 	oldItem.CreatedAt = now.Add(-1 * time.Hour)
 
 	store := newMockStoreWithItems(testDataItem("existing", "PushEvent"))
-	mockProv := &mockProvider{items: []*provider.Item{oldItem}}
+	mockProv := &testutil.MockProvider{Items: []*provider.Item{oldItem}}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
@@ -217,7 +217,7 @@ func TestSyncer_SyncIncremental_ListItemsError(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{SyncStoreListBehavior: testutil.SyncStoreListBehavior{ListErr: errors.New("list failed")}}
-	mockProv := &mockProvider{items: nil}
+	mockProv := &testutil.MockProvider{Items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
@@ -231,7 +231,7 @@ func TestSyncer_GetStats_CountError(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{countErr: errors.New("count failed")}
-	mockProv := &mockProvider{items: nil}
+	mockProv := &testutil.MockProvider{Items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
@@ -246,7 +246,7 @@ func TestSyncer_GetStats_TypeCountError(t *testing.T) {
 
 	items := []*provider.Item{testSyncItem("1", "PushEvent")}
 	store := &mockSyncStore{}
-	mockProv := &mockProvider{items: items}
+	mockProv := &testutil.MockProvider{Items: items}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
