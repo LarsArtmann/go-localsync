@@ -34,6 +34,7 @@ func classifyAction(err error, eventCount int, wasNew bool, conflictWinner strin
 }
 
 func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
+	//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 	return s.ReadModel.Count(ctx, provider.ItemFilter{})
 }
 

@@ -24,7 +24,6 @@
 
       imports = [ inputs.treefmt-nix.flakeModule ];
 
-
       perSystem =
         { config, pkgs, ... }:
         {
@@ -38,14 +37,14 @@
               description = "Generic synchronization SDK with CQRS";
               homepage = "https://github.com/larsartmann/go-localsync";
               license = licenses.mit;
-                mainProgram = "go-localsync";
+              mainProgram = "go-localsync";
             };
           };
 
           apps = {
             default = {
               type = "app";
-              program = pkgs.lib.getExe(config.packages.default);
+              program = pkgs.lib.getExe (config.packages.default);
             };
 
             test = {
@@ -61,7 +60,10 @@
               type = "app";
               program = pkgs.writeShellApplication {
                 name = "run-lint";
-                runtimeInputs = [ pkgs.go_1_26 pkgs.golangci-lint ];
+                runtimeInputs = [
+                  pkgs.go_1_26
+                  pkgs.golangci-lint
+                ];
                 text = "golangci-lint run ./...";
               };
             };
@@ -83,7 +85,8 @@
                 go_1_26
                 golangci-lint
               ];
-            };          };
+            };
+          };
 
           treefmt = {
             projectRootFile = "go.mod";
@@ -99,7 +102,9 @@
           checks = {
             format = config.treefmt.build.check self;
             build = config.packages.default;
-            test = config.packages.default.overrideAttrs (_: { doCheck = true; });
+            test = config.packages.default.overrideAttrs (_: {
+              doCheck = true;
+            });
           };
         };
 
