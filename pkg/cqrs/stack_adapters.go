@@ -45,10 +45,6 @@ func (s *CQRSStack) Count(ctx context.Context) (int64, error) {
 	})
 }
 
-func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
-	return s.ReadModel.GetTypes(ctx)
-}
-
 func (s *CQRSStack) ListItems(
 	ctx context.Context,
 	filter provider.ItemFilter,

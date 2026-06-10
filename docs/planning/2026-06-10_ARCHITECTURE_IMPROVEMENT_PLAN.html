@@ -572,6 +572,7 @@ section + section {
       <a href="#structural" class="warning"><span class="count">2</span> Structural</a>
       <a href="#placement" class="info"><span class="count">4</span> Placement</a>
       <a href="#summary" class="info"><span class="count">✦</span> Summary</a>
+      <a href="#appendix-generics" class="warning"><span class="count">A</span> Appendix: Generics</a>
     </div>
   </div>
 </nav>
@@ -1145,6 +1146,357 @@ section + section {
       <li>Update AGENTS.md with any changed patterns or gotchas</li>
       <li>Mark items as done in TODO_LIST.md</li>
     </ul>
+  </div>
+</section>
+
+<section id="appendix-generics">
+  <div class="container">
+    <div class="section-header">
+      <h2>Appendix A: Generics Opportunities</h2>
+      <p>Where Go generics can eliminate boilerplate, replace runtime assertions with compile-time checks, and make the codebase more robust. Ordered by impact.</p>
+    </div>
+
+    <!-- G-1 -->
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-id">G-1</div>
+          <h3>Adopt <code>command.RegisterTyped[C]</code> for all command handlers</h3>
+        </div>
+        <span class="severity critical">Boilerplate</span>
+      </div>
+      <p class="card-desc">
+        The <code>query</code> package already has <code>RegisterTyped[Q, R]</code> and <code>DispatchTyped[T]</code> — the "typed bookend" pattern that eliminates runtime type assertions. But <code>command</code> has no equivalent. Meanwhile, <strong>go-localsync doesn't use <code>query.RegisterTyped</code> either</strong> — all 6 handlers (2 command + 4 query) use raw <code>Register</code> with manual type assertions. This creates 6 identical blocks of assertion + error-wrapping boilerplate.
+      </p>
+      <div class="file-refs">
+        <span class="file-ref">pkg/cqrs/commands_queries.go <span class="line">:189–213</span> (command handlers)</span>
+        <span class="file-ref">pkg/cqrs/commands_queries.go <span class="line">:239–281</span> (query handlers)</span>
+        <span class="file-ref">go-cqrs-lite/query/dispatcher.go <span class="line">:77</span> (RegisterTyped — exists but unused)</span>
+        <span class="file-ref">go-cqrs-lite/command/dispatcher.go <span class="line">:—</span> (no RegisterTyped)</span>
+      </div>
+      <div class="diff-grid">
+        <div>
+          <div class="diff-label before"><span class="dot"></span> Current — 6× repeated</div>
+          <div class="code-block">
+<pre><span class="kw">func</span> <span class="fn">handleSyncItem</span>(repo, resolver) command.<span class="type">Handler</span> {
+  <span class="kw">return func</span>(ctx context.<span class="type">Context</span>, cmd command.<span class="type">Command</span>) <span class="type">error</span> {
+    syncCmd, ok := cmd.(*<span class="type">SyncItemCommand</span>)
+    <span class="kw">if</span> !ok {
+      <span class="kw">return</span> fmt.<span class="fn">Errorf</span>(
+        <span class="str">"expected *SyncItemCommand, got %T: %w"</span>,
+        cmd, errCommandTypeMismatch)
+    }
+    <span class="kw">return</span> repo.<span class="fn">Execute</span>(ctx, syncCmd.<span class="fn">AggregateID</span>(),
+      aggregateType, <span class="fn">DecideSync</span>(syncCmd.Item, ...))
+  }
+}</pre>
+          </div>
+        </div>
+        <div>
+          <div class="diff-label after"><span class="dot"></span> With RegisterTyped — zero assertions</div>
+          <div class="code-block">
+<pre><span class="cmt">// go-cqrs-lite adds (upstream CQ-8):</span>
+<span class="kw">func</span> command.<span class="fn">RegisterTyped</span>[C <span class="type">Command</span>](
+  d *<span class="type">Dispatcher</span>, t <span class="type">Type</span>,
+  h <span class="kw">func</span>(ctx context.<span class="type">Context</span>, cmd C) <span class="type">error</span>,
+) <span class="type">error</span>
+
+<span class="cmt">// go-localsync wiring becomes:</span>
+command.<span class="fn">RegisterTyped</span>[*<span class="type">SyncItemCommand</span>](
+  dispatcher, commandTypeSyncItem,
+  <span class="kw">func</span>(ctx context.<span class="type">Context</span>, c *<span class="type">SyncItemCommand</span>) <span class="type">error</span> {
+    <span class="kw">return</span> repo.<span class="fn">Execute</span>(ctx, c.<span class="fn">AggregateID</span>(),
+      aggregateType, <span class="fn">DecideSync</span>(c.Item, ...))
+  },
+)</pre>
+          </div>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <p><strong>Upstream: add <code>command.RegisterTyped[C]</code></strong> to go-cqrs-lite. Mirrors the existing <code>query.RegisterTyped[Q, R]</code> pattern. The assertion moves inside the library where it's tested once, not repeated in every consumer.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <p><strong>Consumer: adopt <code>RegisterTyped</code> for all 4 query handlers.</strong> This requires no upstream changes — <code>query.RegisterTyped</code> already exists. Just not used. Deletes ~40 lines of assertion boilerplate immediately.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <p><strong>Consumer: adopt <code>command.RegisterTyped</code> for both command handlers</strong> once upstream ships it. Deletes ~20 more lines. The <code>errCommandTypeMismatch</code> sentinel error and all <code>ok</code> checks disappear entirely.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout">
+        <span><strong>Quick win:</strong> Step 2 requires zero upstream changes. The <code>query.RegisterTyped</code> function already exists in go-cqrs-lite v2.2.0 — go-localsync just doesn't use it. Adopting it for all 4 query handlers is a pure refactor that deletes ~40 lines today.</span>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-item">
+          <div class="impact-label">Lines deleted</div>
+          <div class="impact-value">~60</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Effort</div>
+          <div class="impact-value">1 hour</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Risk</div>
+          <div class="impact-value">Minimal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G-2 -->
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-id">G-2</div>
+          <h3>Typed <code>DecideResult[R]</code> instead of <code>map[string]any</code></h3>
+        </div>
+        <span class="severity warning">Type Safety</span>
+      </div>
+      <p class="card-desc">
+        The CQ-1 proposal in the go-cqrs-lite plan suggests <code>Annotations map[string]any</code> for domain metadata. That's stringly-typed — consumers must assert annotation values at runtime. Generics give a better answer: <strong>a second type parameter on <code>DecideFunc</code></strong> that carries a typed domain result through the library's own type system.
+      </p>
+      <div class="diff-grid">
+        <div>
+          <div class="diff-label before"><span class="dot"></span> CQ-1 as proposed (stringly-typed)</div>
+          <div class="code-block">
+<pre><span class="kw">type</span> <span class="type">DecideResult</span> <span class="kw">struct</span> {
+  Events     []event.<span class="type">Event</span>
+  Annotations <span class="kw">map</span>[<span class="kw">string</span>]<span class="kw">any</span>  <span class="cmt">← runtime assertion</span>
+}
+
+<span class="cmt">// Consumer must assert:</span>
+action := result.Annotations[<span class="str">"action"</span>].(<span class="kw">string</span>)</pre>
+          </div>
+        </div>
+        <div>
+          <div class="diff-label after"><span class="dot"></span> With generics (compile-time typed)</div>
+          <div class="code-block">
+<pre><span class="kw">type</span> <span class="type">DecideResult</span>[R <span class="kw">any</span>] <span class="kw">struct</span> {
+  Events []event.<span class="type">Event</span>
+  Result R                   <span class="cmt">← typed at compile time</span>
+}
+
+<span class="kw">type</span> <span class="type">DecideFunc</span>[S <span class="kw">any</span>, R <span class="kw">any</span>] <span class="kw">func</span>(
+  state S, ver event.<span class="type">Version</span>,
+) (*<span class="type">DecideResult</span>[R], <span class="type">error</span>)
+
+<span class="cmt">// Consumer gets typed result directly:</span>
+result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></pre>
+          </div>
+        </div>
+      </div>
+      <p class="card-desc" style="margin-top:16px;">
+        go-localsync defines its domain result type:
+      </p>
+      <div class="code-block">
+<pre><span class="kw">type</span> <span class="type">SyncDecision</span> <span class="kw">struct</span> {
+  Action    synclib.<span class="type">SyncAction</span>
+  WasNew    <span class="kw">bool</span>
+  Conflict  <span class="kw">string</span>
+}
+
+<span class="cmt">// DecideSync returns a typed result — no countingDecide hack:</span>
+<span class="kw">func</span> <span class="fn">DecideSync</span>(...) <span class="kw">func</span>(
+  state <span class="type">SyncItemState</span>, ver event.<span class="type">Version</span>,
+) (*decider.<span class="type">DecideResult</span>[<span class="type">SyncDecision</span>], <span class="type">error</span>)</pre>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <p><strong>Upstream: parameterize <code>DecideFunc</code> with a result type.</strong> <code>DecideFunc[S, R]</code> where <code>S</code> is aggregate state and <code>R</code> is the domain result. Provide <code>DecideFunc[S]</code> as an alias for <code>DecideFunc[S, struct{}]</code> for consumers who don't need domain results.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <p><strong>Consumer: define <code>SyncDecision</code></strong> and return it from <code>DecideSync</code>. The <code>countingDecide</code> closure in <code>SyncItems</code> is replaced by reading <code>result.Action</code>, <code>result.WasNew</code>, <code>result.Conflict</code> directly. No more reverse-engineering intent from event counts.</p>
+          </div>
+        </div>
+      </div>
+      <div class="callout">
+        <span><strong>Tradeoff:</strong> Two-parameter generics (<code>DecideFunc[S, R]</code>) increase library complexity. For consumers who don't need domain results, the <code>DecideFunc[S]</code> alias keeps the simple case simple. The benefit is eliminating an entire class of bugs where domain semantics are guessed from event counts.</span>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-item">
+          <div class="impact-label">Impact</div>
+          <div class="impact-value">Eliminates countingDecide</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Effort</div>
+          <div class="impact-value">2 hours (consumer side)</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Depends on</div>
+          <div class="impact-value">CQ-1 (upstream)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G-3 -->
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-id">G-3</div>
+          <h3>Rewrite <code>Projector</code> using <code>projection.On[T]</code> builder</h3>
+        </div>
+        <span class="severity info">Zero Library Changes</span>
+      </div>
+      <p class="card-desc">
+        go-cqrs-lite's <strong><code>projection.On[T]</code></strong> already does typed payload decoding inside a wrapper — the exact pattern that go-localsync's <code>Projector</code> reimplements manually. Three <code>handleXxx</code> methods in <code>projection.go</code> each call <code>event.DecodePayload[T]</code> and then delegate to the read model. The builder eliminates all of this.
+      </p>
+      <div class="file-refs">
+        <span class="file-ref">pkg/cqrs/projection.go <span class="line">:33–69</span> (3 manual handler methods)</span>
+        <span class="file-ref">go-cqrs-lite/projection/builder.go <span class="line">:30</span> (On[T] — already exists)</span>
+      </div>
+      <div class="diff-grid">
+        <div>
+          <div class="diff-label before"><span class="dot"></span> Current — 3 manual methods</div>
+          <div class="code-block">
+<pre><span class="kw">func</span> (p *<span class="type">Projector</span>) <span class="fn">Handle</span>(ctx, evt) <span class="type">error</span> {
+  <span class="kw">switch</span> evt.<span class="fn">Type</span>() {
+  <span class="kw">case</span> EventItemSynced:
+    <span class="kw">return</span> p.<span class="fn">handleItemSynced</span>(ctx, evt)
+  <span class="kw">case</span> EventItemDeleted:
+    <span class="kw">return</span> p.<span class="fn">handleItemDeleted</span>(ctx, evt)
+  <span class="kw">case</span> EventItemConflictFound:
+    <span class="kw">return</span> <span class="kw">nil</span> <span class="cmt">// no-op</span>
+  }
+}
+
+<span class="kw">func</span> (p *<span class="type">Projector</span>) <span class="fn">handleItemSynced</span>(ctx, evt) <span class="type">error</span> {
+  payload, err := event.<span class="fn">DecodePayload</span>[<span class="type">ItemSyncedPayload</span>](
+    evt, codec.<span class="type">JSONCodec</span>{})
+  <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> err }
+  item, err := <span class="fn">DataItemFromPayload</span>(payload)
+  <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> err }
+  <span class="kw">return</span> p.readModel.<span class="fn">Upsert</span>(ctx, item)
+}</pre>
+          </div>
+        </div>
+        <div>
+          <div class="diff-label after"><span class="dot"></span> With projection.On[T] builder</div>
+          <div class="code-block">
+<pre>builder := projection.<span class="fn">NewBuilder</span>(<span class="str">"sync_item_projection"</span>)
+
+projection.<span class="fn">On</span>[<span class="type">ItemSyncedPayload</span>](
+  builder, EventItemSynced, codec.<span class="type">JSONCodec</span>{},
+  <span class="kw">func</span>(ctx context.<span class="type">Context</span>, p <span class="type">ItemSyncedPayload</span>) <span class="type">error</span> {
+    item, err := <span class="fn">DataItemFromPayload</span>(p)
+    <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> err }
+    <span class="kw">return</span> rm.<span class="fn">Upsert</span>(ctx, item)
+  },
+)
+
+projection.<span class="fn">On</span>[<span class="type">ItemDeletedPayload</span>](
+  builder, EventItemDeleted, codec.<span class="type">JSONCodec</span>{},
+  <span class="kw">func</span>(ctx context.<span class="type">Context</span>, p <span class="type">ItemDeletedPayload</span>) <span class="type">error</span> {
+    <span class="kw">return</span> rm.<span class="fn">Delete</span>(ctx, p.Source, p.ExternalID)
+  },
+)
+
+proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Projection</span></pre>
+          </div>
+        </div>
+      </div>
+      <div class="callout">
+        <span><strong>No upstream changes needed.</strong> <code>projection.On[T]</code> ships in go-cqrs-lite v2.2.0. This is a pure consumer-side refactor. The <code>Projector</code> struct and its 3 handler methods collapse into a builder call. The <code>EventItemConflictFound</code> no-op handler is simply omitted — the builder only registers event types that have handlers.</span>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-item">
+          <div class="impact-label">Lines deleted</div>
+          <div class="impact-value">~40</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Effort</div>
+          <div class="impact-value">30 min</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Risk</div>
+          <div class="impact-value">Zero</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- G-4 -->
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-id">G-4</div>
+          <h3>Generic <code>ReadModel[T]</code> for cross-domain reuse</h3>
+        </div>
+        <span class="severity info">Future · If Needed</span>
+      </div>
+      <p class="card-desc">
+        The current <code>ReadModel</code> interface is hardcoded to <code>*model.Item</code>. If go-localsync adds a second aggregate type (notifications, webhook deliveries, audit logs), every read model implementation must be rewritten from scratch. A generic <code>ReadModel[T]</code> would allow the <code>MemoryReadModel</code> and <code>SQLiteReadModel</code> to be reused across domains.
+      </p>
+      <div class="code-block">
+<pre><span class="kw">type</span> <span class="type">ReadModel</span>[T <span class="kw">any</span>] <span class="kw">interface</span> {
+  <span class="fn">Get</span>(ctx context.<span class="type">Context</span>, key <span class="kw">string</span>) (T, <span class="type">error</span>)
+  <span class="fn">List</span>(ctx context.<span class="type">Context</span>, filter <span class="type">Filter</span>) ([]T, <span class="type">error</span>)
+  <span class="fn">Count</span>(ctx context.<span class="type">Context</span>, filter <span class="type">Filter</span>) (<span class="kw">int64</span>, <span class="type">error</span>)
+  <span class="fn">Upsert</span>(ctx context.<span class="type">Context</span>, item T) <span class="type">error</span>
+  <span class="fn">Delete</span>(ctx context.<span class="type">Context</span>, key <span class="kw">string</span>) <span class="type">error</span>
+  <span class="fn">Close</span>() <span class="type">error</span>
+}</pre>
+      </div>
+      <div class="callout">
+        <span><strong>Only worth doing when there's a second consumer.</strong> Right now the <code>provider.ItemFilter</code> has specific fields (Type, Actor, Repo, Source, Since) that don't generalize. Genericizing the filter would force <code>any</code> — which is worse than the current domain-specific interface. Revisit when a second aggregate type is added.</span>
+      </div>
+      <div class="impact-grid">
+        <div class="impact-item">
+          <div class="impact-label">Impact</div>
+          <div class="impact-value">Reusability</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Effort</div>
+          <div class="impact-value">3–4 hours</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-label">Priority</div>
+          <div class="impact-value">Low (YAGNI today)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Not worth it -->
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="card-id">Note</div>
+          <h3>What's NOT worth genericizing</h3>
+        </div>
+      </div>
+      <div style="font-size:14px;color:var(--text-secondary);">
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px 20px;margin-top:8px;">
+          <span style="color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Pattern</span>
+          <span style="color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Why not</span>
+
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>Event[T]</code> typed payloads</span>
+          <span>Go can't express union types — the codec decode pattern is the right tradeoff</span>
+
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>SyncStore[I]</code></span>
+          <span>The filter/query interface carries domain-specific fields; genericizing forces <code>any</code> filters</span>
+
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>EventSink[AggType]</code></span>
+          <span>Aggregates handle multiple event types — a type param would be rigid and restrictive</span>
+
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);">Error types</span>
+          <span>Go's <code>error</code> interface is already the right abstraction</span>
+
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>dispatcher[H, M]</code></span>
+          <span>Already generic — this is the foundation that both <code>command</code> and <code>query</code> build on</span>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
