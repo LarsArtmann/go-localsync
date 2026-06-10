@@ -1,808 +1,1030 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>go-localsync — Architecture Improvement Plan</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg-deep: #0a0c10;
-  --bg-surface: #12151c;
-  --bg-card: #181c26;
-  --bg-card-hover: #1e2330;
-  --bg-code: #0d1017;
-  --border-subtle: rgba(255,255,255,0.06);
-  --border-active: rgba(255,255,255,0.12);
-  --text-primary: #e8ecf4;
-  --text-secondary: #8b95a8;
-  --text-muted: #5a6478;
-  --accent-critical: #ff4d6a;
-  --accent-critical-dim: rgba(255,77,106,0.12);
-  --accent-warning: #ffaa2c;
-  --accent-warning-dim: rgba(255,170,44,0.10);
-  --accent-info: #3b9eff;
-  --accent-info-dim: rgba(59,158,255,0.10);
-  --accent-success: #2dd4a0;
-  --accent-success-dim: rgba(45,212,160,0.10);
-  --accent-purple: #a78bfa;
-  --accent-purple-dim: rgba(167,139,250,0.10);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-xs: 6px;
-}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>go-localsync — Architecture Improvement Plan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-deep: #0a0c10;
+        --bg-surface: #12151c;
+        --bg-card: #181c26;
+        --bg-card-hover: #1e2330;
+        --bg-code: #0d1017;
+        --border-subtle: rgba(255, 255, 255, 0.06);
+        --border-active: rgba(255, 255, 255, 0.12);
+        --text-primary: #e8ecf4;
+        --text-secondary: #8b95a8;
+        --text-muted: #5a6478;
+        --accent-critical: #ff4d6a;
+        --accent-critical-dim: rgba(255, 77, 106, 0.12);
+        --accent-warning: #ffaa2c;
+        --accent-warning-dim: rgba(255, 170, 44, 0.1);
+        --accent-info: #3b9eff;
+        --accent-info-dim: rgba(59, 158, 255, 0.1);
+        --accent-success: #2dd4a0;
+        --accent-success-dim: rgba(45, 212, 160, 0.1);
+        --accent-purple: #a78bfa;
+        --accent-purple-dim: rgba(167, 139, 250, 0.1);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --radius-xs: 6px;
+      }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-html { scroll-behavior: smooth; }
+      html {
+        scroll-behavior: smooth;
+      }
 
-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg-deep);
-  color: var(--text-primary);
-  line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-}
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          sans-serif;
+        background: var(--bg-deep);
+        color: var(--text-primary);
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
 
-.container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
 
-/* ── Hero ── */
-.hero {
-  padding: 80px 0 60px;
-  border-bottom: 1px solid var(--border-subtle);
-  position: relative;
-  overflow: hidden;
-}
-.hero::before {
-  content: '';
-  position: absolute;
-  top: -200px;
-  right: -200px;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(59,158,255,0.06) 0%, transparent 70%);
-  pointer-events: none;
-}
-.hero-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  background: var(--accent-info-dim);
-  border: 1px solid rgba(59,158,255,0.2);
-  border-radius: 100px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent-info);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 24px;
-}
-.hero h1 {
-  font-family: 'Instrument Serif', serif;
-  font-size: clamp(36px, 5vw, 52px);
-  font-weight: 400;
-  line-height: 1.15;
-  color: var(--text-primary);
-  margin-bottom: 16px;
-}
-.hero h1 em {
-  font-style: italic;
-  color: var(--accent-info);
-}
-.hero-desc {
-  font-size: 17px;
-  color: var(--text-secondary);
-  max-width: 620px;
-  line-height: 1.7;
-}
-.hero-meta {
-  display: flex;
-  gap: 24px;
-  margin-top: 28px;
-  flex-wrap: wrap;
-}
-.hero-meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.hero-meta-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-muted);
-  font-weight: 600;
-}
-.hero-meta-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
+      /* ── Hero ── */
+      .hero {
+        padding: 80px 0 60px;
+        border-bottom: 1px solid var(--border-subtle);
+        position: relative;
+        overflow: hidden;
+      }
+      .hero::before {
+        content: "";
+        position: absolute;
+        top: -200px;
+        right: -200px;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(59, 158, 255, 0.06) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        background: var(--accent-info-dim);
+        border: 1px solid rgba(59, 158, 255, 0.2);
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--accent-info);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+      }
+      .hero h1 {
+        font-family: "Instrument Serif", serif;
+        font-size: clamp(36px, 5vw, 52px);
+        font-weight: 400;
+        line-height: 1.15;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+      }
+      .hero h1 em {
+        font-style: italic;
+        color: var(--accent-info);
+      }
+      .hero-desc {
+        font-size: 17px;
+        color: var(--text-secondary);
+        max-width: 620px;
+        line-height: 1.7;
+      }
+      .hero-meta {
+        display: flex;
+        gap: 24px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+      }
+      .hero-meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .hero-meta-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+      .hero-meta-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
 
-/* ── Nav ── */
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(10,12,16,0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-subtle);
-  padding: 0;
-}
-.nav-inner {
-  display: flex;
-  gap: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.nav-inner::-webkit-scrollbar { display: none; }
-.nav a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 14px 18px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-decoration: none;
-  white-space: nowrap;
-  border-bottom: 2px solid transparent;
-  transition: color 0.2s, border-color 0.2s;
-}
-.nav a:hover {
-  color: var(--text-secondary);
-}
-.nav a .count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 100px;
-  font-size: 10px;
-  font-weight: 700;
-  background: var(--bg-card);
-  color: var(--text-muted);
-}
-.nav a.critical .count { background: var(--accent-critical-dim); color: var(--accent-critical); }
-.nav a.warning .count { background: var(--accent-warning-dim); color: var(--accent-warning); }
-.nav a.info .count { background: var(--accent-info-dim); color: var(--accent-info); }
+      /* ── Nav ── */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(10, 12, 16, 0.85);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border-subtle);
+        padding: 0;
+      }
+      .nav-inner {
+        display: flex;
+        gap: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .nav-inner::-webkit-scrollbar {
+        display: none;
+      }
+      .nav a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 14px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-decoration: none;
+        white-space: nowrap;
+        border-bottom: 2px solid transparent;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+      }
+      .nav a:hover {
+        color: var(--text-secondary);
+      }
+      .nav a .count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 100px;
+        font-size: 10px;
+        font-weight: 700;
+        background: var(--bg-card);
+        color: var(--text-muted);
+      }
+      .nav a.critical .count {
+        background: var(--accent-critical-dim);
+        color: var(--accent-critical);
+      }
+      .nav a.warning .count {
+        background: var(--accent-warning-dim);
+        color: var(--accent-warning);
+      }
+      .nav a.info .count {
+        background: var(--accent-info-dim);
+        color: var(--accent-info);
+      }
 
-/* ── Sections ── */
-section {
-  padding: 60px 0;
-}
-section + section {
-  border-top: 1px solid var(--border-subtle);
-}
-.section-header {
-  margin-bottom: 36px;
-}
-.section-header h2 {
-  font-family: 'Instrument Serif', serif;
-  font-size: 28px;
-  font-weight: 400;
-  margin-bottom: 8px;
-}
-.section-header p {
-  color: var(--text-secondary);
-  font-size: 15px;
-  max-width: 580px;
-}
+      /* ── Sections ── */
+      section {
+        padding: 60px 0;
+      }
+      section + section {
+        border-top: 1px solid var(--border-subtle);
+      }
+      .section-header {
+        margin-bottom: 36px;
+      }
+      .section-header h2 {
+        font-family: "Instrument Serif", serif;
+        font-size: 28px;
+        font-weight: 400;
+        margin-bottom: 8px;
+      }
+      .section-header p {
+        color: var(--text-secondary);
+        font-size: 15px;
+        max-width: 580px;
+      }
 
-/* ── Cards ── */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  padding: 28px;
-  margin-bottom: 16px;
-  transition: border-color 0.25s, background 0.25s;
-}
-.card:hover {
-  border-color: var(--border-active);
-  background: var(--bg-card-hover);
-}
-.card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.card-id {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-}
-.card h3 {
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.4;
-  margin-bottom: 8px;
-}
-.card-desc {
-  color: var(--text-secondary);
-  font-size: 14px;
-  line-height: 1.7;
-  margin-bottom: 20px;
-}
-.card-desc strong { color: var(--text-primary); font-weight: 500; }
+      /* ── Cards ── */
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        padding: 28px;
+        margin-bottom: 16px;
+        transition:
+          border-color 0.25s,
+          background 0.25s;
+      }
+      .card:hover {
+        border-color: var(--border-active);
+        background: var(--bg-card-hover);
+      }
+      .card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .card-id {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        letter-spacing: 0.5px;
+      }
+      .card h3 {
+        font-size: 17px;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+      .card-desc {
+        color: var(--text-secondary);
+        font-size: 14px;
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+      .card-desc strong {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
 
-/* Severity badges */
-.severity {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 100px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.severity.critical { background: var(--accent-critical-dim); color: var(--accent-critical); }
-.severity.high { background: var(--accent-warning-dim); color: var(--accent-warning); }
-.severity.medium { background: var(--accent-info-dim); color: var(--accent-info); }
-.severity.low { background: var(--accent-success-dim); color: var(--accent-success); }
+      /* Severity badges */
+      .severity {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 10px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .severity.critical {
+        background: var(--accent-critical-dim);
+        color: var(--accent-critical);
+      }
+      .severity.high {
+        background: var(--accent-warning-dim);
+        color: var(--accent-warning);
+      }
+      .severity.medium {
+        background: var(--accent-info-dim);
+        color: var(--accent-info);
+      }
+      .severity.low {
+        background: var(--accent-success-dim);
+        color: var(--accent-success);
+      }
 
-/* ── File references ── */
-.file-refs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-.file-ref {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  background: var(--bg-code);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-}
-.file-ref .line {
-  color: var(--accent-info);
-}
+      /* ── File references ── */
+      .file-refs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 16px;
+      }
+      .file-ref {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        background: var(--bg-code);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xs);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+      .file-ref .line {
+        color: var(--accent-info);
+      }
 
-/* ── Code blocks ── */
-.code-block {
-  background: var(--bg-code);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 20px;
-  margin: 16px 0;
-  overflow-x: auto;
-}
-.code-block pre {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12.5px;
-  line-height: 1.75;
-  color: var(--text-secondary);
-}
-.code-block .kw { color: var(--accent-purple); }
-.code-block .fn { color: var(--accent-info); }
-.code-block .str { color: var(--accent-success); }
-.code-block .cmt { color: var(--text-muted); font-style: italic; }
-.code-block .type { color: var(--accent-warning); }
-.code-block .hl { background: rgba(59,158,255,0.08); display: inline-block; width: 100%; margin: 0 -20px; padding: 0 20px; }
+      /* ── Code blocks ── */
+      .code-block {
+        background: var(--bg-code);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        margin: 16px 0;
+        overflow-x: auto;
+      }
+      .code-block pre {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12.5px;
+        line-height: 1.75;
+        color: var(--text-secondary);
+      }
+      .code-block .kw {
+        color: var(--accent-purple);
+      }
+      .code-block .fn {
+        color: var(--accent-info);
+      }
+      .code-block .str {
+        color: var(--accent-success);
+      }
+      .code-block .cmt {
+        color: var(--text-muted);
+        font-style: italic;
+      }
+      .code-block .type {
+        color: var(--accent-warning);
+      }
+      .code-block .hl {
+        background: rgba(59, 158, 255, 0.08);
+        display: inline-block;
+        width: 100%;
+        margin: 0 -20px;
+        padding: 0 20px;
+      }
 
-/* ── Steps ── */
-.steps {
-  margin-top: 20px;
-}
-.step {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-.step-num {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--bg-code);
-  border: 1px solid var(--border-subtle);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-muted);
-  flex-shrink: 0;
-  padding-top: 5px;
-}
-.step-content {
-  flex: 1;
-}
-.step-content p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 8px;
-}
-.step-content p strong {
-  color: var(--text-primary);
-  font-weight: 500;
-}
+      /* ── Steps ── */
+      .steps {
+        margin-top: 20px;
+      }
+      .step {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .step-num {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--bg-code);
+        border: 1px solid var(--border-subtle);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-muted);
+        flex-shrink: 0;
+        padding-top: 5px;
+      }
+      .step-content {
+        flex: 1;
+      }
+      .step-content p {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: 8px;
+      }
+      .step-content p strong {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
 
-/* ── Before / After ── */
-.diff-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 16px;
-}
-@media (max-width: 700px) {
-  .diff-grid { grid-template-columns: 1fr; }
-}
-.diff-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.diff-label.before { color: var(--accent-critical); }
-.diff-label.after { color: var(--accent-success); }
-.diff-label .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-.diff-label.before .dot { background: var(--accent-critical); }
-.diff-label.after .dot { background: var(--accent-success); }
+      /* ── Before / After ── */
+      .diff-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 16px;
+      }
+      @media (max-width: 700px) {
+        .diff-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .diff-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .diff-label.before {
+        color: var(--accent-critical);
+      }
+      .diff-label.after {
+        color: var(--accent-success);
+      }
+      .diff-label .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+      .diff-label.before .dot {
+        background: var(--accent-critical);
+      }
+      .diff-label.after .dot {
+        background: var(--accent-success);
+      }
 
-/* ── Impact grid ── */
-.impact-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 16px;
-}
-@media (max-width: 600px) {
-  .impact-grid { grid-template-columns: 1fr; }
-}
-.impact-item {
-  background: var(--bg-code);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-}
-.impact-label {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: var(--text-muted);
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-.impact-value {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
+      /* ── Impact grid ── */
+      .impact-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+      }
+      @media (max-width: 600px) {
+        .impact-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .impact-item {
+        background: var(--bg-code);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        padding: 14px 16px;
+      }
+      .impact-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .impact-value {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
 
-/* ── Dependency diagram ── */
-.dep-flow {
-  background: var(--bg-code);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 24px;
-  margin: 16px 0;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  line-height: 2.2;
-  color: var(--text-muted);
-}
-.dep-flow .node {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: var(--radius-xs);
-  border: 1px solid var(--border-active);
-  color: var(--text-secondary);
-  margin: 2px 4px;
-}
-.dep-flow .arrow { color: var(--text-muted); margin: 0 4px; }
-.dep-flow .bad { border-color: var(--accent-critical); color: var(--accent-critical); }
-.dep-flow .good { border-color: var(--accent-success); color: var(--accent-success); }
+      /* ── Dependency diagram ── */
+      .dep-flow {
+        background: var(--bg-code);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        padding: 24px;
+        margin: 16px 0;
+        text-align: center;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        line-height: 2.2;
+        color: var(--text-muted);
+      }
+      .dep-flow .node {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: var(--radius-xs);
+        border: 1px solid var(--border-active);
+        color: var(--text-secondary);
+        margin: 2px 4px;
+      }
+      .dep-flow .arrow {
+        color: var(--text-muted);
+        margin: 0 4px;
+      }
+      .dep-flow .bad {
+        border-color: var(--accent-critical);
+        color: var(--accent-critical);
+      }
+      .dep-flow .good {
+        border-color: var(--accent-success);
+        color: var(--accent-success);
+      }
 
-/* ── Summary ── */
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-top: 24px;
-}
-@media (max-width: 600px) {
-  .summary-grid { grid-template-columns: repeat(2, 1fr); }
-}
-.summary-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius);
-  padding: 20px;
-  text-align: center;
-}
-.summary-card .num {
-  font-family: 'Instrument Serif', serif;
-  font-size: 36px;
-  font-weight: 400;
-  line-height: 1;
-  margin-bottom: 6px;
-}
-.summary-card .label {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.summary-card.critical .num { color: var(--accent-critical); }
-.summary-card.high .num { color: var(--accent-warning); }
-.summary-card.medium .num { color: var(--accent-info); }
-.summary-card.total .num { color: var(--text-primary); }
+      /* ── Summary ── */
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 24px;
+      }
+      @media (max-width: 600px) {
+        .summary-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .summary-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        padding: 20px;
+        text-align: center;
+      }
+      .summary-card .num {
+        font-family: "Instrument Serif", serif;
+        font-size: 36px;
+        font-weight: 400;
+        line-height: 1;
+        margin-bottom: 6px;
+      }
+      .summary-card .label {
+        font-size: 12px;
+        color: var(--text-muted);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .summary-card.critical .num {
+        color: var(--accent-critical);
+      }
+      .summary-card.high .num {
+        color: var(--accent-warning);
+      }
+      .summary-card.medium .num {
+        color: var(--accent-info);
+      }
+      .summary-card.total .num {
+        color: var(--text-primary);
+      }
 
-/* ── Footer ── */
-.footer {
-  padding: 40px 0;
-  border-top: 1px solid var(--border-subtle);
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 13px;
-}
-.footer a { color: var(--accent-info); text-decoration: none; }
+      /* ── Footer ── */
+      .footer {
+        padding: 40px 0;
+        border-top: 1px solid var(--border-subtle);
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 13px;
+      }
+      .footer a {
+        color: var(--accent-info);
+        text-decoration: none;
+      }
 
-/* ── Animations ── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.card {
-  animation: fadeUp 0.4s ease both;
-}
-.card:nth-child(1) { animation-delay: 0.05s; }
-.card:nth-child(2) { animation-delay: 0.10s; }
-.card:nth-child(3) { animation-delay: 0.15s; }
-.card:nth-child(4) { animation-delay: 0.20s; }
-.card:nth-child(5) { animation-delay: 0.25s; }
+      /* ── Animations ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .card {
+        animation: fadeUp 0.4s ease both;
+      }
+      .card:nth-child(1) {
+        animation-delay: 0.05s;
+      }
+      .card:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .card:nth-child(3) {
+        animation-delay: 0.15s;
+      }
+      .card:nth-child(4) {
+        animation-delay: 0.2s;
+      }
+      .card:nth-child(5) {
+        animation-delay: 0.25s;
+      }
 
-/* ── Checklist ── */
-.checklist {
-  margin-top: 16px;
-}
-.checklist li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 8px 0;
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  list-style: none;
-}
-.checklist li::before {
-  content: '';
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
-  border: 1.5px solid var(--border-active);
-  flex-shrink: 0;
-  margin-top: 3px;
-}
+      /* ── Checklist ── */
+      .checklist {
+        margin-top: 16px;
+      }
+      .checklist li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 8px 0;
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        list-style: none;
+      }
+      .checklist li::before {
+        content: "";
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 1.5px solid var(--border-active);
+        flex-shrink: 0;
+        margin-top: 3px;
+      }
 
-/* ── Note callout ── */
-.callout {
-  display: flex;
-  gap: 12px;
-  padding: 16px 20px;
-  background: var(--accent-info-dim);
-  border: 1px solid rgba(59,158,255,0.15);
-  border-radius: var(--radius-sm);
-  margin: 16px 0;
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-.callut-icon {
-  flex-shrink: 0;
-  font-size: 16px;
-  line-height: 1.7;
-}
-.callout strong { color: var(--text-primary); }
-</style>
-</head>
-<body>
-
-<!-- ═══════════════ HERO ═══════════════ -->
-<header class="hero">
-  <div class="container">
-    <div class="hero-badge">Architecture Review · June 2026</div>
-    <h1>go-localsync<br><em>Improvement Plan</em></h1>
-    <p class="hero-desc">
-      Actionable fixes for the 4 structural issues and 6 placement concerns identified in the architecture review. Each item includes the exact file location, the root cause, and a concrete fix plan.
-    </p>
-    <div class="hero-meta">
-      <div class="hero-meta-item">
-        <span class="hero-meta-label">Source</span>
-        <span class="hero-meta-value">go-localsync</span>
-      </div>
-      <div class="hero-meta-item">
-        <span class="hero-meta-label">Integration</span>
-        <span class="hero-meta-value">go-cqrs-lite v2.2.0</span>
-      </div>
-      <div class="hero-meta-item">
-        <span class="hero-meta-label">Scope</span>
-        <span class="hero-meta-value">10 items · 2 critical</span>
-      </div>
-      <div class="hero-meta-item">
-        <span class="hero-meta-label">Effort</span>
-        <span class="hero-meta-value">~3–5 focused sessions</span>
-      </div>
-    </div>
-  </div>
-</header>
-
-<!-- ═══════════════ NAV ═══════════════ -->
-<nav class="nav">
-  <div class="container">
-    <div class="nav-inner">
-      <a href="#critical" class="critical"><span class="count">2</span> Critical</a>
-      <a href="#structural" class="warning"><span class="count">2</span> Structural</a>
-      <a href="#placement" class="info"><span class="count">4</span> Placement</a>
-      <a href="#summary" class="info"><span class="count">✦</span> Summary</a>
-      <a href="#appendix-generics" class="warning"><span class="count">A</span> Appendix: Generics</a>
-    </div>
-  </div>
-</nav>
-
-<!-- ═══════════════ CRITICAL ═══════════════ -->
-<section id="critical">
-  <div class="container">
-    <div class="section-header">
-      <h2>Critical Fixes</h2>
-      <p>Correctness issues that can cause silent data loss or inconsistent behavior in production.</p>
-    </div>
-
-    <!-- LS-1 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-1</div>
-          <h3>SyncItems bypasses the command middleware pipeline</h3>
-        </div>
-        <span class="severity critical">Correctness</span>
-      </div>
-      <p class="card-desc">
-        <strong><code>SyncItems</code></strong> (the primary write path for batch syncs) calls <strong><code>Repo.Execute()</code></strong> directly with a <code>countingDecide</code> closure — completely bypassing the <code>CommandDispatcher</code>. This means no logging, no validation, no retry, and no idempotency protection for the most important code path. Meanwhile, <code>DeleteItem</code> correctly dispatches through <code>CommandDispatcher</code>. This is an inconsistency that also loses observability.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/stack.go <span class="line">:165–243</span></span>
-        <span class="file-ref">pkg/cqrs/stack.go <span class="line">:189</span> (countingDecide)</span>
-        <span class="file-ref">pkg/cqrs/stack.go <span class="line">:214</span> (Repo.Execute)</span>
-        <span class="file-ref">pkg/cqrs/stack.go <span class="line">:157</span> (DeleteItem — correct path)</span>
-      </div>
-      <div class="dep-flow">
-        <span class="node bad">SyncItems()</span>
-        <span class="arrow">→</span>
-        <span class="node bad">Repo.Execute()</span>
-        <span class="arrow" style="color:var(--text-muted)">— no middleware —</span>
-        <br>
-        <span class="node good">DeleteItem()</span>
-        <span class="arrow">→</span>
-        <span class="node good">CommandDispatcher.Dispatch()</span>
-        <span class="arrow">→</span>
-        <span class="node good">middleware chain</span>
-        <span class="arrow">→</span>
-        <span class="node good">Repo.Execute()</span>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p><strong>Add <code>SyncItemCommand</code> dispatch for single items.</strong> Refactor <code>SyncItem()</code> to construct a <code>SyncItemCommand</code> with the deterministic aggregate ID pre-computed from <code>AggregateID(source, externalID)</code>, then dispatch through <code>CommandDispatcher</code>. The handler already exists (<code>handleSyncItem</code> at <code>commands_queries.go:185</code>).</p>
+      /* ── Note callout ── */
+      .callout {
+        display: flex;
+        gap: 12px;
+        padding: 16px 20px;
+        background: var(--accent-info-dim);
+        border: 1px solid rgba(59, 158, 255, 0.15);
+        border-radius: var(--radius-sm);
+        margin: 16px 0;
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+      .callut-icon {
+        flex-shrink: 0;
+        font-size: 16px;
+        line-height: 1.7;
+      }
+      .callout strong {
+        color: var(--text-primary);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════════ HERO ═══════════════ -->
+    <header class="hero">
+      <div class="container">
+        <div class="hero-badge">Architecture Review · June 2026</div>
+        <h1>go-localsync<br /><em>Improvement Plan</em></h1>
+        <p class="hero-desc">
+          Actionable fixes for the 4 structural issues and 6 placement concerns identified in the
+          architecture review. Each item includes the exact file location, the root cause, and a
+          concrete fix plan.
+        </p>
+        <div class="hero-meta">
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Source</span>
+            <span class="hero-meta-value">go-localsync</span>
           </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <p><strong>Refactor <code>SyncItems</code> to dispatch per-item.</strong> Loop over items, construct <code>SyncItemCommand</code> for each, dispatch through the pipeline. Capture results in a slice. The <code>countingDecide</code> hack goes away — domain semantics (created/updated/conflict) are determined from the decider's event output, which can be inspected via a post-commit hook or a result channel on the repository.</p>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Integration</span>
+            <span class="hero-meta-value">go-cqrs-lite v2.2.0</span>
           </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <p><strong>Resolve the <code>DecideFunc</code> return-type limitation upstream.</strong> The root cause is that <code>DecideFunc</code> returns <code>([]Event, error)</code> with no way to carry domain metadata. File an issue / PR on go-cqrs-lite to extend the return type to a <code>DecideResult</code> struct that carries events + annotations. This eliminates reverse-engineering intent from event counts.</p>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Scope</span>
+            <span class="hero-meta-value">10 items · 2 critical</span>
           </div>
-        </div>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">All batch syncs</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">2–3 hours</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Low (refactor)</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- LS-2 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-2</div>
-          <h3>Missing compile-time SyncStore interface assertion</h3>
-        </div>
-        <span class="severity critical">Type Safety</span>
-      </div>
-      <p class="card-desc">
-        <strong><code>CQRSStack</code></strong> implements <code>sync.SyncStore</code> implicitly through adapter methods in <code>stack_adapters.go</code>, but there is no <code>var _ sync.SyncStore = (*CQRSStack)(nil)</code> assertion. If the <code>SyncStore</code> interface gains or changes a method, compilation succeeds but runtime fails at call sites — a silent contract break.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/stack.go <span class="line">:48</span> (CQRSStack struct)</span>
-        <span class="file-ref">pkg/cqrs/stack_adapters.go <span class="line">:52–70</span> (adapter methods)</span>
-        <span class="file-ref">pkg/sync/sync.go <span class="line">:SyncStore</span> (interface)</span>
-      </div>
-      <div class="code-block">
-<pre><span class="cmt">// stack.go — add after CQRSStack definition (line ~58)</span>
-<span class="kw">var</span> _ synclib.<span class="type">SyncStore</span> = (*<span class="type">CQRSStack</span>)(<span class="kw">nil</span>)</pre>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p><strong>Add the compile-time assertion.</strong> One line after the <code>CQRSStack</code> struct definition. This follows the same pattern already used in <code>projection.go:69</code> (<code>var _ event.Projection = (*Projector)(nil)</code>).</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <p><strong>Verify all <code>SyncStore</code> methods are present.</strong> Check that <code>SyncItems</code>, <code>ListItems</code>, <code>CountItems</code>, <code>GetItemTypes</code>, <code>Count</code>, <code>Close</code> all match the interface. The duplicate <code>GetTypes</code> / <code>GetItemTypes</code> methods (see LS-6) should be resolved first.</p>
+          <div class="hero-meta-item">
+            <span class="hero-meta-label">Effort</span>
+            <span class="hero-meta-value">~3–5 focused sessions</span>
           </div>
         </div>
       </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">Interface contract</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">5 minutes</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Zero</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </header>
 
-<!-- ═══════════════ STRUCTURAL ═══════════════ -->
-<section id="structural">
-  <div class="container">
-    <div class="section-header">
-      <h2>Structural Improvements</h2>
-      <p>Architectural patterns that are correct in spirit but have implementation gaps worth closing.</p>
-    </div>
-
-    <!-- LS-3 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-3</div>
-          <h3>CRDT infrastructure is overbuilt for current usage</h3>
+    <!-- ═══════════════ NAV ═══════════════ -->
+    <nav class="nav">
+      <div class="container">
+        <div class="nav-inner">
+          <a href="#critical" class="critical"><span class="count">2</span> Critical</a>
+          <a href="#structural" class="warning"><span class="count">2</span> Structural</a>
+          <a href="#placement" class="info"><span class="count">4</span> Placement</a>
+          <a href="#summary" class="info"><span class="count">✦</span> Summary</a>
+          <a href="#appendix-generics" class="warning"
+            ><span class="count">A</span> Appendix: Generics</a
+          >
         </div>
-        <span class="severity high">YAGNI</span>
       </div>
-      <p class="card-desc">
-        <strong><code>pkg/crdt/</code></strong> defines a full distributed sync protocol: <code>VectorClock</code>, <code>Operation[T]</code>, <code>SyncMessage</code>, <code>SyncRequest</code>, <code>SyncResponse[T]</code>, <code>NodeID</code>, <code>OperationID</code>. However, only <code>ConflictResolver[T]</code> and <code>LWWResolver[T]</code> are actually used. Vector clocks are always empty (created via <code>crdt.NewVectorClock()</code> and never populated). The remaining types are dead code adding cognitive overhead and maintenance surface.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/crdt/conflict.go <span class="line">:ConflictResolver</span></span>
-        <span class="file-ref">pkg/cqrs/decider.go <span class="line">:164–165</span> (empty vector clocks)</span>
-        <span class="file-ref">pkg/crdt/operation.go <span class="line">:Operation[T]</span> (unused)</span>
-        <span class="file-ref">pkg/crdt/vectorclock.go <span class="line">:VectorClock</span> (always empty)</span>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p><strong>Keep the conflict resolution types.</strong> <code>Conflict[T]</code>, <code>ConflictResolver[T]</code>, <code>LWWResolver[T]</code> are actively used and well-designed. Leave them in <code>pkg/crdt/</code>.</p>
+    </nav>
+
+    <!-- ═══════════════ CRITICAL ═══════════════ -->
+    <section id="critical">
+      <div class="container">
+        <div class="section-header">
+          <h2>Critical Fixes</h2>
+          <p>
+            Correctness issues that can cause silent data loss or inconsistent behavior in
+            production.
+          </p>
+        </div>
+
+        <!-- LS-1 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-1</div>
+              <h3>SyncItems bypasses the command middleware pipeline</h3>
+            </div>
+            <span class="severity critical">Correctness</span>
+          </div>
+          <p class="card-desc">
+            <strong><code>SyncItems</code></strong> (the primary write path for batch syncs) calls
+            <strong><code>Repo.Execute()</code></strong> directly with a
+            <code>countingDecide</code> closure — completely bypassing the
+            <code>CommandDispatcher</code>. This means no logging, no validation, no retry, and no
+            idempotency protection for the most important code path. Meanwhile,
+            <code>DeleteItem</code> correctly dispatches through <code>CommandDispatcher</code>.
+            This is an inconsistency that also loses observability.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref">pkg/cqrs/stack.go <span class="line">:165–243</span></span>
+            <span class="file-ref"
+              >pkg/cqrs/stack.go <span class="line">:189</span> (countingDecide)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/stack.go <span class="line">:214</span> (Repo.Execute)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/stack.go <span class="line">:157</span> (DeleteItem — correct path)</span
+            >
+          </div>
+          <div class="dep-flow">
+            <span class="node bad">SyncItems()</span>
+            <span class="arrow">→</span>
+            <span class="node bad">Repo.Execute()</span>
+            <span class="arrow" style="color: var(--text-muted)">— no middleware —</span>
+            <br />
+            <span class="node good">DeleteItem()</span>
+            <span class="arrow">→</span>
+            <span class="node good">CommandDispatcher.Dispatch()</span>
+            <span class="arrow">→</span>
+            <span class="node good">middleware chain</span>
+            <span class="arrow">→</span>
+            <span class="node good">Repo.Execute()</span>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p>
+                  <strong>Add <code>SyncItemCommand</code> dispatch for single items.</strong>
+                  Refactor <code>SyncItem()</code> to construct a <code>SyncItemCommand</code> with
+                  the deterministic aggregate ID pre-computed from
+                  <code>AggregateID(source, externalID)</code>, then dispatch through
+                  <code>CommandDispatcher</code>. The handler already exists (<code
+                    >handleSyncItem</code
+                  >
+                  at <code>commands_queries.go:185</code>).
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p>
+                  <strong>Refactor <code>SyncItems</code> to dispatch per-item.</strong> Loop over
+                  items, construct <code>SyncItemCommand</code> for each, dispatch through the
+                  pipeline. Capture results in a slice. The <code>countingDecide</code> hack goes
+                  away — domain semantics (created/updated/conflict) are determined from the
+                  decider's event output, which can be inspected via a post-commit hook or a result
+                  channel on the repository.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <p>
+                  <strong
+                    >Resolve the <code>DecideFunc</code> return-type limitation upstream.</strong
+                  >
+                  The root cause is that <code>DecideFunc</code> returns
+                  <code>([]Event, error)</code> with no way to carry domain metadata. File an issue
+                  / PR on go-cqrs-lite to extend the return type to a
+                  <code>DecideResult</code> struct that carries events + annotations. This
+                  eliminates reverse-engineering intent from event counts.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">All batch syncs</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">2–3 hours</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Low (refactor)</div>
+            </div>
           </div>
         </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <p><strong>Document the unused types as future API.</strong> Add a <code>doc.go</code> to <code>pkg/crdt/</code> explaining which types are active vs. planned-for-later. This avoids confusion for new contributors without deleting code that has a clear future purpose.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <p><strong>Add tests for empty-vector-clock behavior.</strong> If the contract is "empty clocks mean LWW falls through to timestamp," encode that in a test. This documents the behavior and catches regressions.</p>
-          </div>
-        </div>
-      </div>
-      <div class="callout">
-        <span class="callut-icon">ℹ</span>
-        <span>The types aren't wrong — they're well-designed for a future multi-node sync story. The issue is that they're undocumented dead weight right now. A doc comment + test is cheaper than deletion + re-creation later.</span>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">Code clarity</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">30 minutes</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Zero</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- LS-4 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-4</div>
-          <h3>Inconsistent not-found semantics across ReadModel implementations</h3>
-        </div>
-        <span class="severity high">Correctness</span>
-      </div>
-      <p class="card-desc">
-        <strong><code>MemoryReadModel.Get()</code></strong> returns <code>(nil, nil)</code> for missing items. <strong><code>SQLiteReadModel.Get()</code></strong> returns <code>(nil, ErrNotFound)</code>. This semantic mismatch means code that works in development (memory backend) breaks in production (SQLite backend) or vice versa. Callers can't write consistent error-handling code.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/memory_readmodel.go <span class="line">:27</span> (returns nil, nil)</span>
-        <span class="file-ref">pkg/cqrs/sqlite_readmodel.go <span class="line">:64</span> (returns nil, ErrNotFound)</span>
-        <span class="file-ref">pkg/cqrs/readmodel.go <span class="line">:13</span> (interface)</span>
-      </div>
-      <div class="diff-grid">
-        <div>
-          <div class="diff-label before"><span class="dot"></span> Before</div>
+        <!-- LS-2 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-2</div>
+              <h3>Missing compile-time SyncStore interface assertion</h3>
+            </div>
+            <span class="severity critical">Type Safety</span>
+          </div>
+          <p class="card-desc">
+            <strong><code>CQRSStack</code></strong> implements
+            <code>sync.SyncStore</code> implicitly through adapter methods in
+            <code>stack_adapters.go</code>, but there is no
+            <code>var _ sync.SyncStore = (*CQRSStack)(nil)</code> assertion. If the
+            <code>SyncStore</code> interface gains or changes a method, compilation succeeds but
+            runtime fails at call sites — a silent contract break.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/cqrs/stack.go <span class="line">:48</span> (CQRSStack struct)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/stack_adapters.go <span class="line">:52–70</span> (adapter methods)</span
+            >
+            <span class="file-ref"
+              >pkg/sync/sync.go <span class="line">:SyncStore</span> (interface)</span
+            >
+          </div>
           <div class="code-block">
-<pre><span class="cmt">// MemoryReadModel — silent nil</span>
+            <pre><span class="cmt">// stack.go — add after CQRSStack definition (line ~58)</span>
+<span class="kw">var</span> _ synclib.<span class="type">SyncStore</span> = (*<span class="type">CQRSStack</span>)(<span class="kw">nil</span>)</pre>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p>
+                  <strong>Add the compile-time assertion.</strong> One line after the
+                  <code>CQRSStack</code> struct definition. This follows the same pattern already
+                  used in <code>projection.go:69</code> (<code
+                    >var _ event.Projection = (*Projector)(nil)</code
+                  >).
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p>
+                  <strong>Verify all <code>SyncStore</code> methods are present.</strong> Check that
+                  <code>SyncItems</code>, <code>ListItems</code>, <code>CountItems</code>,
+                  <code>GetItemTypes</code>, <code>Count</code>, <code>Close</code> all match the
+                  interface. The duplicate <code>GetTypes</code> / <code>GetItemTypes</code> methods
+                  (see LS-6) should be resolved first.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">Interface contract</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">5 minutes</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Zero</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ STRUCTURAL ═══════════════ -->
+    <section id="structural">
+      <div class="container">
+        <div class="section-header">
+          <h2>Structural Improvements</h2>
+          <p>
+            Architectural patterns that are correct in spirit but have implementation gaps worth
+            closing.
+          </p>
+        </div>
+
+        <!-- LS-3 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-3</div>
+              <h3>CRDT infrastructure is overbuilt for current usage</h3>
+            </div>
+            <span class="severity high">YAGNI</span>
+          </div>
+          <p class="card-desc">
+            <strong><code>pkg/crdt/</code></strong> defines a full distributed sync protocol:
+            <code>VectorClock</code>, <code>Operation[T]</code>, <code>SyncMessage</code>,
+            <code>SyncRequest</code>, <code>SyncResponse[T]</code>, <code>NodeID</code>,
+            <code>OperationID</code>. However, only <code>ConflictResolver[T]</code> and
+            <code>LWWResolver[T]</code> are actually used. Vector clocks are always empty (created
+            via <code>crdt.NewVectorClock()</code> and never populated). The remaining types are
+            dead code adding cognitive overhead and maintenance surface.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/crdt/conflict.go <span class="line">:ConflictResolver</span></span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/decider.go <span class="line">:164–165</span> (empty vector clocks)</span
+            >
+            <span class="file-ref"
+              >pkg/crdt/operation.go <span class="line">:Operation[T]</span> (unused)</span
+            >
+            <span class="file-ref"
+              >pkg/crdt/vectorclock.go <span class="line">:VectorClock</span> (always empty)</span
+            >
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p>
+                  <strong>Keep the conflict resolution types.</strong> <code>Conflict[T]</code>,
+                  <code>ConflictResolver[T]</code>, <code>LWWResolver[T]</code> are actively used
+                  and well-designed. Leave them in <code>pkg/crdt/</code>.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p>
+                  <strong>Document the unused types as future API.</strong> Add a
+                  <code>doc.go</code> to <code>pkg/crdt/</code> explaining which types are active
+                  vs. planned-for-later. This avoids confusion for new contributors without deleting
+                  code that has a clear future purpose.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <p>
+                  <strong>Add tests for empty-vector-clock behavior.</strong> If the contract is
+                  "empty clocks mean LWW falls through to timestamp," encode that in a test. This
+                  documents the behavior and catches regressions.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            <span class="callut-icon">ℹ</span>
+            <span
+              >The types aren't wrong — they're well-designed for a future multi-node sync story.
+              The issue is that they're undocumented dead weight right now. A doc comment + test is
+              cheaper than deletion + re-creation later.</span
+            >
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">Code clarity</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">30 minutes</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Zero</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LS-4 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-4</div>
+              <h3>Inconsistent not-found semantics across ReadModel implementations</h3>
+            </div>
+            <span class="severity high">Correctness</span>
+          </div>
+          <p class="card-desc">
+            <strong><code>MemoryReadModel.Get()</code></strong> returns <code>(nil, nil)</code> for
+            missing items. <strong><code>SQLiteReadModel.Get()</code></strong> returns
+            <code>(nil, ErrNotFound)</code>. This semantic mismatch means code that works in
+            development (memory backend) breaks in production (SQLite backend) or vice versa.
+            Callers can't write consistent error-handling code.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/cqrs/memory_readmodel.go <span class="line">:27</span> (returns nil, nil)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/sqlite_readmodel.go <span class="line">:64</span> (returns nil,
+              ErrNotFound)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/readmodel.go <span class="line">:13</span> (interface)</span
+            >
+          </div>
+          <div class="diff-grid">
+            <div>
+              <div class="diff-label before"><span class="dot"></span> Before</div>
+              <div class="code-block">
+                <pre><span class="cmt">// MemoryReadModel — silent nil</span>
 <span class="kw">func</span> (m *<span class="type">MemoryReadModel</span>) <span class="fn">Get</span>(...) (*model.<span class="type">Item</span>, <span class="type">error</span>) {
   <span class="kw">return</span> <span class="kw">nil</span>, <span class="kw">nil</span>  <span class="cmt">// ← ambiguous</span>
 }</pre>
-          </div>
-        </div>
-        <div>
-          <div class="diff-label after"><span class="dot"></span> After</div>
-          <div class="code-block">
-<pre><span class="cmt">// MemoryReadModel — explicit ErrNotFound</span>
+              </div>
+            </div>
+            <div>
+              <div class="diff-label after"><span class="dot"></span> After</div>
+              <div class="code-block">
+                <pre><span class="cmt">// MemoryReadModel — explicit ErrNotFound</span>
 <span class="kw">func</span> (m *<span class="type">MemoryReadModel</span>) <span class="fn">Get</span>(...) (*model.<span class="type">Item</span>, <span class="type">error</span>) {
   item, ok := m.items[key]
   <span class="kw">if</span> !ok {
@@ -810,375 +1032,675 @@ section + section {
   }
   <span class="kw">return</span> item, <span class="kw">nil</span>
 }</pre>
+              </div>
+            </div>
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">Dev/Prod parity</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">15 minutes</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Low (test impact)</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">Dev/Prod parity</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">15 minutes</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Low (test impact)</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ═══════════════ PLACEMENT ═══════════════ -->
-<section id="placement">
-  <div class="container">
-    <div class="section-header">
-      <h2>Placement Concerns</h2>
-      <p>Things in the right place conceptually but with friction points worth smoothing.</p>
-    </div>
-
-    <!-- LS-5 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-5</div>
-          <h3>api.Server takes both Syncer and SyncStore separately</h3>
+    <!-- ═══════════════ PLACEMENT ═══════════════ -->
+    <section id="placement">
+      <div class="container">
+        <div class="section-header">
+          <h2>Placement Concerns</h2>
+          <p>Things in the right place conceptually but with friction points worth smoothing.</p>
         </div>
-        <span class="severity medium">Coupling</span>
-      </div>
-      <p class="card-desc">
-        <strong><code>NewServer()</code></strong> accepts both a concrete <code>*synclib.Syncer</code> and an interface <code>synclib.SyncStore</code>. The <code>Syncer</code> already holds a <code>SyncStore</code> internally. Passing both creates a dual-dependency where they could diverge — in practice they're always the same <code>*CQRSStack</code>, but the API surface invites misuse.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/api/server.go <span class="line">:29</span> (NewServer signature)</span>
-        <span class="file-ref">pkg/sync/sync.go <span class="line">:Syncer</span> (struct holds SyncStore)</span>
-      </div>
-      <div class="diff-grid">
-        <div>
-          <div class="diff-label before"><span class="dot"></span> Before</div>
-          <div class="code-block">
-<pre><span class="kw">func</span> <span class="fn">NewServer</span>(
+
+        <!-- LS-5 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-5</div>
+              <h3>api.Server takes both Syncer and SyncStore separately</h3>
+            </div>
+            <span class="severity medium">Coupling</span>
+          </div>
+          <p class="card-desc">
+            <strong><code>NewServer()</code></strong> accepts both a concrete
+            <code>*synclib.Syncer</code> and an interface <code>synclib.SyncStore</code>. The
+            <code>Syncer</code> already holds a <code>SyncStore</code> internally. Passing both
+            creates a dual-dependency where they could diverge — in practice they're always the same
+            <code>*CQRSStack</code>, but the API surface invites misuse.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/api/server.go <span class="line">:29</span> (NewServer signature)</span
+            >
+            <span class="file-ref"
+              >pkg/sync/sync.go <span class="line">:Syncer</span> (struct holds SyncStore)</span
+            >
+          </div>
+          <div class="diff-grid">
+            <div>
+              <div class="diff-label before"><span class="dot"></span> Before</div>
+              <div class="code-block">
+                <pre><span class="kw">func</span> <span class="fn">NewServer</span>(
   syncer *synclib.<span class="type">Syncer</span>,
   store  synclib.<span class="type">SyncStore</span>,  <span class="cmt">// ← redundant</span>
   logger *log.<span class="type">Logger</span>,
 ) *<span class="type">Server</span></pre>
-          </div>
-        </div>
-        <div>
-          <div class="diff-label after"><span class="dot"></span> After</div>
-          <div class="code-block">
-<pre><span class="kw">func</span> <span class="fn">NewServer</span>(
+              </div>
+            </div>
+            <div>
+              <div class="diff-label after"><span class="dot"></span> After</div>
+              <div class="code-block">
+                <pre><span class="kw">func</span> <span class="fn">NewServer</span>(
   syncer *synclib.<span class="type">Syncer</span>,
   logger *log.<span class="type">Logger</span>,
 ) *<span class="type">Server</span>
 <span class="cmt">// Server.store = syncer.store internally</span></pre>
+              </div>
+            </div>
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">API surface</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">30 minutes</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Low</div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">API surface</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">30 minutes</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Low</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- LS-6 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-6</div>
-          <h3>Duplicate methods: GetTypes and GetItemTypes</h3>
-        </div>
-        <span class="severity medium">Dead Code</span>
-      </div>
-      <p class="card-desc">
-        <strong><code>CQRSStack.GetTypes()</code></strong> and <strong><code>CQRSStack.GetItemTypes()</code></strong> are identical methods — both delegate to <code>ReadModel.GetTypes()</code>. One exists for the <code>SyncStore</code> interface, the other is a convenience method. This is confusing for consumers and doubles the API surface for no benefit.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/stack_adapters.go <span class="line">:48–50</span> (GetTypes)</span>
-        <span class="file-ref">pkg/cqrs/stack_adapters.go <span class="line">:66–68</span> (GetItemTypes)</span>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p><strong>Remove <code>GetTypes()</code></strong> and keep <code>GetItemTypes()</code> (which matches the <code>SyncStore</code> interface). Update any callers. This is a minor breaking change to the <code>CQRSStack</code> API, but since <code>GetTypes</code> is not part of any interface, callers should be few.</p>
+        <!-- LS-6 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-6</div>
+              <h3>Duplicate methods: GetTypes and GetItemTypes</h3>
+            </div>
+            <span class="severity medium">Dead Code</span>
+          </div>
+          <p class="card-desc">
+            <strong><code>CQRSStack.GetTypes()</code></strong> and
+            <strong><code>CQRSStack.GetItemTypes()</code></strong> are identical methods — both
+            delegate to <code>ReadModel.GetTypes()</code>. One exists for the
+            <code>SyncStore</code> interface, the other is a convenience method. This is confusing
+            for consumers and doubles the API surface for no benefit.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/cqrs/stack_adapters.go <span class="line">:48–50</span> (GetTypes)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/stack_adapters.go <span class="line">:66–68</span> (GetItemTypes)</span
+            >
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p>
+                  <strong>Remove <code>GetTypes()</code></strong> and keep
+                  <code>GetItemTypes()</code> (which matches the <code>SyncStore</code> interface).
+                  Update any callers. This is a minor breaking change to the
+                  <code>CQRSStack</code> API, but since <code>GetTypes</code> is not part of any
+                  interface, callers should be few.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">API clarity</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">10 minutes</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Minimal</div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">API clarity</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">10 minutes</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Minimal</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- LS-7 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-7</div>
-          <h3>SQLite read model never persists raw JSON</h3>
-        </div>
-        <span class="severity medium">Data Loss</span>
-      </div>
-      <p class="card-desc">
-        <strong><code>SQLiteReadModel.Upsert()</code></strong> always stores <code>[]byte{}</code> for the <code>raw_json</code> column. The actual raw JSON lives only in the event payload. The <code>scannedItem.rawJSON</code> field is scanned from the column but never used. This is a dead column + dead field — wasted storage and confusing code.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/sqlite_readmodel.go <span class="line">:157</span> (empty raw_json)</span>
-        <span class="file-ref">pkg/cqrs/sqlite_readmodel.go <span class="line">:247–288</span> (scannedItem dead field)</span>
-        <span class="file-ref">pkg/cqrs/item_adapter.go <span class="line">:57</span> (ToItemView unused rawJSON param)</span>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p><strong>Option A: Persist raw JSON.</strong> Thread the <code>rawJSON []byte</code> through the projection path (<code>handleItemSynced</code> → <code>ReadModel.Upsert</code>). Requires extending <code>ReadModel.Upsert</code> signature or adding the raw JSON to <code>model.Item</code>.</p>
+        <!-- LS-7 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-7</div>
+              <h3>SQLite read model never persists raw JSON</h3>
+            </div>
+            <span class="severity medium">Data Loss</span>
+          </div>
+          <p class="card-desc">
+            <strong><code>SQLiteReadModel.Upsert()</code></strong> always stores
+            <code>[]byte{}</code> for the <code>raw_json</code> column. The actual raw JSON lives
+            only in the event payload. The <code>scannedItem.rawJSON</code> field is scanned from
+            the column but never used. This is a dead column + dead field — wasted storage and
+            confusing code.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/cqrs/sqlite_readmodel.go <span class="line">:157</span> (empty raw_json)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/sqlite_readmodel.go <span class="line">:247–288</span> (scannedItem dead
+              field)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/item_adapter.go <span class="line">:57</span> (ToItemView unused rawJSON
+              param)</span
+            >
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p>
+                  <strong>Option A: Persist raw JSON.</strong> Thread the
+                  <code>rawJSON []byte</code> through the projection path (<code
+                    >handleItemSynced</code
+                  >
+                  → <code>ReadModel.Upsert</code>). Requires extending
+                  <code>ReadModel.Upsert</code> signature or adding the raw JSON to
+                  <code>model.Item</code>.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p>
+                  <strong>Option B: Remove the column.</strong> If raw JSON is only needed from
+                  events (replayable), drop the <code>raw_json</code> column from the DDL, the
+                  <code>scannedItem.rawJSON</code> field, and the unused
+                  <code>ToItemView</code> parameter. Cleaner — raw JSON is an event-store concern,
+                  not a read-model concern.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            <span class="callut-icon">ℹ</span>
+            <span
+              ><strong>Recommendation: Option B.</strong> The read model should contain the
+              denormalized query fields, not the raw provider payload. Raw JSON belongs in the event
+              store. If consumers need it, they can replay events.</span
+            >
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">Schema clarity</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">30 minutes</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Low (DDL migration)</div>
+            </div>
           </div>
         </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <p><strong>Option B: Remove the column.</strong> If raw JSON is only needed from events (replayable), drop the <code>raw_json</code> column from the DDL, the <code>scannedItem.rawJSON</code> field, and the unused <code>ToItemView</code> parameter. Cleaner — raw JSON is an event-store concern, not a read-model concern.</p>
-          </div>
-        </div>
-      </div>
-      <div class="callout">
-        <span class="callut-icon">ℹ</span>
-        <span><strong>Recommendation: Option B.</strong> The read model should contain the denormalized query fields, not the raw provider payload. Raw JSON belongs in the event store. If consumers need it, they can replay events.</span>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">Schema clarity</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">30 minutes</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Low (DDL migration)</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- LS-8 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">LS-8</div>
-          <h3>Runner.Run() error silently discarded</h3>
-        </div>
-        <span class="severity medium">Observability</span>
-      </div>
-      <p class="card-desc">
-        In <strong><code>runner.go:40</code></strong>, the projection runner's error is discarded: <code>_ = runner.Run(ctx)</code>. If the runner fails (e.g., replay error, journal unavailable), there's no logging, no error propagation, and no retry. The system continues with a stale or empty read model.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/runner.go <span class="line">:40</span> (_ = runner.Run(ctx))</span>
-      </div>
-      <div class="diff-grid">
-        <div>
-          <div class="diff-label before"><span class="dot"></span> Before</div>
-          <div class="code-block">
-<pre><span class="kw">go func</span>() {
+        <!-- LS-8 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">LS-8</div>
+              <h3>Runner.Run() error silently discarded</h3>
+            </div>
+            <span class="severity medium">Observability</span>
+          </div>
+          <p class="card-desc">
+            In <strong><code>runner.go:40</code></strong
+            >, the projection runner's error is discarded: <code>_ = runner.Run(ctx)</code>. If the
+            runner fails (e.g., replay error, journal unavailable), there's no logging, no error
+            propagation, and no retry. The system continues with a stale or empty read model.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/cqrs/runner.go <span class="line">:40</span> (_ = runner.Run(ctx))</span
+            >
+          </div>
+          <div class="diff-grid">
+            <div>
+              <div class="diff-label before"><span class="dot"></span> Before</div>
+              <div class="code-block">
+                <pre><span class="kw">go func</span>() {
   _ = runner.<span class="fn">Run</span>(ctx)  <span class="cmt">// ← silent</span>
 }()</pre>
-          </div>
-        </div>
-        <div>
-          <div class="diff-label after"><span class="dot"></span> After</div>
-          <div class="code-block">
-<pre><span class="kw">go func</span>() {
+              </div>
+            </div>
+            <div>
+              <div class="diff-label after"><span class="dot"></span> After</div>
+              <div class="code-block">
+                <pre><span class="kw">go func</span>() {
   <span class="kw">if</span> err := runner.<span class="fn">Run</span>(ctx); err != <span class="kw">nil</span> {
     slog.<span class="fn">Error</span>(<span class="str">"projection runner failed"</span>,
       <span class="str">"error"</span>, err)
   }
 }()</pre>
+              </div>
+            </div>
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">Production debugging</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">5 minutes</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Zero</div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">Production debugging</div>
+    </section>
+
+    <!-- ═══════════════ SUMMARY ═══════════════ -->
+    <section id="summary">
+      <div class="container">
+        <div class="section-header">
+          <h2>Execution Summary</h2>
+          <p>Prioritized by impact and dependency order.</p>
         </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">5 minutes</div>
+
+        <div class="summary-grid">
+          <div class="summary-card critical">
+            <div class="num">2</div>
+            <div class="label">Critical</div>
+          </div>
+          <div class="summary-card high">
+            <div class="num">2</div>
+            <div class="label">Structural</div>
+          </div>
+          <div class="summary-card medium">
+            <div class="num">4</div>
+            <div class="label">Placement</div>
+          </div>
+          <div class="summary-card total">
+            <div class="num">8</div>
+            <div class="label">Total Items</div>
+          </div>
         </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Zero</div>
+
+        <h3 style="font-size: 17px; font-weight: 600; margin-top: 40px; margin-bottom: 20px">
+          Recommended Execution Order
+        </h3>
+
+        <div class="card" style="padding: 0; overflow: hidden">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px">
+            <thead>
+              <tr style="background: var(--bg-code); border-bottom: 1px solid var(--border-subtle)">
+                <th
+                  style="
+                    padding: 12px 20px;
+                    text-align: left;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  Order
+                </th>
+                <th
+                  style="
+                    padding: 12px 16px;
+                    text-align: left;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  ID
+                </th>
+                <th
+                  style="
+                    padding: 12px 16px;
+                    text-align: left;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  Item
+                </th>
+                <th
+                  style="
+                    padding: 12px 20px;
+                    text-align: left;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  Effort
+                </th>
+                <th
+                  style="
+                    padding: 12px 20px;
+                    text-align: left;
+                    color: var(--text-muted);
+                    font-weight: 600;
+                    font-size: 11px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  Why This Order
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border-subtle)">
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  1
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-critical);
+                  "
+                >
+                  LS-2
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  Compile-time SyncStore assertion
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">5 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  Zero-risk guard; do first
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle)">
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  2
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-critical);
+                  "
+                >
+                  LS-4
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  Consistent not-found semantics
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">15 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  Blocks on dev/prod parity
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle)">
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  3
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-critical);
+                  "
+                >
+                  LS-1
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  SyncItems through command pipeline
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">2–3 hr</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  Biggest correctness win
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle)">
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  4
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-warning);
+                  "
+                >
+                  LS-8
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  Log runner.Run() errors
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">5 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  Quick observability win
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle)">
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  5
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-info);
+                  "
+                >
+                  LS-6
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  Remove duplicate GetTypes
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">10 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  Must resolve before LS-2 assertion
+                </td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle)">
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  6
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-info);
+                  "
+                >
+                  LS-7
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  Remove dead raw_json column/field
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">30 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">Schema cleanup</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-subtle)">
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  7
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-info);
+                  "
+                >
+                  LS-5
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  Simplify NewServer signature
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">30 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  API surface cleanup
+                </td>
+              </tr>
+              <tr>
+                <td
+                  style="
+                    padding: 14px 20px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--text-muted);
+                  "
+                >
+                  8
+                </td>
+                <td
+                  style="
+                    padding: 14px 16px;
+                    font-family: &quot;JetBrains Mono&quot;, monospace;
+                    color: var(--accent-warning);
+                  "
+                >
+                  LS-3
+                </td>
+                <td style="padding: 14px 16px; color: var(--text-primary)">
+                  Document CRDT future API
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">30 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  Non-blocking documentation
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+
+        <ul class="checklist" style="margin-top: 32px">
+          <li>Run <code>go test ./... -count=1</code> after each fix</li>
+          <li>Run <code>golangci-lint run ./... --timeout=5m</code> after each fix</li>
+          <li>
+            Verify dev/prod parity: test with both <code>--backend memory</code> and
+            <code>--backend turso</code>
+          </li>
+          <li>Update AGENTS.md with any changed patterns or gotchas</li>
+          <li>Mark items as done in TODO_LIST.md</li>
+        </ul>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ═══════════════ SUMMARY ═══════════════ -->
-<section id="summary">
-  <div class="container">
-    <div class="section-header">
-      <h2>Execution Summary</h2>
-      <p>Prioritized by impact and dependency order.</p>
-    </div>
-
-    <div class="summary-grid">
-      <div class="summary-card critical">
-        <div class="num">2</div>
-        <div class="label">Critical</div>
-      </div>
-      <div class="summary-card high">
-        <div class="num">2</div>
-        <div class="label">Structural</div>
-      </div>
-      <div class="summary-card medium">
-        <div class="num">4</div>
-        <div class="label">Placement</div>
-      </div>
-      <div class="summary-card total">
-        <div class="num">8</div>
-        <div class="label">Total Items</div>
-      </div>
-    </div>
-
-    <h3 style="font-size:17px;font-weight:600;margin-top:40px;margin-bottom:20px;">Recommended Execution Order</h3>
-
-    <div class="card" style="padding:0;overflow:hidden;">
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">
-        <thead>
-          <tr style="background:var(--bg-code);border-bottom:1px solid var(--border-subtle);">
-            <th style="padding:12px 20px;text-align:left;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Order</th>
-            <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">ID</th>
-            <th style="padding:12px 16px;text-align:left;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Item</th>
-            <th style="padding:12px 20px;text-align:left;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Effort</th>
-            <th style="padding:12px 20px;text-align:left;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Why This Order</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom:1px solid var(--border-subtle);">
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">1</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-critical);">LS-2</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">Compile-time SyncStore assertion</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">5 min</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">Zero-risk guard; do first</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border-subtle);">
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">2</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-critical);">LS-4</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">Consistent not-found semantics</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">15 min</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">Blocks on dev/prod parity</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border-subtle);">
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">3</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-critical);">LS-1</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">SyncItems through command pipeline</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">2–3 hr</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">Biggest correctness win</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border-subtle);">
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">4</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-warning);">LS-8</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">Log runner.Run() errors</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">5 min</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">Quick observability win</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border-subtle);">
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">5</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-info);">LS-6</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">Remove duplicate GetTypes</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">10 min</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">Must resolve before LS-2 assertion</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border-subtle);">
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">6</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-info);">LS-7</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">Remove dead raw_json column/field</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">30 min</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">Schema cleanup</td>
-          </tr>
-          <tr style="border-bottom:1px solid var(--border-subtle);">
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">7</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-info);">LS-5</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">Simplify NewServer signature</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">30 min</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">API surface cleanup</td>
-          </tr>
-          <tr>
-            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);">8</td>
-            <td style="padding:14px 16px;font-family:'JetBrains Mono',monospace;color:var(--accent-warning);">LS-3</td>
-            <td style="padding:14px 16px;color:var(--text-primary);">Document CRDT future API</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">30 min</td>
-            <td style="padding:14px 20px;color:var(--text-secondary);">Non-blocking documentation</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <ul class="checklist" style="margin-top:32px;">
-      <li>Run <code>go test ./... -count=1</code> after each fix</li>
-      <li>Run <code>golangci-lint run ./... --timeout=5m</code> after each fix</li>
-      <li>Verify dev/prod parity: test with both <code>--backend memory</code> and <code>--backend turso</code></li>
-      <li>Update AGENTS.md with any changed patterns or gotchas</li>
-      <li>Mark items as done in TODO_LIST.md</li>
-    </ul>
-  </div>
-</section>
-
-<section id="appendix-generics">
-  <div class="container">
-    <div class="section-header">
-      <h2>Appendix A: Generics Opportunities</h2>
-      <p>Where Go generics can eliminate boilerplate, replace runtime assertions with compile-time checks, and make the codebase more robust. Ordered by impact.</p>
-    </div>
-
-    <!-- G-1 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">G-1</div>
-          <h3>Adopt <code>command.RegisterTyped[C]</code> for all command handlers</h3>
+    <section id="appendix-generics">
+      <div class="container">
+        <div class="section-header">
+          <h2>Appendix A: Generics Opportunities</h2>
+          <p>
+            Where Go generics can eliminate boilerplate, replace runtime assertions with
+            compile-time checks, and make the codebase more robust. Ordered by impact.
+          </p>
         </div>
-        <span class="severity critical">Boilerplate</span>
-      </div>
-      <p class="card-desc">
-        The <code>query</code> package already has <code>RegisterTyped[Q, R]</code> and <code>DispatchTyped[T]</code> — the "typed bookend" pattern that eliminates runtime type assertions. But <code>command</code> has no equivalent. Meanwhile, <strong>go-localsync doesn't use <code>query.RegisterTyped</code> either</strong> — all 6 handlers (2 command + 4 query) use raw <code>Register</code> with manual type assertions. This creates 6 identical blocks of assertion + error-wrapping boilerplate.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/commands_queries.go <span class="line">:189–213</span> (command handlers)</span>
-        <span class="file-ref">pkg/cqrs/commands_queries.go <span class="line">:239–281</span> (query handlers)</span>
-        <span class="file-ref">go-cqrs-lite/query/dispatcher.go <span class="line">:77</span> (RegisterTyped — exists but unused)</span>
-        <span class="file-ref">go-cqrs-lite/command/dispatcher.go <span class="line">:—</span> (no RegisterTyped)</span>
-      </div>
-      <div class="diff-grid">
-        <div>
-          <div class="diff-label before"><span class="dot"></span> Current — 6× repeated</div>
-          <div class="code-block">
-<pre><span class="kw">func</span> <span class="fn">handleSyncItem</span>(repo, resolver) command.<span class="type">Handler</span> {
+
+        <!-- G-1 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">G-1</div>
+              <h3>Adopt <code>command.RegisterTyped[C]</code> for all command handlers</h3>
+            </div>
+            <span class="severity critical">Boilerplate</span>
+          </div>
+          <p class="card-desc">
+            The <code>query</code> package already has <code>RegisterTyped[Q, R]</code> and
+            <code>DispatchTyped[T]</code> — the "typed bookend" pattern that eliminates runtime type
+            assertions. But <code>command</code> has no equivalent. Meanwhile,
+            <strong>go-localsync doesn't use <code>query.RegisterTyped</code> either</strong> — all
+            6 handlers (2 command + 4 query) use raw <code>Register</code> with manual type
+            assertions. This creates 6 identical blocks of assertion + error-wrapping boilerplate.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/cqrs/commands_queries.go <span class="line">:189–213</span> (command
+              handlers)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/commands_queries.go <span class="line">:239–281</span> (query
+              handlers)</span
+            >
+            <span class="file-ref"
+              >go-cqrs-lite/query/dispatcher.go <span class="line">:77</span> (RegisterTyped —
+              exists but unused)</span
+            >
+            <span class="file-ref"
+              >go-cqrs-lite/command/dispatcher.go <span class="line">:—</span> (no
+              RegisterTyped)</span
+            >
+          </div>
+          <div class="diff-grid">
+            <div>
+              <div class="diff-label before"><span class="dot"></span> Current — 6× repeated</div>
+              <div class="code-block">
+                <pre><span class="kw">func</span> <span class="fn">handleSyncItem</span>(repo, resolver) command.<span class="type">Handler</span> {
   <span class="kw">return func</span>(ctx context.<span class="type">Context</span>, cmd command.<span class="type">Command</span>) <span class="type">error</span> {
     syncCmd, ok := cmd.(*<span class="type">SyncItemCommand</span>)
     <span class="kw">if</span> !ok {
@@ -1190,12 +1712,14 @@ section + section {
       aggregateType, <span class="fn">DecideSync</span>(syncCmd.Item, ...))
   }
 }</pre>
-          </div>
-        </div>
-        <div>
-          <div class="diff-label after"><span class="dot"></span> With RegisterTyped — zero assertions</div>
-          <div class="code-block">
-<pre><span class="cmt">// go-cqrs-lite adds (upstream CQ-8):</span>
+              </div>
+            </div>
+            <div>
+              <div class="diff-label after">
+                <span class="dot"></span> With RegisterTyped — zero assertions
+              </div>
+              <div class="code-block">
+                <pre><span class="cmt">// go-cqrs-lite adds (upstream CQ-8):</span>
 <span class="kw">func</span> command.<span class="fn">RegisterTyped</span>[C <span class="type">Command</span>](
   d *<span class="type">Dispatcher</span>, t <span class="type">Type</span>,
   h <span class="kw">func</span>(ctx context.<span class="type">Context</span>, cmd C) <span class="type">error</span>,
@@ -1209,77 +1733,109 @@ command.<span class="fn">RegisterTyped</span>[*<span class="type">SyncItemComman
       aggregateType, <span class="fn">DecideSync</span>(c.Item, ...))
   },
 )</pre>
+              </div>
+            </div>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p>
+                  <strong>Upstream: add <code>command.RegisterTyped[C]</code></strong> to
+                  go-cqrs-lite. Mirrors the existing <code>query.RegisterTyped[Q, R]</code> pattern.
+                  The assertion moves inside the library where it's tested once, not repeated in
+                  every consumer.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p>
+                  <strong
+                    >Consumer: adopt <code>RegisterTyped</code> for all 4 query handlers.</strong
+                  >
+                  This requires no upstream changes — <code>query.RegisterTyped</code> already
+                  exists. Just not used. Deletes ~40 lines of assertion boilerplate immediately.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-content">
+                <p>
+                  <strong
+                    >Consumer: adopt <code>command.RegisterTyped</code> for both command
+                    handlers</strong
+                  >
+                  once upstream ships it. Deletes ~20 more lines. The
+                  <code>errCommandTypeMismatch</code> sentinel error and all <code>ok</code> checks
+                  disappear entirely.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            <span
+              ><strong>Quick win:</strong> Step 2 requires zero upstream changes. The
+              <code>query.RegisterTyped</code> function already exists in go-cqrs-lite v2.2.0 —
+              go-localsync just doesn't use it. Adopting it for all 4 query handlers is a pure
+              refactor that deletes ~40 lines today.</span
+            >
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Lines deleted</div>
+              <div class="impact-value">~60</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">1 hour</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Minimal</div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p><strong>Upstream: add <code>command.RegisterTyped[C]</code></strong> to go-cqrs-lite. Mirrors the existing <code>query.RegisterTyped[Q, R]</code> pattern. The assertion moves inside the library where it's tested once, not repeated in every consumer.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <p><strong>Consumer: adopt <code>RegisterTyped</code> for all 4 query handlers.</strong> This requires no upstream changes — <code>query.RegisterTyped</code> already exists. Just not used. Deletes ~40 lines of assertion boilerplate immediately.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step-num">3</div>
-          <div class="step-content">
-            <p><strong>Consumer: adopt <code>command.RegisterTyped</code> for both command handlers</strong> once upstream ships it. Deletes ~20 more lines. The <code>errCommandTypeMismatch</code> sentinel error and all <code>ok</code> checks disappear entirely.</p>
-          </div>
-        </div>
-      </div>
-      <div class="callout">
-        <span><strong>Quick win:</strong> Step 2 requires zero upstream changes. The <code>query.RegisterTyped</code> function already exists in go-cqrs-lite v2.2.0 — go-localsync just doesn't use it. Adopting it for all 4 query handlers is a pure refactor that deletes ~40 lines today.</span>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Lines deleted</div>
-          <div class="impact-value">~60</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">1 hour</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Minimal</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- G-2 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">G-2</div>
-          <h3>Typed <code>DecideResult[R]</code> instead of <code>map[string]any</code></h3>
-        </div>
-        <span class="severity warning">Type Safety</span>
-      </div>
-      <p class="card-desc">
-        The CQ-1 proposal in the go-cqrs-lite plan suggests <code>Annotations map[string]any</code> for domain metadata. That's stringly-typed — consumers must assert annotation values at runtime. Generics give a better answer: <strong>a second type parameter on <code>DecideFunc</code></strong> that carries a typed domain result through the library's own type system.
-      </p>
-      <div class="diff-grid">
-        <div>
-          <div class="diff-label before"><span class="dot"></span> CQ-1 as proposed (stringly-typed)</div>
-          <div class="code-block">
-<pre><span class="kw">type</span> <span class="type">DecideResult</span> <span class="kw">struct</span> {
+        <!-- G-2 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">G-2</div>
+              <h3>Typed <code>DecideResult[R]</code> instead of <code>map[string]any</code></h3>
+            </div>
+            <span class="severity warning">Type Safety</span>
+          </div>
+          <p class="card-desc">
+            The CQ-1 proposal in the go-cqrs-lite plan suggests
+            <code>Annotations map[string]any</code> for domain metadata. That's stringly-typed —
+            consumers must assert annotation values at runtime. Generics give a better answer:
+            <strong>a second type parameter on <code>DecideFunc</code></strong> that carries a typed
+            domain result through the library's own type system.
+          </p>
+          <div class="diff-grid">
+            <div>
+              <div class="diff-label before">
+                <span class="dot"></span> CQ-1 as proposed (stringly-typed)
+              </div>
+              <div class="code-block">
+                <pre><span class="kw">type</span> <span class="type">DecideResult</span> <span class="kw">struct</span> {
   Events     []event.<span class="type">Event</span>
   Annotations <span class="kw">map</span>[<span class="kw">string</span>]<span class="kw">any</span>  <span class="cmt">← runtime assertion</span>
 }
 
 <span class="cmt">// Consumer must assert:</span>
 action := result.Annotations[<span class="str">"action"</span>].(<span class="kw">string</span>)</pre>
-          </div>
-        </div>
-        <div>
-          <div class="diff-label after"><span class="dot"></span> With generics (compile-time typed)</div>
-          <div class="code-block">
-<pre><span class="kw">type</span> <span class="type">DecideResult</span>[R <span class="kw">any</span>] <span class="kw">struct</span> {
+              </div>
+            </div>
+            <div>
+              <div class="diff-label after">
+                <span class="dot"></span> With generics (compile-time typed)
+              </div>
+              <div class="code-block">
+                <pre><span class="kw">type</span> <span class="type">DecideResult</span>[R <span class="kw">any</span>] <span class="kw">struct</span> {
   Events []event.<span class="type">Event</span>
   Result R                   <span class="cmt">← typed at compile time</span>
 }
@@ -1290,14 +1846,14 @@ action := result.Annotations[<span class="str">"action"</span>].(<span class="kw
 
 <span class="cmt">// Consumer gets typed result directly:</span>
 result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></pre>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <p class="card-desc" style="margin-top:16px;">
-        go-localsync defines its domain result type:
-      </p>
-      <div class="code-block">
-<pre><span class="kw">type</span> <span class="type">SyncDecision</span> <span class="kw">struct</span> {
+          <p class="card-desc" style="margin-top: 16px">
+            go-localsync defines its domain result type:
+          </p>
+          <div class="code-block">
+            <pre><span class="kw">type</span> <span class="type">SyncDecision</span> <span class="kw">struct</span> {
   Action    synclib.<span class="type">SyncAction</span>
   WasNew    <span class="kw">bool</span>
   Conflict  <span class="kw">string</span>
@@ -1307,61 +1863,93 @@ result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></
 <span class="kw">func</span> <span class="fn">DecideSync</span>(...) <span class="kw">func</span>(
   state <span class="type">SyncItemState</span>, ver event.<span class="type">Version</span>,
 ) (*decider.<span class="type">DecideResult</span>[<span class="type">SyncDecision</span>], <span class="type">error</span>)</pre>
-      </div>
-      <div class="steps">
-        <div class="step">
-          <div class="step-num">1</div>
-          <div class="step-content">
-            <p><strong>Upstream: parameterize <code>DecideFunc</code> with a result type.</strong> <code>DecideFunc[S, R]</code> where <code>S</code> is aggregate state and <code>R</code> is the domain result. Provide <code>DecideFunc[S]</code> as an alias for <code>DecideFunc[S, struct{}]</code> for consumers who don't need domain results.</p>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-content">
+                <p>
+                  <strong
+                    >Upstream: parameterize <code>DecideFunc</code> with a result type.</strong
+                  >
+                  <code>DecideFunc[S, R]</code> where <code>S</code> is aggregate state and
+                  <code>R</code> is the domain result. Provide <code>DecideFunc[S]</code> as an
+                  alias for <code>DecideFunc[S, struct{}]</code> for consumers who don't need domain
+                  results.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-content">
+                <p>
+                  <strong>Consumer: define <code>SyncDecision</code></strong> and return it from
+                  <code>DecideSync</code>. The <code>countingDecide</code> closure in
+                  <code>SyncItems</code> is replaced by reading <code>result.Action</code>,
+                  <code>result.WasNew</code>, <code>result.Conflict</code> directly. No more
+                  reverse-engineering intent from event counts.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            <span
+              ><strong>Tradeoff:</strong> Two-parameter generics (<code>DecideFunc[S, R]</code>)
+              increase library complexity. For consumers who don't need domain results, the
+              <code>DecideFunc[S]</code> alias keeps the simple case simple. The benefit is
+              eliminating an entire class of bugs where domain semantics are guessed from event
+              counts.</span
+            >
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">Eliminates countingDecide</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">2 hours (consumer side)</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Depends on</div>
+              <div class="impact-value">CQ-1 (upstream)</div>
+            </div>
           </div>
         </div>
-        <div class="step">
-          <div class="step-num">2</div>
-          <div class="step-content">
-            <p><strong>Consumer: define <code>SyncDecision</code></strong> and return it from <code>DecideSync</code>. The <code>countingDecide</code> closure in <code>SyncItems</code> is replaced by reading <code>result.Action</code>, <code>result.WasNew</code>, <code>result.Conflict</code> directly. No more reverse-engineering intent from event counts.</p>
-          </div>
-        </div>
-      </div>
-      <div class="callout">
-        <span><strong>Tradeoff:</strong> Two-parameter generics (<code>DecideFunc[S, R]</code>) increase library complexity. For consumers who don't need domain results, the <code>DecideFunc[S]</code> alias keeps the simple case simple. The benefit is eliminating an entire class of bugs where domain semantics are guessed from event counts.</span>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">Eliminates countingDecide</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">2 hours (consumer side)</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Depends on</div>
-          <div class="impact-value">CQ-1 (upstream)</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- G-3 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">G-3</div>
-          <h3>Rewrite <code>Projector</code> using <code>projection.On[T]</code> builder</h3>
-        </div>
-        <span class="severity info">Zero Library Changes</span>
-      </div>
-      <p class="card-desc">
-        go-cqrs-lite's <strong><code>projection.On[T]</code></strong> already does typed payload decoding inside a wrapper — the exact pattern that go-localsync's <code>Projector</code> reimplements manually. Three <code>handleXxx</code> methods in <code>projection.go</code> each call <code>event.DecodePayload[T]</code> and then delegate to the read model. The builder eliminates all of this.
-      </p>
-      <div class="file-refs">
-        <span class="file-ref">pkg/cqrs/projection.go <span class="line">:33–69</span> (3 manual handler methods)</span>
-        <span class="file-ref">go-cqrs-lite/projection/builder.go <span class="line">:30</span> (On[T] — already exists)</span>
-      </div>
-      <div class="diff-grid">
-        <div>
-          <div class="diff-label before"><span class="dot"></span> Current — 3 manual methods</div>
-          <div class="code-block">
-<pre><span class="kw">func</span> (p *<span class="type">Projector</span>) <span class="fn">Handle</span>(ctx, evt) <span class="type">error</span> {
+        <!-- G-3 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">G-3</div>
+              <h3>Rewrite <code>Projector</code> using <code>projection.On[T]</code> builder</h3>
+            </div>
+            <span class="severity info">Zero Library Changes</span>
+          </div>
+          <p class="card-desc">
+            go-cqrs-lite's <strong><code>projection.On[T]</code></strong> already does typed payload
+            decoding inside a wrapper — the exact pattern that go-localsync's
+            <code>Projector</code> reimplements manually. Three <code>handleXxx</code> methods in
+            <code>projection.go</code> each call <code>event.DecodePayload[T]</code> and then
+            delegate to the read model. The builder eliminates all of this.
+          </p>
+          <div class="file-refs">
+            <span class="file-ref"
+              >pkg/cqrs/projection.go <span class="line">:33–69</span> (3 manual handler
+              methods)</span
+            >
+            <span class="file-ref"
+              >go-cqrs-lite/projection/builder.go <span class="line">:30</span> (On[T] — already
+              exists)</span
+            >
+          </div>
+          <div class="diff-grid">
+            <div>
+              <div class="diff-label before">
+                <span class="dot"></span> Current — 3 manual methods
+              </div>
+              <div class="code-block">
+                <pre><span class="kw">func</span> (p *<span class="type">Projector</span>) <span class="fn">Handle</span>(ctx, evt) <span class="type">error</span> {
   <span class="kw">switch</span> evt.<span class="fn">Type</span>() {
   <span class="kw">case</span> EventItemSynced:
     <span class="kw">return</span> p.<span class="fn">handleItemSynced</span>(ctx, evt)
@@ -1380,12 +1968,14 @@ result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></
   <span class="kw">if</span> err != <span class="kw">nil</span> { <span class="kw">return</span> err }
   <span class="kw">return</span> p.readModel.<span class="fn">Upsert</span>(ctx, item)
 }</pre>
-          </div>
-        </div>
-        <div>
-          <div class="diff-label after"><span class="dot"></span> With projection.On[T] builder</div>
-          <div class="code-block">
-<pre>builder := projection.<span class="fn">NewBuilder</span>(<span class="str">"sync_item_projection"</span>)
+              </div>
+            </div>
+            <div>
+              <div class="diff-label after">
+                <span class="dot"></span> With projection.On[T] builder
+              </div>
+              <div class="code-block">
+                <pre>builder := projection.<span class="fn">NewBuilder</span>(<span class="str">"sync_item_projection"</span>)
 
 projection.<span class="fn">On</span>[<span class="type">ItemSyncedPayload</span>](
   builder, EventItemSynced, codec.<span class="type">JSONCodec</span>{},
@@ -1404,42 +1994,52 @@ projection.<span class="fn">On</span>[<span class="type">ItemDeletedPayload</spa
 )
 
 proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Projection</span></pre>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            <span
+              ><strong>No upstream changes needed.</strong> <code>projection.On[T]</code> ships in
+              go-cqrs-lite v2.2.0. This is a pure consumer-side refactor. The
+              <code>Projector</code> struct and its 3 handler methods collapse into a builder call.
+              The <code>EventItemConflictFound</code> no-op handler is simply omitted — the builder
+              only registers event types that have handlers.</span
+            >
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Lines deleted</div>
+              <div class="impact-value">~40</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">30 min</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Risk</div>
+              <div class="impact-value">Zero</div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="callout">
-        <span><strong>No upstream changes needed.</strong> <code>projection.On[T]</code> ships in go-cqrs-lite v2.2.0. This is a pure consumer-side refactor. The <code>Projector</code> struct and its 3 handler methods collapse into a builder call. The <code>EventItemConflictFound</code> no-op handler is simply omitted — the builder only registers event types that have handlers.</span>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Lines deleted</div>
-          <div class="impact-value">~40</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">30 min</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Risk</div>
-          <div class="impact-value">Zero</div>
-        </div>
-      </div>
-    </div>
 
-    <!-- G-4 -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">G-4</div>
-          <h3>Generic <code>ReadModel[T]</code> for cross-domain reuse</h3>
-        </div>
-        <span class="severity info">Future · If Needed</span>
-      </div>
-      <p class="card-desc">
-        The current <code>ReadModel</code> interface is hardcoded to <code>*model.Item</code>. If go-localsync adds a second aggregate type (notifications, webhook deliveries, audit logs), every read model implementation must be rewritten from scratch. A generic <code>ReadModel[T]</code> would allow the <code>MemoryReadModel</code> and <code>SQLiteReadModel</code> to be reused across domains.
-      </p>
-      <div class="code-block">
-<pre><span class="kw">type</span> <span class="type">ReadModel</span>[T <span class="kw">any</span>] <span class="kw">interface</span> {
+        <!-- G-4 -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">G-4</div>
+              <h3>Generic <code>ReadModel[T]</code> for cross-domain reuse</h3>
+            </div>
+            <span class="severity info">Future · If Needed</span>
+          </div>
+          <p class="card-desc">
+            The current <code>ReadModel</code> interface is hardcoded to <code>*model.Item</code>.
+            If go-localsync adds a second aggregate type (notifications, webhook deliveries, audit
+            logs), every read model implementation must be rewritten from scratch. A generic
+            <code>ReadModel[T]</code> would allow the <code>MemoryReadModel</code> and
+            <code>SQLiteReadModel</code> to be reused across domains.
+          </p>
+          <div class="code-block">
+            <pre><span class="kw">type</span> <span class="type">ReadModel</span>[T <span class="kw">any</span>] <span class="kw">interface</span> {
   <span class="fn">Get</span>(ctx context.<span class="type">Context</span>, key <span class="kw">string</span>) (T, <span class="type">error</span>)
   <span class="fn">List</span>(ctx context.<span class="type">Context</span>, filter <span class="type">Filter</span>) ([]T, <span class="type">error</span>)
   <span class="fn">Count</span>(ctx context.<span class="type">Context</span>, filter <span class="type">Filter</span>) (<span class="kw">int64</span>, <span class="type">error</span>)
@@ -1447,64 +2047,136 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
   <span class="fn">Delete</span>(ctx context.<span class="type">Context</span>, key <span class="kw">string</span>) <span class="type">error</span>
   <span class="fn">Close</span>() <span class="type">error</span>
 }</pre>
-      </div>
-      <div class="callout">
-        <span><strong>Only worth doing when there's a second consumer.</strong> Right now the <code>provider.ItemFilter</code> has specific fields (Type, Actor, Repo, Source, Since) that don't generalize. Genericizing the filter would force <code>any</code> — which is worse than the current domain-specific interface. Revisit when a second aggregate type is added.</span>
-      </div>
-      <div class="impact-grid">
-        <div class="impact-item">
-          <div class="impact-label">Impact</div>
-          <div class="impact-value">Reusability</div>
+          </div>
+          <div class="callout">
+            <span
+              ><strong>Only worth doing when there's a second consumer.</strong> Right now the
+              <code>provider.ItemFilter</code> has specific fields (Type, Actor, Repo, Source,
+              Since) that don't generalize. Genericizing the filter would force <code>any</code> —
+              which is worse than the current domain-specific interface. Revisit when a second
+              aggregate type is added.</span
+            >
+          </div>
+          <div class="impact-grid">
+            <div class="impact-item">
+              <div class="impact-label">Impact</div>
+              <div class="impact-value">Reusability</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Effort</div>
+              <div class="impact-value">3–4 hours</div>
+            </div>
+            <div class="impact-item">
+              <div class="impact-label">Priority</div>
+              <div class="impact-value">Low (YAGNI today)</div>
+            </div>
+          </div>
         </div>
-        <div class="impact-item">
-          <div class="impact-label">Effort</div>
-          <div class="impact-value">3–4 hours</div>
-        </div>
-        <div class="impact-item">
-          <div class="impact-label">Priority</div>
-          <div class="impact-value">Low (YAGNI today)</div>
+
+        <!-- Not worth it -->
+        <div class="card">
+          <div class="card-top">
+            <div>
+              <div class="card-id">Note</div>
+              <h3>What's NOT worth genericizing</h3>
+            </div>
+          </div>
+          <div style="font-size: 14px; color: var(--text-secondary)">
+            <div
+              style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px 20px; margin-top: 8px"
+            >
+              <span
+                style="
+                  color: var(--text-muted);
+                  font-weight: 600;
+                  font-size: 12px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                "
+                >Pattern</span
+              >
+              <span
+                style="
+                  color: var(--text-muted);
+                  font-weight: 600;
+                  font-size: 12px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                "
+                >Why not</span
+              >
+
+              <span
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 12px;
+                  color: var(--text-primary);
+                "
+                ><code>Event[T]</code> typed payloads</span
+              >
+              <span
+                >Go can't express union types — the codec decode pattern is the right tradeoff</span
+              >
+
+              <span
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 12px;
+                  color: var(--text-primary);
+                "
+                ><code>SyncStore[I]</code></span
+              >
+              <span
+                >The filter/query interface carries domain-specific fields; genericizing forces
+                <code>any</code> filters</span
+              >
+
+              <span
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 12px;
+                  color: var(--text-primary);
+                "
+                ><code>EventSink[AggType]</code></span
+              >
+              <span
+                >Aggregates handle multiple event types — a type param would be rigid and
+                restrictive</span
+              >
+
+              <span
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 12px;
+                  color: var(--text-primary);
+                "
+                >Error types</span
+              >
+              <span>Go's <code>error</code> interface is already the right abstraction</span>
+
+              <span
+                style="
+                  font-family: &quot;JetBrains Mono&quot;, monospace;
+                  font-size: 12px;
+                  color: var(--text-primary);
+                "
+                ><code>dispatcher[H, M]</code></span
+              >
+              <span
+                >Already generic — this is the foundation that both <code>command</code> and
+                <code>query</code> build on</span
+              >
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Not worth it -->
-    <div class="card">
-      <div class="card-top">
-        <div>
-          <div class="card-id">Note</div>
-          <h3>What's NOT worth genericizing</h3>
-        </div>
+    <footer class="footer">
+      <div class="container">
+        Generated from architecture review ·
+        <a href="https://github.com/larsartmann/go-localsync">go-localsync</a> · June 2026
       </div>
-      <div style="font-size:14px;color:var(--text-secondary);">
-        <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px 20px;margin-top:8px;">
-          <span style="color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Pattern</span>
-          <span style="color:var(--text-muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Why not</span>
-
-          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>Event[T]</code> typed payloads</span>
-          <span>Go can't express union types — the codec decode pattern is the right tradeoff</span>
-
-          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>SyncStore[I]</code></span>
-          <span>The filter/query interface carries domain-specific fields; genericizing forces <code>any</code> filters</span>
-
-          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>EventSink[AggType]</code></span>
-          <span>Aggregates handle multiple event types — a type param would be rigid and restrictive</span>
-
-          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);">Error types</span>
-          <span>Go's <code>error</code> interface is already the right abstraction</span>
-
-          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary);"><code>dispatcher[H, M]</code></span>
-          <span>Already generic — this is the foundation that both <code>command</code> and <code>query</code> build on</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer class="footer">
-  <div class="container">
-    Generated from architecture review · <a href="https://github.com/larsartmann/go-localsync">go-localsync</a> · June 2026
-  </div>
-</footer>
-
-</body>
+    </footer>
+  </body>
 </html>

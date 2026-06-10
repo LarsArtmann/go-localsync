@@ -3,7 +3,6 @@ package cqrs
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 
@@ -56,6 +55,8 @@ type CQRSStack struct {
 	db                *sql.DB
 	cancelRunner      context.CancelFunc
 }
+
+var _ synclib.SyncStore = (*CQRSStack)(nil)
 
 // NewCQRSStack creates a fully wired CQRS stack based on the given config.
 func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
@@ -140,7 +141,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         ToDataItem(item),
 		RawJSON:      item.RawJSON,
 	})
@@ -155,7 +156,7 @@ func (s *CQRSStack) DeleteItem(
 	aggID := AggregateID(source, sourceID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &DeleteItemCommand{
-		BasicCommand: *command.MustNew(commandTypeDeleteItem, aggID),
+		BasicCommand: mustNewCommand(commandTypeDeleteItem, aggID),
 		Source:       source,
 		SourceID:     sourceID,
 	})
@@ -174,52 +175,34 @@ func (s *CQRSStack) SyncItems(
 	}
 
 	corrID := cqrsid.NewCorrelationID()
-	syncOpts := []event.Option{event.WithCorrelationID(corrID)}
 
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 		dataItem := ToDataItem(item)
 
-		var (
-			eventCount     int
-			wasNew         bool
-			conflictWinner string
-		)
+		var outcome SyncOutcome
 
-		countingDecide := func(state SyncItemState, ver event.Version) ([]event.Event, error) {
-			wasNew = state.IsNew()
+		syncOpts := []event.Option{event.WithCorrelationID(corrID)}
 
-			events, err := DecideSync(dataItem, item.RawJSON, s.conflictResolver, syncOpts...)(state, ver)
-			if err != nil {
-				return nil, fmt.Errorf(
-					"decide sync for %s/%s: %w",
-					item.Source.Get(),
-					item.ExternalID.Get(),
-					err,
-				)
-			}
-
-			eventCount = len(events)
-
-			if eventCount > 1 {
-				var cp ItemConflictFoundPayload
-
-				_ = json.Unmarshal(events[0].Payload(), &cp)
-				conflictWinner = cp.Winner
-			}
-
-			return events, nil
+		cmd := &SyncItemCommand{
+			BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
+			Item:         dataItem,
+			RawJSON:      item.RawJSON,
+			Options:      syncOpts,
 		}
 
-		err := s.Repo.Execute(ctx, aggID, aggregateType, countingDecide)
+		itemCtx := contextWithSyncOutcome(ctx, &outcome)
+
+		err := s.CommandDispatcher.Dispatch(itemCtx, cmd)
 		if err != nil {
-			err = fmt.Errorf("sync %s/%s (events=%d, winner=%q): %w",
-				item.Source.Get(), item.ExternalID.Get(), eventCount, conflictWinner, err)
+			err = fmt.Errorf("sync %s/%s: %w", item.Source.Get(), item.ExternalID.Get(), err)
 		}
+
+		action := classifyAction(err, outcome.EventCount, outcome.WasNew, outcome.ConflictWinner)
 
 		result := synclib.ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
-			Action:   classifyAction(err, eventCount, wasNew, conflictWinner),
+			Action:   action,
 			Error:    err,
 		}
 
@@ -233,7 +216,6 @@ func (s *CQRSStack) SyncItems(
 				summary.Conflicts++
 			}
 		case synclib.ActionUnchanged:
-			// No counters
 		}
 
 		summary.Results = append(summary.Results, result)

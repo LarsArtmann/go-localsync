@@ -68,6 +68,10 @@ func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer
 	}
 }
 
+func (s *Syncer) Store() SyncStore {
+	return s.store
+}
+
 // SyncProgressFunc is called after each sync batch to report progress.
 type SyncProgressFunc func(fetched, skipped, errors int)
 

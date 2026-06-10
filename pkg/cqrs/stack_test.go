@@ -27,7 +27,7 @@ func TestCQRSStack_SyncNewItem(t *testing.T) {
 		t.Errorf("expected count=1, got %d", count)
 	}
 
-	resultTypes, err := stack.GetTypes(ctx)
+	resultTypes, err := stack.GetItemTypes(ctx)
 	testutil.MustNoError(t, err)
 	if len(resultTypes) != 1 || resultTypes[0] != "PushEvent" {
 		t.Errorf("expected [PushEvent], got %v", resultTypes)
@@ -64,7 +64,7 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 		t.Errorf("expected count=3, got %d", count)
 	}
 
-	resultTypes, err := stack.GetTypes(ctx)
+	resultTypes, err := stack.GetItemTypes(ctx)
 	testutil.MustNoError(t, err)
 	if len(resultTypes) != 2 {
 		t.Errorf("expected 2 types, got %v", resultTypes)

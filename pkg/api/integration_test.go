@@ -73,7 +73,7 @@ func TestIntegration_APIListItemsRoundtrip(t *testing.T) {
 	provider := &mockProvider{}
 	logger := log.Default()
 	syncer := synclib.NewSyncer(provider, stack, logger)
-	server := NewServer(syncer, stack, logger)
+	server := NewServer(syncer, logger)
 
 	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/items", nil)
 	rec := httptest.NewRecorder()
@@ -146,7 +146,7 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 	provider := &mockProvider{}
 	logger := log.Default()
 	syncer := synclib.NewSyncer(provider, stack, logger)
-	server := NewServer(syncer, stack, logger)
+	server := NewServer(syncer, logger)
 
 	req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/stats", nil)
 	rec := httptest.NewRecorder()

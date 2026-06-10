@@ -2,10 +2,12 @@ package cqrs
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -58,7 +60,9 @@ func TestMemoryReadModel_GetNotFound(t *testing.T) {
 	ctx := context.Background()
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
-	testutil.MustNoError(t, err)
+	if !errors.Is(err, pkgerrors.ErrNotFound) {
+		t.Fatalf("expected ErrNotFound, got: %v", err)
+	}
 	if got != nil {
 		t.Error("expected nil for nonexistent item")
 	}
@@ -79,7 +83,9 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 	testutil.MustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("123")))
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
-	testutil.MustNoError(t, err)
+	if !errors.Is(err, pkgerrors.ErrNotFound) {
+		t.Fatalf("expected ErrNotFound after delete, got: %v", err)
+	}
 	if got != nil {
 		t.Error("expected nil after delete")
 	}

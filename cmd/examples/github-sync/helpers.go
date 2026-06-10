@@ -42,7 +42,7 @@ func runStats(stack *cqrs.CQRSStack, jsonOutput bool, logger *log.Logger) {
 		os.Exit(exitSoftware)
 	}
 
-	types, err := stack.GetTypes(context.Background())
+	types, err := stack.GetItemTypes(context.Background())
 	if err != nil {
 		logger.Error("Failed to get item types", "error", err)
 	}
@@ -143,11 +143,10 @@ func exitCodeForError(err error) int {
 
 func runAPIServer(
 	syncer *synclib.Syncer,
-	store synclib.SyncStore,
 	port int,
 	logger *log.Logger,
 ) {
-	server := api.NewServer(syncer, store, logger)
+	server := api.NewServer(syncer, logger)
 	addr := fmt.Sprintf(":%d", port)
 
 	logger.Info("Starting API server", "address", addr)

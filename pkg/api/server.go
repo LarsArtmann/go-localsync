@@ -25,8 +25,8 @@ type Server struct {
 	logger *log.Logger
 }
 
-// NewServer creates an HTTP API server backed by the given syncer and store.
-func NewServer(syncer *synclib.Syncer, store synclib.SyncStore, logger *log.Logger) *Server {
+// NewServer creates an HTTP API server backed by the given syncer.
+func NewServer(syncer *synclib.Syncer, logger *log.Logger) *Server {
 	if logger == nil {
 		logger = log.Default()
 	}
@@ -39,7 +39,7 @@ func NewServer(syncer *synclib.Syncer, store synclib.SyncStore, logger *log.Logg
 		api:    api,
 		mux:    mux,
 		syncer: syncer,
-		store:  store,
+		store:  syncer.Store(),
 		logger: logger,
 	}
 

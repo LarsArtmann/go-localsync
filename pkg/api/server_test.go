@@ -101,7 +101,7 @@ func newTestServer(store synclib.SyncStore) *Server {
 	logger := log.Default()
 	syncer := synclib.NewSyncer(provider, store, logger)
 
-	return NewServer(syncer, store, logger)
+	return NewServer(syncer, logger)
 }
 
 func TestHealthCheck(t *testing.T) {

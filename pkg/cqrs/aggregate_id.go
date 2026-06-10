@@ -19,5 +19,7 @@ func AggregateID(source string, externalID id.ExternalID) cqrsid.AggregateID {
 	key := itemKey(source, externalID)
 	h := sha256.Sum256([]byte(key))
 
-	return cqrsid.MustParseAggregateID(hex.EncodeToString(h[:16]))
+	id, _ := cqrsid.ParseAggregateID(hex.EncodeToString(h[:16]))
+
+	return id
 }

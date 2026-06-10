@@ -53,19 +53,6 @@ func FromDataItem(item *model.Item, rawJSON []byte) *provider.Item {
 	}
 }
 
-// ToItemView creates a read-model view from a domain Item with metadata.
-func ToItemView(item *model.Item, rawJSON []byte) *model.ItemView {
-	if item == nil {
-		return nil
-	}
-
-	//nolint:exhaustruct // view fields populated by projection
-	return &model.ItemView{
-		Item:      *item,
-		IsDeleted: false,
-	}
-}
-
 // DataItemFromPayload reconstructs a data.Item from an event payload.
 func DataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 	itemID, err := parseItemID(payload.ItemID)

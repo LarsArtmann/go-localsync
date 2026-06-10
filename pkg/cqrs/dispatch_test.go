@@ -61,7 +61,7 @@ func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
 	// This tests the type assertion path in handleSyncItem
 	aggID := AggregateID("github", id.NewExternalID("wrong-type-test"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         ToDataItem(testItem("wrong-type-test", "PushEvent")),
 	})
 	testutil.MustNoError(t, err)
@@ -78,7 +78,7 @@ func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
 	// Try to dispatch an unregistered command type
 	aggID := AggregateID("github", id.NewExternalID("unknown"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		BasicCommand: *command.MustNew(command.Type("unknown.command"), aggID),
+		BasicCommand: mustNewCommand(command.Type("unknown.command"), aggID),
 		Item:         ToDataItem(testItem("unknown", "PushEvent")),
 	})
 	if err == nil {
@@ -96,7 +96,7 @@ func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
 	aggID := AggregateID("github", id.NewExternalID("nil-item"))
 
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         nil,
 	})
 	if err == nil {
@@ -116,7 +116,7 @@ func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
 
 	aggID := AggregateID("", id.NewExternalID("empty-source"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		BasicCommand: *command.MustNew(commandTypeSyncItem, aggID),
+		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         ToDataItem(item),
 	})
 	if err == nil {
@@ -134,7 +134,7 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-1", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
-		BasicQuery: *query.MustNew(queryTypeListItem),
+		BasicQuery: mustNewQuery(queryTypeListItem),
 		Filter:     provider.ItemFilter{},
 	})
 	testutil.MustNoError(t, err)
@@ -158,7 +158,7 @@ func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
 	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-2", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetItemQuery{
-		BasicQuery: *query.MustNew(queryTypeGetItem),
+		BasicQuery: mustNewQuery(queryTypeGetItem),
 		Source:     "github",
 		SourceID:   id.NewExternalID("q-2"),
 	})
@@ -183,7 +183,7 @@ func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
 	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-3", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
-		BasicQuery: *query.MustNew(queryTypeCountItem),
+		BasicQuery: mustNewQuery(queryTypeCountItem),
 		Filter:     provider.ItemFilter{},
 	})
 	testutil.MustNoError(t, err)
@@ -207,7 +207,7 @@ func TestQueryDispatcher_GetTypes_ThroughDispatcher(t *testing.T) {
 	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-4", "PushEvent")))
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
-		BasicQuery: *query.MustNew(queryTypeGetTypes),
+		BasicQuery: mustNewQuery(queryTypeGetTypes),
 	})
 	testutil.MustNoError(t, err)
 
@@ -229,7 +229,7 @@ func TestQueryDispatcher_UnknownQueryType(t *testing.T) {
 	ctx := context.Background()
 
 	_, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
-		BasicQuery: *query.MustNew(query.Type("unknown.query")),
+		BasicQuery: mustNewQuery(query.Type("unknown.query")),
 	})
 	if err == nil {
 		t.Error("expected error for unregistered query type")

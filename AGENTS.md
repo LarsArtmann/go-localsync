@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-06-03 (session 9 — correctness fixes)
+**Updated:** 2026-06-10 (session 10 — architecture improvement plan execution)
 
 ## Project Overview
 
@@ -361,6 +361,37 @@ No circular dependencies. The CRDT package is now a real dependency of the CQRS 
 - ✅ **`pkg/testhelpers/` deleted**: Only used by github provider tests. Helpers moved to `pkg/providers/github/testhelpers_test.go` as unexported test helpers.
 - ✅ **`sync_test.go` uses mock `SyncStore`**: No import cycle — sync tests use a `mockSyncStore` struct, not `*cqrs.CQRSStack`. Integration tests for conflict-aware sync live in `pkg/cqrs/`.
 - ✅ **go-cqrs-lite API drift fixed**: `command.Core→BasicCommand`, `query.Core→BasicQuery`, `event.Core→ImmutableEvent`, `NewCheckpointStore→NewMemoryCheckpointStore`.
+
+## Session 10 — 2026-06-10: Architecture Improvement Plan
+
+Executed all 8 items from `docs/planning/2026-06-10_ARCHITECTURE_IMPROVEMENT_PLAN.html`:
+
+### Critical
+
+- ✅ **LS-1: SyncItems through command pipeline**: `SyncItems` now dispatches per-item through `CommandDispatcher` instead of calling `Repo.Execute` directly. New `SyncOutcome` type + `decideWithOutcome` captures domain semantics. `SyncItemCommand.Options` field passes correlation IDs through the pipeline.
+- ✅ **LS-2: Compile-time SyncStore assertion**: `var _ synclib.SyncStore = (*CQRSStack)(nil)` added to `stack.go`.
+
+### Structural
+
+- ✅ **LS-3: CRDT doc.go updated**: `pkg/crdt/doc.go` now clearly marks "Active Types" vs "Future Types (planned for multi-node sync)".
+- ✅ **LS-4: Consistent not-found semantics**: `MemoryReadModel.Get()` now returns `(nil, pkgerrors.ErrNotFound)` instead of `(nil, nil)`, matching `SQLiteReadModel.Get()`.
+
+### Placement
+
+- ✅ **LS-5: NewServer simplified**: `api.NewServer(syncer, logger)` — no longer takes redundant `SyncStore` param. `Syncer.Store()` getter added.
+- ✅ **LS-6: Duplicate GetTypes removed**: `CQRSStack.GetTypes()` removed; callers use `GetItemTypes()`.
+- ✅ **LS-7: Dead raw_json removed**: `raw_json` column, `scannedItem.rawJSON` field, dead `ToItemView` function all removed from SQLite read model.
+- ✅ **LS-8: Runner errors logged**: `runner.Run(ctx)` errors logged via `slog.Error` instead of silently discarded.
+
+### Upstream API Fixes (go-cqrs-lite)
+
+- `cqrsid.MustParseAggregateID` → `cqrsid.ParseAggregateID` (MustParse removed)
+- `command.MustNew` → `command.New` with `mustNewCommand` helper (MustNew removed)
+- `query.MustNew` → `query.New` with `mustNewQuery` helper (MustNew removed)
+
+### New Files
+
+- `pkg/cqrs/sync_outcome.go` — `SyncOutcome` type, context helpers, `decideWithOutcome` wrapper
 
 ## Lint Status
 

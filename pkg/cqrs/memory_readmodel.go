@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -32,7 +33,12 @@ func (m *MemoryReadModel) Get(
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	return m.items[itemKey(source, sourceID)], nil
+	item, ok := m.items[itemKey(source, sourceID)]
+	if !ok {
+		return nil, pkgerrors.ErrNotFound
+	}
+
+	return item, nil
 }
 
 func (m *MemoryReadModel) List(_ context.Context, filter provider.ItemFilter) ([]*model.Item, error) {

@@ -24,7 +24,6 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	repo_url TEXT NOT NULL DEFAULT '',
 	created_at DATETIME NOT NULL,
 	updated_at DATETIME NOT NULL,
-	raw_json TEXT NOT NULL DEFAULT '{}',
 	PRIMARY KEY (source, source_id)
 )`
 
@@ -66,7 +65,7 @@ func (m *SQLiteReadModel) Get(
 	source string,
 	sourceID id.ExternalID,
 ) (*model.Item, error) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at
 		FROM sync_items WHERE source = ? AND source_id = ?`
 
 	row := m.db.QueryRowContext(ctx, query, source, sourceID.Get())
@@ -147,14 +146,14 @@ func (m *SQLiteReadModel) GetTypes(ctx context.Context) ([]string, error) {
 
 func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 	query := `INSERT OR REPLACE INTO sync_items
-		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	_, err := m.db.ExecContext(
 		ctx, query,
 		item.ID.String(), item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
 		item.ActorLogin.Get(), item.ActorAvatarURL, item.RepoName.Get(),
-		item.RepoURL, item.CreatedAt, item.UpdatedAt, []byte{},
+		item.RepoURL, item.CreatedAt, item.UpdatedAt,
 	)
 	if err != nil {
 		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("upsert item: %v", err))
@@ -186,7 +185,7 @@ func (m *SQLiteReadModel) Close() error {
 }
 
 func buildListQuery(filter provider.ItemFilter) (string, []any) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, raw_json
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at
 		FROM sync_items WHERE 1=1`
 
 	args := appendFilterArgs(&query, filter)
@@ -246,7 +245,6 @@ func appendFilterArgs(query *string, filter provider.ItemFilter) []any {
 
 type scannedItem struct {
 	itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-	rawJSON                                                                               []byte
 	createdAt, updatedAt                                                                  time.Time
 }
 
@@ -281,7 +279,6 @@ func newScannedItem() *scannedItem {
 		actorAvatarURL: "",
 		repoName:       "",
 		repoURL:        "",
-		rawJSON:        nil,
 		createdAt:      time.Time{},
 		updatedAt:      time.Time{},
 	}
@@ -291,7 +288,7 @@ func scanItem(row *sql.Row) (*model.Item, error) {
 	si := newScannedItem()
 
 	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.actorLogin,
-		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt, &si.rawJSON)
+		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +313,6 @@ func scanItems(rows *sql.Rows) ([]*model.Item, error) {
 			&si.repoURL,
 			&si.createdAt,
 			&si.updatedAt,
-			&si.rawJSON,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scan item: %w", err)

@@ -9,6 +9,8 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/command/v2"
 	"github.com/larsartmann/go-cqrs-lite/decider/v2"
+	"github.com/larsartmann/go-cqrs-lite/event/v2"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
 	"github.com/larsartmann/go-cqrs-lite/middleware/v2"
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
@@ -118,12 +120,31 @@ const (
 	queryTypeGetTypes  query.Type = "sync_item.get_types"
 )
 
+func mustNewCommand(cmdType command.Type, aggID cqrsid.AggregateID) command.BasicCommand {
+	cmd, err := command.New(cmdType, aggID)
+	if err != nil {
+		panic(fmt.Sprintf("command.New(%s): %v", cmdType, err))
+	}
+
+	return *cmd
+}
+
+func mustNewQuery(queryType query.Type) query.BasicQuery {
+	q, err := query.New(queryType)
+	if err != nil {
+		panic(fmt.Sprintf("query.New(%s): %v", queryType, err))
+	}
+
+	return *q
+}
+
 // SyncItemCommand dispatches a sync operation for a single item.
 type SyncItemCommand struct {
 	command.BasicCommand
 
 	Item    *model.Item
 	RawJSON []byte
+	Options []event.Option
 }
 
 // DeleteItemCommand dispatches a delete operation for a single item.
@@ -192,9 +213,11 @@ func handleSyncItem(
 			return fmt.Errorf("expected *SyncItemCommand, got %T: %w", cmd, errCommandTypeMismatch)
 		}
 
+		outcome := syncOutcomeFromContext(ctx)
+
 		return repo.Execute(
 			ctx, syncCmd.AggregateID(), aggregateType,
-			DecideSync(syncCmd.Item, syncCmd.RawJSON, resolver),
+			decideWithOutcome(syncCmd.Item, syncCmd.RawJSON, resolver, outcome, syncCmd.Options...),
 		)
 	}
 }

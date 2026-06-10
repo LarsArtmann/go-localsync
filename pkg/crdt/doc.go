@@ -3,22 +3,31 @@
 //
 // This package offers transport-agnostic building blocks:
 //
+// # Active Types (used in production)
+//
+// These types are wired into the sync pipeline and exercised in production:
+//
+//   - [Conflict] represents a conflict between local and remote versions of an entity
+//   - [ConflictResolver] is the interface for pluggable conflict resolution strategies
+//   - [LWWResolver] implements Last-Writer-Wins resolution using a timestamp extractor
+//
+// # Future Types (planned for multi-node sync)
+//
+// These types are fully implemented and tested but not yet wired into the sync pipeline.
+// They are designed for a future multi-node synchronization story where nodes exchange
+// operations and need causal ordering:
+//
 //   - [VectorClock] for causal ordering across distributed nodes
 //   - [Operation] for representing typed sync operations with generic payloads
-//   - [ConflictResolver] and [LWWResolver] for pluggable conflict resolution
+//   - [SyncMessage], [SyncRequest], [SyncResponse] for the sync protocol wire format
+//   - [NodeID], [OperationID] for identifying sync participants and their operations
 //
-// The types in this package are domain-agnostic with minimal external dependencies
-// (only github.com/larsartmann/go-error-family for error classification).
+// Currently, conflict resolution in the CQRS decider creates empty vector clocks
+// ([crdt.NewVectorClock]) and the LWW resolver falls through to timestamp comparison.
+// When multi-node sync is implemented, vector clocks will be populated with actual
+// causal state and the Operation type will be used to exchange deltas between nodes.
 //
 // # Quick Start
-//
-//	import "github.com/larsartmann/go-localsync/pkg/crdt"
-//
-//	vc := crdt.NewVectorClock()
-//	vc.Increment(crdt.NodeID("node-1"))
-//	vc.Increment(crdt.NodeID("node-2"))
-//	vc.Clone()
-//	vc.Cmp(otherVC)
 //
 //	resolver, err := crdt.NewLWWResolver[*MyEntity](func(e *MyEntity) time.Time {
 //	    return e.UpdatedAt

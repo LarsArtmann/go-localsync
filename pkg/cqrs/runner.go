@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
@@ -37,7 +38,9 @@ func startProjectionRunner(
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
-		_ = runner.Run(ctx)
+		if err := runner.Run(ctx); err != nil {
+			slog.Error("projection runner failed", "error", err)
+		}
 	}()
 
 	return cancel, nil

@@ -137,7 +137,7 @@ func main() {
 	baseSyncer := synclib.NewSyncer(ghProvider, stack, logger)
 
 	if *serverMode {
-		runAPIServer(baseSyncer, stack, *serverPort, logger)
+		runAPIServer(baseSyncer, *serverPort, logger)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
