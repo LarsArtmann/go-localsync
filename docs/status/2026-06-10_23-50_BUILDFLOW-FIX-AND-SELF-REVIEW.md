@@ -8,13 +8,13 @@
 
 ### Buildflow Lint Fixes (this session)
 
-| Fix | File | Before | After |
-|---|---|---|---|
-| `errors.As` → `errors.AsType` | `pkg/providers/github/client_retry.go:101,112` | `errors.As(err, &ghErr{})` | `errors.AsType[*gh.ErrorResponse](err)` |
-| Error context enrichment | `pkg/cqrs/stack.go:201-203` | `classifyAction` returned `ActionError` with no error context | Error wrapped with `eventCount` + `conflictWinner` on failure |
-| AGENTS.md trimmed | `AGENTS.md` | 399 lines (limit: 377) | 368 lines — removed duplicate SyncStore interface section |
-| query_test.go consolidated | `pkg/data/query/query_test.go` | 363 lines (limit: 350) | 280 lines — table-driven `TestFieldCriteria`, merged page tests |
-| go.sum cleaned | `go.sum` | Stale entries warned by buildflow | `go mod tidy` ran — all "stale" entries are transitive deps (false positive) |
+| Fix                           | File                                           | Before                                                        | After                                                                        |
+| ----------------------------- | ---------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `errors.As` → `errors.AsType` | `pkg/providers/github/client_retry.go:101,112` | `errors.As(err, &ghErr{})`                                    | `errors.AsType[*gh.ErrorResponse](err)`                                      |
+| Error context enrichment      | `pkg/cqrs/stack.go:201-203`                    | `classifyAction` returned `ActionError` with no error context | Error wrapped with `eventCount` + `conflictWinner` on failure                |
+| AGENTS.md trimmed             | `AGENTS.md`                                    | 399 lines (limit: 377)                                        | 368 lines — removed duplicate SyncStore interface section                    |
+| query_test.go consolidated    | `pkg/data/query/query_test.go`                 | 363 lines (limit: 350)                                        | 280 lines — table-driven `TestFieldCriteria`, merged page tests              |
+| go.sum cleaned                | `go.sum`                                       | Stale entries warned by buildflow                             | `go mod tidy` ran — all "stale" entries are transitive deps (false positive) |
 
 ### Architecture Improvement Plan (8/8 items — earlier in session 10)
 
@@ -39,13 +39,13 @@ All items from `docs/planning/2026-06-10_ARCHITECTURE_IMPROVEMENT_PLAN.html` exe
 
 ### Data Module Migration (`pkg/data/`)
 
-| Sub-package | Status | Notes |
-|---|---|---|
-| `data/model` | **WIRED** | `model.Item`, `model.Key`, `model.ProviderItem` used by `cqrs`, `sync`, `api`, `testutil` |
-| `data/schema` | **WIRED** | `schema.Version` on every `model.Item` |
-| `data/query` | **ORPHANED** | Generic criteria/query/page system. Zero production consumers. Duplicates `provider.ItemFilter` functionality |
-| `data/repo` | **ORPHANED** | Generic repository interfaces. Zero production consumers. `cqrs.ReadModel` serves the same role |
-| `data/transform` | **ORPHANED** | Mapper/Compose helpers. Zero production consumers. `cqrs/item_adapter.go` does the actual conversion |
+| Sub-package      | Status       | Notes                                                                                                         |
+| ---------------- | ------------ | ------------------------------------------------------------------------------------------------------------- |
+| `data/model`     | **WIRED**    | `model.Item`, `model.Key`, `model.ProviderItem` used by `cqrs`, `sync`, `api`, `testutil`                     |
+| `data/schema`    | **WIRED**    | `schema.Version` on every `model.Item`                                                                        |
+| `data/query`     | **ORPHANED** | Generic criteria/query/page system. Zero production consumers. Duplicates `provider.ItemFilter` functionality |
+| `data/repo`      | **ORPHANED** | Generic repository interfaces. Zero production consumers. `cqrs.ReadModel` serves the same role               |
+| `data/transform` | **ORPHANED** | Mapper/Compose helpers. Zero production consumers. `cqrs/item_adapter.go` does the actual conversion          |
 
 The `query/`, `repo/`, and `transform/` packages are well-designed but **completely disconnected** from the active codebase. They represent a planned "data module" migration that was never completed.
 
@@ -59,34 +59,34 @@ The `query/`, `repo/`, and `transform/` packages are well-designed but **complet
 
 ### From TODO_LIST.md (carried forward)
 
-| Priority | Task | Effort |
-|---|---|---|
-| HIGH | Integration test for full sync pipeline (Provider → CQRS → ReadModel → API) | 2h |
-| HIGH | Test concurrent read model access | 1h |
-| HIGH | CLI flag for conflict resolver (`--conflict-strategy`) | 1h |
-| MEDIUM | Table-driven tests for `HasChanged` | 30min |
-| MEDIUM | Integration test for `ActionConflictLocal` | 1h |
-| MEDIUM | Performance benchmarks (1k/10k/100k items) | 2h |
-| MEDIUM | Test SQLite read model with real file | 30min |
-| MEDIUM | Doc comments for exported types (~18 missing) | 1h |
-| LOW | OpenTelemetry instrumentation | 4h |
-| LOW | API auth middleware | 2h |
-| LOW | Graceful shutdown for API server | 1h |
+| Priority | Task                                                                        | Effort |
+| -------- | --------------------------------------------------------------------------- | ------ |
+| HIGH     | Integration test for full sync pipeline (Provider → CQRS → ReadModel → API) | 2h     |
+| HIGH     | Test concurrent read model access                                           | 1h     |
+| HIGH     | CLI flag for conflict resolver (`--conflict-strategy`)                      | 1h     |
+| MEDIUM   | Table-driven tests for `HasChanged`                                         | 30min  |
+| MEDIUM   | Integration test for `ActionConflictLocal`                                  | 1h     |
+| MEDIUM   | Performance benchmarks (1k/10k/100k items)                                  | 2h     |
+| MEDIUM   | Test SQLite read model with real file                                       | 30min  |
+| MEDIUM   | Doc comments for exported types (~18 missing)                               | 1h     |
+| LOW      | OpenTelemetry instrumentation                                               | 4h     |
+| LOW      | API auth middleware                                                         | 2h     |
+| LOW      | Graceful shutdown for API server                                            | 1h     |
 
 ### New findings from this review
 
-| Task | Effort | Notes |
-|---|---|---|
-| Fix `SyncItem` missing `Options` (exhaustruct warning) | 10min | Add `Options: syncOpts` to single-item dispatch |
-| Remove dead `Count(ctx)` method | 5min | `stack_adapters.go:36` — zero callers |
-| Remove dead `FromDataItem` export | 5min | `item_adapter.go:36` — only used in bench test |
-| Fix `conflictWinner` string constants → typed enum | 15min | Prevent arbitrary string passing |
-| Extract duplicate payload decode in decider + projection | 15min | `foldItemSynced` and `handleItemSynced` copy-paste `DecodePayload` |
-| Fix `fromUnixNano` timezone loss | 5min | `events.go:60` — should use `.UTC()` |
-| Fix `store_factory.go` no-op error wrap | 5min | `fmt.Errorf("%w", err)` → just `return nil, err` |
-| Fix `SyncOutcome` silent JSON unmarshal error | 10min | `sync_outcome.go:53` — `_ = json.Unmarshal` swallows errors |
-| Wire or delete orphaned data packages | 2-4h | `query/`, `repo/`, `transform/` — either integrate or remove |
-| Fix API `getStats` bypassing syncer | 15min | `server.go:225` — should call `syncer.GetStats()` not query store directly |
+| Task                                                     | Effort | Notes                                                                      |
+| -------------------------------------------------------- | ------ | -------------------------------------------------------------------------- |
+| Fix `SyncItem` missing `Options` (exhaustruct warning)   | 10min  | Add `Options: syncOpts` to single-item dispatch                            |
+| Remove dead `Count(ctx)` method                          | 5min   | `stack_adapters.go:36` — zero callers                                      |
+| Remove dead `FromDataItem` export                        | 5min   | `item_adapter.go:36` — only used in bench test                             |
+| Fix `conflictWinner` string constants → typed enum       | 15min  | Prevent arbitrary string passing                                           |
+| Extract duplicate payload decode in decider + projection | 15min  | `foldItemSynced` and `handleItemSynced` copy-paste `DecodePayload`         |
+| Fix `fromUnixNano` timezone loss                         | 5min   | `events.go:60` — should use `.UTC()`                                       |
+| Fix `store_factory.go` no-op error wrap                  | 5min   | `fmt.Errorf("%w", err)` → just `return nil, err`                           |
+| Fix `SyncOutcome` silent JSON unmarshal error            | 10min  | `sync_outcome.go:53` — `_ = json.Unmarshal` swallows errors                |
+| Wire or delete orphaned data packages                    | 2-4h   | `query/`, `repo/`, `transform/` — either integrate or remove               |
+| Fix API `getStats` bypassing syncer                      | 15min  | `server.go:225` — should call `syncer.GetStats()` not query store directly |
 
 ---
 
@@ -96,11 +96,11 @@ The `query/`, `repo/`, and `transform/` packages are well-designed but **complet
 
 Three near-identical structs exist for the same domain concept:
 
-| Type | Package | Fields | Used By |
-|---|---|---|---|
-| `provider.Item` | `pkg/provider` | ExternalID, Source, Type, ActorLogin, ActorAvatarURL, RepoName, RepoURL, CreatedAt, UpdatedAt, **RawJSON** | GitHub provider, sync, CQRS decider |
-| `model.Item` | `pkg/data/model` | **ID**, ExternalID, Source, Type, ActorLogin, ActorAvatarURL, RepoName, RepoURL, CreatedAt, UpdatedAt, **SchemaVersion** | CQRS read model, API, testutil |
-| `model.ProviderItem` | `pkg/data/model` | ExternalID, Source, Type, ActorLogin, ActorAvatarURL, RepoName, RepoURL, CreatedAt, UpdatedAt, **RawPayload []byte** | transform tests only |
+| Type                 | Package          | Fields                                                                                                                   | Used By                             |
+| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| `provider.Item`      | `pkg/provider`   | ExternalID, Source, Type, ActorLogin, ActorAvatarURL, RepoName, RepoURL, CreatedAt, UpdatedAt, **RawJSON**               | GitHub provider, sync, CQRS decider |
+| `model.Item`         | `pkg/data/model` | **ID**, ExternalID, Source, Type, ActorLogin, ActorAvatarURL, RepoName, RepoURL, CreatedAt, UpdatedAt, **SchemaVersion** | CQRS read model, API, testutil      |
+| `model.ProviderItem` | `pkg/data/model` | ExternalID, Source, Type, ActorLogin, ActorAvatarURL, RepoName, RepoURL, CreatedAt, UpdatedAt, **RawPayload []byte**     | transform tests only                |
 
 The conversion happens in `cqrs/item_adapter.go` (`ToDataItem`/`FromDataItem`). This is the canonical adapter. But `transform.NewFromProviderItem()` also exists and duplicates the same logic. Both do the same field-by-field copy.
 
@@ -152,33 +152,33 @@ The conversion happens in `cqrs/item_adapter.go` (`ToDataItem`/`FromDataItem`). 
 
 Sorted by **(Impact × Urgency) / Effort** — highest value first:
 
-| # | Task | Impact | Effort | Category |
-|---|---|---|---|---|
-| 1 | Fix `SyncItem` missing `Options` field (exhaustruct) | HIGH | 5min | Bug |
-| 2 | Remove dead `Count(ctx)` from `stack_adapters.go` | LOW | 5min | Dead code |
-| 3 | Fix `store_factory.go` no-op `fmt.Errorf("%w", err)` | LOW | 5min | Code quality |
-| 4 | Fix `fromUnixNano` timezone loss in `events.go` | MEDIUM | 5min | Correctness |
-| 5 | Fix `SyncOutcome` silent JSON unmarshal error | MEDIUM | 10min | Correctness |
-| 6 | Typed `ConflictWinner` enum (replace string constants) | MEDIUM | 15min | Type safety |
-| 7 | Extract duplicate payload decode helper (decider + projection) | MEDIUM | 15min | DRY |
-| 8 | Fix API `getStats` to use `syncer.GetStats()` instead of raw store | MEDIUM | 15min | Architecture |
-| 9 | Remove dead `FromDataItem` export (only used in bench test) | LOW | 5min | Dead code |
-| 10 | Add CLI flag for conflict resolver (`--conflict-strategy`) | HIGH | 1h | Feature |
-| 11 | Integration test for `ActionConflictLocal` with real CQRS stack | HIGH | 1h | Testing |
-| 12 | Table-driven tests for `HasChanged` edge cases | HIGH | 30min | Testing |
-| 13 | Kill `model.ProviderItem` + `transform.NewFromProviderItem` | MEDIUM | 30min | Dead code |
-| 14 | Decide fate of orphaned `data/query`, `data/repo`, `data/transform` | HIGH | 30min | Architecture |
-| 15 | Doc comments for ~18 exported types | LOW | 1h | Docs |
-| 16 | Integration test for full sync pipeline (E2E) | HIGH | 2h | Testing |
-| 17 | Performance benchmarks (1k/10k/100k items) | MEDIUM | 2h | Quality |
-| 18 | Unify `provider.Item` and `model.Item` (eliminate split brain) | HIGH | 4h | Architecture |
-| 19 | Wire `data/query` criteria into CQRS read model (replace `provider.ItemFilter`) | HIGH | 4h | Architecture |
-| 20 | OpenTelemetry instrumentation | MEDIUM | 4h | Observability |
-| 21 | Fix `ConflictAwareSyncer` tight coupling to concrete `*Syncer` | MEDIUM | 2h | Architecture |
-| 22 | Add `govalid` struct tags to config types | LOW | 1h | Validation |
-| 23 | API auth middleware | HIGH | 2h | Security |
-| 24 | Graceful shutdown for API server | MEDIUM | 1h | Reliability |
-| 25 | ADR documents for CQRS, branded IDs, CRDT decisions | LOW | 2h | Docs |
+| #   | Task                                                                            | Impact | Effort | Category      |
+| --- | ------------------------------------------------------------------------------- | ------ | ------ | ------------- |
+| 1   | Fix `SyncItem` missing `Options` field (exhaustruct)                            | HIGH   | 5min   | Bug           |
+| 2   | Remove dead `Count(ctx)` from `stack_adapters.go`                               | LOW    | 5min   | Dead code     |
+| 3   | Fix `store_factory.go` no-op `fmt.Errorf("%w", err)`                            | LOW    | 5min   | Code quality  |
+| 4   | Fix `fromUnixNano` timezone loss in `events.go`                                 | MEDIUM | 5min   | Correctness   |
+| 5   | Fix `SyncOutcome` silent JSON unmarshal error                                   | MEDIUM | 10min  | Correctness   |
+| 6   | Typed `ConflictWinner` enum (replace string constants)                          | MEDIUM | 15min  | Type safety   |
+| 7   | Extract duplicate payload decode helper (decider + projection)                  | MEDIUM | 15min  | DRY           |
+| 8   | Fix API `getStats` to use `syncer.GetStats()` instead of raw store              | MEDIUM | 15min  | Architecture  |
+| 9   | Remove dead `FromDataItem` export (only used in bench test)                     | LOW    | 5min   | Dead code     |
+| 10  | Add CLI flag for conflict resolver (`--conflict-strategy`)                      | HIGH   | 1h     | Feature       |
+| 11  | Integration test for `ActionConflictLocal` with real CQRS stack                 | HIGH   | 1h     | Testing       |
+| 12  | Table-driven tests for `HasChanged` edge cases                                  | HIGH   | 30min  | Testing       |
+| 13  | Kill `model.ProviderItem` + `transform.NewFromProviderItem`                     | MEDIUM | 30min  | Dead code     |
+| 14  | Decide fate of orphaned `data/query`, `data/repo`, `data/transform`             | HIGH   | 30min  | Architecture  |
+| 15  | Doc comments for ~18 exported types                                             | LOW    | 1h     | Docs          |
+| 16  | Integration test for full sync pipeline (E2E)                                   | HIGH   | 2h     | Testing       |
+| 17  | Performance benchmarks (1k/10k/100k items)                                      | MEDIUM | 2h     | Quality       |
+| 18  | Unify `provider.Item` and `model.Item` (eliminate split brain)                  | HIGH   | 4h     | Architecture  |
+| 19  | Wire `data/query` criteria into CQRS read model (replace `provider.ItemFilter`) | HIGH   | 4h     | Architecture  |
+| 20  | OpenTelemetry instrumentation                                                   | MEDIUM | 4h     | Observability |
+| 21  | Fix `ConflictAwareSyncer` tight coupling to concrete `*Syncer`                  | MEDIUM | 2h     | Architecture  |
+| 22  | Add `govalid` struct tags to config types                                       | LOW    | 1h     | Validation    |
+| 23  | API auth middleware                                                             | HIGH   | 2h     | Security      |
+| 24  | Graceful shutdown for API server                                                | MEDIUM | 1h     | Reliability   |
+| 25  | ADR documents for CQRS, branded IDs, CRDT decisions                             | LOW    | 2h     | Docs          |
 
 ---
 
@@ -189,6 +189,7 @@ Sorted by **(Impact × Urgency) / Effort** — highest value first:
 These packages represent a clean, generic data layer design (criteria-based queries, generic repository interfaces, composable transforms). They're well-tested and well-structured. But they have **zero production consumers** — the active codebase uses `cqrs.ReadModel` + `provider.ItemFilter` instead.
 
 Three options:
+
 1. **Wire them in** — Replace `provider.ItemFilter` with `query.Query[T]` + criteria, replace `cqrs.ReadModel` interface with `repo.Repository[T]`, use `transform.Mapper` instead of `item_adapter.go`. This is a significant migration (~4-8h).
 2. **Delete them** — Remove the dead code, reduce maintenance burden. If needed later, write from scratch with the benefit of hindsight.
 3. **Archive them** — Move to a `future/` directory or feature branch, out of the main codebase.
@@ -199,11 +200,11 @@ This decision affects the architecture direction for the next 2-4 weeks. I canno
 
 ## Build & Test Status
 
-| Metric | Value |
-|---|---|
-| Packages | 14 (all passing) |
-| Tests | 241+ (all passing) |
-| Race detector | Clean |
-| golangci-lint | 0 issues |
-| go vet | Clean |
-| Coverage | ~85% average |
+| Metric        | Value              |
+| ------------- | ------------------ |
+| Packages      | 14 (all passing)   |
+| Tests         | 241+ (all passing) |
+| Race detector | Clean              |
+| golangci-lint | 0 issues           |
+| go vet        | Clean              |
+| Coverage      | ~85% average       |

@@ -23,6 +23,13 @@ func (t testItem) GetRepoName() id.RepoID    { return t.repo }
 func (t testItem) GetCreatedAt() time.Time   { return t.createdAt }
 func (t testItem) GetUpdatedAt() time.Time   { return t.updatedAt }
 
+func newQueryTestItem(source, itemType string) testItem {
+	return testItem{
+		source:   id.NewProviderID(source),
+		itemType: id.NewEventTypeID(itemType),
+	}
+}
+
 // expectMatch asserts that c.Match(value) equals want.
 func expectMatch[T any](t *testing.T, c Criterion[T], value T, want bool, msg string) {
 	t.Helper()
@@ -202,10 +209,10 @@ func TestQueryMatch(t *testing.T) {
 		},
 	}
 
-	if !q.Match(testItem{source: id.NewProviderID("github"), itemType: id.NewEventTypeID("PushEvent")}) {
+	if !q.Match(newQueryTestItem("github", "PushEvent")) {
 		t.Error("expected match for item satisfying all criteria")
 	}
-	if q.Match(testItem{source: id.NewProviderID("gitlab"), itemType: id.NewEventTypeID("PushEvent")}) {
+	if q.Match(newQueryTestItem("gitlab", "PushEvent")) {
 		t.Error("expected no match for item failing one criterion")
 	}
 }

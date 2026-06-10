@@ -98,7 +98,7 @@ func TestFetch_DefaultOptions(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
+	result, err := fetchFromTestClient(client, "testuser")
 	testutil.MustNoError(t, err)
 	if len(result.Items) != 1 {
 		t.Fatalf("expected 1 item, got %d", len(result.Items))
@@ -165,7 +165,7 @@ func TestFetch_APIError(t *testing.T) {
 	defer server.Close()
 
 	client := newTestClient(server)
-	result, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "nonexistent"})
+	result, err := fetchFromTestClient(client, "nonexistent")
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}

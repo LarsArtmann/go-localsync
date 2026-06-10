@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func assertNodeID(t *testing.T, got NodeID, want string, context string) {
+func assertNodeID(t *testing.T, got NodeID, want, context string) {
 	t.Helper()
 
 	if got.String() != want {

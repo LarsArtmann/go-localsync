@@ -8,28 +8,31 @@
 
 ### Architecture Improvement Plan (8/8 items from `docs/planning/2026-06-10_ARCHITECTURE_IMPROVEMENT_PLAN.html`)
 
-| ID | Item | Impact |
-|---|---|---|
-| LS-1 | **SyncItems through command pipeline** — `SyncItems` now dispatches per-item via `CommandDispatcher` instead of calling `Repo.Execute` directly. New `SyncOutcome` type captures domain semantics. Logging, validation, retry middleware all apply to batch syncs now. | Correctness |
-| LS-2 | **Compile-time SyncStore assertion** — `var _ synclib.SyncStore = (*CQRSStack)(nil)` | Type safety |
-| LS-3 | **CRDT doc.go updated** — Active types vs Future types clearly documented | Clarity |
-| LS-4 | **Consistent not-found semantics** — `MemoryReadModel.Get()` returns `ErrNotFound` (was `(nil, nil)`) | Dev/prod parity |
-| LS-5 | **NewServer simplified** — `api.NewServer(syncer, logger)`, `Syncer.Store()` getter added | API surface |
-| LS-6 | **Duplicate GetTypes removed** — Single `GetItemTypes()` method | Dead code |
-| LS-7 | **Dead raw_json removed** — Column, scannedItem field, unused `ToItemView` all gone | Schema clarity |
-| LS-8 | **Runner errors logged** — `slog.Error` instead of `_ = runner.Run(ctx)` | Observability |
+| ID   | Item                                                                                                                                                                                                                                                                   | Impact          |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| LS-1 | **SyncItems through command pipeline** — `SyncItems` now dispatches per-item via `CommandDispatcher` instead of calling `Repo.Execute` directly. New `SyncOutcome` type captures domain semantics. Logging, validation, retry middleware all apply to batch syncs now. | Correctness     |
+| LS-2 | **Compile-time SyncStore assertion** — `var _ synclib.SyncStore = (*CQRSStack)(nil)`                                                                                                                                                                                   | Type safety     |
+| LS-3 | **CRDT doc.go updated** — Active types vs Future types clearly documented                                                                                                                                                                                              | Clarity         |
+| LS-4 | **Consistent not-found semantics** — `MemoryReadModel.Get()` returns `ErrNotFound` (was `(nil, nil)`)                                                                                                                                                                  | Dev/prod parity |
+| LS-5 | **NewServer simplified** — `api.NewServer(syncer, logger)`, `Syncer.Store()` getter added                                                                                                                                                                              | API surface     |
+| LS-6 | **Duplicate GetTypes removed** — Single `GetItemTypes()` method                                                                                                                                                                                                        | Dead code       |
+| LS-7 | **Dead raw_json removed** — Column, scannedItem field, unused `ToItemView` all gone                                                                                                                                                                                    | Schema clarity  |
+| LS-8 | **Runner errors logged** — `slog.Error` instead of `_ = runner.Run(ctx)`                                                                                                                                                                                               | Observability   |
 
 ### Upstream API Compatibility Fixes (go-cqrs-lite)
+
 - `cqrsid.MustParseAggregateID` → `cqrsid.ParseAggregateID`
 - `command.MustNew` → `command.New` with `mustNewCommand` helper
 - `query.MustNew` → `query.New` with `mustNewQuery` helper
 
 ### Additional Fixes Applied
+
 - Removed unused `fmt` import from `stack_adapters.go`
 - Enhanced error wrapping in `SyncItems` (eventCount + conflictWinner in error message)
 - `errors.AsType` adoption in GitHub client (cleaner than `errors.As` + empty struct)
 
 ### Test Status
+
 - **14 packages, 250+ tests, ALL GREEN**
 - `go build ./...` clean
 - `go vet ./...` clean
@@ -43,24 +46,24 @@
 
 The `pkg/data/` package is a well-architected layer system that is **disconnected from production code**:
 
-| Package | Purpose | Production Usage |
-|---|---|---|
-| `data/model` | Canonical domain types (`Item`, `Key`, `View`, `ProviderItem`) | `model.Item` used by CQRS. `model.Key`, `model.ProviderItem` unused. |
-| `data/query` | Generic `Criterion[T]`, `Query[T]`, `Page[T]` query system | Never imported by CQRS or API. They use `provider.ItemFilter` instead. |
-| `data/transform` | `Mapper[From,To]` with compose, provider→domain→view mappers | Never imported by production code. CQRS uses `ToDataItem` directly. |
-| `data/repo` | `Reader[T]`, `Writer[T]`, `Repository[T]`, `Observable[T]` | Zero production implementations. Only used in its own tests. |
-| `data/schema` | `Version` type with V1/V2 constants | Used by CQRS `DataItemFromPayload`. |
+| Package          | Purpose                                                        | Production Usage                                                       |
+| ---------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `data/model`     | Canonical domain types (`Item`, `Key`, `View`, `ProviderItem`) | `model.Item` used by CQRS. `model.Key`, `model.ProviderItem` unused.   |
+| `data/query`     | Generic `Criterion[T]`, `Query[T]`, `Page[T]` query system     | Never imported by CQRS or API. They use `provider.ItemFilter` instead. |
+| `data/transform` | `Mapper[From,To]` with compose, provider→domain→view mappers   | Never imported by production code. CQRS uses `ToDataItem` directly.    |
+| `data/repo`      | `Reader[T]`, `Writer[T]`, `Repository[T]`, `Observable[T]`     | Zero production implementations. Only used in its own tests.           |
+| `data/schema`    | `Version` type with V1/V2 constants                            | Used by CQRS `DataItemFromPayload`.                                    |
 
 **Assessment:** `data/query`, `data/transform`, and `data/repo` are well-designed aspirational code with tests. They need to either be wired into the production pipeline or deleted. Currently they add cognitive overhead without providing value.
 
 ### Documentation Staleness
 
-| File | Issue |
-|---|---|
-| `README.md:127` | Says "Turso-backed" — should be "SQLite-backed" |
-| `TODO_LIST.md:73-74` | References `turso_readmodel_test.go` (renamed to `sqlite_readmodel_test.go`) |
-| `TODO_LIST.md` | Test counts outdated (says "241" — actually 250+) |
-| `pkg/cqrs/store_factory.go:71` | `ConfigureTursoPool` — misleading name (does generic SQLite pool config) |
+| File                           | Issue                                                                        |
+| ------------------------------ | ---------------------------------------------------------------------------- |
+| `README.md:127`                | Says "Turso-backed" — should be "SQLite-backed"                              |
+| `TODO_LIST.md:73-74`           | References `turso_readmodel_test.go` (renamed to `sqlite_readmodel_test.go`) |
+| `TODO_LIST.md`                 | Test counts outdated (says "241" — actually 250+)                            |
+| `pkg/cqrs/store_factory.go:71` | `ConfigureTursoPool` — misleading name (does generic SQLite pool config)     |
 
 ---
 
@@ -102,7 +105,7 @@ The `pkg/data/` package is a well-architected layer system that is **disconnecte
 ### Critical Architecture Issues
 
 1. **`provider.Item` vs `model.Item` vs `model.ProviderItem` — Three Item Types**
-   - The sync pipeline converts `provider.Item → model.Item` via `cqrs.ToDataItem()` 
+   - The sync pipeline converts `provider.Item → model.Item` via `cqrs.ToDataItem()`
    - `model.ProviderItem` was designed for the `data/transform` layer but never wired
    - `provider.Item` carries `RawJSON` while `model.Item` carries `SchemaVersion`
    - **Fix:** Decide on ONE canonical item type. Either make `model.Item` the universal type (with optional RawJSON) or eliminate `model.ProviderItem` and keep the current two-type system with clear documentation.
@@ -152,48 +155,48 @@ Sorted by **Impact × Effort** (highest ROI first):
 
 ### Tier 1: Quick Wins (< 30 min each, high impact)
 
-| # | Item | Effort | Impact | Why |
-|---|---|---|---|---|
-| 1 | Fix README.md "Turso-backed" → "SQLite-backed" | 5 min | Correctness | Misleading docs |
-| 2 | Rename `ConfigureTursoPool` → `ConfigureSQLitePool` in store_factory | 5 min | Clarity | Last turso remnant in code |
-| 3 | Fix `nlreturn` lint in `sync_outcome.go` | 2 min | Lint hygiene | One blank line |
-| 4 | Add `HasChanged` doc comment about fields NOT compared | 5 min | Clarity | Silent data loss potential |
-| 5 | Update TODO_LIST.md stale references (test count, file names) | 10 min | Accuracy | Outdated metrics |
-| 6 | Add compile-time `ReadModel` assertions for both implementations | 5 min | Type safety | `var _ ReadModel = (*MemoryReadModel)(nil)` already exists for SQLite |
-| 7 | Restart LSP to clear stale diagnostics | 1 min | DX | False errors distracting |
+| #   | Item                                                                 | Effort | Impact       | Why                                                                   |
+| --- | -------------------------------------------------------------------- | ------ | ------------ | --------------------------------------------------------------------- |
+| 1   | Fix README.md "Turso-backed" → "SQLite-backed"                       | 5 min  | Correctness  | Misleading docs                                                       |
+| 2   | Rename `ConfigureTursoPool` → `ConfigureSQLitePool` in store_factory | 5 min  | Clarity      | Last turso remnant in code                                            |
+| 3   | Fix `nlreturn` lint in `sync_outcome.go`                             | 2 min  | Lint hygiene | One blank line                                                        |
+| 4   | Add `HasChanged` doc comment about fields NOT compared               | 5 min  | Clarity      | Silent data loss potential                                            |
+| 5   | Update TODO_LIST.md stale references (test count, file names)        | 10 min | Accuracy     | Outdated metrics                                                      |
+| 6   | Add compile-time `ReadModel` assertions for both implementations     | 5 min  | Type safety  | `var _ ReadModel = (*MemoryReadModel)(nil)` already exists for SQLite |
+| 7   | Restart LSP to clear stale diagnostics                               | 1 min  | DX           | False errors distracting                                              |
 
 ### Tier 2: Medium Effort (1-3 hours each, high impact)
 
-| # | Item | Effort | Impact | Why |
-|---|---|---|---|---|
-| 8 | Add focused tests for `SyncOutcome` + `decideWithOutcome` | 30 min | Coverage | New code has no direct tests |
-| 9 | Delete or wire `data/repo/` package | 1 hr | Clarity | Zero prod implementations |
-| 10 | Delete or wire `data/transform/` package | 1 hr | Clarity | Never wired into pipeline |
-| 11 | Delete `model.ProviderItem` or wire it | 30 min | Clarity | Dead type with tests |
-| 12 | Add `ActorAvatarURL` to `HasChanged` comparison | 15 min | Correctness | Silent data loss |
-| 13 | Extract `provider.ItemFilter` → use `data/query` criteria | 2 hr | Architecture | Unify query layer |
-| 14 | Add structured API error responses via Huma | 1 hr | API quality | Currently returns bare errors |
+| #   | Item                                                      | Effort | Impact       | Why                           |
+| --- | --------------------------------------------------------- | ------ | ------------ | ----------------------------- |
+| 8   | Add focused tests for `SyncOutcome` + `decideWithOutcome` | 30 min | Coverage     | New code has no direct tests  |
+| 9   | Delete or wire `data/repo/` package                       | 1 hr   | Clarity      | Zero prod implementations     |
+| 10  | Delete or wire `data/transform/` package                  | 1 hr   | Clarity      | Never wired into pipeline     |
+| 11  | Delete `model.ProviderItem` or wire it                    | 30 min | Clarity      | Dead type with tests          |
+| 12  | Add `ActorAvatarURL` to `HasChanged` comparison           | 15 min | Correctness  | Silent data loss              |
+| 13  | Extract `provider.ItemFilter` → use `data/query` criteria | 2 hr   | Architecture | Unify query layer             |
+| 14  | Add structured API error responses via Huma               | 1 hr   | API quality  | Currently returns bare errors |
 
 ### Tier 3: Larger Efforts (3+ hours each, strategic impact)
 
-| # | Item | Effort | Impact | Why |
-|---|---|---|---|---|
-| 15 | Second provider (GitLab) to validate Provider interface | 4 hr | Architecture validation | Only GitHub exists |
-| 16 | Wire `data/query` into CQRS read model | 3 hr | Architecture | Replace hand-rolled filter/pagination |
-| 17 | OpenTelemetry tracing for sync pipeline | 3 hr | Observability | Production readiness |
-| 18 | CI pipeline (GitHub Actions) | 2 hr | Quality | No automated CI exists |
-| 19 | Benchmark suite with baselines | 2 hr | Performance | No perf regression detection |
-| 20 | Schema migration tooling for SQLite | 4 hr | Operations | No DDL evolution strategy |
+| #   | Item                                                    | Effort | Impact                  | Why                                   |
+| --- | ------------------------------------------------------- | ------ | ----------------------- | ------------------------------------- |
+| 15  | Second provider (GitLab) to validate Provider interface | 4 hr   | Architecture validation | Only GitHub exists                    |
+| 16  | Wire `data/query` into CQRS read model                  | 3 hr   | Architecture            | Replace hand-rolled filter/pagination |
+| 17  | OpenTelemetry tracing for sync pipeline                 | 3 hr   | Observability           | Production readiness                  |
+| 18  | CI pipeline (GitHub Actions)                            | 2 hr   | Quality                 | No automated CI exists                |
+| 19  | Benchmark suite with baselines                          | 2 hr   | Performance             | No perf regression detection          |
+| 20  | Schema migration tooling for SQLite                     | 4 hr   | Operations              | No DDL evolution strategy             |
 
 ### Tier 4: Long-term Strategic
 
-| # | Item | Effort | Impact | Why |
-|---|---|---|---|---|
-| 21 | TUI with Bubble Tea | 1 week | UX | Roadmap goal |
-| 22 | Multi-node sync protocol (CRDT `SyncRequest`/`SyncResponse`) | 2 weeks | Architecture | Roadmap goal |
-| 23 | Daemon/background mode | 1 week | Operations | Roadmap goal |
-| 24 | JSON/CSV export endpoints | 4 hr | API completeness | Roadmap goal |
-| 25 | Multi-user sync (parallel `-user` flags) | 1 week | Scale | Roadmap goal |
+| #   | Item                                                         | Effort  | Impact           | Why          |
+| --- | ------------------------------------------------------------ | ------- | ---------------- | ------------ |
+| 21  | TUI with Bubble Tea                                          | 1 week  | UX               | Roadmap goal |
+| 22  | Multi-node sync protocol (CRDT `SyncRequest`/`SyncResponse`) | 2 weeks | Architecture     | Roadmap goal |
+| 23  | Daemon/background mode                                       | 1 week  | Operations       | Roadmap goal |
+| 24  | JSON/CSV export endpoints                                    | 4 hr    | API completeness | Roadmap goal |
+| 25  | Multi-user sync (parallel `-user` flags)                     | 1 week  | Scale            | Roadmap goal |
 
 ---
 
@@ -226,9 +229,11 @@ $ git status         3 modified files (minor: golangci.yml regex, error wrapping
 ## File Change Summary (Session 10)
 
 ### New Files
+
 - `pkg/cqrs/sync_outcome.go` — `SyncOutcome` type + context helpers + `decideWithOutcome`
 
 ### Modified Files (committed)
+
 - `pkg/cqrs/stack.go` — SyncItems through command pipeline, compile-time assertion, error wrapping
 - `pkg/cqrs/stack_adapters.go` — Removed duplicate GetTypes, removed unused fmt import
 - `pkg/cqrs/stack_test.go` — GetTypes → GetItemTypes
@@ -250,6 +255,7 @@ $ git status         3 modified files (minor: golangci.yml regex, error wrapping
 - `AGENTS.md` — Session 10 documentation
 
 ### Uncommitted (minor)
+
 - `.golangci.yml` — Regex pattern fix for typecheck exclude
 - `pkg/cqrs/stack.go` — Enhanced error wrapping in SyncItems
 - `pkg/providers/github/client_retry.go` — `errors.AsType` adoption

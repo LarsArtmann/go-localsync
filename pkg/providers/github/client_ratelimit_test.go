@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -19,10 +18,9 @@ func TestFetch_RetryOnServerError(t *testing.T) {
 	server, callCount := newFailingThenSucceedingTestServer(3)
 	defer server.Close()
 
-	client := newTestClient(server)
-	client = client.WithRetryConfig(testRetryConfig())
+	client := newRetryTestClient(server)
 
-	_, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
+	_, err := fetchFromTestClient(client, "testuser")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -40,10 +38,9 @@ func TestFetch_NoRetryOnClientError(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := newTestClient(server)
-	client = client.WithRetryConfig(testRetryConfig())
+	client := newRetryTestClient(server)
 
-	_, err := client.Fetch(context.Background(), &provider.FetchOptions{Source: "testuser"})
+	_, err := fetchFromTestClient(client, "testuser")
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
@@ -122,7 +119,7 @@ func TestIsRetryableError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := &gh.ErrorResponse{Response: &http.Response{StatusCode: tt.statusCode}}
+			err := newGitHubErrorResponse(tt.statusCode)
 			got := isRetryableError(err)
 			if got != tt.want {
 				t.Errorf("expected %v, got %v", tt.want, got)
@@ -144,9 +141,7 @@ func TestWrapGitHubError(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ghErr := &gh.ErrorResponse{
-				Response: &http.Response{StatusCode: tt.statusCode},
-			}
+			ghErr := newGitHubErrorResponse(tt.statusCode)
 			wrapped := wrapGitHubError(ghErr, "testuser")
 			if !errors.Is(wrapped, tt.wantErr) {
 				t.Errorf("expected %v, got %v", tt.wantErr, wrapped)

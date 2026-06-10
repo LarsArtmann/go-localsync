@@ -1,6 +1,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -70,6 +71,21 @@ func testRetryConfig() provider.RetryConfig {
 		InitialBackoff: 1 * time.Millisecond,
 		MaxBackoff:     10 * time.Millisecond,
 	}
+}
+
+func newRetryTestClient(server *httptest.Server) *Client {
+	return newTestClient(server).WithRetryConfig(testRetryConfig())
+}
+
+func fetchFromTestClient(
+	client *Client,
+	source string,
+) (*provider.FetchResult, error) {
+	return client.Fetch(context.Background(), &provider.FetchOptions{Source: source})
+}
+
+func newGitHubErrorResponse(statusCode int) *gh.ErrorResponse {
+	return &gh.ErrorResponse{Response: &http.Response{StatusCode: statusCode}}
 }
 
 const defaultGitHubRateLimit = 5000
