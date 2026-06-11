@@ -41,18 +41,14 @@ func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
 
 	events, err := DecideSync(ToDataItem(remoteItem), nil, &pickSideResolver{pickSide: "remote"})(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 2 {
-		t.Fatalf("expected 2 events, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 2)
 
 	assertEventType(t, events[0], EventItemConflictFound)
 	assertEventType(t, events[1], EventItemSynced)
 
 	conflictPayload := unmarshalConflictPayload(t, events[0])
 
-	if conflictPayload.Winner != "remote" {
-		t.Errorf("expected winner=remote, got %s", conflictPayload.Winner)
-	}
+	testutil.AssertEqual(t, conflictPayload.Winner, "remote", "winner")
 
 	if conflictPayload.RemoteUpdatedAt != remoteTime.UnixNano() {
 		t.Errorf("expected remote timestamp from original remote item")
@@ -80,17 +76,13 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 
 	events, err := DecideSync(ToDataItem(remoteItem), nil, &pickSideResolver{pickSide: "local"})(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 2 {
-		t.Fatalf("expected 2 events, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 2)
 
 	assertEventType(t, events[0], EventItemConflictFound)
 
 	conflictPayload := unmarshalConflictPayload(t, events[0])
 
-	if conflictPayload.Winner != "local" {
-		t.Errorf("expected winner=local, got %s", conflictPayload.Winner)
-	}
+	testutil.AssertEqual(t, conflictPayload.Winner, "local", "winner")
 
 	if conflictPayload.LocalUpdatedAt != localTime.UnixNano() {
 		t.Errorf("expected local timestamp from existing state")
@@ -119,9 +111,7 @@ func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
 
 	events, err := DecideSync(ToDataItem(remoteItem), nil, new(errorResolver))(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 2 {
-		t.Fatalf("expected 2 events, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 2)
 
 	conflictPayload := unmarshalConflictPayload(t, events[0])
 
@@ -145,9 +135,7 @@ func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
 
 	events, err := DecideSync(ToDataItem(remoteItem), nil, resolver)(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 2 {
-		t.Fatalf("expected 2 events, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 2)
 
 	conflictPayload := unmarshalConflictPayload(t, events[0])
 
@@ -171,9 +159,7 @@ func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
 
 	events, err := DecideSync(ToDataItem(remoteItem), nil, resolver)(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 2 {
-		t.Fatalf("expected 2 events, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 2)
 
 	conflictPayload := unmarshalConflictPayload(t, events[0])
 

@@ -43,10 +43,7 @@ func (m *actionMockSyncStore) SyncItems(_ context.Context, items []*provider.Ite
 func TestConflictAwareSyncer_NewItems(t *testing.T) {
 	t.Parallel()
 
-	items := []*provider.Item{
-		testSyncItem("1", "PushEvent"),
-		testSyncItem("2", "IssueEvent"),
-	}
+	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
 
 	syncer, _ := newTestSyncer(items)
 	cas := NewConflictAwareSyncer(syncer)
@@ -60,18 +57,10 @@ func TestConflictAwareSyncer_NewItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 2 {
-		t.Errorf("expected Fetched=2, got %d", result.Fetched)
-	}
-	if result.Upserted != 2 {
-		t.Errorf("expected Upserted=2, got %d", result.Upserted)
-	}
-	if result.Conflicts != 0 {
-		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
-	}
-	if result.Skipped != 0 {
-		t.Errorf("expected Skipped=0, got %d", result.Skipped)
-	}
+	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
+	testutil.AssertInt(t, result.Upserted, 2, "Upserted")
+	testutil.AssertInt(t, result.Conflicts, 0, "Conflicts")
+	testutil.AssertInt(t, result.Skipped, 0, "Skipped")
 }
 
 func TestConflictAwareSyncer_NilOptions(t *testing.T) {
@@ -106,24 +95,15 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 2 {
-		t.Errorf("expected Fetched=2, got %d", result.Fetched)
-	}
-	if result.Errors != 1 {
-		t.Errorf("expected Errors=1 (invalid item), got %d", result.Errors)
-	}
-	if result.Upserted != 1 {
-		t.Errorf("expected Upserted=1 (valid item), got %d", result.Upserted)
-	}
+	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
+	testutil.AssertInt(t, result.Errors, 1, "Errors")
+	testutil.AssertInt(t, result.Upserted, 1, "Upserted")
 }
 
 func TestConflictAwareSyncer_Conflicts(t *testing.T) {
 	t.Parallel()
 
-	items := []*provider.Item{
-		testSyncItem("1", "PushEvent"),
-		testSyncItem("2", "IssueEvent"),
-	}
+	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
 
 	store := &actionMockSyncStore{actions: []SyncAction{ActionConflictRemote, ActionUnchanged}}
 	mockProv := &testutil.MockProvider{Items: items}
@@ -136,27 +116,16 @@ func TestConflictAwareSyncer_Conflicts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 2 {
-		t.Errorf("expected Fetched=2, got %d", result.Fetched)
-	}
-	if result.Conflicts != 1 {
-		t.Errorf("expected Conflicts=1, got %d", result.Conflicts)
-	}
-	if result.Upserted != 1 {
-		t.Errorf("expected Upserted=1, got %d", result.Upserted)
-	}
-	if result.Skipped != 1 {
-		t.Errorf("expected Skipped=1, got %d", result.Skipped)
-	}
+	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
+	testutil.AssertInt(t, result.Conflicts, 1, "Conflicts")
+	testutil.AssertInt(t, result.Upserted, 1, "Upserted")
+	testutil.AssertInt(t, result.Skipped, 1, "Skipped")
 }
 
 func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
 	t.Parallel()
 
-	items := []*provider.Item{
-		testSyncItem("1", "PushEvent"),
-		testSyncItem("2", "IssueEvent"),
-	}
+	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
 
 	store := &actionMockSyncStore{actions: []SyncAction{ActionCreated, ActionError}}
 	mockProv := &testutil.MockProvider{Items: items}
@@ -169,15 +138,9 @@ func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 2 {
-		t.Errorf("expected Fetched=2, got %d", result.Fetched)
-	}
-	if result.Upserted != 1 {
-		t.Errorf("expected Upserted=1, got %d", result.Upserted)
-	}
-	if result.Errors != 1 {
-		t.Errorf("expected Errors=1, got %d", result.Errors)
-	}
+	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
+	testutil.AssertInt(t, result.Upserted, 1, "Upserted")
+	testutil.AssertInt(t, result.Errors, 1, "Errors")
 }
 
 func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
@@ -199,13 +162,7 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 2 {
-		t.Errorf("expected Fetched=2, got %d", result.Fetched)
-	}
-	if result.Errors != 2 {
-		t.Errorf("expected Errors=2 (all invalid), got %d", result.Errors)
-	}
-	if result.Upserted != 0 {
-		t.Errorf("expected Upserted=0, got %d", result.Upserted)
-	}
+	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
+	testutil.AssertInt(t, result.Errors, 2, "Errors")
+	testutil.AssertInt(t, result.Upserted, 0, "Upserted")
 }

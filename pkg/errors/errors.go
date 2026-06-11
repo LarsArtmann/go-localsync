@@ -22,67 +22,87 @@ var (
 // RegisterErrorTemplates registers user-facing message templates for all error codes.
 // Call once at application startup.
 func RegisterErrorTemplates() {
-	for code, tmpl := range errorTemplates {
-		errorfamily.RegisterTemplate(code, tmpl)
+	for _, e := range errorEntries {
+		errorfamily.RegisterTemplate(e.code, e.tmpl)
 	}
 }
 
+type errorEntry struct {
+	code string
+	tmpl errorfamily.MessageTemplate
+}
+
+// makeEntry constructs an errorEntry from raw template fields.
+// Used internally to keep the static table flat.
+func makeEntry(code, what, why, fix, out string) errorEntry {
+	return errorEntry{code: code, tmpl: errorfamily.MessageTemplate{What: what, Why: why, Fix: fix, WayOut: out}}
+}
+
 //nolint:gochecknoglobals // Static template table; initialized once at startup.
-var errorTemplates = map[string]errorfamily.MessageTemplate{
-	"not_found": {
-		What:   "The requested resource was not found.",
-		Why:    "The item or resource you requested does not exist in the system.",
-		Fix:    "Verify the identifier and try again.",
-		WayOut: "Check the logs for the exact resource path.",
-	},
-	"rate_limited": {
-		What:   "Too many requests — rate limit exceeded.",
-		Why:    "The external API has received too many requests from this client.",
-		Fix:    "Wait for the rate limit window to reset and retry.",
-		WayOut: "Use --verbose to see the reset time.",
-	},
-	"invalid_token": {
-		What:   "The provided authentication token is invalid.",
-		Why:    "The token is missing, expired, or does not have the required permissions.",
-		Fix:    "Set a valid token via GITHUB_TOKEN or the -token flag.",
-		WayOut: "Generate a new personal access token on GitHub.",
-	},
-	"user_not_found": {
-		What:   "The specified user was not found.",
-		Why:    "The username does not exist on the provider platform.",
-		Fix:    "Double-check the username spelling.",
-		WayOut: "Try a different username or verify the account exists.",
-	},
-	"sync_failed": {
-		What:   "The synchronization operation failed.",
-		Why:    "An unexpected error occurred while fetching or storing items.",
-		Fix:    "Check network connectivity and provider status.",
-		WayOut: "Run with --verbose for detailed error information.",
-	},
-	"database": {
-		What:   "A database error occurred.",
-		Why:    "The storage backend returned an error during read or write.",
-		Fix:    "Check the database path and permissions.",
-		WayOut: "Verify the backend configuration and disk space.",
-	},
-	"invalid_input": {
-		What:   "The input provided is invalid.",
-		Why:    "A required field is missing or has an unacceptable value.",
-		Fix:    "Review the input and ensure all required fields are set.",
-		WayOut: "See the error detail for the specific missing field.",
-	},
-	"unknown_backend": {
-		What:   "The specified storage backend is not supported.",
-		Why:    "Only 'memory' and 'sqlite' backends are currently supported.",
-		Fix:    "Use --backend memory or --backend sqlite.",
-		WayOut: "Check the documentation for supported backends.",
-	},
-	"db_nil": {
-		What:   "The database connection is nil.",
-		Why:    "The SQLite backend was selected but no database path was provided.",
-		Fix:    "Set a database path via --db or DB_PATH.",
-		WayOut: "Use --backend memory if you do not need persistence.",
-	},
+var errorEntries = []errorEntry{
+	makeEntry(
+		"not_found",
+		"The requested resource was not found.",
+		"The item or resource you requested does not exist in the system.",
+		"Verify the identifier and try again.",
+		"Check the logs for the exact resource path.",
+	),
+	makeEntry(
+		"rate_limited",
+		"Too many requests — rate limit exceeded.",
+		"The external API has received too many requests from this client.",
+		"Wait for the rate limit window to reset and retry.",
+		"Use --verbose to see the reset time.",
+	),
+	makeEntry(
+		"invalid_token",
+		"The provided authentication token is invalid.",
+		"The token is missing, expired, or does not have the required permissions.",
+		"Set a valid token via GITHUB_TOKEN or the -token flag.",
+		"Generate a new personal access token on GitHub.",
+	),
+	makeEntry(
+		"user_not_found",
+		"The specified user was not found.",
+		"The username does not exist on the provider platform.",
+		"Double-check the username spelling.",
+		"Try a different username or verify the account exists.",
+	),
+	makeEntry(
+		"sync_failed",
+		"The synchronization operation failed.",
+		"An unexpected error occurred while fetching or storing items.",
+		"Check network connectivity and provider status.",
+		"Run with --verbose for detailed error information.",
+	),
+	makeEntry(
+		"database",
+		"A database error occurred.",
+		"The storage backend returned an error during read or write.",
+		"Check the database path and permissions.",
+		"Verify the backend configuration and disk space.",
+	),
+	makeEntry(
+		"invalid_input",
+		"The input provided is invalid.",
+		"A required field is missing or has an unacceptable value.",
+		"Review the input and ensure all required fields are set.",
+		"See the error detail for the specific missing field.",
+	),
+	makeEntry(
+		"unknown_backend",
+		"The specified storage backend is not supported.",
+		"Only 'memory' and 'sqlite' backends are currently supported.",
+		"Use --backend memory or --backend sqlite.",
+		"Check the documentation for supported backends.",
+	),
+	makeEntry(
+		"db_nil",
+		"The database connection is nil.",
+		"The SQLite backend was selected but no database path was provided.",
+		"Set a database path via --db or DB_PATH.",
+		"Use --backend memory if you do not need persistence.",
+	),
 }
 
 // IsRetryable reports whether the error is worth retrying.

@@ -64,6 +64,15 @@ func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) 
 	}
 }
 
+// sqliteSeed inserts a test item and fails on error.
+// Reduces the "_ = rm.Upsert(ctx, sqliteTestItem(...))" fixture pattern
+// to a single line per call site.
+func sqliteSeed(t *testing.T, rm *SQLiteReadModel, ctx context.Context, source, extID, eventType, actor, repo string) {
+	t.Helper()
+
+	testutil.MustNoError(t, rm.Upsert(ctx, sqliteTestItem(t, source, extID, eventType, actor, repo)))
+}
+
 func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 	t.Parallel()
 
@@ -106,18 +115,12 @@ func TestSQLiteReadModel_List(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	item1 := sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
-	item2 := sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo")
-
-	_ = rm.Upsert(ctx, item1)
-	_ = rm.Upsert(ctx, item2)
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
 	items, err := rm.List(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
-
-	if len(items) != 2 {
-		t.Fatalf("expected 2 items, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items")
 }
 
 func TestSQLiteReadModel_List_FilterByType(t *testing.T) {
@@ -126,19 +129,15 @@ func TestSQLiteReadModel_List_FilterByType(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
 	pushType := id.NewEventTypeID("PushEvent")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
-
-	if len(items) != 1 {
-		t.Fatalf("expected 1 PushEvent, got %d", len(items))
-	}
-
+	testutil.AssertLen(t, items, 1, "PushEvent items")
 	testutil.AssertEqual(t, items[0].Type.Get(), "PushEvent", "Type")
 }
 
@@ -148,23 +147,17 @@ func TestSQLiteReadModel_Count(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
 	count, err := rm.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
-
-	if count != 2 {
-		t.Errorf("Count = %d, want 2", count)
-	}
+	testutil.AssertInt64(t, count, 2, "Count")
 
 	pushType := id.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushType})
 	testutil.MustNoError(t, err)
-
-	if count != 1 {
-		t.Errorf("filtered Count = %d, want 1", count)
-	}
+	testutil.AssertInt64(t, count, 1, "filtered Count")
 }
 
 func TestSQLiteReadModel_GetTypes(t *testing.T) {
@@ -173,16 +166,13 @@ func TestSQLiteReadModel_GetTypes(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "IssueEvent", "bob", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "PushEvent", "charlie", "org/repo2"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "3", "PushEvent", "charlie", "org/repo2")
 
 	types, err := rm.GetTypes(ctx)
 	testutil.MustNoError(t, err)
-
-	if len(types) != 2 {
-		t.Fatalf("expected 2 types, got %d: %v", len(types), types)
-	}
+	testutil.AssertLen(t, types, 2, "types")
 }
 
 func TestSQLiteReadModel_Delete(t *testing.T) {
@@ -191,10 +181,9 @@ func TestSQLiteReadModel_Delete(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 
-	err := rm.Delete(ctx, "github", id.NewExternalID("1"))
-	testutil.MustNoError(t, err)
+	testutil.MustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("1")))
 
 	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
 	if got != nil {
@@ -209,16 +198,14 @@ func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 	ctx := context.Background()
 
 	item1 := sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo")
-	_ = rm.Upsert(ctx, item1)
+	testutil.MustNoError(t, rm.Upsert(ctx, item1))
 
 	item2 := sqliteTestItem(t, "github", "1", "IssueEvent", "bob", "org/repo")
-	_ = rm.Upsert(ctx, item2)
+	testutil.MustNoError(t, rm.Upsert(ctx, item2))
 
 	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
 	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type")
 
 	count, _ := rm.Count(ctx, provider.ItemFilter{})
-	if count != 1 {
-		t.Errorf("Count = %d, want 1 (upsert should overwrite, not duplicate)", count)
-	}
+	testutil.AssertInt64(t, count, 1, "Count")
 }

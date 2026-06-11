@@ -44,21 +44,13 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	items := testItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	result := stack.SyncItems(ctx, items)
-	if result.Synced != 3 {
-		t.Errorf("expected Synced=3, got %d", result.Synced)
-	}
-	if result.Conflicts != 0 {
-		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
-	}
-	if result.Errors != 0 {
-		t.Errorf("expected Errors=0, got %d", result.Errors)
-	}
+	testutil.AssertInt(t, result.Synced, 3, "Synced")
+	testutil.AssertInt(t, result.Conflicts, 0, "Conflicts")
+	testutil.AssertInt(t, result.Errors, 0, "Errors")
 
 	count, err := stack.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
-	if count != 3 {
-		t.Errorf("expected count=3, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 3, "count")
 
 	resultTypes, err := stack.GetTypes(ctx)
 	testutil.MustNoError(t, err)
@@ -81,9 +73,7 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 
 	count, err := stack.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
-	if count != 1 {
-		t.Errorf("same item synced twice should still have count 1 — idempotent, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 1, "count")
 }
 
 func TestCQRSStack_DeleteItem(t *testing.T) {
@@ -94,21 +84,17 @@ func TestCQRSStack_DeleteItem(t *testing.T) {
 
 	ctx := context.Background()
 
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
+	syncTestItem(t, stack, ctx, "123", "PushEvent")
 
 	count, err := stack.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
-	if count != 1 {
-		t.Errorf("expected count=1, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 1, "count")
 
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
 	count, err = stack.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
-	if count != 0 {
-		t.Errorf("item should be deleted from read model, got count=%d", count)
-	}
+	testutil.AssertInt64(t, count, 0, "count after delete")
 }
 
 func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
@@ -119,20 +105,16 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 
 	ctx := context.Background()
 
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("123", "PushEvent")))
+	syncTestItem(t, stack, ctx, "123", "PushEvent")
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
 	count, _ := stack.Count(ctx, provider.ItemFilter{})
-	if count != 0 {
-		t.Errorf("expected count=0, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 0, "count after delete")
 
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("123", "IssueEvent")))
+	syncTestItem(t, stack, ctx, "123", "IssueEvent")
 
 	count, _ = stack.Count(ctx, provider.ItemFilter{})
-	if count != 1 {
-		t.Errorf("resurrected item should reappear in read model, got count=%d", count)
-	}
+	testutil.AssertInt64(t, count, 1, "count after resurrect")
 
 	got, err := stack.Get(ctx, "github", id.NewExternalID("123"))
 	testutil.MustNoError(t, err)
@@ -150,32 +132,17 @@ func TestCQRSStack_ConflictDetection(t *testing.T) {
 	items := []*provider.Item{testItem("1", "PushEvent")}
 
 	result := stack.SyncItems(ctx, items)
-	if result.Synced != 1 {
-		t.Errorf("expected Synced=1, got %d", result.Synced)
-	}
-	if result.Conflicts != 0 {
-		t.Errorf("expected Conflicts=0, got %d", result.Conflicts)
-	}
-	if result.Errors != 0 {
-		t.Errorf("expected Errors=0, got %d", result.Errors)
-	}
+	testutil.AssertInt(t, result.Synced, 1, "Synced")
+	testutil.AssertInt(t, result.Conflicts, 0, "Conflicts")
+	testutil.AssertInt(t, result.Errors, 0, "Errors")
 
 	updatedItem := testItem("1", "PushEvent")
 	updatedItem.UpdatedAt = time.Now().Add(time.Hour)
 
 	result = stack.SyncItems(ctx, []*provider.Item{updatedItem})
-	if result.Synced != 1 {
-		t.Errorf("expected Synced=1, got %d", result.Synced)
-	}
-	if result.Conflicts != 1 {
-		t.Errorf(
-			"updated item with newer timestamp should trigger conflict, got Conflicts=%d",
-			result.Conflicts,
-		)
-	}
-	if result.Errors != 0 {
-		t.Errorf("expected Errors=0, got %d", result.Errors)
-	}
+	testutil.AssertInt(t, result.Synced, 1, "Synced")
+	testutil.AssertInt(t, result.Conflicts, 1, "Conflicts")
+	testutil.AssertInt(t, result.Errors, 0, "Errors")
 }
 
 func TestCQRSStack_FilterByType(t *testing.T) {
@@ -188,16 +155,12 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 	items := testItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	result := stack.SyncItems(ctx, items)
-	if result.Synced != 3 {
-		t.Errorf("expected Synced=3, got %d", result.Synced)
-	}
+	testutil.AssertInt(t, result.Synced, 3, "Synced")
 
 	pushType := id.NewEventTypeID("PushEvent")
 	results, err := stack.List(ctx, provider.ItemFilter{Type: &pushType})
 	testutil.MustNoError(t, err)
-	if len(results) != 2 {
-		t.Errorf("expected 2 results, got %d", len(results))
-	}
+	testutil.AssertLen(t, results, 2, "results")
 }
 
 func TestCQRSStack_Close(t *testing.T) {

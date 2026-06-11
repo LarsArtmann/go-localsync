@@ -18,12 +18,7 @@ func TestIntegration_SyncItemsPipeline(t *testing.T) {
 	stack := newMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-		testItem("2", "IssueEvent"),
-	}
-
-	summary := stack.SyncItems(ctx, items)
+	summary := syncTestItemsResult(t, stack, ctx, "1", "PushEvent", "2", "IssueEvent")
 	if summary.Errors != 0 {
 		t.Fatalf("unexpected sync errors: %d", summary.Errors)
 	}
@@ -96,11 +91,7 @@ func TestIntegration_SyncItemsWithConflictResolver(t *testing.T) {
 	testutil.MustNoError(t, err)
 	defer func() { _ = stack.Close() }()
 
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-	}
-
-	summary := stack.SyncItems(ctx, items)
+	summary := syncTestItemsResult(t, stack, ctx, "1", "PushEvent")
 	if summary.Errors != 0 {
 		t.Fatalf("unexpected sync errors: %d", summary.Errors)
 	}
@@ -161,12 +152,7 @@ func TestIntegration_SQLiteBackend(t *testing.T) {
 	stack := newSQLiteMemoryStack(t)
 	defer func() { _ = stack.Close() }()
 
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-		testItem("2", "IssueEvent"),
-	}
-
-	stack.SyncItems(ctx, items)
+	syncTestItems(t, stack, ctx, "1", "PushEvent", "2", "IssueEvent")
 	waitForCount(t, stack, ctx, 2)
 
 	list, err := stack.List(ctx, provider.ItemFilter{})

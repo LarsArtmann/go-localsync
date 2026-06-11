@@ -16,12 +16,7 @@ func TestCQRSStack_CorrelationID_Propagated(t *testing.T) {
 	waitFor := subscribeAll(t, stack)
 
 	ctx := context.Background()
-	items := []*provider.Item{
-		testItem("corr-1", "PushEvent"),
-		testItem("corr-2", "IssueEvent"),
-	}
-
-	_ = stack.SyncItems(ctx, items)
+	syncTestItems(t, stack, ctx, "corr-1", "PushEvent", "corr-2", "IssueEvent")
 
 	evts := waitFor(2)
 

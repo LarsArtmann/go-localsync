@@ -102,6 +102,13 @@ func newJSONRequest(t *testing.T, method, path string, body any) *http.Request {
 	return req
 }
 
+// newGETRequest creates a GET request with the standard test context.
+// Reduces the repeated "httptest.NewRequestWithContext(context.Background(),
+// http.MethodGet, path, nil)" pattern to a single call.
+func newGETRequest(_ *testing.T, path string) *http.Request {
+	return httptest.NewRequestWithContext(context.Background(), http.MethodGet, path, nil)
+}
+
 func newMockStoreWithItems() *mockSyncStore {
 	return &mockSyncStore{
 		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
@@ -118,7 +125,7 @@ func TestHealthCheck(t *testing.T) {
 
 	server := newTestServer(&mockSyncStore{})
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/health", nil)
+	req := newGETRequest(t, "/health")
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
@@ -154,7 +161,7 @@ func TestGetStats(t *testing.T) {
 
 	server := newTestServer(store)
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/stats", nil)
+	req := newGETRequest(t, "/stats")
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
@@ -184,7 +191,7 @@ func TestGetStats_StoreError(t *testing.T) {
 	store := &mockSyncStore{countErr: errors.New("count failed")}
 	server := newTestServer(store)
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/stats", nil)
+	req := newGETRequest(t, "/stats")
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
@@ -198,7 +205,7 @@ func TestListItems(t *testing.T) {
 	store := newMockStoreWithItems()
 	server := newTestServer(store)
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items?limit=10", nil)
+	req := newGETRequest(t, "/items?limit=10")
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
@@ -230,7 +237,7 @@ func TestListItems_WithFilter(t *testing.T) {
 	store := newMockStoreWithItems()
 	server := newTestServer(store)
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items?type=PushEvent", nil)
+	req := newGETRequest(t, "/items?type=PushEvent")
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)
@@ -244,7 +251,7 @@ func TestListItems_StoreError(t *testing.T) {
 	store := &mockSyncStore{SyncStoreListBehavior: testutil.SyncStoreListBehavior{ListErr: errors.New("list failed")}}
 	server := newTestServer(store)
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items", nil)
+	req := newGETRequest(t, "/items")
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)

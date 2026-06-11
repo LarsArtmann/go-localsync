@@ -16,22 +16,18 @@ func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "2", "PushEvent", "bob", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "alice", "org/repo")
 
 	actor := id.NewActorID("alice")
 	items, err := rm.List(ctx, provider.ItemFilter{ActorLogin: &actor})
 	testutil.MustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items for alice, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items for alice")
 
 	count, err := rm.Count(ctx, provider.ItemFilter{ActorLogin: &actor})
 	testutil.MustNoError(t, err)
-	if count != 2 {
-		t.Errorf("expected count=2 for alice, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 2, "count for alice")
 }
 
 func TestSQLiteReadModel_List_FilterByRepoName(t *testing.T) {
@@ -40,16 +36,14 @@ func TestSQLiteReadModel_List_FilterByRepoName(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo-a"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "PushEvent", "bob", "org/repo-b"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "IssueEvent", "charlie", "org/repo-a"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo-a")
+	sqliteSeed(t, rm, ctx, "github", "2", "PushEvent", "bob", "org/repo-b")
+	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "charlie", "org/repo-a")
 
 	repo := id.NewRepoID("org/repo-a")
 	items, err := rm.List(ctx, provider.ItemFilter{RepoName: &repo})
 	testutil.MustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items for org/repo-a, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items for org/repo-a")
 }
 
 func TestSQLiteReadModel_List_FilterBySource(t *testing.T) {
@@ -58,18 +52,14 @@ func TestSQLiteReadModel_List_FilterBySource(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "gitlab", "2", "PushEvent", "bob", "org/repo"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	sqliteSeed(t, rm, ctx, "gitlab", "2", "PushEvent", "bob", "org/repo")
 
 	source := id.NewProviderID("github")
 	items, err := rm.List(ctx, provider.ItemFilter{Source: &source})
 	testutil.MustNoError(t, err)
-	if len(items) != 1 {
-		t.Errorf("expected 1 item for github source, got %d", len(items))
-	}
-	if items[0].Source.Get() != "github" {
-		t.Errorf("Source = %q, want github", items[0].Source.Get())
-	}
+	testutil.AssertLen(t, items, 1, "items for github source")
+	testutil.AssertEqual(t, items[0].Source.Get(), "github", "Source")
 }
 
 func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
@@ -86,22 +76,18 @@ func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
 	newItem.CreatedAt = time.Now().Truncate(time.Microsecond)
 	newItem.UpdatedAt = newItem.CreatedAt
 
-	_ = rm.Upsert(ctx, oldItem)
-	_ = rm.Upsert(ctx, newItem)
+	testutil.MustNoError(t, rm.Upsert(ctx, oldItem))
+	testutil.MustNoError(t, rm.Upsert(ctx, newItem))
 
 	since := time.Now().Add(-24 * time.Hour)
 	items, err := rm.List(ctx, provider.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
-	if len(items) != 1 {
-		t.Errorf("expected 1 item after Since cutoff, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 1, "items after Since cutoff")
 	testutil.AssertEqual(t, items[0].ExternalID.Get(), "2", "ExternalID")
 
 	count, err := rm.Count(ctx, provider.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
-	if count != 1 {
-		t.Errorf("expected count=1 after Since cutoff, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 1, "count after Since cutoff")
 }
 
 func TestSQLiteReadModel_List_Pagination(t *testing.T) {
@@ -111,31 +97,22 @@ func TestSQLiteReadModel_List_Pagination(t *testing.T) {
 	ctx := context.Background()
 
 	for i := range 5 {
-		_ = rm.Upsert(
-			ctx,
-			sqliteTestItem(t, "github", string(rune('A'+i)), "PushEvent", "alice", "org/repo"),
-		)
+		sqliteSeed(t, rm, ctx, "github", string(rune('A'+i)), "PushEvent", "alice", "org/repo")
 	}
 
 	items, err := rm.List(ctx, provider.ItemFilter{Limit: 2})
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
-	if len(items) != 2 {
-		t.Errorf("expected 2 items with Limit=2, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items with Limit=2")
 
 	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2, Offset: 2})
 	testutil.MustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items with Limit=2 Offset=2, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items with Limit=2 Offset=2")
 
 	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2, Offset: 4})
 	testutil.MustNoError(t, err)
-	if len(items) != 1 {
-		t.Errorf("expected 1 item with Limit=2 Offset=4, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 1, "items with Limit=2 Offset=4")
 }
 
 func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
@@ -144,17 +121,15 @@ func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "2", "PushEvent", "bob", "org/repo"))
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "3", "IssueEvent", "alice", "org/repo"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "2", "PushEvent", "bob", "org/repo")
+	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "alice", "org/repo")
 
 	pushType := id.NewEventTypeID("PushEvent")
 	actor := id.NewActorID("alice")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType, ActorLogin: &actor})
 	testutil.MustNoError(t, err)
-	if len(items) != 1 {
-		t.Errorf("expected 1 PushEvent by alice, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 1, "PushEvent by alice")
 	testutil.AssertEqual(t, items[0].ExternalID.Get(), "1", "ExternalID")
 }
 
@@ -164,14 +139,12 @@ func TestSQLiteReadModel_List_ZeroResults(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	_ = rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 
 	pushType := id.NewEventTypeID("NonExistentType")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
-	if len(items) != 0 {
-		t.Errorf("expected 0 items for non-existent type, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 0, "items for non-existent type")
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -128,6 +129,33 @@ func testItem(sourceID, itemType string) *provider.Item {
 		UpdatedAt:  time.Now(),
 		RawJSON:    json.RawMessage(`{"test":true}`),
 	}
+}
+
+// syncTestItem is a shorthand for "sync this sourceID/type as a test item".
+// Reduces the `testutil.MustNoError(t, stack.SyncItem(ctx, testItem("X", "Y")))`
+// pattern that appears in many tests to a single call.
+func syncTestItem(t *testing.T, stack *CQRSStack, ctx context.Context, sourceID, itemType string) {
+	t.Helper()
+
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem(sourceID, itemType)))
+}
+
+// syncTestItems is a shorthand for syncing multiple items at once.
+// Returns the SyncSummary so callers can assert on Synced/Conflicts/Errors.
+// Reduces the `items := []*provider.Item{...}; _ = stack.SyncItems(ctx, items)` pattern
+// at sites that ignore the return value.
+func syncTestItems(t *testing.T, stack *CQRSStack, ctx context.Context, pairs ...string) {
+	t.Helper()
+
+	_ = stack.SyncItems(ctx, testItems(pairs...))
+}
+
+// syncTestItemsResult returns the SyncSummary for a multi-item sync.
+// Used when the test needs to assert on Synced/Conflicts/Errors.
+func syncTestItemsResult(t *testing.T, stack *CQRSStack, ctx context.Context, pairs ...string) *synclib.SyncSummary {
+	t.Helper()
+
+	return stack.SyncItems(ctx, testItems(pairs...))
 }
 
 // testItems constructs a slice of items from (id, type) pairs.

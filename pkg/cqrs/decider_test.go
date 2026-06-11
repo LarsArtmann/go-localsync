@@ -79,9 +79,7 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 
 	events, err := DecideSync(dataItem, nil, nil)(InitialState, 0)
 	testutil.MustNoError(t, err)
-	if len(events) != 1 {
-		t.Fatalf("expected 1 event, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 1)
 
 	var payload ItemSyncedPayload
 	if err := json.Unmarshal(events[0].Payload(), &payload); err != nil {
@@ -152,9 +150,7 @@ func TestDecideSync_NewItem(t *testing.T) {
 
 	events, err := DecideSync(item, nil, nil)(InitialState, 0)
 	testutil.MustNoError(t, err)
-	if len(events) != 1 {
-		t.Fatalf("expected 1 event, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemSynced)
 }
 
@@ -193,9 +189,7 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 
 	events, err := DecideSync(item, nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 2 {
-		t.Fatalf("expected 2 events, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 2)
 	assertEventType(t, events[0], EventItemConflictFound)
 	assertEventType(t, events[1], EventItemSynced)
 }
@@ -213,9 +207,7 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 
 	events, err := DecideSync(item, nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 2 {
-		t.Fatalf("expected 2 events, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 2)
 
 	var conflictPayload ItemConflictFoundPayload
 	if err := json.Unmarshal(events[0].Payload(), &conflictPayload); err != nil {
@@ -242,9 +234,7 @@ func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 
 	events, err := DecideSync(item, nil, nil)(state, 2)
 	testutil.MustNoError(t, err)
-	if len(events) != 1 {
-		t.Fatalf("expected 1 event, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemSynced)
 }
 
@@ -255,9 +245,7 @@ func TestDecideDelete_ActiveItem(t *testing.T) {
 
 	events, err := DecideDelete("github", id.NewExternalID("123"))(state, 1)
 	testutil.MustNoError(t, err)
-	if len(events) != 1 {
-		t.Fatalf("expected 1 event, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemDeleted)
 }
 

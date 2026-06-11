@@ -39,7 +39,7 @@ func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
 
 	ctx := context.Background()
 
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("dispatch-2", "PushEvent")))
+	syncTestItem(t, stack, ctx, "dispatch-2", "PushEvent")
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("dispatch-2")))
 
 	count, err := stack.Count(ctx, provider.ItemFilter{})
@@ -131,7 +131,7 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-1", "PushEvent")))
+	syncTestItem(t, stack, ctx, "q-1", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
 		BasicQuery: mustNewQuery(queryTypeListItem),
@@ -155,7 +155,7 @@ func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-2", "PushEvent")))
+	syncTestItem(t, stack, ctx, "q-2", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetItemQuery{
 		BasicQuery: mustNewQuery(queryTypeGetItem),
@@ -180,7 +180,7 @@ func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-3", "PushEvent")))
+	syncTestItem(t, stack, ctx, "q-3", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
 		BasicQuery: mustNewQuery(queryTypeCountItem),
@@ -204,7 +204,7 @@ func TestQueryDispatcher_GetTypes_ThroughDispatcher(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("q-4", "PushEvent")))
+	syncTestItem(t, stack, ctx, "q-4", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
 		BasicQuery: mustNewQuery(queryTypeGetTypes),

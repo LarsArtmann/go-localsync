@@ -16,9 +16,7 @@ import (
 func assertLen(t *testing.T, rm *MemoryReadModel, want int) {
 	t.Helper()
 
-	if rm.Len() != want {
-		t.Errorf("expected Len=%d, got %d", want, rm.Len())
-	}
+	testutil.AssertInt(t, rm.Len(), want, "Len")
 }
 
 func assertNotFound(t *testing.T, err error, got *model.Item) {
@@ -113,29 +111,21 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	pushTypeFilter := id.NewEventTypeID("PushEvent")
 	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushTypeFilter})
 	testutil.MustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items")
 
 	sourceFilter := id.NewProviderID("github")
 	items, err = rm.List(ctx, provider.ItemFilter{Source: &sourceFilter})
 	testutil.MustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items")
 
 	actorFilter := id.NewActorID("alice")
 	items, err = rm.List(ctx, provider.ItemFilter{ActorLogin: &actorFilter})
 	testutil.MustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items")
 
 	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2})
 	testutil.MustNoError(t, err)
-	if len(items) != 2 {
-		t.Errorf("expected 2 items, got %d", len(items))
-	}
+	testutil.AssertLen(t, items, 2, "items")
 
 	items, err = rm.List(ctx, provider.ItemFilter{Offset: 10})
 	testutil.MustNoError(t, err)
@@ -155,16 +145,12 @@ func TestMemoryReadModel_Count(t *testing.T) {
 
 	count, err := rm.Count(ctx, provider.ItemFilter{})
 	testutil.MustNoError(t, err)
-	if count != 2 {
-		t.Errorf("expected count=2, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 2, "count")
 
 	pushTypeFilter := id.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushTypeFilter})
 	testutil.MustNoError(t, err)
-	if count != 1 {
-		t.Errorf("expected count=1, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 1, "count")
 }
 
 func TestMemoryReadModel_GetTypes(t *testing.T) {
@@ -179,9 +165,7 @@ func TestMemoryReadModel_GetTypes(t *testing.T) {
 
 	result, err := rm.GetTypes(ctx)
 	testutil.MustNoError(t, err)
-	if len(result) != 2 {
-		t.Fatalf("expected 2 types, got %d", len(result))
-	}
+	testutil.AssertLen(t, result, 2, "types")
 	if result[0] != "IssueEvent" || result[1] != "PushEvent" {
 		t.Errorf("expected [IssueEvent, PushEvent], got %v", result)
 	}
@@ -295,9 +279,7 @@ func TestReadModel_Integration(t *testing.T) {
 	decide := DecideSync(ToDataItem(item), nil, nil)
 	events, err := decide(InitialState, 0)
 	testutil.MustNoError(t, err)
-	if len(events) != 1 {
-		t.Fatalf("expected 1 event, got %d", len(events))
-	}
+	testutil.RequireLen(t, events, 1)
 
 	for _, evt := range events {
 		testutil.MustNoError(t, proj.Handle(ctx, evt))

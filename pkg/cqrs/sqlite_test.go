@@ -18,12 +18,7 @@ func TestCQRSStack_SQLiteBackend_SyncAndDelete(t *testing.T) {
 	defer func() { _ = stack.Close() }()
 
 	ctx := context.Background()
-	items := []*provider.Item{
-		testItem("1", "PushEvent"),
-		testItem("2", "IssueEvent"),
-	}
-
-	result := stack.SyncItems(ctx, items)
+	result := stack.SyncItems(ctx, testItems("1", "PushEvent", "2", "IssueEvent"))
 	if result.Synced != 2 {
 		t.Errorf("expected Synced=2, got %d", result.Synced)
 	}
@@ -49,8 +44,8 @@ func TestCQRSStack_SQLiteLocalStore_SyncAndReadModel(t *testing.T) {
 
 	ctx := context.Background()
 
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("1", "PushEvent")))
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("2", "IssueEvent")))
+	syncTestItem(t, stack, ctx, "1", "PushEvent")
+	syncTestItem(t, stack, ctx, "2", "IssueEvent")
 
 	waitForCount(t, stack, ctx, 2)
 
@@ -69,7 +64,7 @@ func TestCQRSStack_Projection_SubscribesEvents(t *testing.T) {
 
 	ctx := context.Background()
 
-	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("outbox-1", "PushEvent")))
+	syncTestItem(t, stack, ctx, "outbox-1", "PushEvent")
 
 	waitForCount(t, stack, ctx, 1)
 

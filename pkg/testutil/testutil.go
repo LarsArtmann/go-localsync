@@ -7,6 +7,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"testing"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
@@ -27,6 +28,29 @@ func AssertEqual[T comparable](t *testing.T, got, want T, label string) {
 
 	if got != want {
 		t.Errorf("expected %s=%v, got %v", label, want, got)
+	}
+}
+
+// AssertInt is shorthand for AssertEqual with int values.
+func AssertInt(t *testing.T, got, want int, label string) {
+	t.Helper()
+
+	AssertEqual(t, got, want, label)
+}
+
+// AssertInt64 is shorthand for AssertEqual with int64 values.
+func AssertInt64(t *testing.T, got, want int64, label string) {
+	t.Helper()
+
+	AssertEqual(t, got, want, label)
+}
+
+// AssertContains fails the test if needle is not found in haystack.
+func AssertContains[T comparable](t *testing.T, haystack []T, needle T, label string) {
+	t.Helper()
+
+	if !slices.Contains(haystack, needle) {
+		t.Errorf("expected %s to contain %v, got %v", label, needle, haystack)
 	}
 }
 
@@ -66,6 +90,17 @@ func AssertLen[T any](t *testing.T, got []T, want int, label string) {
 
 	if len(got) != want {
 		t.Errorf("expected %s count=%d, got %d", label, want, len(got))
+	}
+}
+
+// RequireLen fails the test (using Fatalf) if len(got) != want.
+// Use for assertions where the test cannot continue if the length is wrong
+// (e.g. accessing events[0] afterwards).
+func RequireLen[T any](t *testing.T, got []T, want int) {
+	t.Helper()
+
+	if len(got) != want {
+		t.Fatalf("expected %d events, got %d", want, len(got))
 	}
 }
 

@@ -97,6 +97,23 @@ func testSyncItem(externalID, eventType string) *provider.Item {
 	}
 }
 
+// testSyncItems constructs a slice of test sync items from (externalID, eventType) pairs.
+//
+//	testSyncItems("1", "PushEvent", "2", "IssueEvent")
+func testSyncItems(pairs ...string) []*provider.Item {
+	if len(pairs)%2 != 0 {
+		panic("testSyncItems requires an even number of arguments (id, type pairs)")
+	}
+
+	items := make([]*provider.Item, 0, len(pairs)/2)
+	for i := 0; i < len(pairs); i += 2 {
+		//nolint:gosec // i+1 is safe: len(pairs)%2==0 is checked above.
+		items = append(items, testSyncItem(pairs[i], pairs[i+1]))
+	}
+
+	return items
+}
+
 func testDataItem(externalID, eventType string) *model.Item {
 	now := time.Now()
 
@@ -116,10 +133,7 @@ func testDataItem(externalID, eventType string) *model.Item {
 func TestSyncer_Sync(t *testing.T) {
 	t.Parallel()
 
-	items := []*provider.Item{
-		testSyncItem("1", "PushEvent"),
-		testSyncItem("2", "IssueEvent"),
-	}
+	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
 
 	syncer, store := newTestSyncer(items)
 	defer func() { _ = syncer.Close() }()
@@ -129,14 +143,10 @@ func TestSyncer_Sync(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 2 {
-		t.Errorf("expected Fetched=2, got %d", result.Fetched)
-	}
+	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
 
 	count, _ := store.Count(ctx, provider.ItemFilter{})
-	if count != 2 {
-		t.Errorf("expected count=2, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 2, "count")
 }
 
 func TestSyncer_Sync_EmptyResult(t *testing.T) {
@@ -150,12 +160,8 @@ func TestSyncer_Sync_EmptyResult(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 0 {
-		t.Errorf("expected Fetched=0, got %d", result.Fetched)
-	}
-	if result.Errors != 0 {
-		t.Errorf("expected Errors=0, got %d", result.Errors)
-	}
+	testutil.AssertInt(t, result.Fetched, 0, "Fetched")
+	testutil.AssertInt(t, result.Errors, 0, "Errors")
 }
 
 func TestSyncer_Sync_InvalidItem(t *testing.T) {
@@ -173,12 +179,8 @@ func TestSyncer_Sync_InvalidItem(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 1 {
-		t.Errorf("expected Fetched=1, got %d", result.Fetched)
-	}
-	if result.Errors != 1 {
-		t.Errorf("expected Errors=1, got %d", result.Errors)
-	}
+	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
+	testutil.AssertInt(t, result.Errors, 1, "Errors")
 }
 
 func TestSyncer_Sync_NilOptions(t *testing.T) {
@@ -206,24 +208,16 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if result.Fetched != 1 {
-		t.Errorf("expected Fetched=1, got %d", result.Fetched)
-	}
+	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
 
 	count, _ := store.Count(ctx, provider.ItemFilter{})
-	if count != 1 {
-		t.Errorf("expected count=1, got %d", count)
-	}
+	testutil.AssertInt64(t, count, 1, "count")
 }
 
 func TestSyncer_GetStats(t *testing.T) {
 	t.Parallel()
 
-	items := []*provider.Item{
-		testSyncItem("1", "PushEvent"),
-		testSyncItem("2", "IssueEvent"),
-		testSyncItem("3", "PushEvent"),
-	}
+	items := testSyncItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	syncer, _ := newTestSyncer(items)
 	defer func() { _ = syncer.Close() }()
@@ -238,27 +232,9 @@ func TestSyncer_GetStats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if stats.TotalItems != 3 {
-		t.Errorf("expected TotalItems=3, got %d", stats.TotalItems)
-	}
-	found := false
-	for _, t := range stats.ItemTypes {
-		if t == "PushEvent" {
-			found = true
-		}
-	}
-	if !found {
-		t.Errorf("expected ItemTypes to contain PushEvent, got %v", stats.ItemTypes)
-	}
-	found = false
-	for _, t := range stats.ItemTypes {
-		if t == "IssueEvent" {
-			found = true
-		}
-	}
-	if !found {
-		t.Errorf("expected ItemTypes to contain IssueEvent, got %v", stats.ItemTypes)
-	}
+	testutil.AssertInt64(t, stats.TotalItems, 3, "TotalItems")
+	testutil.AssertContains(t, stats.ItemTypes, "PushEvent", "ItemTypes")
+	testutil.AssertContains(t, stats.ItemTypes, "IssueEvent", "ItemTypes")
 }
 
 func TestSyncer_Close(t *testing.T) {
