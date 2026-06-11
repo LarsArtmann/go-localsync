@@ -107,6 +107,7 @@ func main() {
 	}
 
 	var resolver crdt.ConflictResolver[*model.Item]
+
 	if *conflictStrategy == "lww" {
 		lww, lwwErr := crdt.NewLWWResolver[*model.Item](func(i *model.Item) time.Time {
 			return i.UpdatedAt
@@ -118,7 +119,6 @@ func main() {
 		resolver = lww
 	}
 
-	//nolint:exhaustruct // ConflictResolver may be nil (uses default remote-wins)
 	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
 		Backend:          *backend,
 		DBPath:           *dbPath,

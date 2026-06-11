@@ -1,12 +1,15 @@
 package cqrs
+
 import (
 	"context"
 	"fmt"
 	"testing"
 	"time"
+
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
+
 func benchItems(n int) []*provider.Item {
 	items := make([]*provider.Item, n)
 	for i := range n {
@@ -24,6 +27,7 @@ func benchItems(n int) []*provider.Item {
 	}
 	return items
 }
+
 func BenchmarkSyncItems(b *testing.B) {
 	for _, size := range []int{1, 10, 100} {
 		b.Run(fmt.Sprintf("n=%d", size), func(b *testing.B) {
@@ -41,6 +45,7 @@ func BenchmarkSyncItems(b *testing.B) {
 		})
 	}
 }
+
 func BenchmarkSyncItems_ExistingItems(b *testing.B) {
 	ctx := context.Background()
 	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory"})

@@ -194,7 +194,8 @@ func TestIntegration_APIFilterAndPagination(t *testing.T) {
 			Total int64           `json:"total"`
 		}
 
-		if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		err := json.Unmarshal(rec.Body.Bytes(), &body)
+		if err != nil {
 			t.Fatalf("unmarshal: %v", err)
 		}
 
@@ -215,7 +216,8 @@ func TestIntegration_APIFilterAndPagination(t *testing.T) {
 			Total int64           `json:"total"`
 		}
 
-		if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		err := json.Unmarshal(rec.Body.Bytes(), &body)
+		if err != nil {
 			t.Fatalf("unmarshal: %v", err)
 		}
 

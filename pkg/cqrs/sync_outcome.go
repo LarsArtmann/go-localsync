@@ -53,6 +53,7 @@ func decideWithOutcome(
 				if err := json.Unmarshal(events[0].Payload(), &cp); err != nil {
 					return nil, fmt.Errorf("decode conflict payload: %w", err)
 				}
+
 				outcome.ConflictWinner = ConflictWinner(cp.Winner)
 			}
 		}

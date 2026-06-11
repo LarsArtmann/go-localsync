@@ -15,8 +15,8 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/api"
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
-	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
@@ -181,7 +181,7 @@ func runAPIServer(
 	logger.Info("Starting API server", "address", addr)
 
 	if err := httpServer.ListenAndServe(); err != nil {
-		if err == http.ErrServerClosed {
+		if errors.Is(err, http.ErrServerClosed) {
 			logger.Info("API server stopped")
 
 			return

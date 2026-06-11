@@ -1,14 +1,17 @@
 package cqrs
+
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"testing"
 	"time"
+
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	_ "modernc.org/sqlite"
 )
+
 func benchmarkReadModelList(b *testing.B, rm ReadModel) {
 	b.Helper()
 	ctx := context.Background()
@@ -34,10 +37,12 @@ func benchmarkReadModelList(b *testing.B, rm ReadModel) {
 		}
 	}
 }
+
 func BenchmarkMemoryReadModel_List(b *testing.B) {
 	rm := NewMemoryReadModel()
 	benchmarkReadModelList(b, rm)
 }
+
 func BenchmarkSQLiteReadModel_List(b *testing.B) {
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {

@@ -300,9 +300,9 @@ func TestHasChanged(t *testing.T) {
 	}
 
 	tests := []struct {
-		name  string
-		mut   func(remote *model.Item)
-		want  bool
+		name string
+		mut  func(remote *model.Item)
+		want bool
 	}{
 		{
 			name: "identical items",
@@ -335,9 +335,9 @@ func TestHasChanged(t *testing.T) {
 			want: true,
 		},
 		{
-			name:  "only ID fields differ (not tracked)",
-			mut:   func(r *model.Item) { r.ExternalID = id.NewExternalID("other") },
-			want:  false,
+			name: "only ID fields differ (not tracked)",
+			mut:  func(r *model.Item) { r.ExternalID = id.NewExternalID("other") },
+			want: false,
 		},
 	}
 
