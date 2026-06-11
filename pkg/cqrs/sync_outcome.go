@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
@@ -49,8 +50,9 @@ func decideWithOutcome(
 
 			if len(events) > 1 {
 				var cp ItemConflictFoundPayload
-
-				_ = json.Unmarshal(events[0].Payload(), &cp)
+				if err := json.Unmarshal(events[0].Payload(), &cp); err != nil {
+					return nil, fmt.Errorf("decode conflict payload: %w", err)
+				}
 				outcome.ConflictWinner = cp.Winner
 			}
 		}

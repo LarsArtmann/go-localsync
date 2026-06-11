@@ -62,5 +62,5 @@ func fromUnixNano(n int64) time.Time {
 		return time.Time{}
 	}
 
-	return time.Unix(0, n)
+	return time.Unix(0, n).UTC()
 }

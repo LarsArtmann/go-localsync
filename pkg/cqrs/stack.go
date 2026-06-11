@@ -150,6 +150,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         ToDataItem(item),
 		RawJSON:      item.RawJSON,
+		Options:      nil,
 	})
 }
 

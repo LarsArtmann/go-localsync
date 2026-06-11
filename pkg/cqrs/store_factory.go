@@ -85,7 +85,7 @@ func createReadModel(cfg CQRSConfig, sr storeResult) (ReadModel, error) {
 			return NewSQLiteReadModel(sr.db)
 		}
 
-		return nil, fmt.Errorf("%w", errSQLiteRequiresDB)
+		return nil, errSQLiteRequiresDB
 	}
 
 	return NewMemoryReadModel(), nil
