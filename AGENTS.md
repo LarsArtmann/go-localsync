@@ -8,17 +8,17 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## Architecture
 
-| Package                     | Purpose                                                                                                                                         |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy** |
-| `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2** (Decider, ReadModel, Projector, CQRSStack, Runner), split into focused files (middleware.go, commands.go, queries.go, sqlite_*.go) |
-| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                                           |
-| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                        |
-| `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`        |
-| `pkg/id/`                   | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                                 |
-| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`        |
-| `cmd/examples/github-sync/` | Example CLI entry point (sync mode + HTTP server mode via `-server`)                                                                            |
+| Package                     | Purpose                                                                                                                                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy**                                       |
+| `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                          |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2** (Decider, ReadModel, Projector, CQRSStack, Runner), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go) |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                                                                                 |
+| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                                                              |
+| `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`                                              |
+| `pkg/id/`                   | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                                                                       |
+| `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                              |
+| `cmd/examples/github-sync/` | Example CLI entry point (sync mode + HTTP server mode via `-server`)                                                                                                                  |
 
 ### SyncStore Interface Seam
 
@@ -37,19 +37,19 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`
 - `readmodel.go` — `ReadModel` interface + `ItemFilter`, stores `*provider.Item` directly
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
-- `turso_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
+- `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `event.Projection`, wired via direct bus subscription + `projection.Runner` for replay
 - `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, dual projection runner, SQL snapshots/checkpoints, event logging middleware, correlation IDs
-- `runner.go` — Unified projection subscription: direct `bus.SubscribeAll` for synchronous event delivery, plus `projection.Runner` for journal replay (Turso backend)
-- `commands_queries.go` — typed `SyncItemCommand`/`DeleteItemCommand` via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
+- `runner.go` — Unified projection subscription: direct `bus.SubscribeAll` for synchronous event delivery, plus `projection.Runner` for journal replay (SQLite backend)
+- `commands.go` + `queries.go` + `middleware.go` — typed `SyncItemCommand`/`DeleteItemCommand` via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
 
 ### Key Properties
 
 - **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
 - **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
 - **Delete + resurrect**: deleted items reappear with updated state
-- **Projection runner**: Turso uses `projection.Runner` with global replay + live subscription. Memory uses direct `bus.SubscribeAll`. Both paths subscribe synchronously to avoid race conditions.
-- **SQL persistence**: Turso backend persists snapshots (`SQLSnapshotStore`), checkpoints (`SQLCheckpointStore`) via `snapshot/v2` and `storage/v2` modules.
+- **Projection runner**: SQLite uses `projection.Runner` with global replay + live subscription. Memory uses direct `bus.SubscribeAll`. Both paths subscribe synchronously to avoid race conditions.
+- **SQL persistence**: SQLite backend persists snapshots (`SQLSnapshotStore`), checkpoints (`SQLCheckpointStore`) via `snapshot/v2` and `storage/v2` modules.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Command dispatch**: `SyncItem`/`DeleteItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
 - **Query dispatch**: Read model queries dispatched through `query.Dispatcher` with typed queries. Enables logging, metrics middleware.
@@ -112,13 +112,13 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package                    | Tests | Coverage | Status                                                                                                    |
 | -------------------------- | ----- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`                 | ~85   | ~85%     | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Runner, Correlation, CRDT Resolver, Concurrent Access |
+| `pkg/cqrs`                 | ~85   | ~85%     | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Runner, Correlation, CRDT Resolver, Concurrent Access |
 | `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                                  |
 | `pkg/sync`                 | 22    | 91.0%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                            |
 | `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                |
 | `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                           |
 | `pkg/provider`             | 2     | 95.8%    | ✅ Item validation                                                                                        |
-| `pkg/api`                  | ~15   | 92.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests          |
+| `pkg/api`                  | ~15   | 92.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                          |
 | `pkg/crdt`                 | ~55   | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                               |
 | `pkg/data/model`           | ~12   | 100%     | ✅ Item, Key, Validate, ItemFilter builder                                                                |
 | `cmd/examples/github-sync` | 14    | 12.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON                          |
@@ -134,7 +134,7 @@ Storage backends are selected via `CQRSConfig.Backend` in `cqrs.NewCQRSStack()`.
 | Backend  | Flag/Config        | Use Case                                |
 | -------- | ------------------ | --------------------------------------- |
 | `memory` | `--backend memory` | Testing, development (default)          |
-| `turso`  | `--backend turso`  | Local SQLite/Turso file or remote Turso |
+| `sqlite` | `--backend sqlite` | Local SQLite file via modernc.org/sqlite |
 
 Event store + read model use the same backend.
 
@@ -142,7 +142,7 @@ Event store + read model use the same backend.
 
 ```bash
 go run ./cmd/examples/github-sync --backend memory
-go run ./cmd/examples/github-sync --backend turso --db ./data.db
+go run ./cmd/examples/github-sync --backend sqlite --db ./data.db
 ```
 
 ## Provider Development
@@ -214,11 +214,11 @@ Two tables managed by the CQRS stack:
 | IDs            | `id.ID[B, V]` via go-branded-id directly                                                                | `id.Of[T]` — same memory layout                        |
 | Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                       | `event.Store` + `event.Bus` via memory/storage modules |
 | Conflict       | `DecideSync` produces ItemConflictFound events                                                          | Error taxonomy with 5 families                         |
-| Read Model     | `MemoryReadModel` + `TursoReadModel` with filter/pagination                                             | Projected from events via InMemoryRunner               |
+| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                             | Projected from events via InMemoryRunner               |
 | SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`ListItems`, `CountItems`, `GetItemTypes`) | `sync.SyncStore` interface defined in consumer package |
 | SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                   | Types defined in `pkg/sync/`, not `pkg/cqrs/`          |
 | Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                        | Eliminates all manual json.Marshal/Unmarshal           |
-| Projection     | Direct `bus.SubscribeAll` (sync) + `projection.Runner` (Turso replay), SQL checkpoints                  | Replay from store on restart + live subscription       |
+| Projection     | Direct `bus.SubscribeAll` (sync) + `projection.Runner` (SQLite replay), SQL checkpoints                  | Replay from store on restart + live subscription       |
 | Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                | Caps replay cost, persists across restarts             |
 | Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                | Unique per sync run for debugging                      |
 | Logging        | `middleware.EventLogging` via charm log adapter                                                         | Structured logging of all domain events                |
@@ -387,21 +387,21 @@ golangci-lint v2 reports **0 issues** across all 11 packages. Config is strict w
 
 ### File Structure Changes
 
-| Before | After |
-|--------|-------|
-| `commands_queries.go` (299 lines) | `middleware.go` + `commands.go` + `queries.go` |
-| `server.go` (311 lines) | `server.go` + `dto.go` + `handlers.go` |
-| `sqlite_readmodel.go` (337 lines) | `sqlite_readmodel.go` + `sqlite_query.go` + `sqlite_scan.go` |
-| No ADR documents | `docs/adr/0001-cqrs-adoption.md` + `0002-branded-ids.md` + `0003-crdt-integration.md` |
-| API coverage 85.7% | API coverage 92.4% |
+| Before                            | After                                                                                 |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| `commands_queries.go` (299 lines) | `middleware.go` + `commands.go` + `queries.go`                                        |
+| `server.go` (311 lines)           | `server.go` + `dto.go` + `handlers.go`                                                |
+| `sqlite_readmodel.go` (337 lines) | `sqlite_readmodel.go` + `sqlite_query.go` + `sqlite_scan.go`                          |
+| No ADR documents                  | `docs/adr/0001-cqrs-adoption.md` + `0002-branded-ids.md` + `0003-crdt-integration.md` |
+| API coverage 85.7%                | API coverage 92.4%                                                                    |
 
 ### Coverage
 
-| Package | Before | After |
-|---------|--------|-------|
-| `pkg/api` | 85.7% | **92.4%** (+6.7%) |
-| `pkg/data/model` | ~75% | **100%** |
-| All others | Unchanged | Same or better |
+| Package          | Before    | After             |
+| ---------------- | --------- | ----------------- |
+| `pkg/api`        | 85.7%     | **92.4%** (+6.7%) |
+| `pkg/data/model` | ~75%      | **100%**          |
+| All others       | Unchanged | Same or better    |
 
 ## Session 14 — 2026-06-11: Architecture Refactoring Sprint
 

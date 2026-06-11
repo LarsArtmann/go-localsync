@@ -167,7 +167,7 @@
 - Error taxonomy gives meaningful CLI exit codes and smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
 - Projection runner with replay + live subscription for crash-safe sqlite persistence
-- 235 tests with good coverage across all packages
+- 283 tests with good coverage across all packages
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 
 ### Known Gaps
@@ -178,7 +178,7 @@
 | Multi-user sync | CLI accepts one `-user` flag. No multi-user support. | Cannot sync events for multiple users in one run |
 | No daemon mode | No cron/systemd integration for periodic sync | Must run manually or wrap in external scheduler |
 | No data export | No JSON/CSV export of stored events | Cannot export for analysis in external tools |
-| CLI coverage | `cmd/examples/github-sync` at 10.3% coverage | Main sync/stats/server flows untested |
+| CLI coverage | `cmd/examples/github-sync` at 12.3% coverage | Main sync/stats/server flows untested |
 | No observability | No OpenTelemetry, no metrics, no tracing | Production debugging requires log spelunking |
 | API has no auth | HTTP API has no authentication middleware | Not safe to expose on a network |
 | go-cqrs-lite WIP | Upstream v2 migration complete — modules restructured into independent versioned paths | May require further adjustments as upstream stabilizes |
