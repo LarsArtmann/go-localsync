@@ -19,6 +19,8 @@ type mockSyncStore struct {
 	testutil.SyncStoreListBehavior
 
 	synced       []*provider.Item
+	actions      []SyncAction
+	actionIdx    int
 	countErr     error
 	typeCountErr error
 	closeErr     error
@@ -28,12 +30,27 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 	summary := &SyncSummary{Results: make([]ItemSyncResult, 0, len(items))}
 
 	for _, item := range items {
-		m.synced = append(m.synced, item)
-		summary.Synced++
+		action := ActionCreated
+		if len(m.actions) > 0 && m.actionIdx < len(m.actions) {
+			action = m.actions[m.actionIdx]
+			m.actionIdx++
+		}
+
+		if action != ActionError {
+			m.synced = append(m.synced, item)
+		}
+
 		summary.Results = append(summary.Results, ItemSyncResult{
 			SourceID: item.ExternalID.Get(),
-			Action:   ActionCreated,
+			Action:   action,
 		})
+		switch action {
+		case ActionCreated, ActionUpdated, ActionConflictRemote, ActionConflictLocal:
+			summary.Synced++
+		case ActionError:
+			summary.Errors++
+		case ActionUnchanged:
+		}
 	}
 
 	return summary
@@ -101,17 +118,7 @@ func testSyncItem(externalID, eventType string) *provider.Item {
 //
 //	testSyncItems("1", "PushEvent", "2", "IssueEvent")
 func testSyncItems(pairs ...string) []*provider.Item {
-	if len(pairs)%2 != 0 {
-		panic("testSyncItems requires an even number of arguments (id, type pairs)")
-	}
-
-	items := make([]*provider.Item, 0, len(pairs)/2)
-	for i := 0; i < len(pairs); i += 2 {
-		//nolint:gosec // i+1 is safe: len(pairs)%2==0 is checked above.
-		items = append(items, testSyncItem(pairs[i], pairs[i+1]))
-	}
-
-	return items
+	return testutil.BuildPairs(testSyncItem, pairs...)
 }
 
 func testDataItem(externalID, eventType string) *model.Item {

@@ -162,16 +162,7 @@ func syncTestItemsResult(t *testing.T, stack *CQRSStack, ctx context.Context, pa
 //
 //	testItems("1", "PushEvent", "2", "IssueEvent")
 func testItems(pairs ...string) []*provider.Item {
-	if len(pairs)%2 != 0 {
-		panic("testItems requires an even number of arguments (id, type pairs)")
-	}
-
-	items := make([]*provider.Item, 0, len(pairs)/2)
-	for i := 0; i < len(pairs); i += 2 {
-		items = append(items, testItem(pairs[i], pairs[i+1]))
-	}
-
-	return items
+	return testutil.BuildPairs(testItem, pairs...)
 }
 
 func testDataItem(sourceID, itemType string) *model.Item {

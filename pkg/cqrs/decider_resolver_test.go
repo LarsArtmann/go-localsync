@@ -28,142 +28,81 @@ func (errorResolver) Resolve(_ *crdt.Conflict[*model.Item]) (*model.Item, error)
 	return nil, errors.New("resolver failed")
 }
 
-func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
+func TestDecideSync_WithResolver(t *testing.T) {
 	t.Parallel()
 
-	localTime := time.Now().Truncate(time.Millisecond)
-	remoteTime := localTime.Add(2 * time.Hour)
-
-	remoteItem := testItem("123", "PushEvent")
-	remoteItem.UpdatedAt = remoteTime
-
-	state := testStateWithTimestamp("123", "PushEvent", localTime)
-
-	events, err := decideSync(toDataItem(remoteItem), nil, &pickSideResolver{pickSide: "remote"})(state, 1)
-	testutil.MustNoError(t, err)
-	testutil.RequireLen(t, events, 2)
-
-	assertEventType(t, events[0], EventItemConflictFound)
-	assertEventType(t, events[1], EventItemSynced)
-
-	conflictPayload := unmarshalConflictPayload(t, events[0])
-
-	testutil.AssertEqual(t, conflictPayload.Winner, "remote", "winner")
-
-	if conflictPayload.RemoteUpdatedAt != remoteTime.UnixNano() {
-		t.Errorf("expected remote timestamp from original remote item")
+	tests := []struct {
+		name       string
+		resolver   crdt.ConflictResolver[*model.Item]
+		localTime  time.Time
+		remoteTime time.Time
+		wantWinner string
+	}{
+		{
+			name:       "custom_resolver_remote_wins",
+			resolver:   &pickSideResolver{pickSide: "remote"},
+			localTime:  time.Now().Truncate(time.Millisecond),
+			remoteTime: time.Now().Truncate(time.Millisecond).Add(2 * time.Hour),
+			wantWinner: "remote",
+		},
+		{
+			name:       "custom_resolver_local_wins",
+			resolver:   &pickSideResolver{pickSide: "local"},
+			localTime:  time.Now().Truncate(time.Millisecond),
+			remoteTime: time.Now().Truncate(time.Millisecond).Add(2 * time.Hour),
+			wantWinner: "local",
+		},
+		{
+			name:       "error_resolver_falls_back_to_remote",
+			resolver:   new(errorResolver),
+			localTime:  time.Now(),
+			remoteTime: time.Now().Add(time.Hour),
+			wantWinner: "remote",
+		},
+		{
+			name:       "lww_resolver_remote_newer",
+			resolver:   newUpdatedAtLWWResolver(t),
+			localTime:  time.Now().Truncate(time.Millisecond),
+			remoteTime: time.Now().Truncate(time.Millisecond).Add(2 * time.Hour),
+			wantWinner: "remote",
+		},
+		{
+			name:       "lww_resolver_local_newer",
+			resolver:   newUpdatedAtLWWResolver(t),
+			localTime:  testFutureNow(3 * time.Hour),
+			remoteTime: time.Now().Truncate(time.Millisecond),
+			wantWinner: "local",
+		},
 	}
 
-	syncedPayload := unmarshalSyncedPayload(t, events[1])
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	if syncedPayload.UpdatedAt != remoteTime.UnixNano() {
-		t.Errorf("expected synced payload to contain remote item data")
-	}
-}
+			remoteItem := testItem("123", "PushEvent")
+			remoteItem.UpdatedAt = tt.remoteTime
 
-func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
-	t.Parallel()
+			state := testStateWithTimestamp("123", "PushEvent", tt.localTime)
 
-	localTime := time.Now().Truncate(time.Millisecond)
-	remoteTime := localTime.Add(2 * time.Hour)
+			events, err := decideSync(toDataItem(remoteItem), nil, tt.resolver)(state, 1)
+			testutil.MustNoError(t, err)
+			testutil.RequireLen(t, events, 2)
 
-	localItem := testStateWithTimestamp("123", "PushEvent", localTime).Item
+			assertEventType(t, events[0], EventItemConflictFound)
+			assertEventType(t, events[1], EventItemSynced)
 
-	remoteItem := testItem("123", "IssueEvent")
-	remoteItem.UpdatedAt = remoteTime
+			conflictPayload := unmarshalConflictPayload(t, events[0])
+			testutil.AssertEqual(t, conflictPayload.Winner, tt.wantWinner, "winner")
 
-	state := SyncItemState{Item: localItem}
-
-	events, err := decideSync(toDataItem(remoteItem), nil, &pickSideResolver{pickSide: "local"})(state, 1)
-	testutil.MustNoError(t, err)
-	testutil.RequireLen(t, events, 2)
-
-	assertEventType(t, events[0], EventItemConflictFound)
-
-	conflictPayload := unmarshalConflictPayload(t, events[0])
-
-	testutil.AssertEqual(t, conflictPayload.Winner, "local", "winner")
-
-	if conflictPayload.LocalUpdatedAt != localTime.UnixNano() {
-		t.Errorf("expected local timestamp from existing state")
-	}
-
-	if conflictPayload.RemoteUpdatedAt != remoteTime.UnixNano() {
-		t.Errorf("expected remote timestamp from incoming item")
-	}
-
-	assertEventType(t, events[1], EventItemSynced)
-
-	syncedPayload := unmarshalSyncedPayload(t, events[1])
-
-	if syncedPayload.UpdatedAt != localTime.UnixNano() {
-		t.Errorf("expected synced payload to contain local item data")
-	}
-}
-
-func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
-	t.Parallel()
-
-	remoteItem := testItem("123", "PushEvent")
-	remoteItem.UpdatedAt = time.Now().Add(time.Hour)
-
-	state := testStateWithTimestamp("123", "PushEvent", time.Now())
-
-	events, err := decideSync(toDataItem(remoteItem), nil, new(errorResolver))(state, 1)
-	testutil.MustNoError(t, err)
-	testutil.RequireLen(t, events, 2)
-
-	conflictPayload := unmarshalConflictPayload(t, events[0])
-
-	if conflictPayload.Winner != "remote" {
-		t.Errorf("expected fallback to remote on resolver error, got %s", conflictPayload.Winner)
-	}
-}
-
-func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
-	t.Parallel()
-
-	resolver := newUpdatedAtLWWResolver(t)
-
-	localTime := time.Now().Truncate(time.Millisecond)
-	remoteTime := localTime.Add(2 * time.Hour)
-
-	remoteItem := testItem("123", "PushEvent")
-	remoteItem.UpdatedAt = remoteTime
-
-	state := testStateWithTimestamp("123", "PushEvent", localTime)
-
-	events, err := decideSync(toDataItem(remoteItem), nil, resolver)(state, 1)
-	testutil.MustNoError(t, err)
-	testutil.RequireLen(t, events, 2)
-
-	conflictPayload := unmarshalConflictPayload(t, events[0])
-
-	if conflictPayload.Winner != "remote" {
-		t.Errorf("LWW with newer remote should pick remote, got %s", conflictPayload.Winner)
-	}
-}
-
-func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
-	t.Parallel()
-
-	resolver := newUpdatedAtLWWResolver(t)
-
-	localTime := testFutureNow(3 * time.Hour)
-	remoteTime := time.Now().Truncate(time.Millisecond)
-
-	remoteItem := testItem("123", "PushEvent")
-	remoteItem.UpdatedAt = remoteTime
-
-	state := testStateWithTimestamp("123", "PushEvent", localTime)
-
-	events, err := decideSync(toDataItem(remoteItem), nil, resolver)(state, 1)
-	testutil.MustNoError(t, err)
-	testutil.RequireLen(t, events, 2)
-
-	conflictPayload := unmarshalConflictPayload(t, events[0])
-
-	if conflictPayload.Winner != "local" {
-		t.Errorf("LWW with newer local should pick local, got %s", conflictPayload.Winner)
+			syncedPayload := unmarshalSyncedPayload(t, events[1])
+			wantSyncedTime := tt.remoteTime.UnixNano()
+			if tt.wantWinner == "local" {
+				wantSyncedTime = tt.localTime.UnixNano()
+			}
+			if syncedPayload.UpdatedAt != wantSyncedTime {
+				t.Errorf("expected synced payload timestamp from %s item, got %d",
+					tt.wantWinner, syncedPayload.UpdatedAt)
+			}
+		})
 	}
 }

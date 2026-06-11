@@ -21,11 +21,14 @@ func assertLen(t *testing.T, rm *MemoryReadModel, want int) {
 func assertNotFound(t *testing.T, err error, got *model.Item) {
 	t.Helper()
 
+	if err == nil {
+		t.Fatal("expected ErrNotFound, got nil")
+	}
 	if !errors.Is(err, pkgerrors.ErrNotFound) {
 		t.Fatalf("expected ErrNotFound, got: %v", err)
 	}
 	if got != nil {
-		t.Error("expected nil item")
+		t.Fatal("expected nil item")
 	}
 }
 

@@ -77,46 +77,37 @@ func wireQueryDispatcher(rm ReadModel) (*query.Dispatcher, error) {
 	return dispatcher, nil
 }
 
-func handleListItems(rm ReadModel) query.Handler {
+func typedQueryHandler[T query.Query](name string, fn func(ctx context.Context, q T) (any, error)) query.Handler {
 	return func(ctx context.Context, q query.Query) (any, error) {
-		lq, ok := q.(*ListItemsQuery)
+		typed, ok := q.(T)
 		if !ok {
-			return nil, fmt.Errorf("expected *ListItemsQuery, got %T: %w", q, errQueryTypeMismatch)
+			return nil, fmt.Errorf("expected %s, got %T: %w", name, q, errQueryTypeMismatch)
 		}
 
-		return rm.List(ctx, lq.Filter)
+		return fn(ctx, typed)
 	}
+}
+
+func handleListItems(rm ReadModel) query.Handler {
+	return typedQueryHandler[*ListItemsQuery]("*ListItemsQuery", func(ctx context.Context, q *ListItemsQuery) (any, error) {
+		return rm.List(ctx, q.Filter)
+	})
 }
 
 func handleGetItem(rm ReadModel) query.Handler {
-	return func(ctx context.Context, q query.Query) (any, error) {
-		gq, ok := q.(*GetItemQuery)
-		if !ok {
-			return nil, fmt.Errorf("expected *GetItemQuery, got %T: %w", q, errQueryTypeMismatch)
-		}
-
-		return rm.Get(ctx, gq.Source, gq.SourceID)
-	}
+	return typedQueryHandler[*GetItemQuery]("*GetItemQuery", func(ctx context.Context, q *GetItemQuery) (any, error) {
+		return rm.Get(ctx, q.Source, q.SourceID)
+	})
 }
 
 func handleCountItems(rm ReadModel) query.Handler {
-	return func(ctx context.Context, q query.Query) (any, error) {
-		cq, ok := q.(*CountItemsQuery)
-		if !ok {
-			return nil, fmt.Errorf("expected *CountItemsQuery, got %T: %w", q, errQueryTypeMismatch)
-		}
-
-		return rm.Count(ctx, cq.Filter)
-	}
+	return typedQueryHandler[*CountItemsQuery]("*CountItemsQuery", func(ctx context.Context, q *CountItemsQuery) (any, error) {
+		return rm.Count(ctx, q.Filter)
+	})
 }
 
 func handleGetTypes(rm ReadModel) query.Handler {
-	return func(ctx context.Context, q query.Query) (any, error) {
-		_, ok := q.(*GetTypesQuery)
-		if !ok {
-			return nil, fmt.Errorf("expected *GetTypesQuery, got %T: %w", q, errQueryTypeMismatch)
-		}
-
+	return typedQueryHandler[*GetTypesQuery]("*GetTypesQuery", func(ctx context.Context, _ *GetTypesQuery) (any, error) {
 		return rm.GetTypes(ctx)
-	}
+	})
 }

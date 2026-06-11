@@ -21,6 +21,18 @@ func TestKeyString(t *testing.T) {
 	}
 }
 
+type isZeroer interface {
+	IsZero() bool
+}
+
+func testIsZero[T isZeroer](t *testing.T, label string, subject T, want bool) {
+	t.Helper()
+
+	if got := subject.IsZero(); got != want {
+		t.Errorf("%s.IsZero() = %v, want %v", label, got, want)
+	}
+}
+
 func TestKeyIsZero(t *testing.T) {
 	t.Parallel()
 
@@ -39,9 +51,7 @@ func TestKeyIsZero(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			if got := tt.key.IsZero(); got != tt.want {
-				t.Errorf("Key.IsZero() = %v, want %v", got, tt.want)
-			}
+			testIsZero(t, "Key", tt.key, tt.want)
 		})
 	}
 }
@@ -104,9 +114,7 @@ func TestItemIsZero(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			if got := tt.item.IsZero(); got != tt.want {
-				t.Errorf("Item.IsZero() = %v, want %v", got, tt.want)
-			}
+			testIsZero(t, "Item", tt.item, tt.want)
 		})
 	}
 }

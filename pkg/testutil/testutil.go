@@ -117,6 +117,21 @@ func WaitForCount(t *testing.T, ctx context.Context, counter func(context.Contex
 	}
 }
 
+// BuildPairs constructs a slice of T from alternating (id, type) string pairs,
+// using the provided factory function. Panics if pairs has odd length.
+func BuildPairs[T any](factory func(id, typ string) T, pairs ...string) []T {
+	if len(pairs)%2 != 0 {
+		panic("BuildPair requires an even number of arguments (id, type pairs)")
+	}
+
+	result := make([]T, 0, len(pairs)/2)
+	for i := 0; i < len(pairs); i += 2 {
+		result = append(result, factory(pairs[i], pairs[i+1]))
+	}
+
+	return result
+}
+
 // AssertPanics fails the test if fn does not panic.
 func AssertPanics(t *testing.T, fn func(), label string) {
 	t.Helper()

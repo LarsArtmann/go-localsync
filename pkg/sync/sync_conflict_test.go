@@ -10,36 +10,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
-type actionMockSyncStore struct {
-	mockSyncStore
-
-	actions []SyncAction
-	errIdx  int
-}
-
-func (m *actionMockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
-	summary := &SyncSummary{Results: make([]ItemSyncResult, 0, len(items))}
-
-	for range items {
-		action := ActionCreated
-		if m.errIdx < len(m.actions) {
-			action = m.actions[m.errIdx]
-			m.errIdx++
-		}
-
-		summary.Results = append(summary.Results, ItemSyncResult{Action: action})
-		switch action {
-		case ActionCreated, ActionUpdated, ActionConflictRemote, ActionConflictLocal:
-			summary.Synced++
-		case ActionError:
-			summary.Errors++
-		case ActionUnchanged:
-		}
-	}
-
-	return summary
-}
-
 func TestConflictAwareSyncer_NewItems(t *testing.T) {
 	t.Parallel()
 
@@ -105,7 +75,7 @@ func TestConflictAwareSyncer_Conflicts(t *testing.T) {
 
 	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
 
-	store := &actionMockSyncStore{actions: []SyncAction{ActionConflictRemote, ActionUnchanged}}
+	store := &mockSyncStore{actions: []SyncAction{ActionConflictRemote, ActionUnchanged}}
 	mockProv := &testutil.MockProvider{Items: items}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)
@@ -127,7 +97,7 @@ func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
 
 	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
 
-	store := &actionMockSyncStore{actions: []SyncAction{ActionCreated, ActionError}}
+	store := &mockSyncStore{actions: []SyncAction{ActionCreated, ActionError}}
 	mockProv := &testutil.MockProvider{Items: items}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	cas := NewConflictAwareSyncer(syncer)

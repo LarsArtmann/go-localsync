@@ -2,13 +2,11 @@ package cqrs
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/storage/v2"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
-	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 	_ "modernc.org/sqlite"
@@ -30,20 +28,6 @@ func newSQLiteTestDB(t *testing.T) *SQLiteReadModel {
 	}
 
 	return rm
-}
-
-func sqliteAssertNotFound(t *testing.T, err error, got *model.Item) {
-	t.Helper()
-
-	if err == nil {
-		t.Fatal("expected ErrNotFound, got nil")
-	}
-	if !errors.Is(err, pkgerrors.ErrNotFound) {
-		t.Fatalf("Get: got %v, want ErrNotFound", err)
-	}
-	if got != nil {
-		t.Fatal("expected nil for missing item")
-	}
 }
 
 func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) *model.Item {
@@ -105,7 +89,7 @@ func TestSQLiteReadModel_Get_NotFound(t *testing.T) {
 	ctx := context.Background()
 
 	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
-	sqliteAssertNotFound(t, err, got)
+	assertNotFound(t, err, got)
 }
 
 func TestSQLiteReadModel_List(t *testing.T) {

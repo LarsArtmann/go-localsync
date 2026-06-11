@@ -159,90 +159,73 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 	}
 }
 
-func TestCQRSStack_SyncItems_ConflictLocal_WithLWWResolver(t *testing.T) {
+func TestCQRSStack_SyncItems_LWWConflictResolution(t *testing.T) {
 	t.Parallel()
 
-	resolver := newUpdatedAtLWWResolver(t)
-
-	stack, stackErr := NewCQRSStack(CQRSConfig{
-		Backend:          "memory",
-		ConflictResolver: resolver,
-	})
-	testutil.MustNoError(t, stackErr)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
-
-	localTime := testFutureNow(3 * time.Hour)
-
-	first := testItem("1", "PushEvent")
-	first.UpdatedAt = localTime
-
-	firstResult := stack.SyncItems(ctx, []*provider.Item{first})
-	if firstResult.Synced != 1 {
-		t.Fatalf("expected Synced=1, got %d", firstResult.Synced)
+	tests := []struct {
+		name             string
+		localTime        time.Time
+		remoteTime       time.Time
+		wantAction       synclib.SyncAction
+		wantWinnerType   string
+	}{
+		{
+			name:           "local_wins_when_newer",
+			localTime:      testFutureNow(3 * time.Hour),
+			remoteTime:     time.Now().Truncate(time.Millisecond),
+			wantAction:     synclib.ActionConflictLocal,
+			wantWinnerType: "PushEvent",
+		},
+		{
+			name:           "remote_wins_when_newer",
+			localTime:      time.Now().Truncate(time.Millisecond),
+			remoteTime:     time.Now().Truncate(time.Millisecond).Add(2 * time.Hour),
+			wantAction:     synclib.ActionConflictRemote,
+			wantWinnerType: "IssueEvent",
+		},
 	}
 
-	remoteTime := time.Now().Truncate(time.Millisecond)
-	updated := testItem("1", "IssueEvent")
-	updated.UpdatedAt = remoteTime
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	second := stack.SyncItems(ctx, []*provider.Item{updated})
-	if second.Conflicts != 1 {
-		t.Errorf("expected Conflicts=1, got %d", second.Conflicts)
+			resolver := newUpdatedAtLWWResolver(t)
+
+			stack, stackErr := NewCQRSStack(CQRSConfig{
+				Backend:          "memory",
+				ConflictResolver: resolver,
+			})
+			testutil.MustNoError(t, stackErr)
+			defer func() { _ = stack.Close() }()
+
+			ctx := context.Background()
+
+			first := testItem("1", "PushEvent")
+			first.UpdatedAt = tt.localTime
+
+			firstResult := stack.SyncItems(ctx, []*provider.Item{first})
+			if firstResult.Synced != 1 {
+				t.Fatalf("expected Synced=1, got %d", firstResult.Synced)
+			}
+
+			updated := testItem("1", "IssueEvent")
+			updated.UpdatedAt = tt.remoteTime
+
+			second := stack.SyncItems(ctx, []*provider.Item{updated})
+			if second.Conflicts != 1 {
+				t.Errorf("expected Conflicts=1, got %d", second.Conflicts)
+			}
+
+			if !hasAction(second, tt.wantAction) {
+				t.Errorf("expected %v in results", tt.wantAction)
+			}
+
+			got, getErr := stack.Get(ctx, "github", id.NewExternalID("1"))
+			testutil.MustNoError(t, getErr)
+
+			testutil.AssertEqual(t, got.Type.Get(), tt.wantWinnerType, "Type")
+		})
 	}
-
-	if !hasAction(second, synclib.ActionConflictLocal) {
-		t.Error("expected ActionConflictLocal in results (local has newer timestamp)")
-	}
-
-	got, getErr := stack.Get(ctx, "github", id.NewExternalID("1"))
-	testutil.MustNoError(t, getErr)
-
-	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type (local preserved)")
-}
-
-func TestCQRSStack_SyncItems_ConflictRemote_WithLWWResolver(t *testing.T) {
-	t.Parallel()
-
-	resolver := newUpdatedAtLWWResolver(t)
-
-	stack, stackErr := NewCQRSStack(CQRSConfig{
-		Backend:          "memory",
-		ConflictResolver: resolver,
-	})
-	testutil.MustNoError(t, stackErr)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
-
-	localTime := time.Now().Truncate(time.Millisecond)
-
-	first := testItem("1", "PushEvent")
-	first.UpdatedAt = localTime
-
-	firstResult := stack.SyncItems(ctx, []*provider.Item{first})
-	if firstResult.Synced != 1 {
-		t.Fatalf("expected Synced=1, got %d", firstResult.Synced)
-	}
-
-	remoteTime := localTime.Add(2 * time.Hour)
-	updated := testItem("1", "IssueEvent")
-	updated.UpdatedAt = remoteTime
-
-	second := stack.SyncItems(ctx, []*provider.Item{updated})
-	if second.Conflicts != 1 {
-		t.Errorf("expected Conflicts=1, got %d", second.Conflicts)
-	}
-
-	if !hasAction(second, synclib.ActionConflictRemote) {
-		t.Error("expected ActionConflictRemote in results (remote has newer timestamp)")
-	}
-
-	got, getErr := stack.Get(ctx, "github", id.NewExternalID("1"))
-	testutil.MustNoError(t, getErr)
-
-	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type (remote applied)")
 }
 
 // hasAction returns true if any result in summary has the given action.
