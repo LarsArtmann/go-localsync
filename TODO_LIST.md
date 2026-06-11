@@ -1,9 +1,8 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-06-11 (session 15)
-**Status:** Active Development
-**Tests:** 283 passing, 11 packages | **Lint:** 0 issues (golangci-lint v2)
+**Last Updated:** 2026-06-12 (session 17)
+**Tests:** 264+ passing, 11 packages | **Lint:** 0 issues (golangci-lint v2, SA5012 crash is pre-existing)
 
 ## Overview
 
@@ -22,10 +21,25 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 
 ### Testing & Quality
 
+- [x] **Add `UpdatedAt` validation to `model.Item.Validate()`** — DONE (session 17)
+      **Source:** `pkg/data/model/item.go`, `pkg/data/model/errors.go`
+      **Description:** Added `UpdatedAt.IsZero()` check to `validateIdentity()`. New sentinel `errMissingUpdatedAt`. 2 new test cases (valid with UpdatedAt, invalid zero UpdatedAt).
+      **Context:** Fixes latent LWW conflict resolution bug where zero-timestamp items passed validation.
+
+- [x] **Fix `WaitForCount` busy-spin in testutil** — DONE (session 17)
+      **Source:** `pkg/testutil/testutil.go`
+      **Description:** Replaced bare `for{}` with proper `select` on `ctx.Done()` + `ticker.C`. Tests can no longer hang forever.
+      **Context:** Session 16 identified this as a medium-priority correctness issue.
+
+- [x] **Fix `go.mod` version** — DONE (session 17)
+      **Source:** `go.mod`
+      **Description:** Changed `go 1.26.3` → `go 1.26` (minor version only, as per Go convention).
+      **Context:** Patch version in `go.mod` is not valid Go convention.
+
 - [ ] **Improve `cmd/examples/github-sync` coverage (12.3%)**
       **Source:** `cmd/examples/github-sync/`
       **Description:** Core CLI logic (main.go: `runSync`, `runStats`, signal handling) is untested.
-      **Context:** Lowest coverage in the project. Helpers are tested; main flow is not.
+      **Context:** Lowest coverage in the project. Helpers are tested; main flow is not. Uncovered functions call `os.Exit()` — need process-level isolation.
 
 - [x] **Test SQLite read model with real database file**
       **Source:** `pkg/cqrs/sqlite_readmodel_test.go`
@@ -163,7 +177,11 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 | Concurrent access tests for MemoryReadModel (3 tests)                                 | 14      | 2026-06-11 |
 | mapSyncError table-driven tests (6 mappings)                                          | 14      | 2026-06-11 |
 | CRDT example_test.go (LWWResolver with model.Item)                                    | 14      | 2026-06-11 |
-| Benchmarks modernized to b.Loop()                                                     | 14      | 2026-06-11 |
+| ItemFilter Limit/Offset audit (skipped — >0 checks handle zero correctly) | 17 | 2026-06-12 |
+| CLI coverage audit (skipped — uncovered functions call os.Exit) | 17 | 2026-06-12 |
+| UpdatedAt validation added to model.Item.Validate() | 17 | 2026-06-12 |
+| WaitForCount busy-spin fixed (ctx.Done + ticker select) | 17 | 2026-06-12 |
+| go.mod version fixed (1.26.3 → 1.26) | 17 | 2026-06-12 |
 
 ---
 

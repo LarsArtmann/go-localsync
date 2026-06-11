@@ -1,6 +1,6 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-06-11 (session 15)
+**Updated:** 2026-06-12 (session 17)
 
 ## Legend
 
@@ -39,7 +39,7 @@
 || 11 | Full Sync | FULLY_FUNCTIONAL | `pkg/sync` | `Syncer.Sync()` fetches all pages from provider, validates items, syncs via CQRS stack. |
 || 12 | Incremental Sync | FULLY_FUNCTIONAL | `pkg/sync` | `Syncer.SyncIncremental()` uses latest item's `CreatedAt` as cutoff. Falls back to full sync on empty database. |
 || 13 | Conflict-Aware Sync | FULLY_FUNCTIONAL | `pkg/sync` | `ConflictAwareSyncer.SyncWithConflictDetection()` delegates to CQRS decider. Reports conflicts, upserts, skips, errors. Supports pluggable CRDT. |
-|| 14 | Item Validation | FULLY_FUNCTIONAL | `pkg/provider` | `Item.Validate()` checks required fields (ExternalID, Source, Type, CreatedAt). Invalid items counted in error metrics. |
+|| 14 | Item Validation | FULLY_FUNCTIONAL | `pkg/provider` | `Item.Validate()` checks required fields (ExternalID, Source, Type, CreatedAt, UpdatedAt). Invalid items counted in error metrics. |
 || 15 | Progress Callbacks | FULLY_FUNCTIONAL | `pkg/sync` | `SyncOptions.OnProgress` callback for real-time progress reporting during sync. |
 || 16 | Stats Query | FULLY_FUNCTIONAL | `pkg/sync` | `Syncer.GetStats()` returns total count, type list, and per-type counts from read model. |
 

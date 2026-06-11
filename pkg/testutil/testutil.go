@@ -103,7 +103,12 @@ func WaitForCount(t *testing.T, ctx context.Context, counter func(context.Contex
 
 		select {
 		case <-ctx.Done():
-			t.Fatalf("WaitForCount: context canceled while waiting for count %d (last seen: %d): %v", want, got, ctx.Err())
+			t.Fatalf(
+				"WaitForCount: context canceled while waiting for count %d (last seen: %d): %v",
+				want,
+				got,
+				ctx.Err(),
+			)
 		case <-ticker.C:
 		}
 	}
