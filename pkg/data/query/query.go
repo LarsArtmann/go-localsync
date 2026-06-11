@@ -117,6 +117,9 @@ func (qb QueryBuilder[T]) Build() Query[T] {
 // Common sort orders — generic over any type with a time accessor.
 // ---------------------------------------------------------------------------
 
+// TypedItem is satisfied by any type with a GetType() method.
+type TypedItem[T comparable] interface{ GetType() T }
+
 // hasCreatedAt is satisfied by any type with a GetCreatedAt() method.
 type hasCreatedAt interface{ GetCreatedAt() time.Time }
 
@@ -124,7 +127,7 @@ type hasCreatedAt interface{ GetCreatedAt() time.Time }
 type hasUpdatedAt interface{ GetUpdatedAt() time.Time }
 
 // hasType is satisfied by any type with a GetType() method.
-type hasType interface{ GetType() id.EventTypeID }
+type hasType = TypedItem[id.EventTypeID]
 
 // ByCreatedAtDesc sorts by created_at descending.
 func ByCreatedAtDesc[T hasCreatedAt]() Order[T] {
