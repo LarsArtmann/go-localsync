@@ -103,9 +103,7 @@ func TestLWWResolver_LocalWinsByTimestamp(t *testing.T) {
 		t.Fatalf("Resolve() error: %v", err)
 	}
 
-	if winner.Name != "local" {
-		t.Errorf("expected local to win (later timestamp), got %q", winner.Name)
-	}
+	assertWinner(t, winner, "local", " (later timestamp)")
 }
 
 func TestLWWResolver_RemoteWinsByTimestamp(t *testing.T) {
@@ -121,9 +119,7 @@ func TestLWWResolver_RemoteWinsByTimestamp(t *testing.T) {
 		t.Fatalf("Resolve() error: %v", err)
 	}
 
-	if winner.Name != "remote" {
-		t.Errorf("expected remote to win (later timestamp), got %q", winner.Name)
-	}
+	assertWinner(t, winner, "remote", " (later timestamp)")
 }
 
 func TestLWWResolver_RemoteWinsOnTie_NoTiebreaker(t *testing.T) {

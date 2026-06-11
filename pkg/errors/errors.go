@@ -91,9 +91,10 @@ func IsRetryable(err error) bool {
 	return errorfamily.IsRetryable(err)
 }
 
-// WithDetail wraps err with a detail string for debugging context.
-// Preserves errorfamily structure when wrapping an *errorfamily.Error.
-func WithDetail(err error, detail string) error {
+// wrapPreservingFamily wraps an error with detail, preserving errorfamily
+// structure when wrapping an *errorfamily.Error. Falls back to fmt.Errorf
+// for plain errors.
+func wrapPreservingFamily(err error, detail string) error {
 	e, ok := stderrors.AsType[*errorfamily.Error](err)
 	if ok {
 		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), detail)
@@ -102,37 +103,22 @@ func WithDetail(err error, detail string) error {
 	return fmt.Errorf("%s: %w", detail, err)
 }
 
-// WithUserDetail is a convenience function to add username context.
-// Preserves errorfamily structure when wrapping an *errorfamily.Error.
-func WithUserDetail(err error, username string) error {
-	e, ok := stderrors.AsType[*errorfamily.Error](err)
-	if ok {
-		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), "username="+username)
-	}
+// WithDetail wraps err with a detail string for debugging context.
+func WithDetail(err error, detail string) error {
+	return wrapPreservingFamily(err, detail)
+}
 
-	return fmt.Errorf("username=%s: %w", username, err)
+// WithUserDetail is a convenience function to add username context.
+func WithUserDetail(err error, username string) error {
+	return wrapPreservingFamily(err, "username="+username)
 }
 
 // Wrap wraps an error with additional context.
-// Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func Wrap(err error, message string) error {
-	e, ok := stderrors.AsType[*errorfamily.Error](err)
-	if ok {
-		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), message)
-	}
-
-	return fmt.Errorf("%s: %w", message, err)
+	return wrapPreservingFamily(err, message)
 }
 
 // Wrapf wraps an error with a formatted message.
-// Preserves errorfamily structure when wrapping an *errorfamily.Error.
 func Wrapf(err error, format string, args ...any) error {
-	msg := fmt.Sprintf(format, args...)
-
-	e, ok := stderrors.AsType[*errorfamily.Error](err)
-	if ok {
-		return errorfamily.Wrap(e, e.ErrorFamily(), e.Code(), msg)
-	}
-
-	return fmt.Errorf("%s: %w", msg, err)
+	return wrapPreservingFamily(err, fmt.Sprintf(format, args...))
 }

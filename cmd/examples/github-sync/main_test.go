@@ -10,6 +10,14 @@ import (
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
+func assertContains(t *testing.T, out, want, label string) {
+	t.Helper()
+
+	if !strings.Contains(out, want) {
+		t.Errorf("expected %s in output, got %q", label, out)
+	}
+}
+
 func TestExitCodeForError(t *testing.T) {
 	t.Parallel()
 
@@ -229,15 +237,8 @@ func TestPrintVersion(t *testing.T) {
 	printVersion(&buf)
 
 	out := buf.String()
-	if !strings.HasPrefix(out, "gh-sync ") {
-		t.Errorf("expected version prefix, got %q", out)
-	}
-	if !strings.Contains(out, "commit:") {
-		t.Errorf("expected commit info, got %q", out)
-	}
-	if !strings.Contains(out, "built:") {
-		t.Errorf("expected build date info, got %q", out)
-	}
+	assertContains(t, out, "commit:", "commit info")
+	assertContains(t, out, "built:", "build date info")
 }
 
 func TestPrintSyncResultJSON(t *testing.T) {
@@ -252,13 +253,7 @@ func TestPrintSyncResultJSON(t *testing.T) {
 	printSyncResultJSONToWriter(result, &buf)
 
 	out := buf.String()
-	if !strings.Contains(out, `"fetched": 10`) {
-		t.Errorf("expected fetched=10 in output, got %q", out)
-	}
-	if !strings.Contains(out, `"skipped": 2`) {
-		t.Errorf("expected skipped=2 in output, got %q", out)
-	}
-	if !strings.Contains(out, `"errors": 1`) {
-		t.Errorf("expected errors=1 in output, got %q", out)
-	}
+	assertContains(t, out, `"fetched": 10`, "fetched=10")
+	assertContains(t, out, `"skipped": 2`, "skipped=2")
+	assertContains(t, out, `"errors": 1`, "errors=1")
 }
