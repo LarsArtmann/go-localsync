@@ -112,6 +112,8 @@ func (s *Server) healthCheck(_ context.Context, _ *struct{}) (*HealthOutput, err
 
 func mapSyncError(err error) error {
 	switch {
+	case errors.Is(err, pkgerrors.ErrNotFound):
+		return huma.Error404NotFound("not found", err)
 	case errors.Is(err, pkgerrors.ErrRateLimited):
 		return huma.Error429TooManyRequests("rate limited", err)
 	case errors.Is(err, pkgerrors.ErrInvalidToken):
@@ -122,6 +124,8 @@ func mapSyncError(err error) error {
 		return huma.Error500InternalServerError("database error", err)
 	case errors.Is(err, pkgerrors.ErrInvalidInput):
 		return huma.Error400BadRequest("invalid input", err)
+	case errors.Is(err, pkgerrors.ErrUnknownBackend):
+		return huma.Error500InternalServerError("unknown backend", err)
 	default:
 		return huma.Error503ServiceUnavailable("sync failed", err)
 	}
