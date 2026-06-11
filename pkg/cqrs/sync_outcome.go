@@ -15,7 +15,7 @@ type syncOutcomeKey struct{}
 type SyncOutcome struct {
 	WasNew         bool
 	EventCount     int
-	ConflictWinner string
+	ConflictWinner ConflictWinner
 }
 
 func contextWithSyncOutcome(ctx context.Context, outcome *SyncOutcome) context.Context {
@@ -53,7 +53,7 @@ func decideWithOutcome(
 				if err := json.Unmarshal(events[0].Payload(), &cp); err != nil {
 					return nil, fmt.Errorf("decode conflict payload: %w", err)
 				}
-				outcome.ConflictWinner = cp.Winner
+				outcome.ConflictWinner = ConflictWinner(cp.Winner)
 			}
 		}
 

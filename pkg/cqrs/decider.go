@@ -143,23 +143,26 @@ func DecideDelete(
 	}
 }
 
+// ConflictWinner indicates which side won a conflict.
+type ConflictWinner string
+
 const (
-	conflictWinnerRemote = "remote"
-	conflictWinnerLocal  = "local"
+	conflictWinnerRemote ConflictWinner = "remote"
+	conflictWinnerLocal  ConflictWinner = "local"
 )
 
 // conflictMeta carries conflict-specific metadata for event construction.
 type conflictMeta struct {
 	localUpdatedAt  time.Time
 	remoteUpdatedAt time.Time
-	winner          string
+	winner          ConflictWinner
 }
 
 // resolveConflict delegates conflict resolution to the resolver, or defaults to remote-wins.
 func resolveConflict(
 	resolver crdt.ConflictResolver[*model.Item],
 	local, remote *model.Item,
-) (*model.Item, string) {
+) (*model.Item, ConflictWinner) {
 	if resolver == nil {
 		return remote, conflictWinnerRemote
 	}
@@ -203,7 +206,7 @@ func syncEvents(
 				SourceID:        item.ExternalID.Get(),
 				LocalUpdatedAt:  unixNano(conflict.localUpdatedAt),
 				RemoteUpdatedAt: unixNano(conflict.remoteUpdatedAt),
-				Winner:          conflict.winner,
+				Winner:          string(conflict.winner),
 			},
 			DataItemToPayload(item, rawJSON),
 		}
