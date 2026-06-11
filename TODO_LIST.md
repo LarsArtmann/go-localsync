@@ -1,9 +1,9 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-06-11 (session 14)
+**Last Updated:** 2026-06-11 (session 15)
 **Status:** Active Development
-**Tests:** 270+ passing, 11 packages | **Lint:** 0 issues (golangci-lint v2)
+**Tests:** 283 passing, 11 packages | **Lint:** 0 issues (golangci-lint v2)
 
 ## Overview
 
@@ -32,10 +32,7 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
       **Description:** Currently only tests with `:memory:` SQLite. Verify file-based persistence works across restarts.
       **Context:** In-memory tests don't catch file I/O or locking issues.
 
-- [ ] **Improve `pkg/data/model` coverage (68.4%)**
-      **Source:** `pkg/data/model/`
-      **Description:** Coverage dropped after removing ProviderItem tests. Add more Item.Validate edge cases.
-      **Context:** Below project average of ~83%.
+- [x] **Improve `pkg/data/model` coverage** — DONE (100% as of session 14)
 
 ---
 
@@ -43,10 +40,10 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 
 ### Testing & Coverage
 
-- [ ] **Improve `pkg/api` coverage (76.6%)**
+- [ ] **Improve `pkg/api` coverage (92.4%)**
       **Source:** `pkg/api/server_test.go`
-      **Description:** Add error path tests for store failures, malformed requests, edge cases.
-      **Context:** Happy paths are tested; error handling gaps remain.
+      **Description:** Add error path tests for remaining edge cases (malformed since param, concurrent requests).
+      **Context:** Error paths now well-covered after session 15.
 
 - [ ] **Real GitHub PAT smoke test**
       **Source:** `cmd/examples/github-sync/`
@@ -153,6 +150,13 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 | ConflictAwareSyncer coupling fixed (named field + Close)                  | 13      | 2026-06-11 |
 | Graceful shutdown with signal handling                                    | 13      | 2026-06-11 |
 | Deduplication pass (96→73 assertion groups)                               | 12      | 2026-06-11 |
+| SQLite file-based persistence test                                        | 15      | 2026-06-11 |
+| API error path tests (GetTypes error, Count error, all filter params)      | 15      | 2026-06-11 |
+| nolint directives documented (3 without explanation)                       | 15      | 2026-06-11 |
+| commands_queries.go split into middleware.go + commands.go + queries.go     | 15      | 2026-06-11 |
+| server.go split into server.go + dto.go + handlers.go                      | 15      | 2026-06-11 |
+| sqlite_readmodel.go split into sqlite_readmodel.go + sqlite_query.go + sqlite_scan.go | 15 | 2026-06-11 |
+| ADR-001 CQRS Adoption, ADR-002 Branded IDs, ADR-003 CRDT Integration       | 15      | 2026-06-11 |
 | Dead Get\*() methods removed from model.Item                              | 14      | 2026-06-11 |
 | ItemFilter moved from pkg/provider to pkg/data/model                      | 14      | 2026-06-11 |
 | pkg/sync/sync.go split into types.go + sync.go                            | 14      | 2026-06-11 |

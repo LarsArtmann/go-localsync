@@ -1,6 +1,6 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-06-03 (session 8)
+**Updated:** 2026-06-11 (session 15)
 
 ## Legend
 
@@ -146,7 +146,7 @@
 
 || # | Feature | Status | Package | Description |
 || --- | ------------ | ---------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-|| 67 | Test Suite | FULLY_FUNCTIONAL | all | 235 test functions across 9 packages, all passing. |
+|| 67 | Test Suite | FULLY_FUNCTIONAL | all | 283 test functions across 11 packages, all passing. |
 || 68 | Test Helpers | FULLY_FUNCTIONAL | `pkg/providers/github` | Unexported test helpers: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`. |
 
 ## Quality

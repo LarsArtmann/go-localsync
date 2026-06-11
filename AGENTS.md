@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-06-11 (session 14 — architecture refactoring sprint)
+**Updated:** 2026-06-11 (session 15 — code quality and documentation sprint)
 
 ## Project Overview
 
@@ -11,8 +11,8 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | Package                     | Purpose                                                                                                                                         |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy** |
-| `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`)                                                 |
-| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2** (Decider, ReadModel, Projector, CQRSStack, Runner)                                             |
+| `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go |
+| `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2** (Decider, ReadModel, Projector, CQRSStack, Runner), split into focused files (middleware.go, commands.go, queries.go, sqlite_*.go) |
 | `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                                           |
 | `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                        |
 | `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`        |
@@ -118,12 +118,12 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                |
 | `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                           |
 | `pkg/provider`             | 2     | 95.8%    | ✅ Item validation                                                                                        |
-| `pkg/api`                  | ~15   | ~80%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints, mapSyncError tests                        |
+| `pkg/api`                  | ~15   | 92.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests          |
 | `pkg/crdt`                 | ~55   | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                               |
-| `pkg/data/model`           | ~12   | ~75%     | ✅ Item, Key, Validate, ItemFilter builder                                                                |
+| `pkg/data/model`           | ~12   | 100%     | ✅ Item, Key, Validate, ItemFilter builder                                                                |
 | `cmd/examples/github-sync` | 14    | 12.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON                          |
 
-**270+ total test functions** across 11 test packages.
+**283 total test functions** across 11 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -367,6 +367,41 @@ Executed all 8 items from `docs/planning/2026-06-10_ARCHITECTURE_IMPROVEMENT_PLA
 ## Lint Status
 
 golangci-lint v2 reports **0 issues** across all 11 packages. Config is strict with 125+ linters enabled.
+
+## Session 15 — 2026-06-11: Code Quality and Documentation Sprint
+
+### Completed
+
+- ✅ **SQLite file-based persistence test**: `TestSQLiteReadModel_FilePersistence` — creates temp file, writes item, closes, reopens, verifies data survives. Validates real file I/O + DDL + schema recreation.
+- ✅ **API error path tests**: 3 new tests (`TestGetStats_TypesError`, `TestListItems_CountError`, `TestListItems_AllFilterParams`). API coverage: 85.7% → **92.4%**.
+- ✅ **nolint directives documented**: 3 previously undocumented directives now have inline explanations (`exhaustruct` on huma register, `tagalign` on ListItemsInput, `gochecknoglobals` on InitialState).
+- ✅ **`commands_queries.go` split** (299→3 files): `middleware.go` (logging/validation), `commands.go` (types + handlers), `queries.go` (types + handlers). Each <140 lines.
+- ✅ **`server.go` split** (311→3 files): `server.go` (struct + routing), `dto.go` (types + response mapping), `handlers.go` (endpoints + error mapping). Each <130 lines.
+- ✅ **`sqlite_readmodel.go` split** (337→3 files): `sqlite_readmodel.go` (struct + DDL + CRUD), `sqlite_query.go` (filter query builder), `sqlite_scan.go` (row scanning helpers). Each <190 lines.
+- ✅ **ADR-001: CQRS Adoption**: Documents the decision to use event-sourced CQRS via go-cqrs-lite.
+- ✅ **ADR-002: Branded IDs**: Documents phantom-type branded IDs via go-branded-id.
+- ✅ **ADR-003: CRDT Integration**: Documents pluggable conflict resolution strategy.
+- ✅ **FEATURES.md updated**: Test count fixed (235→283), date updated.
+- ✅ **TODO_LIST.md updated**: Model coverage marked done, API coverage updated, session 15 items added to completed list.
+- ✅ **AGENTS.md updated**: Session 15 section, test counts, file structure updated.
+
+### File Structure Changes
+
+| Before | After |
+|--------|-------|
+| `commands_queries.go` (299 lines) | `middleware.go` + `commands.go` + `queries.go` |
+| `server.go` (311 lines) | `server.go` + `dto.go` + `handlers.go` |
+| `sqlite_readmodel.go` (337 lines) | `sqlite_readmodel.go` + `sqlite_query.go` + `sqlite_scan.go` |
+| No ADR documents | `docs/adr/0001-cqrs-adoption.md` + `0002-branded-ids.md` + `0003-crdt-integration.md` |
+| API coverage 85.7% | API coverage 92.4% |
+
+### Coverage
+
+| Package | Before | After |
+|---------|--------|-------|
+| `pkg/api` | 85.7% | **92.4%** (+6.7%) |
+| `pkg/data/model` | ~75% | **100%** |
+| All others | Unchanged | Same or better |
 
 ## Session 14 — 2026-06-11: Architecture Refactoring Sprint
 

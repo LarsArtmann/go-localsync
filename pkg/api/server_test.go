@@ -293,6 +293,53 @@ func TestTriggerSync(t *testing.T) {
 	}
 }
 
+func TestGetStats_TypesError(t *testing.T) {
+	t.Parallel()
+
+	store := &mockSyncStore{typesErr: errors.New("types query failed")}
+	server := newTestServer(store)
+
+	req := newGETRequest(t, "/stats")
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	testutil.AssertStatus(t, rec, http.StatusInternalServerError)
+}
+
+func TestListItems_CountError(t *testing.T) {
+	t.Parallel()
+
+	store := &mockSyncStore{
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			Items: []*model.Item{testItem("1", "PushEvent")},
+		},
+		countErr: errors.New("count failed"),
+	}
+	server := newTestServer(store)
+
+	req := newGETRequest(t, "/items")
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	testutil.AssertStatus(t, rec, http.StatusInternalServerError)
+}
+
+func TestListItems_AllFilterParams(t *testing.T) {
+	t.Parallel()
+
+	store := newMockStoreWithItems()
+	server := newTestServer(store)
+
+	req := newGETRequest(t, "/items?type=PushEvent&actor=testuser&repo=test/repo&source=github&limit=1&offset=0")
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	testutil.AssertStatusOK(t, rec)
+}
+
 func TestTriggerSync_InvalidOptions(t *testing.T) {
 	t.Parallel()
 

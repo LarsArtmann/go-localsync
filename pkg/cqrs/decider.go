@@ -21,7 +21,7 @@ type SyncItemState struct {
 
 // InitialState is the zero state for a new SyncItem aggregate.
 //
-//nolint:gochecknoglobals
+//nolint:gochecknoglobals // immutable zero-value sentinel, not mutable global state
 var InitialState = SyncItemState{
 	Item:    nil,
 	Deleted: false,
