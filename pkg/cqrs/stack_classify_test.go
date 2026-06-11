@@ -163,11 +163,11 @@ func TestCQRSStack_SyncItems_LWWConflictResolution(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name             string
-		localTime        time.Time
-		remoteTime       time.Time
-		wantAction       synclib.SyncAction
-		wantWinnerType   string
+		name           string
+		localTime      time.Time
+		remoteTime     time.Time
+		wantAction     synclib.SyncAction
+		wantWinnerType string
 	}{
 		{
 			name:           "local_wins_when_newer",

@@ -55,14 +55,17 @@ func wireCommandDispatcher(
 	dispatcher.Use(commandValidationMiddleware())
 	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
 
-	syncItemHandler := typedCommandHandler[*SyncItemCommand]("*SyncItemCommand", func(ctx context.Context, cmd *SyncItemCommand) error {
-		outcome := syncOutcomeFromContext(ctx)
+	syncItemHandler := typedCommandHandler[*SyncItemCommand](
+		"*SyncItemCommand",
+		func(ctx context.Context, cmd *SyncItemCommand) error {
+			outcome := syncOutcomeFromContext(ctx)
 
-		return repo.Execute(
-			ctx, cmd.AggregateID(), aggregateType,
-			decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, outcome, cmd.Options...),
-		)
-	})
+			return repo.Execute(
+				ctx, cmd.AggregateID(), aggregateType,
+				decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, outcome, cmd.Options...),
+			)
+		},
+	)
 
 	if err := dispatcher.Register(commandTypeSyncItem, syncItemHandler); err != nil {
 		return nil, fmt.Errorf("register sync item command: %w", err)
@@ -87,7 +90,10 @@ func typedCommandHandler[T command.Command](name string, fn func(ctx context.Con
 }
 
 func handleDeleteItem(repo *decider.Repository[SyncItemState]) command.Handler {
-	return typedCommandHandler[*DeleteItemCommand]("*DeleteItemCommand", func(ctx context.Context, cmd *DeleteItemCommand) error {
-		return repo.Execute(ctx, cmd.AggregateID(), aggregateType, decideDelete(cmd.Source, cmd.SourceID))
-	})
+	return typedCommandHandler[*DeleteItemCommand](
+		"*DeleteItemCommand",
+		func(ctx context.Context, cmd *DeleteItemCommand) error {
+			return repo.Execute(ctx, cmd.AggregateID(), aggregateType, decideDelete(cmd.Source, cmd.SourceID))
+		},
+	)
 }

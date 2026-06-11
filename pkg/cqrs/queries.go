@@ -89,9 +89,12 @@ func typedQueryHandler[T query.Query](name string, fn func(ctx context.Context, 
 }
 
 func handleListItems(rm ReadModel) query.Handler {
-	return typedQueryHandler[*ListItemsQuery]("*ListItemsQuery", func(ctx context.Context, q *ListItemsQuery) (any, error) {
-		return rm.List(ctx, q.Filter)
-	})
+	return typedQueryHandler[*ListItemsQuery](
+		"*ListItemsQuery",
+		func(ctx context.Context, q *ListItemsQuery) (any, error) {
+			return rm.List(ctx, q.Filter)
+		},
+	)
 }
 
 func handleGetItem(rm ReadModel) query.Handler {
@@ -101,13 +104,19 @@ func handleGetItem(rm ReadModel) query.Handler {
 }
 
 func handleCountItems(rm ReadModel) query.Handler {
-	return typedQueryHandler[*CountItemsQuery]("*CountItemsQuery", func(ctx context.Context, q *CountItemsQuery) (any, error) {
-		return rm.Count(ctx, q.Filter)
-	})
+	return typedQueryHandler[*CountItemsQuery](
+		"*CountItemsQuery",
+		func(ctx context.Context, q *CountItemsQuery) (any, error) {
+			return rm.Count(ctx, q.Filter)
+		},
+	)
 }
 
 func handleGetTypes(rm ReadModel) query.Handler {
-	return typedQueryHandler[*GetTypesQuery]("*GetTypesQuery", func(ctx context.Context, _ *GetTypesQuery) (any, error) {
-		return rm.GetTypes(ctx)
-	})
+	return typedQueryHandler[*GetTypesQuery](
+		"*GetTypesQuery",
+		func(ctx context.Context, _ *GetTypesQuery) (any, error) {
+			return rm.GetTypes(ctx)
+		},
+	)
 }

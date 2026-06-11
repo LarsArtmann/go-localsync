@@ -10,6 +10,14 @@ import (
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
+func assertConfigField[T comparable](t *testing.T, got, want T, label string) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("expected %s=%v, got %v", label, want, got)
+	}
+}
+
 func assertContains(t *testing.T, out, want, label string) {
 	t.Helper()
 
@@ -69,12 +77,8 @@ func TestLoadConfig(t *testing.T) {
 	if cfg.Username != "" {
 		t.Errorf("expected empty Username, got %s", cfg.Username)
 	}
-	if cfg.Backend != "memory" {
-		t.Errorf("expected Backend=memory, got %s", cfg.Backend)
-	}
-	if cfg.MaxPages != 10 {
-		t.Errorf("expected MaxPages=10, got %d", cfg.MaxPages)
-	}
+	assertConfigField(t, cfg.Backend, "memory", "Backend")
+	assertConfigField(t, cfg.MaxPages, 10, "MaxPages")
 	if !cfg.Incremental {
 		t.Error("expected Incremental=true")
 	}
@@ -96,12 +100,8 @@ func TestLoadConfig_FromEnv(t *testing.T) {
 	if cfg.Username != "testuser" {
 		t.Errorf("expected Username=testuser, got %s", cfg.Username)
 	}
-	if cfg.Backend != "sqlite" {
-		t.Errorf("expected Backend=sqlite, got %s", cfg.Backend)
-	}
-	if cfg.MaxPages != 5 {
-		t.Errorf("expected MaxPages=5, got %d", cfg.MaxPages)
-	}
+	assertConfigField(t, cfg.Backend, "sqlite", "Backend")
+	assertConfigField(t, cfg.MaxPages, 5, "MaxPages")
 }
 
 func TestAppConfig_Defaults(t *testing.T) {
@@ -159,9 +159,7 @@ func TestLoadConfig_InvalidBackend(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if cfg.Backend != "invalid" {
-		t.Errorf("expected Backend=invalid, got %s", cfg.Backend)
-	}
+	assertConfigField(t, cfg.Backend, "invalid", "Backend")
 }
 
 func TestLoadConfig_Empty(t *testing.T) {
@@ -173,12 +171,8 @@ func TestLoadConfig_Empty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if cfg.Backend != "memory" {
-		t.Errorf("expected default Backend=memory, got %s", cfg.Backend)
-	}
-	if cfg.MaxPages != 10 {
-		t.Errorf("expected default MaxPages=10, got %d", cfg.MaxPages)
-	}
+	assertConfigField(t, cfg.Backend, "memory", "Backend")
+	assertConfigField(t, cfg.MaxPages, 10, "MaxPages")
 	if !cfg.Incremental {
 		t.Error("expected default Incremental=true")
 	}
