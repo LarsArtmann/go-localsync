@@ -110,18 +110,18 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package                    | Tests | Coverage | Status                                                                                 |
-| -------------------------- | ----- | -------- | -------------------------------------------------------------------------------------- |
+| Package                    | Tests | Coverage | Status                                                                                                    |
+| -------------------------- | ----- | -------- | --------------------------------------------------------------------------------------------------------- |
 | `pkg/cqrs`                 | ~85   | ~85%     | ✅ Decider, ReadModel, Projection, Stack, Turso RM, Runner, Correlation, CRDT Resolver, Concurrent Access |
-| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                               |
-| `pkg/sync`                 | 22    | 91.0%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting         |
-| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                             |
-| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates        |
-| `pkg/provider`             | 2     | 95.8%    | ✅ Item validation                                                                     |
-| `pkg/api`                  | ~15   | ~80%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints, mapSyncError tests     |
-| `pkg/crdt`                 | ~55   | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test            |
-| `pkg/data/model`           | ~12   | ~75%     | ✅ Item, Key, Validate, ItemFilter builder                                             |
-| `cmd/examples/github-sync` | 14    | 12.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON       |
+| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                                  |
+| `pkg/sync`                 | 22    | 91.0%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                            |
+| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                |
+| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                           |
+| `pkg/provider`             | 2     | 95.8%    | ✅ Item validation                                                                                        |
+| `pkg/api`                  | ~15   | ~80%     | ✅ Server, routes, handlers, health/stats/items/sync endpoints, mapSyncError tests                        |
+| `pkg/crdt`                 | ~55   | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                               |
+| `pkg/data/model`           | ~12   | ~75%     | ✅ Item, Key, Validate, ItemFilter builder                                                                |
+| `cmd/examples/github-sync` | 14    | 12.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON                          |
 
 **270+ total test functions** across 11 test packages.
 
@@ -372,7 +372,7 @@ golangci-lint v2 reports **0 issues** across all 11 packages. Config is strict w
 
 ### Completed
 
-- ✅ **Dead Get*() methods removed**: 6 methods (`GetSource`, `GetType`, `GetActorLogin`, `GetRepoName`, `GetCreatedAt`, `GetUpdatedAt`) removed from `model.Item`. Zero production consumers after `data/query` package deletion.
+- ✅ **Dead Get\*() methods removed**: 6 methods (`GetSource`, `GetType`, `GetActorLogin`, `GetRepoName`, `GetCreatedAt`, `GetUpdatedAt`) removed from `model.Item`. Zero production consumers after `data/query` package deletion.
 - ✅ **`ItemFilter` moved from `pkg/provider` to `pkg/data/model`**: Fixes `model→provider` architectural dependency. `model` no longer imports `provider`. `provider` package no longer contains `ItemFilter`. All 20+ consumer files updated. `TestItemFilter_Builder` test moved to `pkg/data/model/item_filter_test.go`.
 - ✅ **`pkg/sync/sync.go` split**: Types (`SyncAction`, `ItemSyncResult`, `SyncSummary`, `SyncStore` interface) extracted to `pkg/sync/types.go`. Main `sync.go` reduced from 335 to ~295 lines.
 - ✅ **Concurrent access tests for `MemoryReadModel`**: 3 new tests (`ConcurrentReadWrite`, `ConcurrentReadDuringWrites`, `ConcurrentUpsertDelete`) with `-race` detector. 10 writers × 50 items, 20 readers × 100 reads, contested key upsert/delete.
@@ -382,10 +382,10 @@ golangci-lint v2 reports **0 issues** across all 11 packages. Config is strict w
 
 ### Key Architecture Changes
 
-| Before | After |
-|--------|-------|
-| `model` imports `provider` (for `ItemFilter`) | `model` has zero imports on `provider` |
-| `ItemFilter` in write-side package | `ItemFilter` in read-side package (`data/model`) |
-| `sync.go` = 335 lines (types + logic) | `types.go` + `sync.go` (focused files) |
-| `model.Item` had 6 dead `Get*()` methods | Clean domain type |
-| No concurrent access tests | 3 race-detector tests for `MemoryReadModel` |
+| Before                                        | After                                            |
+| --------------------------------------------- | ------------------------------------------------ |
+| `model` imports `provider` (for `ItemFilter`) | `model` has zero imports on `provider`           |
+| `ItemFilter` in write-side package            | `ItemFilter` in read-side package (`data/model`) |
+| `sync.go` = 335 lines (types + logic)         | `types.go` + `sync.go` (focused files)           |
+| `model.Item` had 6 dead `Get*()` methods      | Clean domain type                                |
+| No concurrent access tests                    | 3 race-detector tests for `MemoryReadModel`      |

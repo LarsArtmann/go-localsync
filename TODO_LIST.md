@@ -131,7 +131,7 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 | CLI helpers extracted to `helpers.go`                                     | 7       | 2026-05-29 |
 | Fix `exhaustruct` warnings (ItemFilter builder)                           | 7       | 2026-05-29 |
 | Domain language documented (`docs/DOMAIN_LANGUAGE.md`)                    | 7       | 2026-05-29 |
-| go-cqrs-lite v2 migration (all 11 modules)                               | 8       | 2026-06-03 |
+| go-cqrs-lite v2 migration (all 11 modules)                                | 8       | 2026-06-03 |
 | Turso→SQLite rename across 11 files                                       | 8       | 2026-06-03 |
 | Dead config removed (RemoteURL, AuthToken, Push/Pull flags)               | 8       | 2026-06-03 |
 | SyncItems through command pipeline                                        | 10      | 2026-06-10 |
@@ -153,9 +153,9 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 | ConflictAwareSyncer coupling fixed (named field + Close)                  | 13      | 2026-06-11 |
 | Graceful shutdown with signal handling                                    | 13      | 2026-06-11 |
 | Deduplication pass (96→73 assertion groups)                               | 12      | 2026-06-11 |
-| Dead Get*() methods removed from model.Item                               | 14      | 2026-06-11 |
+| Dead Get\*() methods removed from model.Item                              | 14      | 2026-06-11 |
 | ItemFilter moved from pkg/provider to pkg/data/model                      | 14      | 2026-06-11 |
-| pkg/sync/sync.go split into types.go + sync.go                           | 14      | 2026-06-11 |
+| pkg/sync/sync.go split into types.go + sync.go                            | 14      | 2026-06-11 |
 | Concurrent access tests for MemoryReadModel (3 tests)                     | 14      | 2026-06-11 |
 | mapSyncError table-driven tests (6 mappings)                              | 14      | 2026-06-11 |
 | CRDT example_test.go (LWWResolver with model.Item)                        | 14      | 2026-06-11 |

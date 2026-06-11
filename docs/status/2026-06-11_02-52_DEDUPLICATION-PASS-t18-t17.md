@@ -14,16 +14,16 @@ Executed a comprehensive semantic code deduplication pass using `art-dupl`. Redu
 
 ### Deduplication Refactoring (this session)
 
-| Change | Files | Before → After |
-|---|---|---|
-| `AssertStatus` + `AssertStatusOK` delegation | `testutil/testutil.go`, `api/server_test.go`, `api/integration_test.go` | 7 inline `rec.Code !=` checks → shared helpers |
-| `WaitForCount` + `waitForProjection` helpers | `testutil/testutil.go`, `api/integration_test.go` | 2 duplicate poll loops → shared helpers |
-| NonErrorFamily test consolidation | `errors/errors_test.go` | 4 tests → 1 table-driven test |
-| `assertNotFound` / `assertLen` / `sqliteAssertNotFound` | `cqrs/readmodel_test.go`, `cqrs/sqlite_readmodel_test.go` | 5 inline checks → shared helpers |
-| `validateIdentity` extraction | `data/model/item.go` | 2 identical `Validate()` methods → shared `validateIdentity()` |
-| `SyncItemState.SkipDecision()` method | `cqrs/decider.go` | `state.Deleted \|\| state.IsNew()` × 2 → method |
-| `MockProvider.fetchResult()` extraction | `testutil/mockprovider.go` | 2 identical method bodies → shared helper |
-| `composeErr()` extraction | `data/transform/transform.go` | 2 error formatting blocks → shared helper |
+| Change                                                  | Files                                                                   | Before → After                                                 |
+| ------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `AssertStatus` + `AssertStatusOK` delegation            | `testutil/testutil.go`, `api/server_test.go`, `api/integration_test.go` | 7 inline `rec.Code !=` checks → shared helpers                 |
+| `WaitForCount` + `waitForProjection` helpers            | `testutil/testutil.go`, `api/integration_test.go`                       | 2 duplicate poll loops → shared helpers                        |
+| NonErrorFamily test consolidation                       | `errors/errors_test.go`                                                 | 4 tests → 1 table-driven test                                  |
+| `assertNotFound` / `assertLen` / `sqliteAssertNotFound` | `cqrs/readmodel_test.go`, `cqrs/sqlite_readmodel_test.go`               | 5 inline checks → shared helpers                               |
+| `validateIdentity` extraction                           | `data/model/item.go`                                                    | 2 identical `Validate()` methods → shared `validateIdentity()` |
+| `SyncItemState.SkipDecision()` method                   | `cqrs/decider.go`                                                       | `state.Deleted \|\| state.IsNew()` × 2 → method                |
+| `MockProvider.fetchResult()` extraction                 | `testutil/mockprovider.go`                                              | 2 identical method bodies → shared helper                      |
+| `composeErr()` extraction                               | `data/transform/transform.go`                                           | 2 error formatting blocks → shared helper                      |
 
 ### Codebase Health
 
@@ -36,22 +36,22 @@ Executed a comprehensive semantic code deduplication pass using `art-dupl`. Redu
 
 ### Coverage by Package
 
-| Package | Coverage |
-|---|---|
-| `pkg/id` | 100.0% |
-| `pkg/errors` | 100.0% |
-| `pkg/data/repo` | 100.0% |
-| `pkg/data/schema` | 100.0% |
-| `pkg/crdt` | 97.6% |
-| `pkg/provider` | 95.8% |
-| `pkg/data/transform` | 96.2% |
-| `pkg/sync` | 90.9% |
-| `pkg/data/query` | 86.2% |
-| `pkg/cqrs` | 85.7% |
-| `pkg/providers/github` | 84.4% |
-| `pkg/api` | 76.5% |
-| `pkg/data/model` | 74.1% |
-| `cmd/examples/github-sync` | 14.5% |
+| Package                    | Coverage |
+| -------------------------- | -------- |
+| `pkg/id`                   | 100.0%   |
+| `pkg/errors`               | 100.0%   |
+| `pkg/data/repo`            | 100.0%   |
+| `pkg/data/schema`          | 100.0%   |
+| `pkg/crdt`                 | 97.6%    |
+| `pkg/provider`             | 95.8%    |
+| `pkg/data/transform`       | 96.2%    |
+| `pkg/sync`                 | 90.9%    |
+| `pkg/data/query`           | 86.2%    |
+| `pkg/cqrs`                 | 85.7%    |
+| `pkg/providers/github`     | 84.4%    |
+| `pkg/api`                  | 76.5%    |
+| `pkg/data/model`           | 74.1%    |
+| `cmd/examples/github-sync` | 14.5%    |
 
 ---
 
@@ -172,11 +172,11 @@ All 26 are structural Go idioms (interface implementations, test data, single-li
 
 ## Duplication Metrics Summary
 
-| Threshold | Clone Groups | Category | Actionable |
-|---|---|---|---|
-| 50 | 0 | — | ✅ Zero (industry standard) |
-| 18 | 10 | all `idiom` | ❌ Structural patterns only |
-| 17 | 26 | all `idiom` | ❌ Structural patterns only |
+| Threshold | Clone Groups | Category    | Actionable                  |
+| --------- | ------------ | ----------- | --------------------------- |
+| 50        | 0            | —           | ✅ Zero (industry standard) |
+| 18        | 10           | all `idiom` | ❌ Structural patterns only |
+| 17        | 26           | all `idiom` | ❌ Structural patterns only |
 
 ---
 

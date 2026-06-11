@@ -22,26 +22,26 @@ A single uncommitted change lingers from Session 10 (`TypedItem` generic interfa
 
 ### Deduplication Pass (Session 12 — both rounds)
 
-| # | Task | Files | Lines | Status |
-|---|---|---|---|---|
-| 1 | `pkg/errors/errors.go` — extracted `wrapPreservingFamily` helper for 4× Wrap constructors | 1 | −24 | ✅ |
-| 2 | `pkg/errors/errors.go` — converted 9× error templates to `makeEntry()` single-line calls | 1 | −20 | ✅ |
-| 3 | `cmd/examples/github-sync/main_test.go` — added `assertContains()` helper for JSON checks | 1 | −6 | ✅ |
-| 4 | `cmd/examples/github-sync/main_test.go` — refactored env-var assertion blocks | 1 | −8 | ✅ |
-| 5 | `pkg/crdt/conflict_test.go` — used existing `assertWinner()` for 2× timestamp tests | 1 | −4 | ✅ |
-| 6 | `pkg/sync/` tests — replaced 14× `if result.X != N { t.Errorf }` with `testutil.AssertInt` | 4 | −50 | ✅ |
-| 7 | `pkg/sync/` tests — extracted `testSyncItems(pairs...)` fixture builder | 3 | −18 | ✅ |
-| 8 | `pkg/cqrs/` tests — extracted `syncTestItem()` helper for `MustNoError(t, stack.SyncItem(...))` | 4 | −30 | ✅ |
-| 9 | `pkg/cqrs/` tests — extracted `syncTestItems()` / `syncTestItemsResult()` helpers | 3 | −15 | ✅ |
-| 10 | `pkg/cqrs/` tests — replaced 12× `if len(events) != N { t.Fatalf }` with `testutil.RequireLen` | 3 | −30 | ✅ |
-| 11 | `pkg/cqrs/` tests — refactored `sqlite_readmodel_filter_test.go` with `sqliteSeed()` | 2 | −50 | ✅ |
-| 12 | `pkg/cqrs/` tests — refactored `sqlite_readmodel_test.go` with `sqliteSeed()` | 1 | −40 | ✅ |
-| 13 | `pkg/cqrs/` tests — refactored `stack_test.go` assertions with `testutil.AssertInt`/`AssertInt64`/`AssertLen` | 1 | −45 | ✅ |
-| 14 | `pkg/cqrs/` tests — refactored `readmodel_test.go` assertions with `testutil.AssertLen`/`AssertInt64` | 1 | −15 | ✅ |
-| 15 | `pkg/cqrs/` tests — refactored `decider_resolver_test.go` winner checks with `testutil.AssertEqual` | 1 | −12 | ✅ |
-| 16 | `pkg/api/server_test.go` — added `newGETRequest()` helper, replaced 6× httptest.NewRequestWithContext | 1 | −8 | ✅ |
-| 17 | `pkg/testutil/testutil.go` — added `AssertInt()`, `AssertInt64()`, `AssertContains[T]()`, `RequireLen[T]()` | 1 | +35 | ✅ |
-| 18 | Pre-commit buildflow hook passed on both commits | — | — | ✅ |
+| #   | Task                                                                                                          | Files | Lines | Status |
+| --- | ------------------------------------------------------------------------------------------------------------- | ----- | ----- | ------ |
+| 1   | `pkg/errors/errors.go` — extracted `wrapPreservingFamily` helper for 4× Wrap constructors                     | 1     | −24   | ✅     |
+| 2   | `pkg/errors/errors.go` — converted 9× error templates to `makeEntry()` single-line calls                      | 1     | −20   | ✅     |
+| 3   | `cmd/examples/github-sync/main_test.go` — added `assertContains()` helper for JSON checks                     | 1     | −6    | ✅     |
+| 4   | `cmd/examples/github-sync/main_test.go` — refactored env-var assertion blocks                                 | 1     | −8    | ✅     |
+| 5   | `pkg/crdt/conflict_test.go` — used existing `assertWinner()` for 2× timestamp tests                           | 1     | −4    | ✅     |
+| 6   | `pkg/sync/` tests — replaced 14× `if result.X != N { t.Errorf }` with `testutil.AssertInt`                    | 4     | −50   | ✅     |
+| 7   | `pkg/sync/` tests — extracted `testSyncItems(pairs...)` fixture builder                                       | 3     | −18   | ✅     |
+| 8   | `pkg/cqrs/` tests — extracted `syncTestItem()` helper for `MustNoError(t, stack.SyncItem(...))`               | 4     | −30   | ✅     |
+| 9   | `pkg/cqrs/` tests — extracted `syncTestItems()` / `syncTestItemsResult()` helpers                             | 3     | −15   | ✅     |
+| 10  | `pkg/cqrs/` tests — replaced 12× `if len(events) != N { t.Fatalf }` with `testutil.RequireLen`                | 3     | −30   | ✅     |
+| 11  | `pkg/cqrs/` tests — refactored `sqlite_readmodel_filter_test.go` with `sqliteSeed()`                          | 2     | −50   | ✅     |
+| 12  | `pkg/cqrs/` tests — refactored `sqlite_readmodel_test.go` with `sqliteSeed()`                                 | 1     | −40   | ✅     |
+| 13  | `pkg/cqrs/` tests — refactored `stack_test.go` assertions with `testutil.AssertInt`/`AssertInt64`/`AssertLen` | 1     | −45   | ✅     |
+| 14  | `pkg/cqrs/` tests — refactored `readmodel_test.go` assertions with `testutil.AssertLen`/`AssertInt64`         | 1     | −15   | ✅     |
+| 15  | `pkg/cqrs/` tests — refactored `decider_resolver_test.go` winner checks with `testutil.AssertEqual`           | 1     | −12   | ✅     |
+| 16  | `pkg/api/server_test.go` — added `newGETRequest()` helper, replaced 6× httptest.NewRequestWithContext         | 1     | −8    | ✅     |
+| 17  | `pkg/testutil/testutil.go` — added `AssertInt()`, `AssertInt64()`, `AssertContains[T]()`, `RequireLen[T]()`   | 1     | +35   | ✅     |
+| 18  | Pre-commit buildflow hook passed on both commits                                                              | —     | —     | ✅     |
 
 ### Previously Done (carried forward)
 
@@ -80,16 +80,16 @@ A single uncommitted change lingers from Session 10 (`TypedItem` generic interfa
 
 ### Test Coverage
 
-| Package | Coverage | Target | Gap |
-|---|---|---|---|
-| `cmd/examples/github-sync` | 10.3% | 80% | 70% |
-| `pkg/api` | ~76% | 90% | 14% |
-| `pkg/cqrs` | ~83% | 90% | 7% |
-| `pkg/sync` | 92.3% | 95% | 3% |
-| `pkg/crdt` | 97.6% | 98% | 0.4% |
-| `pkg/id` | 100% | 100% | 0% |
-| `pkg/errors` | 100% | 100% | 0% |
-| `pkg/providers/github` | 84.6% | 90% | 5.4% |
+| Package                    | Coverage | Target | Gap  |
+| -------------------------- | -------- | ------ | ---- |
+| `cmd/examples/github-sync` | 10.3%    | 80%    | 70%  |
+| `pkg/api`                  | ~76%     | 90%    | 14%  |
+| `pkg/cqrs`                 | ~83%     | 90%    | 7%   |
+| `pkg/sync`                 | 92.3%    | 95%    | 3%   |
+| `pkg/crdt`                 | 97.6%    | 98%    | 0.4% |
+| `pkg/id`                   | 100%     | 100%   | 0%   |
+| `pkg/errors`               | 100%     | 100%   | 0%   |
+| `pkg/providers/github`     | 84.6%    | 90%    | 5.4% |
 
 ---
 
@@ -165,33 +165,33 @@ A single uncommitted change lingers from Session 10 (`TypedItem` generic interfa
 
 ## f) Top #25 Things We Should Get Done Next!
 
-| # | Priority | Task | Effort | Impact | Owner |
-|---|---|---|---|---|---|
-| 1 | 🔴 CRITICAL | Commit or revert `TypedItem` in `pkg/data/query/query.go` | 5 min | Clean working tree | This session |
-| 2 | 🔴 CRITICAL | Integration test: full sync pipeline (Provider → CQRS → ReadModel → API) | 2h | Validates entire architecture | Next session |
-| 3 | 🔴 CRITICAL | Concurrent read model access test | 1h | Catches race conditions | Next session |
-| 4 | 🔴 CRITICAL | Test `cmd/examples/github-sync` main flow (`runSync`, `runStats`) | 3h | CLI entry point coverage | Next 2 sessions |
-| 5 | 🟡 HIGH | Monitor go-cqrs-lite upstream `Sink→EventSink` WIP | Ongoing | Unblocks dependency updates | Background |
-| 6 | 🟡 HIGH | Add `--conflict-strategy` CLI flag | 1h | Makes CRDT usable | Next session |
-| 7 | 🟡 HIGH | Performance benchmarks: `SyncItems` 1k/10k/100k | 2h | Scaling data | Next session |
-| 8 | 🟡 HIGH | Table-driven tests for `HasChanged` edge cases | 1.5h | Conflict detection correctness | Next session |
-| 9 | 🟡 HIGH | Test `mapSyncError()` with all 6 error→status mappings | 1h | API correctness | Next session |
-| 10 | 🟡 HIGH | SQLite read model with real file persistence | 1.5h | Production readiness | Next 2 sessions |
-| 11 | 🟡 HIGH | Integration test for `ActionConflictLocal` with real resolver | 2h | Local-wins path coverage | Next 2 sessions |
-| 12 | 🟡 HIGH | Improve `pkg/api` error path coverage to 90% | 3h | API robustness | Next 2 sessions |
-| 13 | 🟢 MEDIUM | Add second provider (GitLab) | 8h | Validates generic architecture | Future |
-| 14 | 🟢 MEDIUM | WebSocket/SSE real-time notifications | 6h | Real-time sync UX | Future |
-| 15 | 🟢 MEDIUM | Background sync scheduler (cron-like) | 4h | Automation | Future |
-| 16 | 🟢 MEDIUM | Prometheus metrics endpoint | 3h | Observability | Future |
-| 17 | 🟢 MEDIUM | Health check with dependency status | 2h | Production readiness | Future |
-| 18 | 🟢 MEDIUM | Add `sync.Cond` / channel-based test signaling | 2h | Test reliability | Future |
-| 19 | 🟢 MEDIUM | Extract `pkg/testutil` HTTP response helpers | 1h | Test DRYness | Future |
-| 20 | 🟢 MEDIUM | Standardize test naming convention | 2h | Consistency | Future |
-| 21 | 🟢 MEDIUM | Vector clock persistence for multi-node sync | 8h | Distributed sync foundation | Future |
-| 22 | 🟢 MEDIUM | Out-of-order event handling | 6h | Network partition resilience | Future |
-| 23 | 🟢 LOW | Add `go doc` for all exported types | 3h | Documentation | Future |
-| 24 | 🟢 LOW | CONTRIBUTING.md update for new test helpers | 30 min | Onboarding | Future |
-| 25 | 🟢 LOW | Benchmark visualization (Grafana or similar) | 4h | Dev UX | Future |
+| #   | Priority    | Task                                                                     | Effort  | Impact                         | Owner           |
+| --- | ----------- | ------------------------------------------------------------------------ | ------- | ------------------------------ | --------------- |
+| 1   | 🔴 CRITICAL | Commit or revert `TypedItem` in `pkg/data/query/query.go`                | 5 min   | Clean working tree             | This session    |
+| 2   | 🔴 CRITICAL | Integration test: full sync pipeline (Provider → CQRS → ReadModel → API) | 2h      | Validates entire architecture  | Next session    |
+| 3   | 🔴 CRITICAL | Concurrent read model access test                                        | 1h      | Catches race conditions        | Next session    |
+| 4   | 🔴 CRITICAL | Test `cmd/examples/github-sync` main flow (`runSync`, `runStats`)        | 3h      | CLI entry point coverage       | Next 2 sessions |
+| 5   | 🟡 HIGH     | Monitor go-cqrs-lite upstream `Sink→EventSink` WIP                       | Ongoing | Unblocks dependency updates    | Background      |
+| 6   | 🟡 HIGH     | Add `--conflict-strategy` CLI flag                                       | 1h      | Makes CRDT usable              | Next session    |
+| 7   | 🟡 HIGH     | Performance benchmarks: `SyncItems` 1k/10k/100k                          | 2h      | Scaling data                   | Next session    |
+| 8   | 🟡 HIGH     | Table-driven tests for `HasChanged` edge cases                           | 1.5h    | Conflict detection correctness | Next session    |
+| 9   | 🟡 HIGH     | Test `mapSyncError()` with all 6 error→status mappings                   | 1h      | API correctness                | Next session    |
+| 10  | 🟡 HIGH     | SQLite read model with real file persistence                             | 1.5h    | Production readiness           | Next 2 sessions |
+| 11  | 🟡 HIGH     | Integration test for `ActionConflictLocal` with real resolver            | 2h      | Local-wins path coverage       | Next 2 sessions |
+| 12  | 🟡 HIGH     | Improve `pkg/api` error path coverage to 90%                             | 3h      | API robustness                 | Next 2 sessions |
+| 13  | 🟢 MEDIUM   | Add second provider (GitLab)                                             | 8h      | Validates generic architecture | Future          |
+| 14  | 🟢 MEDIUM   | WebSocket/SSE real-time notifications                                    | 6h      | Real-time sync UX              | Future          |
+| 15  | 🟢 MEDIUM   | Background sync scheduler (cron-like)                                    | 4h      | Automation                     | Future          |
+| 16  | 🟢 MEDIUM   | Prometheus metrics endpoint                                              | 3h      | Observability                  | Future          |
+| 17  | 🟢 MEDIUM   | Health check with dependency status                                      | 2h      | Production readiness           | Future          |
+| 18  | 🟢 MEDIUM   | Add `sync.Cond` / channel-based test signaling                           | 2h      | Test reliability               | Future          |
+| 19  | 🟢 MEDIUM   | Extract `pkg/testutil` HTTP response helpers                             | 1h      | Test DRYness                   | Future          |
+| 20  | 🟢 MEDIUM   | Standardize test naming convention                                       | 2h      | Consistency                    | Future          |
+| 21  | 🟢 MEDIUM   | Vector clock persistence for multi-node sync                             | 8h      | Distributed sync foundation    | Future          |
+| 22  | 🟢 MEDIUM   | Out-of-order event handling                                              | 6h      | Network partition resilience   | Future          |
+| 23  | 🟢 LOW      | Add `go doc` for all exported types                                      | 3h      | Documentation                  | Future          |
+| 24  | 🟢 LOW      | CONTRIBUTING.md update for new test helpers                              | 30 min  | Onboarding                     | Future          |
+| 25  | 🟢 LOW      | Benchmark visualization (Grafana or similar)                             | 4h      | Dev UX                         | Future          |
 
 ---
 
@@ -207,11 +207,13 @@ type hasType = TypedItem[id.EventTypeID]
 ```
 
 **Why I can't decide:**
+
 - **Pro:** It makes `hasType` a type alias to a truly generic interface. If we ever need `GetType()` with a different type parameter, `TypedItem` is reusable.
 - **Con:** We only have ONE use site (`hasType`). The generic adds complexity for a single consumer. `interface{ GetType() id.EventTypeID }` is simpler and clearer.
 - **Risk:** If we keep it, we should use it elsewhere (e.g., `GetType() string` for other entities) to justify the abstraction. If we don't, it's dead weight.
 
 **What I need:** A decision on whether to:
+
 1. **Commit it** and plan to use `TypedItem[string]` etc. in other packages
 2. **Revert it** and keep `hasType` as a plain interface
 3. **Expand it** now by finding other `GetType()` usages that could benefit
@@ -220,19 +222,19 @@ type hasType = TypedItem[id.EventTypeID]
 
 ## Metrics Snapshot
 
-| Metric | Value |
-|---|---|
-| Test packages | 14 (all passing) |
-| Total test functions | 220+ |
-| Coverage (highest) | `pkg/id` 100%, `pkg/errors` 100%, `pkg/crdt` 97.6% |
-| Coverage (lowest) | `cmd/examples/github-sync` 10.3% |
-| Lint issues | 4 (all pre-existing) |
-| art-dupl t=15 groups | 73 (down from 96) |
-| art-dupl t=50 groups | 0 (industry standard) |
-| Go version | 1.26.3 |
-| go-cqrs-lite | v2.0.0 (11 sub-modules) |
-| Lines of code (approx) | ~6,500 (Go), ~2,500 (tests) |
-| Uncommitted changes | 1 file (`pkg/data/query/query.go`) |
+| Metric                 | Value                                              |
+| ---------------------- | -------------------------------------------------- |
+| Test packages          | 14 (all passing)                                   |
+| Total test functions   | 220+                                               |
+| Coverage (highest)     | `pkg/id` 100%, `pkg/errors` 100%, `pkg/crdt` 97.6% |
+| Coverage (lowest)      | `cmd/examples/github-sync` 10.3%                   |
+| Lint issues            | 4 (all pre-existing)                               |
+| art-dupl t=15 groups   | 73 (down from 96)                                  |
+| art-dupl t=50 groups   | 0 (industry standard)                              |
+| Go version             | 1.26.3                                             |
+| go-cqrs-lite           | v2.0.0 (11 sub-modules)                            |
+| Lines of code (approx) | ~6,500 (Go), ~2,500 (tests)                        |
+| Uncommitted changes    | 1 file (`pkg/data/query/query.go`)                 |
 
 ---
 
@@ -253,4 +255,4 @@ adcae1d docs, cqrs, data, errors, github, sync, testutil: Session 10 completion
 
 ---
 
-*Report generated by Crush. Waiting for further instructions.*
+_Report generated by Crush. Waiting for further instructions._
