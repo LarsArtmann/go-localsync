@@ -39,7 +39,7 @@ func TestDecideSync_CustomResolver_RemoteWins(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(ToDataItem(remoteItem), nil, &pickSideResolver{pickSide: "remote"})(state, 1)
+	events, err := decideSync(toDataItem(remoteItem), nil, &pickSideResolver{pickSide: "remote"})(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 
@@ -74,7 +74,7 @@ func TestDecideSync_CustomResolver_LocalWins(t *testing.T) {
 
 	state := SyncItemState{Item: localItem}
 
-	events, err := DecideSync(ToDataItem(remoteItem), nil, &pickSideResolver{pickSide: "local"})(state, 1)
+	events, err := decideSync(toDataItem(remoteItem), nil, &pickSideResolver{pickSide: "local"})(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 
@@ -109,7 +109,7 @@ func TestDecideSync_CustomResolver_Error_FallsBackToRemote(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", time.Now())
 
-	events, err := DecideSync(ToDataItem(remoteItem), nil, new(errorResolver))(state, 1)
+	events, err := decideSync(toDataItem(remoteItem), nil, new(errorResolver))(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 
@@ -133,7 +133,7 @@ func TestDecideSync_LWWResolver_RemoteNewer(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(ToDataItem(remoteItem), nil, resolver)(state, 1)
+	events, err := decideSync(toDataItem(remoteItem), nil, resolver)(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 
@@ -157,7 +157,7 @@ func TestDecideSync_LWWResolver_LocalNewer(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(ToDataItem(remoteItem), nil, resolver)(state, 1)
+	events, err := decideSync(toDataItem(remoteItem), nil, resolver)(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 

@@ -82,7 +82,7 @@ func createSQLiteStore(cfg CQRSConfig) (storeResult, error) {
 func createReadModel(cfg CQRSConfig, sr storeResult) (ReadModel, error) {
 	if cfg.Backend == backendSQLite {
 		if sr.db != nil {
-			return NewSQLiteReadModel(sr.db)
+			return newSQLiteReadModel(sr.db)
 		}
 
 		return nil, errSQLiteRequiresDB

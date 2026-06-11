@@ -11,9 +11,9 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-// ToDataItem converts a provider.Item to a data model Item.
+// toDataItem converts a provider.Item to a data model Item.
 // This is the boundary between the provider DTO and the domain entity.
-func ToDataItem(p *provider.Item) *model.Item {
+func toDataItem(p *provider.Item) *model.Item {
 	if p == nil {
 		return nil
 	}
@@ -33,9 +33,9 @@ func ToDataItem(p *provider.Item) *model.Item {
 	}
 }
 
-// FromDataItem converts a data model Item back to a provider.Item.
+// fromDataItem converts a data model Item back to a provider.Item.
 // Used for backward compatibility during the migration.
-func FromDataItem(item *model.Item, rawJSON []byte) *provider.Item {
+func fromDataItem(item *model.Item, rawJSON []byte) *provider.Item {
 	if item == nil {
 		return nil
 	}
@@ -55,8 +55,8 @@ func FromDataItem(item *model.Item, rawJSON []byte) *provider.Item {
 	}
 }
 
-// DataItemFromPayload reconstructs a data.Item from an event payload.
-func DataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
+// dataItemFromPayload reconstructs a data.Item from an event payload.
+func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 	itemID, err := parseItemID(payload.ItemID)
 	if err != nil {
 		return nil, err
@@ -88,8 +88,8 @@ func DataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 	return item, nil
 }
 
-// DataItemToPayload serializes a data.Item into an event payload.
-func DataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
+// dataItemToPayload serializes a data.Item into an event payload.
+func dataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 	if item == nil {
 		//nolint:exhaustruct // zero payload for nil item
 		return ItemSyncedPayload{}
@@ -119,7 +119,7 @@ func decodeItemFromEvent(evt event.Event) (*model.Item, error) {
 		return nil, fmt.Errorf("decode ItemSyncedPayload for event %s: %w", evt.ID(), err)
 	}
 
-	item, err := DataItemFromPayload(payload)
+	item, err := dataItemFromPayload(payload)
 	if err != nil {
 		return nil, fmt.Errorf("reconstruct item from payload: %w", err)
 	}

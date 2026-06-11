@@ -175,7 +175,7 @@ func testItems(pairs ...string) []*provider.Item {
 }
 
 func testDataItem(sourceID, itemType string) *model.Item {
-	return ToDataItem(testItem(sourceID, itemType))
+	return toDataItem(testItem(sourceID, itemType))
 }
 
 // testFutureNow returns time.Now() truncated to milliseconds and offset by delta.

@@ -40,7 +40,7 @@ func decideWithOutcome(
 			outcome.WasNew = state.IsNew()
 		}
 
-		events, err := DecideSync(item, rawJSON, resolver, opts...)(state, ver)
+		events, err := decideSync(item, rawJSON, resolver, opts...)(state, ver)
 		if err != nil {
 			return nil, err
 		}

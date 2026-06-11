@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	stderrors "errors"
 	"github.com/larsartmann/go-cqrs-lite/command/v2"
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
-	stderrors "errors"
 )
 
 var (

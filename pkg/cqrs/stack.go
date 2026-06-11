@@ -76,7 +76,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, err
 	}
 
-	proj := NewProjector(rm)
+	proj := newProjector(rm)
 
 	checkpointStore, cpErr := createCheckpointStore(cfg, sr.db)
 	if cpErr != nil {
@@ -96,7 +96,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 
 	deciderSpec := decider.Decider[SyncItemState]{
 		Initial: InitialState,
-		Fold:    Fold,
+		Fold:    fold,
 	}
 
 	snapshotStore, stratStoreErr := createSnapshotStore(cfg, sr.db)
@@ -148,7 +148,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 
 	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
-		Item:         ToDataItem(item),
+		Item:         toDataItem(item),
 		RawJSON:      item.RawJSON,
 		Options:      nil,
 	})
@@ -185,7 +185,7 @@ func (s *CQRSStack) SyncItems(
 
 	for _, item := range items {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
-		dataItem := ToDataItem(item)
+		dataItem := toDataItem(item)
 
 		var outcome SyncOutcome
 

@@ -14,8 +14,8 @@ type Projector struct {
 	readModel ReadModel
 }
 
-// NewProjector creates a Projector for the given ReadModel.
-func NewProjector(rm ReadModel) *Projector {
+// newProjector creates a Projector for the given ReadModel.
+func newProjector(rm ReadModel) *Projector {
 	return &Projector{readModel: rm}
 }
 

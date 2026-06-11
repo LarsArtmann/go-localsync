@@ -61,7 +61,7 @@ func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
 	aggID := AggregateID("github", id.NewExternalID("wrong-type-test"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
-		Item:         ToDataItem(testItem("wrong-type-test", "PushEvent")),
+		Item:         toDataItem(testItem("wrong-type-test", "PushEvent")),
 	})
 	testutil.MustNoError(t, err)
 }
@@ -78,7 +78,7 @@ func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
 	aggID := AggregateID("github", id.NewExternalID("unknown"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(command.Type("unknown.command"), aggID),
-		Item:         ToDataItem(testItem("unknown", "PushEvent")),
+		Item:         toDataItem(testItem("unknown", "PushEvent")),
 	})
 	if err == nil {
 		t.Error("expected error for unregistered command type")
@@ -116,7 +116,7 @@ func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
 	aggID := AggregateID("", id.NewExternalID("empty-source"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
-		Item:         ToDataItem(item),
+		Item:         toDataItem(item),
 	})
 	if err == nil {
 		t.Error("expected validation error for empty source")

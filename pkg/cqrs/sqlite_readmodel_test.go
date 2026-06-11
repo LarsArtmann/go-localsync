@@ -24,9 +24,9 @@ func newSQLiteTestDB(t *testing.T) *SQLiteReadModel {
 
 	t.Cleanup(func() { _ = db.Close() })
 
-	rm, err := NewSQLiteReadModel(db)
+	rm, err := newSQLiteReadModel(db)
 	if err != nil {
-		t.Fatalf("NewSQLiteReadModel: %v", err)
+		t.Fatalf("newSQLiteReadModel: %v", err)
 	}
 
 	return rm

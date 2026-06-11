@@ -22,7 +22,7 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 	db1, err := storage.OpenSQLite(dbPath)
 	testutil.MustNoError(t, err)
 
-	rm1, err := NewSQLiteReadModel(db1)
+	rm1, err := newSQLiteReadModel(db1)
 	testutil.MustNoError(t, err)
 
 	item := &model.Item{
@@ -43,7 +43,7 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 	testutil.MustNoError(t, err)
 	t.Cleanup(func() { _ = db2.Close() })
 
-	rm2, err := NewSQLiteReadModel(db2)
+	rm2, err := newSQLiteReadModel(db2)
 	testutil.MustNoError(t, err)
 
 	got, err := rm2.Get(ctx, "github", id.NewExternalID("persist-1"))

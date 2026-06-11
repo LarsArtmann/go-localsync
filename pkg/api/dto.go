@@ -4,8 +4,6 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
-	"github.com/larsartmann/go-localsync/pkg/data/schema"
-	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
 // ListItemsInput defines the query parameters for listing items.
@@ -91,22 +89,5 @@ type SyncOutput struct {
 type HealthOutput struct {
 	Body struct {
 		Status string `doc:"Health status" json:"status"`
-	}
-}
-
-// newTestItem creates a model.Item for use in API tests.
-func newTestItem(itemID, eventType string) *model.Item {
-	now := time.Now()
-
-	return &model.Item{
-		ID:            id.NewItemID(),
-		ExternalID:    id.NewExternalID(itemID),
-		Source:        id.NewProviderID("github"),
-		Type:          id.NewEventTypeID(eventType),
-		ActorLogin:    id.NewActorID("testuser"),
-		RepoName:      id.NewRepoID("test/repo"),
-		CreatedAt:     now,
-		UpdatedAt:     now,
-		SchemaVersion: schema.CurrentVersion(),
 	}
 }

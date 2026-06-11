@@ -42,7 +42,7 @@ func TestFold_ItemSynced(t *testing.T) {
 
 	evt := mustNewTestEvent(EventItemSynced, payload)
 
-	state, err := Fold(InitialState, evt)
+	state, err := fold(InitialState, evt)
 	testutil.MustNoError(t, err)
 	if state.Item == nil {
 		t.Fatal("expected non-nil Item")
@@ -64,7 +64,7 @@ func TestFold_ItemSyncedOverwritesState(t *testing.T) {
 
 	evt := mustNewTestEvent(EventItemSynced, updatedPayload)
 
-	state, err := Fold(existing, evt)
+	state, err := fold(existing, evt)
 	testutil.MustNoError(t, err)
 
 	testutil.AssertType(t, state.Item, "IssueEvent")
@@ -77,7 +77,7 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	dataItem.ID = id.NewItemID()
 	originalID := dataItem.ID.String()
 
-	events, err := DecideSync(dataItem, nil, nil)(InitialState, 0)
+	events, err := decideSync(dataItem, nil, nil)(InitialState, 0)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
 
@@ -89,7 +89,7 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 		t.Errorf("expected ItemID=%s, got %s", originalID, payload.ItemID)
 	}
 
-	state, err := Fold(InitialState, events[0])
+	state, err := fold(InitialState, events[0])
 	testutil.MustNoError(t, err)
 	if state.Item == nil {
 		t.Fatal("expected non-nil Item")
@@ -106,7 +106,7 @@ func TestFold_ItemDeleted(t *testing.T) {
 
 	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
-	state, err := Fold(existing, evt)
+	state, err := fold(existing, evt)
 	testutil.MustNoError(t, err)
 
 	if !state.Deleted {
@@ -126,7 +126,7 @@ func TestFold_ItemConflictFound(t *testing.T) {
 		Source: "github", SourceID: "123", Winner: "remote",
 	})
 
-	state, err := Fold(existing, evt)
+	state, err := fold(existing, evt)
 	testutil.MustNoError(t, err)
 
 	testutil.AssertType(t, state.Item, "PushEvent")
@@ -137,7 +137,7 @@ func TestFold_UnknownEventType(t *testing.T) {
 
 	evt := mustNewTestEvent(event.Type("unknown"), map[string]string{"test": "data"})
 
-	_, err := Fold(InitialState, evt)
+	_, err := fold(InitialState, evt)
 	if err == nil {
 		t.Fatal("expected error for unknown event type")
 	}
@@ -148,7 +148,7 @@ func TestDecideSync_NewItem(t *testing.T) {
 
 	item := testDataItem("123", "PushEvent")
 
-	events, err := DecideSync(item, nil, nil)(InitialState, 0)
+	events, err := decideSync(item, nil, nil)(InitialState, 0)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemSynced)
@@ -172,7 +172,7 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 		},
 	}
 
-	events, err := DecideSync(ToDataItem(item), nil, nil)(state, 1)
+	events, err := decideSync(toDataItem(item), nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("unchanged item produces no events, got %d", len(events))
@@ -187,7 +187,7 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", time.Now())
 
-	events, err := DecideSync(item, nil, nil)(state, 1)
+	events, err := decideSync(item, nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 	assertEventType(t, events[0], EventItemConflictFound)
@@ -205,7 +205,7 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 
 	state := testStateWithTimestamp("123", "PushEvent", localTime)
 
-	events, err := DecideSync(item, nil, nil)(state, 1)
+	events, err := decideSync(item, nil, nil)(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 
@@ -232,7 +232,7 @@ func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 
 	state := testDeletedState("123")
 
-	events, err := DecideSync(item, nil, nil)(state, 2)
+	events, err := decideSync(item, nil, nil)(state, 2)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemSynced)
@@ -243,7 +243,7 @@ func TestDecideDelete_ActiveItem(t *testing.T) {
 
 	state := testActiveState("123", "")
 
-	events, err := DecideDelete("github", id.NewExternalID("123"))(state, 1)
+	events, err := decideDelete("github", id.NewExternalID("123"))(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemDeleted)
@@ -254,7 +254,7 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 
 	state := testDeletedState("123")
 
-	events, err := DecideDelete("github", id.NewExternalID("123"))(state, 1)
+	events, err := decideDelete("github", id.NewExternalID("123"))(state, 1)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
@@ -264,7 +264,7 @@ func TestDecideDelete_AlreadyDeleted(t *testing.T) {
 func TestDecideDelete_NewItem(t *testing.T) {
 	t.Parallel()
 
-	events, err := DecideDelete("github", id.NewExternalID("123"))(InitialState, 0)
+	events, err := decideDelete("github", id.NewExternalID("123"))(InitialState, 0)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
@@ -349,9 +349,9 @@ func TestHasChanged(t *testing.T) {
 			remote := base()
 			tt.mut(remote)
 
-			got := HasChanged(local, remote)
+			got := hasChanged(local, remote)
 			if got != tt.want {
-				t.Errorf("HasChanged() = %v, want %v", got, tt.want)
+				t.Errorf("hasChanged() = %v, want %v", got, tt.want)
 			}
 		})
 	}

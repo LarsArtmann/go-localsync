@@ -89,6 +89,6 @@ func handleDeleteItem(repo *decider.Repository[SyncItemState]) command.Handler {
 			)
 		}
 
-		return repo.Execute(ctx, delCmd.AggregateID(), aggregateType, DecideDelete(delCmd.Source, delCmd.SourceID))
+		return repo.Execute(ctx, delCmd.AggregateID(), aggregateType, decideDelete(delCmd.Source, delCmd.SourceID))
 	}
 }

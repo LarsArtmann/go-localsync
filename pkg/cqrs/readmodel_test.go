@@ -174,7 +174,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 	t.Parallel()
 
 	rm := NewMemoryReadModel()
-	proj := NewProjector(rm)
+	proj := newProjector(rm)
 
 	payload := testSyncedPayload("123", "PushEvent")
 
@@ -197,7 +197,7 @@ func TestProjector_ItemDeleted(t *testing.T) {
 
 	upsertTestItem(t, rm, ctx, "github", "123", "PushEvent", "alice", "org/repo")
 
-	proj := NewProjector(rm)
+	proj := newProjector(rm)
 
 	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
 
@@ -214,7 +214,7 @@ func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {
 
 	upsertTestItem(t, rm, ctx, "github", "123", "PushEvent", "alice", "org/repo")
 
-	proj := NewProjector(rm)
+	proj := newProjector(rm)
 
 	evt := mustNewTestEvent(EventItemConflictFound, ItemConflictFoundPayload{
 		Source: "github", SourceID: "123", Winner: "remote",
@@ -229,7 +229,7 @@ func TestProjector_ItemSynced_InvalidItemID(t *testing.T) {
 	t.Parallel()
 
 	rm := NewMemoryReadModel()
-	proj := NewProjector(rm)
+	proj := newProjector(rm)
 
 	payload := ItemSyncedPayload{
 		ItemID:   "not-a-valid-ulid",
@@ -250,7 +250,7 @@ func TestProjector_ItemSynced_MissingRequiredFields(t *testing.T) {
 	t.Parallel()
 
 	rm := NewMemoryReadModel()
-	proj := NewProjector(rm)
+	proj := newProjector(rm)
 
 	payload := ItemSyncedPayload{
 		Source:   "github",
@@ -271,11 +271,11 @@ func TestReadModel_Integration(t *testing.T) {
 
 	ctx := context.Background()
 	rm := NewMemoryReadModel()
-	proj := NewProjector(rm)
+	proj := newProjector(rm)
 
 	item := testItem("123", "PushEvent")
 
-	decide := DecideSync(ToDataItem(item), nil, nil)
+	decide := decideSync(toDataItem(item), nil, nil)
 	events, err := decide(InitialState, 0)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)

@@ -37,8 +37,8 @@ func (s SyncItemState) SkipDecision() bool {
 	return s.Deleted || s.IsNew()
 }
 
-// Fold applies a single event to the SyncItemState, returning the new state.
-func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
+// fold applies a single event to the SyncItemState, returning the new state.
+func fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 	switch evt.Type() {
 	case EventItemSynced:
 		return foldItemSynced(evt)
@@ -68,10 +68,10 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 	return SyncItemState{Item: item, Deleted: false}, nil
 }
 
-// DecideSync returns a decider.DecideFunc that syncs an incoming model.Item.
+// decideSync returns a decider.DecideFunc that syncs an incoming model.Item.
 // If resolver is nil, remote-wins is used as the default strategy.
 // rawJSON is the original provider payload, stored in the event for full-fidelity replay.
-func DecideSync(
+func decideSync(
 	item *model.Item,
 	rawJSON []byte,
 	resolver crdt.ConflictResolver[*model.Item],
@@ -84,7 +84,7 @@ func DecideSync(
 			return syncEvents(item, rawJSON, aggID, currentVersion, nil, opts...)
 		}
 
-		if !HasChanged(state.Item, item) {
+		if !hasChanged(state.Item, item) {
 			return nil, nil
 		}
 
@@ -98,8 +98,8 @@ func DecideSync(
 	}
 }
 
-// DecideDelete returns a decider.DecideFunc that marks an item as deleted.
-func DecideDelete(
+// decideDelete returns a decider.DecideFunc that marks an item as deleted.
+func decideDelete(
 	source string, sourceID id.ExternalID,
 	opts ...event.Option,
 ) decider.DecideFunc[SyncItemState] {
@@ -186,7 +186,7 @@ func syncEvents(
 	opts ...event.Option,
 ) ([]event.Event, error) {
 	eventTypes := []event.Type{EventItemSynced}
-	payloads := []any{DataItemToPayload(item, rawJSON)}
+	payloads := []any{dataItemToPayload(item, rawJSON)}
 
 	if conflict != nil {
 		eventTypes = []event.Type{EventItemConflictFound, EventItemSynced}
@@ -198,7 +198,7 @@ func syncEvents(
 				RemoteUpdatedAt: unixNano(conflict.remoteUpdatedAt),
 				Winner:          string(conflict.winner),
 			},
-			DataItemToPayload(item, rawJSON),
+			dataItemToPayload(item, rawJSON),
 		}
 	}
 
@@ -217,9 +217,9 @@ func syncEvents(
 	return evts, nil
 }
 
-// HasChanged returns true if the remote item differs from the local item
+// hasChanged returns true if the remote item differs from the local item
 // in any tracked field (UpdatedAt, Type, ActorLogin, RepoName, RepoURL).
-func HasChanged(local, remote *model.Item) bool {
+func hasChanged(local, remote *model.Item) bool {
 	return !local.UpdatedAt.Equal(remote.UpdatedAt) ||
 		local.Type.Get() != remote.Type.Get() ||
 		local.ActorLogin.Get() != remote.ActorLogin.Get() ||

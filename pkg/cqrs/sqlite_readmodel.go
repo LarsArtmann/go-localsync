@@ -37,8 +37,8 @@ type SQLiteReadModel struct {
 	db *sql.DB
 }
 
-// NewSQLiteReadModel creates a SQLiteReadModel, initializing the schema.
-func NewSQLiteReadModel(db *sql.DB) (*SQLiteReadModel, error) {
+// newSQLiteReadModel creates a SQLiteReadModel, initializing the schema.
+func newSQLiteReadModel(db *sql.DB) (*SQLiteReadModel, error) {
 	if db == nil {
 		return nil, fmt.Errorf("sqlite read model: %w", pkgerrors.ErrDBNil)
 	}

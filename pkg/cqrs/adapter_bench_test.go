@@ -27,37 +27,37 @@ func testProviderItem() *provider.Item {
 func BenchmarkToDataItem(b *testing.B) {
 	item := testProviderItem()
 	for range b.N {
-		_ = ToDataItem(item)
+		_ = toDataItem(item)
 	}
 }
 
 func BenchmarkFromDataItem(b *testing.B) {
-	item := ToDataItem(testProviderItem())
+	item := toDataItem(testProviderItem())
 	rawJSON := []byte(`{"id":"12345","type":"PushEvent"}`)
 	for range b.N {
-		_ = FromDataItem(item, rawJSON)
+		_ = fromDataItem(item, rawJSON)
 	}
 }
 
 func BenchmarkDataItemRoundtrip(b *testing.B) {
 	item := testProviderItem()
 	for range b.N {
-		d := ToDataItem(item)
-		_ = FromDataItem(d, item.RawJSON)
+		d := toDataItem(item)
+		_ = fromDataItem(d, item.RawJSON)
 	}
 }
 
 func BenchmarkDataItemToPayload(b *testing.B) {
-	item := ToDataItem(testProviderItem())
+	item := toDataItem(testProviderItem())
 	for range b.N {
-		_ = DataItemToPayload(item, []byte(`{}`))
+		_ = dataItemToPayload(item, []byte(`{}`))
 	}
 }
 
 func BenchmarkDataItemFromPayload(b *testing.B) {
-	payload := DataItemToPayload(ToDataItem(testProviderItem()), []byte(`{}`))
+	payload := dataItemToPayload(toDataItem(testProviderItem()), []byte(`{}`))
 	for range b.N {
-		_, err := DataItemFromPayload(payload)
+		_, err := dataItemFromPayload(payload)
 		if err != nil {
 			b.Fatal(err)
 		}
