@@ -1,22 +1,17 @@
 package cqrs
-
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"testing"
 	"time"
-
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	_ "modernc.org/sqlite"
 )
-
 func benchmarkReadModelList(b *testing.B, rm ReadModel) {
 	b.Helper()
 	ctx := context.Background()
-
 	// Seed with 1000 items.
 	for i := range 1000 {
 		item := &model.Item{
@@ -31,34 +26,28 @@ func benchmarkReadModelList(b *testing.B, rm ReadModel) {
 		}
 		_ = rm.Upsert(ctx, item)
 	}
-
 	b.ResetTimer()
-
 	for range b.N {
-		_, err := rm.List(ctx, provider.ItemFilter{Limit: 100, Offset: 0})
+		_, err := rm.List(ctx, model.ItemFilter{Limit: 100, Offset: 0})
 		if err != nil {
 			b.Fatal(err)
 		}
 	}
 }
-
 func BenchmarkMemoryReadModel_List(b *testing.B) {
 	rm := NewMemoryReadModel()
 	benchmarkReadModelList(b, rm)
 }
-
 func BenchmarkSQLiteReadModel_List(b *testing.B) {
 	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		b.Fatal(err)
 	}
 	defer func() { _ = db.Close() }()
-
 	rm, err := NewSQLiteReadModel(db)
 	if err != nil {
 		b.Fatal(err)
 	}
 	defer func() { _ = rm.Close() }()
-
 	benchmarkReadModelList(b, rm)
 }

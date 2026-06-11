@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -21,11 +21,11 @@ func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "alice", "org/repo")
 
 	actor := id.NewActorID("alice")
-	items, err := rm.List(ctx, provider.ItemFilter{ActorLogin: &actor})
+	items, err := rm.List(ctx, model.ItemFilter{ActorLogin: &actor})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items for alice")
 
-	count, err := rm.Count(ctx, provider.ItemFilter{ActorLogin: &actor})
+	count, err := rm.Count(ctx, model.ItemFilter{ActorLogin: &actor})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 2, "count for alice")
 }
@@ -41,7 +41,7 @@ func TestSQLiteReadModel_List_FilterByRepoName(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "charlie", "org/repo-a")
 
 	repo := id.NewRepoID("org/repo-a")
-	items, err := rm.List(ctx, provider.ItemFilter{RepoName: &repo})
+	items, err := rm.List(ctx, model.ItemFilter{RepoName: &repo})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items for org/repo-a")
 }
@@ -56,7 +56,7 @@ func TestSQLiteReadModel_List_FilterBySource(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "gitlab", "2", "PushEvent", "bob", "org/repo")
 
 	source := id.NewProviderID("github")
-	items, err := rm.List(ctx, provider.ItemFilter{Source: &source})
+	items, err := rm.List(ctx, model.ItemFilter{Source: &source})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "items for github source")
 	testutil.AssertEqual(t, items[0].Source.Get(), "github", "Source")
@@ -80,12 +80,12 @@ func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
 	testutil.MustNoError(t, rm.Upsert(ctx, newItem))
 
 	since := time.Now().Add(-24 * time.Hour)
-	items, err := rm.List(ctx, provider.ItemFilter{Since: &since})
+	items, err := rm.List(ctx, model.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "items after Since cutoff")
 	testutil.AssertEqual(t, items[0].ExternalID.Get(), "2", "ExternalID")
 
-	count, err := rm.Count(ctx, provider.ItemFilter{Since: &since})
+	count, err := rm.Count(ctx, model.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 1, "count after Since cutoff")
 }
@@ -100,17 +100,17 @@ func TestSQLiteReadModel_List_Pagination(t *testing.T) {
 		sqliteSeed(t, rm, ctx, "github", string(rune('A'+i)), "PushEvent", "alice", "org/repo")
 	}
 
-	items, err := rm.List(ctx, provider.ItemFilter{Limit: 2})
+	items, err := rm.List(ctx, model.ItemFilter{Limit: 2})
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
 	testutil.AssertLen(t, items, 2, "items with Limit=2")
 
-	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2, Offset: 2})
+	items, err = rm.List(ctx, model.ItemFilter{Limit: 2, Offset: 2})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items with Limit=2 Offset=2")
 
-	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2, Offset: 4})
+	items, err = rm.List(ctx, model.ItemFilter{Limit: 2, Offset: 4})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "items with Limit=2 Offset=4")
 }
@@ -127,7 +127,7 @@ func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 
 	pushType := id.NewEventTypeID("PushEvent")
 	actor := id.NewActorID("alice")
-	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType, ActorLogin: &actor})
+	items, err := rm.List(ctx, model.ItemFilter{Type: &pushType, ActorLogin: &actor})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "PushEvent by alice")
 	testutil.AssertEqual(t, items[0].ExternalID.Get(), "1", "ExternalID")
@@ -142,7 +142,7 @@ func TestSQLiteReadModel_List_ZeroResults(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 
 	pushType := id.NewEventTypeID("NonExistentType")
-	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})
+	items, err := rm.List(ctx, model.ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}

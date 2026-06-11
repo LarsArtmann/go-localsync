@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 // SyncStoreListBehavior provides a default ListItems implementation
@@ -23,7 +22,7 @@ type SyncStoreListBehavior struct {
 // List returns the configured Items or ListErr.
 func (b *SyncStoreListBehavior) List(
 	_ context.Context,
-	_ provider.ItemFilter,
+	_ model.ItemFilter,
 ) ([]*model.Item, error) {
 	if b.ListErr != nil {
 		return nil, b.ListErr

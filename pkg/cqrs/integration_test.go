@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -30,7 +31,7 @@ func TestIntegration_SyncItemsPipeline(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 2)
 
-	list, err := stack.List(ctx, provider.ItemFilter{})
+	list, err := stack.List(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if len(list) != 2 {
 		t.Fatalf("expected 2 items in read model, got %d", len(list))
@@ -75,7 +76,7 @@ func TestIntegration_SyncItemsIdempotent(t *testing.T) {
 		t.Fatalf("expected synced=0 on second sync (unchanged), got %d", summary2.Synced)
 	}
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after idempotent sync, got %d", count)
@@ -138,7 +139,7 @@ func TestIntegration_ReadModelFilter(t *testing.T) {
 	waitForCount(t, stack, ctx, 3)
 
 	pushType := id.NewEventTypeID("PushEvent")
-	filtered, err := stack.List(ctx, provider.ItemFilter{Type: &pushType})
+	filtered, err := stack.List(ctx, model.ItemFilter{Type: &pushType})
 	testutil.MustNoError(t, err)
 	if len(filtered) != 2 {
 		t.Errorf("expected 2 PushEvent items, got %d", len(filtered))
@@ -157,7 +158,7 @@ func TestIntegration_SQLiteBackend(t *testing.T) {
 	syncTestItems(t, stack, ctx, "1", "PushEvent", "2", "IssueEvent")
 	waitForCount(t, stack, ctx, 2)
 
-	list, err := stack.List(ctx, provider.ItemFilter{})
+	list, err := stack.List(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if len(list) != 2 {
 		t.Fatalf("expected 2 items, got %d", len(list))

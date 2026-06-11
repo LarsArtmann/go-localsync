@@ -9,7 +9,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -109,25 +108,25 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	upsertTestItem(t, rm, ctx, "gitlab", "3", "PushEvent", "alice", "org/repo3")
 
 	pushTypeFilter := id.NewEventTypeID("PushEvent")
-	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushTypeFilter})
+	items, err := rm.List(ctx, model.ItemFilter{Type: &pushTypeFilter})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 
 	sourceFilter := id.NewProviderID("github")
-	items, err = rm.List(ctx, provider.ItemFilter{Source: &sourceFilter})
+	items, err = rm.List(ctx, model.ItemFilter{Source: &sourceFilter})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 
 	actorFilter := id.NewActorID("alice")
-	items, err = rm.List(ctx, provider.ItemFilter{ActorLogin: &actorFilter})
+	items, err = rm.List(ctx, model.ItemFilter{ActorLogin: &actorFilter})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 
-	items, err = rm.List(ctx, provider.ItemFilter{Limit: 2})
+	items, err = rm.List(ctx, model.ItemFilter{Limit: 2})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 
-	items, err = rm.List(ctx, provider.ItemFilter{Offset: 10})
+	items, err = rm.List(ctx, model.ItemFilter{Offset: 10})
 	testutil.MustNoError(t, err)
 	if items != nil {
 		t.Errorf("expected nil for out-of-range offset, got %d items", len(items))
@@ -143,12 +142,12 @@ func TestMemoryReadModel_Count(t *testing.T) {
 	upsertTestItem(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 	upsertTestItem(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
-	count, err := rm.Count(ctx, provider.ItemFilter{})
+	count, err := rm.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 2, "count")
 
 	pushTypeFilter := id.NewEventTypeID("PushEvent")
-	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushTypeFilter})
+	count, err = rm.Count(ctx, model.ItemFilter{Type: &pushTypeFilter})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 1, "count")
 }
@@ -292,7 +291,7 @@ func TestReadModel_Integration(t *testing.T) {
 		t.Errorf("expected ActorLogin=testuser, got %s", got.ActorLogin.Get())
 	}
 
-	count, err := rm.Count(ctx, provider.ItemFilter{})
+	count, err := rm.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)

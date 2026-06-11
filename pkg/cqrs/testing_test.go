@@ -190,7 +190,7 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 	deadline := time.Now().Add(5 * time.Second)
 
 	for time.Now().Before(deadline) {
-		count, err := stack.Count(ctx, provider.ItemFilter{})
+		count, err := stack.Count(ctx, model.ItemFilter{})
 		testutil.MustNoError(t, err)
 
 		if count == expected {
@@ -200,7 +200,7 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 		time.Sleep(time.Millisecond)
 	}
 
-	count, _ := stack.Count(ctx, provider.ItemFilter{})
+	count, _ := stack.Count(ctx, model.ItemFilter{})
 	t.Fatalf("timed out waiting for count=%d, got %d", expected, count)
 }
 

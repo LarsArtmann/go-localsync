@@ -46,7 +46,7 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *sy
 	return summary
 }
 
-func (m *mockSyncStore) Count(_ context.Context, _ provider.ItemFilter) (int64, error) {
+func (m *mockSyncStore) Count(_ context.Context, _ model.ItemFilter) (int64, error) {
 	if m.countErr != nil {
 		return 0, m.countErr
 	}

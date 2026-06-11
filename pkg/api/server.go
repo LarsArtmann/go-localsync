@@ -12,7 +12,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
@@ -163,7 +162,7 @@ type ListItemsOutput struct {
 }
 
 func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListItemsOutput, error) {
-	var filter provider.ItemFilter
+	var filter model.ItemFilter
 
 	filter.Limit = input.Limit
 	filter.Offset = input.Offset

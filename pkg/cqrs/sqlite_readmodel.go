@@ -10,7 +10,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
@@ -82,7 +81,7 @@ func (m *SQLiteReadModel) Get(
 	return item, nil
 }
 
-func (m *SQLiteReadModel) List(ctx context.Context, filter provider.ItemFilter) ([]*model.Item, error) {
+func (m *SQLiteReadModel) List(ctx context.Context, filter model.ItemFilter) ([]*model.Item, error) {
 	query, args := buildListQuery(filter)
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
@@ -95,7 +94,7 @@ func (m *SQLiteReadModel) List(ctx context.Context, filter provider.ItemFilter) 
 	return scanItems(rows)
 }
 
-func (m *SQLiteReadModel) Count(ctx context.Context, filter provider.ItemFilter) (int64, error) {
+func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (int64, error) {
 	query := "SELECT COUNT(*) FROM sync_items WHERE 1=1"
 	args := appendFilterArgs(&query, filter)
 
@@ -184,7 +183,7 @@ func (m *SQLiteReadModel) Close() error {
 	return m.db.Close()
 }
 
-func buildListQuery(filter provider.ItemFilter) (string, []any) {
+func buildListQuery(filter model.ItemFilter) (string, []any) {
 	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at
 		FROM sync_items WHERE 1=1`
 
@@ -207,7 +206,7 @@ func buildListQuery(filter provider.ItemFilter) (string, []any) {
 	return query, args
 }
 
-func appendFilterArgs(query *string, filter provider.ItemFilter) []any {
+func appendFilterArgs(query *string, filter model.ItemFilter) []any {
 	var args []any
 
 	if filter.Type != nil {

@@ -39,7 +39,7 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 	return summary
 }
 
-func (m *mockSyncStore) Count(_ context.Context, filter provider.ItemFilter) (int64, error) {
+func (m *mockSyncStore) Count(_ context.Context, filter model.ItemFilter) (int64, error) {
 	if m.countErr != nil {
 		return 0, m.countErr
 	}
@@ -145,7 +145,7 @@ func TestSyncer_Sync(t *testing.T) {
 	}
 	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
 
-	count, _ := store.Count(ctx, provider.ItemFilter{})
+	count, _ := store.Count(ctx, model.ItemFilter{})
 	testutil.AssertInt64(t, count, 2, "count")
 }
 
@@ -210,7 +210,7 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 	}
 	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
 
-	count, _ := store.Count(ctx, provider.ItemFilter{})
+	count, _ := store.Count(ctx, model.ItemFilter{})
 	testutil.AssertInt64(t, count, 1, "count")
 }
 

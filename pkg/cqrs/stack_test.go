@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -21,7 +22,7 @@ func TestCQRSStack_SyncNewItem(t *testing.T) {
 
 	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
@@ -48,7 +49,7 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	testutil.AssertInt(t, result.Conflicts, 0, "Conflicts")
 	testutil.AssertInt(t, result.Errors, 0, "Errors")
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 3, "count")
 
@@ -71,7 +72,7 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 1, "count")
 }
@@ -86,13 +87,13 @@ func TestCQRSStack_DeleteItem(t *testing.T) {
 
 	syncTestItem(t, stack, ctx, "123", "PushEvent")
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 1, "count")
 
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
-	count, err = stack.Count(ctx, provider.ItemFilter{})
+	count, err = stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 0, "count after delete")
 }
@@ -108,12 +109,12 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 	syncTestItem(t, stack, ctx, "123", "PushEvent")
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
 
-	count, _ := stack.Count(ctx, provider.ItemFilter{})
+	count, _ := stack.Count(ctx, model.ItemFilter{})
 	testutil.AssertInt64(t, count, 0, "count after delete")
 
 	syncTestItem(t, stack, ctx, "123", "IssueEvent")
 
-	count, _ = stack.Count(ctx, provider.ItemFilter{})
+	count, _ = stack.Count(ctx, model.ItemFilter{})
 	testutil.AssertInt64(t, count, 1, "count after resurrect")
 
 	got, err := stack.Get(ctx, "github", id.NewExternalID("123"))
@@ -158,7 +159,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 	testutil.AssertInt(t, result.Synced, 3, "Synced")
 
 	pushType := id.NewEventTypeID("PushEvent")
-	results, err := stack.List(ctx, provider.ItemFilter{Type: &pushType})
+	results, err := stack.List(ctx, model.ItemFilter{Type: &pushType})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, results, 2, "results")
 }
@@ -201,7 +202,7 @@ func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
 
 	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after sync, got %d", count)

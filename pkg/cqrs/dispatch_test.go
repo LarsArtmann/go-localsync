@@ -8,7 +8,6 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -24,7 +23,7 @@ func TestCommandDispatcher_SyncItem_ThroughDispatcher(t *testing.T) {
 	// SyncItem goes through CommandDispatcher
 	testutil.MustNoError(t, stack.SyncItem(ctx, item))
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 1 {
 		t.Errorf("expected count=1 after SyncItem through dispatcher, got %d", count)
@@ -42,7 +41,7 @@ func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
 	syncTestItem(t, stack, ctx, "dispatch-2", "PushEvent")
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("dispatch-2")))
 
-	count, err := stack.Count(ctx, provider.ItemFilter{})
+	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 0 {
 		t.Errorf("expected count=0 after DeleteItem through dispatcher, got %d", count)
@@ -135,7 +134,7 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
 		BasicQuery: mustNewQuery(queryTypeListItem),
-		Filter:     provider.ItemFilter{},
+		Filter:     model.ItemFilter{},
 	})
 	testutil.MustNoError(t, err)
 
@@ -184,7 +183,7 @@ func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
 		BasicQuery: mustNewQuery(queryTypeCountItem),
-		Filter:     provider.ItemFilter{},
+		Filter:     model.ItemFilter{},
 	})
 	testutil.MustNoError(t, err)
 

@@ -8,7 +8,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 // MemoryReadModel is a concurrent-safe in-memory implementation of ReadModel.
@@ -41,7 +40,7 @@ func (m *MemoryReadModel) Get(
 	return item, nil
 }
 
-func (m *MemoryReadModel) List(_ context.Context, filter provider.ItemFilter) ([]*model.Item, error) {
+func (m *MemoryReadModel) List(_ context.Context, filter model.ItemFilter) ([]*model.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -60,7 +59,7 @@ func (m *MemoryReadModel) List(_ context.Context, filter provider.ItemFilter) ([
 	return paginate(all, filter.Limit, filter.Offset), nil
 }
 
-func (m *MemoryReadModel) Count(_ context.Context, filter provider.ItemFilter) (int64, error) {
+func (m *MemoryReadModel) Count(_ context.Context, filter model.ItemFilter) (int64, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
@@ -128,7 +127,7 @@ func (m *MemoryReadModel) Len() int {
 	return len(m.items)
 }
 
-func matchesFilter(item *model.Item, filter provider.ItemFilter) bool {
+func matchesFilter(item *model.Item, filter model.ItemFilter) bool {
 	if filter.Type != nil && item.Type.Get() != filter.Type.Get() {
 		return false
 	}

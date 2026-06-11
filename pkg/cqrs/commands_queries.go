@@ -16,7 +16,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 // commandLoggingMiddleware logs command dispatches.
@@ -159,7 +158,7 @@ type DeleteItemCommand struct {
 type ListItemsQuery struct {
 	query.BasicQuery
 
-	Filter provider.ItemFilter
+	Filter model.ItemFilter
 }
 
 // GetItemQuery queries a single item by source and external ID.
@@ -174,7 +173,7 @@ type GetItemQuery struct {
 type CountItemsQuery struct {
 	query.BasicQuery
 
-	Filter provider.ItemFilter
+	Filter model.ItemFilter
 }
 
 // GetTypesQuery returns all distinct item types.

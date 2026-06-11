@@ -16,7 +16,7 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/api"
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
-	"github.com/larsartmann/go-localsync/pkg/provider"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
@@ -40,7 +40,7 @@ type syncResultOutput struct {
 }
 
 func runStats(stack *cqrs.CQRSStack, jsonOutput bool, logger *log.Logger) {
-	stats, err := stack.Count(context.Background(), provider.ItemFilter{})
+	stats, err := stack.Count(context.Background(), model.ItemFilter{})
 	if err != nil {
 		logErrorAndExit(logger, "Failed to get stats", err, exitSoftware)
 	}

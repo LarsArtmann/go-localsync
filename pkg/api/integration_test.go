@@ -10,6 +10,7 @@ import (
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -20,7 +21,7 @@ func waitForProjection(t *testing.T, ctx context.Context, stack *cqrs.CQRSStack,
 	t.Helper()
 
 	testutil.WaitForCount(t, ctx, func(ctx context.Context) (int64, error) {
-		return stack.Count(ctx, provider.ItemFilter{})
+		return stack.Count(ctx, model.ItemFilter{})
 	}, want)
 }
 

@@ -10,7 +10,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 	_ "modernc.org/sqlite"
 )
@@ -118,7 +117,7 @@ func TestSQLiteReadModel_List(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
-	items, err := rm.List(ctx, provider.ItemFilter{})
+	items, err := rm.List(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 }
@@ -133,7 +132,7 @@ func TestSQLiteReadModel_List_FilterByType(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
 	pushType := id.NewEventTypeID("PushEvent")
-	items, err := rm.List(ctx, provider.ItemFilter{Type: &pushType})
+	items, err := rm.List(ctx, model.ItemFilter{Type: &pushType})
 	if err != nil {
 		t.Fatalf("List: %v", err)
 	}
@@ -150,12 +149,12 @@ func TestSQLiteReadModel_Count(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
 
-	count, err := rm.Count(ctx, provider.ItemFilter{})
+	count, err := rm.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 2, "Count")
 
 	pushType := id.NewEventTypeID("PushEvent")
-	count, err = rm.Count(ctx, provider.ItemFilter{Type: &pushType})
+	count, err = rm.Count(ctx, model.ItemFilter{Type: &pushType})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 1, "filtered Count")
 }
@@ -206,6 +205,6 @@ func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
 	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type")
 
-	count, _ := rm.Count(ctx, provider.ItemFilter{})
+	count, _ := rm.Count(ctx, model.ItemFilter{})
 	testutil.AssertInt64(t, count, 1, "Count")
 }

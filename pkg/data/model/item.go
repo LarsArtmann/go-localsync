@@ -9,7 +9,6 @@ import (
 
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	"github.com/larsartmann/go-localsync/pkg/id"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
 // Item is the canonical domain entity for a synced item.
@@ -40,31 +39,13 @@ func (item Item) IsZero() bool {
 	return item.ExternalID.IsZero() && item.Source.IsZero()
 }
 
-// GetSource returns the source for criterion matching.
-func (item Item) GetSource() id.ProviderID { return item.Source }
-
-// GetType returns the type for criterion matching.
-func (item Item) GetType() id.EventTypeID { return item.Type }
-
-// GetActorLogin returns the actor for criterion matching.
-func (item Item) GetActorLogin() id.ActorID { return item.ActorLogin }
-
-// GetRepoName returns the repo for criterion matching.
-func (item Item) GetRepoName() id.RepoID { return item.RepoName }
-
-// GetCreatedAt returns created_at for criterion matching.
-func (item Item) GetCreatedAt() time.Time { return item.CreatedAt }
-
-// GetUpdatedAt returns updated_at for criterion matching.
-func (item Item) GetUpdatedAt() time.Time { return item.UpdatedAt }
-
 // ItemReader is the read-side contract for any storage backend that can
 // list, count, and enumerate item types. Both the CQRS ReadModel and the
 // sync.SyncStore embed this interface so the read-side method signatures
 // are declared exactly once in a shared, import-safe package.
 type ItemReader interface {
-	List(ctx context.Context, filter provider.ItemFilter) ([]*Item, error)
-	Count(ctx context.Context, filter provider.ItemFilter) (int64, error)
+	List(ctx context.Context, filter ItemFilter) ([]*Item, error)
+	Count(ctx context.Context, filter ItemFilter) (int64, error)
 	GetTypes(ctx context.Context) ([]string, error)
 }
 
