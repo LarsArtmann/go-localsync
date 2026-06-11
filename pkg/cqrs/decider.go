@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/codec/v2"
 	"github.com/larsartmann/go-cqrs-lite/decider/v2"
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
@@ -61,18 +60,9 @@ func Fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 }
 
 func foldItemSynced(evt event.Event) (SyncItemState, error) {
-	payload, err := event.DecodePayload[ItemSyncedPayload](evt, codec.JSONCodec{})
+	item, err := decodeItemFromEvent(evt)
 	if err != nil {
-		return SyncItemState{}, fmt.Errorf(
-			"decode ItemSyncedPayload for event %s: %w",
-			evt.ID(),
-			err,
-		)
-	}
-
-	item, err := DataItemFromPayload(payload)
-	if err != nil {
-		return SyncItemState{}, fmt.Errorf("reconstruct item from payload: %w", err)
+		return SyncItemState{}, err
 	}
 
 	return SyncItemState{Item: item, Deleted: false}, nil

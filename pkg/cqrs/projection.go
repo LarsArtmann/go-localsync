@@ -44,14 +44,9 @@ func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
 }
 
 func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error {
-	payload, err := event.DecodePayload[ItemSyncedPayload](evt, codec.JSONCodec{})
+	item, err := decodeItemFromEvent(evt)
 	if err != nil {
-		return fmt.Errorf("decode ItemSyncedPayload for event %s: %w", evt.ID(), err)
-	}
-
-	item, err := DataItemFromPayload(payload)
-	if err != nil {
-		return fmt.Errorf("reconstruct item from payload: %w", err)
+		return err
 	}
 
 	return p.readModel.Upsert(ctx, item)

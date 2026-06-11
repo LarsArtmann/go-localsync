@@ -3,6 +3,8 @@ package cqrs
 import (
 	"fmt"
 
+	"github.com/larsartmann/go-cqrs-lite/codec/v2"
+	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -107,4 +109,20 @@ func DataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 		RawJSON:        rawJSON,
 		SchemaVersion:  item.SchemaVersion.Int(),
 	}
+}
+
+// decodeItemFromEvent decodes an ItemSynced event payload and reconstructs
+// the domain model Item. Shared between decider (fold) and projection (handle).
+func decodeItemFromEvent(evt event.Event) (*model.Item, error) {
+	payload, err := event.DecodePayload[ItemSyncedPayload](evt, codec.JSONCodec{})
+	if err != nil {
+		return nil, fmt.Errorf("decode ItemSyncedPayload for event %s: %w", evt.ID(), err)
+	}
+
+	item, err := DataItemFromPayload(payload)
+	if err != nil {
+		return nil, fmt.Errorf("reconstruct item from payload: %w", err)
+	}
+
+	return item, nil
 }
