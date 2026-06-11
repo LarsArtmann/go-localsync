@@ -44,6 +44,7 @@ type NegativeCounterError struct {
 	Counter int64
 }
 
+// Error returns a formatted error message including the node and counter value.
 func (e NegativeCounterError) Error() string {
 	return fmt.Sprintf("negative counter %d for node %s", e.Counter, e.Node)
 }

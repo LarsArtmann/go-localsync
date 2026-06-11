@@ -94,6 +94,7 @@ const (
 	MergeResultConflict
 )
 
+// String returns a human-readable name for the merge result.
 func (r MergeResult) String() string {
 	switch r {
 	case MergeResultLocalWins:

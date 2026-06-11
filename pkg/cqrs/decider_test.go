@@ -283,3 +283,76 @@ func TestSyncItemState_IsNew(t *testing.T) {
 		t.Error("expected existing state to not be new")
 	}
 }
+
+func TestHasChanged(t *testing.T) {
+	t.Parallel()
+
+	base := func() *model.Item {
+		return &model.Item{
+			ExternalID: id.NewExternalID("123"),
+			Source:     id.NewProviderID("github"),
+			Type:       id.NewEventTypeID("PushEvent"),
+			ActorLogin: id.NewActorID("octocat"),
+			RepoName:   id.NewRepoID("org/repo"),
+			RepoURL:    "https://github.com/org/repo",
+			UpdatedAt:  time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+		}
+	}
+
+	tests := []struct {
+		name  string
+		mut   func(remote *model.Item)
+		want  bool
+	}{
+		{
+			name: "identical items",
+			mut:  func(_ *model.Item) {},
+			want: false,
+		},
+		{
+			name: "UpdatedAt differs",
+			mut:  func(r *model.Item) { r.UpdatedAt = r.UpdatedAt.Add(time.Hour) },
+			want: true,
+		},
+		{
+			name: "Type differs",
+			mut:  func(r *model.Item) { r.Type = id.NewEventTypeID("WatchEvent") },
+			want: true,
+		},
+		{
+			name: "ActorLogin differs",
+			mut:  func(r *model.Item) { r.ActorLogin = id.NewActorID("other") },
+			want: true,
+		},
+		{
+			name: "RepoName differs",
+			mut:  func(r *model.Item) { r.RepoName = id.NewRepoID("org/other") },
+			want: true,
+		},
+		{
+			name: "RepoURL differs",
+			mut:  func(r *model.Item) { r.RepoURL = "https://github.com/org/other" },
+			want: true,
+		},
+		{
+			name:  "only ID fields differ (not tracked)",
+			mut:   func(r *model.Item) { r.ExternalID = id.NewExternalID("other") },
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			local := base()
+			remote := base()
+			tt.mut(remote)
+
+			got := HasChanged(local, remote)
+			if got != tt.want {
+				t.Errorf("HasChanged() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

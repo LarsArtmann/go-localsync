@@ -3,9 +3,11 @@ package cqrs
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -159,5 +161,61 @@ func TestIntegration_SQLiteBackend(t *testing.T) {
 	testutil.MustNoError(t, err)
 	if len(list) != 2 {
 		t.Fatalf("expected 2 items, got %d", len(list))
+	}
+}
+
+// TestIntegration_SyncItems_ConflictLocal verifies that the LWW resolver
+// can produce ActionConflictLocal when local is newer than remote.
+func TestIntegration_SyncItems_ConflictLocal(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	resolver := newUpdatedAtLWWResolver(t)
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory", ConflictResolver: resolver})
+	testutil.MustNoError(t, err)
+	defer func() { _ = stack.Close() }()
+
+	futureTime := time.Now().Add(3 * time.Hour).Truncate(time.Millisecond)
+	localItem := &provider.Item{
+		ExternalID: id.NewExternalID("1"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
+		ActorLogin: id.NewActorID("testuser"),
+		RepoName:   id.NewRepoID("owner/repo"),
+		CreatedAt:  futureTime,
+		UpdatedAt:  futureTime,
+		RawJSON:    []byte(`{"test":true}`),
+	}
+
+	summary1 := stack.SyncItems(ctx, []*provider.Item{localItem})
+	if summary1.Synced != 1 {
+		t.Fatalf("expected synced=1 on first sync, got %d", summary1.Synced)
+	}
+
+	waitForCount(t, stack, ctx, 1)
+
+	olderTime := time.Now().Truncate(time.Millisecond)
+	remoteItem := &provider.Item{
+		ExternalID: id.NewExternalID("1"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
+		ActorLogin: id.NewActorID("testuser"),
+		RepoName:   id.NewRepoID("owner/repo"),
+		CreatedAt:  olderTime,
+		UpdatedAt:  olderTime,
+		RawJSON:    []byte(`{"test":true}`),
+	}
+
+	summary2 := stack.SyncItems(ctx, []*provider.Item{remoteItem})
+	if summary2.Conflicts != 1 {
+		t.Fatalf("expected 1 conflict, got %d", summary2.Conflicts)
+	}
+
+	if len(summary2.Results) != 1 {
+		t.Fatalf("expected 1 result, got %d", len(summary2.Results))
+	}
+
+	if summary2.Results[0].Action != synclib.ActionConflictLocal {
+		t.Errorf("expected ActionConflictLocal, got %s", summary2.Results[0].Action)
 	}
 }

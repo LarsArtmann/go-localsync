@@ -90,10 +90,14 @@ func (vc VectorClock) Merge(other VectorClock) {
 type ClockOrder int
 
 const (
-	OrderBefore     ClockOrder = iota - 1 // this happened before other
-	OrderConcurrent                       // this and other are concurrent
-	OrderAfter                            // this happened after other
-	OrderEqual                            // this and other are identical
+	// OrderBefore indicates the left clock happened before the right.
+	OrderBefore ClockOrder = iota - 1
+	// OrderConcurrent indicates both clocks are concurrent (no causal order).
+	OrderConcurrent
+	// OrderAfter indicates the left clock happened after the right.
+	OrderAfter
+	// OrderEqual indicates both clocks are identical.
+	OrderEqual
 )
 
 // Cmp compares two vector clocks and returns a typed result.
@@ -136,6 +140,7 @@ func (vc VectorClock) Cmp(other VectorClock) ClockOrder {
 	return OrderConcurrent
 }
 
+// String returns a human-readable name for the clock ordering.
 func (o ClockOrder) String() string {
 	switch o {
 	case OrderBefore:

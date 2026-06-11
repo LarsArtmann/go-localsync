@@ -8,6 +8,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/api"
@@ -155,9 +158,35 @@ func runAPIServer(
 	server := api.NewServer(syncer, logger)
 	addr := fmt.Sprintf(":%d", port)
 
+	httpServer := &http.Server{
+		Addr:    addr,
+		Handler: server,
+	}
+
+	go func() {
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+		<-sigChan
+
+		logger.Info("Shutting down API server...")
+
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := httpServer.Shutdown(shutdownCtx); err != nil {
+			logger.Error("API server shutdown error", "error", err)
+		}
+	}()
+
 	logger.Info("Starting API server", "address", addr)
 
-	if err := http.ListenAndServe(addr, server); err != nil {
+	if err := httpServer.ListenAndServe(); err != nil {
+		if err == http.ErrServerClosed {
+			logger.Info("API server stopped")
+
+			return
+		}
+
 		logger.Error("API server error", "error", err)
 		os.Exit(exitSoftware)
 	}

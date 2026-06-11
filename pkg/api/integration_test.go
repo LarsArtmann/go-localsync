@@ -156,3 +156,74 @@ func TestIntegration_APIStatsRoundtrip(t *testing.T) {
 	}
 	testutil.AssertLen(t, body.ItemTypes, 1, "item types")
 }
+
+// TestIntegration_APIFilterAndPagination verifies that query parameters
+// for type, source, and pagination work end-to-end.
+func TestIntegration_APIFilterAndPagination(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	testutil.MustNoError(t, err)
+	defer func() { _ = stack.Close() }()
+
+	items := []*provider.Item{
+		makeTestItem(t, "1", "PushEvent", "2024-01-01T00:00:00Z"),
+		makeTestItem(t, "2", "PushEvent", "2024-01-02T00:00:00Z"),
+		makeTestItem(t, "3", "IssueEvent", "2024-01-03T00:00:00Z"),
+	}
+
+	stack.SyncItems(ctx, items)
+	waitForProjection(t, ctx, stack, 3)
+
+	mockProvider := &testutil.MockProvider{}
+	logger := log.Default()
+	syncer := synclib.NewSyncer(mockProvider, stack, logger)
+	server := NewServer(syncer, logger)
+
+	t.Run("filter_by_type", func(t *testing.T) {
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/items?type=PushEvent", nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+
+		testutil.AssertStatusOK(t, rec)
+
+		var body struct {
+			Items []*ItemResponse `json:"items"`
+			Total int64           `json:"total"`
+		}
+
+		if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+
+		if body.Total != 2 {
+			t.Errorf("expected total=2 for PushEvent filter, got %d", body.Total)
+		}
+	})
+
+	t.Run("pagination", func(t *testing.T) {
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/items?limit=1&offset=1", nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+
+		testutil.AssertStatusOK(t, rec)
+
+		var body struct {
+			Items []*ItemResponse `json:"items"`
+			Total int64           `json:"total"`
+		}
+
+		if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+
+		if len(body.Items) != 1 {
+			t.Errorf("expected 1 item with limit=1, got %d", len(body.Items))
+		}
+
+		if body.Total != 3 {
+			t.Errorf("expected total=3 (all items), got %d", body.Total)
+		}
+	})
+}

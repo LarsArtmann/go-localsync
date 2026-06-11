@@ -8,9 +8,12 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/providers/github"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -65,6 +68,11 @@ func main() {
 			envCfg.ConflictAware,
 			"Use conflict-aware sync with CRDT resolution",
 		)
+		conflictStrategy = flag.String(
+			"conflict-strategy",
+			envCfg.ConflictStrategy,
+			"Conflict resolution strategy: remote-wins (default), lww",
+		)
 		showStats   = flag.Bool("stats", envCfg.ShowStats, "Show database statistics and exit")
 		showVersion = flag.Bool("version", false, "Show version information and exit")
 		verbose     = flag.Bool("verbose", envCfg.Verbose, "Enable verbose logging")
@@ -98,10 +106,23 @@ func main() {
 		logErrorAndExit(logger, "Failed to create database directory", err, exitNoInput)
 	}
 
-	//nolint:exhaustruct // ConflictResolver intentionally omitted (uses default)
+	var resolver crdt.ConflictResolver[*model.Item]
+	if *conflictStrategy == "lww" {
+		lww, lwwErr := crdt.NewLWWResolver[*model.Item](func(i *model.Item) time.Time {
+			return i.UpdatedAt
+		})
+		if lwwErr != nil {
+			logErrorAndExit(logger, "Failed to create LWW resolver", lwwErr, exitSoftware)
+		}
+
+		resolver = lww
+	}
+
+	//nolint:exhaustruct // ConflictResolver may be nil (uses default remote-wins)
 	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
-		Backend: *backend,
-		DBPath:  *dbPath,
+		Backend:          *backend,
+		DBPath:           *dbPath,
+		ConflictResolver: resolver,
 	})
 	if err != nil {
 		logErrorAndExit(logger, "Failed to create CQRS stack", err, exitNoInput)

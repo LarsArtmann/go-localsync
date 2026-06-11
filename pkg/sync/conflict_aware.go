@@ -4,16 +4,23 @@ import (
 	"context"
 )
 
-// ConflictAwareSyncer wraps a Syncer to add per-item conflict detection via the CQRS decider.
+// ConflictAwareSyncer adds per-item conflict detection on top of a Syncer.
+// It delegates fetching and validation to the base Syncer, then classifies
+// conflict outcomes from the CQRS decider's SyncSummary.
 type ConflictAwareSyncer struct {
-	*Syncer
+	syncer *Syncer
 }
 
 // NewConflictAwareSyncer creates a ConflictAwareSyncer that delegates to the base Syncer.
 func NewConflictAwareSyncer(base *Syncer) *ConflictAwareSyncer {
 	return &ConflictAwareSyncer{
-		Syncer: base,
+		syncer: base,
 	}
+}
+
+// Close delegates to the underlying Syncer's Close.
+func (s *ConflictAwareSyncer) Close() error {
+	return s.syncer.Close()
 }
 
 // ConflictResult holds the result of a conflict-aware sync operation.
@@ -30,12 +37,12 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	ctx context.Context,
 	opts *SyncOptions,
 ) (*ConflictResult, error) {
-	err := s.validateOpts(opts)
+	err := s.syncer.validateOpts(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	result, err := s.fetchItems(ctx, opts, "Starting conflict-aware sync", "conflict-aware sync")
+	result, err := s.syncer.fetchItems(ctx, opts, "Starting conflict-aware sync", "conflict-aware sync")
 	if err != nil {
 		return nil, err
 	}
@@ -43,14 +50,14 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	cr := &ConflictResult{Fetched: len(result.Items)}
 
 	validationResult := &SyncResult{Errors: 0}
-	valid := s.filterValidItems(result.Items, validationResult)
+	valid := s.syncer.filterValidItems(result.Items, validationResult)
 	cr.Errors += validationResult.Errors
 
 	if len(valid) == 0 {
 		return cr, nil
 	}
 
-	summary := s.store.SyncItems(ctx, valid)
+	summary := s.syncer.store.SyncItems(ctx, valid)
 
 	for _, r := range summary.Results {
 		switch r.Action {
@@ -62,21 +69,21 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 			cr.Conflicts++
 			cr.Upserted++
 
-			s.logger.Debug("Resolved conflict: remote wins", "sourceID", r.SourceID)
+			s.syncer.logger.Debug("Resolved conflict: remote wins", "sourceID", r.SourceID)
 		case ActionConflictLocal:
 			cr.Conflicts++
 
-			s.logger.Debug("Resolved conflict: local wins", "sourceID", r.SourceID)
+			s.syncer.logger.Debug("Resolved conflict: local wins", "sourceID", r.SourceID)
 		case ActionUnchanged:
 			cr.Skipped++
 		case ActionError:
 			cr.Errors++
 
-			s.logger.Warn("Failed to sync item", "sourceID", r.SourceID, "error", r.Error)
+			s.syncer.logger.Warn("Failed to sync item", "sourceID", r.SourceID, "error", r.Error)
 		}
 	}
 
-	s.logger.Info(
+	s.syncer.logger.Info(
 		"Conflict-aware sync completed",
 		"fetched", cr.Fetched,
 		"upserted", cr.Upserted,

@@ -58,21 +58,6 @@ func (item Item) GetCreatedAt() time.Time { return item.CreatedAt }
 // GetUpdatedAt returns updated_at for criterion matching.
 func (item Item) GetUpdatedAt() time.Time { return item.UpdatedAt }
 
-// ProviderItem is the DTO returned by provider implementations.
-// It carries the raw payload for full-fidelity storage.
-type ProviderItem struct {
-	ExternalID     id.ExternalID
-	Source         id.ProviderID
-	Type           id.EventTypeID
-	ActorLogin     id.ActorID
-	ActorAvatarURL string
-	RepoName       id.RepoID
-	RepoURL        string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	RawPayload     []byte
-}
-
 // ItemReader is the read-side contract for any storage backend that can
 // list, count, and enumerate item types. Both the CQRS ReadModel and the
 // sync.SyncStore embed this interface so the read-side method signatures
@@ -86,10 +71,6 @@ type ItemReader interface {
 // Validate checks that all required identity fields are present.
 func (item Item) Validate() error {
 	return validateIdentity(item.ExternalID, item.Source, item.Type, item.CreatedAt)
-}
-
-func (p ProviderItem) Validate() error {
-	return validateIdentity(p.ExternalID, p.Source, p.Type, p.CreatedAt)
 }
 
 func validateIdentity(

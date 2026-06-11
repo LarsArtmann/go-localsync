@@ -111,17 +111,17 @@ func TestItemIsZero(t *testing.T) {
 	}
 }
 
-func TestProviderItemValidate(t *testing.T) {
+func TestItemValidate(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
 		name    string
-		item    ProviderItem
+		item    Item
 		wantErr bool
 	}{
 		{
 			name: "valid",
-			item: ProviderItem{
+			item: Item{
 				ExternalID: id.NewExternalID("123"),
 				Source:     id.NewProviderID("github"),
 				Type:       id.NewEventTypeID("PushEvent"),
@@ -131,7 +131,7 @@ func TestProviderItemValidate(t *testing.T) {
 		},
 		{
 			name: "missing externalID",
-			item: ProviderItem{
+			item: Item{
 				Source:    id.NewProviderID("github"),
 				Type:      id.NewEventTypeID("PushEvent"),
 				CreatedAt: time.Now(),
@@ -140,7 +140,7 @@ func TestProviderItemValidate(t *testing.T) {
 		},
 		{
 			name: "missing source",
-			item: ProviderItem{
+			item: Item{
 				ExternalID: id.NewExternalID("123"),
 				Type:       id.NewEventTypeID("PushEvent"),
 				CreatedAt:  time.Now(),
@@ -149,7 +149,7 @@ func TestProviderItemValidate(t *testing.T) {
 		},
 		{
 			name: "missing type",
-			item: ProviderItem{
+			item: Item{
 				ExternalID: id.NewExternalID("123"),
 				Source:     id.NewProviderID("github"),
 				CreatedAt:  time.Now(),
@@ -158,7 +158,7 @@ func TestProviderItemValidate(t *testing.T) {
 		},
 		{
 			name: "missing createdAt",
-			item: ProviderItem{
+			item: Item{
 				ExternalID: id.NewExternalID("123"),
 				Source:     id.NewProviderID("github"),
 				Type:       id.NewEventTypeID("PushEvent"),
@@ -179,71 +179,10 @@ func TestProviderItemValidate(t *testing.T) {
 	}
 }
 
-func TestItemViewDelegates(t *testing.T) {
-	t.Parallel()
-
-	item := Item{
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
-		ActorLogin: id.NewActorID("octocat"),
-		RepoName:   id.NewRepoID("org/repo"),
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-	}
-
-	view := ItemView{Item: item}
-
-	if view.GetSource() != item.Source {
-		t.Error("GetSource delegation failed")
-	}
-
-	if view.GetType() != item.Type {
-		t.Error("GetType delegation failed")
-	}
-
-	if view.GetActorLogin() != item.ActorLogin {
-		t.Error("GetActorLogin delegation failed")
-	}
-
-	if view.GetRepoName() != item.RepoName {
-		t.Error("GetRepoName delegation failed")
-	}
-
-	if !view.GetCreatedAt().Equal(item.CreatedAt) {
-		t.Error("GetCreatedAt delegation failed")
-	}
-
-	if !view.GetUpdatedAt().Equal(item.UpdatedAt) {
-		t.Error("GetUpdatedAt delegation failed")
-	}
-}
-
-func TestEmptyStatsView(t *testing.T) {
-	t.Parallel()
-
-	sv := EmptyStatsView()
-
-	if sv.ItemTypes == nil {
-		t.Error("ItemTypes should be initialized")
-	}
-
-	if sv.TypeCounts == nil {
-		t.Error("TypeCounts should be initialized")
-	}
-
-	if sv.Sources == nil {
-		t.Error("Sources should be initialized")
-	}
-}
-
 func TestItemSchemaVersion(t *testing.T) {
 	t.Parallel()
 
 	item := Item{
-		Source:        id.NewProviderID("github"),
-		ExternalID:    id.NewExternalID("123"),
-		Type:          id.NewEventTypeID("PushEvent"),
-		CreatedAt:     time.Now(),
 		SchemaVersion: schema.V2,
 	}
 

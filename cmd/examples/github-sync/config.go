@@ -24,6 +24,8 @@ type AppConfig struct {
 	Incremental bool `env:"INCREMENTAL" envDefault:"true"`
 	// ConflictAware enables conflict-aware sync with CRDT resolution.
 	ConflictAware bool `env:"CONFLICT_AWARE" envDefault:"false"`
+	// ConflictStrategy selects the conflict resolver: remote-wins, lww.
+	ConflictStrategy string `env:"CONFLICT_STRATEGY" envDefault:"remote-wins"`
 	// ShowStats shows database statistics and exits.
 	ShowStats bool `env:"SHOW_STATS" envDefault:"false"`
 	// Verbose enables debug-level logging.

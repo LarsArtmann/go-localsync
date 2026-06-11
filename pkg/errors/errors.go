@@ -7,16 +7,27 @@ import (
 	errorfamily "github.com/larsartmann/go-error-family"
 )
 
+// Sentinel errors classified by error family.
+// Rejection = permanent, Transient = retryable, Infrastructure = system-level.
 var (
-	ErrNotFound       = errorfamily.NewRejection("not_found", "not found")
-	ErrRateLimited    = errorfamily.NewTransient("rate_limited", "rate limited")
-	ErrInvalidToken   = errorfamily.NewRejection("invalid_token", "invalid token")
-	ErrUserNotFound   = errorfamily.NewRejection("user_not_found", "user not found")
-	ErrSyncFailed     = errorfamily.NewTransient("sync_failed", "sync failed")
-	ErrDatabase       = errorfamily.NewInfrastructure("database", "database error")
-	ErrInvalidInput   = errorfamily.NewRejection("invalid_input", "invalid input")
+	// ErrNotFound indicates the requested resource does not exist.
+	ErrNotFound = errorfamily.NewRejection("not_found", "not found")
+	// ErrRateLimited indicates the external API rate limit has been exceeded.
+	ErrRateLimited = errorfamily.NewTransient("rate_limited", "rate limited")
+	// ErrInvalidToken indicates the authentication token is invalid.
+	ErrInvalidToken = errorfamily.NewRejection("invalid_token", "invalid token")
+	// ErrUserNotFound indicates the specified user does not exist.
+	ErrUserNotFound = errorfamily.NewRejection("user_not_found", "user not found")
+	// ErrSyncFailed indicates a sync operation failed.
+	ErrSyncFailed = errorfamily.NewTransient("sync_failed", "sync failed")
+	// ErrDatabase indicates a storage backend error.
+	ErrDatabase = errorfamily.NewInfrastructure("database", "database error")
+	// ErrInvalidInput indicates a required field is missing or invalid.
+	ErrInvalidInput = errorfamily.NewRejection("invalid_input", "invalid input")
+	// ErrUnknownBackend indicates an unsupported storage backend was specified.
 	ErrUnknownBackend = errorfamily.NewRejection("unknown_backend", "unknown backend")
-	ErrDBNil          = errorfamily.NewRejection("db_nil", "database is nil")
+	// ErrDBNil indicates the database connection is nil.
+	ErrDBNil = errorfamily.NewRejection("db_nil", "database is nil")
 )
 
 // RegisterErrorTemplates registers user-facing message templates for all error codes.
