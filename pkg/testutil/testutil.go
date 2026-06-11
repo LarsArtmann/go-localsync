@@ -1,6 +1,3 @@
-// Package testutil provides shared test helpers for use across test files.
-//
-// All functions take *testing.T to integrate with the standard testing package.
 package testutil
 
 import (
@@ -9,11 +6,11 @@ import (
 	"net/http/httptest"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 )
 
-// MustNoError fails the test immediately if err is non-nil.
 func MustNoError(t *testing.T, err error) {
 	t.Helper()
 
@@ -22,7 +19,6 @@ func MustNoError(t *testing.T, err error) {
 	}
 }
 
-// AssertEqual fails the test if got != want.
 func AssertEqual[T comparable](t *testing.T, got, want T, label string) {
 	t.Helper()
 
@@ -31,21 +27,18 @@ func AssertEqual[T comparable](t *testing.T, got, want T, label string) {
 	}
 }
 
-// AssertInt is shorthand for AssertEqual with int values.
 func AssertInt(t *testing.T, got, want int, label string) {
 	t.Helper()
 
 	AssertEqual(t, got, want, label)
 }
 
-// AssertInt64 is shorthand for AssertEqual with int64 values.
 func AssertInt64(t *testing.T, got, want int64, label string) {
 	t.Helper()
 
 	AssertEqual(t, got, want, label)
 }
 
-// AssertContains fails the test if needle is not found in haystack.
 func AssertContains[T comparable](t *testing.T, haystack []T, needle T, label string) {
 	t.Helper()
 
@@ -54,21 +47,18 @@ func AssertContains[T comparable](t *testing.T, haystack []T, needle T, label st
 	}
 }
 
-// AssertExternalID fails the test if the item's ExternalID does not match want.
 func AssertExternalID(t *testing.T, item *model.Item, want string) {
 	t.Helper()
 
 	AssertEqual(t, item.ExternalID.Get(), want, "ExternalID")
 }
 
-// AssertType fails the test if the item's Type does not match want.
 func AssertType(t *testing.T, item *model.Item, want string) {
 	t.Helper()
 
 	AssertEqual(t, item.Type.Get(), want, "Type")
 }
 
-// AssertStatus fails the test if the recorder's HTTP status is not the expected code.
 func AssertStatus(t *testing.T, rec *httptest.ResponseRecorder, wantCode int) {
 	t.Helper()
 
@@ -77,14 +67,12 @@ func AssertStatus(t *testing.T, rec *httptest.ResponseRecorder, wantCode int) {
 	}
 }
 
-// AssertStatusOK fails the test if the recorder's HTTP status is not 200.
 func AssertStatusOK(t *testing.T, rec *httptest.ResponseRecorder) {
 	t.Helper()
 
 	AssertStatus(t, rec, http.StatusOK)
 }
 
-// AssertLen fails the test if len(got) != want.
 func AssertLen[T any](t *testing.T, got []T, want int, label string) {
 	t.Helper()
 
@@ -93,9 +81,6 @@ func AssertLen[T any](t *testing.T, got []T, want int, label string) {
 	}
 }
 
-// RequireLen fails the test (using Fatalf) if len(got) != want.
-// Use for assertions where the test cannot continue if the length is wrong
-// (e.g. accessing events[0] afterwards).
 func RequireLen[T any](t *testing.T, got []T, want int) {
 	t.Helper()
 
@@ -104,21 +89,26 @@ func RequireLen[T any](t *testing.T, got []T, want int) {
 	}
 }
 
-// WaitForCount polls counter until it returns the expected count.
-// counter is a function that returns the current count (e.g., stack.Count).
 func WaitForCount(t *testing.T, ctx context.Context, counter func(context.Context) (int64, error), want int64) {
 	t.Helper()
+
+	ticker := time.NewTicker(time.Millisecond)
+	defer ticker.Stop()
 
 	for {
 		got, _ := counter(ctx)
 		if got == want {
 			return
 		}
+
+		select {
+		case <-ctx.Done():
+			t.Fatalf("WaitForCount: context canceled while waiting for count %d (last seen: %d): %v", want, got, ctx.Err())
+		case <-ticker.C:
+		}
 	}
 }
 
-// BuildPairs constructs a slice of T from alternating (id, type) string pairs,
-// using the provided factory function. Panics if pairs has odd length.
 func BuildPairs[T any](factory func(id, typ string) T, pairs ...string) []T {
 	if len(pairs)%2 != 0 {
 		panic("BuildPair requires an even number of arguments (id, type pairs)")
@@ -132,7 +122,6 @@ func BuildPairs[T any](factory func(id, typ string) T, pairs ...string) []T {
 	return result
 }
 
-// AssertPanics fails the test if fn does not panic.
 func AssertPanics(t *testing.T, fn func(), label string) {
 	t.Helper()
 

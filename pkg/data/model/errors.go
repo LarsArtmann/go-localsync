@@ -7,4 +7,5 @@ var (
 	errMissingSource     = errors.New("provider item: source is required")
 	errMissingType       = errors.New("provider item: type is required")
 	errMissingCreatedAt  = errors.New("provider item: createdAt is required")
+	errMissingUpdatedAt  = errors.New("provider item: updatedAt is required")
 )

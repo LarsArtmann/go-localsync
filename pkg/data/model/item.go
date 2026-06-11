@@ -51,7 +51,7 @@ type ItemReader interface {
 
 // Validate checks that all required identity fields are present.
 func (item Item) Validate() error {
-	return validateIdentity(item.ExternalID, item.Source, item.Type, item.CreatedAt)
+	return validateIdentity(item.ExternalID, item.Source, item.Type, item.CreatedAt, item.UpdatedAt)
 }
 
 func validateIdentity(
@@ -59,6 +59,7 @@ func validateIdentity(
 	source id.ProviderID,
 	eventType id.EventTypeID,
 	createdAt time.Time,
+	updatedAt time.Time,
 ) error {
 	switch {
 	case externalID.IsZero():
@@ -69,6 +70,8 @@ func validateIdentity(
 		return errMissingType
 	case createdAt.IsZero():
 		return errMissingCreatedAt
+	case updatedAt.IsZero():
+		return errMissingUpdatedAt
 	default:
 		return nil
 	}
