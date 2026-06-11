@@ -223,22 +223,15 @@ type StatsOutput struct {
 }
 
 func (s *Server) getStats(ctx context.Context, _ *struct{}) (*StatsOutput, error) {
-	var filter provider.ItemFilter
-
-	count, err := s.store.Count(ctx, filter)
-	if err != nil {
-		return nil, err
-	}
-
-	types, err := s.store.GetTypes(ctx)
+	stats, err := s.syncer.GetStats(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var resp StatsOutput
 
-	resp.Body.TotalItems = count
-	resp.Body.ItemTypes = types
+	resp.Body.TotalItems = stats.TotalItems
+	resp.Body.ItemTypes = stats.ItemTypes
 
 	return &resp, nil
 }
