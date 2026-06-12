@@ -5,10 +5,11 @@ package provider
 import (
 	"context"
 	"encoding/json"
+	stderrors "errors"
 	"fmt"
 	"time"
 
-	"github.com/larsartmann/go-localsync/pkg/errors"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -52,23 +53,25 @@ func (item *Item) String() string {
 
 // Validate checks that the Item has all required fields set.
 func (item *Item) Validate() error {
+	var errs []error
+
 	if item.ExternalID.IsZero() {
-		return errors.WithDetail(errors.ErrInvalidInput, "item.ExternalID is required")
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.ExternalID is required"))
 	}
 
 	if item.Source.IsZero() {
-		return errors.WithDetail(errors.ErrInvalidInput, "item.Source is required")
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.Source is required"))
 	}
 
 	if item.Type.IsZero() {
-		return errors.WithDetail(errors.ErrInvalidInput, "item.Type is required")
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.Type is required"))
 	}
 
 	if item.CreatedAt.IsZero() {
-		return errors.WithDetail(errors.ErrInvalidInput, "item.CreatedAt is required")
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.CreatedAt is required"))
 	}
 
-	return nil
+	return stderrors.Join(errs...)
 }
 
 // FetchOptions controls how items are fetched from a provider.
