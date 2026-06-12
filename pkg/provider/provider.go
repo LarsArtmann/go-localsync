@@ -74,7 +74,7 @@ func (item *Item) Validate() error {
 // FetchOptions controls how items are fetched from a provider.
 type FetchOptions struct {
 	// Source identifies what to fetch (e.g., username for GitHub, project ID for GitLab).
-	Source string
+	Source id.ProviderID
 	// PerPage is the number of items per page.
 	PerPage int
 	// Page is the page number to fetch (1-indexed).

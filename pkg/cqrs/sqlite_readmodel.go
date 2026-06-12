@@ -38,20 +38,16 @@ type SQLiteReadModel struct {
 }
 
 // newSQLiteReadModel creates a SQLiteReadModel, initializing the schema.
-func newSQLiteReadModel(db *sql.DB) (*SQLiteReadModel, error) {
+func newSQLiteReadModel(ctx context.Context, db *sql.DB) (*SQLiteReadModel, error) {
 	if db == nil {
 		return nil, fmt.Errorf("sqlite read model: %w", pkgerrors.ErrDBNil)
 	}
 
-	ctx := context.Background()
-
-	_, err := db.ExecContext(ctx, syncItemsDDL)
-	if err != nil {
+	if _, err := db.ExecContext(ctx, syncItemsDDL); err != nil {
 		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items table: %v", err))
 	}
 
-	_, err = db.ExecContext(ctx, syncItemsIndexes)
-	if err != nil {
+	if _, err := db.ExecContext(ctx, syncItemsIndexes); err != nil {
 		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items indexes: %v", err))
 	}
 

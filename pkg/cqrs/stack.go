@@ -22,9 +22,8 @@ import (
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
-// newSlogLogger creates an slog.Logger backed by charm.land/log/v2.
-// Used by middleware.EventLogging to bridge charm's structured logger
-// to the slog interface expected by go-cqrs-lite middleware.
+// newSlogLogger creates an *slog.Logger backed by charm.land/log/v2.
+// Required by middleware.EventLogging which expects *slog.Logger.
 func newSlogLogger() *slog.Logger {
 	return slog.New(log.Default())
 }
@@ -66,12 +65,14 @@ var _ synclib.SyncStore = (*CQRSStack)(nil)
 
 // NewCQRSStack creates a fully wired CQRS stack based on the given config.
 func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
-	sr, err := createStoreAndBus(cfg)
+	ctx := context.Background()
+
+	sr, err := createStoreAndBus(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	rm, err := createReadModel(cfg, sr)
+	rm, err := createReadModel(ctx, cfg, sr)
 	if err != nil {
 		return nil, err
 	}

@@ -22,7 +22,7 @@ type storeResult struct {
 	loader event.Journal
 }
 
-func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
+func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error) {
 	switch cfg.Backend {
 	case backendMemory, "":
 		return storeResult{
@@ -32,7 +32,7 @@ func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 			loader: nil,
 		}, nil
 	case backendSQLite:
-		return createSQLiteStore(cfg)
+		return createSQLiteStore(ctx, cfg)
 	default:
 		return storeResult{}, fmt.Errorf(
 			"unknown backend: %s: %w",
@@ -42,9 +42,7 @@ func createStoreAndBus(cfg CQRSConfig) (storeResult, error) {
 	}
 }
 
-func createSQLiteStore(cfg CQRSConfig) (storeResult, error) {
-	ctx := context.Background()
-
+func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error) {
 	dbPath := cfg.DBPath
 	if dbPath == "" {
 		dbPath = dbPathInMemory
@@ -79,10 +77,10 @@ func createSQLiteStore(cfg CQRSConfig) (storeResult, error) {
 }
 
 //nolint:ireturn
-func createReadModel(cfg CQRSConfig, sr storeResult) (ReadModel, error) {
+func createReadModel(ctx context.Context, cfg CQRSConfig, sr storeResult) (ReadModel, error) {
 	if cfg.Backend == backendSQLite {
 		if sr.db != nil {
-			return newSQLiteReadModel(sr.db)
+			return newSQLiteReadModel(ctx, sr.db)
 		}
 
 		return nil, errSQLiteRequiresDB

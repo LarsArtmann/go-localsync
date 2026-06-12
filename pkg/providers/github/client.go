@@ -98,7 +98,7 @@ func (c *Client) Fetch(
 	opts *provider.FetchOptions,
 ) (*provider.FetchResult, error) {
 	if opts == nil {
-		opts = &provider.FetchOptions{Source: "", PerPage: 100, Page: 1}
+		opts = &provider.FetchOptions{Source: id.NewProviderID(""), PerPage: 100, Page: 1}
 	}
 
 	if opts.PerPage == 0 {
@@ -121,7 +121,7 @@ func (c *Client) Fetch(
 	err = c.withRetry(ctx, func() error {
 		activity, _, err = c.client.Activity.ListEventsPerformedByUser(
 			ctx,
-			opts.Source,
+			opts.Source.Get(),
 			false,
 			&gh.ListOptions{
 				Page:    opts.Page,
@@ -133,9 +133,9 @@ func (c *Client) Fetch(
 	})
 	if err != nil {
 		return nil, pkgerrors.Wrapf(
-			wrapGitHubError(err, opts.Source),
+			wrapGitHubError(err, opts.Source.Get()),
 			"fetching events for %s failed (page %d)",
-			opts.Source,
+			opts.Source.Get(),
 			opts.Page,
 		)
 	}
@@ -162,7 +162,7 @@ func (c *Client) FetchAll(
 
 	for page := 1; page <= maxPages; page++ {
 		result, err := c.Fetch(ctx, &provider.FetchOptions{
-			Source:  source,
+			Source:  id.NewProviderID(source),
 			PerPage: 100,
 			Page:    page,
 		})

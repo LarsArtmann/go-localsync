@@ -102,7 +102,12 @@ func (s *Server) triggerSync(ctx context.Context, input *SyncInput) (*SyncOutput
 	return &resp, nil
 }
 
-func (s *Server) healthCheck(_ context.Context, _ *struct{}) (*HealthOutput, error) {
+func (s *Server) healthCheck(ctx context.Context, _ *struct{}) (*HealthOutput, error) {
+	_, err := s.store.Count(ctx, model.ItemFilter{})
+	if err != nil {
+		return nil, huma.Error503ServiceUnavailable("store unavailable", err)
+	}
+
 	var resp HealthOutput
 
 	resp.Body.Status = "healthy"

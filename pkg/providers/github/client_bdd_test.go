@@ -11,6 +11,7 @@ import (
 	"time"
 
 	gh "github.com/google/go-github/v69/github"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
@@ -26,7 +27,7 @@ type githubTestWorld struct {
 }
 
 func (w *githubTestWorld) fetchFor(source string) {
-	w.result, w.err = w.client.Fetch(w.ctx, &provider.FetchOptions{Source: source})
+	w.result, w.err = w.client.Fetch(w.ctx, &provider.FetchOptions{Source: id.NewProviderID(source)})
 }
 
 func (w *githubTestWorld) withRetryConfig() {

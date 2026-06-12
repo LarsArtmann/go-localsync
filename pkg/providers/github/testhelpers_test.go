@@ -9,6 +9,7 @@ import (
 	"time"
 
 	gh "github.com/google/go-github/v69/github"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
@@ -81,7 +82,7 @@ func fetchFromTestClient(
 	client *Client,
 	source string,
 ) (*provider.FetchResult, error) {
-	return client.Fetch(context.Background(), &provider.FetchOptions{Source: source})
+	return client.Fetch(context.Background(), &provider.FetchOptions{Source: id.NewProviderID(source)})
 }
 
 func newGitHubErrorResponse(statusCode int) *gh.ErrorResponse {

@@ -95,12 +95,26 @@ func (op *Operation[T]) Serialize() ([]byte, error) {
 }
 
 // DeserializeOperation parses JSON bytes into an Operation[T].
+// Returns an error if the data is invalid JSON or if the decoded
+// operation has zero ID, zero NodeID, or an invalid Type.
 func DeserializeOperation[T any](data []byte) (*Operation[T], error) {
 	var op Operation[T]
 
 	err := json.Unmarshal(data, &op)
 	if err != nil {
 		return nil, err //nolint:wrapcheck // implementing standard deserialization
+	}
+
+	if op.ID.IsZero() {
+		return nil, ErrEmptyOperationID
+	}
+
+	if op.NodeID.IsZero() {
+		return nil, ErrEmptyNodeID
+	}
+
+	if !op.Type.Valid() {
+		return nil, ErrInvalidOperationType
 	}
 
 	return &op, nil

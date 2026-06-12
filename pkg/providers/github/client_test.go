@@ -12,6 +12,7 @@ import (
 
 	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
@@ -125,7 +126,7 @@ func TestFetch_CustomOptions(t *testing.T) {
 	client := newTestClient(server)
 	result, err := client.Fetch(
 		context.Background(),
-		&provider.FetchOptions{Source: "testuser", PerPage: expectedPerPage, Page: expectedPage},
+		&provider.FetchOptions{Source: id.NewProviderID("testuser"), PerPage: expectedPerPage, Page: expectedPage},
 	)
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, result.Items, 0, "items")
@@ -138,7 +139,7 @@ func TestFetch_ZeroPerPage_DefaultsTo100(t *testing.T) {
 	client := newTestClient(server)
 	result, err := client.Fetch(
 		context.Background(),
-		&provider.FetchOptions{Source: "testuser", PerPage: 0, Page: expectedPage},
+		&provider.FetchOptions{Source: id.NewProviderID("testuser"), PerPage: 0, Page: expectedPage},
 	)
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, result.Items, 0, "items")

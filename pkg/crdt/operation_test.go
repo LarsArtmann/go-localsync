@@ -187,17 +187,9 @@ func TestDeserializeOperation_InvalidJSON(t *testing.T) {
 }
 
 func TestDeserializeOperation_EmptyJSON(t *testing.T) {
-	op, err := DeserializeOperation[string]([]byte("{}"))
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if op.ID != "" {
-		t.Errorf("expected empty ID, got %q", op.ID)
-	}
-
-	if op.Payload != "" {
-		t.Errorf("expected empty payload, got %q", op.Payload)
+	_, err := DeserializeOperation[string]([]byte("{}"))
+	if err == nil {
+		t.Fatal("expected error for empty JSON operation, got nil")
 	}
 }
 

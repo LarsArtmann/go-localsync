@@ -49,7 +49,7 @@ func BenchmarkSQLiteReadModel_List(b *testing.B) {
 		b.Fatal(err)
 	}
 	defer func() { _ = db.Close() }()
-	rm, err := newSQLiteReadModel(db)
+	rm, err := newSQLiteReadModel(context.Background(), db)
 	if err != nil {
 		b.Fatal(err)
 	}
