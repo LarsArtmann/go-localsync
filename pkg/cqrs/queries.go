@@ -58,65 +58,41 @@ func wireQueryDispatcher(rm ReadModel) (*query.Dispatcher, error) {
 
 	dispatcher.Use(queryLoggingMiddleware(log.Default()))
 
-	if err := dispatcher.Register(queryTypeListItem, handleListItems(rm)); err != nil {
+	if err := query.RegisterTyped[*ListItemsQuery, []*model.Item](
+		dispatcher, queryTypeListItem,
+		func(ctx context.Context, q *ListItemsQuery) ([]*model.Item, error) {
+			return rm.List(ctx, q.Filter)
+		},
+	); err != nil {
 		return nil, fmt.Errorf("register list items query: %w", err)
 	}
 
-	if err := dispatcher.Register(queryTypeGetItem, handleGetItem(rm)); err != nil {
+	if err := query.RegisterTyped[*GetItemQuery, *model.Item](
+		dispatcher, queryTypeGetItem,
+		func(ctx context.Context, q *GetItemQuery) (*model.Item, error) {
+			return rm.Get(ctx, q.Source, q.SourceID)
+		},
+	); err != nil {
 		return nil, fmt.Errorf("register get item query: %w", err)
 	}
 
-	if err := dispatcher.Register(queryTypeCountItem, handleCountItems(rm)); err != nil {
+	if err := query.RegisterTyped[*CountItemsQuery, int64](
+		dispatcher, queryTypeCountItem,
+		func(ctx context.Context, q *CountItemsQuery) (int64, error) {
+			return rm.Count(ctx, q.Filter)
+		},
+	); err != nil {
 		return nil, fmt.Errorf("register count items query: %w", err)
 	}
 
-	if err := dispatcher.Register(queryTypeGetTypes, handleGetTypes(rm)); err != nil {
+	if err := query.RegisterTyped[*GetTypesQuery, []string](
+		dispatcher, queryTypeGetTypes,
+		func(ctx context.Context, _ *GetTypesQuery) ([]string, error) {
+			return rm.GetTypes(ctx)
+		},
+	); err != nil {
 		return nil, fmt.Errorf("register get types query: %w", err)
 	}
 
 	return dispatcher, nil
-}
-
-func typedQueryHandler[T query.Query](name string, fn func(ctx context.Context, q T) (any, error)) query.Handler {
-	return func(ctx context.Context, q query.Query) (any, error) {
-		typed, ok := q.(T)
-		if !ok {
-			return nil, fmt.Errorf("expected %s, got %T: %w", name, q, errQueryTypeMismatch)
-		}
-
-		return fn(ctx, typed)
-	}
-}
-
-func handleListItems(rm ReadModel) query.Handler {
-	return typedQueryHandler[*ListItemsQuery](
-		"*ListItemsQuery",
-		func(ctx context.Context, q *ListItemsQuery) (any, error) {
-			return rm.List(ctx, q.Filter)
-		},
-	)
-}
-
-func handleGetItem(rm ReadModel) query.Handler {
-	return typedQueryHandler[*GetItemQuery]("*GetItemQuery", func(ctx context.Context, q *GetItemQuery) (any, error) {
-		return rm.Get(ctx, q.Source, q.SourceID)
-	})
-}
-
-func handleCountItems(rm ReadModel) query.Handler {
-	return typedQueryHandler[*CountItemsQuery](
-		"*CountItemsQuery",
-		func(ctx context.Context, q *CountItemsQuery) (any, error) {
-			return rm.Count(ctx, q.Filter)
-		},
-	)
-}
-
-func handleGetTypes(rm ReadModel) query.Handler {
-	return typedQueryHandler[*GetTypesQuery](
-		"*GetTypesQuery",
-		func(ctx context.Context, _ *GetTypesQuery) (any, error) {
-			return rm.GetTypes(ctx)
-		},
-	)
 }

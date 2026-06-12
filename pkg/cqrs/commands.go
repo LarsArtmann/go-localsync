@@ -55,45 +55,26 @@ func wireCommandDispatcher(
 	dispatcher.Use(commandValidationMiddleware())
 	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
 
-	syncItemHandler := typedCommandHandler[*SyncItemCommand](
-		"*SyncItemCommand",
-		func(ctx context.Context, cmd *SyncItemCommand) error {
-			outcome := syncOutcomeFromContext(ctx)
+	syncItemHandler := func(ctx context.Context, cmd *SyncItemCommand) error {
+		outcome := syncOutcomeFromContext(ctx)
 
-			return repo.Execute(
-				ctx, cmd.AggregateID(), aggregateType,
-				decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, outcome, cmd.Options...),
-			)
-		},
-	)
+		return repo.Execute(
+			ctx, cmd.AggregateID(), aggregateType,
+			decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, outcome, cmd.Options...),
+		)
+	}
 
-	if err := dispatcher.Register(commandTypeSyncItem, syncItemHandler); err != nil {
+	if err := command.RegisterTyped[*SyncItemCommand](dispatcher, commandTypeSyncItem, syncItemHandler); err != nil {
 		return nil, fmt.Errorf("register sync item command: %w", err)
 	}
 
-	if err := dispatcher.Register(commandTypeDeleteItem, handleDeleteItem(repo)); err != nil {
+	deleteHandler := func(ctx context.Context, cmd *DeleteItemCommand) error {
+		return repo.Execute(ctx, cmd.AggregateID(), aggregateType, decideDelete(cmd.Source, cmd.SourceID))
+	}
+
+	if err := command.RegisterTyped[*DeleteItemCommand](dispatcher, commandTypeDeleteItem, deleteHandler); err != nil {
 		return nil, fmt.Errorf("register delete item command: %w", err)
 	}
 
 	return dispatcher, nil
-}
-
-func typedCommandHandler[T command.Command](name string, fn func(ctx context.Context, cmd T) error) command.Handler {
-	return func(ctx context.Context, cmd command.Command) error {
-		typed, ok := cmd.(T)
-		if !ok {
-			return fmt.Errorf("expected %s, got %T: %w", name, cmd, errCommandTypeMismatch)
-		}
-
-		return fn(ctx, typed)
-	}
-}
-
-func handleDeleteItem(repo *decider.Repository[SyncItemState]) command.Handler {
-	return typedCommandHandler[*DeleteItemCommand](
-		"*DeleteItemCommand",
-		func(ctx context.Context, cmd *DeleteItemCommand) error {
-			return repo.Execute(ctx, cmd.AggregateID(), aggregateType, decideDelete(cmd.Source, cmd.SourceID))
-		},
-	)
 }

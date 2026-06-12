@@ -16,30 +16,30 @@ Continued the semantic code deduplication effort from session 11, pushing from t
 
 ### Deduplication (Sessions 11+17)
 
-| Threshold | Clone Groups | Category | Status |
-|---|---|---|---|
-| **50** (industry standard) | **0** | — | ✅ ZERO — clean |
-| **18** | 13 | all `idiom`/`low` | ✅ Structural Go patterns only |
-| **15** | 61 | all `idiom`/`low` | ✅ Go syntax atoms — floor reached |
+| Threshold                  | Clone Groups | Category          | Status                             |
+| -------------------------- | ------------ | ----------------- | ---------------------------------- |
+| **50** (industry standard) | **0**        | —                 | ✅ ZERO — clean                    |
+| **18**                     | 13           | all `idiom`/`low` | ✅ Structural Go patterns only     |
+| **15**                     | 61           | all `idiom`/`low` | ✅ Go syntax atoms — floor reached |
 
 ### Session 17 Changes (this session)
 
-| Change | File | Detail |
-|---|---|---|
+| Change                                | File                                    | Detail                                                                                             |
+| ------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `assertConfigField[T]` generic helper | `cmd/examples/github-sync/main_test.go` | Replaced 5 inline config assertions across 4 tests with generic helper. Reduced from 62→61 groups. |
 
 ### Session 11 Changes (previous, already committed)
 
-| Change | Files |
-|---|---|
-| `AssertStatus` + `AssertStatusOK` delegation | `testutil/testutil.go`, `api/server_test.go`, `api/integration_test.go` |
-| `WaitForCount` + `waitForProjection` helpers | `testutil/testutil.go`, `api/integration_test.go` |
-| NonErrorFamily test consolidation (4→1 table-driven) | `errors/errors_test.go` |
-| `assertNotFound` / `assertLen` / `sqliteAssertNotFound` | `cqrs/readmodel_test.go`, `cqrs/sqlite_readmodel_test.go` |
-| `validateIdentity` extraction (2 Validate methods→1 shared) | `data/model/item.go` |
-| `SyncItemState.SkipDecision()` method | `cqrs/decider.go` |
-| `MockProvider.fetchResult()` extraction | `testutil/mockprovider.go` |
-| `composeErr()` extraction in `Compose` | `data/transform/transform.go` |
+| Change                                                      | Files                                                                   |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `AssertStatus` + `AssertStatusOK` delegation                | `testutil/testutil.go`, `api/server_test.go`, `api/integration_test.go` |
+| `WaitForCount` + `waitForProjection` helpers                | `testutil/testutil.go`, `api/integration_test.go`                       |
+| NonErrorFamily test consolidation (4→1 table-driven)        | `errors/errors_test.go`                                                 |
+| `assertNotFound` / `assertLen` / `sqliteAssertNotFound`     | `cqrs/readmodel_test.go`, `cqrs/sqlite_readmodel_test.go`               |
+| `validateIdentity` extraction (2 Validate methods→1 shared) | `data/model/item.go`                                                    |
+| `SyncItemState.SkipDecision()` method                       | `cqrs/decider.go`                                                       |
+| `MockProvider.fetchResult()` extraction                     | `testutil/mockprovider.go`                                              |
+| `composeErr()` extraction in `Compose`                      | `data/transform/transform.go`                                           |
 
 ### Codebase Health
 
@@ -51,19 +51,19 @@ Continued the semantic code deduplication effort from session 11, pushing from t
 
 ### Coverage by Package
 
-| Package | Coverage |
-|---|---|
-| `pkg/data/model` | 100.0% |
-| `pkg/data/schema` | 100.0% |
-| `pkg/errors` | 100.0% |
-| `pkg/id` | 100.0% |
-| `pkg/crdt` | 97.6% |
-| `pkg/api` | 94.9% |
-| `pkg/sync` | 91.0% |
-| `pkg/provider` | 90.0% |
-| `pkg/cqrs` | 86.4% |
-| `pkg/providers/github` | 84.4% |
-| `cmd/examples/github-sync` | 12.3% |
+| Package                    | Coverage |
+| -------------------------- | -------- |
+| `pkg/data/model`           | 100.0%   |
+| `pkg/data/schema`          | 100.0%   |
+| `pkg/errors`               | 100.0%   |
+| `pkg/id`                   | 100.0%   |
+| `pkg/crdt`                 | 97.6%    |
+| `pkg/api`                  | 94.9%    |
+| `pkg/sync`                 | 91.0%    |
+| `pkg/provider`             | 90.0%    |
+| `pkg/cqrs`                 | 86.4%    |
+| `pkg/providers/github`     | 84.4%    |
+| `cmd/examples/github-sync` | 12.3%    |
 
 ### Recent Commits (sessions 11-17)
 
@@ -86,15 +86,15 @@ Attempted to reduce from 62→0 at t=15. After one extraction (`assertConfigFiel
 
 **Analysis of all 61 remaining groups at t=15:**
 
-| Pattern Type | Count | Example | Actionable? |
-|---|---|---|---|
-| Single-line test assertions (`if x != y`) | ~25 | `if cfg.Backend != "memory"` | ❌ Go testing idiom |
-| Interface method signatures | ~10 | `func (m *T) SyncItems(...) *Summary` | ❌ Go requires |
-| Struct construction (different data) | ~8 | `Key{Source: ..., ExternalID: ...}` | ❌ Test data |
-| Closure/type signatures | ~6 | `func(ctx, cmd Command) error` | ❌ Framework types |
-| 2-token function calls | ~6 | `return f(ctx, ...)` | ❌ Syntax |
-| HTTP boilerplate | ~4 | `w.Header().Set("Content-Type", ...)` | ❌ Standard lib |
-| Helper functions (become clones) | ~2 | `assertConfigField`, `AssertEqual` | ❌ Meta-clones |
+| Pattern Type                              | Count | Example                               | Actionable?         |
+| ----------------------------------------- | ----- | ------------------------------------- | ------------------- |
+| Single-line test assertions (`if x != y`) | ~25   | `if cfg.Backend != "memory"`          | ❌ Go testing idiom |
+| Interface method signatures               | ~10   | `func (m *T) SyncItems(...) *Summary` | ❌ Go requires      |
+| Struct construction (different data)      | ~8    | `Key{Source: ..., ExternalID: ...}`   | ❌ Test data        |
+| Closure/type signatures                   | ~6    | `func(ctx, cmd Command) error`        | ❌ Framework types  |
+| 2-token function calls                    | ~6    | `return f(ctx, ...)`                  | ❌ Syntax           |
+| HTTP boilerplate                          | ~4    | `w.Header().Set("Content-Type", ...)` | ❌ Standard lib     |
+| Helper functions (become clones)          | ~2    | `assertConfigField`, `AssertEqual`    | ❌ Meta-clones      |
 
 ---
 
@@ -202,11 +202,11 @@ The lint issues (exhaustruct, unparam, ireturn, mnd, tparallel) are real but cos
 
 ## Duplication Metrics Summary
 
-| Threshold | Clone Groups | Category | Assessment |
-|---|---|---|---|
-| 50 | **0** | — | ✅ Zero (industry standard) |
-| 18 | 13 | all `idiom` | ✅ Go structural patterns |
-| 15 | 61 | all `idiom` | ✅ Go syntax atoms — floor reached |
+| Threshold | Clone Groups | Category    | Assessment                         |
+| --------- | ------------ | ----------- | ---------------------------------- |
+| 50        | **0**        | —           | ✅ Zero (industry standard)        |
+| 18        | 13           | all `idiom` | ✅ Go structural patterns          |
+| 15        | 61           | all `idiom` | ✅ Go syntax atoms — floor reached |
 
 ### Why t=15 Is the Floor
 

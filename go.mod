@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-localsync
 
-go 1.26
+go 1.26.3
 
 require (
 	charm.land/log/v2 v2.0.0

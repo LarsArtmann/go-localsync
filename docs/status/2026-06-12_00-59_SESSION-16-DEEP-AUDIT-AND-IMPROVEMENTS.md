@@ -16,35 +16,35 @@ Follow-up to session 15's deduplication work. Executed a deep self-audit, fixed 
 
 ### a) FULLY DONE ✅
 
-| Item | Commit | Description |
-|------|--------|-------------|
-| BuildFlow auto-formatting | `69a5cd9` | gofumpt reformatting + go mod tidy (transitive dep bumps) |
-| API error mapping gaps | `ff7182f` | Added `ErrNotFound→404` and `ErrUnknownBackend→500` to `mapSyncError`, +2 test cases |
-| AGENTS.md stale refs | `bb625e5` | Fixed 10 stale references: turso→sqlite, commands_queries→split files, backend names |
-| TODO_LIST.md stale checkboxes | `bb625e5` | Marked 5 completed items as done (SQLite test, testutil, 3 ADRs) |
-| FEATURES.md stale counts | `bb625e5` | Test count 235→283, CLI coverage 10.3%→12.3% |
-| All 11 test packages green | — | `go test ./... -count=1` passes cleanly |
+| Item                          | Commit    | Description                                                                          |
+| ----------------------------- | --------- | ------------------------------------------------------------------------------------ |
+| BuildFlow auto-formatting     | `69a5cd9` | gofumpt reformatting + go mod tidy (transitive dep bumps)                            |
+| API error mapping gaps        | `ff7182f` | Added `ErrNotFound→404` and `ErrUnknownBackend→500` to `mapSyncError`, +2 test cases |
+| AGENTS.md stale refs          | `bb625e5` | Fixed 10 stale references: turso→sqlite, commands_queries→split files, backend names |
+| TODO_LIST.md stale checkboxes | `bb625e5` | Marked 5 completed items as done (SQLite test, testutil, 3 ADRs)                     |
+| FEATURES.md stale counts      | `bb625e5` | Test count 235→283, CLI coverage 10.3%→12.3%                                         |
+| All 11 test packages green    | —         | `go test ./... -count=1` passes cleanly                                              |
 
 ### b) PARTIALLY DONE
 
-| Item | Status | What's Left |
-|------|--------|-------------|
+| Item                                    | Status                   | What's Left                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `model.Item.Validate()` UpdatedAt check | Audited, decided to skip | Adding UpdatedAt validation would cascade through 20+ test files. Needs a separate session to update `testItem()` factory + all callers. The current `validateIdentity` function doesn't check UpdatedAt, which means items with zero UpdatedAt pass validation but could produce incorrect LWW conflict resolution. |
 
 ### c) NOT STARTED
 
-| Item | Priority | Notes |
-|------|----------|-------|
-| `WaitForCount` timeout | Medium | Has a busy-spin infinite loop with no context cancellation check. Should add `select` on `ctx.Done()` |
-| `ItemFilter.Limit/Offset` typed as `int` | Low | Can't distinguish "unset" from "zero". Should be `*int` for proper optional pagination |
-| `provider.Item.Source` is `ProviderID` but `FetchOptions.Source` is `string` | Low | Type inconsistency at the boundary |
-| Real GitHub API integration test | High | All testing is mock-based. No verification against real API |
-| `go.mod` has `go 1.26.3` | Low | Should be `go 1.26` (minor version only) |
+| Item                                                                         | Priority | Notes                                                                                                 |
+| ---------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `WaitForCount` timeout                                                       | Medium   | Has a busy-spin infinite loop with no context cancellation check. Should add `select` on `ctx.Done()` |
+| `ItemFilter.Limit/Offset` typed as `int`                                     | Low      | Can't distinguish "unset" from "zero". Should be `*int` for proper optional pagination                |
+| `provider.Item.Source` is `ProviderID` but `FetchOptions.Source` is `string` | Low      | Type inconsistency at the boundary                                                                    |
+| Real GitHub API integration test                                             | High     | All testing is mock-based. No verification against real API                                           |
+| `go.mod` has `go 1.26.3`                                                     | Low      | Should be `go 1.26` (minor version only)                                                              |
 
 ### d) TOTALLY FUCKED UP
 
-| Item | What Happened |
-|------|---------------|
+| Item                                     | What Happened                                                                                                                                                                                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Previous session's "dead testutil" audit | **WRONG**. All 6 suspected-dead helpers (`AssertExternalID`, `AssertType`, `AssertPanics`, `AssertStatusOK`, `AssertStatus`, `WaitForCount`) have active consumers. The grep in this session found 20+ real usages. The previous session failed to search properly. |
 
 ---
@@ -115,10 +115,12 @@ Follow-up to session 15's deduplication work. Executed a deep self-audit, fixed 
 **Should `model.Item.Validate()` require `UpdatedAt` to be non-zero?**
 
 Arguments for:
+
 - LWW conflict resolution relies on `UpdatedAt` for correctness
 - Zero `UpdatedAt` would produce wrong conflict winners silently
 
 Arguments against:
+
 - GitHub API occasionally returns items with zero/missing `UpdatedAt` for certain event types
 - The current `testItem()` factory doesn't set `UpdatedAt` (would need to update ~30 test call sites)
 - `CreatedAt` is already validated, and for new items CreatedAt ≈ UpdatedAt
@@ -140,6 +142,7 @@ bb625e5 docs: fix stale references in AGENTS.md, TODO_LIST.md, FEATURES.md
 ## Test Results
 
 All 11 packages pass:
+
 ```
 ok  github.com/larsartmann/go-localsync/cmd/examples/github-sync
 ok  github.com/larsartmann/go-localsync/pkg/api

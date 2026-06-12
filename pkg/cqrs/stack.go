@@ -212,7 +212,7 @@ func (s *CQRSStack) SyncItems(
 		}
 
 		result := synclib.ItemSyncResult{
-			SourceID: item.ExternalID.Get(),
+			SourceID: item.ExternalID,
 			Action:   action,
 			Error:    err,
 		}

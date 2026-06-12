@@ -41,7 +41,7 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 		}
 
 		summary.Results = append(summary.Results, ItemSyncResult{
-			SourceID: item.ExternalID.Get(),
+			SourceID: item.ExternalID,
 			Action:   action,
 		})
 		switch action {

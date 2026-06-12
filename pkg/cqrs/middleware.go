@@ -11,10 +11,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/query/v2"
 )
 
-var (
-	errCommandTypeMismatch = stderrors.New("command type mismatch")
-	errQueryTypeMismatch   = stderrors.New("query type mismatch")
-)
+var errValidationFailed = stderrors.New("command validation failed")
 
 func commandLoggingMiddleware(logger *log.Logger) command.Middleware {
 	return func(next command.Handler) command.Handler {
@@ -49,20 +46,20 @@ func commandValidationMiddleware() command.Middleware {
 			switch cmdTyped := cmd.(type) {
 			case *SyncItemCommand:
 				if cmdTyped.Item == nil {
-					return fmt.Errorf("sync item command: item is nil: %w", errCommandTypeMismatch)
+					return fmt.Errorf("sync item command: item is nil: %w", errValidationFailed)
 				}
 
 				if cmdTyped.Item.Source.Get() == "" {
 					return fmt.Errorf(
 						"sync item command: source is empty: %w",
-						errCommandTypeMismatch,
+						errValidationFailed,
 					)
 				}
 			case *DeleteItemCommand:
 				if cmdTyped.Source == "" {
 					return fmt.Errorf(
 						"delete item command: source is empty: %w",
-						errCommandTypeMismatch,
+						errValidationFailed,
 					)
 				}
 			}

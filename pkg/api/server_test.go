@@ -38,7 +38,7 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *sy
 	for _, item := range items {
 		summary.Synced++
 		summary.Results = append(summary.Results, synclib.ItemSyncResult{
-			SourceID: item.ExternalID.Get(),
+			SourceID: item.ExternalID,
 			Action:   synclib.ActionCreated,
 		})
 	}

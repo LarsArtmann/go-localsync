@@ -2,8 +2,10 @@ package sync
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
@@ -21,9 +23,17 @@ const (
 
 // ItemSyncResult holds the result of syncing a single item.
 type ItemSyncResult struct {
-	SourceID string
+	SourceID id.ExternalID
 	Action   SyncAction
 	Error    error
+}
+
+func (r ItemSyncResult) String() string {
+	if r.Error != nil {
+		return fmt.Sprintf("%s:%s(%s)", r.SourceID, r.Action, r.Error)
+	}
+
+	return fmt.Sprintf("%s:%s", r.SourceID, r.Action)
 }
 
 // SyncSummary aggregates results from a batch SyncItems call.
@@ -32,6 +42,21 @@ type SyncSummary struct {
 	Conflicts int
 	Errors    int
 	Results   []ItemSyncResult
+}
+
+func (s SyncSummary) String() string {
+	return fmt.Sprintf("synced=%d conflicts=%d errors=%d", s.Synced, s.Conflicts, s.Errors)
+}
+
+func (a SyncAction) String() string { return string(a) }
+
+func (a SyncAction) IsValid() bool {
+	switch a {
+	case ActionCreated, ActionUpdated, ActionConflictRemote, ActionConflictLocal, ActionUnchanged, ActionError:
+		return true
+	default:
+		return false
+	}
 }
 
 // SyncStore is the minimal interface that decouples sync logic from concrete storage.

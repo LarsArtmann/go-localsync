@@ -177,11 +177,11 @@ Actionable tasks for the next 2–4 weeks. Items are organized by priority.
 | Concurrent access tests for MemoryReadModel (3 tests)                                 | 14      | 2026-06-11 |
 | mapSyncError table-driven tests (6 mappings)                                          | 14      | 2026-06-11 |
 | CRDT example_test.go (LWWResolver with model.Item)                                    | 14      | 2026-06-11 |
-| ItemFilter Limit/Offset audit (skipped — >0 checks handle zero correctly) | 17 | 2026-06-12 |
-| CLI coverage audit (skipped — uncovered functions call os.Exit) | 17 | 2026-06-12 |
-| UpdatedAt validation added to model.Item.Validate() | 17 | 2026-06-12 |
-| WaitForCount busy-spin fixed (ctx.Done + ticker select) | 17 | 2026-06-12 |
-| go.mod version fixed (1.26.3 → 1.26) | 17 | 2026-06-12 |
+| ItemFilter Limit/Offset audit (skipped — >0 checks handle zero correctly)             | 17      | 2026-06-12 |
+| CLI coverage audit (skipped — uncovered functions call os.Exit)                       | 17      | 2026-06-12 |
+| UpdatedAt validation added to model.Item.Validate()                                   | 17      | 2026-06-12 |
+| WaitForCount busy-spin fixed (ctx.Done + ticker select)                               | 17      | 2026-06-12 |
+| go.mod version fixed (1.26.3 → 1.26)                                                  | 17      | 2026-06-12 |
 
 ---
 
