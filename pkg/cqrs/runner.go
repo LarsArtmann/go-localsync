@@ -3,9 +3,9 @@ package cqrs
 import (
 	"context"
 	"fmt"
-	"charm.land/log/v2"
 	"time"
 
+	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsprojection "github.com/larsartmann/go-cqrs-lite/projection/v2"
 )

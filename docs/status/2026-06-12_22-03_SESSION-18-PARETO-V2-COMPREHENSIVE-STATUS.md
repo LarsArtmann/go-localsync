@@ -12,29 +12,29 @@
 
 ### Architecture & Foundation (Sessions 1–18)
 
-| Area | Status | Details |
-|------|--------|---------|
-| CQRS Stack | FULLY_FUNCTIONAL | Event-sourced architecture via go-cqrs-lite v2.2. No legacy CRUD. Decider, Repository, ReadModel, Projection all wired. |
-| Event Sourcing | FULLY_FUNCTIONAL | 3 domain events: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`. All state changes via events. |
-| Deterministic Aggregate IDs | FULLY_FUNCTIONAL | SHA256→hex from (source, sourceID) with `sync.Map` cache. Idempotent sync. |
-| Projection | FULLY_FUNCTIONAL | Direct `bus.SubscribeAll` (sync) + `projection.Runner` (SQLite replay). SQL checkpoints. |
-| Dual Backend | FULLY_FUNCTIONAL | Memory + SQLite via `CQRSConfig.Backend`. Factory pattern. Both pass all tests. |
-| Branded IDs | FULLY_FUNCTIONAL | 6 phantom types via go-branded-id: `ItemID` (ULID), `ExternalID`, `ProviderID`, `ActorID`, `RepoID`, `EventTypeID`. |
-| Pluggable CRDT Conflict Resolution | FULLY_FUNCTIONAL | `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*provider.Item]`. Default nil = remote-wins. |
-| Error Taxonomy | FULLY_FUNCTIONAL | 9 sentinel errors via go-error-family constructors. Intrinsic classification. `IsRetryable`. User-facing templates. |
-| Provider Interface | FULLY_FUNCTIONAL | Generic `Provider`: `Name()`, `Fetch()`, `FetchAll()`, `GetRateLimit()`. GitHub implementation complete. |
-| HTTP API | FULLY_FUNCTIONAL | Huma v2 + stdlib: `GET /items`, `GET /stats`, `POST /sync`, `GET /health`. Auto-generated OpenAPI 3 spec. |
-| CLI / Example App | FULLY_FUNCTIONAL | Signal handling, graceful shutdown, env config, exit codes, version info, JSON output, server mode. |
-| Nix Flake | FULLY_FUNCTIONAL | `flake.nix` with devShell + `buildGoModule`. Pure Go (no CGO). |
-| CI/CD | FULLY_FUNCTIONAL | GitHub Actions: test (race + coverage), lint, build (linux/darwin, amd64/arm64), release (on tags). |
+| Area                               | Status           | Details                                                                                                                 |
+| ---------------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| CQRS Stack                         | FULLY_FUNCTIONAL | Event-sourced architecture via go-cqrs-lite v2.2. No legacy CRUD. Decider, Repository, ReadModel, Projection all wired. |
+| Event Sourcing                     | FULLY_FUNCTIONAL | 3 domain events: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`. All state changes via events.                        |
+| Deterministic Aggregate IDs        | FULLY_FUNCTIONAL | SHA256→hex from (source, sourceID) with `sync.Map` cache. Idempotent sync.                                              |
+| Projection                         | FULLY_FUNCTIONAL | Direct `bus.SubscribeAll` (sync) + `projection.Runner` (SQLite replay). SQL checkpoints.                                |
+| Dual Backend                       | FULLY_FUNCTIONAL | Memory + SQLite via `CQRSConfig.Backend`. Factory pattern. Both pass all tests.                                         |
+| Branded IDs                        | FULLY_FUNCTIONAL | 6 phantom types via go-branded-id: `ItemID` (ULID), `ExternalID`, `ProviderID`, `ActorID`, `RepoID`, `EventTypeID`.     |
+| Pluggable CRDT Conflict Resolution | FULLY_FUNCTIONAL | `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*provider.Item]`. Default nil = remote-wins.           |
+| Error Taxonomy                     | FULLY_FUNCTIONAL | 9 sentinel errors via go-error-family constructors. Intrinsic classification. `IsRetryable`. User-facing templates.     |
+| Provider Interface                 | FULLY_FUNCTIONAL | Generic `Provider`: `Name()`, `Fetch()`, `FetchAll()`, `GetRateLimit()`. GitHub implementation complete.                |
+| HTTP API                           | FULLY_FUNCTIONAL | Huma v2 + stdlib: `GET /items`, `GET /stats`, `POST /sync`, `GET /health`. Auto-generated OpenAPI 3 spec.               |
+| CLI / Example App                  | FULLY_FUNCTIONAL | Signal handling, graceful shutdown, env config, exit codes, version info, JSON output, server mode.                     |
+| Nix Flake                          | FULLY_FUNCTIONAL | `flake.nix` with devShell + `buildGoModule`. Pure Go (no CGO).                                                          |
+| CI/CD                              | FULLY_FUNCTIONAL | GitHub Actions: test (race + coverage), lint, build (linux/darwin, amd64/arm64), release (on tags).                     |
 
 ### Session 18 Specific (Committed)
 
-| Commit | What |
-|--------|------|
+| Commit    | What                                                                                                                                                             |
+| --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `80409a9` | **Phase 0**: Fixed broken build (`FetchOptions.Source` branding — `opts.Source` → `opts.Source.Get()` in 3 call sites). Added self-review + revised Pareto plan. |
-| `8617217` | **Phase 1.1**: `provider.Item.Validate()` refactored to `errors.Join` — collects all validation errors at once instead of early-return. |
-| `80f799a` | **Phase 1.3**: WSL lint fixes in `model/item.go` `validateIdentity()`. |
+| `8617217` | **Phase 1.1**: `provider.Item.Validate()` refactored to `errors.Join` — collects all validation errors at once instead of early-return.                          |
+| `80f799a` | **Phase 1.3**: WSL lint fixes in `model/item.go` `validateIdentity()`.                                                                                           |
 
 ### Session 17 (Prior, Committed)
 
@@ -65,14 +65,14 @@
 
 The revised 4-phase plan (`docs/planning/2026-06-12_SESSION-18-PARETO-V2.md`) completed Phase 0 and Phase 1 only:
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| Phase 0 | Fix broken build + self-review plan | DONE |
-| Phase 1.1 | `errors.Join` in `provider.Item.Validate()` | DONE |
-| Phase 1.2 | `errors.Join` in `model.Item.Validate()` | DONE (session 17) |
-| Phase 1.3 | Lint fixes (wsl_v5) | DONE |
-| **Phase 2** | **Type Model Deepening** | **NOT STARTED** |
-| **Phase 3** | **Product Features** | **NOT STARTED** |
+| Phase       | Description                                 | Status            |
+| ----------- | ------------------------------------------- | ----------------- |
+| Phase 0     | Fix broken build + self-review plan         | DONE              |
+| Phase 1.1   | `errors.Join` in `provider.Item.Validate()` | DONE              |
+| Phase 1.2   | `errors.Join` in `model.Item.Validate()`    | DONE (session 17) |
+| Phase 1.3   | Lint fixes (wsl_v5)                         | DONE              |
+| **Phase 2** | **Type Model Deepening**                    | **NOT STARTED**   |
+| **Phase 3** | **Product Features**                        | **NOT STARTED**   |
 
 ### Type Model Deepening (Phase 2 — Partially Done)
 
@@ -189,48 +189,48 @@ The LSP reports 4 compiler errors in github provider test files about `ProviderI
 
 ### Tier 1: High Impact, Low Effort (Do First)
 
-| # | Item | Package | Effort | Impact |
-|---|------|---------|--------|--------|
-| 1 | Brand `GetTypes()` return as `[]id.EventTypeID` | `data/model`, `cqrs`, `sync` | 30min | Type safety at read boundary |
-| 2 | Brand `Stats.ItemTypes` / `TypeCounts` | `pkg/sync` | 20min | Type safety at stats boundary |
-| 3 | Fix gopls stale diagnostics (reindex) | IDE | 5min | Developer experience |
-| 4 | Add API authentication middleware (`RequireAPIKey`) | `pkg/api` | 1h | Security — critical gap |
-| 5 | Add `X-Total-Count` pagination header | `pkg/api` | 30min | API usability |
-| 6 | Add `--conflict-strategy` CLI flag | `cmd/examples/github-sync` | 30min | Runtime conflict control |
-| 7 | Add `--watch` daemon mode | `cmd/examples/github-sync` | 1h | Operational — enables periodic sync |
+| #   | Item                                                | Package                      | Effort | Impact                              |
+| --- | --------------------------------------------------- | ---------------------------- | ------ | ----------------------------------- |
+| 1   | Brand `GetTypes()` return as `[]id.EventTypeID`     | `data/model`, `cqrs`, `sync` | 30min  | Type safety at read boundary        |
+| 2   | Brand `Stats.ItemTypes` / `TypeCounts`              | `pkg/sync`                   | 20min  | Type safety at stats boundary       |
+| 3   | Fix gopls stale diagnostics (reindex)               | IDE                          | 5min   | Developer experience                |
+| 4   | Add API authentication middleware (`RequireAPIKey`) | `pkg/api`                    | 1h     | Security — critical gap             |
+| 5   | Add `X-Total-Count` pagination header               | `pkg/api`                    | 30min  | API usability                       |
+| 6   | Add `--conflict-strategy` CLI flag                  | `cmd/examples/github-sync`   | 30min  | Runtime conflict control            |
+| 7   | Add `--watch` daemon mode                           | `cmd/examples/github-sync`   | 1h     | Operational — enables periodic sync |
 
 ### Tier 2: High Impact, Medium Effort
 
-| # | Item | Package | Effort | Impact |
-|---|------|---------|--------|--------|
-| 8 | Improve CLI test coverage (12.3% → 50%+) | `cmd/examples/github-sync` | 2h | Confidence in main flows |
-| 9 | Add OpenTelemetry spans for sync operations | `pkg/sync`, `pkg/cqrs` | 2h | Production observability |
-| 10 | Disable SA5012 in `.golangci.yml` to fix pre-commit | project root | 15min | Restore `git commit` without `--no-verify` |
-| 11 | API rate limiting middleware | `pkg/api` | 1h | Prevent `POST /sync` abuse |
-| 12 | Structured logging fields (user, page, event_id) | `pkg/sync`, `pkg/providers/github` | 1h | Debuggability |
-| 13 | Type `CQRSConfig.Backend` as enum | `pkg/cqrs` | 30min | Eliminate invalid backend strings |
-| 14 | Real GitHub PAT smoke test | `cmd/examples/github-sync` | 30min | End-to-end confidence |
+| #   | Item                                                | Package                            | Effort | Impact                                     |
+| --- | --------------------------------------------------- | ---------------------------------- | ------ | ------------------------------------------ |
+| 8   | Improve CLI test coverage (12.3% → 50%+)            | `cmd/examples/github-sync`         | 2h     | Confidence in main flows                   |
+| 9   | Add OpenTelemetry spans for sync operations         | `pkg/sync`, `pkg/cqrs`             | 2h     | Production observability                   |
+| 10  | Disable SA5012 in `.golangci.yml` to fix pre-commit | project root                       | 15min  | Restore `git commit` without `--no-verify` |
+| 11  | API rate limiting middleware                        | `pkg/api`                          | 1h     | Prevent `POST /sync` abuse                 |
+| 12  | Structured logging fields (user, page, event_id)    | `pkg/sync`, `pkg/providers/github` | 1h     | Debuggability                              |
+| 13  | Type `CQRSConfig.Backend` as enum                   | `pkg/cqrs`                         | 30min  | Eliminate invalid backend strings          |
+| 14  | Real GitHub PAT smoke test                          | `cmd/examples/github-sync`         | 30min  | End-to-end confidence                      |
 
 ### Tier 3: Medium Impact, Medium Effort
 
-| # | Item | Package | Effort | Impact |
-|---|------|---------|--------|--------|
-| 15 | OpenAPI error response schemas per endpoint | `pkg/api` | 1h | API documentation quality |
-| 16 | Improve CONTRIBUTING.md | docs | 1h | Onboarding |
-| 17 | Add `govalid` struct tags to config types | `cmd/`, `pkg/cqrs` | 30min | Input validation |
-| 18 | Clean `nolint:ireturn` in store_factory | `pkg/cqrs` | 30min | Code quality |
-| 19 | Adopt `UpcasterRegistry` from go-cqrs-lite | `pkg/cqrs` | 2h | Schema evolution readiness |
-| 20 | Multi-user sync support | `pkg/sync`, `cmd/` | 3h | Feature completeness |
+| #   | Item                                        | Package            | Effort | Impact                     |
+| --- | ------------------------------------------- | ------------------ | ------ | -------------------------- |
+| 15  | OpenAPI error response schemas per endpoint | `pkg/api`          | 1h     | API documentation quality  |
+| 16  | Improve CONTRIBUTING.md                     | docs               | 1h     | Onboarding                 |
+| 17  | Add `govalid` struct tags to config types   | `cmd/`, `pkg/cqrs` | 30min  | Input validation           |
+| 18  | Clean `nolint:ireturn` in store_factory     | `pkg/cqrs`         | 30min  | Code quality               |
+| 19  | Adopt `UpcasterRegistry` from go-cqrs-lite  | `pkg/cqrs`         | 2h     | Schema evolution readiness |
+| 20  | Multi-user sync support                     | `pkg/sync`, `cmd/` | 3h     | Feature completeness       |
 
 ### Tier 4: Future
 
-| # | Item | Package | Effort | Impact |
-|---|------|---------|--------|--------|
-| 21 | Data export (JSON/CSV) | `cmd/` | 2h | Data portability |
-| 22 | Adopt `catalog/` for AsyncAPI/D2 generation | `pkg/cqrs` | 2h | Documentation automation |
-| 23 | Resolve go-cqrs-lite upstream WIP | `go.mod` | varies | Dependency stability |
-| 24 | Unify test framework (stdlib) | all test files | 3h | Consistency |
-| 25 | TUI with Bubble Tea | `cmd/` | 4h | User experience |
+| #   | Item                                        | Package        | Effort | Impact                   |
+| --- | ------------------------------------------- | -------------- | ------ | ------------------------ |
+| 21  | Data export (JSON/CSV)                      | `cmd/`         | 2h     | Data portability         |
+| 22  | Adopt `catalog/` for AsyncAPI/D2 generation | `pkg/cqrs`     | 2h     | Documentation automation |
+| 23  | Resolve go-cqrs-lite upstream WIP           | `go.mod`       | varies | Dependency stability     |
+| 24  | Unify test framework (stdlib)               | all test files | 3h     | Consistency              |
+| 25  | TUI with Bubble Tea                         | `cmd/`         | 4h     | User experience          |
 
 ---
 
@@ -239,6 +239,7 @@ The LSP reports 4 compiler errors in github provider test files about `ProviderI
 **Should we fix the BuildFlow pre-commit hook by disabling SA5012 in `.golangci.yml`, or wait for the upstream golangci-lint fix?**
 
 Context:
+
 - Every commit requires `--no-verify` to bypass the panic
 - The panic is in `honnef.co/go/tools@v0.7.0` SA5012 analysis, not our code
 - Disabling SA5012 would restore normal `git commit` workflow
@@ -252,19 +253,19 @@ This is a judgment call about workflow friction vs. static analysis coverage. I 
 
 ## Coverage Summary
 
-| Package | Coverage | Tests |
-|---------|----------|-------|
-| `pkg/data/model` | 100.0% | ~12 |
-| `pkg/data/schema` | 100.0% | ~2 |
-| `pkg/errors` | 100.0% | 11 |
-| `pkg/id` | 100.0% | 10 |
-| `pkg/api` | 93.9% | ~15 |
-| `pkg/crdt` | 96.2% | ~55 |
-| `pkg/provider` | 90.9% | 2 |
-| `pkg/cqrs` | 86.4% | ~85 |
-| `pkg/sync` | 85.4% | 22 |
-| `pkg/providers/github` | 84.4% | 32 |
-| `cmd/examples/github-sync` | 12.3% | 14 |
+| Package                    | Coverage | Tests |
+| -------------------------- | -------- | ----- |
+| `pkg/data/model`           | 100.0%   | ~12   |
+| `pkg/data/schema`          | 100.0%   | ~2    |
+| `pkg/errors`               | 100.0%   | 11    |
+| `pkg/id`                   | 100.0%   | 10    |
+| `pkg/api`                  | 93.9%    | ~15   |
+| `pkg/crdt`                 | 96.2%    | ~55   |
+| `pkg/provider`             | 90.9%    | 2     |
+| `pkg/cqrs`                 | 86.4%    | ~85   |
+| `pkg/sync`                 | 85.4%    | 22    |
+| `pkg/providers/github`     | 84.4%    | 32    |
+| `cmd/examples/github-sync` | 12.3%    | 14    |
 
 **Weighted average: ~87%** across 11 packages.
 

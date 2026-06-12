@@ -33,14 +33,14 @@
 
 ### What Could Still Improve
 
-| # | Issue | Why It Matters |
-|---|-------|----------------|
-| 1 | `provider.Item.Validate()` uses individual returns, `model.Item.Validate()` uses `errors.Join` | Inconsistent DX — `provider.Item` should also collect all errors |
-| 2 | `Stats.ItemTypes` is `[]string` not `[]id.EventTypeID` | Loses type info at read boundary |
-| 3 | `GetTypes()` returns `[]string` | Same issue — forces re-wrapping |
-| 4 | API DTO layer is all raw strings | Acceptable for HTTP boundaries but validation could be typed |
-| 5 | No `Backend` type enum for `CQRSConfig.Backend` | Magic string "memory"/"sqlite" |
-| 6 | Linter warnings in `item.go` (wsl_v5, nlreturn) | Cosmetic but fixable |
+| #   | Issue                                                                                          | Why It Matters                                                   |
+| --- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 1   | `provider.Item.Validate()` uses individual returns, `model.Item.Validate()` uses `errors.Join` | Inconsistent DX — `provider.Item` should also collect all errors |
+| 2   | `Stats.ItemTypes` is `[]string` not `[]id.EventTypeID`                                         | Loses type info at read boundary                                 |
+| 3   | `GetTypes()` returns `[]string`                                                                | Same issue — forces re-wrapping                                  |
+| 4   | API DTO layer is all raw strings                                                               | Acceptable for HTTP boundaries but validation could be typed     |
+| 5   | No `Backend` type enum for `CQRSConfig.Backend`                                                | Magic string "memory"/"sqlite"                                   |
+| 6   | Linter warnings in `item.go` (wsl_v5, nlreturn)                                                | Cosmetic but fixable                                             |
 
 ---
 
@@ -48,38 +48,38 @@
 
 ### Phase 0: Fix Build (BLOCKER — must do first)
 
-| # | Task | Effort | Files |
-|---|------|--------|-------|
-| 0.1 | Fix `client.go:124,136` — `opts.Source.Get()` | XS | `pkg/providers/github/client.go` |
-| 0.2 | Fix test files — `id.NewProviderID(...)` wrapping | XS | 4 test files |
-| 0.3 | Build + test → green | XS | — |
+| #   | Task                                              | Effort | Files                            |
+| --- | ------------------------------------------------- | ------ | -------------------------------- |
+| 0.1 | Fix `client.go:124,136` — `opts.Source.Get()`     | XS     | `pkg/providers/github/client.go` |
+| 0.2 | Fix test files — `id.NewProviderID(...)` wrapping | XS     | 4 test files                     |
+| 0.3 | Build + test → green                              | XS     | —                                |
 
 ### Phase 1: 1% / 51% — Consistency Fixes
 
-| # | Task | Effort | Files |
-|---|------|--------|-------|
-| 1.1 | `provider.Item.Validate()` → use `errors.Join` like `model.Item` | S | `pkg/provider/provider.go` |
-| 1.2 | Add `Backend` type enum for `CQRSConfig.Backend` | S | `pkg/cqrs/stack.go` |
-| 1.3 | Fix linter warnings in `model/item.go` | XS | `pkg/data/model/item.go` |
-| 1.4 | Commit + verify | XS | — |
+| #   | Task                                                             | Effort | Files                      |
+| --- | ---------------------------------------------------------------- | ------ | -------------------------- |
+| 1.1 | `provider.Item.Validate()` → use `errors.Join` like `model.Item` | S      | `pkg/provider/provider.go` |
+| 1.2 | Add `Backend` type enum for `CQRSConfig.Backend`                 | S      | `pkg/cqrs/stack.go`        |
+| 1.3 | Fix linter warnings in `model/item.go`                           | XS     | `pkg/data/model/item.go`   |
+| 1.4 | Commit + verify                                                  | XS     | —                          |
 
 ### Phase 2: 4% / 64% — Type Model Deepening
 
-| # | Task | Effort | Files |
-|---|------|--------|-------|
-| 2.1 | `GetTypes()` → return `[]id.EventTypeID` | S | `pkg/data/model/item.go`, `pkg/cqrs/stack_adapters.go`, read models |
-| 2.2 | `Stats.ItemTypes` → `[]id.EventTypeID`, `TypeCounts` → `map[id.EventTypeID]int64` | S | `pkg/sync/types.go`, callers |
-| 2.3 | `SyncOptions.Source` validation uses branded check | XS | `pkg/sync/sync.go` |
-| 2.4 | Commit + verify | XS | — |
+| #   | Task                                                                              | Effort | Files                                                               |
+| --- | --------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------- |
+| 2.1 | `GetTypes()` → return `[]id.EventTypeID`                                          | S      | `pkg/data/model/item.go`, `pkg/cqrs/stack_adapters.go`, read models |
+| 2.2 | `Stats.ItemTypes` → `[]id.EventTypeID`, `TypeCounts` → `map[id.EventTypeID]int64` | S      | `pkg/sync/types.go`, callers                                        |
+| 2.3 | `SyncOptions.Source` validation uses branded check                                | XS     | `pkg/sync/sync.go`                                                  |
+| 2.4 | Commit + verify                                                                   | XS     | —                                                                   |
 
 ### Phase 3: 20% / 80% — Product Features (from prior plan, still valid)
 
-| # | Task | Effort | Files |
-|---|------|--------|-------|
-| 3.1 | API auth middleware (API-key) | M | `pkg/api/middleware.go` (new) |
-| 3.2 | API pagination headers | M | `pkg/api/handlers.go` |
-| 3.3 | CLI `--conflict-strategy` flag | S | `cmd/examples/github-sync/main.go` |
-| 3.4 | CLI `--watch` flag (ticker + graceful shutdown) | M | `cmd/examples/github-sync/main.go` |
+| #   | Task                                            | Effort | Files                              |
+| --- | ----------------------------------------------- | ------ | ---------------------------------- |
+| 3.1 | API auth middleware (API-key)                   | M      | `pkg/api/middleware.go` (new)      |
+| 3.2 | API pagination headers                          | M      | `pkg/api/handlers.go`              |
+| 3.3 | CLI `--conflict-strategy` flag                  | S      | `cmd/examples/github-sync/main.go` |
+| 3.4 | CLI `--watch` flag (ticker + graceful shutdown) | M      | `cmd/examples/github-sync/main.go` |
 
 ---
 

@@ -13,50 +13,50 @@
 
 ## Project At a Glance
 
-| Metric | Value |
-| --- | --- |
-| Production code | 4,980 lines (52 files) |
-| Test code | 7,758 lines (46 files) |
-| Test:prod ratio | 1.56:1 |
-| Packages | 10 production packages + 1 example CLI |
-| Test functions | 285 |
-| Exported types | 68 |
-| Interfaces | 5 (`Provider`, `SyncStore`, `ReadModel`, `ConflictResolver[T]`, `ItemReader`) |
-| Direct dependencies | 20 |
-| Commits since June 11 | 13 |
-| TODO/FIXME/HACK in code | **0** |
-| Files over 300 lines (prod) | **0** |
+| Metric                      | Value                                                                         |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| Production code             | 4,980 lines (52 files)                                                        |
+| Test code                   | 7,758 lines (46 files)                                                        |
+| Test:prod ratio             | 1.56:1                                                                        |
+| Packages                    | 10 production packages + 1 example CLI                                        |
+| Test functions              | 285                                                                           |
+| Exported types              | 68                                                                            |
+| Interfaces                  | 5 (`Provider`, `SyncStore`, `ReadModel`, `ConflictResolver[T]`, `ItemReader`) |
+| Direct dependencies         | 20                                                                            |
+| Commits since June 11       | 13                                                                            |
+| TODO/FIXME/HACK in code     | **0**                                                                         |
+| Files over 300 lines (prod) | **0**                                                                         |
 
 ### Coverage by Package
 
-| Package | Coverage | Tests |
-| --- | --- | --- |
-| `pkg/data/model` | 100.0% | 14 |
-| `pkg/data/schema` | 100.0% | 0 |
-| `pkg/errors` | 100.0% | 9 |
-| `pkg/id` | 100.0% | 12 |
-| `pkg/crdt` | 96.2% | 57 |
-| `pkg/api` | 93.9% | 15 |
-| `pkg/provider` | 90.9% | 2 |
-| `pkg/providers/github` | 84.4% | 32 |
-| `pkg/sync` | 85.4% | 24 |
-| `pkg/cqrs` | 86.4% | 98 |
-| `cmd/examples/github-sync` | 12.3% | 14 |
+| Package                    | Coverage | Tests |
+| -------------------------- | -------- | ----- |
+| `pkg/data/model`           | 100.0%   | 14    |
+| `pkg/data/schema`          | 100.0%   | 0     |
+| `pkg/errors`               | 100.0%   | 9     |
+| `pkg/id`                   | 100.0%   | 12    |
+| `pkg/crdt`                 | 96.2%    | 57    |
+| `pkg/api`                  | 93.9%    | 15    |
+| `pkg/provider`             | 90.9%    | 2     |
+| `pkg/providers/github`     | 84.4%    | 32    |
+| `pkg/sync`                 | 85.4%    | 24    |
+| `pkg/cqrs`                 | 86.4%    | 98    |
+| `cmd/examples/github-sync` | 12.3%    | 14    |
 
 ### Package Size (Production Lines)
 
-| Package | Files | Lines |
-| --- | --- | --- |
-| `pkg/cqrs` | 19 | 1,891 |
-| `pkg/crdt` | 6 | 614 |
-| `pkg/data` | 2 sub-packages | 243 |
-| `pkg/sync` | 4 | 465 |
-| `pkg/providers/github` | 3 | 492 |
-| `pkg/api` | 4 | 335 |
-| `pkg/testutil` | 3 | 205 |
-| `pkg/errors` | 2 | 157 |
-| `pkg/provider` | 1 | 156 |
-| `pkg/id` | 1 | 88 |
+| Package                | Files          | Lines |
+| ---------------------- | -------------- | ----- |
+| `pkg/cqrs`             | 19             | 1,891 |
+| `pkg/crdt`             | 6              | 614   |
+| `pkg/data`             | 2 sub-packages | 243   |
+| `pkg/sync`             | 4              | 465   |
+| `pkg/providers/github` | 3              | 492   |
+| `pkg/api`              | 4              | 335   |
+| `pkg/testutil`         | 3              | 205   |
+| `pkg/errors`           | 2              | 157   |
+| `pkg/provider`         | 1              | 156   |
+| `pkg/id`               | 1              | 88    |
 
 ---
 
@@ -86,7 +86,7 @@ These items are complete, tested, committed, and pushed.
 - **Session 11:** Data module types (Item, Key, schema.Version), MockProvider consolidation
 - **Session 12:** Deduplication pass (96→73 assertion groups)
 - **Session 13:** Dead types removed, ConflictStrategy CLI, HasChanged tests, benchmarks, graceful shutdown
-- **Session 14:** Dead Get*() methods removed, ItemFilter moved to model, concurrent access tests, mapSyncError tests
+- **Session 14:** Dead Get\*() methods removed, ItemFilter moved to model, concurrent access tests, mapSyncError tests
 - **Session 15:** File splits (3 large files → 9 focused), ADR-001/002/003, API error path tests
 - **Session 16:** Deep audit, WaitForCount fix, go.mod version fix, UpdatedAt validation
 - **Session 17:** UpdatedAt validation, WaitForCount busy-spin, go.mod fix, item/limit audit
@@ -99,14 +99,14 @@ These items are complete, tested, committed, and pushed.
 
 **Status:** Factory functions cleaned up. Remaining 6 call sites are appropriate.
 
-| Location | Justification | Verdict |
-| --- | --- | --- |
-| `pkg/providers/github/client.go:37` | oauth2.NewClient has no ctx param — acceptable | Keep |
-| `pkg/cqrs/runner.go:38` | Goroutine root context for projection runner | Acceptable |
-| `pkg/cqrs/stack.go:68` | Stack constructor entry point | Acceptable |
+| Location                                    | Justification                                  | Verdict    |
+| ------------------------------------------- | ---------------------------------------------- | ---------- |
+| `pkg/providers/github/client.go:37`         | oauth2.NewClient has no ctx param — acceptable | Keep       |
+| `pkg/cqrs/runner.go:38`                     | Goroutine root context for projection runner   | Acceptable |
+| `pkg/cqrs/stack.go:68`                      | Stack constructor entry point                  | Acceptable |
 | `cmd/examples/github-sync/helpers.go:43,48` | CLI entry point — no request context available | Acceptable |
-| `cmd/examples/github-sync/helpers.go:173` | Shutdown timeout context — correct usage | Acceptable |
-| `cmd/examples/github-sync/main.go:161` | Main goroutine root context | Acceptable |
+| `cmd/examples/github-sync/helpers.go:173`   | Shutdown timeout context — correct usage       | Acceptable |
+| `cmd/examples/github-sync/main.go:161`      | Main goroutine root context                    | Acceptable |
 
 ### Logging Standardization (90% done)
 
@@ -177,7 +177,7 @@ The codebase is in the best shape it has ever been. Build passes, all 285 tests 
 
 - `pkg/cqrs/commands.go:25` — `mustNewCommand` helper (programmer error if fails)
 - `pkg/cqrs/queries.go:23` — `mustNewQuery` helper (programmer error if fails)
-- `pkg/crdt/operation.go:86` — `MustNewOperation` (explicitly named Must*)
+- `pkg/crdt/operation.go:86` — `MustNewOperation` (explicitly named Must\*)
 - `pkg/crdt/types.go:21,51` — `MustNewVectorClock`, `MustNewSyncMessage`
 - `pkg/testutil/testutil.go:119` — `BuildPair` argument validation
 
@@ -222,43 +222,43 @@ These are acceptable Go convention for "this should never happen" paths.
 
 ### Tier 1: High Impact, Low Effort (< 1 hour each)
 
-| # | Task | Why | Effort |
-| --- | --- | --- | --- |
-| 1 | **Smoke test with real GitHub PAT** | Never validated against real API. Mock-passing ≠ working. | 30 min |
-| 2 | **Add full-stack integration test** | Provider→Syncer→CQRS→ReadModel→API in one test. Catches wiring bugs. | 45 min |
-| 3 | **Extract testable logic from `main.go`** | Move `runSync`/`runStats`/`runAPIServer` logic to testable functions. Don't call `os.Exit()` directly. | 45 min |
-| 4 | **Archive old sessions from AGENTS.md** | Move sessions 4–16 to `docs/status/archive/`. Keep only architecture + current state. | 20 min |
-| 5 | **Archive old status reports** | Move pre-June reports to `docs/status/archive/`. Keep last 5. | 10 min |
-| 6 | **Add `String()` to all branded IDs** | Consistent logging. Check `ExternalID`, `ProviderID`, `ActorID`, `RepoID`, `EventTypeID`. | 15 min |
-| 7 | **Add API pagination headers** | `X-Total-Count` header on `GET /items`. Standard REST convention. | 20 min |
-| 8 | **Clean up remaining `context.Background()` in cmd/** | Pass ctx from main through helpers instead of creating new backgrounds. | 30 min |
+| #   | Task                                                  | Why                                                                                                    | Effort |
+| --- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------ |
+| 1   | **Smoke test with real GitHub PAT**                   | Never validated against real API. Mock-passing ≠ working.                                              | 30 min |
+| 2   | **Add full-stack integration test**                   | Provider→Syncer→CQRS→ReadModel→API in one test. Catches wiring bugs.                                   | 45 min |
+| 3   | **Extract testable logic from `main.go`**             | Move `runSync`/`runStats`/`runAPIServer` logic to testable functions. Don't call `os.Exit()` directly. | 45 min |
+| 4   | **Archive old sessions from AGENTS.md**               | Move sessions 4–16 to `docs/status/archive/`. Keep only architecture + current state.                  | 20 min |
+| 5   | **Archive old status reports**                        | Move pre-June reports to `docs/status/archive/`. Keep last 5.                                          | 10 min |
+| 6   | **Add `String()` to all branded IDs**                 | Consistent logging. Check `ExternalID`, `ProviderID`, `ActorID`, `RepoID`, `EventTypeID`.              | 15 min |
+| 7   | **Add API pagination headers**                        | `X-Total-Count` header on `GET /items`. Standard REST convention.                                      | 20 min |
+| 8   | **Clean up remaining `context.Background()` in cmd/** | Pass ctx from main through helpers instead of creating new backgrounds.                                | 30 min |
 
 ### Tier 2: High Impact, Medium Effort (1–4 hours each)
 
-| # | Task | Why | Effort |
-| --- | --- | --- | --- |
-| 9 | **OpenTelemetry instrumentation** | No observability. Production debugging is blind. Start with sync + HTTP middleware spans. | 3 h |
-| 10 | **API authentication middleware** | API is unsafe on any network. API key middleware is minimal. | 2 h |
-| 11 | **Build a second provider** (GitLab or Jira) | Validates the provider abstraction isn't GitHub-specific. Forces interface clarity. | 3 h |
-| 12 | **Increase `cmd/examples/github-sync` coverage to 50%+** | Entry point is barely tested. Subprocess tests for `os.Exit()` paths. | 2 h |
-| 13 | **Property-based tests for CRDT VectorClock** | Verify CRDT mathematical properties (commutativity, associativity, idempotency). | 2 h |
-| 14 | **CONTRIBUTING.md architecture guide** | Layered architecture diagram, file naming conventions, testing requirements. | 1.5 h |
-| 15 | **Add structured logging fields consistently** | Add source, user, page, event_id fields to all log statements for filterability. | 2 h |
-| 16 | **Resolve go-cqrs-lite upstream WIP** | `Sink→EventSink` rename + Source type collision blocks upgrades. Coordinate with upstream. | 2 h |
+| #   | Task                                                     | Why                                                                                        | Effort |
+| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------ |
+| 9   | **OpenTelemetry instrumentation**                        | No observability. Production debugging is blind. Start with sync + HTTP middleware spans.  | 3 h    |
+| 10  | **API authentication middleware**                        | API is unsafe on any network. API key middleware is minimal.                               | 2 h    |
+| 11  | **Build a second provider** (GitLab or Jira)             | Validates the provider abstraction isn't GitHub-specific. Forces interface clarity.        | 3 h    |
+| 12  | **Increase `cmd/examples/github-sync` coverage to 50%+** | Entry point is barely tested. Subprocess tests for `os.Exit()` paths.                      | 2 h    |
+| 13  | **Property-based tests for CRDT VectorClock**            | Verify CRDT mathematical properties (commutativity, associativity, idempotency).           | 2 h    |
+| 14  | **CONTRIBUTING.md architecture guide**                   | Layered architecture diagram, file naming conventions, testing requirements.               | 1.5 h  |
+| 15  | **Add structured logging fields consistently**           | Add source, user, page, event_id fields to all log statements for filterability.           | 2 h    |
+| 16  | **Resolve go-cqrs-lite upstream WIP**                    | `Sink→EventSink` rename + Source type collision blocks upgrades. Coordinate with upstream. | 2 h    |
 
 ### Tier 3: Strategic, Higher Effort (4+ hours each)
 
-| # | Task | Why | Effort |
-| --- | --- | --- | --- |
-| 17 | **Daemon/background mode** | Periodic sync without manual execution. Cron or systemd integration. | 4 h |
-| 18 | **Real-time multi-node sync protocol** | Use the CRDT infrastructure that already exists. Wire `SyncMessage` over WebSocket/gRPC. | 8 h |
-| 19 | **Extract `pkg/crdt` to own repository** | Generic data structures shouldn't be coupled to go-localsync releases. | 4 h |
-| 20 | **Multi-user sync** | Accept multiple users, track which user each event belongs to in read model. | 6 h |
-| 21 | **Data export (JSON/CSV)** | Export stored events for external analysis. Simple but useful. | 3 h |
-| 22 | **Chaos/fault-injection test suite** | Corrupted SQLite, partial writes, concurrent schema changes. Hardens the system. | 4 h |
-| 23 | **Build TUI with Bubble Tea** | Interactive terminal UI for browsing events and real-time sync. | 4 h |
-| 24 | **API rate limiting middleware** | Protect POST /sync from abuse. Token bucket or sliding window. | 2 h |
-| 25 | **Adopt `catalog/` from go-cqrs-lite** | Auto-generate AsyncAPI/OpenAPI specs from event catalog. | 3 h |
+| #   | Task                                     | Why                                                                                      | Effort |
+| --- | ---------------------------------------- | ---------------------------------------------------------------------------------------- | ------ |
+| 17  | **Daemon/background mode**               | Periodic sync without manual execution. Cron or systemd integration.                     | 4 h    |
+| 18  | **Real-time multi-node sync protocol**   | Use the CRDT infrastructure that already exists. Wire `SyncMessage` over WebSocket/gRPC. | 8 h    |
+| 19  | **Extract `pkg/crdt` to own repository** | Generic data structures shouldn't be coupled to go-localsync releases.                   | 4 h    |
+| 20  | **Multi-user sync**                      | Accept multiple users, track which user each event belongs to in read model.             | 6 h    |
+| 21  | **Data export (JSON/CSV)**               | Export stored events for external analysis. Simple but useful.                           | 3 h    |
+| 22  | **Chaos/fault-injection test suite**     | Corrupted SQLite, partial writes, concurrent schema changes. Hardens the system.         | 4 h    |
+| 23  | **Build TUI with Bubble Tea**            | Interactive terminal UI for browsing events and real-time sync.                          | 4 h    |
+| 24  | **API rate limiting middleware**         | Protect POST /sync from abuse. Token bucket or sliding window.                           | 2 h    |
+| 25  | **Adopt `catalog/` from go-cqrs-lite**   | Auto-generate AsyncAPI/OpenAPI specs from event catalog.                                 | 3 h    |
 
 ---
 
@@ -272,6 +272,7 @@ The codebase has two very different trajectories baked in:
 2. **Distributed multi-node sync platform** — CRDT types, VectorClocks, SyncMessages, ConflictResolvers, branded IDs. This is what the infrastructure suggests.
 
 The tension matters because:
+
 - If it's (1), then `pkg/crdt/` is 614 lines of YAGNI. The provider abstraction may be over-engineered. OpenTelemetry and auth are less urgent.
 - If it's (2), then the CLI example needs to become a real daemon, multi-user support is critical, and the CRDT package needs real wire protocol work.
 
