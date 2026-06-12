@@ -1,3 +1,25 @@
+// Package cqrs — adapter layer that bridges CQRSStack to synclib.SyncStore.
+//
+// The List / Count / GetTypes methods below deliberately bypass the
+// QueryDispatcher and call the ReadModel directly. Reasons:
+//
+//  1. Hot path performance: these read endpoints are called for every
+//     GET /items, GET /stats, and every SyncItems result. Routing them
+//     through the dispatcher would add reflection / middleware overhead
+//     with no behavioral benefit at the call sites.
+//
+//  2. The query.Dispatcher is still wired (see stack.go:wireQueryDispatcher)
+//     and registered in tests for verifying handler resolution and
+//     middleware behavior. It is intentionally not used at runtime.
+//
+//  3. The dispatcher's `query.ListItemsHandler` (queries.go) remains the
+//     single source of truth for the read-side query contract — these
+//     adapters just happen to be the direct implementation it would
+//     delegate to.
+//
+// If you are adding a new read endpoint, prefer extending this adapter
+// file over creating a new dispatcher handler unless the endpoint needs
+// the cross-cutting middleware chain (logging, metrics, retry).
 package cqrs
 
 import (

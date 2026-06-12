@@ -199,6 +199,41 @@ func TestItemValidate(t *testing.T) {
 	}
 }
 
+// TestValidate_CollectsAllFieldErrors verifies that Validate() returns all
+// field errors in a single call via errors.Join, not just the first one.
+// This is critical for UX — callers should fix all problems in one round
+// instead of building, running, and rebuilding for each error.
+func TestValidate_CollectsAllFieldErrors(t *testing.T) {
+	t.Parallel()
+
+	err := Item{}.Validate()
+	if err == nil {
+		t.Fatal("Validate() on zero item should fail")
+	}
+
+	msg := err.Error()
+	for _, want := range []string{
+		"externalID", "source", "type", "createdAt", "updatedAt",
+	} {
+		if !contains(msg, want) {
+			t.Errorf("Validate() error should mention %q, got: %v", want, err)
+		}
+	}
+}
+
+func contains(haystack, needle string) bool {
+	return len(haystack) >= len(needle) && indexOf(haystack, needle) >= 0
+}
+
+func indexOf(haystack, needle string) int {
+	for i := 0; i+len(needle) <= len(haystack); i++ {
+		if haystack[i:i+len(needle)] == needle {
+			return i
+		}
+	}
+	return -1
+}
+
 func TestItemSchemaVersion(t *testing.T) {
 	t.Parallel()
 

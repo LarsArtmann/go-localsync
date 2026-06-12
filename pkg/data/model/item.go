@@ -5,6 +5,7 @@ package model
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
@@ -50,6 +51,9 @@ type ItemReader interface {
 }
 
 // Validate checks that all required identity fields are present.
+// All field errors are collected and returned together via errors.Join
+// so callers see every problem in a single call instead of fixing
+// them one at a time.
 func (item Item) Validate() error {
 	return validateIdentity(item.ExternalID, item.Source, item.Type, item.CreatedAt, item.UpdatedAt)
 }
@@ -61,18 +65,21 @@ func validateIdentity(
 	createdAt time.Time,
 	updatedAt time.Time,
 ) error {
-	switch {
-	case externalID.IsZero():
-		return errMissingExternalID
-	case source.IsZero():
-		return errMissingSource
-	case eventType.IsZero():
-		return errMissingType
-	case createdAt.IsZero():
-		return errMissingCreatedAt
-	case updatedAt.IsZero():
-		return errMissingUpdatedAt
-	default:
-		return nil
+	var errs []error
+	if externalID.IsZero() {
+		errs = append(errs, errMissingExternalID)
 	}
+	if source.IsZero() {
+		errs = append(errs, errMissingSource)
+	}
+	if eventType.IsZero() {
+		errs = append(errs, errMissingType)
+	}
+	if createdAt.IsZero() {
+		errs = append(errs, errMissingCreatedAt)
+	}
+	if updatedAt.IsZero() {
+		errs = append(errs, errMissingUpdatedAt)
+	}
+	return errors.Join(errs...)
 }
