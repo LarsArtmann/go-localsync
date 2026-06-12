@@ -66,20 +66,26 @@ func validateIdentity(
 	updatedAt time.Time,
 ) error {
 	var errs []error
+
 	if externalID.IsZero() {
 		errs = append(errs, errMissingExternalID)
 	}
+
 	if source.IsZero() {
 		errs = append(errs, errMissingSource)
 	}
+
 	if eventType.IsZero() {
 		errs = append(errs, errMissingType)
 	}
+
 	if createdAt.IsZero() {
 		errs = append(errs, errMissingCreatedAt)
 	}
+
 	if updatedAt.IsZero() {
 		errs = append(errs, errMissingUpdatedAt)
 	}
+
 	return errors.Join(errs...)
 }
