@@ -44,7 +44,7 @@
           apps = {
             default = {
               type = "app";
-              program = pkgs.lib.getExe (config.packages.default);
+              program = pkgs.lib.getExe config.packages.default;
             };
 
             test = {
