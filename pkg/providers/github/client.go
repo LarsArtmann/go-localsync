@@ -29,12 +29,32 @@ type Client struct {
 
 var _ provider.Provider = (*Client)(nil)
 
+// newHTTPClient creates a configured HTTP client with timeout and tuned transport
+// for GitHub API interaction.
+func newHTTPClient() *http.Client {
+	return &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 10,
+			IdleConnTimeout:     90 * time.Second,
+		},
+	}
+}
+
 // NewClient creates a new GitHub provider client with the given token.
 func NewClient(token string) *Client {
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(context.Background(), ts)
+	tc.Timeout = 30 * time.Second
+
+	if tr, ok := tc.Transport.(*oauth2.Transport); ok {
+		if base := tr.Base; base == nil {
+			tr.Base = newHTTPClient().Transport
+		}
+	}
 
 	return &Client{
 		client:          gh.NewClient(tc),

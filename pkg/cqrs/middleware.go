@@ -28,7 +28,7 @@ func commandLoggingMiddleware(logger *log.Logger) command.Middleware {
 					"error", err,
 				)
 			} else {
-				logger.Info(
+				logger.Debug(
 					"command dispatch succeeded",
 					"type", cmd.Type(),
 					"duration", duration,
@@ -84,7 +84,7 @@ func queryLoggingMiddleware(logger *log.Logger) query.Middleware {
 					"error", err,
 				)
 			} else {
-				logger.Info(
+				logger.Debug(
 					"query dispatch succeeded",
 					"type", queryArg.Type(),
 					"duration", duration,

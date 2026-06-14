@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 
+
+
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory/v2"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v2"
@@ -66,7 +68,13 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 		return storeResult{}, fmt.Errorf("create event store: %w", storeErr)
 	}
 
-	cqrsstorage.ConfigureTursoPool(db)
+	if walErr := cqrsstorage.SQLiteEnableWAL(ctx, db); walErr != nil {
+		_ = db.Close()
+
+		return storeResult{}, fmt.Errorf("enable WAL mode: %w", walErr)
+	}
+
+	configureSQLitePool(dbPath, db)
 
 	return storeResult{
 		store:  store,
@@ -74,6 +82,20 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 		db:     db,
 		loader: store,
 	}, nil
+}
+
+// configureSQLitePool sets connection pool size and PRAGMAs based on whether
+// the database is in-memory or file-backed.
+//
+// In-memory databases MUST use a single connection (each connection gets its
+// own private database). File-backed databases use WAL mode with multiple
+// reader connections for concurrent read access.
+func configureSQLitePool(_ string, db *sql.DB) {
+	// SQLite with database/sql requires a single connection to ensure
+	// PRAGMAs (like busy_timeout) apply consistently. Multiple connections
+	// would each need their own PRAGMA setup, and in-memory databases
+	// require exactly 1 connection to share state.
+	db.SetMaxOpenConns(1)
 }
 
 //nolint:ireturn

@@ -3,6 +3,7 @@ package cqrs
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"sync"
 
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -13,13 +14,27 @@ func itemKey(source string, externalID id.ExternalID) string {
 	return source + ":" + externalID.Get()
 }
 
+// aggIDCache caches deterministic AggregateID computations to avoid
+// repeated SHA256 hashing of the same (source, externalID) pairs.
+// Keys are immutable so cache entries never need invalidation.
+//
+//nolint:gochecknoglobals // immutable append-only cache, not mutable global state
+var aggIDCache sync.Map
+
 // AggregateID returns a deterministic AggregateID derived from (source, externalID).
-// Same inputs always produce the same ID.
+// Same inputs always produce the same ID. Results are cached for O(1) repeat lookups.
 func AggregateID(source string, externalID id.ExternalID) cqrsid.AggregateID {
 	key := itemKey(source, externalID)
+
+	if cached, ok := aggIDCache.Load(key); ok {
+		return cached.(cqrsid.AggregateID) //nolint:errcheck,forcetypeassert // type is always cqrsid.AggregateID
+	}
+
 	h := sha256.Sum256([]byte(key))
 
-	id, _ := cqrsid.ParseAggregateID(hex.EncodeToString(h[:16]))
+	result, _ := cqrsid.ParseAggregateID(hex.EncodeToString(h[:16]))
 
-	return id
+	aggIDCache.Store(key, result)
+
+	return result
 }
