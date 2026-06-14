@@ -10,15 +10,15 @@ require (
 	github.com/larsartmann/go-branded-id v0.3.0
 	github.com/larsartmann/go-cqrs-lite/codec/v2 v2.3.0
 	github.com/larsartmann/go-cqrs-lite/command/v2 v2.3.0
-	github.com/larsartmann/go-cqrs-lite/decider/v2 v2.2.0
+	github.com/larsartmann/go-cqrs-lite/decider/v2 v2.3.0
 	github.com/larsartmann/go-cqrs-lite/event/v2 v2.3.0
 	github.com/larsartmann/go-cqrs-lite/id/v2 v2.3.0
-	github.com/larsartmann/go-cqrs-lite/memory/v2 v2.2.0
-	github.com/larsartmann/go-cqrs-lite/middleware/v2 v2.2.0
-	github.com/larsartmann/go-cqrs-lite/projection/v2 v2.2.0
+	github.com/larsartmann/go-cqrs-lite/memory/v2 v2.3.0
+	github.com/larsartmann/go-cqrs-lite/middleware/v2 v2.3.0
+	github.com/larsartmann/go-cqrs-lite/projection/v2 v2.3.0
 	github.com/larsartmann/go-cqrs-lite/query/v2 v2.3.0
-	github.com/larsartmann/go-cqrs-lite/snapshot/v2 v2.2.0
-	github.com/larsartmann/go-cqrs-lite/storage/v2 v2.2.0
+	github.com/larsartmann/go-cqrs-lite/snapshot/v2 v2.3.0
+	github.com/larsartmann/go-cqrs-lite/storage/v2 v2.3.0
 	github.com/larsartmann/go-error-family v0.3.0
 	github.com/oklog/ulid/v2 v2.1.1
 	golang.org/x/oauth2 v0.36.0
@@ -44,8 +44,8 @@ require (
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/dispatcher/v2 v2.3.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/listing/v2 v2.2.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/otel/v2 v2.2.0 // indirect
+	github.com/larsartmann/go-cqrs-lite/listing/v2 v2.3.0 // indirect
+	github.com/larsartmann/go-cqrs-lite/otel/v2 v2.3.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mattn/go-runewidth v0.0.24 // indirect
