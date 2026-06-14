@@ -46,6 +46,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/dispatcher/v2 v2.3.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/listing/v2 v2.3.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/otel/v2 v2.3.0 // indirect
+	github.com/larsartmann/go-cqrs-lite/schema/v2 v2.3.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/mattn/go-runewidth v0.0.24 // indirect
