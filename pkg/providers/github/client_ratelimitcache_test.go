@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"sync/atomic"
 	"testing"
+	"time"
 
-	gh "github.com/google/go-github/v69/github"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
@@ -29,7 +29,7 @@ func TestRateLimitCache_HitAvoidsAPICall(t *testing.T) {
 			return
 		}
 
-		_ = json.NewEncoder(w).Encode([]*gh.Event{})
+		_ = json.NewEncoder(w).Encode([]json.RawMessage{})
 	}))
 	defer server.Close()
 
@@ -48,10 +48,10 @@ func TestRateLimitCache_HitAvoidsAPICall(t *testing.T) {
 	}
 
 	// Populate cache from a simulated API response
-	client.rateCache.update(&gh.Rate{
+	client.rateCache.update(&provider.RateLimitInfo{
 		Limit:     5000,
 		Remaining: 4999,
-		Reset:     gh.Timestamp{},
+		ResetAt:   time.Time{},
 	})
 
 	// Second call: cache hit, should NOT make API call
@@ -76,7 +76,7 @@ func TestRateLimitCache_FallbackWhenEmpty(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode([]*gh.Event{})
+		_ = json.NewEncoder(w).Encode([]json.RawMessage{})
 	}))
 	defer server.Close()
 

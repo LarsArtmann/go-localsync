@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"sync/atomic"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -23,7 +24,7 @@ type githubTestWorld struct {
 	result    *provider.FetchResult
 	rateLimit *provider.RateLimitInfo
 	err       error
-	callCount int
+	callCount atomic.Int64
 }
 
 func (w *githubTestWorld) fetchFor(source string) {
@@ -54,7 +55,7 @@ func TestBDD_FetchValidUser(t *testing.T) {
 
 	world.server = httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			world.callCount++
+			world.callCount.Add(1)
 			if !strings.Contains(r.URL.Path, "/users/octocat/events") {
 				t.Errorf("expected path to contain /users/octocat/events, got %s", r.URL.Path)
 			}
@@ -129,11 +130,11 @@ func TestBDD_FetchValidUser(t *testing.T) {
 
 func TestBDD_FetchAllPaginated(t *testing.T) {
 	world := githubTestWorld{ctx: context.Background()}
-	world.callCount = 0
+	
 
 	world.server = httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			world.callCount++
+		world.callCount.Add(1)
 			page := r.URL.Query().Get("page")
 
 			var events []*gh.Event
@@ -172,8 +173,8 @@ func TestBDD_FetchAllPaginated(t *testing.T) {
 	if len(world.result.Items) != 150 {
 		t.Errorf("expected 150 items, got %d", len(world.result.Items))
 	}
-	if world.callCount > 3 {
-		t.Errorf("expected at most 3 calls, got %d", world.callCount)
+	if world.callCount.Load() > 3 {
+		t.Errorf("expected at most 3 calls, got %d", world.callCount.Load())
 	}
 }
 

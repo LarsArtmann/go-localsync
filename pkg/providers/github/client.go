@@ -23,23 +23,45 @@ import (
 const providerName = "github"
 
 // rateLimitCache stores rate-limit info extracted from API response headers.
-// Shared across With* copies so config changes don't lose the cache.
+// Uses the provider-agnostic provider.RateLimitInfo type so the cache concept
+// could be reused for non-GitHub providers. Shared across With* copies so
+// config changes don't lose the cache.
 type rateLimitCache struct {
 	mu   sync.Mutex
-	rate *gh.Rate
+	info *provider.RateLimitInfo
 }
 
-func (c *rateLimitCache) update(rate *gh.Rate) {
-	if rate == nil || rate.Limit == 0 {
+// update stores the authoritative rate-limit info from an API response.
+// Overwrites any local decrement-based estimate.
+func (c *rateLimitCache) update(info *provider.RateLimitInfo) {
+	if info == nil || info.Limit == 0 {
 		return
 	}
 
 	c.mu.Lock()
-	c.rate = rate
+	c.info = info
 	c.mu.Unlock()
 }
 
-func (c *rateLimitCache) get() (*gh.Rate, bool) {
+// decrement locally decrements the remaining count by n after dispatching
+// API calls, giving a conservative estimate between API responses.
+// The next API response will overwrite with the authoritative value.
+func (c *rateLimitCache) decrement(n int) {
+	if c == nil || n <= 0 {
+		return
+	}
+
+	c.mu.Lock()
+	if c.info != nil {
+		c.info.Remaining -= n
+		if c.info.Remaining < 0 {
+			c.info.Remaining = 0
+		}
+	}
+	c.mu.Unlock()
+}
+
+func (c *rateLimitCache) get() (*provider.RateLimitInfo, bool) {
 	if c == nil {
 		return nil, false
 	}
@@ -47,7 +69,20 @@ func (c *rateLimitCache) get() (*gh.Rate, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	return c.rate, c.rate != nil
+	return c.info, c.info != nil
+}
+
+// ghRateToInfo converts a GitHub SDK rate struct to provider-agnostic RateLimitInfo.
+func ghRateToInfo(rate *gh.Rate) *provider.RateLimitInfo {
+	if rate == nil {
+		return nil
+	}
+
+	return &provider.RateLimitInfo{
+		Limit:     rate.Limit,
+		Remaining: rate.Remaining,
+		ResetAt:   rate.Reset.Time,
+	}
 }
 
 // Client implements provider.Provider for GitHub.
@@ -198,7 +233,7 @@ func (c *Client) Fetch(
 	}
 
 	if resp != nil {
-		c.rateCache.update(&resp.Rate)
+		c.rateCache.update(ghRateToInfo(&resp.Rate))
 	}
 
 	items := convertEvents(activity)
