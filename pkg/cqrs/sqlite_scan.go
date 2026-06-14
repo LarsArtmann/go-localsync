@@ -63,11 +63,10 @@ func scanItem(row *sql.Row) (*model.Item, error) {
 }
 
 func scanItems(rows *sql.Rows) ([]*model.Item, error) {
-	var items []*model.Item
+	items := make([]*model.Item, 0, 64)
+	si := newScannedItem()
 
 	for rows.Next() {
-		si := newScannedItem()
-
 		err := rows.Scan(
 			&si.itemIDStr,
 			&si.source,

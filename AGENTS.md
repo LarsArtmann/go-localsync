@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-06-12 (session 18 — TypedHandler adoption + type model improvements)
+**Updated:** 2026-06-14 (session 19 — Performance optimization sprint)
 
 ## Project Overview
 
@@ -367,6 +367,25 @@ Executed all 8 items from `docs/planning/2026-06-10_ARCHITECTURE_IMPROVEMENT_PLA
 ## Lint Status
 
 golangci-lint v2 reports **0 issues** across all 11 packages. Config is strict with 125+ linters enabled. Known SA5012 panic in `cqrs` and `sync` packages is a golangci-lint v2 bug, not our code.
+
+## Session 19 — 2026-06-14: Performance Optimization Sprint
+
+### Completed
+
+- ✅ **T1: SQLite WAL mode**: `SQLiteEnableWAL(ctx, db)` in `store_factory.go`
+- ✅ **T3: Aggregate ID cache**: `sync.Map` cache in `aggregate_id.go`
+- ✅ **T4: HTTP client tuning**: 30s timeout + transport pool
+- ✅ **T5: Rate limit cache from headers**: `rateLimitCache` with `sync.Mutex` on `Client`. `Fetch()` captures `resp.Rate` from API response headers; `waitForRateLimit()` checks cache before making `/rate_limit` API call
+- ✅ **T6: Middleware logging → Debug**: Success logs at Debug, errors at Error
+- ✅ **T7: SQLite scan pre-allocation**: `scanItems()` pre-allocates `make(0, 64)` + reuses single `scannedItem` struct
+- ✅ **T9: Concurrent FetchAll**: `errgroup.WithContext` + bounded semaphore (cap=3). Page 1 sequential, pages 2-N concurrent
+- ✅ **T10: Benchmarks verified**: SQLite List 227µs/1738 allocs, Memory List 80µs/3 allocs
+- ✅ **T11: Documentation updated**
+
+### Reverted (Not Viable)
+
+- **T2: N+1 GetStats**: Mock `Count` doesn't filter by Type
+- **T8: Multi-connection SQLite pool**: `busy_timeout` doesn't propagate across pooled connections
 
 ## Session 18 — 2026-06-12: TypedHandler Adoption + Type Model Improvements
 

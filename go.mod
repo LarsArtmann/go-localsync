@@ -22,6 +22,7 @@ require (
 	github.com/larsartmann/go-error-family v0.3.0
 	github.com/oklog/ulid/v2 v2.1.1
 	golang.org/x/oauth2 v0.36.0
+	golang.org/x/sync v0.21.0
 	modernc.org/sqlite v1.52.0
 )
 
@@ -63,7 +64,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
-	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 	modernc.org/libc v1.73.0 // indirect
