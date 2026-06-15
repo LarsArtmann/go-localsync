@@ -28,6 +28,11 @@ func (errorResolver) Resolve(_ *crdt.Conflict[*model.Item]) (*model.Item, error)
 	return nil, errors.New("resolver failed")
 }
 
+var (
+	resolverTestNow    = time.Now().Truncate(time.Millisecond)
+	resolverTestFuture = resolverTestNow.Add(2 * time.Hour)
+)
+
 func TestDecideSync_WithResolver(t *testing.T) {
 	t.Parallel()
 
@@ -41,15 +46,15 @@ func TestDecideSync_WithResolver(t *testing.T) {
 		{
 			name:       "custom_resolver_remote_wins",
 			resolver:   &pickSideResolver{pickSide: "remote"},
-			localTime:  time.Now().Truncate(time.Millisecond),
-			remoteTime: time.Now().Truncate(time.Millisecond).Add(2 * time.Hour),
+			localTime:  resolverTestNow,
+			remoteTime: resolverTestFuture,
 			wantWinner: "remote",
 		},
 		{
 			name:       "custom_resolver_local_wins",
 			resolver:   &pickSideResolver{pickSide: "local"},
-			localTime:  time.Now().Truncate(time.Millisecond),
-			remoteTime: time.Now().Truncate(time.Millisecond).Add(2 * time.Hour),
+			localTime:  resolverTestNow,
+			remoteTime: resolverTestFuture,
 			wantWinner: "local",
 		},
 		{
@@ -62,15 +67,15 @@ func TestDecideSync_WithResolver(t *testing.T) {
 		{
 			name:       "lww_resolver_remote_newer",
 			resolver:   newUpdatedAtLWWResolver(t),
-			localTime:  time.Now().Truncate(time.Millisecond),
-			remoteTime: time.Now().Truncate(time.Millisecond).Add(2 * time.Hour),
+			localTime:  resolverTestNow,
+			remoteTime: resolverTestFuture,
 			wantWinner: "remote",
 		},
 		{
 			name:       "lww_resolver_local_newer",
 			resolver:   newUpdatedAtLWWResolver(t),
 			localTime:  testFutureNow(3 * time.Hour),
-			remoteTime: time.Now().Truncate(time.Millisecond),
+			remoteTime: resolverTestNow,
 			wantWinner: "local",
 		},
 	}

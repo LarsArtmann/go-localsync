@@ -33,12 +33,7 @@ func TestRateLimitCache_HitAvoidsAPICall(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := newTestClient(server)
-	client = client.WithRateLimitConfig(provider.RateLimitConfig{
-		Enabled:      true,
-		MinRemaining: 10,
-		MaxWait:      1 * 1e9,
-	})
+	client := newTestClientWithRateLimit(server)
 
 	// First call: cache is empty, makes API call
 	_ = client.waitForRateLimit(context.Background())
@@ -80,12 +75,7 @@ func TestRateLimitCache_FallbackWhenEmpty(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := newTestClient(server)
-	client = client.WithRateLimitConfig(provider.RateLimitConfig{
-		Enabled:      true,
-		MinRemaining: 10,
-		MaxWait:      1 * 1e9,
-	})
+	client := newTestClientWithRateLimit(server)
 
 	// Cache is empty → should fall back to API call
 	err := client.waitForRateLimit(context.Background())

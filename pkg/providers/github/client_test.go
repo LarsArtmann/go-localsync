@@ -73,6 +73,14 @@ func newTestClient(server *httptest.Server) *Client {
 	return client
 }
 
+func newTestClientWithRateLimit(server *httptest.Server) *Client {
+	return newTestClient(server).WithRateLimitConfig(provider.RateLimitConfig{
+		Enabled:      true,
+		MinRemaining: 10,
+		MaxWait:      1 * 1e9,
+	})
+}
+
 func TestNewClient(t *testing.T) {
 	assertClientName(t, NewClient("test-token"))
 }

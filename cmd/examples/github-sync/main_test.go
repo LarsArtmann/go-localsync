@@ -8,15 +8,8 @@ import (
 
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
+	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
-
-func assertConfigField[T comparable](t *testing.T, got, want T, label string) {
-	t.Helper()
-
-	if got != want {
-		t.Errorf("expected %s=%v, got %v", label, want, got)
-	}
-}
 
 func assertContains(t *testing.T, out, want, label string) {
 	t.Helper()
@@ -77,8 +70,8 @@ func TestLoadConfig(t *testing.T) {
 	if cfg.Username != "" {
 		t.Errorf("expected empty Username, got %s", cfg.Username)
 	}
-	assertConfigField(t, cfg.Backend, "memory", "Backend")
-	assertConfigField(t, cfg.MaxPages, 10, "MaxPages")
+	testutil.AssertEqual(t, cfg.Backend, "memory", "Backend")
+	testutil.AssertEqual(t, cfg.MaxPages, 10, "MaxPages")
 	if !cfg.Incremental {
 		t.Error("expected Incremental=true")
 	}
@@ -100,8 +93,8 @@ func TestLoadConfig_FromEnv(t *testing.T) {
 	if cfg.Username != "testuser" {
 		t.Errorf("expected Username=testuser, got %s", cfg.Username)
 	}
-	assertConfigField(t, cfg.Backend, "sqlite", "Backend")
-	assertConfigField(t, cfg.MaxPages, 5, "MaxPages")
+	testutil.AssertEqual(t, cfg.Backend, "sqlite", "Backend")
+	testutil.AssertEqual(t, cfg.MaxPages, 5, "MaxPages")
 }
 
 func TestAppConfig_Defaults(t *testing.T) {
@@ -159,7 +152,7 @@ func TestLoadConfig_InvalidBackend(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	assertConfigField(t, cfg.Backend, "invalid", "Backend")
+	testutil.AssertEqual(t, cfg.Backend, "invalid", "Backend")
 }
 
 func TestLoadConfig_Empty(t *testing.T) {
@@ -171,8 +164,8 @@ func TestLoadConfig_Empty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	assertConfigField(t, cfg.Backend, "memory", "Backend")
-	assertConfigField(t, cfg.MaxPages, 10, "MaxPages")
+	testutil.AssertEqual(t, cfg.Backend, "memory", "Backend")
+	testutil.AssertEqual(t, cfg.MaxPages, 10, "MaxPages")
 	if !cfg.Incremental {
 		t.Error("expected default Incremental=true")
 	}

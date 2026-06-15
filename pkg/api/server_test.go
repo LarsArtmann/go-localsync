@@ -199,18 +199,32 @@ func TestGetStats(t *testing.T) {
 	testutil.AssertLen(t, body.ItemTypes, 2, "item types")
 }
 
-func TestGetStats_StoreError(t *testing.T) {
+func TestGetStats_CountError(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{countErr: errors.New("count failed")}
-	server := newTestServer(store)
+	tests := []struct {
+		name   string
+		errMsg string
+	}{
+		{name: "store error", errMsg: "count failed"},
+		{name: "count query error", errMsg: "count query failed"},
+	}
 
-	req := newGETRequest(t, "/stats")
-	rec := httptest.NewRecorder()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	server.ServeHTTP(rec, req)
+			store := &mockSyncStore{countErr: errors.New(tc.errMsg)}
+			server := newTestServer(store)
 
-	testutil.AssertStatus(t, rec, http.StatusInternalServerError)
+			req := newGETRequest(t, "/stats")
+			rec := httptest.NewRecorder()
+
+			server.ServeHTTP(rec, req)
+
+			testutil.AssertStatus(t, rec, http.StatusInternalServerError)
+		})
+	}
 }
 
 func TestListItems(t *testing.T) {
@@ -305,20 +319,6 @@ func TestTriggerSync(t *testing.T) {
 	if body.Fetched != 0 {
 		t.Errorf("expected fetched=0, got %d", body.Fetched)
 	}
-}
-
-func TestGetStats_CountError(t *testing.T) {
-	t.Parallel()
-
-	store := &mockSyncStore{countErr: errors.New("count query failed")}
-	server := newTestServer(store)
-
-	req := newGETRequest(t, "/stats")
-	rec := httptest.NewRecorder()
-
-	server.ServeHTTP(rec, req)
-
-	testutil.AssertStatus(t, rec, http.StatusInternalServerError)
 }
 
 func TestListItems_CountError(t *testing.T) {
