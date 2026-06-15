@@ -10,25 +10,25 @@
 
 ### Performance Optimizations (Committed & Pushed)
 
-| ID | Optimization | Impact | Commit |
-|----|-------------|--------|--------|
-| T1 | SQLite WAL mode enabled in `store_factory.go` | Concurrent read-during-write | `2df72e7` |
-| T3 | Aggregate ID `sync.Map` cache in `aggregate_id.go` | Eliminates SHA256 on repeat keys | `2df72e7` |
-| T4 | HTTP client 30s timeout + transport pool tuning | Prevents hung connections | `2df72e7` |
-| T5 | Rate limit cache from API response headers | Eliminates `/rate_limit` API call after first fetch | `38e954b` |
-| T6 | Middleware logging moved to Debug level | ~3 fewer log lines per synced item | `2df72e7` |
-| T7 | SQLite scanItems pre-allocation + struct reuse | Eliminates per-row struct allocation | `38e954b` |
-| T9 | Concurrent FetchAll via `errgroup` + bounded semaphore (cap=3) | ~3x faster multi-page fetches | `38e954b` |
+| ID  | Optimization                                                   | Impact                                              | Commit    |
+| --- | -------------------------------------------------------------- | --------------------------------------------------- | --------- |
+| T1  | SQLite WAL mode enabled in `store_factory.go`                  | Concurrent read-during-write                        | `2df72e7` |
+| T3  | Aggregate ID `sync.Map` cache in `aggregate_id.go`             | Eliminates SHA256 on repeat keys                    | `2df72e7` |
+| T4  | HTTP client 30s timeout + transport pool tuning                | Prevents hung connections                           | `2df72e7` |
+| T5  | Rate limit cache from API response headers                     | Eliminates `/rate_limit` API call after first fetch | `38e954b` |
+| T6  | Middleware logging moved to Debug level                        | ~3 fewer log lines per synced item                  | `2df72e7` |
+| T7  | SQLite scanItems pre-allocation + struct reuse                 | Eliminates per-row struct allocation                | `38e954b` |
+| T9  | Concurrent FetchAll via `errgroup` + bounded semaphore (cap=3) | ~3x faster multi-page fetches                       | `38e954b` |
 
 ### Architecture Quality Fixes
 
-| Fix | What Changed | Commit |
-|-----|-------------|--------|
-| Type leak removed | `rateLimitCache` stores `provider.RateLimitInfo` instead of `*gh.Rate` | `5685c27` |
-| Test data race fixed | `TestBDD_FetchAllPaginated` `callCount` changed from `int` to `atomic.Int64` | `5685c27` |
-| go.mod tidied | `golang.org/x/sync` promoted from indirect to direct | `38e954b` |
-| `ghRateToInfo` converter | Boundary converter added at API call sites | `5685c27` |
-| `decrement()` method | Added to `rateLimitCache` for future local rate tracking | `5685c27` |
+| Fix                      | What Changed                                                                 | Commit    |
+| ------------------------ | ---------------------------------------------------------------------------- | --------- |
+| Type leak removed        | `rateLimitCache` stores `provider.RateLimitInfo` instead of `*gh.Rate`       | `5685c27` |
+| Test data race fixed     | `TestBDD_FetchAllPaginated` `callCount` changed from `int` to `atomic.Int64` | `5685c27` |
+| go.mod tidied            | `golang.org/x/sync` promoted from indirect to direct                         | `38e954b` |
+| `ghRateToInfo` converter | Boundary converter added at API call sites                                   | `5685c27` |
+| `decrement()` method     | Added to `rateLimitCache` for future local rate tracking                     | `5685c27` |
 
 ### Documentation
 
@@ -40,53 +40,57 @@
 
 ## b) PARTIALLY DONE
 
-| Item | Status | What Remains |
-|------|--------|-------------|
-| Rate cache decrement | Method exists (`decrement()`) but not wired into `Fetch()` | Would track local API call count between server responses. Low priority — response headers already provide authoritative counts. |
-| Early termination on empty pages | Not implemented in concurrent FetchAll | If page 2 returns 0 items, pages 3-N still fire. Would need errgroup cancellation via context. |
-| Benchmarks comparison | After-numbers captured but no before/after diff table in docs | Need to run pre-sprint baselines for comparison (impossible now — code already changed). |
+| Item                             | Status                                                        | What Remains                                                                                                                     |
+| -------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Rate cache decrement             | Method exists (`decrement()`) but not wired into `Fetch()`    | Would track local API call count between server responses. Low priority — response headers already provide authoritative counts. |
+| Early termination on empty pages | Not implemented in concurrent FetchAll                        | If page 2 returns 0 items, pages 3-N still fire. Would need errgroup cancellation via context.                                   |
+| Benchmarks comparison            | After-numbers captured but no before/after diff table in docs | Need to run pre-sprint baselines for comparison (impossible now — code already changed).                                         |
 
 ---
 
 ## c) NOT STARTED
 
-| Item | Why Not | Priority |
-|------|---------|----------|
-| T2: N+1 GetStats fix | Mock `SyncStore.Count` doesn't filter by Type. Blocks correctness. | Low — ~2ms savings, high risk |
-| T8: Multi-connection SQLite pool | `busy_timeout` PRAGMA doesn't propagate across pooled connections | Low — WAL provides most benefit without pooling |
-| N+1 GetStats with fixed mock | Would need to fix mock to properly filter by Type field | Medium — test infrastructure improvement |
-| Connection pool with PRAGMA-per-connection | Would need `connector` wrapper to set PRAGMAs per connection | Low — complexity not worth it for local-first tool |
+| Item                                       | Why Not                                                            | Priority                                           |
+| ------------------------------------------ | ------------------------------------------------------------------ | -------------------------------------------------- |
+| T2: N+1 GetStats fix                       | Mock `SyncStore.Count` doesn't filter by Type. Blocks correctness. | Low — ~2ms savings, high risk                      |
+| T8: Multi-connection SQLite pool           | `busy_timeout` PRAGMA doesn't propagate across pooled connections  | Low — WAL provides most benefit without pooling    |
+| N+1 GetStats with fixed mock               | Would need to fix mock to properly filter by Type field            | Medium — test infrastructure improvement           |
+| Connection pool with PRAGMA-per-connection | Would need `connector` wrapper to set PRAGMAs per connection       | Low — complexity not worth it for local-first tool |
 
 ---
 
 ## d) TOTALLY FUCKED UP (Fixed)
 
-| Incident | What Happened | How Fixed |
-|----------|--------------|-----------|
-| `*gh.Rate` type leak | Cache stored GitHub SDK type, coupling cache to provider SDK | Changed to `provider.RateLimitInfo`, added `ghRateToInfo()` converter |
-| Data race in `TestBDD_FetchAllPaginated` | Concurrent FetchAll triggered concurrent HTTP handler calls racing on `callCount int` | Changed to `atomic.Int64` |
-| `go.mod` not tidied | `errgroup` was `// indirect` despite direct import | `go mod tidy` promoted it |
+| Incident                                 | What Happened                                                                         | How Fixed                                                             |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `*gh.Rate` type leak                     | Cache stored GitHub SDK type, coupling cache to provider SDK                          | Changed to `provider.RateLimitInfo`, added `ghRateToInfo()` converter |
+| Data race in `TestBDD_FetchAllPaginated` | Concurrent FetchAll triggered concurrent HTTP handler calls racing on `callCount int` | Changed to `atomic.Int64`                                             |
+| `go.mod` not tidied                      | `errgroup` was `// indirect` despite direct import                                    | `go mod tidy` promoted it                                             |
 
 ---
 
 ## e) WHAT WE SHOULD IMPROVE
 
 ### Code Quality
+
 1. **`rateLimitCache.decrement()` is dead code** — Either wire it in or remove it. Currently unused.
 2. **No benchmark diff table** — Sprint didn't capture before/after comparison in a structured format.
 3. **`FetchAll` concurrency is hardcoded to 3** — Should be configurable via `Client` option.
 4. **Early termination missing** — Pages 3+ fire even after a short page. Context cancellation needed.
 
 ### Architecture
+
 5. **`rateLimitCache` lives in GitHub provider package** — Could be extracted to `pkg/provider/` as a reusable abstraction for any provider.
 6. **No provider-level rate limit interface** — The `Provider` interface doesn't expose rate limit status. `RateLimitInfo` exists but isn't part of the fetch contract.
 7. **Fetch returns `[]*provider.Item` not a stream** — Large syncs hold all items in memory. Could use channels or iterators.
 
 ### Testing
+
 8. **No concurrent FetchAll unit test** — Only BDD test covers it (indirectly). Need explicit test for bounded concurrency, early termination, partial failure.
 9. **No integration test for rate limit cache under concurrency** — Multiple goroutines calling Fetch simultaneously should be tested.
 
 ### Operations
+
 10. **No metrics/observability for rate limit status** — Cache hits, cache misses, and API calls should be instrumented.
 
 ---
@@ -140,6 +144,7 @@
 **Should the performance optimizations from this sprint be gated behind feature flags, or should they become the default behavior?**
 
 Specifically:
+
 - **Concurrent FetchAll** changes behavior (pages arrive out of order, different error semantics with errgroup)
 - **Rate limit cache** changes behavior (cache may be stale, local decrement is conservative)
 - **WAL mode** changes the SQLite file format (`.db-wal` and `.db-shm` files appear alongside `.db`)
@@ -152,8 +157,8 @@ These are all currently unconditional defaults. For a library/SDK, should they b
 
 ## Commits This Session
 
-| SHA | Message |
-|-----|---------|
-| `2df72e7` | perf: SQLite WAL, aggregate ID cache, HTTP timeout, log level Debug |
+| SHA       | Message                                                               |
+| --------- | --------------------------------------------------------------------- |
+| `2df72e7` | perf: SQLite WAL, aggregate ID cache, HTTP timeout, log level Debug   |
 | `38e954b` | perf: rate limit cache, concurrent FetchAll, SQLite scan optimization |
 | `5685c27` | fix: remove gh.Rate type leak from rateLimitCache, fix test data race |
