@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync/atomic"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -130,11 +130,10 @@ func TestBDD_FetchValidUser(t *testing.T) {
 
 func TestBDD_FetchAllPaginated(t *testing.T) {
 	world := githubTestWorld{ctx: context.Background()}
-	
 
 	world.server = httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		world.callCount.Add(1)
+			world.callCount.Add(1)
 			page := r.URL.Query().Get("page")
 
 			var events []*gh.Event

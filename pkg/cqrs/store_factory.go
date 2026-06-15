@@ -6,8 +6,6 @@ import (
 	"errors"
 	"fmt"
 
-
-
 	"github.com/larsartmann/go-cqrs-lite/event/v2"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory/v2"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v2"

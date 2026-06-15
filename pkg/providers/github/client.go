@@ -250,10 +250,7 @@ func (c *Client) FetchAll(
 	remaining := maxPages - 1
 	results := make([]*provider.FetchResult, remaining)
 
-	concurrency := c.fetchConfig.MaxConcurrentFetches
-	if concurrency < 1 {
-		concurrency = 1
-	}
+	concurrency := max(c.fetchConfig.MaxConcurrentFetches, 1)
 
 	group, groupCtx := errgroup.WithContext(ctx)
 	sem := make(chan struct{}, concurrency)

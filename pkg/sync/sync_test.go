@@ -18,11 +18,11 @@ import (
 type mockSyncStore struct {
 	testutil.SyncStoreListBehavior
 
-	synced   []*provider.Item
-	actions  []SyncAction
+	synced    []*provider.Item
+	actions   []SyncAction
 	actionIdx int
-	countErr error
-	closeErr error
+	countErr  error
+	closeErr  error
 }
 
 func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
