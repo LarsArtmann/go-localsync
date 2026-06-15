@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+func newRateLimitInfo(limit, remaining int) *RateLimitInfo {
+	return &RateLimitInfo{
+		Limit:     limit,
+		Remaining: remaining,
+		ResetAt:   time.Now().Add(1 * time.Hour),
+	}
+}
+
 func TestRateLimitCache_UpdateAndGet(t *testing.T) {
 	t.Parallel()
 
@@ -16,11 +24,7 @@ func TestRateLimitCache_UpdateAndGet(t *testing.T) {
 		t.Fatalf("expected empty cache, got %v", info)
 	}
 
-	expected := &RateLimitInfo{
-		Limit:     5000,
-		Remaining: 4999,
-		ResetAt:   time.Now().Add(1 * time.Hour),
-	}
+	expected := newRateLimitInfo(5000, 4999)
 
 	cache.Update(expected)
 
@@ -62,7 +66,7 @@ func TestRateLimitCache_Decrement(t *testing.T) {
 	t.Parallel()
 
 	cache := NewRateLimitCache()
-	cache.Update(&RateLimitInfo{Limit: 5000, Remaining: 100, ResetAt: time.Now().Add(1 * time.Hour)})
+	cache.Update(newRateLimitInfo(5000, 100))
 
 	cache.Decrement(1)
 
@@ -82,7 +86,7 @@ func TestRateLimitCache_DecrementToZero(t *testing.T) {
 	t.Parallel()
 
 	cache := NewRateLimitCache()
-	cache.Update(&RateLimitInfo{Limit: 5000, Remaining: 3, ResetAt: time.Now().Add(1 * time.Hour)})
+	cache.Update(newRateLimitInfo(5000, 3))
 
 	cache.Decrement(10)
 
@@ -120,7 +124,7 @@ func TestRateLimitCache_ConcurrentAccess(t *testing.T) {
 	t.Parallel()
 
 	cache := NewRateLimitCache()
-	cache.Update(&RateLimitInfo{Limit: 10000, Remaining: 10000, ResetAt: time.Now().Add(1 * time.Hour)})
+	cache.Update(newRateLimitInfo(10000, 10000))
 
 	var wg sync.WaitGroup
 

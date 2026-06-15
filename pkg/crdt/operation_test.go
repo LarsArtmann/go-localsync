@@ -179,18 +179,21 @@ func TestOperation_Serialize_Deserialize(t *testing.T) {
 	}
 }
 
-func TestDeserializeOperation_InvalidJSON(t *testing.T) {
-	_, err := DeserializeOperation[string]([]byte("not json"))
+func assertDeserializeError[T any](t *testing.T, input []byte, desc string) {
+	t.Helper()
+
+	_, err := DeserializeOperation[T](input)
 	if err == nil {
-		t.Fatal("expected error for invalid JSON, got nil")
+		t.Fatalf("expected error for %s, got nil", desc)
 	}
 }
 
+func TestDeserializeOperation_InvalidJSON(t *testing.T) {
+	assertDeserializeError[string](t, []byte("not json"), "invalid JSON")
+}
+
 func TestDeserializeOperation_EmptyJSON(t *testing.T) {
-	_, err := DeserializeOperation[string]([]byte("{}"))
-	if err == nil {
-		t.Fatal("expected error for empty JSON operation, got nil")
-	}
+	assertDeserializeError[string](t, []byte("{}"), "empty JSON operation")
 }
 
 func TestOperation_RoundTrip_PreservesAllFields(t *testing.T) {
