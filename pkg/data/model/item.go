@@ -47,6 +47,7 @@ func (item Item) IsZero() bool {
 type ItemReader interface {
 	List(ctx context.Context, filter ItemFilter) ([]*Item, error)
 	Count(ctx context.Context, filter ItemFilter) (int64, error)
+	CountByType(ctx context.Context, filter ItemFilter) (map[string]int64, error)
 	GetTypes(ctx context.Context) ([]string, error)
 }
 

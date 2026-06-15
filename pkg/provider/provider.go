@@ -90,6 +90,9 @@ type FetchResult struct {
 	Items []*Item
 	// HasMore indicates if more pages are available.
 	HasMore bool
+	// RateLimit contains rate-limit info from the API response headers, if available.
+	// nil when the provider does not expose rate-limit headers.
+	RateLimit *RateLimitInfo
 }
 
 // RateLimitInfo contains rate limiting information.
@@ -100,6 +103,25 @@ type RateLimitInfo struct {
 	Remaining int
 	// ResetAt is when the rate limit resets.
 	ResetAt time.Time
+}
+
+// FetchProgressFunc is called after each page is fetched in FetchAll.
+// page is the page number (1-indexed), total is the maximum page count,
+// and fetched is the cumulative item count so far.
+type FetchProgressFunc func(page, total, fetched int)
+
+// FetchConfig configures multi-page fetch behavior for FetchAll.
+type FetchConfig struct {
+	// MaxConcurrentFetches controls how many pages are fetched in parallel.
+	// 0 or 1 means sequential fetching. Defaults to 3 when unset.
+	MaxConcurrentFetches int
+	// OnProgress is an optional callback invoked after each page completes.
+	OnProgress FetchProgressFunc
+}
+
+// DefaultFetchConfig provides sensible defaults for multi-page fetching.
+var DefaultFetchConfig = FetchConfig{
+	MaxConcurrentFetches: 3,
 }
 
 // Provider defines the interface for a data source that can be synced.

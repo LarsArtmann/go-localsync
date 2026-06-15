@@ -62,6 +62,10 @@ func (s *CQRSStack) Count(ctx context.Context, filter model.ItemFilter) (int64, 
 	return s.ReadModel.Count(ctx, filter)
 }
 
+func (s *CQRSStack) CountByType(ctx context.Context, filter model.ItemFilter) (map[string]int64, error) {
+	return s.ReadModel.CountByType(ctx, filter)
+}
+
 func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
 	return s.ReadModel.GetTypes(ctx)
 }

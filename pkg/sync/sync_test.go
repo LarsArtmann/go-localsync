@@ -18,12 +18,11 @@ import (
 type mockSyncStore struct {
 	testutil.SyncStoreListBehavior
 
-	synced       []*provider.Item
-	actions      []SyncAction
-	actionIdx    int
-	countErr     error
-	typeCountErr error
-	closeErr     error
+	synced   []*provider.Item
+	actions  []SyncAction
+	actionIdx int
+	countErr error
+	closeErr error
 }
 
 func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
@@ -56,16 +55,26 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 	return summary
 }
 
-func (m *mockSyncStore) Count(_ context.Context, filter model.ItemFilter) (int64, error) {
+func (m *mockSyncStore) Count(_ context.Context, _ model.ItemFilter) (int64, error) {
 	if m.countErr != nil {
 		return 0, m.countErr
 	}
 
-	if filter.Type != nil && m.typeCountErr != nil {
-		return 0, m.typeCountErr
+	return int64(len(m.synced)), nil
+}
+
+func (m *mockSyncStore) CountByType(_ context.Context, _ model.ItemFilter) (map[string]int64, error) {
+	if m.countErr != nil {
+		return nil, m.countErr
 	}
 
-	return int64(len(m.synced)), nil
+	counts := make(map[string]int64)
+
+	for _, item := range m.synced {
+		counts[item.Type.Get()]++
+	}
+
+	return counts, nil
 }
 
 func (m *mockSyncStore) GetTypes(_ context.Context) ([]string, error) {

@@ -54,6 +54,20 @@ func (m *mockSyncStore) Count(_ context.Context, _ model.ItemFilter) (int64, err
 	return int64(len(m.Items)), nil
 }
 
+func (m *mockSyncStore) CountByType(_ context.Context, _ model.ItemFilter) (map[string]int64, error) {
+	if m.countErr != nil {
+		return nil, m.countErr
+	}
+
+	counts := make(map[string]int64)
+
+	for _, item := range m.Items {
+		counts[item.Type.Get()]++
+	}
+
+	return counts, nil
+}
+
 func (m *mockSyncStore) GetTypes(_ context.Context) ([]string, error) {
 	if m.typesErr != nil {
 		return nil, m.typesErr
@@ -293,10 +307,10 @@ func TestTriggerSync(t *testing.T) {
 	}
 }
 
-func TestGetStats_TypesError(t *testing.T) {
+func TestGetStats_CountError(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{typesErr: errors.New("types query failed")}
+	store := &mockSyncStore{countErr: errors.New("count query failed")}
 	server := newTestServer(store)
 
 	req := newGETRequest(t, "/stats")

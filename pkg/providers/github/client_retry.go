@@ -17,7 +17,7 @@ func (c *Client) waitForRateLimit(ctx context.Context) error {
 
 	// Use cached rate info from previous API response headers if available.
 	// This avoids a dedicated /rate_limit API call on every Fetch.
-	if cached, ok := c.rateCache.get(); ok {
+	if cached, ok := c.rateCache.Get(); ok {
 		return c.checkRateLimit(ctx, cached.Remaining, cached.ResetAt)
 	}
 
@@ -31,7 +31,7 @@ func (c *Client) waitForRateLimit(ctx context.Context) error {
 		return nil
 	}
 
-	c.rateCache.update(ghRateToInfo(core))
+	c.rateCache.Update(ghRateToInfo(core))
 
 	return c.checkRateLimit(ctx, core.Remaining, core.Reset.Time)
 }

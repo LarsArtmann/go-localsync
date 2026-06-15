@@ -74,6 +74,21 @@ func (m *MemoryReadModel) Count(_ context.Context, filter model.ItemFilter) (int
 	return count, nil
 }
 
+func (m *MemoryReadModel) CountByType(_ context.Context, filter model.ItemFilter) (map[string]int64, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	counts := make(map[string]int64)
+
+	for _, item := range m.items {
+		if matchesFilter(item, filter) {
+			counts[item.Type.Get()]++
+		}
+	}
+
+	return counts, nil
+}
+
 func (m *MemoryReadModel) GetTypes(_ context.Context) ([]string, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()

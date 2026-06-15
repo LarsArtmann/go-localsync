@@ -103,6 +103,39 @@ func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (i
 	return count, nil
 }
 
+func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilter) (map[string]int64, error) {
+	query := "SELECT type, COUNT(*) FROM sync_items WHERE 1=1"
+	args := appendFilterArgs(&query, filter)
+	query += " GROUP BY type"
+
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("count by type: %v", err))
+	}
+
+	defer func() { _ = rows.Close() }()
+
+	counts := make(map[string]int64)
+
+	for rows.Next() {
+		var itemType string
+
+		var count int64
+
+		if err := rows.Scan(&itemType, &count); err != nil {
+			return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("scan count by type: %v", err))
+		}
+
+		counts[itemType] = count
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("iterate count by type: %v", err))
+	}
+
+	return counts, nil
+}
+
 func (m *SQLiteReadModel) GetTypes(ctx context.Context) ([]string, error) {
 	query := "SELECT DISTINCT type FROM sync_items ORDER BY type"
 

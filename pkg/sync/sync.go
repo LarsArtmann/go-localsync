@@ -165,40 +165,26 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 }
 
 // GetStats returns aggregate statistics including per-type counts.
+// Uses a single CountByType query instead of N+1 per-type Count calls.
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 	//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
-	count, err := s.store.Count(ctx, model.ItemFilter{})
+	typeCounts, err := s.store.CountByType(ctx, model.ItemFilter{})
 	if err != nil {
 		return nil, err
 	}
 
-	eventTypes, err := s.store.GetTypes(ctx)
-	if err != nil {
-		return nil, err
-	}
+	var total int64
 
-	typeCounts := make(map[string]int64)
+	types := make([]string, 0, len(typeCounts))
 
-	for _, t := range eventTypes {
-		eventType := id.NewEventTypeID(t)
-
-		count, err := s.store.Count(
-			ctx,
-			//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
-			model.ItemFilter{Type: &eventType},
-		)
-		if err != nil {
-			s.logger.Warn("Failed to count items by type", "type", t, "error", err)
-
-			continue
-		}
-
-		typeCounts[t] = count
+	for t, c := range typeCounts {
+		total += c
+		types = append(types, t)
 	}
 
 	return &Stats{
-		TotalItems: count,
-		ItemTypes:  eventTypes,
+		TotalItems: total,
+		ItemTypes:  types,
 		TypeCounts: typeCounts,
 	}, nil
 }

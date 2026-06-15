@@ -208,26 +208,16 @@ func TestSyncer_GetStats_CountError(t *testing.T) {
 	}
 }
 
-func TestSyncer_GetStats_TypeCountError(t *testing.T) {
+func TestSyncer_GetStats_CountByTypeError(t *testing.T) {
 	t.Parallel()
 
-	items := []*provider.Item{testSyncItem("1", "PushEvent")}
-	store := &mockSyncStore{}
-	mockProv := &testutil.MockProvider{Items: items}
+	store := &mockSyncStore{countErr: errors.New("count by type failed")}
+	mockProv := &testutil.MockProvider{}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
-	ctx := context.Background()
-	_, _ = syncer.Sync(ctx, testSyncOpts())
-
-	store.typeCountErr = errors.New("type count failed")
-
-	stats, err := syncer.GetStats(ctx)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	testutil.AssertInt64(t, stats.TotalItems, 1, "TotalItems")
-	if len(stats.TypeCounts) != 0 {
-		t.Errorf("expected empty TypeCounts on error, got %v", stats.TypeCounts)
+	_, err := syncer.GetStats(context.Background())
+	if err == nil {
+		t.Fatal("expected error when CountByType fails")
 	}
 }

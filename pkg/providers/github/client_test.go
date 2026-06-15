@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -179,10 +180,10 @@ func TestFetch_APIError(t *testing.T) {
 }
 
 func TestFetchAll_MultiplePages(t *testing.T) {
-	callCount := 0
+	callCount := &atomic.Int64{}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount++
+		callCount.Add(1)
 		page := r.URL.Query().Get("page")
 		perPage := r.URL.Query().Get("per_page")
 
@@ -213,16 +214,16 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 	result, err := client.FetchAll(context.Background(), "testuser", 3)
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, result.Items, 200, "items")
-	if callCount != 3 {
-		t.Errorf("expected 3 calls, got %d", callCount)
+	if callCount.Load() != 3 {
+		t.Errorf("expected 3 calls, got %d", callCount.Load())
 	}
 }
 
 func TestFetchAll_DefaultMaxPages(t *testing.T) {
-	callCount := 0
+	callCount := &atomic.Int64{}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount++
+		callCount.Add(1)
 
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode([]*gh.Event{})
@@ -232,16 +233,16 @@ func TestFetchAll_DefaultMaxPages(t *testing.T) {
 	client := newTestClient(server)
 	_, err := client.FetchAll(context.Background(), "testuser", 0)
 	testutil.MustNoError(t, err)
-	if callCount != 1 {
+	if callCount.Load() != 1 {
 		t.Errorf("expected 1 call, got %d", callCount)
 	}
 }
 
 func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
-	callCount := 0
+	callCount := &atomic.Int64{}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		callCount++
+		callCount.Add(1)
 		page := r.URL.Query().Get("page")
 
 		if page == "1" {
@@ -260,8 +261,8 @@ func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 	result, err := client.FetchAll(context.Background(), "testuser", 10)
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, result.Items, 1, "items")
-	if callCount > 2 {
-		t.Errorf("expected at most 2 calls, got %d", callCount)
+	if callCount.Load() > 2 {
+		t.Errorf("expected at most 2 calls, got %d", callCount.Load())
 	}
 }
 

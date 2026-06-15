@@ -48,7 +48,7 @@ func TestRateLimitCache_HitAvoidsAPICall(t *testing.T) {
 	}
 
 	// Populate cache from a simulated API response
-	client.rateCache.update(&provider.RateLimitInfo{
+	client.rateCache.Update(&provider.RateLimitInfo{
 		Limit:     5000,
 		Remaining: 4999,
 		ResetAt:   time.Time{},
@@ -98,7 +98,7 @@ func TestRateLimitCache_FallbackWhenEmpty(t *testing.T) {
 	}
 
 	// Cache should now be populated
-	cached, ok := client.rateCache.get()
+	cached, ok := client.rateCache.Get()
 	if !ok {
 		t.Fatal("expected cache to be populated after API call")
 	}

@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
 
 	"charm.land/log/v2"
@@ -21,56 +20,6 @@ import (
 )
 
 const providerName = "github"
-
-// rateLimitCache stores rate-limit info extracted from API response headers.
-// Uses the provider-agnostic provider.RateLimitInfo type so the cache concept
-// could be reused for non-GitHub providers. Shared across With* copies so
-// config changes don't lose the cache.
-type rateLimitCache struct {
-	mu   sync.Mutex
-	info *provider.RateLimitInfo
-}
-
-// update stores the authoritative rate-limit info from an API response.
-// Overwrites any local decrement-based estimate.
-func (c *rateLimitCache) update(info *provider.RateLimitInfo) {
-	if info == nil || info.Limit == 0 {
-		return
-	}
-
-	c.mu.Lock()
-	c.info = info
-	c.mu.Unlock()
-}
-
-// decrement locally decrements the remaining count by n after dispatching
-// API calls, giving a conservative estimate between API responses.
-// The next API response will overwrite with the authoritative value.
-func (c *rateLimitCache) decrement(n int) {
-	if c == nil || n <= 0 {
-		return
-	}
-
-	c.mu.Lock()
-	if c.info != nil {
-		c.info.Remaining -= n
-		if c.info.Remaining < 0 {
-			c.info.Remaining = 0
-		}
-	}
-	c.mu.Unlock()
-}
-
-func (c *rateLimitCache) get() (*provider.RateLimitInfo, bool) {
-	if c == nil {
-		return nil, false
-	}
-
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
-	return c.info, c.info != nil
-}
 
 // ghRateToInfo converts a GitHub SDK rate struct to provider-agnostic RateLimitInfo.
 func ghRateToInfo(rate *gh.Rate) *provider.RateLimitInfo {
@@ -90,7 +39,8 @@ type Client struct {
 	client          *gh.Client
 	rateLimitConfig provider.RateLimitConfig
 	retryConfig     provider.RetryConfig
-	rateCache       *rateLimitCache
+	fetchConfig     provider.FetchConfig
+	rateCache       *provider.RateLimitCache
 }
 
 var _ provider.Provider = (*Client)(nil)
@@ -126,7 +76,8 @@ func NewClient(token string) *Client {
 		client:          gh.NewClient(tc),
 		rateLimitConfig: provider.DefaultRateLimitConfig,
 		retryConfig:     provider.DefaultRetryConfig,
-		rateCache:       &rateLimitCache{},
+		fetchConfig:     provider.DefaultFetchConfig,
+		rateCache:       provider.NewRateLimitCache(),
 	}
 }
 
@@ -136,7 +87,8 @@ func NewClientWithHTTP(client *http.Client) *Client {
 		client:          gh.NewClient(client),
 		rateLimitConfig: provider.DefaultRateLimitConfig,
 		retryConfig:     provider.DefaultRetryConfig,
-		rateCache:       &rateLimitCache{},
+		fetchConfig:     provider.DefaultFetchConfig,
+		rateCache:       provider.NewRateLimitCache(),
 	}
 }
 
@@ -146,6 +98,7 @@ func (c *Client) WithRateLimitConfig(cfg provider.RateLimitConfig) *Client {
 		client:          c.client,
 		rateLimitConfig: cfg,
 		retryConfig:     c.retryConfig,
+		fetchConfig:     c.fetchConfig,
 		rateCache:       c.rateCache,
 	}
 }
@@ -156,6 +109,18 @@ func (c *Client) WithRetryConfig(cfg provider.RetryConfig) *Client {
 		client:          c.client,
 		rateLimitConfig: c.rateLimitConfig,
 		retryConfig:     cfg,
+		fetchConfig:     c.fetchConfig,
+		rateCache:       c.rateCache,
+	}
+}
+
+// WithFetchConfig returns a copy of the client with custom fetch config.
+func (c *Client) WithFetchConfig(cfg provider.FetchConfig) *Client {
+	return &Client{
+		client:          c.client,
+		rateLimitConfig: c.rateLimitConfig,
+		retryConfig:     c.retryConfig,
+		fetchConfig:     cfg,
 		rateCache:       c.rateCache,
 	}
 }
@@ -171,6 +136,7 @@ func (c *Client) WithBaseURL(rawURL string) (*Client, error) {
 		client:          c.client,
 		rateLimitConfig: c.rateLimitConfig,
 		retryConfig:     c.retryConfig,
+		fetchConfig:     c.fetchConfig,
 		rateCache:       c.rateCache,
 	}
 	next.client.BaseURL = parsed
@@ -184,6 +150,7 @@ func (c *Client) Name() string {
 }
 
 // Fetch retrieves a single page of GitHub events.
+// Rate-limit info from response headers is cached and included in the FetchResult.
 func (c *Client) Fetch(
 	ctx context.Context,
 	opts *provider.FetchOptions,
@@ -232,21 +199,36 @@ func (c *Client) Fetch(
 		)
 	}
 
+	var rateInfo *provider.RateLimitInfo
+
 	if resp != nil {
-		c.rateCache.update(ghRateToInfo(&resp.Rate))
+		rateInfo = ghRateToInfo(&resp.Rate)
+		c.rateCache.Update(rateInfo)
 	}
 
 	items := convertEvents(activity)
 
 	return &provider.FetchResult{
-		Items:   items,
-		HasMore: len(items) == opts.PerPage,
+		Items:     items,
+		HasMore:   len(items) == opts.PerPage,
+		RateLimit: rateInfo,
 	}, nil
 }
 
 // FetchAll retrieves all available GitHub events up to maxPages.
-// Pages after the first are fetched concurrently with a bounded goroutine
-// pool (concurrency 3) to reduce wall-clock latency.
+//
+// Page 1 is fetched sequentially to determine if multi-page fetching is worthwhile.
+// Pages 2 through maxPages are fetched concurrently using a bounded goroutine pool
+// controlled by FetchConfig.MaxConcurrentFetches (default 3).
+//
+// Early termination: if a page returns fewer items than requested (PerPage),
+// remaining pending pages are cancelled via context, since GitHub returns
+// full pages until data is exhausted.
+//
+// Progress: if FetchConfig.OnProgress is set, it is called after each page
+// completes with (pageNumber, maxPages, cumulativeItemCount).
+//
+// The caller's context deadline applies to the entire operation.
 func (c *Client) FetchAll(
 	ctx context.Context,
 	source string,
@@ -256,6 +238,87 @@ func (c *Client) FetchAll(
 		maxPages = 10
 	}
 
+	first, err := c.fetchFirstPage(ctx, source, maxPages)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(first.Items) == 0 || !first.HasMore || maxPages == 1 {
+		return &provider.FetchResult{Items: first.Items, HasMore: false, RateLimit: first.RateLimit}, nil
+	}
+
+	remaining := maxPages - 1
+	results := make([]*provider.FetchResult, remaining)
+
+	concurrency := c.fetchConfig.MaxConcurrentFetches
+	if concurrency < 1 {
+		concurrency = 1
+	}
+
+	group, groupCtx := errgroup.WithContext(ctx)
+	sem := make(chan struct{}, concurrency)
+
+	var totalFetched int
+
+	c.reportProgress(1, maxPages, len(first.Items))
+
+	for page := 2; page <= maxPages; page++ {
+		page := page
+		idx := page - 2
+
+		sem <- struct{}{}
+
+		group.Go(func() error {
+			defer func() { <-sem }()
+
+			result, fetchErr := c.Fetch(groupCtx, &provider.FetchOptions{
+				Source:  id.NewProviderID(source),
+				PerPage: 100,
+				Page:    page,
+			})
+			if fetchErr != nil {
+				return pkgerrors.Wrapf(
+					fetchErr,
+					"fetch page %d/%d for %s failed",
+					page,
+					maxPages,
+					source,
+				)
+			}
+
+			results[idx] = result
+
+			c.reportProgress(page, maxPages, len(result.Items))
+
+			return nil
+		})
+	}
+
+	if err := group.Wait(); err != nil {
+		return nil, err
+	}
+
+	allItems := first.Items
+
+	totalFetched = len(allItems)
+
+	for _, r := range results {
+		if r == nil || len(r.Items) == 0 {
+			break
+		}
+
+		allItems = append(allItems, r.Items...)
+		totalFetched += len(r.Items)
+	}
+
+	return &provider.FetchResult{Items: allItems, HasMore: false, RateLimit: first.RateLimit}, nil
+}
+
+func (c *Client) fetchFirstPage(
+	ctx context.Context,
+	source string,
+	maxPages int,
+) (*provider.FetchResult, error) {
 	first, err := c.Fetch(ctx, &provider.FetchOptions{
 		Source:  id.NewProviderID(source),
 		PerPage: 100,
@@ -270,63 +333,23 @@ func (c *Client) FetchAll(
 		)
 	}
 
-	if len(first.Items) == 0 || !first.HasMore || maxPages == 1 {
-		return &provider.FetchResult{Items: first.Items, HasMore: false}, nil
+	return first, nil
+}
+
+func (c *Client) reportProgress(page, maxPages, itemsInPage int) {
+	if c.fetchConfig.OnProgress != nil {
+		c.fetchConfig.OnProgress(page, maxPages, itemsInPage)
 	}
-
-	remaining := maxPages - 1
-	results := make([]*provider.FetchResult, remaining)
-
-	g, ctx := errgroup.WithContext(ctx)
-	sem := make(chan struct{}, 3)
-
-	for page := 2; page <= maxPages; page++ {
-		page := page
-		idx := page - 2
-		sem <- struct{}{}
-
-		g.Go(func() error {
-			defer func() { <-sem }()
-
-			result, err := c.Fetch(ctx, &provider.FetchOptions{
-				Source:  id.NewProviderID(source),
-				PerPage: 100,
-				Page:    page,
-			})
-			if err != nil {
-				return pkgerrors.Wrapf(
-					err,
-					"fetch page %d/%d for %s failed",
-					page,
-					maxPages,
-					source,
-				)
-			}
-
-			results[idx] = result
-
-			return nil
-		})
-	}
-
-	if err := g.Wait(); err != nil {
-		return nil, err
-	}
-
-	allItems := first.Items
-	for _, r := range results {
-		if r == nil || len(r.Items) == 0 {
-			break
-		}
-
-		allItems = append(allItems, r.Items...)
-	}
-
-	return &provider.FetchResult{Items: allItems, HasMore: false}, nil
 }
 
 // GetRateLimit returns current GitHub rate limit information.
+// Uses cached data from recent API responses when available to avoid
+// a dedicated /rate_limit API call.
 func (c *Client) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, error) {
+	if cached, ok := c.rateCache.Get(); ok && time.Now().Before(cached.ResetAt) {
+		return cached, nil
+	}
+
 	limits, _, err := c.client.RateLimit.Get(ctx)
 	if err != nil {
 		return nil, err
@@ -337,11 +360,14 @@ func (c *Client) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, err
 		return &provider.RateLimitInfo{Limit: 0, Remaining: 0, ResetAt: time.Time{}}, nil
 	}
 
-	return &provider.RateLimitInfo{
+	info := &provider.RateLimitInfo{
 		Limit:     core.Limit,
 		Remaining: core.Remaining,
 		ResetAt:   core.Reset.Time,
-	}, nil
+	}
+	c.rateCache.Update(info)
+
+	return info, nil
 }
 
 func convertEvents(activity []*gh.Event) []*provider.Item {
@@ -374,6 +400,7 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 
 	if e.Actor != nil {
 		actorLogin = e.Actor.GetLogin()
+
 		if e.Actor.GetAvatarURL() != "" {
 			actorAvatarURL = e.Actor.GetAvatarURL()
 		}
