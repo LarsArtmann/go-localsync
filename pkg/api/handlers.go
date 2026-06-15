@@ -73,6 +73,7 @@ func (s *Server) getStats(ctx context.Context, _ *struct{}) (*StatsOutput, error
 
 	resp.Body.TotalItems = stats.TotalItems
 	resp.Body.ItemTypes = stats.ItemTypes
+	resp.Body.TypeCounts = stats.TypeCounts
 
 	return &resp, nil
 }
