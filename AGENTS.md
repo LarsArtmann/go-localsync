@@ -70,10 +70,13 @@ The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `Acti
 
 ### Local Development
 
-1. Create `go.work` in project root (already in `.gitignore`):
+1. **Optional**: Create `go.work` in project root ONLY for live-editing local sibling checkouts. It is in `.gitignore` and **must never be committed or left on disk during `buildflow`** — buildflow detects go.work on disk and expands `go test ./...` to ALL workspace modules (including `../go-cqrs-lite/*`), causing sibling test failures. With the committed `vendor/` directory, builds and tests work offline without go.work (`go build ./...`, `go test ./...` use vendor mode automatically). Remove go.work before running buildflow:
+
    ```
    go 1.26.3
+
    use .
+
    use (
        ../go-branded-id
        ../go-cqrs-lite/codec
@@ -90,10 +93,12 @@ The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `Acti
        ../go-error-family
    )
    ```
+
 2. Build: `go build ./...`
 3. Test: `go test ./... -count=1`
 4. Lint: `golangci-lint run ./... --timeout=5m`
 5. Format: `golangci-lint fmt ./...`
+6. Full pipeline: `buildflow --build-mode full` (ensure go.work is removed first)
 
 ### CI (No go.work)
 
@@ -107,6 +112,13 @@ GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go test
 ### Pre-commit Hooks
 
 Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as executable and are skipped.
+
+### Build & Lint Gotchas
+
+- **Private dependency**: `go-cqrs-lite` is a **private** GitHub repo (siblings `go-branded-id` and `go-error-family` are public). The nix sandbox cannot fetch it, so `nix build` / `nix flake check` require **vendored deps**: a committed `vendor/` dir + `vendorHash = null` in `flake.nix` + a `vendor/**` exclusion in `treefmt`. Regenerate with `GOWORK=off go mod vendor`. Cleanest long-term fix: make `go-cqrs-lite` public, then switch to a real `vendorHash` and drop `vendor/`.
+- **go.work breaks buildflow**: buildflow's `ForEachGoModule` detects go.work **on disk** (not just tracked) and runs `go test ./...` in every workspace module — including sibling repos (`../go-cqrs-lite/*`) whose tests fail. Always **delete go.work before `buildflow`**; with `vendor/` committed, builds/tests work without it.
+- **golangci-lint v2.12 `exhaustruct`**: the `settings.exhaustruct.exclude` list does **not** match local-package types in full runs (only stdlib full-path patterns work). For local domain structs with optional fields (`ItemFilter`, `FetchConfig`, `FetchResult`, `RateLimitCache`), suppress via `issues.exclusions.rules` with a `text:` regex instead.
+- **`SA5012` disabled**: staticcheck v0.7 panics ("can't set facts on objects belonging another package") on cross-package even-elements analysis (e.g. `testutil.BuildPairs` called from another package's tests). Disabled in `linters.settings.staticcheck.checks`.
 
 ## Testing
 

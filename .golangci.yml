@@ -131,11 +131,11 @@ linters:
     depguard:
       rules:
         Main:
+          allow:
+            - log/slog
           deny:
             - desc: use github.com/charmbracelet/log
               pkg: log
-          allow:
-            - log/slog
           list-mode: lax
     exhaustruct:
       exclude:
@@ -145,6 +145,9 @@ linters:
         - github\.com/google/go-github/v69/github\.
         - database/sql\.Null
         - golang\.org/x/oauth2\.Token
+    ginkgolinter:
+      forbid-focus-container: true
+      forbid-spec-pollution: true
     gocognit:
       min-complexity: 35
     gocritic:
@@ -166,10 +169,6 @@ linters:
         - "15"
         - "3"
         - "30"
-    staticcheck:
-      checks:
-        - all
-        - -SA5012
     revive:
       rules:
         - disabled: true
@@ -180,6 +179,14 @@ linters:
           name: package-comments
         - disabled: true
           name: blank-imports
+    staticcheck:
+      checks:
+        - all
+        - -SA5012
+    testifylint:
+      disable:
+        - go-require
+      enable-all: true
     varnamelen:
       ignore-names:
         - id
@@ -205,7 +212,7 @@ linters:
   exclusions:
     generated: lax
     rules:
-      - text: "(ItemFilter|FetchConfig|FetchResult|RateLimitCache) is missing"
+      - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache) is missing
         linters:
           - exhaustruct
       - path: _test\.go
@@ -302,6 +309,7 @@ formatters:
     - goimports
     - gofumpt
     - golines
+    - swaggo
   settings:
     golines:
       max-len: 120

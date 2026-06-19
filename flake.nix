@@ -31,8 +31,7 @@
             pname = "go-localsync";
             version = "0.1.0";
             src = ./.;
-            vendorHash = pkgs.lib.fakeHash;
-            proxyVendor = true;
+            vendorHash = null;
             meta = with pkgs.lib; {
               description = "Generic synchronization SDK with CQRS";
               homepage = "https://github.com/larsartmann/go-localsync";
@@ -90,6 +89,9 @@
 
           treefmt = {
             projectRootFile = "go.mod";
+            settings.excludes = [
+              "vendor/**"
+            ];
             programs = {
               gofumpt.enable = true;
               goimports.enable = true;

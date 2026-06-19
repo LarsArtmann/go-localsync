@@ -3,3 +3,4 @@
 docs/status/*.md linguist-documentation
 # Exclude from language statistics
 reports/** linguist-generated
+vendor/** linguist-vendored
