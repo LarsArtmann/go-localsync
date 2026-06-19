@@ -33,28 +33,6 @@ func toDataItem(p *provider.Item) *model.Item {
 	}
 }
 
-// fromDataItem converts a data model Item back to a provider.Item.
-// Used for backward compatibility during the migration.
-func fromDataItem(item *model.Item, rawJSON []byte) *provider.Item {
-	if item == nil {
-		return nil
-	}
-
-	return &provider.Item{
-		ID:             item.ID,
-		ExternalID:     item.ExternalID,
-		Source:         item.Source,
-		Type:           item.Type,
-		ActorLogin:     item.ActorLogin,
-		ActorAvatarURL: item.ActorAvatarURL,
-		RepoName:       item.RepoName,
-		RepoURL:        item.RepoURL,
-		CreatedAt:      item.CreatedAt,
-		UpdatedAt:      item.UpdatedAt,
-		RawJSON:        rawJSON,
-	}
-}
-
 // dataItemFromPayload reconstructs a data.Item from an event payload.
 func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 	itemID, err := parseItemID(payload.ItemID)

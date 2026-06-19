@@ -31,22 +31,6 @@ func BenchmarkToDataItem(b *testing.B) {
 	}
 }
 
-func BenchmarkFromDataItem(b *testing.B) {
-	item := toDataItem(testProviderItem())
-	rawJSON := []byte(`{"id":"12345","type":"PushEvent"}`)
-	for range b.N {
-		_ = fromDataItem(item, rawJSON)
-	}
-}
-
-func BenchmarkDataItemRoundtrip(b *testing.B) {
-	item := testProviderItem()
-	for range b.N {
-		d := toDataItem(item)
-		_ = fromDataItem(d, item.RawJSON)
-	}
-}
-
 func BenchmarkDataItemToPayload(b *testing.B) {
 	item := toDataItem(testProviderItem())
 	for range b.N {

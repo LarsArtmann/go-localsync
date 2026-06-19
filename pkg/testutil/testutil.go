@@ -115,12 +115,14 @@ func WaitForCount(t *testing.T, ctx context.Context, counter func(context.Contex
 }
 
 func BuildPairs[T any](factory func(id, typ string) T, pairs ...string) []T {
-	if len(pairs)%2 != 0 {
+	const pairSize = 2
+
+	if len(pairs)%pairSize != 0 {
 		panic("BuildPair requires an even number of arguments (id, type pairs)")
 	}
 
-	result := make([]T, 0, len(pairs)/2)
-	for i := 0; i < len(pairs); i += 2 {
+	result := make([]T, 0, len(pairs)/pairSize)
+	for i := 0; i < len(pairs); i += pairSize {
 		result = append(result, factory(pairs[i], pairs[i+1]))
 	}
 

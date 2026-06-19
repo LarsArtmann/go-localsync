@@ -31,7 +31,7 @@ func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer
 	}
 }
 
-func (s *Syncer) Store() SyncStore {
+func (s *Syncer) Store() SyncStore { //nolint:ireturn
 	return s.store
 }
 
@@ -126,7 +126,6 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 
 	items, err := s.store.List(
 		ctx,
-		//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 		model.ItemFilter{
 			Source: &source,
 			Limit:  1,
@@ -167,7 +166,6 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 // GetStats returns aggregate statistics including per-type counts.
 // Uses a single CountByType query instead of N+1 per-type Count calls.
 func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
-	//nolint:exhaustruct // ItemFilter zero-value is the "no filter" sentinel
 	typeCounts, err := s.store.CountByType(ctx, model.ItemFilter{})
 	if err != nil {
 		return nil, err
@@ -179,6 +177,7 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 
 	for t, c := range typeCounts {
 		total += c
+
 		types = append(types, t)
 	}
 

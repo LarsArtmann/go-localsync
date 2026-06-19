@@ -32,14 +32,14 @@ func (c *RateLimitCache) Update(info *RateLimitInfo) {
 // Decrement locally reduces the remaining count by n after dispatching
 // API calls, giving a conservative estimate between API responses.
 // The next API response will overwrite with the authoritative value.
-func (c *RateLimitCache) Decrement(n int) {
-	if c == nil || n <= 0 {
+func (c *RateLimitCache) Decrement(count int) {
+	if c == nil || count <= 0 {
 		return
 	}
 
 	c.mu.Lock()
 	if c.info != nil {
-		c.info.Remaining -= n
+		c.info.Remaining -= count
 		if c.info.Remaining < 0 {
 			c.info.Remaining = 0
 		}

@@ -198,14 +198,7 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 func newUpdatedAtLWWResolver(t *testing.T) *crdt.LWWResolver[*model.Item] {
 	t.Helper()
 
-	resolver, err := crdt.NewLWWResolver[*model.Item](func(item *model.Item) time.Time {
-		return item.UpdatedAt
-	})
-	if err != nil {
-		t.Fatalf("unexpected LWW resolver error: %v", err)
-	}
-
-	return resolver
+	return NewUpdatedAtLWWResolver()
 }
 
 func subscribeAll(t *testing.T, stack *CQRSStack) func(minCount int) []event.Event {

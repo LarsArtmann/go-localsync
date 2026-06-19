@@ -166,7 +166,7 @@ func TestIntegration_APIFilterAndPagination(t *testing.T) {
 	ctx := context.Background()
 	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
 	testutil.MustNoError(t, err)
-	defer func() { _ = stack.Close() }()
+	t.Cleanup(func() { _ = stack.Close() })
 
 	items := []*provider.Item{
 		makeTestItem(t, "1", "PushEvent", "2024-01-01T00:00:00Z"),
@@ -183,6 +183,8 @@ func TestIntegration_APIFilterAndPagination(t *testing.T) {
 	server := NewServer(syncer, logger)
 
 	t.Run("filter_by_type", func(t *testing.T) {
+		t.Parallel()
+
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/items?type=PushEvent", nil)
 		rec := httptest.NewRecorder()
 		server.ServeHTTP(rec, req)
@@ -205,6 +207,8 @@ func TestIntegration_APIFilterAndPagination(t *testing.T) {
 	})
 
 	t.Run("pagination", func(t *testing.T) {
+		t.Parallel()
+
 		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/items?limit=1&offset=1", nil)
 		rec := httptest.NewRecorder()
 		server.ServeHTTP(rec, req)

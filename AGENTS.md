@@ -224,4 +224,3 @@ Two tables managed by the CQRS stack:
 | Logging        | `middleware.EventLogging` via charm log adapter                                                         | Structured logging of all domain events                |
 | Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                         | Smart retry classification for provider errors         |
 | Version        | `event.Version` with `Increment()`, `Add()`                                                             | Phantom type safety — no `int()` casts                 |
-

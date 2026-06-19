@@ -62,8 +62,10 @@ func scanItem(row *sql.Row) (*model.Item, error) {
 	return si.toItem()
 }
 
+const defaultScanItemsCapacity = 64
+
 func scanItems(rows *sql.Rows) ([]*model.Item, error) {
-	items := make([]*model.Item, 0, 64)
+	items := make([]*model.Item, 0, defaultScanItemsCapacity)
 	si := newScannedItem()
 
 	for rows.Next() {

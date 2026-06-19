@@ -1,4 +1,4 @@
-// Package cqrs — adapter layer that bridges CQRSStack to synclib.SyncStore.
+// stack_adapters.go bridges CQRSStack to synclib.SyncStore.
 //
 // The List / Count / GetTypes methods below deliberately bypass the
 // QueryDispatcher and call the ReadModel directly. Reasons:
@@ -20,6 +20,7 @@
 // If you are adding a new read endpoint, prefer extending this adapter
 // file over creating a new dispatcher handler unless the endpoint needs
 // the cross-cutting middleware chain (logging, metrics, retry).
+
 package cqrs
 
 import (

@@ -27,7 +27,7 @@ func AggregateID(source string, externalID id.ExternalID) cqrsid.AggregateID {
 	key := itemKey(source, externalID)
 
 	if cached, ok := aggIDCache.Load(key); ok {
-		return cached.(cqrsid.AggregateID) //nolint:errcheck,forcetypeassert // type is always cqrsid.AggregateID
+		return cached.(cqrsid.AggregateID) //nolint:forcetypeassert // type is always cqrsid.AggregateID
 	}
 
 	h := sha256.Sum256([]byte(key))

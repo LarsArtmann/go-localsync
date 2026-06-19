@@ -260,7 +260,6 @@ func (c *Client) FetchAll(
 	c.reportProgress(1, maxPages, len(first.Items))
 
 	for page := 2; page <= maxPages; page++ {
-		page := page
 		idx := page - 2
 
 		sem <- struct{}{}

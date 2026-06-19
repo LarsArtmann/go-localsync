@@ -31,7 +31,7 @@
             pname = "go-localsync";
             version = "0.1.0";
             src = ./.;
-            vendorHash = null;
+            vendorHash = pkgs.lib.fakeHash;
             proxyVendor = true;
             meta = with pkgs.lib; {
               description = "Generic synchronization SDK with CQRS";

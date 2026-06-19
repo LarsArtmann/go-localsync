@@ -63,9 +63,9 @@ type ListItemsOutput struct {
 // StatsOutput defines the response for statistics.
 type StatsOutput struct {
 	Body struct {
-		TotalItems int64            `doc:"Total number of synced items"     json:"totalItems"`
-		ItemTypes  []string         `doc:"List of distinct item types"      json:"itemTypes"`
-		TypeCounts map[string]int64 `doc:"Count of items per type"          json:"typeCounts"`
+		TotalItems int64            `doc:"Total number of synced items" json:"totalItems"`
+		ItemTypes  []string         `doc:"List of distinct item types"  json:"itemTypes"`
+		TypeCounts map[string]int64 `doc:"Count of items per type"      json:"typeCounts"`
 	}
 }
 

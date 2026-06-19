@@ -8,7 +8,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
-	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
@@ -109,14 +108,7 @@ func main() {
 	var resolver crdt.ConflictResolver[*model.Item]
 
 	if *conflictStrategy == "lww" {
-		lww, lwwErr := crdt.NewLWWResolver[*model.Item](func(i *model.Item) time.Time {
-			return i.UpdatedAt
-		})
-		if lwwErr != nil {
-			logErrorAndExit(logger, "Failed to create LWW resolver", lwwErr, exitSoftware)
-		}
-
-		resolver = lww
+		resolver = cqrs.NewUpdatedAtLWWResolver()
 	}
 
 	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{

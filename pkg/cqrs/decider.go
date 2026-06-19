@@ -101,7 +101,6 @@ func decideSync(
 // decideDelete returns a decider.DecideFunc that marks an item as deleted.
 func decideDelete(
 	source string, sourceID id.ExternalID,
-	opts ...event.Option,
 ) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		if state.SkipDecision() {
@@ -117,7 +116,6 @@ func decideDelete(
 				Source:   source,
 				SourceID: sourceID.Get(),
 			}},
-			opts...,
 		)
 		if err != nil {
 			return nil, fmt.Errorf(
