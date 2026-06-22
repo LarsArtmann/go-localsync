@@ -29,23 +29,17 @@
         {
           packages.default = pkgs.buildGoModule {
             pname = "go-localsync";
-            version = "0.1.0";
+            version = "0.2.0";
             src = ./.;
             vendorHash = null;
             meta = with pkgs.lib; {
               description = "Generic synchronization SDK with CQRS";
               homepage = "https://github.com/larsartmann/go-localsync";
               license = licenses.mit;
-              mainProgram = "go-localsync";
             };
           };
 
           apps = {
-            default = {
-              type = "app";
-              program = pkgs.lib.getExe config.packages.default;
-            };
-
             test = {
               type = "app";
               program = pkgs.writeShellApplication {

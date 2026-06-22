@@ -3,9 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-Release dates and entries are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`).
+Release dates and entries are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`).
 
 ## [Unreleased]
+
+## [0.2.0] - 2026-06-22
 
 ### Added
 
@@ -37,6 +39,10 @@ Release dates and entries are reconciled against the actual git tags (`v0.1.0`, 
 - **Concurrent `FetchAll`** — pages fetched in parallel (`MaxConcurrentFetches`, default 3).
 - **SQLite optimizations** — WAL mode, aggregate-ID `sync.Map` cache, scan-path query optimization.
 - **`CountByType`** — fixes the `GetStats` N+1 query; `TypeCounts` added to the API `StatsOutput`.
+
+### Fixed
+
+- **`flake.nix` release coherence** — bumped package `version` to 0.2.0 (was stuck at 0.1.0), removed stale `mainProgram = "go-localsync"` and the broken `apps.default` (it used `getExe` on a library, so `nix run` failed). The SDK is a pure contract library with no binaries as of this release.
 
 ## [0.1.1] - 2026-06-14
 
