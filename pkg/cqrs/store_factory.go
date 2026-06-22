@@ -6,10 +6,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/larsartmann/go-cqrs-lite/event/v2"
-	cqrsmemory "github.com/larsartmann/go-cqrs-lite/memory/v2"
-	"github.com/larsartmann/go-cqrs-lite/snapshot/v2"
-	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage/v2"
+	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-cqrs-lite/snapshot/v3"
+	cqrsmemory "github.com/larsartmann/go-cqrs-lite/storage/memory/v3"
+	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage/v3"
+	cqrswatermill "github.com/larsartmann/go-cqrs-lite/watermill/v3"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
@@ -27,7 +28,7 @@ func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 	case backendMemory, "":
 		return storeResult{
 			store:  cqrsmemory.NewMemoryStore(),
-			bus:    cqrsmemory.NewMemoryBus(),
+			bus:    cqrswatermill.NewEventBus(),
 			db:     nil,
 			loader: nil,
 		}, nil
@@ -76,7 +77,7 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 
 	return storeResult{
 		store:  store,
-		bus:    cqrsmemory.NewMemoryBus(),
+		bus:    cqrswatermill.NewEventBus(),
 		db:     db,
 		loader: store,
 	}, nil
@@ -119,16 +120,4 @@ func createSnapshotStore(
 	}
 
 	return cqrsstorage.NewSQLiteSnapshotStore(db)
-}
-
-//nolint:ireturn
-func createCheckpointStore(
-	cfg CQRSConfig,
-	db *sql.DB,
-) (event.CheckpointStore, error) {
-	if cfg.Backend != backendSQLite || db == nil {
-		return cqrsmemory.NewMemoryCheckpointStore(), nil
-	}
-
-	return cqrsstorage.NewSQLiteCheckpointStore(db)
 }

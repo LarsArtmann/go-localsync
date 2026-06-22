@@ -26,6 +26,7 @@ package cqrs
 import (
 	"context"
 	"errors"
+	"io"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -96,9 +97,22 @@ func (s *CQRSStack) Close() error {
 		}
 	}
 
+	// v3 removed io.Closer from event.Store/event.Bus interfaces (ADR-0010).
+	// The concrete stores and the watermill EventBus still implement Close();
+	// type-assert to invoke it where present.
 	if s.Store != nil {
-		if err := s.Store.Close(); err != nil {
-			errs = append(errs, err)
+		if c, ok := s.Store.(io.Closer); ok {
+			if err := c.Close(); err != nil {
+				errs = append(errs, err)
+			}
+		}
+	}
+
+	if s.Bus != nil {
+		if c, ok := s.Bus.(io.Closer); ok {
+			if err := c.Close(); err != nil {
+				errs = append(errs, err)
+			}
 		}
 	}
 

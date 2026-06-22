@@ -7,14 +7,14 @@ import (
 	"log/slog"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-cqrs-lite/codec/v2"
-	"github.com/larsartmann/go-cqrs-lite/command/v2"
-	"github.com/larsartmann/go-cqrs-lite/decider/v2"
-	"github.com/larsartmann/go-cqrs-lite/event/v2"
-	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
-	"github.com/larsartmann/go-cqrs-lite/middleware/v2"
-	"github.com/larsartmann/go-cqrs-lite/query/v2"
-	"github.com/larsartmann/go-cqrs-lite/snapshot/v2"
+	"github.com/larsartmann/go-cqrs-lite/codec/v3"
+	"github.com/larsartmann/go-cqrs-lite/command/v3"
+	"github.com/larsartmann/go-cqrs-lite/decider/v3"
+	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
+	"github.com/larsartmann/go-cqrs-lite/middleware/v3"
+	"github.com/larsartmann/go-cqrs-lite/query/v3"
+	"github.com/larsartmann/go-cqrs-lite/snapshot/v3"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -79,25 +79,20 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 
 	proj := newProjector(rm)
 
-	checkpointStore, cpErr := createCheckpointStore(cfg, sr.db)
-	if cpErr != nil {
-		return nil, cpErr
-	}
-
 	if err := sr.bus.Use(
 		middleware.EventLogging(newSlogLogger()),
 	); err != nil {
 		return nil, fmt.Errorf("wire event logging middleware: %w", err)
 	}
 
-	cancelRunner, err := startProjectionRunner(sr, checkpointStore, proj)
+	cancelRunner, err := startProjectionRunner(sr, proj)
 	if err != nil {
 		return nil, fmt.Errorf("start projection runner: %w", err)
 	}
 
 	deciderSpec := decider.Decider[SyncItemState]{
 		Initial: InitialState,
-		Fold:    fold,
+		Apply:   fold,
 	}
 
 	snapshotStore, stratStoreErr := createSnapshotStore(cfg, sr.db)

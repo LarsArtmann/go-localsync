@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"sync"
 
-	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v2"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
