@@ -816,7 +816,10 @@
           </div>
           <div class="hero-badge">Status Update &middot; 2026-06-19</div>
           <h1>Buildflow All Green + Vendor Offline Migration</h1>
-          <p class="hero-subtitle">All 6 buildflow failures resolved. Pipeline runs clean in 1m4s. Private go-cqrs-lite dep now vendored for offline nix builds.</p>
+          <p class="hero-subtitle">
+            All 6 buildflow failures resolved. Pipeline runs clean in 1m4s. Private go-cqrs-lite dep
+            now vendored for offline nix builds.
+          </p>
         </div>
 
         <!-- Inline TOC (alternative to sidebar; pick one) -->
@@ -864,7 +867,10 @@
 
         <div class="callout callout-solution">
           <strong>Bottom line:</strong>
-          <code>buildflow --build-mode full</code> now exits 0 with zero failures in 1m4s. All 6 previously-failing steps (golangci-lint, duplications-checker, test-race, test-coverage, nix-build, nix-flake-check) are green. The private <code>go-cqrs-lite</code> dependency is now vendored for offline nix builds.
+          <code>buildflow --build-mode full</code> now exits 0 with zero failures in 1m4s. All 6
+          previously-failing steps (golangci-lint, duplications-checker, test-race, test-coverage,
+          nix-build, nix-flake-check) are green. The private <code>go-cqrs-lite</code> dependency is
+          now vendored for offline nix builds.
         </div>
 
         <!-- a) FULLY DONE -->
@@ -872,32 +878,64 @@
 
         <div class="card card-solution">
           <h4>All 6 Buildflow Failures Fixed</h4>
-          <p>Root-caused and resolved every failing step. Verified with a clean <code>buildflow --build-mode full</code> run: <strong>0 failures, 1m4s</strong>.</p>
+          <p>
+            Root-caused and resolved every failing step. Verified with a clean
+            <code>buildflow --build-mode full</code> run: <strong>0 failures, 1m4s</strong>.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>golangci-lint SA5012 Panic + 23 Masked Issues</h4>
-          <p>staticcheck v0.7's SA5012 checker panicked on cross-package analysis (<code>testutil.BuildPairs</code>), crashing golangci-lint before it could report. This masked <strong>23 real lint issues</strong>. Disabled SA5012 in config and fixed all 23: exhaustruct rules (via <code>issues.exclusions</code> text regex — the <code>settings.exhaustruct.exclude</code> is broken for local packages in v2.12), unparam (removed dead <code>opts</code> param + <code>fromDataItem</code>), funlen, tagalign, copyloopvar, mnd (named constants), varnamelen, tparallel (<code>t.Cleanup</code>), godoclint (canonical doc.go), nolintlint cleanup.</p>
+          <p>
+            staticcheck v0.7's SA5012 checker panicked on cross-package analysis
+            (<code>testutil.BuildPairs</code>), crashing golangci-lint before it could report. This
+            masked <strong>23 real lint issues</strong>. Disabled SA5012 in config and fixed all 23:
+            exhaustruct rules (via <code>issues.exclusions</code> text regex — the
+            <code>settings.exhaustruct.exclude</code> is broken for local packages in v2.12),
+            unparam (removed dead <code>opts</code> param + <code>fromDataItem</code>), funlen,
+            tagalign, copyloopvar, mnd (named constants), varnamelen, tparallel
+            (<code>t.Cleanup</code>), godoclint (canonical doc.go), nolintlint cleanup.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>go.work Untracked + Removed from Disk</h4>
-          <p>go.work was force-tracked despite being in <code>.gitignore</code> — a landmine. Worse, buildflow's <code>ForEachGoModule</code> detects go.work <strong>on disk</strong> and expands <code>go test ./...</code> to ALL workspace modules including sibling repos (<code>../go-cqrs-lite/*</code>) whose tests fail. Fix: untracked go.work AND removed it from disk. Builds now use the committed <code>vendor/</code> directory.</p>
+          <p>
+            go.work was force-tracked despite being in <code>.gitignore</code> — a landmine. Worse,
+            buildflow's <code>ForEachGoModule</code> detects go.work <strong>on disk</strong> and
+            expands <code>go test ./...</code> to ALL workspace modules including sibling repos
+            (<code>../go-cqrs-lite/*</code>) whose tests fail. Fix: untracked go.work AND removed it
+            from disk. Builds now use the committed <code>vendor/</code> directory.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Committed vendor/ for Offline Nix Builds</h4>
-          <p><code>go-cqrs-lite</code> is a <strong>private</strong> GitHub repo — the nix sandbox cannot fetch it. Added committed <code>vendor/</code> (regenerated via <code>GOWORK=off go mod vendor</code>), set <code>vendorHash = null</code> in <code>flake.nix</code>, and excluded <code>vendor/**</code> from treefmt. <code>nix build</code> and <code>nix flake check</code> now pass offline.</p>
+          <p>
+            <code>go-cqrs-lite</code> is a <strong>private</strong> GitHub repo — the nix sandbox
+            cannot fetch it. Added committed <code>vendor/</code> (regenerated via
+            <code>GOWORK=off go mod vendor</code>), set <code>vendorHash = null</code> in
+            <code>flake.nix</code>, and excluded <code>vendor/**</code> from treefmt.
+            <code>nix build</code> and <code>nix flake check</code> now pass offline.
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Dead Code Removed + Duplication Eliminated</h4>
-          <p>Removed <code>fromDataItem</code> (dead migration code with no production caller) + 2 dependent benchmarks. This eliminated the duplications-checker clone group (art-dupl now reports <strong>0 clones</strong>).</p>
+          <p>
+            Removed <code>fromDataItem</code> (dead migration code with no production caller) + 2
+            dependent benchmarks. This eliminated the duplications-checker clone group (art-dupl now
+            reports <strong>0 clones</strong>).
+          </p>
         </div>
 
         <div class="card card-solution">
           <h4>Documentation Updated</h4>
-          <p>AGENTS.md: documented all build/lint gotchas (private dep, go.work-on-disk breaks buildflow, exhaustruct v2 quirk, SA5012 panic). <code>.gitattributes</code>: added <code>vendor/** linguist-vendored</code>.</p>
+          <p>
+            AGENTS.md: documented all build/lint gotchas (private dep, go.work-on-disk breaks
+            buildflow, exhaustruct v2 quirk, SA5012 panic). <code>.gitattributes</code>: added
+            <code>vendor/** linguist-vendored</code>.
+          </p>
         </div>
 
         <!-- b) PARTIALLY DONE -->
@@ -905,17 +943,30 @@
 
         <div class="card card-warning">
           <h4>Vendor Approach is a Workaround</h4>
-          <p>The 250MB committed <code>vendor/</code> is functional but heavy for a library. The real fix is making <code>go-cqrs-lite</code> public, after which we switch to a real <code>vendorHash</code> and drop <code>vendor/</code> entirely.</p>
+          <p>
+            The 250MB committed <code>vendor/</code> is functional but heavy for a library. The real
+            fix is making <code>go-cqrs-lite</code> public, after which we switch to a real
+            <code>vendorHash</code> and drop <code>vendor/</code> entirely.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Test Coverage at 75.6%</h4>
-          <p>Above average but not exemplary. <code>cmd/examples/github-sync</code> sits at 12.3% (CLI plumbing). Core packages (cqrs ~85%, sync 91%, crdt 97.6%) are strong. No coverage threshold is enforced yet.</p>
+          <p>
+            Above average but not exemplary. <code>cmd/examples/github-sync</code> sits at 12.3%
+            (CLI plumbing). Core packages (cqrs ~85%, sync 91%, crdt 97.6%) are strong. No coverage
+            threshold is enforced yet.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>LSP Diagnostics Show Stale Warnings</h4>
-          <p>The golangci-lint LSP cache hasn't refreshed post-edits — it still surfaces 17 warnings that the real <code>golangci-lint run</code> (exit 0) confirms are resolved. A <code>golangci-lint cache clean</code> + editor reload clears them. Not a real problem, but confusing during development.</p>
+          <p>
+            The golangci-lint LSP cache hasn't refreshed post-edits — it still surfaces 17 warnings
+            that the real <code>golangci-lint run</code> (exit 0) confirms are resolved. A
+            <code>golangci-lint cache clean</code> + editor reload clears them. Not a real problem,
+            but confusing during development.
+          </p>
         </div>
 
         <!-- c) NOT STARTED (rolled into improve) -->
@@ -925,22 +976,46 @@
 
         <div class="card card-problem">
           <h4>go.work Was Force-Tracked Despite .gitignore</h4>
-          <p>go.work was in <code>.gitignore</code> (line 9) yet <strong>tracked in git</strong> — committed back in <code>d1b8d5e</code>. This is a classic <code>git add -f</code> or pre-gitignore-commit landmine. It silently broke every sandboxed build (nix, buildflow) because <code>../go-cqrs-lite</code> doesn't exist there. Should have been caught by a <code>.gitignore</code> compliance check.</p>
+          <p>
+            go.work was in <code>.gitignore</code> (line 9) yet <strong>tracked in git</strong> —
+            committed back in <code>d1b8d5e</code>. This is a classic <code>git add -f</code> or
+            pre-gitignore-commit landmine. It silently broke every sandboxed build (nix, buildflow)
+            because <code>../go-cqrs-lite</code> doesn't exist there. Should have been caught by a
+            <code>.gitignore</code> compliance check.
+          </p>
         </div>
 
         <div class="card card-problem">
           <h4>Parallel Agent Committed Broken Intermediate State</h4>
-          <p>A parallel agent's commit <code>d1bdd71</code> ("Add UpdatedAtLWWResolver helper") captured my temporary <code>vendorHash = pkgs.lib.fakeHash</code> — a discovery-only value that breaks <code>nix build</code>. Caught during verification and fixed, but it shipped a broken <code>flake.nix</code> to HEAD. Concurrent agents editing the same files is inherently risky.</p>
+          <p>
+            A parallel agent's commit <code>d1bdd71</code> ("Add UpdatedAtLWWResolver helper")
+            captured my temporary <code>vendorHash = pkgs.lib.fakeHash</code> — a discovery-only
+            value that breaks <code>nix build</code>. Caught during verification and fixed, but it
+            shipped a broken <code>flake.nix</code> to HEAD. Concurrent agents editing the same
+            files is inherently risky.
+          </p>
         </div>
 
         <div class="card card-problem">
           <h4>Original exhaustruct Excludes Never Worked</h4>
-          <p>The <code>.golangci.yml</code> had <code>github\.com/larsartmann/go-localsync/pkg/provider\.</code> in <code>settings.exhaustruct.exclude</code> — but golangci-lint v2.12's exhaustruct matches short type forms (<code>provider.FetchConfig</code>), not full paths, in full multi-linter runs. The excludes were silently no-ops for 5 local types. Only stdlib full-path excludes (<code>net/http\.Client</code>) worked.</p>
+          <p>
+            The <code>.golangci.yml</code> had
+            <code>github\.com/larsartmann/go-localsync/pkg/provider\.</code> in
+            <code>settings.exhaustruct.exclude</code> — but golangci-lint v2.12's exhaustruct
+            matches short type forms (<code>provider.FetchConfig</code>), not full paths, in full
+            multi-linter runs. The excludes were silently no-ops for 5 local types. Only stdlib
+            full-path excludes (<code>net/http\.Client</code>) worked.
+          </p>
         </div>
 
         <div class="card card-problem">
           <h4>SA5012 Panic Hid 23 Real Issues</h4>
-          <p>For an unknown period, golangci-lint was <strong>crashing</strong> on this repo (SA5012 panic on <code>pkg/sync</code> tests) and reporting exit 3 — which masqueraded as "lint passes (no issues listed)" in casual review. 23 real issues accumulated unnoticed behind the crash.</p>
+          <p>
+            For an unknown period, golangci-lint was <strong>crashing</strong> on this repo (SA5012
+            panic on <code>pkg/sync</code> tests) and reporting exit 3 — which masqueraded as "lint
+            passes (no issues listed)" in casual review. 23 real issues accumulated unnoticed behind
+            the crash.
+          </p>
         </div>
 
         <!-- e) WHAT WE SHOULD IMPROVE -->
@@ -948,27 +1023,47 @@
 
         <div class="card">
           <h4>Make go-cqrs-lite Public</h4>
-          <p>The single highest-leverage improvement. Eliminates the 250MB vendor/ workaround, enables clean <code>vendorHash</code>, simplifies CI, and unblocks external contributors. Siblings (<code>go-branded-id</code>, <code>go-error-family</code>) are already public.</p>
+          <p>
+            The single highest-leverage improvement. Eliminates the 250MB vendor/ workaround,
+            enables clean <code>vendorHash</code>, simplifies CI, and unblocks external
+            contributors. Siblings (<code>go-branded-id</code>, <code>go-error-family</code>) are
+            already public.
+          </p>
         </div>
 
         <div class="card">
           <h4>Add a go.work-absent Guard</h4>
-          <p>A pre-commit or buildflow check that fails if <code>go.work</code> exists on disk. Prevents the recurring "buildflow tests sibling repos" failure mode. Cheap to add, high prevention value.</p>
+          <p>
+            A pre-commit or buildflow check that fails if <code>go.work</code> exists on disk.
+            Prevents the recurring "buildflow tests sibling repos" failure mode. Cheap to add, high
+            prevention value.
+          </p>
         </div>
 
         <div class="card">
           <h4>Enforce Coverage Threshold</h4>
-          <p>Add a coverage floor (e.g. 80%) to buildflow or CI. Current 75.6% has no gate — regressions slip in silently.</p>
+          <p>
+            Add a coverage floor (e.g. 80%) to buildflow or CI. Current 75.6% has no gate —
+            regressions slip in silently.
+          </p>
         </div>
 
         <div class="card">
           <h4>Reduce vendor/ Footprint</h4>
-          <p>If vendor/ must stay: strip test files, docs, and <code>.git</code> dirs from vendored deps to shrink 250MB. Or use <code>go mod vendor -e</code> + a <code>.gitattributes</code> cleanup.</p>
+          <p>
+            If vendor/ must stay: strip test files, docs, and <code>.git</code> dirs from vendored
+            deps to shrink 250MB. Or use <code>go mod vendor -e</code> + a
+            <code>.gitattributes</code> cleanup.
+          </p>
         </div>
 
         <div class="card">
           <h4>Coordinate Concurrent Agents</h4>
-          <p>The <code>d1bdd71</code> incident shows two agents editing <code>flake.nix</code> simultaneously is dangerous. Add a lockfile or serialization convention for shared files.</p>
+          <p>
+            The <code>d1bdd71</code> incident shows two agents editing
+            <code>flake.nix</code> simultaneously is dangerous. Add a lockfile or serialization
+            convention for shared files.
+          </p>
         </div>
 
         <!-- f) TOP 25 NEXT -->
@@ -983,31 +1078,158 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td>1</td><td><span class="badge badge-critical">Critical</span></td><td>Make go-cqrs-lite repo public (or decide to keep private)</td><td>Unblocks clean vendorHash, drops 250MB vendor/</td></tr>
-            <tr><td>2</td><td><span class="badge badge-critical">Critical</span></td><td>Commit all staged changes (vendor/, flake.nix, go.work deletion, lint fixes)</td><td>Persists the buildflow-green state</td></tr>
-            <tr><td>3</td><td><span class="badge badge-high">High</span></td><td>Add go.work-absent pre-commit guard</td><td>Prevents recurring sibling-test failure</td></tr>
-            <tr><td>4</td><td><span class="badge badge-high">High</span></td><td>Switch to real vendorHash once go-cqrs-lite is public</td><td>Removes vendor/ maintenance burden</td></tr>
-            <tr><td>5</td><td><span class="badge badge-high">High</span></td><td>Enforce 80% coverage threshold in CI/buildflow</td><td>Prevents silent coverage regressions</td></tr>
-            <tr><td>6</td><td><span class="badge badge-high">High</span></td><td>Update FEATURES.md with current feature inventory</td><td>Project docs freshness</td></tr>
-            <tr><td>7</td><td><span class="badge badge-high">High</span></td><td>Update TODO_LIST.md from session learnings</td><td>Capture open work</td></tr>
-            <tr><td>8</td><td><span class="badge badge-medium">Medium</span></td><td>Add README CI badge (buildflow status)</td><td>Trust signal for users</td></tr>
-            <tr><td>9</td><td><span class="badge badge-medium">Medium</span></td><td>Improve cmd/examples coverage (12.3% → 40%+)</td><td>Lowest-coverage package</td></tr>
-            <tr><td>10</td><td><span class="badge badge-medium">Medium</span></td><td>Add a second provider (e.g. gitlab) to validate Provider interface</td><td>Proves architecture extensibility</td></tr>
-            <tr><td>11</td><td><span class="badge badge-medium">Medium</span></td><td>Investigate SQLite read-model concurrent-write stress test</td><td>Production hardening</td></tr>
-            <tr><td>12</td><td><span class="badge badge-medium">Medium</span></td><td>Document the conflict-resolution plugin contract (CRDT)</td><td>Enables custom resolvers</td></tr>
-            <tr><td>13</td><td><span class="badge badge-medium">Medium</span></td><td>Add structured error codes to HTTP API responses</td><td>API consumer UX</td></tr>
-            <tr><td>14</td><td><span class="badge badge-medium">Medium</span></td><td>Review SnapshotStoreEveryNEvents threshold tuning</td><td>Replay performance</td></tr>
-            <tr><td>15</td><td><span class="badge badge-low">Low</span></td><td>Add OpenAPI spec export to docs/</td><td>API discoverability</td></tr>
-            <tr><td>16</td><td><span class="badge badge-low">Low</span></td><td>Strip non-essential files from vendor/ (docs, tests)</td><td>Repo size reduction</td></tr>
-            <tr><td>17</td><td><span class="badge badge-low">Low</span></td><td>Migrate remaining test clones flagged by dupl (test code)</td><td>Test maintainability</td></tr>
-            <tr><td>18</td><td><span class="badge badge-low">Low</span></td><td>Add ROADMAP.md for long-term direction</td><td>Planning clarity</td></tr>
-            <tr><td>19</td><td><span class="badge badge-low">Low</span></td><td>Benchmarks: re-add roundtrip benchmark once read model stabilizes</td><td>Performance tracking</td></tr>
-            <tr><td>20</td><td><span class="badge badge-low">Low</span></td><td>Review golangci-lint wsl_v5 strictness (blank-line rules)</td><td>Code style ergonomics</td></tr>
-            <tr><td>21</td><td><span class="badge badge-low">Low</span></td><td>Add a CHANGELOG.md (currently ad-hoc)</td><td>Release tracking</td></tr>
-            <tr><td>22</td><td><span class="badge badge-low">Low</span></td><td>Consider go-cqrs-lite dispatcher usage at runtime (currently wired but unused)</td><td>Architecture consistency</td></tr>
-            <tr><td>23</td><td><span class="badge badge-low">Low</span></td><td>Dockerize the example server for easy deployment</td><td>Ops readiness</td></tr>
-            <tr><td>24</td><td><span class="badge badge-low">Low</span></td><td>Add request tracing/correlation to HTTP layer</td><td>Observability</td></tr>
-            <tr><td>25</td><td><span class="badge badge-low">Low</span></td><td>Investigate WAL mode tuning for SQLite under load</td><td>Throughput</td></tr>
+            <tr>
+              <td>1</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>Make go-cqrs-lite repo public (or decide to keep private)</td>
+              <td>Unblocks clean vendorHash, drops 250MB vendor/</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td><span class="badge badge-critical">Critical</span></td>
+              <td>Commit all staged changes (vendor/, flake.nix, go.work deletion, lint fixes)</td>
+              <td>Persists the buildflow-green state</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>Add go.work-absent pre-commit guard</td>
+              <td>Prevents recurring sibling-test failure</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>Switch to real vendorHash once go-cqrs-lite is public</td>
+              <td>Removes vendor/ maintenance burden</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>Enforce 80% coverage threshold in CI/buildflow</td>
+              <td>Prevents silent coverage regressions</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>Update FEATURES.md with current feature inventory</td>
+              <td>Project docs freshness</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td><span class="badge badge-high">High</span></td>
+              <td>Update TODO_LIST.md from session learnings</td>
+              <td>Capture open work</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Add README CI badge (buildflow status)</td>
+              <td>Trust signal for users</td>
+            </tr>
+            <tr>
+              <td>9</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Improve cmd/examples coverage (12.3% → 40%+)</td>
+              <td>Lowest-coverage package</td>
+            </tr>
+            <tr>
+              <td>10</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Add a second provider (e.g. gitlab) to validate Provider interface</td>
+              <td>Proves architecture extensibility</td>
+            </tr>
+            <tr>
+              <td>11</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Investigate SQLite read-model concurrent-write stress test</td>
+              <td>Production hardening</td>
+            </tr>
+            <tr>
+              <td>12</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Document the conflict-resolution plugin contract (CRDT)</td>
+              <td>Enables custom resolvers</td>
+            </tr>
+            <tr>
+              <td>13</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Add structured error codes to HTTP API responses</td>
+              <td>API consumer UX</td>
+            </tr>
+            <tr>
+              <td>14</td>
+              <td><span class="badge badge-medium">Medium</span></td>
+              <td>Review SnapshotStoreEveryNEvents threshold tuning</td>
+              <td>Replay performance</td>
+            </tr>
+            <tr>
+              <td>15</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Add OpenAPI spec export to docs/</td>
+              <td>API discoverability</td>
+            </tr>
+            <tr>
+              <td>16</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Strip non-essential files from vendor/ (docs, tests)</td>
+              <td>Repo size reduction</td>
+            </tr>
+            <tr>
+              <td>17</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Migrate remaining test clones flagged by dupl (test code)</td>
+              <td>Test maintainability</td>
+            </tr>
+            <tr>
+              <td>18</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Add ROADMAP.md for long-term direction</td>
+              <td>Planning clarity</td>
+            </tr>
+            <tr>
+              <td>19</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Benchmarks: re-add roundtrip benchmark once read model stabilizes</td>
+              <td>Performance tracking</td>
+            </tr>
+            <tr>
+              <td>20</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Review golangci-lint wsl_v5 strictness (blank-line rules)</td>
+              <td>Code style ergonomics</td>
+            </tr>
+            <tr>
+              <td>21</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Add a CHANGELOG.md (currently ad-hoc)</td>
+              <td>Release tracking</td>
+            </tr>
+            <tr>
+              <td>22</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>
+                Consider go-cqrs-lite dispatcher usage at runtime (currently wired but unused)
+              </td>
+              <td>Architecture consistency</td>
+            </tr>
+            <tr>
+              <td>23</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Dockerize the example server for easy deployment</td>
+              <td>Ops readiness</td>
+            </tr>
+            <tr>
+              <td>24</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Add request tracing/correlation to HTTP layer</td>
+              <td>Observability</td>
+            </tr>
+            <tr>
+              <td>25</td>
+              <td><span class="badge badge-low">Low</span></td>
+              <td>Investigate WAL mode tuning for SQLite under load</td>
+              <td>Throughput</td>
+            </tr>
           </tbody>
         </table>
 
@@ -1015,7 +1237,12 @@
         <h2 id="question"><span class="num">06</span>The #1 Question I Cannot Answer</h2>
         <div class="callout callout-warning">
           <strong>Should go-cqrs-lite be made public?</strong>
-          This is the single decision that shapes the entire build/CI architecture. If <strong>public</strong>: we drop the 250MB vendor/ workaround, use a clean <code>vendorHash</code>, simplify CI, and external contributors can use the library. If it <strong>must stay private</strong>: the vendor/ approach is correct and permanent, but we should invest in a vendor-refresh automation step and accept the repo-size cost. I cannot make this call — it depends on go-cqrs-lite's ownership/intent, which only you know.
+          This is the single decision that shapes the entire build/CI architecture. If
+          <strong>public</strong>: we drop the 250MB vendor/ workaround, use a clean
+          <code>vendorHash</code>, simplify CI, and external contributors can use the library. If it
+          <strong>must stay private</strong>: the vendor/ approach is correct and permanent, but we
+          should invest in a vendor-refresh automation step and accept the repo-size cost. I cannot
+          make this call — it depends on go-cqrs-lite's ownership/intent, which only you know.
         </div>
 
         <!-- Root Cause Timeline -->
@@ -1025,24 +1252,36 @@
           <div class="compare-after">Root Cause &amp; Fix (After)</div>
         </div>
         <div class="compare-row">
-          <div><strong>golangci-lint [Failed]</strong><br>exit status 3 — SA5012 panic on pkg/sync tests</div>
+          <div>
+            <strong>golangci-lint [Failed]</strong><br />exit status 3 — SA5012 panic on pkg/sync
+            tests
+          </div>
           <div>Disabled SA5012 (upstream staticcheck bug); fixed 23 masked lint issues</div>
         </div>
         <div class="compare-row">
-          <div><strong>duplications-checker [Failed]</strong><br>1 clone group &gt; 30 tokens</div>
+          <div>
+            <strong>duplications-checker [Failed]</strong><br />1 clone group &gt; 30 tokens
+          </div>
           <div>Removed dead <code>fromDataItem</code> + benchmarks (the mirror clone)</div>
         </div>
         <div class="compare-row">
-          <div><strong>test-race / test-coverage [Failed]</strong><br>exit status 1 in buildflow, pass locally</div>
+          <div>
+            <strong>test-race / test-coverage [Failed]</strong><br />exit status 1 in buildflow,
+            pass locally
+          </div>
           <div>go.work on disk → buildflow tested sibling repos; removed go.work</div>
         </div>
         <div class="compare-row">
-          <div><strong>nix-build / nix-flake-check [Failed]</strong><br>git ls-remote: could not read Username</div>
+          <div>
+            <strong>nix-build / nix-flake-check [Failed]</strong><br />git ls-remote: could not read
+            Username
+          </div>
           <div>go-cqrs-lite is private; committed vendor/ + vendorHash=null</div>
         </div>
 
         <footer class="footer">
-          Generated 2026-06-19 &middot; Verified via <code>buildflow --build-mode full</code> (0 failures, 1m4s) &middot; All claims checked against source
+          Generated 2026-06-19 &middot; Verified via <code>buildflow --build-mode full</code> (0
+          failures, 1m4s) &middot; All claims checked against source
         </footer>
       </main>
     </div>
