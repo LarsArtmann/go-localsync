@@ -4,9 +4,7 @@ go 1.26.3
 
 require (
 	charm.land/log/v2 v2.0.0
-	github.com/caarlos0/env/v11 v11.4.1
 	github.com/danielgtaylor/huma/v2 v2.38.0
-	github.com/google/go-github/v69 v69.2.0
 	github.com/larsartmann/go-branded-id v0.3.1
 	github.com/larsartmann/go-cqrs-lite/codec/v2 v2.6.0
 	github.com/larsartmann/go-cqrs-lite/command/v2 v2.6.0
@@ -21,8 +19,6 @@ require (
 	github.com/larsartmann/go-cqrs-lite/storage/v2 v2.6.0
 	github.com/larsartmann/go-error-family v0.4.0
 	github.com/oklog/ulid/v2 v2.1.1
-	golang.org/x/oauth2 v0.36.0
-	golang.org/x/sync v0.21.0
 	modernc.org/sqlite v1.52.0
 )
 
@@ -30,7 +26,7 @@ require (
 	charm.land/lipgloss/v2 v2.0.4 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
-	github.com/charmbracelet/ultraviolet v0.0.0-20260615092913-2399af76d5b1 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260622092850-f39628c8a989 // indirect
 	github.com/charmbracelet/x/ansi v0.11.7 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
@@ -42,7 +38,6 @@ require (
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
-	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/dispatcher/v2 v2.6.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/listing/v2 v2.6.0 // indirect
@@ -65,6 +60,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
 	golang.org/x/exp v0.0.0-20260611194520-c48552f49976 // indirect
+	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 	modernc.org/libc v1.73.0 // indirect

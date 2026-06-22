@@ -61,11 +61,7 @@
 
 || # | Feature | Status | Package | Description |
 || --- | --------------------------- | ---------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-|| 26 | Provider Interface | FULLY_FUNCTIONAL | `pkg/provider` | Generic `Provider` interface: `Name()`, `Fetch()`, `FetchAll()`, `GetRateLimit()`. Any data source can implement it. |
-|| 27 | GitHub Provider | FULLY_FUNCTIONAL | `pkg/providers/github` | Full implementation: paginated user events, rate limiting, retry, error classification, raw JSON preservation. |
-|| 28 | Rate Limiting | FULLY_FUNCTIONAL | `pkg/providers/github` | Pre-fetch rate limit check with configurable `MinRemaining` and `MaxWait`. Waits for reset if within limits. |
-|| 29 | Retry with Backoff | FULLY_FUNCTIONAL | `pkg/providers/github` | Exponential backoff retry for 5xx and 429 errors. Configurable `MaxRetries`, `InitialBackoff`, `MaxBackoff`. |
-|| 30 | GitHub Error Classification | FULLY_FUNCTIONAL | `pkg/providers/github` | Maps HTTP status codes to typed errors: 401→`ErrInvalidToken`, 403→`ErrRateLimited`, 404→`ErrUserNotFound`. |
+|| 26 | Provider Interface | FULLY_FUNCTIONAL | `pkg/provider` | Generic `Provider` interface: `Name()`, `Fetch()`, `FetchAll()`, `GetRateLimit()`, plus config types (`RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. Any data source can implement it. The GitHub implementation lives in the consumer app (`github-local-sync/internal/github`), not the SDK. |
 
 ## Read Model
 
@@ -146,8 +142,8 @@
 
 || # | Feature | Status | Package | Description |
 || --- | ------------ | ---------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-|| 67 | Test Suite | FULLY_FUNCTIONAL | all | 283 test functions across 11 packages, all passing. |
-|| 68 | Test Helpers | FULLY_FUNCTIONAL | `pkg/providers/github` | Unexported test helpers: `NewTestEvent`, `NewErrorTestServer`, `NewFailingThenSucceedingTestServer`, `TestRetryConfig`. |
+|| 67 | Test Suite | FULLY_FUNCTIONAL | all | Test functions across all packages, all passing. |
+|| 68 | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, assertions. (GitHub-specific helpers moved to `github-local-sync/internal/github`.) |
 
 ## Quality
 

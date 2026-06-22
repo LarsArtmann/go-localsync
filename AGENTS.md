@@ -13,12 +13,10 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | `pkg/crdt/`                 | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy**                                                       |
 | `pkg/api/`                  | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                          |
 | `pkg/cqrs/`                 | CQRS integration layer using go-cqrs-lite **v2.2** (Decider, ReadModel, Projector, CQRSStack, Runner, TypedHandler), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go) |
-| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`)                                                                                                                 |
-| `pkg/providers/github/`     | GitHub provider implementation (only provider currently)                                                                                                                                              |
+| `pkg/provider/`             | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps. |
 | `pkg/sync/`                 | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`                                                              |
 | `pkg/id/`                   | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                                                                                       |
 | `pkg/errors/`               | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                              |
-| `cmd/examples/github-sync/` | Example CLI entry point (sync mode + HTTP server mode via `-server`)                                                                                                                                  |
 
 ### SyncStore Interface Seam
 
@@ -125,7 +123,6 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | Package                    | Tests | Coverage | Status                                                                                                     |
 | -------------------------- | ----- | -------- | ---------------------------------------------------------------------------------------------------------- |
 | `pkg/cqrs`                 | ~85   | ~85%     | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Runner, Correlation, CRDT Resolver, Concurrent Access |
-| `pkg/providers/github`     | 32    | 84.6%    | ✅ Client, fetch, retry, error handling, rate limit, BDD                                                   |
 | `pkg/sync`                 | 22    | 91.0%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                             |
 | `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                 |
 | `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                            |
