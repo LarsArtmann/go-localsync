@@ -1,0 +1,1169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>go-localsync Status Report &middot; 2026-06-22</title>
+    <style>
+      /* =========================================================================
+         BAUHAUS DARK — Dashboard template
+         Design language: form follows function. Primary colors on graphite.
+         Zero external dependencies: system fonts, no CDN, no build step.
+         Token architecture: see references/bauhaus-tokens.md
+         ========================================================================= */
+
+      :root {
+        /* --- Primitive palette (Bauhaus Dark) --- */
+        --color-graphite: #0e0e10;
+        --color-graphite-2: #18181d;
+        --color-graphite-3: #16161a;
+        --color-bone: #f4f4f0;
+        --color-red: #ff6b6b;
+        --color-blue: #6eb5ff;
+        --color-yellow: #f4d35e;
+        --color-amber: #ffb347;
+        --color-hairline: rgba(244, 244, 240, 0.12);
+        --color-hairline-strong: rgba(244, 244, 240, 0.25);
+
+        /* --- Semantic layer (shared vocabulary with editorial template) --- */
+        --surface: var(--color-graphite);
+        --surface-raised: var(--color-graphite-2);
+        --surface-sunken: var(--color-graphite-3);
+        --text: var(--color-bone);
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --text-faint: rgba(244, 244, 240, 0.45);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-amber);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+
+        /* --- Backward-compatible aliases (do not break consumer skills) --- */
+        --bg: var(--surface);
+        --bg-elevated: var(--surface-raised);
+        --bg-sunken: var(--surface-sunken);
+        --bg-card: var(--surface-raised);
+        --bg-code: var(--surface-sunken);
+        --ink: var(--text);
+        --ink-secondary: var(--text-muted);
+        --ink-muted: var(--text-faint);
+        --rose: var(--problem);
+        --rose-glow: color-mix(in srgb, var(--problem) 15%, transparent);
+        --emerald: var(--solution);
+        --emerald-glow: color-mix(in srgb, var(--solution) 15%, transparent);
+        --amber-glow: color-mix(in srgb, var(--warning) 15%, transparent);
+        --coral: var(--problem);
+        --coral-light: color-mix(in srgb, var(--problem) 15%, transparent);
+        --teal: var(--solution);
+        --teal-light: color-mix(in srgb, var(--solution) 15%, transparent);
+        --amber-light: color-mix(in srgb, var(--warning) 20%, transparent);
+
+        /* --- Shape --- */
+        --radius: 0px; /* Bauhaus default: sharp corners */
+        --radius-sm: 0px;
+
+        /* --- Type stacks (system only — zero external fonts) --- */
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      /* Sticky-header offset for anchor jumps */
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
+
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* --- Full-bleed top bar --- */
+      .top-bar {
+        background: var(--text);
+        color: var(--surface);
+        padding: 0.6rem 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* --- Layout: optional sticky sidebar TOC --- */
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .sidebar .label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .sidebar a {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.45rem 0.75rem;
+        border-left: 2px solid transparent;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+        font-weight: 500;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        color: var(--accent);
+        border-left-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* --- Headings --- */
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      h1 {
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        line-height: 1.1;
+        margin: 0 0 0.6rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--border-strong);
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+      }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+      h3 {
+        font-size: 1.1rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 0.98rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
+
+      /* --- Hero --- */
+      .hero {
+        padding: 1.5rem 0 1.5rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid var(--border-strong);
+      }
+      .hero-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--surface);
+        background: var(--accent);
+        padding: 0.3rem 0.7rem;
+        margin-bottom: 0.9rem;
+      }
+      .hero-subtitle {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0;
+      }
+
+      /* Bauhaus signature: geometric shape cluster (optional) */
+      .hero-shapes {
+        position: relative;
+        height: 80px;
+        margin-bottom: 1rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 56px;
+        height: 56px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 24px;
+        left: 72px;
+        width: 48px;
+        height: 48px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        left: 140px;
+        width: 0;
+        height: 0;
+        border-left: 28px solid transparent;
+        border-right: 28px solid transparent;
+        border-bottom: 48px solid var(--warning);
+      }
+
+      /* --- General cards --- */
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+
+      /* --- Issue cards --- */
+      .issue {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1.3rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--border-strong);
+      }
+      .issue-critical {
+        border-left-color: var(--problem);
+        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+      }
+      .issue-important {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+      }
+      .issue-nice {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+      }
+      .issue h3 {
+        margin-bottom: 0.3rem;
+      }
+      .issue .where {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin: 0.2rem 0 0.6rem;
+      }
+      .issue p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* --- Severity badges (used inside issue cards) --- */
+      .severity {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        margin-bottom: 0.6rem;
+        color: var(--surface);
+      }
+      .severity-critical {
+        background: var(--problem);
+      }
+      .severity-important {
+        background: var(--warning);
+      }
+      .severity-nice {
+        background: var(--solution);
+      }
+
+      /* --- Inline badges (used in tables) --- */
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.18rem 0.5rem;
+        border: 1px solid var(--border-strong);
+        color: var(--text-muted);
+      }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-medium {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+      .badge-low {
+        color: var(--text-muted);
+      }
+      .badge-fixed {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
+
+      /* --- Callouts (used inside issues or standalone) --- */
+      .callout {
+        margin: 0.8rem 0 0;
+        padding: 0.7rem 0.9rem;
+        border-left: 3px solid var(--border-strong);
+        background: color-mix(in srgb, var(--text) 5%, transparent);
+        font-size: 0.9rem;
+      }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 10%, transparent);
+      }
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 10%, transparent);
+      }
+
+      /* --- Stat cards / scorecards (aliased vocabulary) --- */
+      .stat-grid,
+      .scorecard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .stat-card,
+      .score-card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.1rem 1rem;
+        position: relative;
+      }
+      .stat-card::before,
+      .score-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border-strong);
+      }
+      .stat-bad,
+      .score-bad {
+        /* default top bar already set */
+      }
+      .stat-bad::before,
+      .score-bad::before {
+        background: var(--problem);
+      }
+      .stat-good::before,
+      .score-good::before {
+        background: var(--solution);
+      }
+      .stat-warn::before,
+      .score-warn::before {
+        background: var(--warning);
+      }
+      .stat-value,
+      .score {
+        font-family: var(--font-heading);
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.03em;
+        color: var(--text);
+      }
+      .stat-bad .stat-value,
+      .score-bad .score {
+        color: var(--problem);
+      }
+      .stat-good .stat-value,
+      .score-good .score {
+        color: var(--solution);
+      }
+      .stat-warn .stat-value,
+      .score-warn .score {
+        color: var(--warning);
+      }
+      .stat-label,
+      .score-card .label {
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-faint);
+        margin-top: 0.5rem;
+      }
+
+      /* --- Strengths list --- */
+      .strengths {
+        display: grid;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .strength {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.8rem;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .strength .check {
+        font-family: var(--font-mono);
+        font-weight: 700;
+        color: var(--solution);
+        font-size: 1.1rem;
+        line-height: 1.4;
+      }
+      .strength .text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .strength .text span {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      /* --- Tables --- */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.9rem;
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--surface-raised);
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      td {
+        padding: 0.6rem 0.9rem;
+        border-bottom: 1px solid var(--border);
+      }
+      tr:hover td {
+        background: var(--surface-raised);
+      }
+
+      /* --- Before/After comparison --- */
+      .compare-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin: 1rem 0 0.5rem;
+      }
+      .compare-before,
+      .compare-after {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.4rem 0.7rem;
+        color: var(--surface);
+      }
+      .compare-before {
+        background: var(--problem);
+      }
+      .compare-after {
+        background: var(--solution);
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .compare-row pre {
+        margin: 0;
+      }
+
+      /* --- Code blocks + syntax highlighting --- */
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      .tok-keyword {
+        color: var(--accent);
+      } /* func, type, struct, if, return */
+      .tok-type {
+        color: var(--warning);
+      } /* int, string, bool, error */
+      .tok-string {
+        color: var(--solution);
+      } /* "quoted strings" */
+      .tok-comment {
+        color: var(--text-faint);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #74a9ff;
+      } /* function names */
+      .tok-number {
+        color: var(--accent);
+      } /* 42, 3.14 */
+      .tok-generic {
+        color: var(--problem);
+      } /* T, ID in generics */
+      .tok-builtin {
+        color: #4dd9ff;
+      } /* make, len, append */
+      .tok-punct {
+        color: var(--text-muted);
+      } /* { } ( ) ; = : */
+      .tok-attr {
+        color: var(--accent);
+      } /* Nix attribute names */
+
+      /* --- Dependency tree / ASCII diagrams --- */
+      .dep-tree {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.7;
+        white-space: pre;
+        overflow-x: auto;
+      }
+      .dep-tree .root {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .dep-tree .ok {
+        color: var(--solution);
+      }
+      .dep-tree .unwanted {
+        color: var(--problem);
+      }
+
+      /* --- Inline node-and-arrow diagrams --- */
+      .diagram {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+      }
+      .node {
+        display: inline-block;
+        padding: 0.35rem 0.7rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: var(--surface-sunken);
+        border: 1px solid var(--border-strong);
+      }
+      .node-core {
+        background: var(--accent);
+        color: var(--surface);
+        border-color: var(--accent);
+      }
+      .node-problem {
+        background: var(--problem);
+        color: var(--surface);
+        border-color: var(--problem);
+      }
+      .node-good {
+        background: var(--solution);
+        color: var(--surface);
+        border-color: var(--solution);
+      }
+      .arrow {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Grids (responsive) --- */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      /* --- Inline TOC (alternative to sidebar) --- */
+      .toc {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.3rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .toc h3 {
+        margin-bottom: 0.5rem;
+      }
+      .toc ul {
+        list-style: none;
+        padding: 0;
+      }
+      .toc li {
+        margin: 0.25rem 0;
+      }
+      .toc a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .toc a:hover {
+        color: var(--accent);
+      }
+
+      /* --- Migration / numbered steps --- */
+      .migration-step {
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 1rem;
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+      }
+      .migration-num {
+        font-family: var(--font-mono);
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .migration-content h4 {
+        margin-bottom: 0.2rem;
+      }
+      .migration-content p {
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      /* --- Footer --- */
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        font-size: 0.8rem;
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Responsive --- */
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
+      @media (max-width: 768px) {
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .compare-header,
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+        .stat-grid,
+        .scorecard {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .migration-step {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Full-bleed top bar -->
+    <div class="top-bar">
+      <span>STATUS REPORT</span>
+      <span>2026-06-22</span>
+      <span>go-localsync &middot; pure-contract SDK</span>
+    </div>
+
+    <div class="layout">
+      <!-- Sidebar TOC (hidden below 1024px) -->
+      <aside class="sidebar" data-nav>
+        <nav>
+          <div class="label">Contents</div>
+          <a href="#summary">Summary</a>
+          <a href="#done">Fully Done</a>
+          <a href="#partial">Partially Done</a>
+          <a href="#notstarted">Not Started</a>
+          <a href="#fucked">Totally Fucked Up</a>
+          <a href="#improve">Improve</a>
+          <a href="#top25">Top 25 Next</a>
+          <a href="#question">My #1 Question</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <!-- Hero -->
+        <div class="hero">
+          <div class="hero-shapes">
+            <div class="circle"></div>
+            <div class="square"></div>
+            <div class="tri"></div>
+          </div>
+          <div class="hero-badge">Status Report &middot; Post-Docs-Freshness</div>
+          <h1>go-localsync Health Check</h1>
+          <p class="hero-subtitle">
+            Full audit of a pure-contract sync SDK after two big refactorings landed without doc
+            updates: the go-cqrs-lite v2&rarr;v3 migration and the pure-contract-library refactor.
+            All six core docs were just refreshed and verified; build, vet, tests, and lint are green.
+            One real bug (broken CI) was surfaced and honestly documented.
+          </p>
+        </div>
+
+        <nav class="toc">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#summary">Summary</a></li>
+            <li><a href="#done">Fully Done</a></li>
+            <li><a href="#partial">Partially Done</a></li>
+            <li><a href="#notstarted">Not Started</a></li>
+            <li><a href="#fucked">Totally Fucked Up</a></li>
+            <li><a href="#improve">What We Should Improve</a></li>
+            <li><a href="#top25">Top 25 Next</a></li>
+            <li><a href="#question">My #1 Question</a></li>
+          </ul>
+        </nav>
+
+        <!-- Summary Stats -->
+        <h2 id="summary"><span class="num">00</span>Summary</h2>
+        <div class="stat-grid">
+          <div class="stat-card stat-good">
+            <div class="stat-value">225</div>
+            <div class="stat-label">Tests Passing (9 pkgs)</div>
+          </div>
+          <div class="stat-card stat-good">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Lint Issues</div>
+          </div>
+          <div class="stat-card stat-warn">
+            <div class="stat-value">1</div>
+            <div class="stat-label">Broken CI Job</div>
+          </div>
+          <div class="stat-card stat-good">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Docs Refreshed</div>
+          </div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-value">10,921</div>
+            <div class="stat-label">Go LOC (86 files)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Domain Events</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Storage Backends</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">v3.0.0</div>
+            <div class="stat-label">go-cqrs-lite</div>
+          </div>
+        </div>
+
+        <div class="callout callout-solution">
+          <strong>Verification baseline.</strong>
+          <code>go build ./...</code> &middot; <code>go vet ./...</code> &middot;
+          <code>go test ./... -count=1</code> (225/225) &middot;
+          <code>golangci-lint run</code> (0 issues) &mdash; all green at the time of this report.
+        </div>
+
+        <!-- Strengths / Fully Done -->
+        <h2 id="done"><span class="num">a</span>Fully Done</h2>
+        <p>These are complete, tested, and production-ready.</p>
+        <div class="strengths">
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>CQRS architecture &mdash; no legacy CRUD</strong>
+              <span>Event-sourced via go-cqrs-lite v3: Decider, ReadModel, Projection, Stack. 3 domain events (<code>ItemSynced</code>, <code>ItemConflictFound</code>, <code>ItemDeleted</code>). Single authority for all state transitions.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Dual storage backends</strong>
+              <span>In-memory + SQLite (<code>modernc.org/sqlite</code>, no CGo) with identical <code>ReadModel</code> API, snapshots (<code>EveryNEvents(10)</code>), and correlation IDs.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Projection without a checkpoint store</strong>
+              <span>Synchronous live delivery via <code>bus.SubscribeAll</code> (watermill <code>EventBus</code>) + background <code>replayJournal</code> for SQLite catch-up. The idempotent projection tolerates replay/live overlap.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Pluggable CRDT conflict resolution</strong>
+              <span><code>CQRSConfig.ConflictResolver</code> accepts any <code>crdt.ConflictResolver[*model.Item]</code>. <code>LWWResolver</code> is default; nil = remote-wins. Exported <code>ConflictWinner</code> constants + <code>ParseConflictWinner</code>.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Clear DTO/domain boundary</strong>
+              <span><code>provider.Item</code> (DTO) &harr; <code>model.Item</code> (domain entity with <code>SchemaVersion</code>) via <code>item_adapter.go</code>. Decider, read model, events, and resolver all operate on <code>*model.Item</code>.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Sync engine</strong>
+              <span>Full + incremental sync, pagination, configurable rate limiting & retry, progress callbacks, conflict-aware sync, deterministic idempotent aggregate IDs.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>HTTP API</strong>
+              <span>Huma v2 + stdlib adapter. 4 endpoints (<code>GET /items</code>, <code>GET /stats</code>, <code>POST /sync</code>, <code>GET /health</code>) with auto-generated OpenAPI 3 spec.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Pure-contract library</strong>
+              <span>Defines the contract only; no provider or CLI shipped in-repo. Reference GitHub provider + CLI lives in <code>github-local-sync</code>. Branded phantom-type IDs for compile-time safety.</span>
+            </div>
+          </div>
+          <div class="strength">
+            <div class="check">+</div>
+            <div class="text">
+              <strong>Docs freshness pass (this session)</strong>
+              <span>Six core docs refreshed: AGENTS, FEATURES, README, ROADMAP, TODO_LIST, CHANGELOG (+ bonus CONTRIBUTING). Ghosts fixed, counts recomputed against code, README quick-start verified to compile.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-solution">
+          <h4>Test coverage by package</h4>
+          <table>
+            <thead>
+              <tr><th>Package</th><th>Tests</th><th>Coverage</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>pkg/data/model</code></td><td>10</td><td><span class="badge badge-fixed">100.0%</span></td></tr>
+              <tr><td><code>pkg/data/schema</code></td><td>4</td><td><span class="badge badge-fixed">100.0%</span></td></tr>
+              <tr><td><code>pkg/errors</code></td><td>9</td><td><span class="badge badge-fixed">100.0%</span></td></tr>
+              <tr><td><code>pkg/id</code></td><td>12</td><td><span class="badge badge-fixed">100.0%</span></td></tr>
+              <tr><td><code>pkg/provider</code></td><td>10</td><td><span class="badge badge-fixed">96.7%</span></td></tr>
+              <tr><td><code>pkg/crdt</code></td><td>53</td><td><span class="badge badge-fixed">96.2%</span></td></tr>
+              <tr><td><code>pkg/api</code></td><td>14</td><td><span class="badge badge-medium">94.0%</span></td></tr>
+              <tr><td><code>pkg/sync</code></td><td>24</td><td><span class="badge badge-medium">85.5%</span></td></tr>
+              <tr><td><code>pkg/cqrs</code></td><td>89</td><td><span class="badge badge-high">81.4%</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Partially Done -->
+        <h2 id="partial"><span class="num">b</span>Partially Done</h2>
+        <div class="card card-warning">
+          <h4>CI pipeline &mdash; test &amp; lint pass, build &amp; release do not</h4>
+          <p>
+            The <code>test</code> and <code>lint</code> jobs in <code>.github/workflows/ci.yml</code> pass.
+            The <code>build</code> job (and the <code>release</code> job that depends on it) are broken because
+            they target the deleted <code>./cmd/examples/github-sync</code> path (now in
+            <code>github-local-sync</code>). See <a href="#fucked">Totally Fucked Up</a>.
+          </p>
+        </div>
+        <div class="card card-warning">
+          <h4><code>pkg/cqrs</code> coverage at 81.4%</h4>
+          <p>
+            The largest and most important package has the lowest coverage. Error paths and some
+            store-factory branches remain untested. The other 8 packages are 85&ndash;100%.
+          </p>
+        </div>
+        <div class="card card-warning">
+          <h4>HTTP API &mdash; functional but unauthenticated</h4>
+          <p>
+            All four endpoints work and are tested, but there is no authentication, rate-limiting,
+            or pagination-header middleware. Fine for local use; not safe on a network.
+          </p>
+        </div>
+
+        <!-- Not Started -->
+        <h2 id="notstarted"><span class="num">c</span>Not Started</h2>
+        <p>Deliberately out-of-scope so far &mdash; the contract-library boundary pushes some of these into consumer apps.</p>
+        <div class="card">
+          <h4>Observability</h4>
+          <p>No OpenTelemetry instrumentation, metrics, or tracing. go-cqrs-lite v3 ships an <code>otel/v3</code> module that is imported indirectly but not wired.</p>
+        </div>
+        <div class="card">
+          <h4>Data export</h4>
+          <p>No JSON/CSV export of stored events. No <code>-export</code> equivalent.</p>
+        </div>
+        <div class="card">
+          <h4>Multi-user / multi-source sync</h4>
+          <p>Read model does not track which user/source an event belongs to in a first-class way. Multi-source is supported at the provider level but not surfaced as a sync feature.</p>
+        </div>
+        <div class="card">
+          <h4>Daemon / scheduler / TUI</h4>
+          <p>No cron/systemd integration, no watch mode, no Bubble Tea TUI. These are consumer-app concerns per the contract-library split.</p>
+        </div>
+        <div class="card">
+          <h4>Per-sync conflict-override</h4>
+          <p>Conflict resolution is configurable via <code>CQRSConfig.ConflictResolver</code> but not per-sync (<code>SyncOptions.ConflictResolver</code> does not exist yet).</p>
+        </div>
+
+        <!-- Totally Fucked Up -->
+        <h2 id="fucked"><span class="num">d</span>Totally Fucked Up</h2>
+        <div class="issue issue-critical">
+          <span class="severity severity-critical">Broken</span>
+          <h3>CI <code>build</code> &amp; <code>release</code> jobs reference deleted code</h3>
+          <div class="where">.github/workflows/ci.yml:96 (build) &middot; ci.yml:104 (release)</div>
+          <p>
+            The <code>build</code> job cross-compiles <code>./cmd/examples/github-sync</code>, which was removed
+            when the SDK became a pure contract library (the example moved to
+            <code>github-local-sync</code>). <code>go build</code> on a deleted package fails, so the build job
+            fails on every push and PR. The <code>release</code> job <code>needs: [build]</code>, so tagged
+            releases never run either. This is the single most damaging defect in the repo right now:
+            <strong>no release has succeeded since the contract-library refactor</strong>.
+          </p>
+          <div class="callout callout-solution">
+            <strong>Fix.</strong>
+            Rework for a library-appropriate release flow: either (a) delete the <code>build</code> &amp;
+            <code>release</code> jobs (a pure module has no binary), or (b) move binary builds/releases into
+            the <code>github-local-sync</code> consumer repo. Not fixed in this session because it is a design
+            decision &mdash; flagged as high priority in TODO_LIST.md.
+          </div>
+        </div>
+        <div class="issue issue-important">
+          <span class="severity severity-important">Tech debt</span>
+          <h3>Committed <code>vendor/</code> + <code>vendorHash = null</code> workaround</h3>
+          <div class="where">flake.nix &middot; vendor/ &middot; go.mod</div>
+          <p>
+            <code>go-cqrs-lite</code> is private, so the nix sandbox cannot fetch it. The workaround is a
+            committed <code>vendor/</code> dir with <code>vendorHash = null</code>. It works, but it bloats the
+            repo and forces manual <code>GOWORK=off go mod vendor</code> on every dep bump. The clean fix is to
+            make <code>go-cqrs-lite</code> public.
+          </p>
+        </div>
+
+        <!-- What to improve -->
+        <h2 id="improve"><span class="num">e</span>What We Should Improve</h2>
+        <div class="callout callout-warning">
+          <strong>Fix the release flow first.</strong>
+          Every other improvement is worthless if tagged releases keep silently failing. This unblocks all
+          downstream consumers (including <code>github-local-sync</code>).
+        </div>
+        <ul>
+          <li><strong>Make <code>go-cqrs-lite</code> public</strong> &mdash; drops <code>vendor/</code>, enables a real <code>vendorHash</code>, removes a recurring class of breakage.</li>
+          <li><strong>Decouple living docs from session history</strong> &mdash; AGENTS.md must stay a context file, never a changelog. CHANGELOG.md now owns history; the session logs under <code>docs/status/</code> are point-in-time archives.</li>
+          <li><strong>OpenTelemetry</strong> &mdash; the <code>otel/v3</code> module is already an indirect dep; wire spans for <code>Syncer.Sync</code>, <code>CQRSStack.SyncItems</code>, and HTTP middleware.</li>
+          <li><strong>Harden the HTTP API</strong> &mdash; auth middleware, rate limiting, pagination headers, richer OpenAPI error schemas.</li>
+          <li><strong>Adopt <code>UpcasterRegistry</code></strong> &mdash; the <code>schema.Version</code> foundation in <code>pkg/data/schema/</code> is ready for forward event migration; wire it.</li>
+          <li><strong>Push <code>pkg/cqrs</code> coverage up</strong> from 81.4% &mdash; it is the largest package and the lowest-covered one.</li>
+        </ul>
+
+        <!-- Top 25 next -->
+        <h2 id="top25"><span class="num">f</span>Top 25 Things To Do Next</h2>
+        <p>Sorted by impact &times; urgency. Badge = priority tier.</p>
+        <table>
+          <thead>
+            <tr><th>#</th><th>Priority</th><th>Task</th><th>Where</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td><span class="badge badge-critical">Critical</span></td><td>Fix CI <code>build</code>/<code>release</code> jobs (rework for a library, or move to consumer repo)</td><td><code>.github/workflows/ci.yml</code></td></tr>
+            <tr><td>2</td><td><span class="badge badge-critical">Critical</span></td><td>Make <code>go-cqrs-lite</code> public &rarr; drop <code>vendor/</code>, set real <code>vendorHash</code></td><td><code>go.mod</code>, <code>flake.nix</code>, <code>vendor/</code></td></tr>
+            <tr><td>3</td><td><span class="badge badge-high">High</span></td><td>Cut a real tagged release once CI is fixed (first release since contract refactor)</td><td>git tags &rarr; CI release job</td></tr>
+            <tr><td>4</td><td><span class="badge badge-high">High</span></td><td>OpenTelemetry: spans for <code>Syncer.Sync</code>, <code>CQRSStack.SyncItems</code>, HTTP mw</td><td><code>pkg/sync</code>, <code>pkg/cqrs</code>, <code>pkg/api</code></td></tr>
+            <tr><td>5</td><td><span class="badge badge-high">High</span></td><td>HTTP API auth middleware (API key or JWT)</td><td><code>pkg/api/server.go</code></td></tr>
+            <tr><td>6</td><td><span class="badge badge-high">High</span></td><td>Raise <code>pkg/cqrs</code> coverage from 81.4% (error paths, store-factory branches)</td><td><code>pkg/cqrs/*_test.go</code></td></tr>
+            <tr><td>7</td><td><span class="badge badge-medium">Medium</span></td><td>API rate-limiting middleware (protect <code>POST /sync</code>)</td><td><code>pkg/api</code></td></tr>
+            <tr><td>8</td><td><span class="badge badge-medium">Medium</span></td><td>API pagination headers (<code>X-Total-Count</code>, cursor)</td><td><code>pkg/api/handlers.go</code></td></tr>
+            <tr><td>9</td><td><span class="badge badge-medium">Medium</span></td><td>Richer OpenAPI error schemas per endpoint</td><td><code>pkg/api</code></td></tr>
+            <tr><td>10</td><td><span class="badge badge-medium">Medium</span></td><td>Adopt <code>UpcasterRegistry</code> for schema evolution (foundation ready)</td><td><code>pkg/data/schema</code>, <code>pkg/cqrs</code></td></tr>
+            <tr><td>11</td><td><span class="badge badge-medium">Medium</span></td><td>Per-sync conflict override: <code>SyncOptions.ConflictResolver</code></td><td><code>pkg/sync/types.go</code></td></tr>
+            <tr><td>12</td><td><span class="badge badge-medium">Medium</span></td><td>Consistent structured log fields (source, page, event_id)</td><td><code>pkg/sync</code></td></tr>
+            <tr><td>13</td><td><span class="badge badge-medium">Medium</span></td><td>Data export (JSON/CSV) of stored events</td><td>read model</td></tr>
+            <tr><td>14</td><td><span class="badge badge-low">Low</span></td><td>Real provider smoke test in <code>github-local-sync</code> (cross-repo)</td><td>consumer app</td></tr>
+            <tr><td>15</td><td><span class="badge badge-low">Low</span></td><td>Multi-source sync: first-class source tracking in read model</td><td><code>pkg/data/model</code>, <code>pkg/cqrs</code></td></tr>
+            <tr><td>16</td><td><span class="badge badge-low">Low</span></td><td>Real-time sync protocol (<code>SyncRequest</code>/<code>SyncResponse</code> from <code>pkg/crdt</code>)</td><td><code>pkg/crdt</code></td></tr>
+            <tr><td>17</td><td><span class="badge badge-low">Low</span></td><td>Event retention / TTL policy</td><td><code>pkg/cqrs</code></td></tr>
+            <tr><td>18</td><td><span class="badge badge-low">Low</span></td><td>Add <code>govalid</code> struct tags to <code>SyncOptions</code>, <code>CQRSConfig</code></td><td><code>pkg/sync</code>, <code>pkg/cqrs</code></td></tr>
+            <tr><td>19</td><td><span class="badge badge-low">Low</span></td><td>Expand <code>CONTRIBUTING.md</code>: architecture guide, file-split conventions, testing rules</td><td><code>CONTRIBUTING.md</code></td></tr>
+            <tr><td>20</td><td><span class="badge badge-low">Low</span></td><td>Deduplicate the dated session reports under <code>docs/status/</code> (archive strategy)</td><td><code>docs/status/</code></td></tr>
+            <tr><td>21</td><td><span class="badge badge-low">Low</span></td><td>Benchmarks: track sync throughput in CI (regression guard)</td><td><code>pkg/cqrs</code> bench tests</td></tr>
+            <tr><td>22</td><td><span class="badge badge-low">Low</span></td><td>Decide event-retention vs. unbounded growth tradeoff</td><td>design</td></tr>
+            <tr><td>23</td><td><span class="badge badge-low">Low</span></td><td>Snapshot restore tests across restart (file-based SQLite)</td><td><code>pkg/cqrs/sqlite_*</code></td></tr>
+            <tr><td>24</td><td><span class="badge badge-low">Low</span></td><td>Document the contract-library boundary for new contributors</td><td><code>README.md</code>, <code>AGENTS.md</code></td></tr>
+            <tr><td>25</td><td><span class="badge badge-low">Low</span></td><td>Consider a minimal in-repo example provider behind a build tag</td><td><code>example/</code></td></tr>
+          </tbody>
+        </table>
+
+        <!-- Top Question -->
+        <h2 id="question"><span class="num">g</span>My #1 Question</h2>
+        <div class="callout callout-warning">
+          <strong>What does a tagged release of a pure-Go library module look like without a binary?</strong>
+          <p>
+            I cannot decide the CI fix (task #1) without your answer. The old pipeline cross-compiled a
+            <code>gh-sync</code> binary and attached it to a GitHub Release. A contract library has no binary.
+            The realistic options are: <strong>(a)</strong> delete <code>build</code> &amp; <code>release</code>
+            jobs entirely (rely on Go module proxy + git tags), or <strong>(b)</strong> keep a release job that
+            only publishes release notes / a changelog artifact on tag. Which do you want? Once you pick, I
+            will rewrite <code>.github/workflows/ci.yml</code> accordingly and verify a dry-run.
+          </p>
+        </div>
+
+        <footer class="footer">
+          Generated 2026-06-22 &middot; All metrics verified against source code (build, vet, test, lint). Point-in-time snapshot.
+        </footer>
+      </main>
+    </div>
+
+    <!-- Progressive-enhancement scrollspy. Nav still works without JS via anchor links. -->
+    <script>
+      (function () {
+        if (!("IntersectionObserver" in window)) return;
+        var nav = document.querySelector("[data-nav]");
+        if (!nav) return;
+        var links = nav.querySelectorAll('a[href^="#"]');
+        var ids = Array.from(links).map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        if (!sections.length) return;
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                links.forEach(function (link) {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href") === "#" + entry.target.id,
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
+        );
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
+      })();
+    </script>
+  </body>
+</html>
