@@ -11,26 +11,25 @@ is designed so the following goals can be achieved.
   modules](https://github.com/golang/go/wiki/Modules).
   - [Semantic import
     versioning](https://github.com/golang/go/wiki/Modules#semantic-import-versioning)
-    will be used.
-    - Versions will comply with [semver
-      2.0](https://semver.org/spec/v2.0.0.html) with the following exceptions.
-      - New methods may be added to exported API interfaces. All exported
-        interfaces that fall within this exception will include the following
-        paragraph in their public documentation.
+    will be used. - Versions will comply with [semver
+    2.0](https://semver.org/spec/v2.0.0.html) with the following exceptions. - New methods may be added to exported API interfaces. All exported
+    interfaces that fall within this exception will include the following
+    paragraph in their public documentation.
 
-        > Warning: methods may be added to this interface in minor releases.
+            > Warning: methods may be added to this interface in minor releases.
 
-    - If a module is version `v2` or higher, the major version of the module
-      must be included as a `/vN` at the end of the module paths used in
-      `go.mod` files (e.g., `module go.opentelemetry.io/otel/v2`, `require
-go.opentelemetry.io/otel/v2 v2.0.1`) and in the package import path
-      (e.g., `import "go.opentelemetry.io/otel/v2/trace"`). This includes the
-      paths used in `go get` commands (e.g., `go get
-go.opentelemetry.io/otel/v2@v2.0.1`). Note there is both a `/v2` and a
-      `@v2.0.1` in that example. One way to think about it is that the module
-      name now includes the `/v2`, so include `/v2` whenever you are using the
-      module name).
-    - If a module is version `v0` or `v1`, do not include the major version in
+        - If a module is version `v2` or higher, the major version of the module
+          must be included as a `/vN` at the end of the module paths used in
+          `go.mod` files (e.g., `module go.opentelemetry.io/otel/v2`, `require
+
+    go.opentelemetry.io/otel/v2 v2.0.1`) and in the package import path
+  (e.g., `import "go.opentelemetry.io/otel/v2/trace"`). This includes the
+  paths used in `go get`commands (e.g.,`go get
+    go.opentelemetry.io/otel/v2@v2.0.1`). Note there is both a `/v2`and a
+ `@v2.0.1`in that example. One way to think about it is that the module
+  name now includes the`/v2`, so include `/v2`whenever you are using the
+    module name).
+    - If a module is version`v0`or`v1`, do not include the major version in
       either the module path or the import path.
 
   - Modules will be used to encapsulate signals and components.
@@ -67,22 +66,19 @@ go.opentelemetry.io/otel/v2@v2.0.1`). Note there is both a `/v2` and a
   modules](https://github.com/golang/go/wiki/Modules).
   - [Semantic import
     versioning](https://github.com/golang/go/wiki/Modules#semantic-import-versioning)
-    will be used.
-    - Versions will comply with [semver 2.0](https://semver.org/spec/v2.0.0.html).
-    - If a module is version `v2` or higher, the
-      major version of the module must be included as a `/vN` at the end of the
-      module paths used in `go.mod` files (e.g., `module
+    will be used. - Versions will comply with [semver 2.0](https://semver.org/spec/v2.0.0.html). - If a module is version `v2` or higher, the
+    major version of the module must be included as a `/vN` at the end of the
+    module paths used in `go.mod` files (e.g., `module
 go.opentelemetry.io/contrib/instrumentation/host/v2`, `require
 go.opentelemetry.io/contrib/instrumentation/host/v2 v2.0.1`) and in the
-      package import path (e.g., `import
+    package import path (e.g., `import
 "go.opentelemetry.io/contrib/instrumentation/host/v2"`). This includes
-      the paths used in `go get` commands (e.g., `go get
+    the paths used in `go get` commands (e.g., `go get
 go.opentelemetry.io/contrib/instrumentation/host/v2@v2.0.1`. Note there
-      is both a `/v2` and a `@v2.0.1` in that example. One way to think about
-      it is that the module name now includes the `/v2`, so include `/v2`
-      whenever you are using the module name).
-    - If a module is version `v0` or `v1`, do not include the major version
-      in either the module path or the import path.
+    is both a `/v2` and a `@v2.0.1` in that example. One way to think about
+    it is that the module name now includes the `/v2`, so include `/v2`
+    whenever you are using the module name). - If a module is version `v0` or `v1`, do not include the major version
+    in either the module path or the import path.
   - In addition to public APIs, telemetry produced by stable instrumentation
     will remain stable and backwards compatible. This is to avoid breaking
     alerts and dashboards.

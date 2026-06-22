@@ -8,15 +8,16 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 ## Architecture
 
-| Package         | Purpose                                                                                                                                                                                                                |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/crdt/`     | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy**                                                                        |
-| `pkg/api/`      | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                           |
-| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.0** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go)                          |
-| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps. |
-| `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`                                                                               |
-| `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                                                                                                        |
-| `pkg/errors/`   | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                               |
+| Package         | Purpose                                                                                                                                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pkg/crdt/`     | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy**                                                                                                  |
+| `pkg/api/`      | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                     |
+| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.0** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go)                                                    |
+| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                           |
+| `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`                                                                                                         |
+| `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion`), `model.Key`, `model.ItemFilter`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
+| `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                                                                                                                                  |
+| `pkg/errors/`   | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                         |
 
 ### SyncStore Interface Seam
 
@@ -31,9 +32,9 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 ### Core Components
 
 - `aggregate_id.go` — deterministic SHA256→hex from (source, sourceID) with sync.Map cache, shared `itemKey` helper
-- `decider.go` — `SyncItemState{Item *provider.Item, Deleted bool}`, pure Apply (the event applier) + DecideSync/DecideDelete, `HasChanged` checks UpdatedAt/Type/ActorLogin/RepoName/RepoURL
+- `decider.go` — `SyncItemState{Item *model.Item, Deleted bool}`, pure Apply (the event applier) + DecideSync/DecideDelete, `HasChanged` checks UpdatedAt/Type/ActorLogin/RepoName/RepoURL
 - `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`
-- `readmodel.go` — `ReadModel` interface + `ItemFilter`, stores `*provider.Item` directly
+- `readmodel.go` — `ReadModel` interface (embeds `model.ItemReader`) + `model.ItemFilter`, stores `*model.Item` directly
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
 - `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `event.Projection`, wired via direct bus subscription (live) + manual journal replay (persistence)
@@ -52,17 +53,17 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **Command dispatch**: `SyncItem`/`DeleteItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
 - **Query dispatch**: Read model queries dispatched through `query.Dispatcher` with typed queries. Enables logging, metrics middleware.
 - **Remote wins (default)**: on conflict with no resolver configured, the incoming item always overwrites (remote-wins LWW)
-- **Pluggable conflict resolution**: `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*provider.Item]` — `LWWResolver`, custom merge, etc.
+- **Pluggable conflict resolution**: `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*model.Item]` — `LWWResolver`, custom merge, etc.
 
 ### Conflict Flow
 
 `ConflictAwareSyncer` delegates entirely to `SyncStore.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and:
 
-1. If no resolver configured (nil): emits `ItemConflictFound{Winner: "remote"}` + `ItemSynced` with the incoming item (default remote-wins)
-2. If resolver configured: calls `resolver.Resolve(&Conflict{Local, Remote, ...})` and uses the winner for `ItemSynced`. `ItemConflictFound{Winner}` records which side won ("remote" or "local")
+1. If no resolver configured (nil): emits `ItemConflictFound{Winner: ConflictWinnerRemote}` + `ItemSynced` with the incoming item (default remote-wins)
+2. If resolver configured: calls `resolver.Resolve(&Conflict{Local, Remote, ...})` and uses the winner for `ItemSynced`. `ItemConflictFound{Winner}` records which side won (`ConflictWinnerRemote` or `ConflictWinnerLocal`)
 3. On resolver error: falls back to remote-wins
 
-The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `ActionConflictLocal`. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
+The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exported with `ParseConflictWinner` for safe payload→enum decoding (unknown values default to remote-wins). The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `ActionConflictLocal`. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
 
 ## Development Workflow
 
@@ -71,7 +72,7 @@ The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `Acti
 1. **Optional**: Create `go.work` in project root ONLY for live-editing local sibling checkouts. It is in `.gitignore` and **must never be committed or left on disk during `buildflow`** — buildflow detects go.work on disk and expands `go test ./...` to ALL workspace modules (including `../go-cqrs-lite/*`), causing sibling test failures. With the committed `vendor/` directory, builds and tests work offline without go.work (`go build ./...`, `go test ./...` use vendor mode automatically). Remove go.work before running buildflow:
 
    ```
-   go 1.26.3
+   go 1.26.4
 
    use .
 
@@ -125,18 +126,19 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package          | Tests | Coverage | Status                                                                                                     |
-| ---------------- | ----- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`       | 89    | ~85%     | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, CRDT Resolver, Concurrent Access |
-| `pkg/sync`       | 24    | 91.0%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                             |
-| `pkg/id`         | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                 |
-| `pkg/errors`     | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                            |
-| `pkg/provider`   | 10    | 95.8%    | ✅ Item validation                                                                                         |
-| `pkg/api`        | 14    | 92.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                           |
-| `pkg/crdt`       | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                                |
-| `pkg/data/model` | 14    | 100%     | ✅ Item, Key, Validate, ItemFilter builder                                                                 |
+| Package           | Tests | Coverage | Status                                                                                                     |
+| ----------------- | ----- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `pkg/cqrs`        | 89    | 81.4%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, CRDT Resolver, Concurrent Access |
+| `pkg/sync`        | 24    | 85.5%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                             |
+| `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                 |
+| `pkg/errors`      | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                            |
+| `pkg/provider`    | 10    | 96.7%    | ✅ Item validation, RateLimitCache                                                                         |
+| `pkg/api`         | 14    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                           |
+| `pkg/crdt`        | 53    | 96.2%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                                |
+| `pkg/data/model`  | 10    | 100.0%   | ✅ Item, Key, Validate, ItemFilter builder                                                                 |
+| `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                           |
 
-**224 total test functions** across 8 test packages.
+**225 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -144,10 +146,10 @@ Run: `go test ./... -count=1`
 
 Storage backends are selected via `CQRSConfig.Backend` in `cqrs.NewCQRSStack()`.
 
-| Backend  | Flag/Config        | Use Case                                 |
-| -------- | ------------------ | ---------------------------------------- |
-| `memory` | `--backend memory` | Testing, development (default)           |
-| `sqlite` | `--backend sqlite` | Local SQLite file via modernc.org/sqlite |
+| Backend  | Config value        | Use Case                                 |
+| -------- | ------------------- | ---------------------------------------- |
+| `memory` | `Backend: "memory"` | Testing, development (default)           |
+| `sqlite` | `Backend: "sqlite"` | Local SQLite file via modernc.org/sqlite |
 
 Event store + read model use the same backend.
 
@@ -191,12 +193,10 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/middleware/v3`       | v3.0.0  | EventLogging + CommandRetry middleware                           |
 | `go-cqrs-lite/watermill/v3`        | v3.0.0  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)   |
 | `go-cqrs-lite/storage/v3`          | v3.0.0  | SQLite event store, snapshot, KV store                           |
-| `go-branded-id`                    | v0.3.0  | Branded phantom-type IDs for compile-time safety                 |
-| `go-error-family`                  | v0.3.0  | Structured error classification + user-facing message templates  |
-| `go-github/v69`                    | v69.2.0 | GitHub API client                                                |
-| `modernc.org/sqlite`               | v1.51.0 | Pure-Go SQLite driver (replaces tursogo for local SQLite)        |
+| `go-branded-id`                    | v0.3.1  | Branded phantom-type IDs for compile-time safety                 |
+| `go-error-family`                  | v0.4.0  | Structured error classification + user-facing message templates  |
+| `modernc.org/sqlite`               | v1.52.0 | Pure-Go SQLite driver (no CGo)                                   |
 | `charm.land/log/v2`                | v2.0.0  | Structured logging                                               |
-| `caarlos0/env/v11`                 | v11.4.1 | Environment variable config                                      |
 | `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter    |
 
 ### Test Dependencies
@@ -214,18 +214,18 @@ Two tables managed by the CQRS stack:
 
 ## go-cqrs-lite Integration
 
-| Area           | go-localsync                                                                                            | go-cqrs-lite                                                                 |
-| -------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                | `id.Of[T]` — same memory layout                                              |
-| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                       | `event.Store` + `event.Bus` via storage/memory + watermill modules           |
-| Conflict       | `DecideSync` produces ItemConflictFound events                                                          | Error taxonomy with 5 families                                               |
-| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                            | Projected from events via custom `Projector` (no `projection/` module in v3) |
-| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`ListItems`, `CountItems`, `GetItemTypes`) | `sync.SyncStore` interface defined in consumer package                       |
-| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                   | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                |
-| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                        | Eliminates all manual json.Marshal/Unmarshal                                 |
-| Projection     | Direct `bus.SubscribeAll` (sync) + background `replayJournal` (SQLite catch-up); no checkpoint store    | `projection/` deleted in v3 — manual replay replaces it                      |
-| Snapshots      | `SQLiteSnapshotStore` (Turso) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                | Caps replay cost, persists across restarts                                   |
-| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                | Unique per sync run for debugging                                            |
-| Logging        | `middleware.EventLogging` via charm log adapter                                                         | Structured logging of all domain events                                      |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                         | Smart retry classification for provider errors                               |
-| Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                    | `int` → `uint64` in v3; no `int()` casts needed                              |
+| Area           | go-localsync                                                                                             | go-cqrs-lite                                                                 |
+| -------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                 | `id.Of[T]` — same memory layout                                              |
+| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                        | `event.Store` + `event.Bus` via storage/memory + watermill modules           |
+| Conflict       | `DecideSync` produces ItemConflictFound events                                                           | Error taxonomy with 5 families                                               |
+| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                             | Projected from events via custom `Projector` (no `projection/` module in v3) |
+| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`, `GetTypes`) | `sync.SyncStore` interface defined in consumer package                       |
+| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                    | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                |
+| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                         | Eliminates all manual json.Marshal/Unmarshal                                 |
+| Projection     | Direct `bus.SubscribeAll` (sync) + background `replayJournal` (SQLite catch-up); no checkpoint store     | `projection/` deleted in v3 — manual replay replaces it                      |
+| Snapshots      | `SQLiteSnapshotStore` (SQLite) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                | Caps replay cost, persists across restarts                                   |
+| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                 | Unique per sync run for debugging                                            |
+| Logging        | `middleware.EventLogging` via charm log adapter                                                          | Structured logging of all domain events                                      |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                          | Smart retry classification for provider errors                               |
+| Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                     | `int` → `uint64` in v3; no `int()` casts needed                              |

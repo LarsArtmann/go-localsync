@@ -16,51 +16,51 @@ However, **two documentation files (FEATURES.md, TODO_LIST.md) are stale** and r
 
 ## a) FULLY DONE ✅
 
-| Area | Detail |
-|------|--------|
-| **v3 Migration** | All 15 cqrs-lite module deps upgraded `/v2` → `/v3`. 6 breaking changes adapted: `projection/` deleted → manual journal replay; `memory/` moved + `NewMemoryBus` deleted → `storage/memory` + `watermill.EventBus`; `Fold`→`Apply`; `Version` int→uint64; `io.Closer` removed from interfaces → type-assert; all import paths updated. |
-| **Middleware dedup** | Replaced 60 LOC of hand-rolled `commandLoggingMiddleware`/`queryLoggingMiddleware` with v3 library equivalents (`middleware.CommandLogging`/`QueryLogging`). Eliminates SA1019 deprecation + removes `charm.land/log` dep from 2 files. |
-| **Type safety** | `ConflictWinner` constants exported (`ConflictWinnerRemote`/`ConflictWinnerLocal`); `ParseConflictWinner(string)` added as controlled entry point replacing unsafe `ConflictWinner(jsonString)` cast. |
-| **Test improvement** | `TestCQRSStack_SQLiteRestart_PreservesData` improved: renamed from stale `ProjectionRunner_ReplaysOnRestart`, added item-data verification + post-restart sync to confirm full operational recovery. |
-| **Docs accuracy** | `AGENTS.md` updated: dependency table (v3.0.0), architecture descriptions (Fold→Apply, projection deletion), go.work template (18 v3 modules), testing table (224 tests, 8 packages). |
-| **Build pipeline** | `go build` ✅ · `go vet` ✅ · `golangci-lint` 0 issues ✅ · `go test` 224 tests pass ✅ · `gofmt` clean ✅ |
-| **Git hygiene** | 4 commits, each self-contained, all pushed. Clean working tree. |
+| Area                 | Detail                                                                                                                                                                                                                                                                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **v3 Migration**     | All 15 cqrs-lite module deps upgraded `/v2` → `/v3`. 6 breaking changes adapted: `projection/` deleted → manual journal replay; `memory/` moved + `NewMemoryBus` deleted → `storage/memory` + `watermill.EventBus`; `Fold`→`Apply`; `Version` int→uint64; `io.Closer` removed from interfaces → type-assert; all import paths updated. |
+| **Middleware dedup** | Replaced 60 LOC of hand-rolled `commandLoggingMiddleware`/`queryLoggingMiddleware` with v3 library equivalents (`middleware.CommandLogging`/`QueryLogging`). Eliminates SA1019 deprecation + removes `charm.land/log` dep from 2 files.                                                                                                |
+| **Type safety**      | `ConflictWinner` constants exported (`ConflictWinnerRemote`/`ConflictWinnerLocal`); `ParseConflictWinner(string)` added as controlled entry point replacing unsafe `ConflictWinner(jsonString)` cast.                                                                                                                                  |
+| **Test improvement** | `TestCQRSStack_SQLiteRestart_PreservesData` improved: renamed from stale `ProjectionRunner_ReplaysOnRestart`, added item-data verification + post-restart sync to confirm full operational recovery.                                                                                                                                   |
+| **Docs accuracy**    | `AGENTS.md` updated: dependency table (v3.0.0), architecture descriptions (Fold→Apply, projection deletion), go.work template (18 v3 modules), testing table (224 tests, 8 packages).                                                                                                                                                  |
+| **Build pipeline**   | `go build` ✅ · `go vet` ✅ · `golangci-lint` 0 issues ✅ · `go test` 224 tests pass ✅ · `gofmt` clean ✅                                                                                                                                                                                                                             |
+| **Git hygiene**      | 4 commits, each self-contained, all pushed. Clean working tree.                                                                                                                                                                                                                                                                        |
 
 ### Metrics (current)
 
-| Package | Tests | Coverage | LOC |
-|---------|-------|----------|-----|
-| `pkg/cqrs` | 89 | 81.4% | 1,974 |
-| `pkg/crdt` | 52 | 96.2% | 614 |
-| `pkg/sync` | 24 | 85.5% | 450 |
-| `pkg/api` | 14 | 94.0% | 337 |
-| `pkg/data/model` | 14 | 100% | 234 |
-| `pkg/provider` | 10 | 96.7% | 239 |
-| `pkg/id` | 12 | 100% | 88 |
-| `pkg/errors` | 9 | 100% | 157 |
-| **Total** | **224** | **avg 91.7%** | **4,293** |
+| Package          | Tests   | Coverage      | LOC       |
+| ---------------- | ------- | ------------- | --------- |
+| `pkg/cqrs`       | 89      | 81.4%         | 1,974     |
+| `pkg/crdt`       | 52      | 96.2%         | 614       |
+| `pkg/sync`       | 24      | 85.5%         | 450       |
+| `pkg/api`        | 14      | 94.0%         | 337       |
+| `pkg/data/model` | 14      | 100%          | 234       |
+| `pkg/provider`   | 10      | 96.7%         | 239       |
+| `pkg/id`         | 12      | 100%          | 88        |
+| `pkg/errors`     | 9       | 100%          | 157       |
+| **Total**        | **224** | **avg 91.7%** | **4,293** |
 
 ---
 
 ## b) PARTIALLY DONE 🟡
 
-| Item | What's done | What's missing |
-|------|-------------|----------------|
-| **`AGENTS.md`** | Dependency table, architecture, go.work template, testing table all updated | Minor: `CQRS Architecture > Core Components` list still says "dual projection runner" in stack.go description (line 40) — cosmetic |
-| **Vendor regeneration** | `vendor/` fully regenerated for v3, `vendorHash = null` in flake.nix, `vendor/**` excluded from treefmt | Long-term: making go-cqrs-lite public would allow a real `vendorHash` instead of `null` |
-| **Replay path** | Manual `replayJournal` works, tested by `TestCQRSStack_SQLiteRestart_PreservesData` | No checkpointing — full journal re-read on every restart (acceptable for local-sync scale, but not for large datasets) |
+| Item                    | What's done                                                                                             | What's missing                                                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **`AGENTS.md`**         | Dependency table, architecture, go.work template, testing table all updated                             | Minor: `CQRS Architecture > Core Components` list still says "dual projection runner" in stack.go description (line 40) — cosmetic |
+| **Vendor regeneration** | `vendor/` fully regenerated for v3, `vendorHash = null` in flake.nix, `vendor/**` excluded from treefmt | Long-term: making go-cqrs-lite public would allow a real `vendorHash` instead of `null`                                            |
+| **Replay path**         | Manual `replayJournal` works, tested by `TestCQRSStack_SQLiteRestart_PreservesData`                     | No checkpointing — full journal re-read on every restart (acceptable for local-sync scale, but not for large datasets)             |
 
 ---
 
 ## c) NOT STARTED ⬜
 
-| Item | Impact | Notes |
-|------|--------|-------|
-| **Update `FEATURES.md`** | Medium | Still references v2 (`Fold`, `projection.Runner`), deleted `cmd/examples`, stale status "FULLY_FUNCTIONAL" descriptions. Last updated session 17 (2026-06-12). |
-| **Update `TODO_LIST.md`** | Medium | Still references v2 blockers ("go-cqrs-lite upstream WIP" — now resolved!), deleted `cmd/examples` coverage, wrong test count (264+ → 224). Last updated session 17. |
-| **`watermill.CatchUpSubscriber` migration** | Low | Would add checkpointed replay for large datasets. Requires restructuring projection through watermill message router + `kv.TypedStore` adaptation. Deferred — current idempotent full-replay works. |
-| **`stack.Materialize` adoption** | Low | v3 provides `stack.Materialize[V,K]` — a tombstone-aware projection builder over `kv.TypedStore`. Would require re-encoding go-localsync's custom `ReadModel` into a `kv.TypedStore` interface. Significant refactor for marginal payoff. |
-| **CI pipeline update** | Low | CI uses `GONOSUMCHECK` env vars — may need updating to reflect v3 module paths. Not verified this session. |
+| Item                                        | Impact | Notes                                                                                                                                                                                                                                     |
+| ------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Update `FEATURES.md`**                    | Medium | Still references v2 (`Fold`, `projection.Runner`), deleted `cmd/examples`, stale status "FULLY_FUNCTIONAL" descriptions. Last updated session 17 (2026-06-12).                                                                            |
+| **Update `TODO_LIST.md`**                   | Medium | Still references v2 blockers ("go-cqrs-lite upstream WIP" — now resolved!), deleted `cmd/examples` coverage, wrong test count (264+ → 224). Last updated session 17.                                                                      |
+| **`watermill.CatchUpSubscriber` migration** | Low    | Would add checkpointed replay for large datasets. Requires restructuring projection through watermill message router + `kv.TypedStore` adaptation. Deferred — current idempotent full-replay works.                                       |
+| **`stack.Materialize` adoption**            | Low    | v3 provides `stack.Materialize[V,K]` — a tombstone-aware projection builder over `kv.TypedStore`. Would require re-encoding go-localsync's custom `ReadModel` into a `kv.TypedStore` interface. Significant refactor for marginal payoff. |
+| **CI pipeline update**                      | Low    | CI uses `GONOSUMCHECK` env vars — may need updating to reflect v3 module paths. Not verified this session.                                                                                                                                |
 
 ---
 
@@ -110,33 +110,33 @@ One **near-miss worth calling out:** In the initial migration I skipped `golangc
 
 Sorted by **impact ÷ effort** (highest first).
 
-| # | Task | Impact | Effort | Category |
-|---|------|--------|--------|----------|
-| 1 | **Update `TODO_LIST.md`** — remove resolved v2 blockers, deleted cmd/examples, fix test count | High | Low | Docs |
-| 2 | **Update `FEATURES.md`** — replace Fold/projection.Runner references with v3 reality | High | Low | Docs |
-| 3 | **Fix AGENTS.md line 40** — "dual projection runner" → accurate description | Low | Trivial | Docs |
-| 4 | **Add concurrent sync-during-replay test** — verify idempotent overlap assumption | Medium | Low | Testing |
-| 5 | **Cover the 18.6% gap in `pkg/cqrs`** — identify and test uncovered error paths | Medium | Medium | Testing |
-| 6 | **Add `ParseConflictWinner` unit test** — verify unknown values default to remote | Low | Trivial | Testing |
-| 7 | **Consider `stack.Materialize` for projection** — evaluate if the tombstone-aware builder fits | Medium | High | Architecture |
-| 8 | **Evaluate `watermill.CatchUpSubscriber`** — for checkpointed incremental replay | Medium | High | Architecture |
-| 9 | **Seal `SyncItemState` invariant** — make "deleted ⇒ Item nil" unrepresentable | Medium | Medium | Type Model |
-| 10 | **Replace `charm.land/log` in stack.go** — use stdlib `slog` directly if adapter adds no value | Low | Low | Dependencies |
-| 11 | **Remove `SyncItemCommand.Options` field** — move event options to decider/repository layer | Medium | Medium | Architecture |
-| 12 | **Add `SyncOutcome` typed key** — replace bare `struct{}` context key with typed wrapper | Low | Low | Type Model |
-| 13 | **Make go-cqrs-lite public** — enables real `vendorHash`, drops committed vendor/ | High | External | Dependencies |
-| 14 | **Add CI verification** — confirm CI pipeline works with v3 module paths | Medium | Low | CI |
-| 15 | **Add `buildflow` full run** — verify the complete nix pipeline passes end-to-end | Medium | Low | CI |
-| 16 | **Add coverage badge to README** — surface the 91.7% average | Low | Low | Docs |
-| 17 | **Document v3 migration in CHANGELOG** — if the project maintains one | Low | Low | Docs |
-| 18 | **Add domain language glossary** — `docs/DOMAIN_LANGUAGE.md` per AGENTS.md conventions | Medium | Medium | Docs |
-| 19 | **Consider `sync.SyncSummary` streaming** — for large syncs, yield results incrementally | Low | High | Feature |
-| 20 | **Add rate-limit backpressure test** — verify `RateLimitCache` under concurrent access | Low | Medium | Testing |
-| 21 | **Evaluate `go-error-family` v0.4 patterns** — check if new constructors improve error paths | Low | Low | Dependencies |
-| 22 | **Add `pkg/testutil` tests** — currently 0% coverage | Low | Low | Testing |
-| 23 | **Consider OpenTelemetry tracing** — v3 middleware has `EventTracing`/`CommandTracing` | Low | Medium | Feature |
-| 24 | **Audit `nolint` directives (13)** — verify each is still necessary after v3 migration | Low | Low | Quality |
-| 25 | **Add provider example** — since SDK is pure contract, a reference provider would help consumers | Medium | Medium | Feature |
+| #   | Task                                                                                             | Impact | Effort   | Category     |
+| --- | ------------------------------------------------------------------------------------------------ | ------ | -------- | ------------ |
+| 1   | **Update `TODO_LIST.md`** — remove resolved v2 blockers, deleted cmd/examples, fix test count    | High   | Low      | Docs         |
+| 2   | **Update `FEATURES.md`** — replace Fold/projection.Runner references with v3 reality             | High   | Low      | Docs         |
+| 3   | **Fix AGENTS.md line 40** — "dual projection runner" → accurate description                      | Low    | Trivial  | Docs         |
+| 4   | **Add concurrent sync-during-replay test** — verify idempotent overlap assumption                | Medium | Low      | Testing      |
+| 5   | **Cover the 18.6% gap in `pkg/cqrs`** — identify and test uncovered error paths                  | Medium | Medium   | Testing      |
+| 6   | **Add `ParseConflictWinner` unit test** — verify unknown values default to remote                | Low    | Trivial  | Testing      |
+| 7   | **Consider `stack.Materialize` for projection** — evaluate if the tombstone-aware builder fits   | Medium | High     | Architecture |
+| 8   | **Evaluate `watermill.CatchUpSubscriber`** — for checkpointed incremental replay                 | Medium | High     | Architecture |
+| 9   | **Seal `SyncItemState` invariant** — make "deleted ⇒ Item nil" unrepresentable                   | Medium | Medium   | Type Model   |
+| 10  | **Replace `charm.land/log` in stack.go** — use stdlib `slog` directly if adapter adds no value   | Low    | Low      | Dependencies |
+| 11  | **Remove `SyncItemCommand.Options` field** — move event options to decider/repository layer      | Medium | Medium   | Architecture |
+| 12  | **Add `SyncOutcome` typed key** — replace bare `struct{}` context key with typed wrapper         | Low    | Low      | Type Model   |
+| 13  | **Make go-cqrs-lite public** — enables real `vendorHash`, drops committed vendor/                | High   | External | Dependencies |
+| 14  | **Add CI verification** — confirm CI pipeline works with v3 module paths                         | Medium | Low      | CI           |
+| 15  | **Add `buildflow` full run** — verify the complete nix pipeline passes end-to-end                | Medium | Low      | CI           |
+| 16  | **Add coverage badge to README** — surface the 91.7% average                                     | Low    | Low      | Docs         |
+| 17  | **Document v3 migration in CHANGELOG** — if the project maintains one                            | Low    | Low      | Docs         |
+| 18  | **Add domain language glossary** — `docs/DOMAIN_LANGUAGE.md` per AGENTS.md conventions           | Medium | Medium   | Docs         |
+| 19  | **Consider `sync.SyncSummary` streaming** — for large syncs, yield results incrementally         | Low    | High     | Feature      |
+| 20  | **Add rate-limit backpressure test** — verify `RateLimitCache` under concurrent access           | Low    | Medium   | Testing      |
+| 21  | **Evaluate `go-error-family` v0.4 patterns** — check if new constructors improve error paths     | Low    | Low      | Dependencies |
+| 22  | **Add `pkg/testutil` tests** — currently 0% coverage                                             | Low    | Low      | Testing      |
+| 23  | **Consider OpenTelemetry tracing** — v3 middleware has `EventTracing`/`CommandTracing`           | Low    | Medium   | Feature      |
+| 24  | **Audit `nolint` directives (13)** — verify each is still necessary after v3 migration           | Low    | Low      | Quality      |
+| 25  | **Add provider example** — since SDK is pure contract, a reference provider would help consumers | Medium | Medium   | Feature      |
 
 ---
 
