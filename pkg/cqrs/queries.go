@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"charm.land/log/v2"
+	"github.com/larsartmann/go-cqrs-lite/middleware/v3"
 	"github.com/larsartmann/go-cqrs-lite/query/v3"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -56,7 +56,7 @@ type GetTypesQuery struct {
 func wireQueryDispatcher(rm ReadModel) (*query.Dispatcher, error) {
 	dispatcher := query.NewDispatcher()
 
-	dispatcher.Use(queryLoggingMiddleware(log.Default()))
+	dispatcher.Use(middleware.QueryLogging(newSlogLogger()))
 
 	if err := query.RegisterTyped[*ListItemsQuery, []*model.Item](
 		dispatcher, queryTypeListItem,

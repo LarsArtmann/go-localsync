@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/command/v3"
 	"github.com/larsartmann/go-cqrs-lite/decider/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
@@ -51,7 +50,7 @@ func wireCommandDispatcher(
 ) (*command.Dispatcher, error) {
 	dispatcher := command.NewDispatcher()
 
-	dispatcher.Use(commandLoggingMiddleware(log.Default()))
+	dispatcher.Use(middleware.CommandLogging(newSlogLogger()))
 	dispatcher.Use(commandValidationMiddleware())
 	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
 

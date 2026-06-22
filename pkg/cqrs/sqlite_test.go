@@ -75,7 +75,7 @@ func TestCQRSStack_Projection_SubscribesEvents(t *testing.T) {
 	}
 }
 
-func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
+func TestCQRSStack_SQLiteRestart_PreservesData(t *testing.T) {
 	tmpDir := t.TempDir()
 	dbPath := filepath.Join(tmpDir, "replay-test.db")
 
@@ -100,6 +100,16 @@ func TestCQRSStack_ProjectionRunner_ReplaysOnRestart(t *testing.T) {
 	count, err := stack2.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 2 {
-		t.Errorf("expected count=2 after replay, got %d", count)
+		t.Errorf("expected count=2 after restart, got %d", count)
 	}
+
+	got, err := stack2.Get(ctx, "github", id.NewExternalID("replay-1"))
+	testutil.MustNoError(t, err)
+	if got == nil {
+		t.Fatal("item replay-1 should be readable after restart")
+	}
+	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type after restart")
+
+	testutil.MustNoError(t, stack2.SyncItem(ctx, testItem("replay-3", "WatchEvent")))
+	waitForCount(t, stack2, ctx, 3)
 }
