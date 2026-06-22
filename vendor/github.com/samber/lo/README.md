@@ -1,4 +1,3 @@
-
 # lo - Iterate over slices, maps, channels...
 
 [![tag](https://img.shields.io/github/tag/samber/lo.svg)](https://github.com/samber/lo/releases)
@@ -23,10 +22,11 @@ A utility library based on Go 1.18+ generics that makes it easier to work with s
 - [samber/mo](https://github.com/samber/mo): Monads based on Go 1.18+ Generics (Option, Result, Either...)
 
 What makes it different from **samber/ro**?
+
 - lo: synchronous helpers across finite sequences (maps, slices...)
 - ro: processing of infinite data streams for event-driven scenarios
 
-----
+---
 
 <div align="center">
   <sup><b>💖 Sponsored by:</b></sup>
@@ -41,7 +41,7 @@ What makes it different from **samber/ro**?
   </a>
 </div>
 
-----
+---
 
 **Why this name?**
 
@@ -885,6 +885,7 @@ slice := lo.Concat(nil, []int{1, 2}, nil, []int{3, 4}, nil)
 slice := lo.Concat[int]()
 // []int{}
 ```
+
 ### Interleave
 
 Round-robin alternating input slices and sequentially appending value at index into result.
@@ -1892,6 +1893,7 @@ maps := lo.ChunkEntries(
 //    {"d": 4, "e": 5},
 // }
 ```
+
 [[play](https://go.dev/play/p/X_YQL6mmoD-)]
 
 ### MapKeys
@@ -2960,7 +2962,8 @@ ok := lo.Some([]int{0, 1, 2, 3, 4, 5}, []int{0, 6})
 
 ok := lo.Some([]int{0, 1, 2, 3, 4, 5}, []int{-1, 6})
 // false
-```
+
+````
 
 ### SomeBy
 
@@ -2972,7 +2975,7 @@ b := SomeBy([]int{1, 2, 3, 4}, func(x int) bool {
     return x < 3
 })
 // true
-```
+````
 
 ### None
 
@@ -3775,6 +3778,7 @@ nth, err := lo.Nth([]int{0, 1, 2, 3}, -2)
 ### NthOr
 
 Returns the element at index `nth` of the collection. If `nth` is negative, it returns the `nth` element from the end. If `nth` is out of slice bounds, it returns the provided fallback value
+
 ```go
 nth := lo.NthOr([]int{10, 20, 30, 40, 50}, 2, -1)
 // 30
@@ -3789,7 +3793,8 @@ nth := lo.NthOr([]int{10, 20, 30, 40, 50}, 5, -1)
 ### NthOrEmpty
 
 Returns the element at index `nth` of the collection. If `nth` is negative, it returns the `nth` element from the end. If `nth` is out of slice bounds, it returns the zero value for the element type (e.g., 0 for integers, "" for strings, etc).
-``` go
+
+```go
 nth := lo.NthOrEmpty([]int{10, 20, 30, 40, 50}, 2)
 // 30
 

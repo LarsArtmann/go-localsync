@@ -1,4 +1,3 @@
-
 ## Benchmark
 
 ### NowNano()

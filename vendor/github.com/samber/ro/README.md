@@ -1,4 +1,3 @@
-
 # ro - Streams & reactive programming for Go
 
 [![tag](https://img.shields.io/github/tag/samber/ro.svg)](https://github.com/samber/ro/releases)
@@ -9,11 +8,11 @@
 [![Coverage](https://img.shields.io/codecov/c/github/samber/ro)](https://app.codecov.io/gh/samber/ro)
 [![Contributors](https://img.shields.io/github/contributors/samber/ro)](https://github.com/samber/ro/graphs/contributors)
 
-> A *Go* implementation of the [ReactiveX](https://reactivex.io/) spec.
+> A _Go_ implementation of the [ReactiveX](https://reactivex.io/) spec.
 
 The purpose of Reactive Programming is to simplify the development of event-driven and asynchronous applications by providing a declarative and composable way to handle streams of data or events.
 
-----
+---
 
 <div align="center">
   <sup><b>💖 Sponsored by:</b></sup>
@@ -28,7 +27,7 @@ The purpose of Reactive Programming is to simplify the development of event-driv
   </a>
 </div>
 
-----
+---
 
 ![cover](/docs/static/img/cover.png)
 
@@ -39,6 +38,7 @@ The purpose of Reactive Programming is to simplify the development of event-driv
 - [samber/mo](https://github.com/samber/mo): Monads based on Go 1.18+ Generics (Option, Result, Either...)
 
 What makes it different from **samber/lo**?
+
 - lo: synchronous helpers across finite sequences (maps, slices...)
 - ro: processing of infinite data streams for event-driven scenarios
 
@@ -78,7 +78,6 @@ values, err := ro.Collect(observable)
 
 Now you discovered the paradigm, follow the documentation and turn reactive: [🚀 Getting started](https://ro.samber.dev/docs/getting-started)
 
-
 ## 🚀 Install
 
 ```sh
@@ -96,6 +95,7 @@ This library has minimal dependencies outside the Go standard library.
 [Full documentation here](https://ro.samber.dev/docs/operator).
 
 The `ro` library provides all basic operators:
+
 - **Creation operators**: The data source, usually the first argument of `ro.Pipe`
 - **Chainable operators**: They filter, validate, transform, enrich... messages
   - **Transforming operators**: They transform items emitted by an `Observable`
@@ -115,6 +115,7 @@ The `ro` library provides a rich ecosystem of plugins for various use cases:
 [Full documentation here](https://ro.samber.dev/docs/plugins).
 
 ### Data Manipulation
+
 - **Bytes** (`plugins/bytes`) - String and byte slice manipulation operators
 - **Strings** (`plugins/strings`) - String manipulation operators
 - **Sort** (`plugins/sort`) - Sorting operators
@@ -122,21 +123,25 @@ The `ro` library provides a rich ecosystem of plugins for various use cases:
 - **SIMD** (`plugins/exp/simd`) - SIMD-accelerated transformations
 
 ### Encoding & Serialization
+
 - **JSON** (`plugins/encoding/json`) - JSON marshaling and unmarshaling
 - **CSV** (`plugins/encoding/csv`) - CSV reading and writing
 - **Base64** (`plugins/encoding/base64`) - Base64 encoding and decoding
 - **Gob** (`plugins/encoding/gob`) - Go binary serialization
 
 ### Scheduling & Timing
+
 - **Cron** (`plugins/cron`) - Schedule jobs using cron expressions or duration intervals
 - **ICS** (`plugins/ics`) - Read and parse ICS/iCal calendars
 
 ### Network & I/O
+
 - **HTTP** (`plugins/http`) - HTTP request operators
 - **I/O** (`plugins/io`) - File and stream I/O operators
 - **File System** (`plugins/fsnotify`) - File system monitoring operators
 
 ### Observability & Logging
+
 - **Log** (`plugins/observability/log`) - Standard logging operators
 - **Zap** (`plugins/observability/zap`) - Structured logging with zap
 - **Logrus** (`plugins/observability/logrus`) - Structured logging with logrus
@@ -146,26 +151,32 @@ The `ro` library provides a rich ecosystem of plugins for various use cases:
 - **Oops** (`plugins/samber/oops`) - Structured error handling
 
 ### Rate Limiting
+
 - **Native** (`plugins/ratelimit/native`) - Native rate limiting operators
 - **Ulule** (`plugins/ratelimit/ulule`) - Rate limiting with ulule/limiter
 
 ### Text Processing
+
 - **Regular Expressions** (`plugins/regexp`) - Regular expression operators
 - **Templates** (`plugins/template`) - Template processing operators
 
 ### System Integration
+
 - **Process** (`plugins/proc`) - Process execution operators
 - **Signal** (`plugins/signal`) - Signal handling operators
 - **Iterators** (`plugins/iter`) - Iterator operators
 - **PSI** (`plugins/samber/psi`) - Starvation notifier
 
 ### Data Validation
+
 - **Validation** (`plugins/ozzo/ozzo-validation`) - Data validation operators
 
 ### Testing
+
 - **Testing** (`plugins/testify`) - Testing utilities
 
 ### Utilities
+
 - **HyperLogLog** (`plugins/hyperloglog`) - Cardinality estimation operators
 - **Hot** (`plugins/samber/hot`) - In-memory cache
 
