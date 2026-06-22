@@ -38,7 +38,7 @@ func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) 
 		ExternalID:     id.NewExternalID(extID),
 		Source:         id.NewProviderID(source),
 		Type:           id.NewEventTypeID(eventType),
-		ActorLogin:     id.NewActorID(actor),
+		ActorLogin:     id.NewActorLogin(actor),
 		ActorAvatarURL: "https://avatar.example.com/" + actor,
 		RepoName:       id.NewRepoID(repo),
 		RepoURL:        "https://github.com/" + repo,

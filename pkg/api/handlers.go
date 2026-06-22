@@ -23,7 +23,7 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 	}
 
 	if input.ActorLogin != "" {
-		a := id.NewActorID(input.ActorLogin)
+		a := id.NewActorLogin(input.ActorLogin)
 		filter.ActorLogin = &a
 	}
 

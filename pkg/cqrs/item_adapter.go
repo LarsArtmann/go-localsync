@@ -50,7 +50,7 @@ func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 		ExternalID:     id.NewExternalID(payload.SourceID),
 		Source:         id.NewProviderID(payload.Source),
 		Type:           id.NewEventTypeID(payload.Type),
-		ActorLogin:     id.NewActorID(payload.ActorLogin),
+		ActorLogin:     id.NewActorLogin(payload.ActorLogin),
 		ActorAvatarURL: payload.ActorAvatarURL,
 		RepoName:       id.NewRepoID(payload.RepoName),
 		RepoURL:        payload.RepoURL,

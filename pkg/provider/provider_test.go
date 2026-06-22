@@ -94,7 +94,7 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 		ExternalID:     id.NewExternalID("12345"),
 		Source:         id.NewProviderID("github"),
 		Type:           id.NewEventTypeID("PushEvent"),
-		ActorLogin:     id.NewActorID("octocat"),
+		ActorLogin:     id.NewActorLogin("octocat"),
 		ActorAvatarURL: "https://avatar.url",
 		RepoName:       id.NewRepoID("org/repo"),
 		RepoURL:        "https://github.com/org/repo",

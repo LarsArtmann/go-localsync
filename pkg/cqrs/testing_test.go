@@ -123,7 +123,7 @@ func testItem(sourceID, itemType string) *provider.Item {
 		ExternalID: id.NewExternalID(sourceID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(itemType),
-		ActorLogin: id.NewActorID("testuser"),
+		ActorLogin: id.NewActorLogin("testuser"),
 		RepoName:   id.NewRepoID("owner/repo"),
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),

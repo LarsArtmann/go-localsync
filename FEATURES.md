@@ -98,7 +98,7 @@
 
 | #   | Feature           | Status           | Package           | Description                                                                                                                                                                 |
 | --- | ----------------- | ---------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 40  | Branded IDs       | FULLY_FUNCTIONAL | `pkg/id`          | 6 phantom-type IDs: `ItemID` (ULID), `ExternalID`, `ProviderID`, `ActorID`, `RepoID`, `EventTypeID` (all string). Compile-time type safety via go-branded-id.               |
+| 40  | Branded IDs       | FULLY_FUNCTIONAL | `pkg/id`          | 6 phantom-type IDs: `ItemID` (ULID), `ExternalID`, `ProviderID`, `ActorLogin`, `RepoID`, `EventTypeID` (all string). Compile-time type safety via go-branded-id.            |
 | 41  | Item ID (ULID)    | FULLY_FUNCTIONAL | `pkg/id`          | `ItemID` uses ULID for sortable, unique internal identifiers. `NewItemID()` generates with crypto/rand.                                                                     |
 | 42  | Structured Errors | FULLY_FUNCTIONAL | `pkg/errors`      | Sentinel errors via `go-error-family` constructors with intrinsic classification (Rejection, Transient, Infrastructure). `WithDetail`, `Wrap`, `Wrapf` preserve family.     |
 | 43  | Domain Model      | FULLY_FUNCTIONAL | `pkg/data/model`  | `Item` (domain entity with `SchemaVersion`), `Key`, `ItemFilter`, `ItemReader` interface, `Validate()`. The single canonical model used across decider, read model, events. |

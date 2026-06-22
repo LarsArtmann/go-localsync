@@ -80,7 +80,7 @@ func (stubProvider) fetchResult() *provider.FetchResult {
 			ExternalID: id.NewExternalID("event-1"),
 			Source:     id.NewProviderID("stub"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorID("octocat"),
+			ActorLogin: id.NewActorLogin("octocat"),
 			RepoName:   id.NewRepoID("octocat/Hello-World"),
 			CreatedAt:  now,
 			UpdatedAt:  now,
@@ -133,7 +133,7 @@ type Item struct {
 	ExternalID     id.ExternalID  // Original ID from source system
 	Source         id.ProviderID  // Provider name (e.g., "github")
 	Type           id.EventTypeID // Item type (e.g., "PushEvent")
-	ActorLogin     id.ActorID     // Who triggered it
+	ActorLogin     id.ActorLogin    // Who triggered it
 	ActorAvatarURL string
 	RepoName       id.RepoID      // Repository (e.g., "owner/repo")
 	RepoURL        string
@@ -204,7 +204,7 @@ ItemID        // id.ID[ItemBrand, ulid.ULID]      — internal ULID-based identi
 ExternalID    // id.ID[ExternalBrand, string]      — provider-specific item identifier
 ProviderID    // id.ID[ProviderBrand, string]       — source provider (e.g., "github")
 EventTypeID   // id.ID[EventTypeBrand, string]      — item type (e.g., "PushEvent")
-ActorID       // id.ID[ActorBrand, string]          — user/actor who triggered the event
+ActorLogin      // id.ID[ActorLoginBrand, string]      — external user who triggered the event
 RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner/repo")
 ```
 

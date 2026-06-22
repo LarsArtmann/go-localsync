@@ -19,7 +19,7 @@ func concurrentTestItem(source, extID, eventType string) *model.Item {
 		ExternalID: id.NewExternalID(extID),
 		Source:     id.NewProviderID(source),
 		Type:       id.NewEventTypeID(eventType),
-		ActorLogin: id.NewActorID("user"),
+		ActorLogin: id.NewActorLogin("user"),
 		RepoName:   id.NewRepoID("repo"),
 		CreatedAt:  ts,
 		UpdatedAt:  ts,

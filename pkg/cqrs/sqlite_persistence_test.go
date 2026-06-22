@@ -30,7 +30,7 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 		ExternalID: id.NewExternalID("persist-1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
-		ActorLogin: id.NewActorID("alice"),
+		ActorLogin: id.NewActorLogin("alice"),
 		RepoName:   id.NewRepoID("org/repo"),
 		CreatedAt:  testFutureNow(0),
 		UpdatedAt:  testFutureNow(0),

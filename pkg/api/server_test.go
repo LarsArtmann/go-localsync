@@ -86,7 +86,7 @@ func testItem(itemID, eventType string) *model.Item {
 		ExternalID:    id.NewExternalID(itemID),
 		Source:        id.NewProviderID("github"),
 		Type:          id.NewEventTypeID(eventType),
-		ActorLogin:    id.NewActorID("testuser"),
+		ActorLogin:    id.NewActorLogin("testuser"),
 		RepoName:      id.NewRepoID("test/repo"),
 		CreatedAt:     now,
 		UpdatedAt:     now,

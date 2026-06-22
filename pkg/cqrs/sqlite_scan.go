@@ -26,7 +26,7 @@ func (si *scannedItem) toItem() (*model.Item, error) {
 		ExternalID:     id.NewExternalID(si.sourceID),
 		Source:         id.NewProviderID(si.source),
 		Type:           id.NewEventTypeID(si.eventType),
-		ActorLogin:     id.NewActorID(si.actorLogin),
+		ActorLogin:     id.NewActorLogin(si.actorLogin),
 		ActorAvatarURL: si.actorAvatarURL,
 		RepoName:       id.NewRepoID(si.repoName),
 		RepoURL:        si.repoURL,

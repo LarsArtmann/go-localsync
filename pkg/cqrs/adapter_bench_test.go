@@ -14,7 +14,7 @@ func testProviderItem() *provider.Item {
 		ExternalID:     id.NewExternalID("12345"),
 		Source:         id.NewProviderID("github"),
 		Type:           id.NewEventTypeID("PushEvent"),
-		ActorLogin:     id.NewActorID("testuser"),
+		ActorLogin:     id.NewActorLogin("testuser"),
 		ActorAvatarURL: "https://example.com/avatar.png",
 		RepoName:       id.NewRepoID("owner/repo"),
 		RepoURL:        "https://github.com/owner/repo",

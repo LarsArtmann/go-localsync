@@ -16,7 +16,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                           |
 | `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`                                                                                                         |
 | `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion`), `model.Key`, `model.ItemFilter`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
-| `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorID`, `RepoID`)                                                                                                                                  |
+| `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                               |
 | `pkg/errors/`   | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                         |
 
 ### SyncStore Interface Seam

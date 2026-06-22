@@ -45,7 +45,7 @@ func makeTestItem(t *testing.T, sourceID, eventType, date string) *provider.Item
 		ExternalID: id.NewExternalID(sourceID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(eventType),
-		ActorLogin: id.NewActorID("testuser"),
+		ActorLogin: id.NewActorLogin("testuser"),
 		RepoName:   id.NewRepoID("test/repo"),
 		CreatedAt:  ts,
 		UpdatedAt:  ts,

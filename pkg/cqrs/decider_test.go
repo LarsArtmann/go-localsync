@@ -166,7 +166,7 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 			ExternalID: id.NewExternalID("123"),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorID("testuser"),
+			ActorLogin: id.NewActorLogin("testuser"),
 			RepoName:   id.NewRepoID("owner/repo"),
 			UpdatedAt:  now,
 		},
@@ -292,7 +292,7 @@ func TestHasChanged(t *testing.T) {
 			ExternalID: id.NewExternalID("123"),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorID("octocat"),
+			ActorLogin: id.NewActorLogin("octocat"),
 			RepoName:   id.NewRepoID("org/repo"),
 			RepoURL:    "https://github.com/org/repo",
 			UpdatedAt:  time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -321,7 +321,7 @@ func TestHasChanged(t *testing.T) {
 		},
 		{
 			name: "ActorLogin differs",
-			mut:  func(r *model.Item) { r.ActorLogin = id.NewActorID("other") },
+			mut:  func(r *model.Item) { r.ActorLogin = id.NewActorLogin("other") },
 			want: true,
 		},
 		{

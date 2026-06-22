@@ -18,7 +18,7 @@ func benchItems(n int) []*provider.Item {
 			ExternalID: id.NewExternalID(fmt.Sprintf("bench-%d", i)),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorID("benchuser"),
+			ActorLogin: id.NewActorLogin("benchuser"),
 			RepoName:   id.NewRepoID("bench/repo"),
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),

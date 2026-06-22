@@ -22,7 +22,7 @@ func benchmarkReadModelList(b *testing.B, rm ReadModel) {
 			ExternalID: id.NewExternalID(fmt.Sprintf("item-%d", i)),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorID("testuser"),
+			ActorLogin: id.NewActorLogin("testuser"),
 			RepoName:   id.NewRepoID("test/repo"),
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),

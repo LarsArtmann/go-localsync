@@ -44,7 +44,7 @@ func upsertTestItem(
 		ExternalID: id.NewExternalID(extID),
 		Source:     id.NewProviderID(source),
 		Type:       id.NewEventTypeID(eventType),
-		ActorLogin: id.NewActorID(actor),
+		ActorLogin: id.NewActorLogin(actor),
 		RepoName:   id.NewRepoID(repo),
 		CreatedAt:  time.Now(),
 	}))
@@ -120,7 +120,7 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 
-	actorFilter := id.NewActorID("alice")
+	actorFilter := id.NewActorLogin("alice")
 	items, err = rm.List(ctx, model.ItemFilter{ActorLogin: &actorFilter})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")

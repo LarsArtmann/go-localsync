@@ -19,7 +19,7 @@ type Item struct {
 	ExternalID     id.ExternalID
 	Source         id.ProviderID
 	Type           id.EventTypeID
-	ActorLogin     id.ActorID
+	ActorLogin     id.ActorLogin
 	ActorAvatarURL string
 	RepoName       id.RepoID
 	RepoURL        string

@@ -12,7 +12,7 @@ func TestItemFilter_Builder(t *testing.T) {
 
 	now := time.Now()
 	typeID := id.NewEventTypeID("PushEvent")
-	actorID := id.NewActorID("testuser")
+	actorID := id.NewActorLogin("testuser")
 	repoID := id.NewRepoID("test/repo")
 	sourceID := id.NewProviderID("github")
 

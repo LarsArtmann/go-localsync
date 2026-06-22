@@ -9,7 +9,7 @@ import (
 // ItemFilter defines optional filters for querying items. Nil fields are ignored.
 type ItemFilter struct {
 	Type       *id.EventTypeID
-	ActorLogin *id.ActorID
+	ActorLogin *id.ActorLogin
 	RepoName   *id.RepoID
 	Source     *id.ProviderID
 	Since      *time.Time
@@ -25,7 +25,7 @@ func (f ItemFilter) WithType(t id.EventTypeID) ItemFilter {
 }
 
 // WithActorLogin returns a copy of f with ActorLogin set.
-func (f ItemFilter) WithActorLogin(a id.ActorID) ItemFilter {
+func (f ItemFilter) WithActorLogin(a id.ActorLogin) ItemFilter {
 	f.ActorLogin = &a
 
 	return f

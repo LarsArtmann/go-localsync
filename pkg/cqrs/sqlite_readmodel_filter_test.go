@@ -20,7 +20,7 @@ func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "2", "PushEvent", "bob", "org/repo")
 	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "alice", "org/repo")
 
-	actor := id.NewActorID("alice")
+	actor := id.NewActorLogin("alice")
 	items, err := rm.List(ctx, model.ItemFilter{ActorLogin: &actor})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items for alice")
@@ -126,7 +126,7 @@ func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "alice", "org/repo")
 
 	pushType := id.NewEventTypeID("PushEvent")
-	actor := id.NewActorID("alice")
+	actor := id.NewActorLogin("alice")
 	items, err := rm.List(ctx, model.ItemFilter{Type: &pushType, ActorLogin: &actor})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "PushEvent by alice")
