@@ -7,6 +7,10 @@ Release dates and entries are reconciled against the actual git tags (`v0.1.0`, 
 
 ## [Unreleased]
 
+### Changed
+
+- **go-error-family upgraded from v0.4.0 to v0.5.0.** Vendored dependencies re-synced. No code changes needed — `RegisterTemplate`, `NewRejection`, `Wrap`, and `IsRetryable` APIs are backward-compatible (global functions now delegate to `DefaultRegistry`).
+
 ## [0.2.0] - 2026-06-22
 
 ### Added
