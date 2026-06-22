@@ -1,40 +1,35 @@
 # ROADMAP.md
 
-**Project:** go-localsync  
-**Last Updated:** 2026-06-03
+**Project:** go-localsync
+**Last Updated:** 2026-06-22
 
 ## Overview
 
-Aspirational features and improvements with no fixed timeline. These are planned for future phases.
+Long-term direction and raw ideas not yet refined into actionable tasks. For short/mid-term work, see [TODO_LIST.md](TODO_LIST.md). For the feature inventory, see [FEATURES.md](FEATURES.md).
 
 ---
 
 ## ✅ COMPLETED
 
 - [x] **CQRS migration** — Full event-sourced architecture via go-cqrs-lite. Legacy CRUD deleted.
-- [x] **Deterministic aggregate IDs** — SHA256→ULID from (source, sourceID) for idempotency.
+- [x] **Deterministic aggregate IDs** — SHA256→hex from (source, sourceID) for idempotency.
 - [x] **Conflict-aware sync** — `DecideSync` detects conflicts and emits `ItemConflictFound` events.
-- [x] **Provider architecture** — Generic `Provider` interface with GitHub implementation.
+- [x] **Provider architecture** — Generic `Provider` interface; reference GitHub provider lives in the consumer app [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
 - [x] **Branded type IDs** — 6 phantom types for compile-time safety.
-- [x] **SQLite backend** — SQLite event store + read model with snapshots and checkpoints. Pure-Go via `modernc.org/sqlite`.
-- [x] **cockroachdb/errors removal** — Replaced with stdlib `fmt.Errorf` + `%w`.
-- [x] **Database migration system** — Replaced by go-cqrs-lite/storage schema management.
-- [x] **Zero lint issues** — golangci-lint v2 with 125+ linters, 0 issues.
-- [x] **Dead code removal** — `types.SourceID` (unused), `AggregateID` sync.Map cache.
-- [x] **AggregateID double-computation eliminated** — Uses `cmd.AggregateID()` from command metadata.
+- [x] **SQLite backend** — SQLite event store + read model + snapshots (no checkpoint store in v3). Pure-Go via `modernc.org/sqlite`.
+- [x] **cockroachdb/errors removal** — Replaced with `go-error-family` constructors.
+- [x] **Zero lint issues** — golangci-lint v2 with `enable-all`, 0 issues.
 - [x] **HTTP API** — Huma v2 with 4 endpoints (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`). OpenAPI 3 spec auto-generated.
-- [x] **JSON output** — `-json` flag for structured CLI output.
-- [x] **CLI server mode** — `-server` flag runs HTTP API.
-- [x] **Error templates** — `RegisterErrorTemplates()` for all 9 error codes with What/Why/Fix/WayOut.
-- [x] **Nix flake** — `flake.nix` with devShell + `buildGoModule`.
+- [x] **Error templates** — `RegisterErrorTemplates()` for all error codes with What/Why/Fix/WayOut.
+- [x] **Nix flake** — `flake.nix` with devShell + `buildGoModule` (vendored private deps).
 - [x] **CRDT conflict resolution** — `crdt.ConflictResolver[T]` wired into `DecideSync`. `LWWResolver` default. `ActionConflictLocal` support.
 - [x] **Pluggable conflict strategy** — `CQRSConfig.ConflictResolver` accepts any resolver. Default nil = remote-wins.
-
-- [x] **CLI helpers extracted** — `helpers.go` with `runStats`, `runAPIServer`, `printSyncResultJSON`, `printVersion`, etc.
-- [x] **conflict_aware.go extracted** — `ConflictAwareSyncer` in own file, decoupled from `sync.go`.
-- [x] **235 tests passing** — 9 packages, 0 lint issues.
-- [x] **go-cqrs-lite v2 migration** — Migrated 11 modules to v2 paths. Removed outbox, Turso sync. Adopted `modernc.org/sqlite`.
-- [x] **turso→sqlite rename** — All internal references renamed. Dead RemoteURL/AuthToken config removed.
+- [x] **Pure contract library** — Removed all provider implementations and the example CLI. The SDK now defines the contract only; consumers implement providers. Reference consumer: [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
+- [x] **go-cqrs-lite v3 migration** — Migrated all modules to v3.0.0 paths. Adopted `watermill/v3` `EventBus` (replaces deleted `memory.NewMemoryBus`), `middleware.EventLogging` (replaces hand-rolled logging adapter), and `uint64` `event.Version`.
+- [x] **projection.Runner removal** — go-cqrs-lite v3 dropped `projection/`. Replaced with direct `bus.SubscribeAll` (synchronous live delivery) + background `runner.replayJournal` (SQLite catch-up). Idempotent projection tolerates replay/live overlap, so no checkpoint store is needed.
+- [x] **Exported ConflictWinner** — `ConflictWinnerRemote`/`ConflictWinnerLocal` constants + `ParseConflictWinner` for safe payload→enum decoding.
+- [x] **DTO/domain boundary** — `provider.Item` (DTO) ↔ `model.Item` (domain entity) via `item_adapter.go`. Decider, read model, events, and resolver all use `*model.Item`.
+- [x] **225 tests passing** — 9 packages, 0 lint issues.
 
 ---
 
@@ -42,53 +37,48 @@ Aspirational features and improvements with no fixed timeline. These are planned
 
 ### Enhanced Features
 
-- [ ] **Build TUI with Bubble Tea**  
-       Interactive terminal UI for browsing events, filtering, and real-time sync.  
-       Effort: ~2h. Low priority.
+- [ ] **Build TUI with Bubble Tea**
+      Interactive terminal UI for browsing events, filtering, and real-time sync. Lives in a consumer app, not the SDK.
 
-- [ ] **Support multiple user sync**  
-       Accept multiple `-user` flags or user list from file.  
-       Requires read model schema to track which user each event belongs to.
+- [ ] **Support multiple user sync**
+      Accept multiple sources in one sync run. Requires read model schema to track which user each event belongs to.
 
-- [ ] **Implement daemon/background mode**  
-       Run as cron job or systemd service for periodic sync.
+- [ ] **Daemon/background mode**
+      Run as cron job or systemd service for periodic sync. (Consumer-app concern.)
 
 ### Data & Export
 
 - [ ] **Add export to JSON/CSV**
-      Export stored events to file formats (`-export json` or `-export csv`).
+      Export stored events to file formats.
 
 - [ ] **Conflict resolution per-sync override** — `SyncOptions.ConflictResolver` for per-sync strategy.
+
 - [ ] **Real-time sync protocol** — `SyncRequest`/`SyncResponse` from `pkg/crdt/` for live multi-node sync.
 
 ---
 
 ## 🔧 TECHNICAL DEBT
 
-### Architecture
+### CI/CD
 
-- [x] **Adopt projection.Runner** (Completed)  
-       `projection.Runner` for replay + checkpointing. Direct `bus.SubscribeAll` for synchronous projection.
-
-- [x] **Wire error taxonomy** (Completed)  
-       Uses go-cqrs-lite's `event.RegisterClassification` for proper CLI exit codes.
-
-- [x] **Adopt command.Dispatcher** (Completed)  
-       Typed command dispatch via `SyncItemCommand`/`DeleteItemCommand` through `command.Dispatcher`.
+- [ ] **Rework CI build & release jobs for a pure library**
+      The `build` job cross-compiles the deleted `./cmd/examples/github-sync` path (now in `github-local-sync`), and `release` depends on it — both fail. A pure library has no binary to build; rework to a library-appropriate release flow (or remove these jobs). **High priority.**
 
 ### Code Quality
 
-- [ ] **Unify test framework**  
-       1 file uses Ginkgo, 6 files use testify. Standardize on one approach (stdlib recommended).
+- [ ] **OpenTelemetry instrumentation** — spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, HTTP middleware.
 
-- [x] **CLI tests** (Completed)  
-       `main_test.go` covers exitCodeForError, LoadConfig, env defaults.
+- [ ] **API authentication middleware** — API key or JWT; the HTTP API is currently unauthenticated.
+
+- [ ] **API pagination headers** — `X-Total-Count`, cursor-based.
+
+- [ ] **Adopt `UpcasterRegistry`** from go-cqrs-lite for schema evolution (the `schema.Version` foundation is already in place).
 
 ---
 
 ## ❓ OPEN QUESTIONS
 
-1. **End-to-end testing** — Do we need a real GitHub PAT for CI integration tests, or are mocks sufficient?
-2. **Multi-user sync** — Should the read model track which user each event belongs to?
-3. **Event retention/TTL** — Automatic cleanup of old events? Configurable?
-4. **Conflict resolution policy** — Configurable via `CQRSConfig.ConflictResolver`. CLI flag (`--conflict-strategy`) pending.
+1. **Multi-user sync** — Should the read model track which user each event belongs to?
+2. **Event retention/TTL** — Automatic cleanup of old events? Configurable?
+3. **Conflict resolution policy** — Configurable via `CQRSConfig.ConflictResolver`. A per-sync override (`SyncOptions.ConflictResolver`) is pending.
+4. **Library release flow** — What does a tagged release of a pure Go module look like without a binary? (Governs the CI rework above.)

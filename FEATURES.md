@@ -2,7 +2,7 @@
 
 **Updated:** 2026-06-22
 
-> The SDK is a **pure contract library**. It defines the `Provider` interface, the CQRS sync engine, and CRDT primitives — but ships **no provider implementations and no CLI binary**. Concrete providers (e.g. GitHub) live in consumer applications.
+> The SDK is a **pure contract library**. It defines the `Provider` interface, the CQRS sync engine, and CRDT primitives — but ships **no provider implementations and no CLI binary**. The reference consumer application — GitHub provider + CLI — lives in [`github.com/larsartmann/github-local-sync`](https://github.com/larsartmann/github-local-sync). New providers (GitLab, Jira, …) are built the same way, in their own consumer apps.
 
 ## Legend
 
@@ -160,11 +160,10 @@
 
 ### Known Gaps
 
-| Area                    | Issue                                                                                        | Impact                                                                 |
-| ----------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| CI build & release jobs | `build` job builds deleted `./cmd/examples/github-sync`; `release` depends on it. Both fail. | Cross-platform builds and tag releases do not work. High-priority fix. |
-| No provider shipped     | SDK is contract-only. No GitLab, Jira, etc.                                                  | Consumers must implement their own provider                            |
-| No CLI binary           | Contract-library refactor removed `cmd/`. No reference CLI exists in-repo.                   | No runnable example app; README shows library usage only               |
-| No observability        | No OpenTelemetry, no metrics, no tracing                                                     | Production debugging requires log spelunking                           |
-| API has no auth         | HTTP API has no authentication middleware                                                    | Not safe to expose on a network                                        |
-| No data export          | No JSON/CSV export of stored events                                                          | Cannot export for analysis in external tools                           |
+| Area                    | Issue                                                                                                                                      | Impact                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| CI build & release jobs | `build` job builds deleted `./cmd/examples/github-sync` (now in `github-local-sync`); `release` depends on it. Both fail.                  | Cross-platform builds and tag releases do not work. High-priority fix. |
+| Contract-only SDK       | No provider or CLI shipped in-repo. GitHub provider + CLI live in [`github-local-sync`](https://github.com/larsartmann/github-local-sync). | Consumers implement their own provider against the interface.          |
+| No observability        | No OpenTelemetry, no metrics, no tracing                                                                                                   | Production debugging requires log spelunking                           |
+| API has no auth         | HTTP API has no authentication middleware                                                                                                  | Not safe to expose on a network                                        |
+| No data export          | No JSON/CSV export of stored events                                                                                                        | Cannot export for analysis in external tools                           |

@@ -39,19 +39,19 @@ nix build                      # Build the package
 ## Architecture Overview
 
 ```
-cmd/examples/github-sync/    CLI entry point
 pkg/api/                      HTTP API (Huma v2, split into server.go + dto.go + handlers.go)
-pkg/cqrs/                     CQRS stack (go-cqrs-lite v2, split into focused files)
+pkg/cqrs/                     CQRS stack (go-cqrs-lite v3, split into focused files)
 pkg/crdt/                     CRDT primitives (VectorClock, ConflictResolver, LWWResolver)
 pkg/data/model/               Read-side domain types (Item, Key, ItemFilter)
 pkg/data/schema/              Schema versioning
 pkg/errors/                   Structured error taxonomy
 pkg/id/                       Branded phantom-type IDs
-pkg/provider/                 Provider interface + Item type
-pkg/providers/github/         GitHub provider implementation
+pkg/provider/                 Provider interface + Item DTO (contract only — no provider impls shipped)
 pkg/sync/                     Sync engine (Syncer, ConflictAwareSyncer, SyncStore interface)
 pkg/testutil/                 Shared test helpers
 ```
+
+> The SDK is a **pure contract library** — it ships no provider implementation or CLI. The reference GitHub provider + CLI lives in the consumer app [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
 
 ### Key Design Decisions
 

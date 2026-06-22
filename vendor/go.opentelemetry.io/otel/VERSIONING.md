@@ -16,18 +16,18 @@ is designed so the following goals can be achieved.
     interfaces that fall within this exception will include the following
     paragraph in their public documentation.
 
-            > Warning: methods may be added to this interface in minor releases.
+               > Warning: methods may be added to this interface in minor releases.
 
-        - If a module is version `v2` or higher, the major version of the module
-          must be included as a `/vN` at the end of the module paths used in
-          `go.mod` files (e.g., `module go.opentelemetry.io/otel/v2`, `require
+           - If a module is version `v2` or higher, the major version of the module
+             must be included as a `/vN` at the end of the module paths used in
+             `go.mod` files (e.g., `module go.opentelemetry.io/otel/v2`, `require
 
     go.opentelemetry.io/otel/v2 v2.0.1`) and in the package import path
-  (e.g., `import "go.opentelemetry.io/otel/v2/trace"`). This includes the
-  paths used in `go get`commands (e.g.,`go get
+ (e.g., `import "go.opentelemetry.io/otel/v2/trace"`). This includes the
+ paths used in `go get`commands (e.g.,`go get
     go.opentelemetry.io/otel/v2@v2.0.1`). Note there is both a `/v2`and a
- `@v2.0.1`in that example. One way to think about it is that the module
-  name now includes the`/v2`, so include `/v2`whenever you are using the
+`@v2.0.1`in that example. One way to think about it is that the module
+ name now includes the`/v2`, so include `/v2`whenever you are using the
     module name).
     - If a module is version`v0`or`v1`, do not include the major version in
       either the module path or the import path.
