@@ -35,7 +35,7 @@ func TestClassifyAction(t *testing.T) {
 			err:            nil,
 			eventCount:     2,
 			wasNew:         false,
-			conflictWinner: conflictWinnerRemote,
+			conflictWinner: ConflictWinnerRemote,
 			want:           synclib.ActionConflictRemote,
 		},
 		{
@@ -43,7 +43,7 @@ func TestClassifyAction(t *testing.T) {
 			err:            nil,
 			eventCount:     2,
 			wasNew:         false,
-			conflictWinner: conflictWinnerLocal,
+			conflictWinner: ConflictWinnerLocal,
 			want:           synclib.ActionConflictLocal,
 		},
 		{

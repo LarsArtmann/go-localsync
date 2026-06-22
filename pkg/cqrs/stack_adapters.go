@@ -38,7 +38,7 @@ func classifyAction(err error, eventCount int, wasNew bool, conflictWinner Confl
 	}
 
 	if eventCount > 1 {
-		if conflictWinner == conflictWinnerLocal {
+		if conflictWinner == ConflictWinnerLocal {
 			return synclib.ActionConflictLocal
 		}
 

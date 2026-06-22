@@ -135,9 +135,21 @@ func decideDelete(
 type ConflictWinner string
 
 const (
-	conflictWinnerRemote ConflictWinner = "remote"
-	conflictWinnerLocal  ConflictWinner = "local"
+	ConflictWinnerRemote ConflictWinner = "remote"
+	ConflictWinnerLocal  ConflictWinner = "local"
 )
+
+// ParseConflictWinner converts a winner string from an event payload into a
+// ConflictWinner. Unknown values default to ConflictWinnerRemote (the safe
+// fallback, matching the resolver-error behaviour in resolveConflict).
+func ParseConflictWinner(s string) ConflictWinner {
+	switch ConflictWinner(s) {
+	case ConflictWinnerLocal:
+		return ConflictWinnerLocal
+	default:
+		return ConflictWinnerRemote
+	}
+}
 
 // conflictMeta carries conflict-specific metadata for event construction.
 type conflictMeta struct {
@@ -152,7 +164,7 @@ func resolveConflict(
 	local, remote *model.Item,
 ) (*model.Item, ConflictWinner) {
 	if resolver == nil {
-		return remote, conflictWinnerRemote
+		return remote, ConflictWinnerRemote
 	}
 
 	conflict := &crdt.Conflict[*model.Item]{
@@ -165,14 +177,14 @@ func resolveConflict(
 
 	winner, err := resolver.Resolve(conflict)
 	if err != nil {
-		return remote, conflictWinnerRemote
+		return remote, ConflictWinnerRemote
 	}
 
 	if winner == local {
-		return local, conflictWinnerLocal
+		return local, ConflictWinnerLocal
 	}
 
-	return remote, conflictWinnerRemote
+	return remote, ConflictWinnerRemote
 }
 
 func syncEvents(

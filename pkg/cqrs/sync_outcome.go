@@ -54,7 +54,7 @@ func decideWithOutcome(
 					return nil, fmt.Errorf("decode conflict payload: %w", err)
 				}
 
-				outcome.ConflictWinner = ConflictWinner(cp.Winner)
+				outcome.ConflictWinner = ParseConflictWinner(cp.Winner)
 			}
 		}
 
