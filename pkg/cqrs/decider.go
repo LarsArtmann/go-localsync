@@ -146,6 +146,8 @@ func ParseConflictWinner(s string) ConflictWinner {
 	switch ConflictWinner(s) {
 	case ConflictWinnerLocal:
 		return ConflictWinnerLocal
+	case ConflictWinnerRemote:
+		return ConflictWinnerRemote
 	default:
 		return ConflictWinnerRemote
 	}

@@ -125,19 +125,18 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package                    | Tests | Coverage | Status                                                                                                     |
-| -------------------------- | ----- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`                 | ~85   | ~85%     | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Runner, Correlation, CRDT Resolver, Concurrent Access |
-| `pkg/sync`                 | 22    | 91.0%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                             |
-| `pkg/id`                   | 10    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                 |
-| `pkg/errors`               | 11    | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                            |
-| `pkg/provider`             | 2     | 95.8%    | ✅ Item validation                                                                                         |
-| `pkg/api`                  | ~15   | 92.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                           |
-| `pkg/crdt`                 | ~55   | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                                |
-| `pkg/data/model`           | ~12   | 100%     | ✅ Item, Key, Validate, ItemFilter builder                                                                 |
-| `cmd/examples/github-sync` | 14    | 12.3%    | ✅ exitCodeForError, LoadConfig, env defaults, printVersion, printSyncResultJSON                           |
+| Package          | Tests | Coverage | Status                                                                                                     |
+| ---------------- | ----- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `pkg/cqrs`       | 89    | ~85%     | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, CRDT Resolver, Concurrent Access |
+| `pkg/sync`       | 24    | 91.0%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                             |
+| `pkg/id`         | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                 |
+| `pkg/errors`     | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                            |
+| `pkg/provider`   | 10    | 95.8%    | ✅ Item validation                                                                                         |
+| `pkg/api`        | 14    | 92.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                           |
+| `pkg/crdt`       | 52    | 97.6%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                                |
+| `pkg/data/model` | 14    | 100%     | ✅ Item, Key, Validate, ItemFilter builder                                                                 |
 
-**283 total test functions** across 11 test packages.
+**224 total test functions** across 8 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -152,22 +151,14 @@ Storage backends are selected via `CQRSConfig.Backend` in `cqrs.NewCQRSStack()`.
 
 Event store + read model use the same backend.
 
-### CLI Usage
-
-```bash
-go run ./cmd/examples/github-sync --backend memory
-go run ./cmd/examples/github-sync --backend sqlite --db ./data.db
-```
-
 ## Provider Development
 
-When adding new providers:
+The SDK is a pure contract library — concrete providers live in consumer apps. To add a new provider:
 
 1. Implement the `provider.Provider` interface (`Name`, `Fetch`, `FetchAll`, `GetRateLimit`)
 2. Convert provider-specific data to `provider.Item` using branded types from `pkg/id/`
 3. Add provider-specific tests
 4. Update documentation with provider configuration
-5. Add example in `cmd/examples/`
 
 ## Database Schema
 
