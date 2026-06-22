@@ -89,12 +89,17 @@ linters:
         - github.com/larsartmann/go-error-family.HandleConfig
         - github.com/larsartmann/go-error-family.HandleResult
         - github.com/larsartmann/go-error-family.MessageTemplate
+        - github.com/larsartmann/go-error-family.RetryPolicy
+        - github.com/larsartmann/go-error-family.jsonError
         - github.com/larsartmann/go-error-family.DiagnosticFinding
+        - github.com/larsartmann/go-error-family.Registry
         - github.com/larsartmann/go-error-family.familyInfo
         - github.com/larsartmann/go-error-family/diagnose.DiagnosticResult
+        - github.com/larsartmann/go-error-family/diagnose.Fix
         - github.com/larsartmann/go-error-family/diagnose.Runner
         - github.com/larsartmann/go-error-family/diagnose.RuleSpec
         - github.com/larsartmann/go-error-family/diagnose.MockCommandRunner
+        - github.com/larsartmann/go-error-family/diagnose.MockResponse
         - github.com/larsartmann/go-error-family/diagnose.ruleResult
         - github.com/larsartmann/go-error-family/diagnose.staticRule
         - github.com/larsartmann/go-error-family/agent.AgentResult
@@ -147,14 +152,6 @@ linters:
         text: unused
         linters:
           - unused
-      - path: classify\.go
-        text: anonymous.*is missing field mu
-        linters:
-          - exhaustruct
-      - path: handle\.go
-        text: anonymous.*is missing field mu
-        linters:
-          - exhaustruct
     paths:
       - \.gen\.go$
       - _mock\.go$

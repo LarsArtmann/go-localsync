@@ -4,6 +4,64 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.5.0] - 2026-06-22
+
+First release since `v0.4.0`. Consolidates the copy-on-write error refactor, module extraction, severity-ordered multi-error classification, lock-free sentinel lookup, structured diagnostic fixes, new family adapters, and the bridge `%s` format fix.
+
+### Added
+
+- **`Registry` type** (`registry.go`) — injectable classification sentinels + message templates. Replaces global mutable maps with a construct-and-pass type for test isolation (no `t.Cleanup(Unregister...)` needed) and scoped error handling within a single binary. Zero value is not usable — use `NewRegistry()`.
+- **`NewRegistry()`** constructor and **`DefaultRegistry`** package-level var — backward-compatible defaults for all convenience functions (`Classify`, `RegisterClassification`, `RegisterTemplate`, etc.).
+- **`HandleConfig.Registry`** field — pass a custom registry to `HandleError*` functions. Falls back to `DefaultRegistry` when nil.
+- **`Registry.Clone()`** — deep-copy for inherit-and-extend patterns (start from `DefaultRegistry`, clone, register scope-specific overrides without touching the global).
+- **`Registry.RegisterTemplates(map)`** — batch template registration, matching the existing `RegisterClassifications` batch.
+- **`Family.Severity() int`** — total order for multi-error classification (Transient < Rejection < Conflict < Infrastructure < Corruption).
+- **`Family.HTTPStatus() int`** — canonical family → HTTP status mapping (Rejection→400, Conflict→409, Transient→503, Corruption→500, Infrastructure→503).
+- **`Family.RetryPolicy() RetryPolicy`** — advisory retry defaults per family (Transient: 3 attempts, 100ms–5s; others: single attempt). The library does not run the loop.
+- **`Error.JSON() ([]byte, error)`** — canonical JSON (`{family,code,message,context,retryable,timestamp}`) for API boundaries.
+- **`Error.WithContextMap(map[string]string)`** and **`Error.WithContextf(key, format, args...)`** — batch and formatted context attachment.
+- **`RegisterStdlibDefaults(reg)`** (`stdlib.go`) — maps `context`/`sql`/`os` errors with documented rationale for ambiguous cases (DeadlineExceeded→Transient, Canceled→Rejection, etc.).
+- **`diagnose/`** and **`agent/`** are now independent Go modules with their own `go.mod`, enabling independent versioning. Import paths are unchanged.
+- **`go.work`** expanded to 6 workspace modules (root, diagnose, agent, bridge, diagnose/git, diagnose/postgres).
+- **Experimental stability notices** in package docs for `agent`, `diagnose`, `diagnose/git`, `diagnose/postgres`, and `bridge`. Root package documented as the stable classification core.
+- **Fuzz tests**: `FuzzParseFamily`, `FuzzParseFamilyRoundTrip`, `FuzzClassify`, `FuzzClassifyPlainError`, `FuzzErrorFormatting` (root); `FuzzFormat` (bridge).
+
+### Changed (BREAKING)
+
+- **Copy-on-write errors:** `WithContext`, `WithCause`, and `WithTimestamp` now return a NEW `*Error` instead of mutating the receiver. Fixes a data race when errors are shared across goroutines (e.g. package-level sentinels). Previous chaining calls that assumed identity preservation still compile but now get a distinct pointer.
+- **Template placeholder syntax** changed from `{{.key}}` to `{key}`. The old syntax collided with Go's `text/template`. Migration: replace all `{{.key}}` with `{key}` in registered templates.
+- **Severity-ordered multi-error classification:** `Classify` on an `errors.Join` result now returns the worst (highest-severity) sub-error instead of the first non-Transient one. Classification is deterministic regardless of join argument order; fail-closed retry semantics preserved.
+- **Lock-free sentinel lookup:** `Registry.sentinels` changed from `map[error]Family` to `atomic.Pointer[sentinelMap]` (copy-on-write). At 50 registered sentinels, `Classify` dropped from ~1330 ns/3 allocs/1832 B to ~285 ns/0 allocs/0 B.
+- **Structured diagnostic fixes:** `DiagnosticResult.SuggestedFix string` replaced with `Fix struct{Summary, Command string}`. Diagnostic rules now emit the remediation summary and shell command as distinct fields. The `agent` no longer parses suggestions — `extractCommand` and `looksLikeCommand` (40+ lines of heuristic prose parsing) are deleted; `FixStep.Command` comes directly from `diagnose.Fix.Command`.
+- **Module extraction:** root module no longer contains `diagnose/` and `agent/` as sub-packages — they are separate modules. Consumers using `go.work` see no difference. Local `replace` directives added until published versions resolve the extraction.
+- **`agent.Config.Enabled`** now returns `(nil, error)` instead of a synthetic `AgentResult`. Calling `Analyze` on a disabled agent is a programming error, not a silent no-op.
+
+### Changed
+
+- Package-level `RegisterClassification`/`RegisterClassifications`/`UnregisterClassification`/`RegisterTemplate`/`UnregisterTemplate` now delegate to `DefaultRegistry` (backward compatible).
+- Template resolution (override → registry → built-in default) extracted into a single shared `resolveTemplate` helper used by both `renderCLI` and `resolveSuggestedFix`, eliminating split-brain divergence. Templates are cohesive units (What/Why/Fix belong together).
+- README retry wording clarified: `IsRetryable` returns a binary signal; backoff, jitter, and idempotency are the consumer's responsibility.
+
+### Removed
+
+- **`Compose(errs...)`** — use stdlib `errors.Join` directly. `Classify` already classifies multi-errors. One less API surface to learn.
+
+### Fixed
+
+- **Data race** in `WithContext`/`WithCause`/`WithTimestamp` — these methods mutated the receiver's fields and returned the same pointer. All three now use copy-on-write via a shared `clone()` helper.
+- **Bridge `Format(%s)`** returned an empty string when the wrapped error's message was empty — added a `[family]` fallback matching `Error()` and `%v`. Found by `FuzzFormat`.
+
+### Modules
+
+Coordinated multi-module release.
+
+- `github.com/larsartmann/go-error-family` → **v0.5.0** (breaking changes + new APIs)
+- `github.com/larsartmann/go-error-family/diagnose` → **v0.1.0** (first tagged release — structured `Fix`, `MockCommandRunner`)
+- `github.com/larsartmann/go-error-family/agent` → **v0.1.0** (first tagged release — structured `FixStep`)
+- `github.com/larsartmann/go-error-family/bridge` → **v0.2.0** (format fix + root v0.5.0 bump)
+- `github.com/larsartmann/go-error-family/diagnose/git` → **v0.4.0** (structured `Fix`, `MockCommandRunner.Set`)
+- `github.com/larsartmann/go-error-family/diagnose/postgres` → **v0.4.0** (structured `Fix`, `MockCommandRunner.Set`)
+
 ## [0.4.0] - 2026-06-17
 
 ### Added

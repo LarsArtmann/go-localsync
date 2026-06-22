@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
 )
 
 // Error code constants to satisfy goconst linter.
@@ -41,7 +40,13 @@ type HandleConfig struct {
 	// Output is where human-readable messages are written. Defaults to os.Stderr.
 	Output io.Writer
 
+	// Registry provides classification sentinels and message templates.
+	// If nil, DefaultRegistry is used. Set this for test isolation or
+	// scoped error handling within a single binary.
+	Registry *Registry
+
 	// TemplateOverride overrides the default message template for a specific error code.
+	// Takes precedence over registered templates.
 	// map[errorCode]MessageTemplate
 	TemplateOverride map[string]MessageTemplate
 
@@ -76,13 +81,13 @@ type DiagnosticFinding struct {
 // MessageTemplate defines the Wix-style presentation for an error code.
 // Based on the Wix UX framework: What / Why / Fix / WayOut.
 type MessageTemplate struct {
-	// What describes what happened. Supports {{.key}} placeholders from error context.
+	// What describes what happened. Supports {key} placeholders from error context.
 	What string
-	// Why explains why it happened. Supports {{.key}} placeholders.
+	// Why explains why it happened. Supports {key} placeholders.
 	Why string
-	// Fix suggests how to resolve the error. Supports {{.key}} placeholders.
+	// Fix suggests how to resolve the error. Supports {key} placeholders.
 	Fix string
-	// WayOut provides an escape hatch or alternative action. Supports {{.key}} placeholders.
+	// WayOut provides an escape hatch or alternative action. Supports {key} placeholders.
 	WayOut string
 }
 
@@ -125,7 +130,12 @@ func HandleErrorWithContext(ctx context.Context, err error, cfg HandleConfig) in
 		cfg.Output = os.Stderr
 	}
 
-	family := Classify(err)
+	reg := cfg.Registry
+	if reg == nil {
+		reg = DefaultRegistry
+	}
+
+	family := reg.Classify(err)
 	exitCode := family.ExitCode()
 
 	code := extractCode(err)
@@ -138,7 +148,7 @@ func HandleErrorWithContext(ctx context.Context, err error, cfg HandleConfig) in
 		}
 	}
 
-	message := renderCLI(code, errCtx, family, cfg)
+	message := renderCLI(code, errCtx, family, cfg, reg)
 
 	_, _ = fmt.Fprintln(cfg.Output, message)
 
@@ -160,21 +170,22 @@ func HandleErrorDetailedWithConfig(err error, cfg HandleConfig) *HandleResult {
 		return &HandleResult{ExitCode: 0}
 	}
 
-	family := Classify(err)
+	reg := cfg.Registry
+	if reg == nil {
+		reg = DefaultRegistry
+	}
+
+	family := reg.Classify(err)
 	code := extractCode(err)
 	errCtx := extractContext(err)
 
 	result := &HandleResult{
 		ExitCode: family.ExitCode(),
-		Message:  renderCLI(code, errCtx, family, cfg),
+		Message:  renderCLI(code, errCtx, family, cfg, reg),
 	}
 
-	if !IsRetryable(err) {
-		if tmpl, ok := lookupDefault(code); ok && tmpl.Fix != "" {
-			result.SuggestedFix = applyContext(tmpl.Fix, errCtx)
-		} else {
-			result.SuggestedFix = family.DefaultFix()
-		}
+	if !family.IsRetryable() {
+		result.SuggestedFix = resolveSuggestedFix(code, errCtx, cfg, reg, family)
 	}
 
 	return result
@@ -194,21 +205,53 @@ func extractContext(err error) map[string]string {
 	return map[string]string{}
 }
 
-func renderCLI(code string, context map[string]string, family Family, cfg HandleConfig) string {
-	// 1. Consumer override (per-call).
+// resolveTemplate walks the shared template-resolution chain (per-call override →
+// registry → built-in default) and returns the first matching template.
+// renderCLI and resolveSuggestedFix both build on this so the resolution order
+// can never diverge between message rendering and fix suggestion.
+func resolveTemplate(code string, cfg HandleConfig, reg *Registry) (MessageTemplate, bool) {
 	if cfg.TemplateOverride != nil {
 		if tmpl, ok := cfg.TemplateOverride[code]; ok {
-			return applyTemplate(tmpl, context, family)
+			return tmpl, true
 		}
 	}
+	if tmpl, ok := reg.lookupTemplate(code); ok {
+		return tmpl, true
+	}
+	if tmpl, ok := lookupDefault(code); ok {
+		return tmpl, true
+	}
+	return MessageTemplate{}, false
+}
 
-	// 2. Registered template (global).
-	if tmpl, ok := lookupTemplate(code); ok {
+func renderCLI(
+	code string,
+	context map[string]string,
+	family Family,
+	cfg HandleConfig,
+	reg *Registry,
+) string {
+	if tmpl, ok := resolveTemplate(code, cfg, reg); ok {
 		return applyTemplate(tmpl, context, family)
 	}
-
-	// 3. Default rendering (exact code match → family fallback).
 	return renderMessage(code, context, family)
+}
+
+// resolveSuggestedFix finds the Fix field from the resolved template
+// (override → registry → built-in default), falling back to the family default.
+// Only called for non-retryable errors. A template is treated as a cohesive
+// unit: its Fix belongs with its What/Why rather than being mixed across sources.
+func resolveSuggestedFix(
+	code string,
+	errCtx map[string]string,
+	cfg HandleConfig,
+	reg *Registry,
+	family Family,
+) string {
+	if tmpl, ok := resolveTemplate(code, cfg, reg); ok && tmpl.Fix != "" {
+		return applyContext(tmpl.Fix, errCtx)
+	}
+	return family.DefaultFix()
 }
 
 func renderMessage(code string, context map[string]string, family Family) string {
@@ -255,7 +298,7 @@ func applyTemplate(tmpl MessageTemplate, context map[string]string, family Famil
 func applyContext(template string, context map[string]string) string {
 	s := template
 	for k, v := range context {
-		s = strings.ReplaceAll(s, "{{."+k+"}}", v)
+		s = strings.ReplaceAll(s, "{"+k+"}", v)
 	}
 	return s
 }
@@ -311,30 +354,15 @@ var defaultMessages = map[string]MessageTemplate{ //nolint:gochecknoglobals // I
 
 // RegisterTemplate adds a MessageTemplate for a specific error code.
 // Thread-safe. Overrides any existing template for the same code.
+//
+// Delegates to [DefaultRegistry]. For scoped registration, use
+// [Registry.RegisterTemplate] on a custom Registry.
 func RegisterTemplate(code string, tmpl MessageTemplate) {
-	templateRegistry.mu.Lock()
-	defer templateRegistry.mu.Unlock()
-	templateRegistry.entries[strings.ToLower(code)] = tmpl
+	DefaultRegistry.RegisterTemplate(code, tmpl)
 }
 
 // UnregisterTemplate removes a previously registered template.
 // Thread-safe. No-op if the code has no registered template.
 func UnregisterTemplate(code string) {
-	templateRegistry.mu.Lock()
-	defer templateRegistry.mu.Unlock()
-	delete(templateRegistry.entries, strings.ToLower(code))
-}
-
-var templateRegistry = struct { //nolint:gochecknoglobals // Mutex-protected template registry, populated via RegisterTemplate.
-	mu      sync.RWMutex
-	entries map[string]MessageTemplate
-}{
-	entries: make(map[string]MessageTemplate),
-}
-
-func lookupTemplate(code string) (MessageTemplate, bool) {
-	templateRegistry.mu.RLock()
-	defer templateRegistry.mu.RUnlock()
-	tmpl, ok := templateRegistry.entries[strings.ToLower(code)]
-	return tmpl, ok
+	DefaultRegistry.UnregisterTemplate(code)
 }

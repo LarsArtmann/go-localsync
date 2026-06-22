@@ -53,7 +53,9 @@ const (
 // Adding a new family requires exactly one entry here.
 type familyInfo struct {
 	Name     string
+	Severity int // total order for multi-error classification: higher = worse (Transient=1 … Corruption=5)
 	Exit     int
+	HTTP     int // HTTP status code mapping
 	Tone     Tone
 	Audience Audience
 	Message  string
@@ -64,7 +66,9 @@ type familyInfo struct {
 var familyData = [...]familyInfo{ //nolint:gochecknoglobals // Immutable lookup table for Family metadata.
 	Rejection: {
 		Name:     strRejection,
+		Severity: 2, // user error — fixable by caller
 		Exit:     1,
+		HTTP:     400, // Bad Request
 		Tone:     ToneInstructional,
 		Audience: AudienceUser,
 		Message:  "The request was invalid. Check your input and try again.",
@@ -72,7 +76,9 @@ var familyData = [...]familyInfo{ //nolint:gochecknoglobals // Immutable lookup 
 	},
 	Conflict: {
 		Name:     strConflict,
+		Severity: 3, // user must resolve state before retrying
 		Exit:     1,
+		HTTP:     409, // Conflict
 		Tone:     ToneExplanatory,
 		Audience: AudienceUser,
 		Message:  "A conflict was detected. Refresh and try again.",
@@ -80,7 +86,9 @@ var familyData = [...]familyInfo{ //nolint:gochecknoglobals // Immutable lookup 
 	},
 	Transient: {
 		Name:     strTransient,
+		Severity: 1, // least bad — temporary, will likely pass on retry
 		Exit:     75,
+		HTTP:     503, // Service Unavailable
 		Tone:     ToneReassuring,
 		Audience: AudienceAll,
 		Message:  "A temporary error occurred. Please try again in a few moments.",
@@ -89,7 +97,9 @@ var familyData = [...]familyInfo{ //nolint:gochecknoglobals // Immutable lookup 
 	},
 	Corruption: {
 		Name:     strCorruption,
+		Severity: 5, // worst — source of truth is damaged, data integrity at risk
 		Exit:     65,
+		HTTP:     500, // Internal Server Error (data integrity break is server-side)
 		Tone:     ToneUrgent,
 		Audience: AudienceOps,
 		Message:  "Data appears to be corrupted. This requires manual intervention.",
@@ -98,7 +108,9 @@ var familyData = [...]familyInfo{ //nolint:gochecknoglobals // Immutable lookup 
 	},
 	Infrastructure: {
 		Name:     strInfrastructure,
+		Severity: 4, // system cannot serve, but data is intact
 		Exit:     69,
+		HTTP:     503, // Service Unavailable
 		Tone:     ToneApologetic,
 		Audience: AudienceOps,
 		Message:  "The service is currently unavailable. Please try again later.",
@@ -149,12 +161,41 @@ func (f Family) IsValid() bool {
 	return f >= Rejection && f <= Infrastructure
 }
 
+// Severity returns a total order across families for multi-error classification.
+// Higher = worse. Used by Classify to pick the worst sub-error of an errors.Join
+// result deterministically, independent of argument order.
+//
+//	Transient(1) < Rejection(2) < Conflict(3) < Infrastructure(4) < Corruption(5)
+//
+// This preserves the fail-closed retry guarantee: if ANY sub-error is non-Transient
+// (severity > 1), the joined error is non-Transient.
+func (f Family) Severity() int {
+	if f.IsValid() {
+		return familyData[f].Severity
+	}
+	return 0
+}
+
 // ExitCode returns the BSD sysexits.h compatible exit code for this family.
 func (f Family) ExitCode() int {
 	if f.IsValid() {
 		return familyData[f].Exit
 	}
 	return 70 // EX_SOFTWARE — internal software error
+}
+
+// HTTPStatus returns the recommended HTTP response status code for this family.
+// Use at HTTP/REST boundaries to translate a classified error into a response code:
+//
+//	Rejection → 400, Conflict → 409, Transient → 503,
+//	Corruption → 500, Infrastructure → 503.
+//
+// Invalid families return 500 (Internal Server Error).
+func (f Family) HTTPStatus() int {
+	if f.IsValid() {
+		return familyData[f].HTTP
+	}
+	return 500
 }
 
 // DefaultMessage returns the default human-readable message for this family.

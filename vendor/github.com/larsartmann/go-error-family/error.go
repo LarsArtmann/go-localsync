@@ -1,12 +1,17 @@
 package errorfamily
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"time"
 )
 
 // Error is the reference implementation of a classified, structured error.
+//
+// This is a convenience type, not the contract. The public protocol is the
+// Coded/Classified/Contextual/Retryable interfaces — your own domain error
+// types implement only those and need not embed or use this struct.
 //
 // Projects with simple error needs can use this directly.
 // Projects with domain-specific needs (e.g., FindingError with Position/File)
@@ -118,26 +123,58 @@ func (e *Error) formatVerbose(f fmt.State) {
 }
 
 // WithContext adds a key-value pair to the error's context.
-// Returns the same error for chaining.
+// Returns a new Error, leaving the original unchanged — safe for shared/sentinel errors.
 func (e *Error) WithContext(key, value string) *Error {
-	if e.context == nil {
-		e.context = make(map[string]string)
-	}
-	e.context[key] = value
-	return e
+	clone := e.clone()
+	clone.context[key] = value
+	return clone
 }
 
-// WithCause sets the underlying cause and returns the error for chaining.
+// WithContextMap merges a map of key-value pairs into the error's context.
+// Returns a new Error, leaving the original unchanged. Nil or empty input
+// returns a clone with no added context.
+func (e *Error) WithContextMap(ctx map[string]string) *Error {
+	clone := e.clone()
+	maps.Insert(clone.context, maps.All(ctx))
+	return clone
+}
+
+// WithContextf adds a formatted key-value pair to the error's context.
+// The value is produced by fmt.Sprintf(format, args...).
+// Returns a new Error, leaving the original unchanged.
+func (e *Error) WithContextf(key, format string, args ...any) *Error {
+	clone := e.clone()
+	clone.context[key] = fmt.Sprintf(format, args...)
+	return clone
+}
+
+// WithCause sets the underlying cause and returns a new error for chaining.
 func (e *Error) WithCause(cause error) *Error {
-	e.cause = cause
-	return e
+	clone := e.clone()
+	clone.cause = cause
+	return clone
 }
 
-// WithTimestamp sets the error timestamp and returns the error for chaining.
+// WithTimestamp sets the error timestamp and returns a new error for chaining.
 // Useful for testing and deterministic construction.
 func (e *Error) WithTimestamp(ts time.Time) *Error {
-	e.timestamp = ts
-	return e
+	clone := e.clone()
+	clone.timestamp = ts
+	return clone
+}
+
+// clone returns a shallow copy of the error with a deep-copied context map.
+func (e *Error) clone() *Error {
+	c := &Error{
+		code:      e.code,
+		message:   e.message,
+		family:    e.family,
+		cause:     e.cause,
+		timestamp: e.timestamp,
+		context:   make(map[string]string, len(e.context)),
+	}
+	maps.Copy(c.context, e.context)
+	return c
 }
 
 // Summary returns a one-line human-readable summary suitable for logs and CLI output.
@@ -164,4 +201,36 @@ func (e *Error) ContextValue(key string) string {
 		return ""
 	}
 	return e.context[key]
+}
+
+// jsonError is the JSON view of an Error for API responses.
+type jsonError struct {
+	Family    string            `json:"family"`
+	Code      string            `json:"code"`
+	Message   string            `json:"message"`
+	Context   map[string]string `json:"context,omitempty"`
+	Retryable bool              `json:"retryable"`
+	Timestamp string            `json:"timestamp,omitempty"`
+}
+
+// JSON returns a canonical JSON encoding of the error for API boundaries.
+// The shape is stable: {family, code, message, context, retryable, timestamp}.
+// Use this for HTTP/REST error responses where a structured body is preferable
+// to the [transient:code] message format of Error().
+func (e *Error) JSON() ([]byte, error) {
+	view := jsonError{
+		Family:    e.family.String(),
+		Code:      e.code,
+		Message:   e.message,
+		Context:   e.context,
+		Retryable: e.IsRetryable(),
+	}
+	if !e.timestamp.IsZero() {
+		view.Timestamp = e.timestamp.Format(time.RFC3339)
+	}
+	data, err := json.Marshal(view)
+	if err != nil {
+		return nil, fmt.Errorf("marshal error view: %w", err)
+	}
+	return data, nil
 }
