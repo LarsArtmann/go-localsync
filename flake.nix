@@ -29,7 +29,7 @@
         {
           packages.default = pkgs.buildGoModule {
             pname = "go-localsync";
-            version = "0.2.0";
+            version = "0.3.0";
             src = ./.;
             vendorHash = null;
             meta = with pkgs.lib; {

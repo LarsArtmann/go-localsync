@@ -3,12 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-Release dates and entries are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`).
+Release dates and entries are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.3.0`).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-23
+
 ### Changed
 
+- **Breaking: `ActorID` renamed to `ActorLogin`** (`pkg/id`). The type previously called `ActorID` actually represents an external provider actor login (e.g. a GitHub username like `"octocat"`), and every field using it was already named `ActorLogin` — the type name didn't match its purpose. The rename also resolves a P0 seam violation where three incompatible types across sibling repos were all named `ActorID`. Affected public API:
+  - `ActorBrand` → `ActorLoginBrand` (phantom type)
+  - `ActorID` → `ActorLogin` (type alias)
+  - `NewActorID(v string)` → `NewActorLogin(v string)` (constructor)
+  - Field types updated across `pkg/data/model` (`Item.ActorLogin`, `ItemFilter.ActorLogin`, `WithActorLogin`), `pkg/provider` (`Item.ActorLogin`), `pkg/api`, and `pkg/cqrs`. Consumers referencing `id.ActorID` or `id.NewActorID` must update to `id.ActorLogin` / `id.NewActorLogin`.
 - **go-error-family upgraded from v0.4.0 to v0.5.0.** Vendored dependencies re-synced. No code changes needed — `RegisterTemplate`, `NewRejection`, `Wrap`, and `IsRetryable` APIs are backward-compatible (global functions now delegate to `DefaultRegistry`).
 
 ## [0.2.0] - 2026-06-22

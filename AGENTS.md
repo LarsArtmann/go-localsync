@@ -1,6 +1,6 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-06-22
+**Updated:** 2026-06-23
 
 ## Project Overview
 
@@ -195,7 +195,7 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/watermill/v3`        | v3.0.0  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)   |
 | `go-cqrs-lite/storage/v3`          | v3.0.0  | SQLite event store, snapshot, KV store                           |
 | `go-branded-id`                    | v0.3.1  | Branded phantom-type IDs for compile-time safety                 |
-| `go-error-family`                  | v0.4.0  | Structured error classification + user-facing message templates  |
+| `go-error-family`                  | v0.5.0  | Structured error classification + user-facing message templates  |
 | `modernc.org/sqlite`               | v1.52.0 | Pure-Go SQLite driver (no CGo)                                   |
 | `charm.land/log/v2`                | v2.0.0  | Structured logging                                               |
 | `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter    |
