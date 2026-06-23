@@ -8,13 +8,13 @@ notices.
 The following is a list of third-party software included in this repository,
 their locations, and their respective licenses.
 
-
-----
+---
 
 ## Go
 
-* **URL:** https://github.com/golang/go
-----
+- **URL:** https://github.com/golang/go
+
+---
 
 Copyright (c) 2009 The Go Authors. All rights reserved.
 
@@ -22,15 +22,15 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+- Redistributions of source code must retain the above copyright
+  notice, this list of conditions and the following disclaimer.
+- Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the following disclaimer
+  in the documentation and/or other materials provided with the
+  distribution.
+- Neither the name of Google Inc. nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -44,17 +44,18 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-----
+---
 
 ## musl libc
 
-* **URL:** https://musl.libc.org/
+- **URL:** https://musl.libc.org/
 
-----
+---
 
 musl as a whole is licensed under the following standard MIT license:
 
-----------------------------------------------------------------------
+---
+
 Copyright © 2005-2020 Rich Felker, et al.
 
 Permission is hereby granted, free of charge, to any person obtaining
@@ -75,7 +76,8 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-----------------------------------------------------------------------
+
+---
 
 Authors/contributors include:
 
@@ -171,7 +173,7 @@ under a 2-clause BSD license (license text in the source files). The
 included version has been heavily modified by Rich Felker in 2012, in
 the interests of size, simplicity, and namespace cleanliness.
 
-Much of the math library code (src/math/* and src/complex/*) is
+Much of the math library code (src/math/_ and src/complex/_) is
 Copyright © 1993,2004 Sun Microsystems or
 Copyright © 2003-2011 David Schultz or
 Copyright © 2003-2009 Steven G. Kargl or
@@ -185,7 +187,7 @@ The ARM memcpy code (src/string/arm/memcpy.S) is Copyright © 2008
 The Android Open Source Project and is licensed under a two-clause BSD
 license. It was taken from Bionic libc, used on Android.
 
-The AArch64 memcpy and memset code (src/string/aarch64/*) are
+The AArch64 memcpy and memset code (src/string/aarch64/\*) are
 Copyright © 1999-2019, Arm Limited.
 
 The implementation of DES for crypt (src/crypt/crypt_des.c) is
@@ -223,8 +225,8 @@ omission of copyright and license comments in each file is in the
 interest of source tree size.
 
 In addition, permission is hereby granted for all public header files
-(include/* and arch/*/bits/*) and crt files intended to be linked into
-applications (crt/*, ldso/dlstart.c, and arch/*/crt_arch.h) to omit
+(include/_ and arch/_/bits/_) and crt files intended to be linked into
+applications (crt/_, ldso/dlstart.c, and arch/\*/crt_arch.h) to omit
 the copyright notice and permission notice otherwise required by the
 license, and to use these files without any requirement of
 attribution. These files include substantial contributions from:
@@ -246,13 +248,13 @@ negated the permissions granted in the license. In the spirit of
 permissive licensing, and of not having licensing issues being an
 obstacle to adoption, that text has been removed.
 
-----
+---
 
 ## go-netdb
 
-* **URL:** https://github.com/dominikh/go-netdb
+- **URL:** https://github.com/dominikh/go-netdb
 
-----
+---
 
 Copyright (c) 2012 Dominik Honnef
 
@@ -275,13 +277,13 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-----
+---
 
 ## NixOS/nixpkgs
 
-* **URL:** https://github.com/NixOS/nixpkgs
+- **URL:** https://github.com/NixOS/nixpkgs
 
-----
+---
 
 Copyright (c) 2003-2025 Eelco Dolstra and the Nixpkgs/NixOS contributors
 

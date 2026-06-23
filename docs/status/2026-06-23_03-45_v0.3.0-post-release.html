@@ -817,7 +817,10 @@
           </div>
           <div class="hero-badge">Post-Release Snapshot</div>
           <h1>go-localsync v0.3.0</h1>
-          <p class="hero-subtitle">Full status audit immediately after cutting the ActorLogin rename release. 224 tests passing, 0 lint issues, one broken CI job.</p>
+          <p class="hero-subtitle">
+            Full status audit immediately after cutting the ActorLogin rename release. 224 tests
+            passing, 0 lint issues, one broken CI job.
+          </p>
         </div>
 
         <!-- Inline TOC (alternative to sidebar; pick one) -->
@@ -874,7 +877,14 @@
 
         <div class="card">
           <h4>Release Just Shipped</h4>
-          <p><strong>v0.3.0</strong> cuts the <code>ActorID &rarr; ActorLogin</code> breaking rename across <code>pkg/id</code>, <code>pkg/data/model</code>, <code>pkg/provider</code>, <code>pkg/api</code>, and <code>pkg/cqrs</code>, plus the backward-compatible <code>go-error-family v0.4.0 &rarr; v0.5.0</code> bump. Tagged, pushed, and coherent: <code>go.mod</code>, <code>AGENTS.md</code>, <code>CHANGELOG.md</code>, and <code>flake.nix</code> all agree on versions.</p>
+          <p>
+            <strong>v0.3.0</strong> cuts the <code>ActorID &rarr; ActorLogin</code> breaking rename
+            across <code>pkg/id</code>, <code>pkg/data/model</code>, <code>pkg/provider</code>,
+            <code>pkg/api</code>, and <code>pkg/cqrs</code>, plus the backward-compatible
+            <code>go-error-family v0.4.0 &rarr; v0.5.0</code> bump. Tagged, pushed, and coherent:
+            <code>go.mod</code>, <code>AGENTS.md</code>, <code>CHANGELOG.md</code>, and
+            <code>flake.nix</code> all agree on versions.
+          </p>
         </div>
 
         <!-- ============ FULLY DONE ============ -->
@@ -886,98 +896,158 @@
             <div class="check">+</div>
             <div class="text">
               <strong>CQRS event-sourced architecture</strong>
-              <span>Full Decider + ReadModel + Projector + EventStore via go-cqrs-lite v3.0. No legacy CRUD path. 3 domain events (<code>ItemSynced</code>, <code>ItemConflictFound</code>, <code>ItemDeleted</code>). <code>pkg/cqrs</code> — 89 tests, 81.4% coverage.</span>
+              <span
+                >Full Decider + ReadModel + Projector + EventStore via go-cqrs-lite v3.0. No legacy
+                CRUD path. 3 domain events (<code>ItemSynced</code>, <code>ItemConflictFound</code>,
+                <code>ItemDeleted</code>). <code>pkg/cqrs</code> — 89 tests, 81.4% coverage.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Deterministic aggregate IDs</strong>
-              <span>SHA256&rarr;hex from (source, sourceID) with <code>sync.Map</code> cache. Same inputs always produce the same ID. Idempotent sync: same item synced twice &rarr; 1 aggregate.</span>
+              <span
+                >SHA256&rarr;hex from (source, sourceID) with <code>sync.Map</code> cache. Same
+                inputs always produce the same ID. Idempotent sync: same item synced twice &rarr; 1
+                aggregate.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Pluggable conflict resolution</strong>
-              <span><code>CQRSConfig.ConflictResolver</code> accepts any <code>crdt.ConflictResolver[*model.Item]</code>. Default nil = remote-wins LWW. <code>DecideSync</code> is the single authority — no split-brain. Winner constants exported with <code>ParseConflictWinner</code>.</span>
+              <span
+                ><code>CQRSConfig.ConflictResolver</code> accepts any
+                <code>crdt.ConflictResolver[*model.Item]</code>. Default nil = remote-wins LWW.
+                <code>DecideSync</code> is the single authority — no split-brain. Winner constants
+                exported with <code>ParseConflictWinner</code>.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>CRDT primitives</strong>
-              <span><code>pkg/crdt</code> ships <code>VectorClock</code>, <code>Operation[T]</code>, <code>Conflict[T]</code>, <code>LWWResolver[T]</code>, <code>SyncMessage</code>. 53 tests, 96.2% coverage.</span>
+              <span
+                ><code>pkg/crdt</code> ships <code>VectorClock</code>, <code>Operation[T]</code>,
+                <code>Conflict[T]</code>, <code>LWWResolver[T]</code>, <code>SyncMessage</code>. 53
+                tests, 96.2% coverage.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Dual storage backends</strong>
-              <span>In-memory (testing/dev) + SQLite (production) via <code>modernc.org/sqlite</code> (pure-Go, no CGo). Backend selected at construction via <code>CQRSConfig.Backend</code>. SQL snapshots cap replay cost.</span>
+              <span
+                >In-memory (testing/dev) + SQLite (production) via
+                <code>modernc.org/sqlite</code> (pure-Go, no CGo). Backend selected at construction
+                via <code>CQRSConfig.Backend</code>. SQL snapshots cap replay cost.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Projection (live + replay)</strong>
-              <span>Direct <code>bus.SubscribeAll</code> for synchronous live delivery (read-your-writes). Background <code>replayJournal</code> for SQLite catch-up. Idempotent projection tolerates replay/live overlap — no checkpoint store needed.</span>
+              <span
+                >Direct <code>bus.SubscribeAll</code> for synchronous live delivery
+                (read-your-writes). Background <code>replayJournal</code> for SQLite catch-up.
+                Idempotent projection tolerates replay/live overlap — no checkpoint store
+                needed.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Branded phantom-type IDs</strong>
-              <span>6 types via go-branded-id: <code>ItemID</code> (ULID), <code>ExternalID</code>, <code>ProviderID</code>, <code>ActorLogin</code>, <code>RepoID</code>, <code>EventTypeID</code>. Compile-time type safety. <code>pkg/id</code> — 100% coverage.</span>
+              <span
+                >6 types via go-branded-id: <code>ItemID</code> (ULID), <code>ExternalID</code>,
+                <code>ProviderID</code>, <code>ActorLogin</code>, <code>RepoID</code>,
+                <code>EventTypeID</code>. Compile-time type safety. <code>pkg/id</code> — 100%
+                coverage.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>HTTP API</strong>
-              <span>Huma v2 with <code>GET /items</code>, <code>GET /stats</code>, <code>POST /sync</code>, <code>GET /health</code>. OpenAPI 3 spec auto-generated. <code>pkg/api</code> — 14 tests, 94% coverage.</span>
+              <span
+                >Huma v2 with <code>GET /items</code>, <code>GET /stats</code>,
+                <code>POST /sync</code>, <code>GET /health</code>. OpenAPI 3 spec auto-generated.
+                <code>pkg/api</code> — 14 tests, 94% coverage.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Error taxonomy</strong>
-              <span><code>go-error-family</code> constructors (Rejection, Transient, Infrastructure) with intrinsic classification and <code>IsRetryable</code>. <code>RegisterErrorTemplates()</code> for all error codes with What/Why/Fix/WayOut. <code>pkg/errors</code> — 100% coverage.</span>
+              <span
+                ><code>go-error-family</code> constructors (Rejection, Transient, Infrastructure)
+                with intrinsic classification and <code>IsRetryable</code>.
+                <code>RegisterErrorTemplates()</code> for all error codes with What/Why/Fix/WayOut.
+                <code>pkg/errors</code> — 100% coverage.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Pure contract library</strong>
-              <span>All provider implementations + example CLI removed. SDK defines the <code>Provider</code> interface only. Reference consumer lives in <code>github-local-sync</code>. Clean architectural boundary.</span>
+              <span
+                >All provider implementations + example CLI removed. SDK defines the
+                <code>Provider</code> interface only. Reference consumer lives in
+                <code>github-local-sync</code>. Clean architectural boundary.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>DTO/domain boundary</strong>
-              <span><code>item_adapter.go</code> converts <code>provider.Item</code> (DTO) &rarr; <code>model.Item</code> (domain entity with <code>SchemaVersion</code>). Decider, read model, events, and resolver all operate on <code>*model.Item</code>.</span>
+              <span
+                ><code>item_adapter.go</code> converts <code>provider.Item</code> (DTO) &rarr;
+                <code>model.Item</code> (domain entity with <code>SchemaVersion</code>). Decider,
+                read model, events, and resolver all operate on <code>*model.Item</code>.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Sync engine</strong>
-              <span>Full sync, incremental sync, conflict-aware sync with progress callbacks. <code>SyncStore</code> interface decouples sync logic from CQRS infrastructure. <code>pkg/sync</code> — 24 tests, 85.5% coverage.</span>
+              <span
+                >Full sync, incremental sync, conflict-aware sync with progress callbacks.
+                <code>SyncStore</code> interface decouples sync logic from CQRS infrastructure.
+                <code>pkg/sync</code> — 24 tests, 85.5% coverage.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Nix flake + buildflow</strong>
-              <span><code>flake.nix</code> with devShell + <code>buildGoModule</code> (vendored private deps). Buildflow pre-commit passes 26 checks (golangci-lint, gitleaks, nix-fmt, etc.). Version coherent at 0.3.0.</span>
+              <span
+                ><code>flake.nix</code> with devShell + <code>buildGoModule</code> (vendored private
+                deps). Buildflow pre-commit passes 26 checks (golangci-lint, gitleaks, nix-fmt,
+                etc.). Version coherent at 0.3.0.</span
+              >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
               <strong>Schema versioning</strong>
-              <span><code>pkg/data/schema</code> — <code>Version</code> (V1/V2) with <code>CurrentVersion()</code>, <code>Valid()</code>. Carried on every item for forward event migration (upcasting). 100% coverage.</span>
+              <span
+                ><code>pkg/data/schema</code> — <code>Version</code> (V1/V2) with
+                <code>CurrentVersion()</code>, <code>Valid()</code>. Carried on every item for
+                forward event migration (upcasting). 100% coverage.</span
+              >
             </div>
           </div>
         </div>
@@ -988,30 +1058,50 @@
 
         <div class="card card-warning">
           <h4>pkg/cqrs coverage at 81.4%</h4>
-          <p>Lowest-coverage package. The core CQRS stack works correctly, but some error paths and store-factory branches lack test coverage. Target: 90%+.</p>
+          <p>
+            Lowest-coverage package. The core CQRS stack works correctly, but some error paths and
+            store-factory branches lack test coverage. Target: 90%+.
+          </p>
           <div class="callout callout-warning">
             <strong>Gap</strong>
-            Error paths in <code>store_factory.go</code>, edge cases in snapshot loading, and some SQLite read model filter combinations.
+            Error paths in <code>store_factory.go</code>, edge cases in snapshot loading, and some
+            SQLite read model filter combinations.
           </div>
         </div>
 
         <div class="card card-warning">
           <h4>CI pipeline — test + lint pass, build + release broken</h4>
-          <p>The <code>test</code> and <code>lint</code> jobs in <code>.github/workflows/ci.yml</code> pass cleanly. The <code>build</code> job cross-compiles <code>./cmd/examples/github-sync</code> — a path deleted when the SDK became a pure contract library. The <code>release</code> job depends on <code>build</code>, so neither runs.</p>
+          <p>
+            The <code>test</code> and <code>lint</code> jobs in
+            <code>.github/workflows/ci.yml</code> pass cleanly. The <code>build</code> job
+            cross-compiles <code>./cmd/examples/github-sync</code> — a path deleted when the SDK
+            became a pure contract library. The <code>release</code> job depends on
+            <code>build</code>, so neither runs.
+          </p>
           <div class="callout callout-warning">
             <strong>Impact</strong>
-            Tagged releases (like v0.3.0) trigger the <code>release</code> job, which fails. The GitHub Release must be created manually or the jobs must be reworked.
+            Tagged releases (like v0.3.0) trigger the <code>release</code> job, which fails. The
+            GitHub Release must be created manually or the jobs must be reworked.
           </div>
         </div>
 
         <div class="card card-warning">
           <h4>HTTP API — no auth, no rate limiting, no pagination headers</h4>
-          <p>The API works correctly but has no production hardening: unauthenticated endpoints, no <code>X-Total-Count</code> pagination header, no rate limiting on <code>POST /sync</code>.</p>
+          <p>
+            The API works correctly but has no production hardening: unauthenticated endpoints, no
+            <code>X-Total-Count</code> pagination header, no rate limiting on
+            <code>POST /sync</code>.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Vendored private dependency</h4>
-          <p><code>go-cqrs-lite</code> is private, forcing a committed <code>vendor/</code> dir + <code>vendorHash = null</code> in <code>flake.nix</code>. Works, but prevents <code>nix flake check</code> from using a real <code>vendorHash</code>. Also bloats the repo with ~173 files of vendored deps.</p>
+          <p>
+            <code>go-cqrs-lite</code> is private, forcing a committed <code>vendor/</code> dir +
+            <code>vendorHash = null</code> in <code>flake.nix</code>. Works, but prevents
+            <code>nix flake check</code> from using a real <code>vendorHash</code>. Also bloats the
+            repo with ~173 files of vendored deps.
+          </p>
         </div>
 
         <!-- ============ NOT STARTED ============ -->
@@ -1030,7 +1120,10 @@
           <tbody>
             <tr>
               <td>1</td>
-              <td>OpenTelemetry instrumentation (spans for <code>Syncer.Sync()</code>, <code>CQRSStack.SyncItems()</code>, HTTP middleware)</td>
+              <td>
+                OpenTelemetry instrumentation (spans for <code>Syncer.Sync()</code>,
+                <code>CQRSStack.SyncItems()</code>, HTTP middleware)
+              </td>
               <td><code>TODO_LIST.md</code></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
@@ -1060,7 +1153,9 @@
             </tr>
             <tr>
               <td>6</td>
-              <td>Per-sync conflict resolver override (<code>SyncOptions.ConflictResolver</code>)</td>
+              <td>
+                Per-sync conflict resolver override (<code>SyncOptions.ConflictResolver</code>)
+              </td>
               <td><code>TODO_LIST.md</code></td>
               <td><span class="badge badge-low">Lower</span></td>
             </tr>
@@ -1078,7 +1173,9 @@
             </tr>
             <tr>
               <td>9</td>
-              <td>Real-time sync protocol (<code>SyncMessage</code> from <code>pkg/crdt/</code>)</td>
+              <td>
+                Real-time sync protocol (<code>SyncMessage</code> from <code>pkg/crdt/</code>)
+              </td>
               <td><code>ROADMAP.md</code></td>
               <td><span class="badge badge-low">Future</span></td>
             </tr>
@@ -1110,10 +1207,17 @@
           <span class="severity severity-critical">Broken</span>
           <h3>CI build &amp; release jobs cross-compile a deleted path</h3>
           <div class="where">.github/workflows/ci.yml — build + release jobs</div>
-          <p>The <code>build</code> job runs <code>go build ... ./cmd/examples/github-sync</code> — a directory deleted in v0.2.0 when the SDK became a pure contract library. The <code>release</code> job depends on <code>build</code>, so neither job can succeed. Every tagged release (including v0.3.0) triggers a failing <code>release</code> job.</p>
+          <p>
+            The <code>build</code> job runs <code>go build ... ./cmd/examples/github-sync</code> — a
+            directory deleted in v0.2.0 when the SDK became a pure contract library. The
+            <code>release</code> job depends on <code>build</code>, so neither job can succeed.
+            Every tagged release (including v0.3.0) triggers a failing <code>release</code> job.
+          </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            A pure Go library has no binary to cross-compile. Either (a) remove both jobs entirely, (b) replace with a <code>go build ./...</code> smoke test, or (c) adopt a library-appropriate release flow. This is the #1 blocker for CI green.
+            A pure Go library has no binary to cross-compile. Either (a) remove both jobs entirely,
+            (b) replace with a <code>go build ./...</code> smoke test, or (c) adopt a
+            library-appropriate release flow. This is the #1 blocker for CI green.
           </div>
         </div>
 
@@ -1122,32 +1226,57 @@
 
         <div class="card card-solution">
           <h4>Architectural strengths to preserve</h4>
-          <p>The CQRS-first design, <code>SyncStore</code> interface seam, branded IDs, and DTO/domain boundary are well-executed. The decider-as-single-authority for conflict detection eliminates split-brain. These are the foundations to build on.</p>
+          <p>
+            The CQRS-first design, <code>SyncStore</code> interface seam, branded IDs, and
+            DTO/domain boundary are well-executed. The decider-as-single-authority for conflict
+            detection eliminates split-brain. These are the foundations to build on.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Release automation gap</h4>
-          <p>v0.3.0 was cut manually: changelog updated, commit amended, tag force-pushed. The CI <code>release</code> job that should automate this is broken. A library release flow (GoReleaser or GitHub-native) would make releases repeatable and less error-prone.</p>
+          <p>
+            v0.3.0 was cut manually: changelog updated, commit amended, tag force-pushed. The CI
+            <code>release</code> job that should automate this is broken. A library release flow
+            (GoReleaser or GitHub-native) would make releases repeatable and less error-prone.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Observability blind spot</h4>
-          <p>No tracing, no metrics. go-cqrs-lite v3 already ships an <code>otel/v3</code> module — the wiring is available but unused. Production debugging currently requires log spelunking. This is the highest-impact gap for operational readiness.</p>
+          <p>
+            No tracing, no metrics. go-cqrs-lite v3 already ships an <code>otel/v3</code> module —
+            the wiring is available but unused. Production debugging currently requires log
+            spelunking. This is the highest-impact gap for operational readiness.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>Vendored dependency debt</h4>
-          <p>The committed <code>vendor/</code> dir (~34,000+ lines across 173 files) exists only because <code>go-cqrs-lite</code> is private. Making it public eliminates the workaround, shrinks the repo dramatically, and enables a real <code>vendorHash</code> for reproducible nix builds.</p>
+          <p>
+            The committed <code>vendor/</code> dir (~34,000+ lines across 173 files) exists only
+            because <code>go-cqrs-lite</code> is private. Making it public eliminates the
+            workaround, shrinks the repo dramatically, and enables a real
+            <code>vendorHash</code> for reproducible nix builds.
+          </p>
         </div>
 
         <div class="card card-warning">
           <h4>API production-readiness</h4>
-          <p>The HTTP API is functional but unauthenticated, unrated, and lacks pagination metadata. Before any production deployment, auth + rate limiting + pagination headers are mandatory.</p>
+          <p>
+            The HTTP API is functional but unauthenticated, unrated, and lacks pagination metadata.
+            Before any production deployment, auth + rate limiting + pagination headers are
+            mandatory.
+          </p>
         </div>
 
         <div class="card">
           <h4>Test coverage depth</h4>
-          <p>Overall coverage is strong (91.6% avg), but <code>pkg/cqrs</code> at 81.4% drags the average down. Focusing on error paths and store-factory branches would push the weakest package to 90%+.</p>
+          <p>
+            Overall coverage is strong (91.6% avg), but <code>pkg/cqrs</code> at 81.4% drags the
+            average down. Focusing on error paths and store-factory branches would push the weakest
+            package to 90%+.
+          </p>
         </div>
 
         <!-- ============ TOP 25 NEXT ============ -->
@@ -1166,25 +1295,37 @@
           <tbody>
             <tr>
               <td>1</td>
-              <td><strong>Fix CI build/release jobs</strong> — remove or rework for a pure library (no binary to cross-compile)</td>
+              <td>
+                <strong>Fix CI build/release jobs</strong> — remove or rework for a pure library (no
+                binary to cross-compile)
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>2</td>
-              <td><strong>Make go-cqrs-lite public</strong> — eliminates vendor/ dir + enables real vendorHash</td>
+              <td>
+                <strong>Make go-cqrs-lite public</strong> — eliminates vendor/ dir + enables real
+                vendorHash
+              </td>
               <td><span class="badge badge-critical">Critical</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
             <tr>
               <td>3</td>
-              <td><strong>Drop vendor/ dir</strong> after go-cqrs-lite is public — set real vendorHash, remove vendor/** exclusion</td>
+              <td>
+                <strong>Drop vendor/ dir</strong> after go-cqrs-lite is public — set real
+                vendorHash, remove vendor/** exclusion
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>4</td>
-              <td><strong>API authentication middleware</strong> — API key or JWT; currently unauthenticated</td>
+              <td>
+                <strong>API authentication middleware</strong> — API key or JWT; currently
+                unauthenticated
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
@@ -1196,67 +1337,96 @@
             </tr>
             <tr>
               <td>6</td>
-              <td><strong>OpenTelemetry instrumentation</strong> — spans for Sync, CQRS, HTTP; <code>otel/v3</code> already available</td>
+              <td>
+                <strong>OpenTelemetry instrumentation</strong> — spans for Sync, CQRS, HTTP;
+                <code>otel/v3</code> already available
+              </td>
               <td><span class="badge badge-high">High</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
             <tr>
               <td>7</td>
-              <td><strong>API pagination headers</strong> — <code>X-Total-Count</code>, cursor-based</td>
+              <td>
+                <strong>API pagination headers</strong> — <code>X-Total-Count</code>, cursor-based
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>8</td>
-              <td><strong>Improve pkg/cqrs coverage</strong> — 81.4% &rarr; 90%+ (error paths, store-factory)</td>
+              <td>
+                <strong>Improve pkg/cqrs coverage</strong> — 81.4% &rarr; 90%+ (error paths,
+                store-factory)
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
             <tr>
               <td>9</td>
-              <td><strong>Per-sync conflict resolver override</strong> — <code>SyncOptions.ConflictResolver</code></td>
+              <td>
+                <strong>Per-sync conflict resolver override</strong> —
+                <code>SyncOptions.ConflictResolver</code>
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>10</td>
-              <td><strong>Structured logging fields</strong> — consistent source/page/event_id context</td>
+              <td>
+                <strong>Structured logging fields</strong> — consistent source/page/event_id context
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>11</td>
-              <td><strong>OpenAPI error response schemas</strong> — per-endpoint error documentation</td>
+              <td>
+                <strong>OpenAPI error response schemas</strong> — per-endpoint error documentation
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>12</td>
-              <td><strong>Adopt UpcasterRegistry</strong> — schema evolution via go-cqrs-lite; foundation ready in <code>pkg/data/schema</code></td>
+              <td>
+                <strong>Adopt UpcasterRegistry</strong> — schema evolution via go-cqrs-lite;
+                foundation ready in <code>pkg/data/schema</code>
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
             <tr>
               <td>13</td>
-              <td><strong>CONTRIBUTING.md</strong> — architecture guide, file-split conventions, testing requirements</td>
+              <td>
+                <strong>CONTRIBUTING.md</strong> — architecture guide, file-split conventions,
+                testing requirements
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>14</td>
-              <td><strong>govalid struct tags</strong> — on <code>SyncOptions</code>, <code>CQRSConfig</code></td>
+              <td>
+                <strong>govalid struct tags</strong> — on <code>SyncOptions</code>,
+                <code>CQRSConfig</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>15</td>
-              <td><strong>Benchmark suite</strong> — baseline sync throughput, projection latency</td>
+              <td>
+                <strong>Benchmark suite</strong> — baseline sync throughput, projection latency
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
             <tr>
               <td>16</td>
-              <td><strong>Fuzzing tests</strong> — conflict resolver inputs, JSON payload decoding, aggregate ID generation</td>
+              <td>
+                <strong>Fuzzing tests</strong> — conflict resolver inputs, JSON payload decoding,
+                aggregate ID generation
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
@@ -1268,49 +1438,73 @@
             </tr>
             <tr>
               <td>18</td>
-              <td><strong>Real-time sync protocol</strong> — <code>SyncMessage</code> from <code>pkg/crdt/</code> for multi-node sync</td>
+              <td>
+                <strong>Real-time sync protocol</strong> — <code>SyncMessage</code> from
+                <code>pkg/crdt/</code> for multi-node sync
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-high">High</span></td>
             </tr>
             <tr>
               <td>19</td>
-              <td><strong>Multi-user sync</strong> — read model schema to track which user each event belongs to</td>
+              <td>
+                <strong>Multi-user sync</strong> — read model schema to track which user each event
+                belongs to
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-high">High</span></td>
             </tr>
             <tr>
               <td>20</td>
-              <td><strong>Event retention/TTL policy</strong> — automatic cleanup of old events, configurable</td>
+              <td>
+                <strong>Event retention/TTL policy</strong> — automatic cleanup of old events,
+                configurable
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-medium">Medium</span></td>
             </tr>
             <tr>
               <td>21</td>
-              <td><strong>Dependency update automation</strong> — Renovate or Dependabot for go.mod + flake inputs</td>
+              <td>
+                <strong>Dependency update automation</strong> — Renovate or Dependabot for go.mod +
+                flake inputs
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>22</td>
-              <td><strong>GitHub Release automation</strong> — GoReleaser or GitHub-native release notes on tag push</td>
+              <td>
+                <strong>GitHub Release automation</strong> — GoReleaser or GitHub-native release
+                notes on tag push
+              </td>
               <td><span class="badge badge-medium">Medium</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>23</td>
-              <td><strong>Pre-commit hook setup</strong> — buildflow hooks exist but are not executable / are skipped</td>
+              <td>
+                <strong>Pre-commit hook setup</strong> — buildflow hooks exist but are not
+                executable / are skipped
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>24</td>
-              <td><strong>nixpkgs Go 1.26.4 readiness</strong> — monitor nixpkgs for go_1_26 bump to unblock <code>nix flake check</code></td>
+              <td>
+                <strong>nixpkgs Go 1.26.4 readiness</strong> — monitor nixpkgs for go_1_26 bump to
+                unblock <code>nix flake check</code>
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
             <tr>
               <td>25</td>
-              <td><strong>Domain language glossary</strong> — <code>docs/DOMAIN_LANGUAGE.md</code> for ubiquitous language reference</td>
+              <td>
+                <strong>Domain language glossary</strong> — <code>docs/DOMAIN_LANGUAGE.md</code> for
+                ubiquitous language reference
+              </td>
               <td><span class="badge badge-low">Low</span></td>
               <td><span class="badge badge-low">Low</span></td>
             </tr>
@@ -1324,16 +1518,38 @@
           <span class="severity severity-important">Decision needed</span>
           <h3>What does a tagged release of a pure Go library look like without a binary?</h3>
           <div class="where">.github/workflows/ci.yml — release job</div>
-          <p>The CI <code>build</code> and <code>release</code> jobs were written when the SDK shipped a CLI binary (<code>gh-sync</code>). That binary now lives in the consumer app <code>github-local-sync</code>. The SDK is a pure library — it has no binary to cross-compile, no artifact to upload, no release attachment.</p>
+          <p>
+            The CI <code>build</code> and <code>release</code> jobs were written when the SDK
+            shipped a CLI binary (<code>gh-sync</code>). That binary now lives in the consumer app
+            <code>github-local-sync</code>. The SDK is a pure library — it has no binary to
+            cross-compile, no artifact to upload, no release attachment.
+          </p>
           <p><strong>Three options:</strong></p>
           <ul>
-            <li><strong>(a) Remove both jobs</strong> — the <code>test</code> + <code>lint</code> jobs already gate merges. A tag is just a git annotation, no CI artifact needed. Simplest.</li>
-            <li><strong>(b) Replace <code>build</code> with a smoke test</strong> — <code>go build ./...</code> as a compile check, remove the <code>release</code> job entirely. Slightly more verification, no artifact.</li>
-            <li><strong>(c) Keep a <code>release</code> job for GitHub Release notes</strong> — use <code>softprops/action-gh-release</code> with <code>generate_release_notes: true</code> and no binary artifacts. Creates a Release page from the CHANGELOG, even without a binary. Best DX for consumers browsing releases.</li>
+            <li>
+              <strong>(a) Remove both jobs</strong> — the <code>test</code> + <code>lint</code> jobs
+              already gate merges. A tag is just a git annotation, no CI artifact needed. Simplest.
+            </li>
+            <li>
+              <strong>(b) Replace <code>build</code> with a smoke test</strong> —
+              <code>go build ./...</code> as a compile check, remove the <code>release</code> job
+              entirely. Slightly more verification, no artifact.
+            </li>
+            <li>
+              <strong>(c) Keep a <code>release</code> job for GitHub Release notes</strong> — use
+              <code>softprops/action-gh-release</code> with
+              <code>generate_release_notes: true</code> and no binary artifacts. Creates a Release
+              page from the CHANGELOG, even without a binary. Best DX for consumers browsing
+              releases.
+            </li>
           </ul>
           <div class="callout callout-warning">
             <strong>Why I can't decide this alone</strong>
-            This is a product/UX decision: does a go-localsync consumer benefit from a GitHub Release page (option c), or is a git tag + CHANGELOG sufficient (option a/b)? The answer depends on how you want consumers to discover and track SDK releases. I recommend <strong>option (c)</strong> — Release notes are useful even for libraries, and the job is trivial to maintain.
+            This is a product/UX decision: does a go-localsync consumer benefit from a GitHub
+            Release page (option c), or is a git tag + CHANGELOG sufficient (option a/b)? The answer
+            depends on how you want consumers to discover and track SDK releases. I recommend
+            <strong>option (c)</strong> — Release notes are useful even for libraries, and the job
+            is trivial to maintain.
           </div>
         </div>
 
@@ -1349,36 +1565,88 @@
             </tr>
           </thead>
           <tbody>
-            <tr><td><code>pkg/id</code></td><td>12</td><td>100.0%</td><td><span class="badge badge-fixed">Perfect</span></td></tr>
-            <tr><td><code>pkg/errors</code></td><td>9</td><td>100.0%</td><td><span class="badge badge-fixed">Perfect</span></td></tr>
-            <tr><td><code>pkg/data/model</code></td><td>10</td><td>100.0%</td><td><span class="badge badge-fixed">Perfect</span></td></tr>
-            <tr><td><code>pkg/data/schema</code></td><td>4</td><td>100.0%</td><td><span class="badge badge-fixed">Perfect</span></td></tr>
-            <tr><td><code>pkg/crdt</code></td><td>53</td><td>96.2%</td><td><span class="badge badge-fixed">Excellent</span></td></tr>
-            <tr><td><code>pkg/provider</code></td><td>10</td><td>96.7%</td><td><span class="badge badge-fixed">Excellent</span></td></tr>
-            <tr><td><code>pkg/api</code></td><td>14</td><td>94.0%</td><td><span class="badge badge-fixed">Excellent</span></td></tr>
-            <tr><td><code>pkg/sync</code></td><td>24</td><td>85.5%</td><td><span class="badge badge-medium">Good</span></td></tr>
-            <tr><td><code>pkg/cqrs</code></td><td>89</td><td>81.4%</td><td><span class="badge badge-high">Improve</span></td></tr>
+            <tr>
+              <td><code>pkg/id</code></td>
+              <td>12</td>
+              <td>100.0%</td>
+              <td><span class="badge badge-fixed">Perfect</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/errors</code></td>
+              <td>9</td>
+              <td>100.0%</td>
+              <td><span class="badge badge-fixed">Perfect</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/data/model</code></td>
+              <td>10</td>
+              <td>100.0%</td>
+              <td><span class="badge badge-fixed">Perfect</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/data/schema</code></td>
+              <td>4</td>
+              <td>100.0%</td>
+              <td><span class="badge badge-fixed">Perfect</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/crdt</code></td>
+              <td>53</td>
+              <td>96.2%</td>
+              <td><span class="badge badge-fixed">Excellent</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/provider</code></td>
+              <td>10</td>
+              <td>96.7%</td>
+              <td><span class="badge badge-fixed">Excellent</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/api</code></td>
+              <td>14</td>
+              <td>94.0%</td>
+              <td><span class="badge badge-fixed">Excellent</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/sync</code></td>
+              <td>24</td>
+              <td>85.5%</td>
+              <td><span class="badge badge-medium">Good</span></td>
+            </tr>
+            <tr>
+              <td><code>pkg/cqrs</code></td>
+              <td>89</td>
+              <td>81.4%</td>
+              <td><span class="badge badge-high">Improve</span></td>
+            </tr>
           </tbody>
         </table>
 
         <!-- ============ DEPENDENCY DIAGRAM ============ -->
         <h2><span class="num">&diams;</span>Package Dependency Flow</h2>
-        <div class="dep-tree"><span class="root">consumer app</span> (e.g. github-local-sync)
-  ├── <span class="ok">pkg/api</span> (HTTP handlers)
-  │     └── <span class="ok">pkg/sync</span> (Syncer, ConflictAwareSyncer)
-  │           └── <span class="ok">pkg/cqrs</span> (Decider, ReadModel, Projection, Stack)
-  │                 ├── <span class="ok">pkg/data/model</span> (domain Item, ItemFilter)
-  │                 ├── <span class="ok">pkg/data/schema</span> (Version V1/V2)
-  │                 ├── <span class="ok">pkg/id</span> (branded phantom IDs)
-  │                 ├── <span class="ok">pkg/crdt</span> (ConflictResolver, LWWResolver)
-  │                 ├── <span class="ok">pkg/errors</span> (go-error-family constructors)
-  │                 └── <span class="ok">pkg/provider</span> (Provider interface, Item DTO)
-  │
-  └── <span class="ok">pkg/provider</span> ← consumer implements this interface</div>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem;">One-way dependency flow: <code>cqrs &rarr; sync &rarr; provider/types/errors</code>. No import cycles. The <code>SyncStore</code> interface in <code>pkg/sync</code> decouples sync logic from CQRS infrastructure.</p>
+        <div class="dep-tree">
+          <span class="root">consumer app</span> (e.g. github-local-sync) ├──
+          <span class="ok">pkg/api</span> (HTTP handlers) │ └──
+          <span class="ok">pkg/sync</span> (Syncer, ConflictAwareSyncer) │ └──
+          <span class="ok">pkg/cqrs</span> (Decider, ReadModel, Projection, Stack) │ ├──
+          <span class="ok">pkg/data/model</span> (domain Item, ItemFilter) │ ├──
+          <span class="ok">pkg/data/schema</span> (Version V1/V2) │ ├──
+          <span class="ok">pkg/id</span> (branded phantom IDs) │ ├──
+          <span class="ok">pkg/crdt</span> (ConflictResolver, LWWResolver) │ ├──
+          <span class="ok">pkg/errors</span> (go-error-family constructors) │ └──
+          <span class="ok">pkg/provider</span> (Provider interface, Item DTO) │ └──
+          <span class="ok">pkg/provider</span> ← consumer implements this interface
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem">
+          One-way dependency flow: <code>cqrs &rarr; sync &rarr; provider/types/errors</code>. No
+          import cycles. The <code>SyncStore</code> interface in <code>pkg/sync</code> decouples
+          sync logic from CQRS infrastructure.
+        </p>
 
         <footer class="footer">
-          Generated 2026-06-23 &middot; Reviewed against go-localsync v0.3.0 (commit 3633c43) &middot; All claims verified via <code>go test</code>, <code>golangci-lint</code>, <code>git log</code>, and source inspection
+          Generated 2026-06-23 &middot; Reviewed against go-localsync v0.3.0 (commit 3633c43)
+          &middot; All claims verified via <code>go test</code>, <code>golangci-lint</code>,
+          <code>git log</code>, and source inspection
         </footer>
       </main>
     </div>

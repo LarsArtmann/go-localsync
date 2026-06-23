@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.3
+  go: 1.26.4
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -162,6 +162,8 @@ linters:
         - anon
         - stdlib
         - generic
+    makezero:
+      always: true
     mnd:
       ignored-numbers:
         - "100"
@@ -317,4 +319,6 @@ formatters:
     generated: lax
     paths:
       - _templ\.go$
-issues: {}
+issues:
+  max-issues-per-linter: 50
+  max-same-issues: 10

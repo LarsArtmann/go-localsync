@@ -1,0 +1,1387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adoption Feedback · go-localsync → DiscordSync</title>
+    <style>
+      /* =========================================================================
+         BAUHAUS LIGHT — Editorial template
+         Design language: form follows function. Primary colors on warm paper.
+         Zero external dependencies: system fonts, no CDN, no build step.
+         ========================================================================= */
+
+      :root {
+        --color-paper: #f4f4f0;
+        --color-paper-2: #ffffff;
+        --color-paper-3: #e8e8e2;
+        --color-ink: #111111;
+        --color-red: #e63946;
+        --color-blue: #1d3557;
+        --color-yellow: #f4d35e;
+        --color-hairline: rgba(17, 17, 17, 0.14);
+        --color-hairline-strong: rgba(17, 17, 17, 0.3);
+
+        --surface: var(--color-paper);
+        --surface-raised: var(--color-paper-2);
+        --surface-sunken: var(--color-paper-3);
+        --text: var(--color-ink);
+        --text-muted: rgba(17, 17, 17, 0.72);
+        --text-faint: rgba(17, 17, 17, 0.5);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-red);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+
+        --radius: 0px;
+        --radius-sm: 0px;
+
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
+
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .top-bar {
+        background: var(--text);
+        color: var(--surface);
+        padding: 0.6rem 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .sidebar .label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--text);
+      }
+      .sidebar a {
+        font-size: 0.86rem;
+        color: var(--text);
+        text-decoration: none;
+        padding: 0.5rem 0.75rem;
+        border-left: 4px solid transparent;
+        font-weight: 600;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        border-left-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        color: var(--accent);
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+      h1 {
+        font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+        line-height: 1.05;
+        margin: 0 0 0.6rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 3px solid var(--text);
+        display: flex;
+        align-items: baseline;
+        gap: 0.7rem;
+      }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      h3 {
+        font-size: 1.15rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 1rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
+
+      .hero {
+        padding: 1.5rem 0 2rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 3px solid var(--text);
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--accent);
+        margin-bottom: 0.9rem;
+      }
+      .subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0 0 1rem;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .tag {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        padding: 0.25rem 0.6rem;
+        background: var(--surface-sunken);
+        color: var(--text);
+        border: 1px solid var(--border-strong);
+      }
+      .tag.amber {
+        background: var(--warning);
+        border-color: var(--warning);
+        color: var(--text);
+      }
+      .tag.teal {
+        background: var(--solution);
+        border-color: var(--solution);
+        color: var(--surface);
+      }
+
+      .hero-shapes {
+        position: relative;
+        height: 90px;
+        margin-bottom: 1.2rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        right: 180px;
+        width: 64px;
+        height: 64px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 26px;
+        right: 90px;
+        width: 56px;
+        height: 56px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-left: 32px solid transparent;
+        border-right: 32px solid transparent;
+        border-bottom: 56px solid var(--warning);
+      }
+      .hero-shapes .bar {
+        position: absolute;
+        bottom: 0;
+        right: 230px;
+        width: 100px;
+        height: 14px;
+        background: var(--text);
+      }
+
+      .scorecard,
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0;
+        margin: 1.5rem 0 2rem;
+        border: 3px solid var(--text);
+      }
+      .score-card,
+      .stat-card {
+        padding: 1.3rem 1rem;
+        text-align: center;
+        border-right: 3px solid var(--text);
+        background: var(--surface-raised);
+      }
+      .score-card:last-child,
+      .stat-card:last-child {
+        border-right: none;
+      }
+      .score-card:nth-child(1),
+      .stat-card:nth-child(1) {
+        background: var(--problem);
+        color: var(--surface);
+      }
+      .score-card:nth-child(2),
+      .stat-card:nth-child(2) {
+        background: var(--solution);
+        color: var(--surface);
+      }
+      .score-card:nth-child(3),
+      .stat-card:nth-child(3) {
+        background: var(--warning);
+        color: var(--text);
+      }
+      .score-card:nth-child(4),
+      .stat-card:nth-child(4) {
+        background: var(--text);
+        color: var(--surface);
+      }
+
+      .score,
+      .stat-value {
+        font-family: var(--font-heading);
+        font-size: 2.6rem;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+      .score-card .label,
+      .stat-label {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-top: 0.5rem;
+      }
+      .score-good,
+      .stat-good {
+        background: var(--solution) !important;
+        color: var(--surface) !important;
+      }
+      .score-warn,
+      .stat-warn {
+        background: var(--warning) !important;
+        color: var(--text) !important;
+      }
+      .score-bad,
+      .stat-bad {
+        background: var(--problem) !important;
+        color: var(--surface) !important;
+      }
+
+      .card {
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        border-left: 8px solid var(--border-strong);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+      }
+
+      .issue {
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        border-left: 8px solid var(--border-strong);
+      }
+      .issue-critical {
+        border-left-color: var(--problem);
+      }
+      .issue-important {
+        border-left-color: var(--warning);
+      }
+      .issue-nice {
+        border-left-color: var(--solution);
+      }
+      .issue h3 {
+        margin-bottom: 0.3rem;
+      }
+      .issue .where {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin: 0.2rem 0 0.6rem;
+      }
+      .issue p:last-child {
+        margin-bottom: 0;
+      }
+
+      .severity {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.22rem 0.6rem;
+        margin-bottom: 0.6rem;
+        color: var(--surface);
+      }
+      .severity-critical {
+        background: var(--problem);
+      }
+      .severity-important {
+        background: var(--warning);
+        color: var(--text);
+      }
+      .severity-nice {
+        background: var(--solution);
+      }
+
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        border: 1px solid var(--text);
+        color: var(--text);
+      }
+      .badge-critical {
+        background: var(--problem);
+        color: var(--surface);
+      }
+      .badge-high {
+        background: var(--warning);
+      }
+      .badge-medium {
+        background: var(--surface-sunken);
+      }
+      .badge-fixed {
+        background: var(--solution);
+        color: var(--surface);
+      }
+
+      .callout {
+        margin: 0.8rem 0 0;
+        padding: 0.8rem 1rem;
+        border: 1px solid var(--border-strong);
+        border-left: 4px solid var(--border-strong);
+        background: var(--surface-sunken);
+        font-size: 0.92rem;
+      }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-teal,
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(in srgb, var(--solution) 10%, var(--surface-raised));
+      }
+      .callout-amber,
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(in srgb, var(--warning) 18%, var(--surface-raised));
+      }
+
+      .strengths {
+        display: grid;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .strength {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.9rem;
+        padding: 0.75rem 0;
+        border-bottom: 2px solid var(--border);
+      }
+      .strength .check {
+        font-family: var(--font-mono);
+        font-weight: 900;
+        color: var(--solution);
+        font-size: 1.3rem;
+        line-height: 1.3;
+      }
+      .strength .text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .strength .text span {
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.92rem;
+        border: 2px solid var(--text);
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--text);
+        color: var(--surface);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-right: 1px solid var(--border-strong);
+      }
+      th:last-child {
+        border-right: none;
+      }
+      td {
+        padding: 0.6rem 0.9rem;
+        border-top: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+        vertical-align: top;
+      }
+      td:last-child {
+        border-right: none;
+      }
+      tr:nth-child(even) td {
+        background: var(--surface-sunken);
+      }
+      table.compare td.yes {
+        color: var(--solution);
+        font-weight: 700;
+      }
+      table.compare td.no {
+        color: var(--problem);
+        font-weight: 700;
+      }
+
+      pre {
+        background: var(--text);
+        color: var(--surface);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+        border: 2px solid var(--text);
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      .tok-keyword {
+        color: var(--warning);
+      }
+      .tok-type {
+        color: var(--warning);
+      }
+      .tok-string {
+        color: #95e1d3;
+      }
+      .tok-comment {
+        color: rgba(244, 244, 240, 0.45);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #6eb5ff;
+      }
+      .tok-number {
+        color: var(--warning);
+      }
+      .tok-generic {
+        color: var(--problem);
+      }
+      .tok-builtin {
+        color: #6eb5ff;
+      }
+      .tok-punct {
+        color: rgba(244, 244, 240, 0.7);
+      }
+      .tok-attr {
+        color: var(--warning);
+      }
+
+      .dep-tree {
+        background: var(--surface-sunken);
+        border: 2px solid var(--text);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.7;
+        white-space: pre;
+        overflow-x: auto;
+      }
+      .dep-tree .root {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .dep-tree .ok {
+        color: var(--solution);
+      }
+      .dep-tree .unwanted {
+        color: var(--problem);
+      }
+
+      .diagram {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+      }
+      .node {
+        display: inline-block;
+        padding: 0.4rem 0.75rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: var(--surface-sunken);
+        border: 1px solid var(--text);
+      }
+      .node-core {
+        background: var(--accent);
+        color: var(--surface);
+      }
+      .node-problem {
+        background: var(--problem);
+        color: var(--surface);
+      }
+      .node-good {
+        background: var(--solution);
+        color: var(--surface);
+      }
+      .arrow {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      .toc {
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        border-left: 6px solid var(--accent);
+        padding: 1rem 1.3rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .toc h3 {
+        margin-bottom: 0.5rem;
+      }
+      .toc ul {
+        list-style: none;
+        padding: 0;
+      }
+      .toc li {
+        margin: 0.25rem 0;
+      }
+      .toc a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+      .toc a:hover {
+        color: var(--accent);
+      }
+
+      .migration-step {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 1.1rem;
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        border-left: 6px solid var(--accent);
+      }
+      .migration-num {
+        font-family: var(--font-mono);
+        font-weight: 900;
+        font-size: 1.8rem;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .migration-content h4 {
+        margin-bottom: 0.2rem;
+      }
+      .migration-content p {
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 0.94rem;
+      }
+
+      .compare-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin: 1rem 0 0.5rem;
+      }
+      .compare-before,
+      .compare-after {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.4rem 0.7rem;
+        color: var(--surface);
+      }
+      .compare-before {
+        background: var(--problem);
+      }
+      .compare-after {
+        background: var(--solution);
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .compare-row pre {
+        margin: 0;
+      }
+
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 3px solid var(--text);
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+      }
+
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
+      @media (max-width: 768px) {
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .compare-header,
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+        .scorecard,
+        .stat-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .score-card:nth-child(2),
+        .stat-card:nth-child(2) {
+          border-right: none;
+        }
+        .score-card:nth-child(1),
+        .stat-card:nth-child(1),
+        .score-card:nth-child(2),
+        .stat-card:nth-child(2) {
+          border-bottom: 3px solid var(--text);
+        }
+        .migration-step {
+          grid-template-columns: 1fr;
+        }
+        .hero-shapes {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <span>Adoption Feedback</span>
+      <span>2026-06-23</span>
+      <span>Reviewer: Crush (DiscordSync perspective)</span>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav>
+        <nav>
+          <div class="label">Contents</div>
+          <a href="#scorecard">The gap at a glance</a>
+          <a href="#summary">Summary</a>
+          <a href="#shared">What's already shared</a>
+          <a href="#strengths">What's genuinely good</a>
+          <a href="#findings">What must change</a>
+          <a href="#target">Target shape</a>
+          <a href="#matrix">Priority matrix</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="hero">
+          <div class="hero-shapes">
+            <div class="bar"></div>
+            <div class="circle"></div>
+            <div class="square"></div>
+            <div class="tri"></div>
+          </div>
+          <div class="eyebrow">Adoption Feedback &middot; 2026-06-23</div>
+          <h1>What go-localsync would need to change before DiscordSync could consider it</h1>
+          <p class="subtitle">
+            An honest, grounded review of go-localsync's current architecture against DiscordSync's
+            actual domain. The goal is not to dismiss the SDK — it has improved meaningfully — but
+            to name precisely what blocks adoption, and what a generic multi-aggregate rewrite would
+            look like.
+          </p>
+          <div class="meta">
+            <span class="tag amber">Scope: go-localsync as a consumer SDK</span>
+            <span class="tag">Consumer: DiscordSync</span>
+            <span class="tag teal">Status: not viable as-is</span>
+          </div>
+        </header>
+
+        <section id="scorecard" class="scorecard">
+          <div class="score-card score-bad">
+            <div class="score">1</div>
+            <div class="label">go-localsync aggregates</div>
+          </div>
+          <div class="score-card score-bad">
+            <div class="score">6</div>
+            <div class="label">DiscordSync aggregates</div>
+          </div>
+          <div class="score-card score-bad">
+            <div class="score">3</div>
+            <div class="label">SDK event types (fixed)</div>
+          </div>
+          <div class="score-card score-bad">
+            <div class="score">13</div>
+            <div class="label">DiscordSync event types</div>
+          </div>
+        </section>
+
+        <section id="summary">
+          <h2><span class="num">00</span>Summary</h2>
+          <p>
+            go-localsync is now a genuinely well-engineered single-aggregate sync SDK. Its CQRS
+            stack, idempotent sync loop, deterministic IDs, and pluggable CRDT resolution are
+            excellent — for the domain it models:
+            <em
+              >paginated pull of flat items from one REST source into one event-sourced read
+              model.</em
+            >
+            DiscordSync's domain is structurally different: a <em>push-driven</em> stream (Discord
+            Gateway) producing <strong>six aggregate types</strong> with
+            <strong>thirteen typed events</strong> and <strong>four+ projections</strong>, each with
+            rich typed payloads (attachments, embeds, edit history, soft-delete).
+          </p>
+          <div class="callout callout-amber">
+            <strong>The bottom line</strong>
+            go-localsync cannot host DiscordSync's domain without a fundamental rewrite of its core:
+            the single hard-coded aggregate type, the fixed three-event vocabulary, the flat single
+            projection, and the pull-only ingestion model. Tweaks won't close the gap. Both projects
+            already correctly share <em>go-cqrs-lite v3</em> — that is the right sharing boundary
+            today.
+          </div>
+          <p>
+            For adoption to become worth revisiting, go-localsync would need to generalise from a
+            <em>single-aggregate Item sync engine</em> into a
+            <em>multi-aggregate event-sourcing framework</em> where consumers register their own
+            aggregates, events, projections, and ingestion sources. The six findings below name
+            exactly what that entails.
+          </p>
+        </section>
+
+        <section id="shared">
+          <h2><span class="num">&diams;</span>What's already shared (and correct)</h2>
+          <p>
+            Before the gaps: both projects already sit on the right foundation. This is not
+            accidental — it is the correct sharing boundary, and it is the reason the gaps below are
+            about <em>what go-localsync adds on top</em>, not about the primitives.
+          </p>
+          <div class="dep-tree">
+            <span class="root">DiscordSync</span> &amp; <span class="root">go-localsync</span> ├──
+            <span class="ok">go-cqrs-lite/event/v3</span> Event types, Store, Bus, Journal,
+            Projection ├── <span class="ok">go-cqrs-lite/id/v3</span> AggregateID, CorrelationID,
+            branded IDs ├── <span class="ok">go-cqrs-lite/codec/v3</span> JSONCodec,
+            DecodePayload[T] ├── <span class="ok">go-cqrs-lite/storage/v3</span> SQLite event store
+            ├── <span class="ok">go-cqrs-lite/snapshot/v3</span> Snapshot store └──
+            <span class="ok">go-cqrs-lite/watermill/v3</span> In-process EventBus
+          </div>
+          <div class="callout callout-teal">
+            <strong>Key insight</strong>
+            The shared layer already exists. The question is whether go-localsync's
+            <em>opinionated layer on top</em> (Item aggregate, Provider sync, CRDT) adds value for
+            DiscordSync or actively fights its domain.
+          </div>
+        </section>
+
+        <section id="strengths">
+          <h2><span class="num">01</span>What's genuinely good in go-localsync now</h2>
+          <p>
+            These improvements are real and worth acknowledging — they are why the question is worth
+            revisiting at all rather than dismissing outright.
+          </p>
+          <div class="strengths">
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Clean CQRS layer on v3</strong>
+                <span
+                  >Decider, ReadModel, Projection, Stack — no legacy CRUD, idempotent sync,
+                  deterministic SHA256(source, sourceID) IDs. The v3 migration is done
+                  properly.</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>DTO / domain boundary</strong>
+                <span
+                  ><code>provider.Item</code> (DTO) &rarr; <code>model.Item</code> (domain) via
+                  <code>item_adapter.go</code>. Separation of wire format from domain entity is the
+                  right pattern.</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Pluggable CRDT conflict resolution</strong>
+                <span
+                  >Inject any <code>ConflictResolver[*model.Item]</code>; LWW is default. Real
+                  composability for the single-aggregate case.</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>225 tests, strong coverage</strong>
+                <span
+                  >89 tests in <code>pkg/cqrs</code> alone (81.4%). Idempotency, concurrency,
+                  replay, correlation all covered.</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Synchronous projection + journal replay</strong>
+                <span
+                  >Live events via <code>bus.SubscribeAll</code>; SQLite catch-up via background
+                  journal replay with no checkpoint store. Read-your-writes preserved.</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="findings">
+          <h2><span class="num">02</span>What must change for adoption</h2>
+          <p>
+            Six structural gaps, ordered by how fundamentally they block adoption. Each names the
+            current state (with code references), why it fights DiscordSync's domain, and what would
+            need to change.
+          </p>
+
+          <!-- Finding 1: single aggregate -->
+          <div class="issue issue-critical" id="single-aggregate">
+            <span class="severity severity-critical">Blocking &middot; Architectural core</span>
+            <h3>1. Single hard-coded aggregate type</h3>
+            <div class="where">pkg/cqrs/events.go:10 &middot; pkg/cqrs/decider.go:17-19</div>
+            <p>
+              The SDK is built around exactly one aggregate. The aggregate type is a package-level
+              constant <code>const aggregateType = "sync_item"</code>, and the single decider state
+              is <code>SyncItemState{Item *model.Item, Deleted bool}</code>. Every synced entity
+              collapses into one flat Item. There is no mechanism to register a second aggregate
+              type.
+            </p>
+            <pre><code><span class="tok-comment">// The single aggregate state — there is no other</span>
+<span class="tok-keyword">type</span> <span class="tok-type">SyncItemState</span> <span class="tok-keyword">struct</span> {
+    <span class="tok-attr">Item</span>    *<span class="tok-type">model.Item</span>
+    <span class="tok-attr">Deleted</span> <span class="tok-type">bool</span>
+}</code></pre>
+            <p>
+              DiscordSync has <strong>six</strong> aggregates with distinct lifecycles: Message
+              (created &rarr; edited &rarr; soft-deleted), Thread (created &rarr; updated &rarr;
+              archived), Member (joined &rarr; updated &rarr; left), plus Channel, Guild, and User.
+              Collapsing them into one Item loses the type-level distinctions that make the domain
+              tractable.
+            </p>
+            <div class="callout callout-teal">
+              <strong>What must change</strong>
+              The stack must become aggregate-pluggable: consumers register their own
+              <code>AggregateType</code> + <code>Decider[S]</code> pairs, and the store/indexing
+              must support multiple aggregate types simultaneously (it already does at the
+              go-cqrs-lite level — go-localsync just doesn't expose it).
+            </div>
+          </div>
+
+          <!-- Finding 2: fixed event vocabulary -->
+          <div class="issue issue-critical" id="fixed-events">
+            <span class="severity severity-critical">Blocking &middot; Domain expressiveness</span>
+            <h3>2. Fixed three-event vocabulary</h3>
+            <div class="where">pkg/cqrs/events.go:12-19 &middot; pkg/cqrs/projection.go:28-29</div>
+            <p>
+              The SDK defines exactly three event types —
+              <code>sync_item.synced</code>, <code>sync_item.conflict_found</code>,
+              <code>sync_item.deleted</code> — and the projector handles <em>only</em> those three
+              in a hard-coded switch. There is no way for a consumer to add
+              <code>discord.message.created</code>, <code>discord.reaction.added</code>, or any
+              domain-specific event without forking the projector.
+            </p>
+            <pre><code><span class="tok-comment">// Fixed — consumers cannot extend this</span>
+<span class="tok-keyword">const</span> (
+    <span class="tok-attr">EventItemSynced</span>        <span class="tok-type">event.Type</span> = <span class="tok-string">"sync_item.synced"</span>
+    <span class="tok-attr">EventItemConflictFound</span> <span class="tok-type">event.Type</span> = <span class="tok-string">"sync_item.conflict_found"</span>
+    <span class="tok-attr">EventItemDeleted</span>       <span class="tok-type">event.Type</span> = <span class="tok-string">"sync_item.deleted"</span>
+)</code></pre>
+            <p>
+              DiscordSync has <strong>thirteen</strong> typed events with distinct payloads:
+              <code>MessageCreated</code> (with <code>Attachments[]</code> and
+              <code>Embeds[]</code>), <code>MessageUpdated</code> (with <code>AfterContent</code>,
+              edit tracking), <code>ReactionAdded</code>, <code>MemberJoined</code>,
+              <code>ThreadArchived</code>, and so on. A flat <code>synced</code> event cannot
+              represent edit history or soft-delete semantics without losing the typed payload that
+              makes the projections correct.
+            </p>
+            <div class="callout callout-teal">
+              <strong>What must change</strong>
+              Event types and their payloads must be consumer-defined. The SDK should provide the
+              <em>machinery</em> (event construction helpers, codec, bus subscription) and let
+              consumers declare their own <code>event.Type</code> constants and typed payload
+              structs — exactly as DiscordSync already does directly against go-cqrs-lite.
+            </div>
+          </div>
+
+          <!-- Finding 3: single flat projection -->
+          <div class="issue issue-critical" id="single-projection">
+            <span class="severity severity-critical">Blocking &middot; Read model</span>
+            <h3>3. Single flat projection / read model</h3>
+            <div class="where">
+              pkg/cqrs/projection.go:24-44 &middot; pkg/data/model/item.go:17-29
+            </div>
+            <p>
+              One projector (<code>"sync_item_projection"</code>) upserts into one flat read model
+              keyed by <code>(source, source_id)</code> with columns like <code>actor_login</code>,
+              <code>repo_name</code>, <code>repo_url</code>. DiscordSync needs four+ projections
+              with rich relational shape: a messages table with edit history, soft-delete columns,
+              joined attachments and embeds; a reactions table; a members table; a threads table —
+              each driven by different event types.
+            </p>
+            <pre><code><span class="tok-comment">// DiscordSync's typed payloads — not representable in one flat Item</span>
+<span class="tok-keyword">type</span> <span class="tok-type">MessageCreatedPayload</span> <span class="tok-keyword">struct</span> {
+    <span class="tok-attr">Attachments</span> []<span class="tok-type">AttachmentPayload</span> <span class="tok-comment">// file download side-effects</span>
+    <span class="tok-attr">Embeds</span>      []<span class="tok-type">EmbedPayload</span>
+    <span class="tok-attr">Author</span>      <span class="tok-type">UserPayload</span>
+    ...
+}</code></pre>
+            <div class="callout callout-teal">
+              <strong>What must change</strong>
+              Support multiple consumer-defined projections, each subscribing to its own subset of
+              event types and writing to its own typed schema. The SDK already uses go-cqrs-lite's
+              <code>event.Projection</code> interface — expose a registry so consumers can attach N
+              projections, not one.
+            </div>
+          </div>
+
+          <!-- Finding 4: pull-only ingestion -->
+          <div class="issue issue-critical" id="pull-ingestion">
+            <span class="severity severity-critical">Blocking &middot; Ingestion model</span>
+            <h3>4. Pull-only ingestion (Provider.Fetch pagination)</h3>
+            <div class="where">pkg/provider/provider.go:128-141 &middot; pkg/sync/sync.go</div>
+            <p>
+              The entire sync engine is pull-based: a <code>Provider</code> implements
+              <code>Fetch()</code> / <code>FetchAll()</code> with pagination, and the
+              <code>Syncer</code> loops pages into the CQRS stack. DiscordSync's primary path is
+              <strong>push</strong>: a persistent Discord Gateway websocket that delivers events as
+              they happen. Backfill (REST pagination) is a secondary concern, and even it needs the
+              fetched data routed into typed projections, not a flat Item table.
+            </p>
+            <div class="diagram">
+              <span class="node node-problem">Provider.Fetch()</span>
+              <span class="arrow">&rarr;</span>
+              <span class="node">pages</span>
+              <span class="arrow">&rarr;</span>
+              <span class="node">flat Item</span>
+              <span class="arrow">vs</span>
+              <span class="node node-good">Gateway WS push</span>
+              <span class="arrow">&rarr;</span>
+              <span class="node">typed events</span>
+              <span class="arrow">&rarr;</span>
+              <span class="node">N projections</span>
+            </div>
+            <div class="callout callout-teal">
+              <strong>What must change</strong>
+              Decouple ingestion from the CQRS write path. The SDK should accept events from
+              <em>any</em> source — a push handler, a webhook, a cron, or a paginated pull — and
+              route them through consumer-defined command/event paths. The <code>Provider</code> +
+              <code>Syncer</code> loop would become one optional ingestion adapter, not the only
+              entry point.
+            </div>
+          </div>
+
+          <!-- Finding 5: GitHub-shaped vocabulary -->
+          <div class="issue issue-important" id="github-vocabulary">
+            <span class="severity severity-important">Important &middot; Domain leakage</span>
+            <h3>5. The vocabulary is GitHub-shaped, not generic</h3>
+            <div class="where">pkg/data/model/item.go:17-29 &middot; pkg/id/ids.go:19-52</div>
+            <p>
+              Despite the "any provider" framing, the core types bake in GitHub's domain.
+              <code>model.Item</code> carries <code>ActorLogin</code>, <code>RepoName</code>,
+              <code>RepoURL</code>. The branded IDs include <code>ActorLogin</code> and
+              <code>RepoID</code>. These fields have no Discord meaning — Discord has channels,
+              guilds, authors, attachments, not repos and actors. An SDK named "localsync" that
+              claims provider-agnosticism but ships repo-name columns signals the abstraction was
+              extracted from one consumer, not designed from the domain.
+            </p>
+            <pre><code><span class="tok-comment">// model.Item — GitHub activity feed, not a generic sync entity</span>
+<span class="tok-keyword">type</span> <span class="tok-type">Item</span> <span class="tok-keyword">struct</span> {
+    <span class="tok-attr">ActorLogin</span> <span class="tok-type">id.ActorLogin</span>   <span class="tok-comment">// GitHub user</span>
+    <span class="tok-attr">RepoName</span>   <span class="tok-type">id.RepoID</span>       <span class="tok-comment">// "owner/repo"</span>
+    <span class="tok-attr">RepoURL</span>    <span class="tok-type">string</span>
+    ...
+}</code></pre>
+            <div class="callout callout-teal">
+              <strong>What must change</strong>
+              The domain model must either be truly generic (identity + timestamps + opaque typed
+              payload, no provider-specific fields) or — better — consumer-defined entirely. The
+              reference consumer (github-local-sync) would define ActorLogin/RepoID in its own
+              package; the SDK ships only the sync/CQRS machinery.
+            </div>
+          </div>
+
+          <!-- Finding 6: read model interface -->
+          <div class="issue issue-important" id="read-model">
+            <span class="severity severity-important">Important &middot; Query surface</span>
+            <h3>6. Read model query surface is too narrow</h3>
+            <div class="where">pkg/data/model/item.go:47-52 &middot; pkg/cqrs/readmodel.go</div>
+            <p>
+              The read-side contract (<code>ItemReader</code>) exposes
+              <code>List</code>, <code>Count</code>, <code>CountByType</code>,
+              <code>GetTypes</code> — a flat-item query API. DiscordSync's
+              <code>Database</code> interface has <strong>28 methods</strong>:
+              <code>GetMessagesByChannel</code>, paginated message search, attachment record updates
+              after download, edit-history queries, member lookups by guild, thread archive filters,
+              and stats aggregations. These are not variations on "list items"; they are genuinely
+              different query shapes against a relational schema.
+            </p>
+            <div class="callout callout-teal">
+              <strong>What must change</strong>
+              The SDK cannot predefine the query surface. Consumers must own their read-model schema
+              and queries. The SDK's value would be in the <em>write-side</em> machinery (event
+              store, bus, projection wiring, idempotency) — not in a read-model contract that
+              assumes one flat table.
+            </div>
+          </div>
+        </section>
+
+        <section id="target">
+          <h2><span class="num">03</span>The target shape</h2>
+          <p>
+            If go-localsync were generalised to address all six findings, it would stop being an
+            "Item sync engine" and become a
+            <strong>multi-aggregate event-sourcing framework</strong>. The consumer (DiscordSync)
+            would bring its own aggregates, events, projections, and ingestion, and the framework
+            would provide the wiring.
+          </p>
+          <div class="compare-header">
+            <div class="compare-before">Today — go-localsync</div>
+            <div class="compare-after">Target — generic framework</div>
+          </div>
+          <div class="compare-row">
+            <pre><code><span class="tok-comment">// Single aggregate, hard-coded</span>
+<span class="tok-keyword">const</span> <span class="tok-attr">aggregateType</span> = <span class="tok-string">"sync_item"</span>
+
+<span class="tok-comment">// Three fixed events</span>
+<span class="tok-attr">EventItemSynced</span>, <span class="tok-attr">EventItemDeleted</span>,
+<span class="tok-attr">EventItemConflictFound</span>
+
+<span class="tok-comment">// One projection, flat read model</span>
+<span class="tok-func">newProjector</span>(<span class="tok-attr">rm</span>)
+
+<span class="tok-comment">// Pull-only: Provider.Fetch loop</span>
+<span class="tok-func">NewSyncer</span>(<span class="tok-attr">provider</span>, <span class="tok-attr">stack</span>, <span class="tok-keyword">nil</span>)</code></pre>
+            <pre><code><span class="tok-comment">// Consumer registers N aggregates</span>
+<span class="tok-attr">stack</span>.<span class="tok-func">RegisterAggregate</span>(
+    <span class="tok-attr">msg</span>.<span class="tok-attr">AggregateMessage</span>,
+    <span class="tok-attr">msg</span>.<span class="tok-type">Decider</span>{},
+)
+
+<span class="tok-comment">// Consumer defines own event types</span>
+<span class="tok-keyword">const</span> <span class="tok-attr">MessageCreated</span> <span class="tok-type">event.Type</span> = ...
+
+<span class="tok-comment">// N projections, each its own schema</span>
+<span class="tok-attr">stack</span>.<span class="tok-func">AttachProjection</span>(<span class="tok-attr">msg</span>.<span class="tok-func">NewProjection</span>(<span class="tok-attr">db</span>))
+
+<span class="tok-comment">// Ingestion-agnostic: push OR pull</span>
+<span class="tok-attr">stack</span>.<span class="tok-func">Emit</span>(<span class="tok-attr">ctx</span>, <span class="tok-attr">evt</span>) <span class="tok-comment">// from anywhere</span></code></pre>
+          </div>
+          <div class="callout callout-teal">
+            <strong>The honest tradeoff</strong>
+            At that point the framework's value-add over using go-cqrs-lite directly narrows to:
+            projection wiring helpers, idempotency patterns, the CRDT conflict layer, and the
+            optional <code>Provider</code>+<code>Syncer</code> pull adapter. That is still real
+            value — but it must justify itself against the simplicity of the direct go-cqrs-lite
+            path DiscordSync already uses successfully.
+          </div>
+        </section>
+
+        <section id="matrix">
+          <h2><span class="num">04</span>Priority matrix</h2>
+          <p>
+            If go-localsync wanted to make itself viable for DiscordSync-class consumers, here is
+            the order that unlocks the most per unit of effort.
+          </p>
+          <table class="compare">
+            <thead>
+              <tr>
+                <th>Gap</th>
+                <th>Blocks adoption?</th>
+                <th>Rewrite depth</th>
+                <th>Effort</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1. Multi-aggregate registration</td>
+                <td class="no">Yes</td>
+                <td class="no">Core</td>
+                <td>High</td>
+              </tr>
+              <tr>
+                <td>2. Consumer-defined event types</td>
+                <td class="no">Yes</td>
+                <td class="no">Core</td>
+                <td>High</td>
+              </tr>
+              <tr>
+                <td>3. Multiple projections</td>
+                <td class="no">Yes</td>
+                <td class="no">Core</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td>4. Push ingestion support</td>
+                <td class="no">Yes</td>
+                <td>Core</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td>5. De-GitHubify the vocabulary</td>
+                <td>Partial</td>
+                <td>Surface</td>
+                <td>Medium</td>
+              </tr>
+              <tr>
+                <td>6. Consumer-owned query surface</td>
+                <td>Partial</td>
+                <td>Surface</td>
+                <td>Low</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="callout callout-amber">
+            <strong>The compounding effect</strong>
+            Findings 1–4 are individually blocking and collectively reinforcing: fixing any one
+            without the others still leaves a single-aggregate or single-projection straitjacket.
+            They must be addressed together for the framework to cross the viability line — which is
+            why this is a "fundamental rewrite," not an incremental enhancement.
+          </div>
+        </section>
+
+        <section id="appendix">
+          <h2><span class="num">05</span>Appendix: structural mismatch at a glance</h2>
+          <table class="compare">
+            <thead>
+              <tr>
+                <th>Dimension</th>
+                <th>go-localsync</th>
+                <th>DiscordSync</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Aggregate types</td>
+                <td class="no">1 (sync_item)</td>
+                <td>6 (Message, Channel, Guild, User, Thread, Member)</td>
+              </tr>
+              <tr>
+                <td>Event types</td>
+                <td class="no">3 (fixed)</td>
+                <td>13 (consumer-defined)</td>
+              </tr>
+              <tr>
+                <td>Projections</td>
+                <td class="no">1 (flat sync_items)</td>
+                <td>4+ (messages, reactions, members, threads)</td>
+              </tr>
+              <tr>
+                <td>Ingestion</td>
+                <td class="no">Pull (Provider.Fetch pagination)</td>
+                <td>Push (Gateway websocket) + backfill</td>
+              </tr>
+              <tr>
+                <td>Identity</td>
+                <td>SHA256(source, sourceID) deterministic</td>
+                <td>Discord snowflakes as AggregateID</td>
+              </tr>
+              <tr>
+                <td>Domain vocabulary</td>
+                <td class="no">GitHub (ActorLogin, RepoName)</td>
+                <td>Discord (ChannelID, GuildID, Attachments[])</td>
+              </tr>
+              <tr>
+                <td>Read query surface</td>
+                <td class="no">4 methods (List/Count/Types)</td>
+                <td>28 methods (Database interface)</td>
+              </tr>
+              <tr>
+                <td>Shared foundation</td>
+                <td class="yes">go-cqrs-lite v3</td>
+                <td class="yes">go-cqrs-lite v3</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <footer class="footer">
+          <p>
+            Generated 2026-06-23 &middot; Reviewed against go-localsync (post-v0.3.0) &amp;
+            DiscordSync (master, commit 979c17d) &middot; All code references verified against
+            source.
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        if (!("IntersectionObserver" in window)) return;
+        var nav = document.querySelector("[data-nav]");
+        if (!nav) return;
+        var links = nav.querySelectorAll('a[href^="#"]');
+        var ids = Array.from(links).map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        if (!sections.length) return;
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                links.forEach(function (link) {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href") === "#" + entry.target.id,
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
+        );
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
+      })();
+    </script>
+  </body>
+</html>

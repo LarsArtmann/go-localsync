@@ -56,7 +56,7 @@
   - 使用[API Sprout](https://github.com/danielgtaylor/apisprout)或[Prism进行模拟](https://stoplight.io/open-source/prism)
   - [带有OpenAPI Generator](https://github.com/OpenAPITools/openapi-generator)或[oapi-codegen 的](https://github.com/deepmap/oapi-codegen)SDK
   - CLI 与[Restish](https://rest.sh/)
-  - 还有[更多](https://openapi.tools/) 
+  - 还有[更多](https://openapi.tools/)
 - 使用可选`describedby`链接关系标头以及`$schema`返回对象中的可选属性为每个资源生成 JSON 架构，这些属性集成到编辑器中以进行验证和完成。
 
 该项目的灵感来自[FastAPI](https://fastapi.tiangolo.com/)。标志和品牌由卡里·泰勒设计。
@@ -79,7 +79,7 @@
 
 > 谢谢丹尼尔为胡玛。非常有用的项目，并且由于 OpenAPI gen 为我们节省了大量的时间和麻烦——类似于 Python 中的 FastAPI。 - [WolvesOfAllStreets](https://www.reddit.com/r/golang/comments/1aqj99d/comment/kqfqcml/?utm_source=reddit&utm_medium=web2x&context=3)
 
-> Huma 很棒，我最近开始使用它，很高兴，所以非常感谢您的努力🙏  - [callmemicah](https://www.reddit.com/r/golang/comments/1b32ts4/comment/ksvr9h7/?utm_source=reddit&utm_medium=web2x&context=3)
+> Huma 很棒，我最近开始使用它，很高兴，所以非常感谢您的努力🙏 - [callmemicah](https://www.reddit.com/r/golang/comments/1b32ts4/comment/ksvr9h7/?utm_source=reddit&utm_medium=web2x&context=3)
 
 # 安装
 

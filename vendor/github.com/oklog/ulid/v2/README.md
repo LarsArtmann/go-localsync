@@ -45,7 +45,7 @@ and some random data.
 Timestamps are modeled as uint64 values representing a Unix time in milliseconds.
 They can be produced by passing a [time.Time](https://pkg.go.dev/time#Time) to
 [ulid.Timestamp](https://pkg.go.dev/github.com/oklog/ulid/v2#Timestamp),
-or by calling  [time.Time.UnixMilli](https://pkg.go.dev/time#Time.UnixMilli)
+or by calling [time.Time.UnixMilli](https://pkg.go.dev/time#Time.UnixMilli)
 and converting the returned value to `uint64`.
 
 Random data is taken from a provided [io.Reader](https://pkg.go.dev/io#Reader).
@@ -143,11 +143,13 @@ Below is the current specification of ULID as implemented in this repository.
 ### Components
 
 **Timestamp**
+
 - 48 bits
 - UNIX-time in milliseconds
 - Won't run out of space till the year 10889 AD
 
 **Entropy**
+
 - 80 bits
 - User defined entropy source.
 - Monotonicity within the same millisecond with [`ulid.Monotonic`](https://godoc.org/github.com/oklog/ulid#Monotonic)
