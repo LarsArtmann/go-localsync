@@ -55,6 +55,20 @@ func newMemoryStack(t *testing.T) *CQRSStack {
 	return stack
 }
 
+// setupMemoryStack is the standard parallel test fixture: it marks the test
+// as parallel, creates an in-memory CQRS stack, registers cleanup, and returns
+// the stack together with a background context. Extracts the t.Parallel() +
+// newMemoryStack + defer Close + context.Background() boilerplate.
+func setupMemoryStack(t *testing.T) (*CQRSStack, context.Context) {
+	t.Helper()
+	t.Parallel()
+
+	stack := newMemoryStack(t)
+	t.Cleanup(func() { _ = stack.Close() })
+
+	return stack, context.Background()
+}
+
 func newSQLiteMemoryStack(t *testing.T) *CQRSStack {
 	t.Helper()
 

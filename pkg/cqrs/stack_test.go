@@ -123,12 +123,7 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 }
 
 func TestCQRSStack_ConflictDetection(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 
 	items := []*provider.Item{testItem("1", "PushEvent")}
 

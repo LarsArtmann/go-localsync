@@ -11,9 +11,9 @@ import (
 )
 
 func benchItems(n int) []*provider.Item {
-	items := make([]*provider.Item, n)
+	items := make([]*provider.Item, 0, n)
 	for i := range n {
-		items[i] = &provider.Item{
+		items = append(items, &provider.Item{
 			ID:         id.NewItemID(),
 			ExternalID: id.NewExternalID(fmt.Sprintf("bench-%d", i)),
 			Source:     id.NewProviderID("github"),
@@ -23,7 +23,7 @@ func benchItems(n int) []*provider.Item {
 			CreatedAt:  time.Now(),
 			UpdatedAt:  time.Now(),
 			RawJSON:    []byte(`{"bench":true}`),
-		}
+		})
 	}
 	return items
 }

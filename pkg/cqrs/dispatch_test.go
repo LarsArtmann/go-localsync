@@ -1,7 +1,6 @@
 package cqrs
 
 import (
-	"context"
 	"testing"
 
 	"github.com/larsartmann/go-cqrs-lite/command/v3"
@@ -12,12 +11,7 @@ import (
 )
 
 func TestCommandDispatcher_SyncItem_ThroughDispatcher(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 	item := testItem("dispatch-1", "PushEvent")
 
 	// SyncItem goes through CommandDispatcher
@@ -31,12 +25,7 @@ func TestCommandDispatcher_SyncItem_ThroughDispatcher(t *testing.T) {
 }
 
 func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 
 	syncTestItem(t, stack, ctx, "dispatch-2", "PushEvent")
 	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("dispatch-2")))
@@ -49,12 +38,7 @@ func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
 }
 
 func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 
 	// Send a raw SyncItemCommand with wrong type by using the dispatcher directly
 	// This tests the type assertion path in handleSyncItem
@@ -67,12 +51,7 @@ func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
 }
 
 func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 
 	// Try to dispatch an unregistered command type
 	aggID := AggregateID("github", id.NewExternalID("unknown"))
@@ -86,12 +65,7 @@ func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
 }
 
 func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 	aggID := AggregateID("github", id.NewExternalID("nil-item"))
 
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
@@ -104,12 +78,7 @@ func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
 }
 
 func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 	item := testItem("empty-source", "PushEvent")
 	item.Source = id.NewProviderID("") // empty source
 
@@ -124,12 +93,7 @@ func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
 }
 
 func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 	syncTestItem(t, stack, ctx, "q-1", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
@@ -148,12 +112,7 @@ func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
 }
 
 func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 	syncTestItem(t, stack, ctx, "q-2", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetItemQuery{
@@ -173,12 +132,7 @@ func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
 }
 
 func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 	syncTestItem(t, stack, ctx, "q-3", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
@@ -197,12 +151,7 @@ func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
 }
 
 func TestQueryDispatcher_GetTypes_ThroughDispatcher(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 	syncTestItem(t, stack, ctx, "q-4", "PushEvent")
 
 	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
@@ -220,12 +169,7 @@ func TestQueryDispatcher_GetTypes_ThroughDispatcher(t *testing.T) {
 }
 
 func TestQueryDispatcher_UnknownQueryType(t *testing.T) {
-	t.Parallel()
-
-	stack := newMemoryStack(t)
-	defer func() { _ = stack.Close() }()
-
-	ctx := context.Background()
+	stack, ctx := setupMemoryStack(t)
 
 	_, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
 		BasicQuery: mustNewQuery(query.Type("unknown.query")),
