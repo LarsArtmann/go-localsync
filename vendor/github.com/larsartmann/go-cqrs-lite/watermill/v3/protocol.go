@@ -1,6 +1,7 @@
 package watermill
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -147,8 +148,12 @@ func MessageToEvent(topic string, msg *message.Message) (event.Event, error) {
 	opts = append(opts, event.WithMetadata(metadata))
 
 	evt, err := event.NewEvent(
-		eventType, aggregateID, aggregateType, event.Version(version),
-		msg.Payload, opts...,
+		eventType,
+		aggregateID,
+		aggregateType,
+		event.Version(version), //nolint:gosec // G115: version bounded by event count
+		msg.Payload,
+		opts...,
 	)
 	if err != nil {
 		return nil, event.WrapCorruption(err, "watermill.create_event_failed", "create event")
@@ -264,7 +269,7 @@ func buildMetadata(md message.Metadata) (event.Metadata, error) {
 		}
 	}
 
-	return m, event.Compose(errs...)
+	return m, errors.Join(errs...)
 }
 
 func parseIDField[T any](
