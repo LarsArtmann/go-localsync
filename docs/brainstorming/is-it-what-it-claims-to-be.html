@@ -6,19 +6,26 @@
     <title>go-localsync — Is It What It Claims To Be?</title>
     <style>
       :root {
-        --bg: #0d1117;
-        --bg-elevated: #161b22;
-        --border: #30363d;
-        --text: #c9d1d9;
-        --text-muted: #8b949e;
-        --accent: #58a6ff;
+        --bg: #0a0e14;
+        --bg-elevated: #151b26;
+        --bg-elevated-2: #1c2433;
+        --border: #2a3447;
+        --border-soft: #1f2738;
+        --text: #d4dde8;
+        --text-muted: #8a98ad;
+        --text-faint: #5f6b80;
+        --accent: #5eb1ff;
         --accent-soft: #1f6feb;
-        --success: #3fb950;
-        --warning: #d29922;
-        --danger: #f85149;
+        --accent-glow: rgba(94, 177, 255, 0.12);
+        --success: #4fd693;
+        --warning: #e8b339;
+        --danger: #ff6b6b;
+        --danger-soft: rgba(255, 107, 107, 0.1);
         --code-bg: #0d1117;
-        --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
-        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font-mono: "JetBrains Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
+        --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+        --radius: 12px;
+        --radius-sm: 8px;
       }
 
       * {
@@ -26,76 +33,259 @@
         padding: 0;
         box-sizing: border-box;
       }
+      html {
+        scroll-behavior: smooth;
+      }
 
       body {
         background: var(--bg);
+        background-image:
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(94, 177, 255, 0.08), transparent),
+          radial-gradient(ellipse 60% 40% at 90% 100%, rgba(255, 107, 107, 0.04), transparent);
+        background-attachment: fixed;
         color: var(--text);
         font-family: var(--font-sans);
-        line-height: 1.6;
-        font-size: 15px;
+        line-height: 1.65;
+        font-size: 15.5px;
+        -webkit-font-smoothing: antialiased;
       }
 
       .container {
-        max-width: 1100px;
+        max-width: 1080px;
         margin: 0 auto;
-        padding: 40px 24px;
+        padding: 48px 28px 80px;
+      }
+
+      .decision-bar {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: rgba(10, 14, 20, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 28px;
+        margin: 0 -28px 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+      .decision-bar .bar-title {
+        font-weight: 600;
+        color: var(--text);
+        white-space: nowrap;
+      }
+      .decision-bar .bar-spacer {
+        flex: 1;
+      }
+      .decision-bar .bar-prompt {
+        color: var(--warning);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .decision-bar .bar-prompt::before {
+        content: "⏳ ";
+      }
+      @media (max-width: 720px) {
+        .decision-bar .bar-title {
+          display: none;
+        }
+      }
+
+      .hero {
+        margin-bottom: 40px;
       }
 
       h1 {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 8px;
+        font-size: 2.6rem;
+        font-weight: 800;
+        margin-bottom: 10px;
         color: var(--text);
-        letter-spacing: -0.02em;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+      }
+      h1 .accent {
+        color: var(--accent);
       }
 
       .subtitle {
         color: var(--text-muted);
-        font-size: 1.05rem;
-        margin-bottom: 32px;
+        font-size: 1.15rem;
+        margin-bottom: 28px;
+        max-width: 720px;
       }
 
       .meta {
         display: flex;
-        gap: 20px;
-        margin-bottom: 40px;
+        gap: 12px;
+        margin-bottom: 32px;
         flex-wrap: wrap;
       }
-
       .meta-badge {
         background: var(--bg-elevated);
         border: 1px solid var(--border);
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-size: 0.85rem;
+        padding: 7px 14px;
+        border-radius: 20px;
+        font-size: 0.82rem;
         color: var(--text-muted);
       }
-
       .meta-badge strong {
         color: var(--accent);
         font-weight: 600;
       }
 
-      h2 {
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin: 48px 0 20px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid var(--border);
+      .bottom-line {
+        background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-elevated-2) 100%);
+        border: 1px solid var(--border);
+        border-left: 4px solid var(--warning);
+        border-radius: var(--radius);
+        padding: 28px 32px;
+        margin-bottom: 48px;
+        position: relative;
+        overflow: hidden;
+      }
+      .bottom-line::before {
+        content: "TL;DR";
+        position: absolute;
+        top: 16px;
+        right: 24px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        color: var(--text-faint);
+      }
+      .bottom-line h3 {
+        color: var(--warning);
+        margin-top: 0;
+        margin-bottom: 14px;
+        font-size: 1.1rem;
+      }
+      .bottom-line p {
+        color: var(--text);
+        font-size: 1.02rem;
+        margin-bottom: 12px;
+      }
+      .bottom-line p:last-child {
+        margin-bottom: 0;
+      }
+      .bottom-line strong {
         color: var(--text);
       }
 
-      h3 {
-        font-size: 1.15rem;
-        font-weight: 600;
-        margin: 32px 0 12px;
+      .arc {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        margin: 0 0 56px;
+        position: relative;
+      }
+      .arc-step {
+        text-align: center;
+        padding: 18px 8px;
+        position: relative;
+      }
+      .arc-step::after {
+        content: "";
+        position: absolute;
+        top: 32px;
+        right: -50%;
+        width: 100%;
+        height: 2px;
+        background: var(--border);
+        z-index: 0;
+      }
+      .arc-step:last-child::after {
+        display: none;
+      }
+      .arc-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--bg-elevated);
+        border: 2px solid var(--border);
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+        margin-bottom: 8px;
+      }
+      .arc-num.c-claim {
+        border-color: var(--accent);
         color: var(--accent);
       }
+      .arc-num.c-audit {
+        border-color: var(--danger);
+        color: var(--danger);
+      }
+      .arc-num.c-correct {
+        border-color: var(--warning);
+        color: var(--warning);
+      }
+      .arc-num.c-decision {
+        border-color: var(--success);
+        color: var(--success);
+      }
+      .arc-label {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        font-weight: 600;
+      }
+      .arc-sub {
+        font-size: 0.72rem;
+        color: var(--text-faint);
+      }
+      @media (max-width: 640px) {
+        .arc {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+        }
+        .arc-step::after {
+          display: none;
+        }
+      }
 
+      h2 {
+        font-size: 1.55rem;
+        font-weight: 700;
+        margin: 56px 0 8px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        letter-spacing: -0.015em;
+        scroll-margin-top: 70px;
+      }
+      h2 .sec-num {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        background: var(--accent-glow);
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        border-radius: 50%;
+        font-size: 0.9rem;
+        margin-right: 14px;
+        vertical-align: middle;
+        font-weight: 700;
+      }
+      h3 {
+        font-size: 1.18rem;
+        font-weight: 600;
+        margin: 36px 0 14px;
+        color: var(--accent);
+        scroll-margin-top: 70px;
+      }
       h4 {
         font-size: 1rem;
         font-weight: 600;
-        margin: 24px 0 10px;
+        margin: 22px 0 10px;
         color: var(--text);
       }
 
@@ -103,50 +293,55 @@
         margin-bottom: 14px;
         color: var(--text);
       }
-
       .lead {
-        font-size: 1.1rem;
+        font-size: 1.12rem;
         color: var(--text-muted);
-        margin-bottom: 24px;
+        margin: 8px 0 24px;
         line-height: 1.7;
       }
 
       .section-intro {
         background: var(--bg-elevated);
         border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 24px;
+        border-radius: var(--radius);
+        padding: 26px 28px;
         margin-bottom: 28px;
+      }
+
+      ul,
+      ol {
+        margin: 14px 0 14px 26px;
+      }
+      li {
+        margin-bottom: 9px;
+        color: var(--text);
       }
 
       code {
         font-family: var(--font-mono);
-        font-size: 0.88em;
-        background: rgba(110, 118, 129, 0.15);
-        padding: 2px 6px;
-        border-radius: 4px;
+        font-size: 0.86em;
+        background: rgba(94, 177, 255, 0.1);
+        padding: 2px 7px;
+        border-radius: 5px;
         color: var(--accent);
       }
-
       pre {
         background: var(--code-bg);
         border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 18px 20px;
+        border-radius: var(--radius-sm);
+        padding: 18px 22px;
         overflow-x: auto;
-        margin: 16px 0;
+        margin: 18px 0;
         font-family: var(--font-mono);
-        font-size: 0.85rem;
-        line-height: 1.55;
+        font-size: 0.84rem;
+        line-height: 1.6;
       }
-
       pre code {
         background: none;
         padding: 0;
         color: var(--text);
         font-size: inherit;
       }
-
       .keyword {
         color: #ff7b72;
       }
@@ -157,7 +352,8 @@
         color: #a5d6ff;
       }
       .comment {
-        color: #8b949e;
+        color: #6e7681;
+        font-style: italic;
       }
       .func {
         color: #d2a8ff;
@@ -165,30 +361,13 @@
       .number {
         color: #79c0ff;
       }
-      .highlight {
-        color: var(--accent);
-      }
-
-      .two-col {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-        margin: 20px 0;
-      }
-
-      @media (max-width: 800px) {
-        .two-col {
-          grid-template-columns: 1fr;
-        }
-      }
 
       .card {
         background: var(--bg-elevated);
         border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 20px;
+        border-radius: var(--radius);
+        padding: 22px;
       }
-
       .card-header {
         display: flex;
         align-items: center;
@@ -198,124 +377,161 @@
         font-size: 0.95rem;
       }
 
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin: 22px 0;
+      }
+      @media (max-width: 800px) {
+        .two-col {
+          grid-template-columns: 1fr;
+        }
+      }
+
       .badge {
         display: inline-block;
         padding: 3px 10px;
         border-radius: 4px;
-        font-size: 0.78rem;
-        font-weight: 600;
+        font-size: 0.74rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.04em;
       }
-
       .badge-good {
-        background: rgba(63, 185, 80, 0.15);
+        background: rgba(79, 214, 147, 0.15);
         color: var(--success);
-        border: 1px solid rgba(63, 185, 80, 0.25);
+        border: 1px solid rgba(79, 214, 147, 0.3);
       }
       .badge-ok {
-        background: rgba(210, 153, 34, 0.15);
+        background: rgba(232, 179, 57, 0.15);
         color: var(--warning);
-        border: 1px solid rgba(210, 153, 34, 0.25);
+        border: 1px solid rgba(232, 179, 57, 0.3);
       }
       .badge-bad {
-        background: rgba(248, 81, 73, 0.15);
+        background: rgba(255, 107, 107, 0.15);
         color: var(--danger);
-        border: 1px solid rgba(248, 81, 73, 0.25);
+        border: 1px solid rgba(255, 107, 107, 0.3);
       }
       .badge-info {
-        background: rgba(88, 166, 255, 0.15);
+        background: rgba(94, 177, 255, 0.15);
         color: var(--accent);
-        border: 1px solid rgba(88, 166, 255, 0.25);
+        border: 1px solid rgba(94, 177, 255, 0.3);
       }
 
-      ul,
-      ol {
-        margin: 12px 0 12px 24px;
+      .problem-box,
+      .solution-box,
+      .insight-box,
+      .correction-box {
+        padding: 18px 22px;
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        margin: 18px 0;
       }
-      li {
-        margin-bottom: 8px;
-        color: var(--text);
-      }
-
       .problem-box {
-        background: rgba(248, 81, 73, 0.08);
-        border-left: 3px solid var(--danger);
-        padding: 16px 20px;
-        border-radius: 0 8px 8px 0;
-        margin: 16px 0;
+        background: var(--danger-soft);
+        border-left: 4px solid var(--danger);
       }
       .problem-box h4 {
         color: var(--danger);
         margin-top: 0;
       }
-
       .solution-box {
-        background: rgba(63, 185, 80, 0.08);
-        border-left: 3px solid var(--success);
-        padding: 16px 20px;
-        border-radius: 0 8px 8px 0;
-        margin: 16px 0;
+        background: rgba(79, 214, 147, 0.07);
+        border-left: 4px solid var(--success);
       }
       .solution-box h4 {
         color: var(--success);
         margin-top: 0;
       }
-
       .insight-box {
-        background: rgba(88, 166, 255, 0.08);
-        border-left: 3px solid var(--accent);
-        padding: 16px 20px;
-        border-radius: 0 8px 8px 0;
-        margin: 16px 0;
+        background: var(--accent-glow);
+        border-left: 4px solid var(--accent);
       }
       .insight-box h4 {
         color: var(--accent);
         margin-top: 0;
       }
-
       .correction-box {
-        background: rgba(210, 153, 34, 0.08);
-        border-left: 3px solid var(--warning);
-        padding: 16px 20px;
-        border-radius: 0 8px 8px 0;
-        margin: 16px 0;
+        background: rgba(232, 179, 57, 0.08);
+        border-left: 4px solid var(--warning);
       }
       .correction-box h4 {
         color: var(--warning);
         margin-top: 0;
       }
 
+      .pullquote {
+        font-size: 1.3rem;
+        font-weight: 600;
+        line-height: 1.5;
+        color: var(--text);
+        text-align: center;
+        padding: 32px 24px;
+        margin: 32px 0;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        letter-spacing: -0.01em;
+      }
+      .pullquote .quote-mark {
+        display: block;
+        font-size: 2.4rem;
+        color: var(--accent);
+        line-height: 0.5;
+        margin-bottom: 16px;
+        font-family: Georgia, serif;
+      }
+      .pullquote cite {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        margin-top: 14px;
+        font-style: normal;
+      }
+
       table {
         width: 100%;
         border-collapse: collapse;
-        margin: 16px 0;
+        margin: 18px 0;
         font-size: 0.9rem;
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
       }
-
       th,
       td {
         text-align: left;
-        padding: 10px 14px;
-        border-bottom: 1px solid var(--border);
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-soft);
         vertical-align: top;
       }
-
+      tbody tr:nth-child(even) {
+        background: rgba(255, 255, 255, 0.015);
+      }
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      tbody tr:hover td {
+        background: rgba(94, 177, 255, 0.04);
+      }
       th {
         color: var(--text-muted);
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
-      }
-
-      tr:hover td {
-        background: rgba(110, 118, 129, 0.05);
+        letter-spacing: 0.05em;
+        background: var(--bg-elevated);
       }
 
       .severity {
-        font-weight: 600;
+        font-weight: 700;
         white-space: nowrap;
+      }
+      .severity::before {
+        content: "●";
+        margin-right: 6px;
+        font-size: 0.7em;
+        vertical-align: middle;
       }
       .sev-critical {
         color: var(--danger);
@@ -330,108 +546,334 @@
         color: var(--text-muted);
       }
 
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        padding: 14px 18px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin: 18px 0 22px;
+        font-size: 0.84rem;
+        color: var(--text-muted);
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
       .toc {
         background: var(--bg-elevated);
         border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 24px;
-        margin-bottom: 40px;
+        border-radius: var(--radius);
+        padding: 24px 28px;
+        margin-bottom: 48px;
       }
-
-      .toc ol {
-        margin: 0;
-        padding-left: 20px;
+      .toc h3 {
+        margin-top: 0;
+        color: var(--text);
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .toc-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 24px;
       }
       .toc a {
-        color: var(--accent);
+        color: var(--text-muted);
         text-decoration: none;
-        font-size: 0.95rem;
+        font-size: 0.92rem;
+        padding: 6px 0;
+        transition: color 0.15s;
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
       }
       .toc a:hover {
-        text-decoration: underline;
+        color: var(--accent);
       }
-
-      .pill {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 10px;
-        font-size: 0.75rem;
+      .toc a .toc-num {
+        color: var(--text-faint);
+        font-size: 0.8rem;
         font-weight: 600;
-        margin-left: 8px;
+        min-width: 18px;
+      }
+      @media (max-width: 640px) {
+        .toc-grid {
+          grid-template-columns: 1fr;
+        }
       }
 
-      .quote {
-        border-left: 3px solid var(--border);
-        padding-left: 16px;
-        color: var(--text-muted);
-        font-style: italic;
-        margin: 16px 0;
-      }
-
-      .decision-pending {
-        background: rgba(210, 153, 34, 0.12);
-        border: 1px solid rgba(210, 153, 34, 0.3);
-        border-radius: 10px;
-        padding: 20px 24px;
+      .cluster-diagram {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
         margin: 24px 0;
       }
+      .cluster {
+        border-radius: var(--radius);
+        padding: 22px;
+        position: relative;
+      }
+      .cluster-a {
+        background: linear-gradient(160deg, rgba(94, 177, 255, 0.08), rgba(94, 177, 255, 0.02));
+        border: 1px solid rgba(94, 177, 255, 0.3);
+      }
+      .cluster-b {
+        background: linear-gradient(160deg, rgba(255, 107, 107, 0.08), rgba(255, 107, 107, 0.02));
+        border: 1px solid rgba(255, 107, 107, 0.3);
+      }
+      .cluster-tag {
+        position: absolute;
+        top: -10px;
+        left: 18px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        padding: 3px 10px;
+        border-radius: 4px;
+        text-transform: uppercase;
+      }
+      .cluster-a .cluster-tag {
+        background: var(--bg);
+        color: var(--accent);
+        border: 1px solid rgba(94, 177, 255, 0.4);
+      }
+      .cluster-b .cluster-tag {
+        background: var(--bg);
+        color: var(--danger);
+        border: 1px solid rgba(255, 107, 107, 0.4);
+      }
+      .cluster h4 {
+        margin-top: 8px;
+      }
+      @media (max-width: 700px) {
+        .cluster-diagram {
+          grid-template-columns: 1fr;
+        }
+      }
 
-      .decision-pending h3 {
-        margin-top: 0;
+      .decision-final {
+        background: linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-elevated-2) 100%);
+        border: 2px solid var(--warning);
+        border-radius: var(--radius);
+        padding: 36px 36px 28px;
+        margin: 36px 0;
+        text-align: center;
+      }
+      .decision-final h2 {
+        border: none;
+        padding: 0;
+        margin: 0 0 8px;
         color: var(--warning);
+        text-align: center;
+      }
+      .decision-final p {
+        color: var(--text-muted);
+        margin-bottom: 24px;
+      }
+
+      .decision-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 0;
+        align-items: stretch;
+        text-align: left;
+        margin-top: 8px;
+      }
+      .decision-option {
+        padding: 24px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        background: var(--bg);
+      }
+      .decision-option.opt-a {
+        border-top: 4px solid var(--accent);
+      }
+      .decision-option.opt-b {
+        border-top: 4px solid var(--success);
+      }
+      .decision-option h4 {
+        font-size: 1.15rem;
+        margin: 0 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .decision-option .opt-tag {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 4px;
+        letter-spacing: 0.06em;
+      }
+      .opt-a .opt-tag {
+        background: rgba(94, 177, 255, 0.15);
+        color: var(--accent);
+      }
+      .opt-b .opt-tag {
+        background: rgba(79, 214, 147, 0.15);
+        color: var(--success);
+      }
+      .decision-vs {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 16px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-faint);
+        letter-spacing: 0.1em;
+      }
+      .decision-fate {
+        margin: 12px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .decision-fate li {
+        font-size: 0.86rem;
+        padding: 6px 0;
+        margin: 0;
+        border-bottom: 1px solid var(--border-soft);
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .decision-fate li:last-child {
+        border-bottom: none;
+      }
+      .decision-fate .fate-icon {
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      @media (max-width: 760px) {
+        .decision-grid {
+          grid-template-columns: 1fr;
+        }
+        .decision-vs {
+          padding: 8px 0;
+        }
       }
 
       hr {
         border: none;
         border-top: 1px solid var(--border);
-        margin: 40px 0;
+        margin: 48px 0;
       }
 
       .footer {
-        margin-top: 60px;
-        padding-top: 24px;
+        margin-top: 72px;
+        padding-top: 28px;
         border-top: 1px solid var(--border);
         color: var(--text-muted);
-        font-size: 0.85rem;
+        font-size: 0.86rem;
+      }
+      .footer p {
+        color: var(--text-muted);
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>go-localsync — Is It What It Claims To Be?</h1>
-      <p class="subtitle">
-        A brainstorming session: brutal diagnosis, course corrections, and the open fork that
-        decides everything.
-      </p>
+      <div class="decision-bar">
+        <span class="bar-title">go-localsync · Brainstorming</span>
+        <span class="bar-spacer"></span>
+        <span class="bar-prompt">One decision pending: A or B? (see §8)</span>
+      </div>
 
-      <div class="meta">
-        <div class="meta-badge"><strong>Date:</strong> 2026-06-27</div>
-        <div class="meta-badge"><strong>Type:</strong> Brainstorming / Diagnostic</div>
-        <div class="meta-badge"><strong>Status:</strong> Unresolved — one decision pending</div>
-        <div class="meta-badge"><strong>Participants:</strong> Lars + Crush</div>
+      <div class="hero">
+        <h1>Is It What It <span class="accent">Claims</span> To Be?</h1>
+        <p class="subtitle">
+          A diagnostic session on go-localsync: brutal audit, two course corrections, and the single
+          fork that decides the entire architecture.
+        </p>
+
+        <div class="meta">
+          <div class="meta-badge"><strong>Date:</strong> 2026-06-27</div>
+          <div class="meta-badge"><strong>Type:</strong> Brainstorming / Diagnostic</div>
+          <div class="meta-badge"><strong>Status:</strong> 1 decision pending</div>
+          <div class="meta-badge"><strong>Verified:</strong> against source</div>
+        </div>
+      </div>
+
+      <div class="bottom-line">
+        <h3>Bottom line</h3>
+        <p>
+          The CQRS persistence core is genuinely good. The sync engine draped over it is
+          <strong>uncommitted</strong> — a pull mirror wearing a few of two-way-sync's clothes
+          (<code>DeleteItem</code>, vector clocks, <code>SyncRequest</code>) with
+          <strong>none of them wired</strong>. Worse, the public <code>Sync()</code> API
+          <strong>silently drops data while returning <code>nil</code> error</strong> — the worst
+          failure mode a sync product can have.
+        </p>
+        <p>
+          The path to "superb" is not adding features. It's
+          <strong
+            >fixing the silent-data-loss paths, killing the phantom surfaces, and committing to one
+            identity</strong
+          >
+          — pure pull mirror, or offline two-way sync. Everything hangs on that one choice.
+        </p>
+      </div>
+
+      <div class="arc">
+        <div class="arc-step">
+          <div class="arc-num c-claim">1</div>
+          <div class="arc-label">Claim</div>
+          <div class="arc-sub">CRDT theater</div>
+        </div>
+        <div class="arc-step">
+          <div class="arc-num c-audit">2</div>
+          <div class="arc-label">Audit</div>
+          <div class="arc-sub">the bleeding</div>
+        </div>
+        <div class="arc-step">
+          <div class="arc-num c-correct">3</div>
+          <div class="arc-label">Correction</div>
+          <div class="arc-sub">honest retraction</div>
+        </div>
+        <div class="arc-step">
+          <div class="arc-num c-decision">4</div>
+          <div class="arc-label">Decision</div>
+          <div class="arc-sub">A or B?</div>
+        </div>
       </div>
 
       <div class="toc">
-        <h3 style="margin-top: 0">Contents</h3>
-        <ol>
-          <li><a href="#opening">Opening: The CRDT Theater Characterization</a></li>
-          <li><a href="#thesis">The Thesis: Superb ≠ Featureful</a></li>
-          <li><a href="#integrity">Data Integrity Audit — What Corrupts User Data</a></li>
-          <li><a href="#resilience">Sync Loop & Resilience Audit — The Inert Knobs</a></li>
-          <li><a href="#boundaries">The Boundary Question: Move to go-cqrs-lite?</a></li>
-          <li><a href="#vector-clocks">Vector Clocks: A Defense, Then a Retraction</a></li>
-          <li><a href="#deleteitem">The DeleteItem Discovery: The Real Fork</a></li>
-          <li><a href="#fork">The Open Fork: What Is go-localsync?</a></li>
-        </ol>
+        <h3>Contents</h3>
+        <div class="toc-grid">
+          <a href="#opening"><span class="toc-num">1</span> The CRDT Theater Characterization</a>
+          <a href="#thesis"><span class="toc-num">2</span> The Thesis: Superb ≠ Featureful</a>
+          <a href="#integrity"
+            ><span class="toc-num">3</span> Data Integrity — What Corrupts Data</a
+          >
+          <a href="#resilience"><span class="toc-num">4</span> Sync Loop &amp; Resilience Audit</a>
+          <a href="#boundaries"><span class="toc-num">5</span> The Boundary: Move to cqrs-lite?</a>
+          <a href="#vector-clocks"
+            ><span class="toc-num">6</span> Vector Clocks: Defense → Retraction</a
+          >
+          <a href="#deleteitem"><span class="toc-num">7</span> The DeleteItem Discovery</a>
+          <a href="#fork"><span class="toc-num">8</span> The Open Fork: What Is This?</a>
+        </div>
       </div>
 
-      <!-- ============================================================ -->
-      <h2 id="opening">1. Opening: The CRDT Theater Characterization</h2>
+      <h2 id="opening"><span class="sec-num">1</span>The CRDT Theater Characterization</h2>
 
       <div class="section-intro">
         <p>
           The session opened with a sharp claim about go-localsync's current state, which was
-          <strong>verified against the actual code and confirmed accurate:</strong>
+          <strong>verified against the actual code and confirmed accurate</strong>. Four claims, all
+          true:
         </p>
         <ul>
           <li>
@@ -449,14 +891,13 @@
           </li>
           <li>
             <strong>Vector clocks are always empty</strong> (<code>crdt.NewVectorClock()</code>)
-            when LWW runs, so the causal-ordering branch is structurally unreachable — LWW always
-            falls through to timestamp comparison.
+            when LWW runs, so the causal branch is structurally unreachable — LWW always falls
+            through to timestamp comparison.
           </li>
-          <li>ADR-0003 explicitly defers all of this as "future multi-node work."</li>
         </ul>
       </div>
 
-      <h3>What's genuinely wired vs. what's theater</h3>
+      <h3>Wired vs. theater</h3>
       <table>
         <thead>
           <tr>
@@ -470,23 +911,23 @@
             <td><code>ConflictResolver[T]</code> interface</td>
             <td>
               Wired through <code>CQRSConfig</code> →
-              <code>decideSync</code> (<code>pkg/cqrs/decider.go:77,165</code>)
+              <code>decideSync</code> (<code>decider.go:77,165</code>)
             </td>
             <td><span class="badge badge-good">Wired</span></td>
           </tr>
           <tr>
             <td><code>LWWResolver[T]</code></td>
             <td>
-              The only concrete impl — referenced <strong>only in tests/docs</strong>. Default
-              production path is <code>resolver == nil</code> → remote-wins short-circuit.
+              The only concrete impl — referenced <strong>only in tests/docs</strong>. Default path
+              is <code>resolver == nil</code> → remote-wins short-circuit.
             </td>
             <td><span class="badge badge-ok">Tests only</span></td>
           </tr>
           <tr>
             <td><code>VectorClock</code></td>
             <td>
-              Constructed at <code>decider.go:175-176</code> but <strong>always empty</strong>.
-              Never populated.
+              Constructed at <code>decider.go:175</code> but <strong>always empty</strong>. Never
+              populated.
             </td>
             <td><span class="badge badge-bad">Decorative</span></td>
           </tr>
@@ -505,29 +946,29 @@
       </table>
 
       <div class="insight-box">
-        <h4>The net characterization</h4>
+        <h4>Net characterization</h4>
         <p>
           It's <strong>YAGNI infrastructure with a documentation alibi</strong>. The CRDT package
           isn't <em>wrong</em> — it's a correct, tested foundation for a multi-node future that
           ADR-0003 deliberately defers. The mild smell is calling this "CRDT conflict resolution" in
           marketing when production behavior is
           <strong>plain last-write-wins on <code>UpdatedAt</code></strong> with a plugin seam nobody
-          plugs anything into. The system today is:
-          <strong>single-node, pull-only, remote-wins LWW by timestamp</strong>, with a well-built
-          but dormant CRDT layer.
+          plugs anything into.
         </p>
       </div>
 
       <hr />
 
-      <!-- ============================================================ -->
-      <h2 id="thesis">2. The Thesis: Superb ≠ Featureful</h2>
+      <h2 id="thesis"><span class="sec-num">2</span>The Thesis: Superb ≠ Featureful</h2>
 
-      <p class="lead">
-        The user's challenge: "Let's actually fucking create a superb SDK that handles all edge
-        cases so superbly 99% of developers would fall out of their chair… INSTEAD OF CREATING
-        ANOTHER DOGSHIT PROGRAM!"
-      </p>
+      <p class="lead">The user's challenge, verbatim:</p>
+
+      <div class="pullquote">
+        <span class="quote-mark">"</span>
+        Let's actually fucking create a superb SDK that handles all edge cases so superbly 99% of
+        developers would fall out of their chair… INSTEAD OF CREATING ANOTHER DOGSHIT PROGRAM!
+        <cite>— Lars, opening the session</cite>
+      </div>
 
       <div class="problem-box">
         <h4>The trap to avoid</h4>
@@ -561,22 +1002,29 @@
         </p>
       </div>
 
-      <p>
-        Before proposing a single line of code, the actual failure surface had to be mapped. Two
-        deep audits followed.
-      </p>
-
       <hr />
 
-      <!-- ============================================================ -->
-      <h2 id="integrity">3. Data Integrity Audit — What Corrupts User Data</h2>
+      <h2 id="integrity"><span class="sec-num">3</span>Data Integrity — What Corrupts User Data</h2>
 
       <p class="lead">
         The decider, the event sourcing, the read-model projection — every place data could be
         silently lost or corrupted.
       </p>
 
-      <h3>The bleeding: confirmed data-loss & corruption vectors</h3>
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-dot" style="background: var(--danger)"></span> Critical — silent data
+          loss / corruption
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background: var(--warning)"></span> High — data loss under
+          realistic conditions
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot" style="background: var(--accent)"></span> Medium — correctness
+          risk under edge cases
+        </div>
+      </div>
 
       <table>
         <thead>
@@ -592,20 +1040,19 @@
             <td>1</td>
             <td>
               <strong>No upstream-deletion detection</strong>. Items the provider stops returning
-              live <strong>forever</strong>. No tombstone, no reconciliation diff. Add/update-only
-              against the provider.
+              live <strong>forever</strong>. No tombstone, no reconciliation. Add/update-only.
             </td>
             <td class="severity sev-critical">Critical</td>
-            <td><code>sync/sync.go:72-116</code></td>
+            <td><code>sync/sync.go:72</code></td>
           </tr>
           <tr>
             <td>2</td>
             <td>
-              <strong>Aggregate-ID colon-delimiter collision</strong> → two distinct items corrupt
-              one event stream. The <code>":"</code> separator isn't length-prefixed or escaped.
+              <strong>Aggregate-ID colon collision</strong> → two distinct items corrupt one event
+              stream. The <code>":"</code> separator isn't length-prefixed or escaped.
             </td>
             <td class="severity sev-critical">Critical</td>
-            <td><code>cqrs/aggregate_id.go:13</code></td>
+            <td><code>aggregate_id.go:13</code></td>
           </tr>
           <tr>
             <td>3</td>
@@ -614,10 +1061,10 @@
                 ><code>hasChanged</code> ignores <code>ActorAvatarURL</code> &amp;
                 <code>RawJSON</code></strong
               >
-              → real updates silently dropped. Avatar URLs drift frequently in the wild.
+              → real updates silently dropped. Avatar URLs drift constantly in the wild.
             </td>
-            <td class="severity sev-critical">High</td>
-            <td><code>cqrs/decider.go:234</code></td>
+            <td class="severity sev-high">High</td>
+            <td><code>decider.go:234</code></td>
           </tr>
           <tr>
             <td>4</td>
@@ -626,50 +1073,50 @@
               unconditionally when a deleted item reappears.
             </td>
             <td class="severity sev-high">High</td>
-            <td><code>cqrs/decider.go:83-85</code></td>
+            <td><code>decider.go:83</code></td>
           </tr>
           <tr>
             <td>5</td>
             <td>
               <strong>Live + background replay overlap resurrects deleted rows</strong> in the read
-              model during startup catch-up. The "idempotent, no checkpoint needed" comment is wrong
-              under reordering.
+              model during startup catch-up. The "no checkpoint needed" comment is wrong under
+              reordering.
             </td>
             <td class="severity sev-high">High</td>
-            <td><code>cqrs/runner.go:17</code></td>
+            <td><code>runner.go:17</code></td>
           </tr>
           <tr>
             <td>6</td>
             <td>
-              <strong>LWW with provider clocks, no skew guard</strong>; vector clocks always empty
-              (dead code). A provider with a fast clock always wins.
+              <strong>LWW with provider clocks, no skew guard</strong>; vector clocks always empty.
+              A fast provider clock always wins.
             </td>
             <td class="severity sev-high">High</td>
-            <td><code>cqrs/decider.go:172-178</code></td>
+            <td><code>decider.go:172</code></td>
           </tr>
           <tr>
             <td>7</td>
             <td>
               <strong>OCC not enforced by localsync</strong>; concurrent same-item syncs can
-              diverge. Relies entirely on go-cqrs-lite's expected-version check.
+              diverge. Relies entirely on go-cqrs-lite's version check.
             </td>
             <td class="severity sev-medium">Medium</td>
-            <td><code>cqrs/decider.go:80,105</code></td>
+            <td><code>decider.go:80</code></td>
           </tr>
           <tr>
             <td>8</td>
             <td>
-              <strong>Schema upcasting not implemented</strong>; the entire "upcasting" is
+              <strong>Schema upcasting not implemented</strong>; entire "upcasting" is
               <code>if v==0 { v=V1 }</code>. Future schema changes = silent zero-fills.
             </td>
             <td class="severity sev-medium">Medium</td>
-            <td><code>data/schema/version.go</code></td>
+            <td><code>version.go</code></td>
           </tr>
         </tbody>
       </table>
 
-      <h4>Detail: the aggregate-ID collision</h4>
-      <pre><code><span class="comment">// pkg/cqrs/aggregate_id.go:13-15</span>
+      <h3>Detail: the aggregate-ID collision</h3>
+      <pre><code><span class="comment">// pkg/cqrs/aggregate_id.go:13</span>
 <span class="keyword">func</span> <span class="func">itemKey</span>(source <span class="type">string</span>, externalID <span class="type">id.ExternalID</span>) <span class="type">string</span> {
     <span class="keyword">return</span> source + <span class="string">":"</span> + externalID.<span class="func">Get</span>()
 }</code></pre>
@@ -677,12 +1124,13 @@
         Two distinct items collide: <code>source="github", externalID=":42"</code> → key
         <code>"github::42"</code> and <code>source="github:", externalID="42"</code> → key
         <code>"github::42"</code>. Both hash to the same <code>AggregateID</code> → their events
-        interleave in one aggregate → cross-item corruption. <strong>Fix:</strong> length-prefixed
-        encoding or null-byte separator before hashing.
+        interleave in one aggregate → <strong>cross-item corruption</strong>.
+        <span class="badge badge-good">Fix</span> length-prefixed encoding or null-byte separator
+        before hashing.
       </p>
 
-      <h4>Detail: <code>hasChanged</code> false-negative</h4>
-      <pre><code><span class="comment">// pkg/cqrs/decider.go:234-240</span>
+      <h3>Detail: <code>hasChanged</code> false-negative</h3>
+      <pre><code><span class="comment">// pkg/cqrs/decider.go:234</span>
 <span class="keyword">func</span> <span class="func">hasChanged</span>(local, remote *<span class="type">model.Item</span>) <span class="type">bool</span> {
     <span class="keyword">return</span> !local.UpdatedAt.<span class="func">Equal</span>(remote.UpdatedAt) ||
         local.Type.<span class="func">Get</span>() != remote.Type.<span class="func">Get</span>() ||
@@ -700,22 +1148,23 @@
 
       <hr />
 
-      <!-- ============================================================ -->
-      <h2 id="resilience">4. Sync Loop & Resilience Audit — The Inert Knobs</h2>
+      <h2 id="resilience"><span class="sec-num">4</span>Sync Loop &amp; Resilience Audit</h2>
 
       <p class="lead">
         The sync engine draped over the CQRS core is a facade. The resilience knobs are all
         declared, none enforced.
       </p>
 
-      <h3>The worst property: <code>Sync()</code> always lies</h3>
       <div class="problem-box">
-        <h4><code>sync.go:99-115</code></h4>
+        <h4>The worst property: <code>Sync()</code> always lies</h4>
         <p>
-          <code>Sync()</code> returns <code>(*SyncResult, error)</code> but the error is
+          <code>sync.go:99</code> — <code>Sync()</code> returns
+          <code>(*SyncResult, error)</code> but the error is
           <strong>structurally always <code>nil</code></strong
           >, even when hundreds of items fail. Per-item errors are swallowed into an integer
           counter; the caller cannot tell <em>which</em> items failed or <em>why</em>.
+        </p>
+        <p style="margin-bottom: 0">
           <strong
             >This is the single worst failure mode a sync product can have: silently dropping data
             while returning green.</strong
@@ -729,17 +1178,17 @@
             <th>#</th>
             <th>Area</th>
             <th>Severity</th>
-            <th>One-line verdict</th>
+            <th>Verdict</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>1</td>
             <td>Partial failure</td>
-            <td class="severity sev-critical">High</td>
+            <td class="severity sev-high">High</td>
             <td>
-              Partial commit; <code>Sync</code> always returns <code>nil</code> error even when
-              hundreds of items fail; per-item detail discarded.
+              Partial commit; <code>Sync</code> always returns <code>nil</code> even when hundreds
+              fail; per-item detail discarded.
             </td>
           </tr>
           <tr>
@@ -748,8 +1197,8 @@
             <td class="severity sev-critical">Critical</td>
             <td>
               <code>RateLimitConfig</code>/<code>RateLimitCache</code> are
-              <strong>dead code</strong>. No <code>Retry-After</code>, no backoff, no enforcement.
-              Will hammer a 429'd API.
+              <strong>dead code</strong>. No <code>Retry-After</code>, no backoff. Will hammer a
+              429'd API.
             </td>
           </tr>
           <tr>
@@ -767,7 +1216,7 @@
             <td>Pagination</td>
             <td class="severity sev-critical">Critical</td>
             <td>
-              No <code>FetchAll</code> implementation ships. <code>FetchConfig</code>/<code
+              No <code>FetchAll</code> impl ships. <code>FetchConfig</code>/<code
                 >MaxConcurrentFetches</code
               >
               unused. Memory unbounded by contract.
@@ -788,7 +1237,7 @@
             <td class="severity sev-high">High</td>
             <td>
               <code>ctx</code> propagated but <strong>never checked in the batch loop</strong>.
-              Cancel mid-batch runs to completion. No partial-state reporting.
+              Cancel mid-batch runs to completion.
             </td>
           </tr>
           <tr>
@@ -828,94 +1277,85 @@
           The overcoat has no buttons: the provider contract is unimplemented, the resilience knobs
           (<code>RetryConfig</code>, <code>RateLimitConfig</code>, <code>FetchConfig</code>,
           <code>IsRetryable</code>) are inert, and the public <code>Sync</code> API actively
-          conceals failure by always returning <code>nil</code>. Under real load against a real
-          flaky provider, an operator will see items silently dropped, no retries, no rate-limit
-          respect, and a green "no error" return.
+          conceals failure. Under real load against a real flaky provider, an operator will see
+          items silently dropped, no retries, no rate-limit respect — and a green "no error" return.
         </p>
       </div>
 
       <hr />
 
-      <!-- ============================================================ -->
-      <h2 id="boundaries">5. The Boundary Question: Move to go-cqrs-lite?</h2>
+      <h2 id="boundaries"><span class="sec-num">5</span>The Boundary: Move to go-cqrs-lite?</h2>
 
       <p class="lead">
         User asked: "Maybe we actually just need to move some of the capabilities currently in this
-        project to go-cqrs-lite or an existing or new sub module of it?"
+        project to go-cqrs-lite or a new submodule of it?"
       </p>
 
-      <h3>What go-cqrs-lite IS</h3>
       <p>
-        A <strong>43-module CQRS + Event Sourcing library</strong> (v3.1.0) with per-module
-        <code>go.mod</code> isolation. It provides the complete CQRS/ES primitive set — but
-        <strong>deliberately excludes</strong> all distributed-systems sync primitives. Its
-        authoritative charter doc (<code>docs/ECOSYSTEM_BOUNDARIES.md</code>) explicitly assigns
-        CRDT/conflict logic to <strong>go-localsync</strong>, out of cqrs-lite.
+        go-cqrs-lite is a <strong>43-module CQRS + Event Sourcing library</strong> (v3.1.0) that
+        <strong>deliberately excludes</strong> all distributed-systems sync primitives. Its charter
+        (<code>docs/ECOSYSTEM_BOUNDARIES.md</code>) explicitly assigns CRDT/conflict logic to
+        <strong>go-localsync</strong>, out of cqrs-lite.
       </p>
 
       <h3>The key insight: <code>pkg/crdt/</code> is two unrelated things wearing one name</h3>
-      <p>That conflation is the whole source of confusion:</p>
 
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header">
-            <span class="badge badge-good">Cluster A</span> Generic conflict resolution
-          </div>
+      <div class="cluster-diagram">
+        <div class="cluster cluster-a">
+          <span class="cluster-tag">Cluster A</span>
+          <h4>Generic conflict resolution</h4>
           <p>
-            <strong
-              ><code>Conflict[T]</code>, <code>ConflictResolver[T]</code>,
-              <code>LWWResolver[T]</code></strong
-            >
+            <code>Conflict[T]</code>, <code>ConflictResolver[T]</code>, <code>LWWResolver[T]</code>
           </p>
           <p>
             A plain strategy pattern: "two candidate values arrive for one aggregate, which wins?"
-            Generic over <code>T</code>. Not a CRDT — <code>LWWResolver</code> is literally "compare
-            two timestamps." Every event-sourced app needs this policy.
+            Generic over <code>T</code>. <strong>Not a CRDT</strong> — <code>LWWResolver</code> is
+            literally "compare two timestamps." Every event-sourced app needs this policy.
           </p>
-          <p style="margin-bottom: 0"><span class="badge badge-info">Genuinely used</span></p>
+          <p><span class="badge badge-good">Genuinely used</span></p>
         </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="badge badge-bad">Cluster B</span> Distributed delta-CRDT sync
-          </div>
+        <div class="cluster cluster-b">
+          <span class="cluster-tag">Cluster B</span>
+          <h4>Distributed delta-CRDT sync</h4>
           <p>
-            <strong
-              ><code>VectorClock</code>, <code>Operation[T]</code>, <code>SyncMessage</code>,
-              <code>SyncRequest</code>, <code>SyncResponse[T]</code></strong
-            >
+            <code>VectorClock</code>, <code>Operation[T]</code>, <code>SyncMessage</code>,
+            <code>SyncRequest</code>, <code>SyncResponse[T]</code>
           </p>
           <p>
             Multi-node delta-exchange protocol types. Real CRDTs. Useful only when ≥2 nodes exchange
-            deltas. Zero non-test references anywhere in the codebase.
+            deltas. <strong>Zero non-test references anywhere.</strong>
           </p>
-          <p style="margin-bottom: 0"><span class="badge badge-bad">Dead</span></p>
+          <p><span class="badge badge-bad">Dead</span></p>
         </div>
+      </div>
+
+      <div class="insight-box">
+        <h4>Why this matters</h4>
+        <p>
+          The <code>crdt/</code> name lied to the boundary doc, and that lie is why everything feels
+          tangled. <code>ConflictResolver[T]</code> isn't a CRDT — so migrating it doesn't violate
+          the charter. The <em>actual</em> CRDTs are Cluster B.
+        </p>
       </div>
 
       <h3>The recommended three-way split</h3>
 
       <div class="solution-box">
-        <h4>
-          1. <code>Conflict[T]</code> / <code>ConflictResolver[T]</code> /
-          <code>LWWResolver[T]</code> → new <code>go-cqrs-lite/conflict/v3</code>
-        </h4>
+        <h4>1. Cluster A → new <code>go-cqrs-lite/conflict/v3</code></h4>
         <p>
           The <em>only</em> migration that creates real value. Every event-sourced app needs a "what
           wins on conflicting writes" policy; today go-cqrs-lite's sole answer is "reject with a
-          Conflict error and let the caller retry." A resolve/merge strategy fills a genuine gap.
-          <code>ConflictResolver[T]</code> <strong>isn't a CRDT</strong> — so it doesn't violate the
-          charter. Amend the boundary doc:
+          Conflict error and retry." A resolve/merge strategy fills a genuine gap.
+          <strong>Isn't a CRDT</strong> — doesn't violate the charter. Amend the doc:
           <em>generic conflict resolution IN, distributed CRDT merge OUT.</em>
         </p>
       </div>
 
-      <div class="problem-box">
+      <div class="correction-box">
         <h4>
-          2. <code>VectorClock</code> / <code>Operation[T]</code> / <code>SyncMessage</code> /
-          <code>SyncRequest</code> / <code>SyncResponse[T]</code> → delete (or defer)
+          2. Cluster B → delete (or defer) <span class="badge badge-ok">challenged in §6</span>
         </h4>
         <p>
-          <em>This recommendation was later challenged — see <a href="#vector-clocks">§6</a>.</em>
           Moving dead code to a new home doesn't make it alive — it just relocates the facade.
           If/when a second node exists, revive into a correctly-named <code>go-crdt-lite</code>.
         </p>
@@ -926,39 +1366,37 @@
         <p>
           It's the domain. The generic wiring helpers (<code>stack.go</code>,
           <code>store_factory.go</code>) could eventually graduate to
-          <code>go-cqrs-lite/stack</code> once de-domain-ified — but not worth the cost now.
+          <code>go-cqrs-lite/stack</code> once de-domain-ified — not worth the cost now.
         </p>
       </div>
 
-      <div class="correction-box">
+      <div class="problem-box">
         <h4>Crucial caveat</h4>
         <p>
           Don't let "move things to cqrs-lite" become a way to <em>avoid fixing the bleeding</em>.
-          Migration is <strong>orthogonal</strong> to the data-integrity bugs. The aggregate-ID
-          collision, the <code>hasChanged</code> data loss, the lying <code>Sync()</code> — those
-          stay broken regardless of where the types live.
+          Migration is <strong>orthogonal</strong> to the data-integrity bugs. The collision, the
+          <code>hasChanged</code> data loss, the lying <code>Sync()</code> — those stay broken
+          regardless of where the types live.
         </p>
       </div>
 
       <hr />
 
-      <!-- ============================================================ -->
-      <h2 id="vector-clocks">6. Vector Clocks: A Defense, Then a Retraction</h2>
+      <h2 id="vector-clocks"><span class="sec-num">6</span>Vector Clocks: Defense → Retraction</h2>
 
       <p class="lead">
         User pushed back: "VectorClock's sound cool though, and can solve real problems specially in
         cases where some emitter may not have internet for a while."
       </p>
 
-      <h3>First response: a defense (partially correct, partially overreaching)</h3>
+      <h3>First: a defense (partially correct)</h3>
       <p>
-        The initial reaction conceded that vector clocks aren't speculative — they earn their keep
-        the moment an aggregate has <strong>≥2 potential writers</strong>. The claim was that
-        <code>stack.DeleteItem</code> was already a second writer (local delete vs remote update),
-        making vector clocks the principled fix for a real present-day bug (silent resurrect-stale).
+        Vector clocks earn their keep the moment an aggregate has
+        <strong>≥2 potential writers</strong>. The claim was that <code>stack.DeleteItem</code> was
+        already a second writer (local delete vs remote update), making vector clocks the principled
+        fix for a real present-day bug.
       </p>
 
-      <h3>The scenario table</h3>
       <table>
         <thead>
           <tr>
@@ -975,17 +1413,17 @@
           </tr>
           <tr>
             <td><strong>Local delete + remote update interleave</strong></td>
-            <td><strong>Yes</strong></td>
+            <td class="sev-critical"><strong>Yes</strong></td>
             <td><strong>Yes</strong></td>
           </tr>
           <tr>
             <td>Offline emitter buffers edits, reconnects</td>
-            <td>Yes (concurrent updates)</td>
+            <td class="sev-high">Yes</td>
             <td>Yes</td>
           </tr>
           <tr>
             <td>Multi-source merge of cross-posted items</td>
-            <td>Yes (different provider clocks)</td>
+            <td class="sev-high">Yes</td>
             <td>Yes — <em>only if</em> items unify into one aggregate</td>
           </tr>
         </tbody>
@@ -995,35 +1433,38 @@
         <h4>The honest problem isn't the types — it's the empty wiring</h4>
         <p>
           The types are correct. <code>VectorClock</code>, <code>Operation[T]</code> are
-          textbook-correct, well-tested primitives. <strong>Not theater.</strong> The lie is the
-          empty construction in the decider — <code>crdt.NewVectorClock()</code> on every conflict,
-          which makes the causal branch structurally unreachable while pretending it was consulted.
+          textbook-correct, well-tested. <strong>Not theater.</strong> The lie is the empty
+          construction in the decider — <code>crdt.NewVectorClock()</code> on every conflict, making
+          the causal branch structurally unreachable while <em>pretending</em> it was consulted.
+        </p>
+        <p style="margin-bottom: 0">
           So "delete the cluster" was the wrong prescription. The right one:
           <strong
-            >keep the types, kill the empty-wiring, and decide whether to wire them for
-            real.</strong
+            >keep the types, kill the empty-wiring, decide whether to wire them for real.</strong
           >
         </p>
       </div>
 
-      <h3>Then: the retraction (see next section)</h3>
-      <p>
-        This entire defense rested on <code>stack.DeleteItem</code> being a live second writer. The
-        next question exposed that assumption as false.
-      </p>
+      <div class="problem-box">
+        <h4>Then: the retraction</h4>
+        <p>
+          This entire defense rested on <code>stack.DeleteItem</code> being a live second writer.
+          The next question exposed that assumption as false. <strong>See §7.</strong>
+        </p>
+      </div>
 
       <hr />
 
-      <!-- ============================================================ -->
-      <h2 id="deleteitem">7. The DeleteItem Discovery: The Real Fork</h2>
+      <h2 id="deleteitem"><span class="sec-num">7</span>The DeleteItem Discovery</h2>
 
       <p class="lead">
-        User's two-word reaction to the <code>stack.DeleteItem</code> claim: "We have Delete?"
+        User's two-word reaction to the <code>stack.DeleteItem</code> claim:
+        <em>"We have Delete?"</em>
       </p>
 
       <p>
-        Verified against the code: <code>DeleteItem</code> exists at <code>stack.go:154-166</code>.
-        But <strong>who calls it?</strong>
+        Verified: <code>DeleteItem</code> exists at <code>stack.go:154</code>. But
+        <strong>who calls it?</strong>
       </p>
 
       <table>
@@ -1062,14 +1503,14 @@
         </p>
         <ul>
           <li>
-            The resurrect bug (local delete vs remote update interleave)
+            The resurrect bug (local delete vs remote update)
             <strong>cannot occur in the running system</strong> — nothing writes the delete.
           </li>
           <li>Vector clocks genuinely have <strong>no live justification today.</strong></li>
           <li>
-            Pure LWW-by-timestamp is, for the <em>actual</em> current single-writer model, a
-            defensible strategy — the problem was the empty vector-clock construction
-            <em>pretending</em> it was consulted, not the absence of vector clocks.
+            Pure LWW-by-timestamp is, for the <em>actual</em> single-writer model, a defensible
+            strategy — the problem was the empty vector-clock construction <em>pretending</em> it
+            was consulted.
           </li>
         </ul>
         <p style="margin-bottom: 0">
@@ -1079,111 +1520,162 @@
         </p>
       </div>
 
-      <div class="insight-box">
-        <h4>The real diagnosis</h4>
-        <p>
-          <code>DeleteItem</code> being orphaned means
-          <strong>go-localsync hasn't decided what it is.</strong> The code today is neither a pure
-          pull mirror nor a two-way sync engine — it's a pull mirror wearing a few of two-way-sync's
-          clothes (<code>DeleteItem</code>, vector clocks, <code>SyncRequest</code>) with none of
-          them wired. That's the source of the "dogshit" feeling —
-          <strong>it's not under-built, it's uncommitted.</strong>
-        </p>
+      <div class="pullquote">
+        <span class="quote-mark">"</span>
+        It's not under-built, it's <strong>uncommitted</strong>.
+        <cite>— the real diagnosis, after the retraction</cite>
       </div>
 
       <hr />
 
-      <!-- ============================================================ -->
-      <h2 id="fork">8. The Open Fork: What Is go-localsync?</h2>
+      <h2 id="fork"><span class="sec-num">8</span>The Open Fork: What Is go-localsync?</h2>
 
       <p class="lead">
         This is the single product-identity decision that shapes everything downstream. Nothing else
         can be decided until it is.
       </p>
 
-      <div class="decision-pending">
-        <h3>⏳ DECISION REQUIRED: A or B?</h3>
-        <p>One sentence settles the architecture. Everything in this document hangs off it.</p>
-      </div>
+      <div class="decision-final">
+        <h2 style="border: none">One decision. Everything hangs on it.</h2>
+        <p>
+          Is this a <strong>pure pull mirror</strong> or an
+          <strong>offline-capable two-way sync engine</strong>?
+        </p>
 
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header">
-            <span class="badge badge-info">Option A</span> Pure pull mirror
-          </div>
-          <p>
-            <strong>Read-only local projection of upstream.</strong> SDK only ever adds/updates from
-            provider. Deletion = "provider stopped returning it" → reconciliation diff, not an
-            event.
-          </p>
-          <ul style="margin-top: 12px">
-            <li>
-              <strong><code>DeleteItem</code></strong> →
-              <span class="badge badge-bad">delete the orphan</span> — misleading phantom surface.
-            </li>
-            <li>
-              <strong>Vector clocks</strong> → dormant / honestly stubbed. Single writer doesn't
-              need them.
-            </li>
-            <li><strong>Upstream deletion</strong> → set-diff reconciliation.</li>
-          </ul>
-          <p style="margin-top: 12px; margin-bottom: 0">
-            <em
-              >Result: honest, tiny surface, vector clocks correctly absent rather than
-              decorative.</em
+        <div class="decision-grid">
+          <div class="decision-option opt-a">
+            <h4><span class="opt-tag">Option A</span> Pure pull mirror</h4>
+            <p style="font-size: 0.9rem; color: var(--text-muted)">
+              Read-only local projection of upstream. SDK only ever adds/updates from provider.
+              Deletion = "provider stopped returning it" → reconciliation diff.
+            </p>
+            <p
+              style="
+                font-size: 0.82rem;
+                color: var(--text-faint);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-top: 16px;
+              "
             >
-          </p>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="badge badge-info">Option B</span> Offline-capable two-way sync
+              What happens to each surface:
+            </p>
+            <ul class="decision-fate">
+              <li>
+                <span class="fate-icon" style="color: var(--danger)">✕</span>
+                <code>DeleteItem</code> → <strong>delete the orphan</strong>
+              </li>
+              <li>
+                <span class="fate-icon" style="color: var(--text-muted)">○</span> Vector clocks →
+                dormant, honestly stubbed
+              </li>
+              <li>
+                <span class="fate-icon" style="color: var(--accent)">→</span> Upstream deletion →
+                set-diff reconciliation
+              </li>
+              <li>
+                <span class="fate-icon" style="color: var(--danger)">✕</span> Cluster B CRDT types →
+                delete
+              </li>
+            </ul>
+            <p
+              style="
+                font-size: 0.86rem;
+                font-style: italic;
+                color: var(--accent);
+                margin-top: 14px;
+                margin-bottom: 0;
+              "
+            >
+              Honest, tiny surface, vector clocks correctly absent.
+            </p>
           </div>
-          <p>
-            <strong>Local mutations (delete/edit) buffer and reconcile with upstream later.</strong>
-            "Emitter loses internet" is a real scenario. <code>DeleteItem</code> is the seed of the
-            real product.
-          </p>
-          <ul style="margin-top: 12px">
-            <li>
-              <strong><code>DeleteItem</code></strong> →
-              <span class="badge badge-good">wire it to the API + sync loop</span> as the first real
-              local mutation.
-            </li>
-            <li>
-              <strong>Vector clocks / HLC</strong> →
-              <span class="badge badge-good">actually populate</span> them. Eat the schema
-              migration.
-            </li>
-            <li><strong>Much bigger scope</strong> — but it's a real product.</li>
-          </ul>
-          <p style="margin-top: 12px; margin-bottom: 0">
-            <em>Result: causal history tracked, offline edits reconcile correctly.</em>
-          </p>
+
+          <div class="decision-vs">OR</div>
+
+          <div class="decision-option opt-b">
+            <h4><span class="opt-tag">Option B</span> Offline two-way sync</h4>
+            <p style="font-size: 0.9rem; color: var(--text-muted)">
+              Local mutations (delete/edit) buffer and reconcile with upstream later. "Emitter loses
+              internet" is a real scenario. <code>DeleteItem</code> is the seed of the real product.
+            </p>
+            <p
+              style="
+                font-size: 0.82rem;
+                color: var(--text-faint);
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                margin-top: 16px;
+              "
+            >
+              What happens to each surface:
+            </p>
+            <ul class="decision-fate">
+              <li>
+                <span class="fate-icon" style="color: var(--success)">✓</span>
+                <code>DeleteItem</code> → <strong>wire to API + sync loop</strong>
+              </li>
+              <li>
+                <span class="fate-icon" style="color: var(--success)">✓</span> Vector clocks / HLC →
+                <strong>actually populate</strong>
+              </li>
+              <li>
+                <span class="fate-icon" style="color: var(--success)">✓</span> Causal history
+                tracked, offline edits reconcile
+              </li>
+              <li>
+                <span class="fate-icon" style="color: var(--warning)">▲</span> Much bigger scope —
+                eat the schema migration
+              </li>
+            </ul>
+            <p
+              style="
+                font-size: 0.86rem;
+                font-style: italic;
+                color: var(--success);
+                margin-top: 14px;
+                margin-bottom: 0;
+              "
+            >
+              A real product — but a real commitment.
+            </p>
+          </div>
         </div>
       </div>
 
       <h3>Why this can't be deferred</h3>
       <p>Every other question in this document is downstream of A vs B:</p>
-      <ul>
-        <li>
-          <strong>Fix order:</strong> Both options require fixing the bleeding (aggregate-ID
-          collision, <code>hasChanged</code>, lying <code>Sync()</code>) first. But only B then
-          requires wiring <code>DeleteItem</code> + causality tracking.
-        </li>
-        <li>
-          <strong>Migration scope:</strong> Both options benefit from moving
-          <code>ConflictResolver[T]</code> to <code>go-cqrs-lite/conflict/v3</code>. But only B
-          keeps the distributed-CRDT cluster; A deletes it.
-        </li>
-        <li>
-          <strong>Resurrect handling:</strong> Under A, the resurrect bug is moot (no delete path).
-          Under B, it's a real bug that vector clocks / HLC fix correctly.
-        </li>
-        <li>
-          <strong>Marketing honesty:</strong> Under A, "pull mirror" is honest. Under B, "two-way
-          offline sync" must become true, not aspirational.
-        </li>
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>Concern</th>
+            <th>Under A</th>
+            <th>Under B</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Fix order</strong></td>
+            <td>Both fix the bleeding first. Only A then stops.</td>
+            <td>Also must wire <code>DeleteItem</code> + causality.</td>
+          </tr>
+          <tr>
+            <td><strong>Migration scope</strong></td>
+            <td>Both move Cluster A to <code>conflict/v3</code>. Only A deletes Cluster B.</td>
+            <td>Keeps Cluster B; wires it for real.</td>
+          </tr>
+          <tr>
+            <td><strong>Resurrect handling</strong></td>
+            <td>Moot — no delete path exists.</td>
+            <td>Real bug; vector clocks / HLC fix it.</td>
+          </tr>
+          <tr>
+            <td><strong>Marketing honesty</strong></td>
+            <td>"Pull mirror" is honest.</td>
+            <td>"Two-way offline sync" must become true.</td>
+          </tr>
+        </tbody>
+      </table>
 
       <div class="insight-box">
         <h4>Recommended sequence (regardless of A or B)</h4>
@@ -1196,25 +1688,10 @@
           <li><strong>Decide A vs B.</strong> This is the pivot.</li>
           <li>
             <strong>Then:</strong> migrate <code>ConflictResolver[T]</code> →
-            <code>go-cqrs-lite/conflict/v3</code> (small, decoupling, unblocks reuse); and either
-            delete the dead CRDT cluster (A) or wire causality for real (B).
+            <code>go-cqrs-lite/conflict/v3</code>; and either delete the dead CRDT cluster (A) or
+            wire causality for real (B).
           </li>
         </ol>
-      </div>
-
-      <div class="problem-box">
-        <h4>The honest summary</h4>
-        <p>
-          The CQRS persistence core is genuinely good. The sync engine draped over it is
-          uncommitted. The path to "superb" is not adding features — it's
-          <strong
-            >fixing the silent-data-loss paths, killing the phantom surfaces, and committing to one
-            identity</strong
-          >. The energy is right. The foundation, once the bleeding stops, is worth building on. But
-          the A-vs-B question must be answered before a single line of new code is written, because
-          it determines whether <code>DeleteItem</code>, vector clocks, and the entire offline story
-          are <strong>the future of the product or scaffolding to tear out.</strong>
-        </p>
       </div>
 
       <div class="footer">
