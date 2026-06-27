@@ -1,12 +1,14 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-06-22
-**Tests:** 225 passing, 9 packages | **Lint:** 0 issues (golangci-lint v2)
+**Last Updated:** 2026-06-27
+**Tests:** 224 passing, 9 packages | **Lint:** 0 issues (golangci-lint v2)
 
 ## Overview
 
 Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.md](CHANGELOG.md); the feature inventory lives in [FEATURES.md](FEATURES.md); long-term ideas in [ROADMAP.md](ROADMAP.md).
+
+> **Scope note:** go-localsync is deliberately a **single-aggregate Item sync SDK**. Generalising it into a multi-aggregate event-sourcing framework was considered and **deferred** — see [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [DiscordSync adoption feedback](docs/feedback/2026-06-23_discordsync-adoption-feedback.html). The tasks below improve the SDK _within its current scope_; do not add tasks that widen it without revisiting that decision.
 
 ---
 

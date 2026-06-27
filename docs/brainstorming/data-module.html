@@ -450,6 +450,46 @@
       <h1>go-localsync Data Module</h1>
       <p class="subtitle">Current State & Path to Perfection — A Brutally Honest Audit</p>
 
+      <div
+        style="
+          background: #3d1f1f;
+          border: 2px solid #f85149;
+          border-radius: 10px;
+          padding: 20px 24px;
+          margin: 24px 0;
+        "
+      >
+        <div
+          style="
+            color: #f85149;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+          "
+        >
+          ⚠ SUPERSEDED — DO NOT ACT ON THESE RECOMMENDATIONS
+        </div>
+        <p style="margin: 0; color: #c9d1d9">
+          This audit (2026-06-05) describes a proposed
+          <code>pkg/data/{query,transform,repo}</code> layer that was <strong>never built</strong>.
+          The live codebase only contains <code>pkg/data/model/</code> and
+          <code>pkg/data/schema/</code> — there are no getter methods, SQL string combinators,
+          <code>Observable</code> decorator, or <code>ItemRepository</code> to refactor. The
+          "problems" critiqued here do not exist in the current source.
+        </p>
+        <p style="margin: 12px 0 0; color: #c9d1d9">
+          The only recommendations that survived are already tracked:
+          <strong>observability</strong> (OpenTelemetry) and
+          <strong>schema upcasters</strong> (<code>UpcasterRegistry</code>), both in
+          <code>TODO_LIST.md</code>. The strategic question of whether go-localsync should
+          generalise beyond a single-aggregate Item engine is settled (deferred) in
+          <strong>ADR-0004</strong>
+          (<code>docs/adr/0004-multi-aggregate-generalisation-deferred.md</code>). This document is
+          retained only as historical context.
+        </p>
+      </div>
+
       <div class="meta">
         <div class="meta-badge">Package: <strong>pkg/data/</strong></div>
         <div class="meta-badge">Language: <strong>Go 1.26</strong></div>

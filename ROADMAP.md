@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-06-22
+**Last Updated:** 2026-06-27
 
 ## Overview
 
@@ -29,7 +29,7 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 - [x] **projection.Runner removal** — go-cqrs-lite v3 dropped `projection/`. Replaced with direct `bus.SubscribeAll` (synchronous live delivery) + background `runner.replayJournal` (SQLite catch-up). Idempotent projection tolerates replay/live overlap, so no checkpoint store is needed.
 - [x] **Exported ConflictWinner** — `ConflictWinnerRemote`/`ConflictWinnerLocal` constants + `ParseConflictWinner` for safe payload→enum decoding.
 - [x] **DTO/domain boundary** — `provider.Item` (DTO) ↔ `model.Item` (domain entity) via `item_adapter.go`. Decider, read model, events, and resolver all use `*model.Item`.
-- [x] **225 tests passing** — 9 packages, 0 lint issues.
+- [x] **224 tests passing** — 9 packages, 0 lint issues.
 
 ---
 
@@ -82,3 +82,15 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 2. **Event retention/TTL** — Automatic cleanup of old events? Configurable?
 3. **Conflict resolution policy** — Configurable via `CQRSConfig.ConflictResolver`. A per-sync override (`SyncOptions.ConflictResolver`) is pending.
 4. **Library release flow** — What does a tagged release of a pure Go module look like without a binary? (Governs the CI rework above.)
+5. **Multi-aggregate generalisation** — Should go-localsync generalise beyond a single `sync_item` aggregate into a multi-aggregate event-sourcing framework? **Decided: deferred.** See [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [DiscordSync adoption feedback](docs/feedback/2026-06-23_discordsync-adoption-feedback.html). Revisit only if a third+ consumer needs it or `go-cqrs-lite` can't evolve the ergonomics. `go-cqrs-lite v3` remains the cross-project sharing boundary.
+
+---
+
+## 📑 RECORDED DECISIONS
+
+| ADR                                                                  | Decision                                                                      | Status   |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------- |
+| [ADR-0001](docs/adr/0001-cqrs-adoption.md)                           | Adopt event-sourced CQRS via go-cqrs-lite (no legacy CRUD)                    | Accepted |
+| [ADR-0002](docs/adr/0002-branded-ids.md)                             | Branded phantom-type IDs for compile-time safety                              | Accepted |
+| [ADR-0003](docs/adr/0003-crdt-integration.md)                        | Pluggable CRDT conflict resolution (`ConflictResolver[T]`)                    | Accepted |
+| [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) | Defer multi-aggregate generalisation; go-cqrs-lite stays the sharing boundary | Accepted |

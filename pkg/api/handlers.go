@@ -53,9 +53,9 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 
 	var resp ListItemsOutput
 
-	resp.Body.Items = make([]*ItemResponse, len(items))
-	for i, item := range items {
-		resp.Body.Items[i] = toItemResponse(item)
+	resp.Body.Items = make([]*ItemResponse, 0, len(items))
+	for _, item := range items {
+		resp.Body.Items = append(resp.Body.Items, toItemResponse(item))
 	}
 
 	resp.Body.Total = total

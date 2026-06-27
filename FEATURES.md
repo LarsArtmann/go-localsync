@@ -1,8 +1,10 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-06-22
+**Updated:** 2026-06-27
 
 > The SDK is a **pure contract library**. It defines the `Provider` interface, the CQRS sync engine, and CRDT primitives — but ships **no provider implementations and no CLI binary**. The reference consumer application — GitHub provider + CLI — lives in [`github.com/larsartmann/github-local-sync`](https://github.com/larsartmann/github-local-sync). New providers (GitLab, Jira, …) are built the same way, in their own consumer apps.
+>
+> **Scope boundary (see [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md)):** go-localsync is a **single-aggregate, pull-only, flat-Item sync engine**. The domain model is GitHub-activity-feed-shaped (`ActorLogin`, `RepoName`, `RepoURL`), the event vocabulary is fixed at three events, and there is one flat projection. It is **not** a generic multi-aggregate event-sourcing framework — generalising it was considered and deferred. For push-driven, multi-aggregate consumers (e.g. DiscordSync), share `go-cqrs-lite v3` directly instead.
 
 ## Legend
 
@@ -133,7 +135,7 @@
 
 | #   | Feature      | Status           | Package        | Description                                                                                                                                  |
 | --- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 55  | Test Suite   | FULLY_FUNCTIONAL | all            | 225 test functions across 9 packages, all passing. Run: `go test ./... -count=1`.                                                            |
+| 55  | Test Suite   | FULLY_FUNCTIONAL | all            | 224 test functions across 9 packages, all passing. Run: `go test ./... -count=1`.                                                            |
 | 56  | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.) |
 
 ## Quality
@@ -154,16 +156,17 @@
 - Error taxonomy gives smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
 - Projection via synchronous `bus.SubscribeAll` + background journal replay (no checkpoint store needed)
-- 225 tests with good coverage across all packages
+- 224 tests with good coverage across all packages
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 - Clear DTO/domain boundary: `provider.Item` (DTO) → `model.Item` (domain entity) via `item_adapter.go`
 
 ### Known Gaps
 
-| Area                    | Issue                                                                                                                                      | Impact                                                                 |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| CI build & release jobs | `build` job builds deleted `./cmd/examples/github-sync` (now in `github-local-sync`); `release` depends on it. Both fail.                  | Cross-platform builds and tag releases do not work. High-priority fix. |
-| Contract-only SDK       | No provider or CLI shipped in-repo. GitHub provider + CLI live in [`github-local-sync`](https://github.com/larsartmann/github-local-sync). | Consumers implement their own provider against the interface.          |
-| No observability        | No OpenTelemetry, no metrics, no tracing                                                                                                   | Production debugging requires log spelunking                           |
-| API has no auth         | HTTP API has no authentication middleware                                                                                                  | Not safe to expose on a network                                        |
-| No data export          | No JSON/CSV export of stored events                                                                                                        | Cannot export for analysis in external tools                           |
+| Area                    | Issue                                                                                                                                                                 | Impact                                                                                                                                      |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| CI build & release jobs | `build` job builds deleted `./cmd/examples/github-sync` (now in `github-local-sync`); `release` depends on it. Both fail.                                             | Cross-platform builds and tag releases do not work. High-priority fix.                                                                      |
+| Contract-only SDK       | No provider or CLI shipped in-repo. GitHub provider + CLI live in [`github-local-sync`](https://github.com/larsartmann/github-local-sync).                            | Consumers implement their own provider against the interface.                                                                               |
+| No observability        | No OpenTelemetry, no metrics, no tracing                                                                                                                              | Production debugging requires log spelunking                                                                                                |
+| API has no auth         | HTTP API has no authentication middleware                                                                                                                             | Not safe to expose on a network                                                                                                             |
+| No data export          | No JSON/CSV export of stored events                                                                                                                                   | Cannot export for analysis in external tools                                                                                                |
+| Single-aggregate scope  | One `sync_item` aggregate, three fixed events, one flat projection, pull-only `Provider`+`Syncer`. Domain model is GitHub-shaped (`ActorLogin`/`RepoName`/`RepoURL`). | Not suitable for multi-aggregate / push consumers. Accepted scope per [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md). |

@@ -1,10 +1,12 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-06-23
+**Updated:** 2026-06-27
 
 ## Project Overview
 
 Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It uses event-sourced CQRS via go-cqrs-lite for state management, pluggable conflict resolution via CRDT (`pkg/crdt/`), and branded IDs from go-branded-id for compile-time type safety.
+
+> **Scope boundary (ADR-0004):** The SDK is deliberately a **single-aggregate, pull-only, flat-Item sync engine** — one `sync_item` aggregate, three fixed events, one projection. The domain model is GitHub-activity-feed-shaped (`ActorLogin`, `RepoName`, `RepoURL`). Generalising it into a multi-aggregate event-sourcing framework was considered and **deferred** — see [`docs/adr/0004-multi-aggregate-generalisation-deferred.md`](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [`docs/feedback/`](docs/feedback/) adoption reviews. `go-cqrs-lite v3` is the cross-project sharing boundary. Do not widen the scope (multi-aggregate, push ingestion, consumer-defined events) without revisiting that ADR.
 
 ## Architecture
 
@@ -12,7 +14,7 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `pkg/crdt/`     | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy**                                                                                                  |
 | `pkg/api/`      | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                     |
-| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.0** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go)                                                    |
+| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.1** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go)                                                    |
 | `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                           |
 | `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`                                                                                                         |
 | `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion`), `model.Key`, `model.ItemFilter`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
@@ -39,7 +41,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `event.Projection`, wired via direct bus subscription (live) + manual journal replay (persistence)
 - `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, SQL snapshots, event logging middleware, correlation IDs
-- `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus background `replayJournal` (reads all persisted events via `Journal.ReadAll`) for SQLite catch-up. Replaces the deleted `projection.Runner` (go-cqrs-lite v3 dropped `projection/` per ADR-0030).
+- `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus background `replayJournal` (reads all persisted events via `Journal.ReadAll`) for SQLite catch-up. Replaces the deleted `projection.Runner` (go-cqrs-lite v3 dropped `projection/` — there is no `projection/v3` module).
 - `commands.go` + `queries.go` + `middleware.go` — typed `SyncItemCommand`/`DeleteItemCommand` via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
 
 ### Key Properties
@@ -135,11 +137,11 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/errors`      | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                            |
 | `pkg/provider`    | 10    | 96.7%    | ✅ Item validation, RateLimitCache                                                                         |
 | `pkg/api`         | 14    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                           |
-| `pkg/crdt`        | 53    | 96.2%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                                |
+| `pkg/crdt`        | 52    | 96.2%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                                |
 | `pkg/data/model`  | 10    | 100.0%   | ✅ Item, Key, Validate, ItemFilter builder                                                                 |
 | `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                           |
 
-**225 total test functions** across 9 test packages.
+**224 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -183,19 +185,19 @@ Two tables managed by the CQRS stack:
 
 | Dependency                         | Version | Purpose                                                          |
 | ---------------------------------- | ------- | ---------------------------------------------------------------- |
-| `go-cqrs-lite/event/v3`            | v3.0.0  | Event types, Store, Bus, Journal, Projection, `Version` (uint64) |
-| `go-cqrs-lite/command/v3`          | v3.0.0  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T]     |
-| `go-cqrs-lite/query/v3`            | v3.0.0  | Query types, Dispatcher, TypedHandler[Q,R], RegisterTyped[Q,R]   |
-| `go-cqrs-lite/decider/v3`          | v3.0.0  | Decider (`Apply` field), Repository, snapshot/codec options      |
-| `go-cqrs-lite/id/v3`               | v3.0.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)      |
-| `go-cqrs-lite/codec/v3`            | v3.0.0  | Codec interface, JSONCodec                                       |
-| `go-cqrs-lite/snapshot/v3`         | v3.0.0  | SnapshotStore, EveryNEvents strategy                             |
-| `go-cqrs-lite/storage/memory/v3`   | v3.0.0  | In-memory event store + snapshot store (bus deleted in v3)       |
-| `go-cqrs-lite/middleware/v3`       | v3.0.0  | EventLogging + CommandRetry middleware                           |
-| `go-cqrs-lite/watermill/v3`        | v3.0.0  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)   |
-| `go-cqrs-lite/storage/v3`          | v3.0.0  | SQLite event store, snapshot, KV store                           |
+| `go-cqrs-lite/event/v3`            | v3.1.0  | Event types, Store, Bus, Journal, Projection, `Version` (uint64) |
+| `go-cqrs-lite/command/v3`          | v3.1.0  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T]     |
+| `go-cqrs-lite/query/v3`            | v3.1.0  | Query types, Dispatcher, TypedHandler[Q,R], RegisterTyped[Q,R]   |
+| `go-cqrs-lite/decider/v3`          | v3.1.0  | Decider (`Apply` field), Repository, snapshot/codec options      |
+| `go-cqrs-lite/id/v3`               | v3.1.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)      |
+| `go-cqrs-lite/codec/v3`            | v3.1.0  | Codec interface, JSONCodec                                       |
+| `go-cqrs-lite/snapshot/v3`         | v3.1.0  | SnapshotStore, EveryNEvents strategy                             |
+| `go-cqrs-lite/storage/memory/v3`   | v3.1.0  | In-memory event store + snapshot store (bus deleted in v3)       |
+| `go-cqrs-lite/middleware/v3`       | v3.1.0  | EventLogging + CommandRetry middleware                           |
+| `go-cqrs-lite/watermill/v3`        | v3.1.0  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)   |
+| `go-cqrs-lite/storage/v3`          | v3.1.0  | SQLite event store, snapshot, KV store                           |
 | `go-branded-id`                    | v0.3.1  | Branded phantom-type IDs for compile-time safety                 |
-| `go-error-family`                  | v0.5.0  | Structured error classification + user-facing message templates  |
+| `go-error-family`                  | v0.5.1  | Structured error classification + user-facing message templates  |
 | `modernc.org/sqlite`               | v1.52.0 | Pure-Go SQLite driver (no CGo)                                   |
 | `charm.land/log/v2`                | v2.0.0  | Structured logging                                               |
 | `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter    |

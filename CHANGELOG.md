@@ -7,6 +7,13 @@ Release dates and entries are reconciled against the actual git tags (`v0.1.0`, 
 
 ## [Unreleased]
 
+### Changed
+
+- **go-cqrs-lite upgraded from v3.0.0 to v3.1.0** across all 15 modules (direct + transitive: `codec`, `command`, `decider`, `dispatcher`, `event`, `id`, `kv`, `listing`, `middleware`, `otel`, `query`, `snapshot`, `storage`, `storage/memory`, `watermill`). `vendor/` re-synced to match; no API changes required.
+- **go-error-family upgraded from v0.5.0 to v0.5.1.** Vendored dependency re-synced. No code changes needed.
+- `flake.lock` refreshed to the latest nixpkgs revision.
+- `CONTRIBUTING.md` streamlined to a minimal two-command setup guide.
+
 ## [0.3.0] - 2026-06-23
 
 ### Changed
