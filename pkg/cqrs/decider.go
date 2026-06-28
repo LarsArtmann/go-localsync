@@ -172,8 +172,6 @@ func resolveConflict(
 	conflict := &crdt.Conflict[*model.Item]{
 		Local:     local,
 		Remote:    remote,
-		LocalVC:   crdt.NewVectorClock(),
-		RemoteVC:  crdt.NewVectorClock(),
 		Timestamp: time.Now(),
 	}
 
