@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/larsartmann/go-cqrs-lite/codec/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
@@ -12,6 +13,10 @@ import (
 // Projector projects domain events onto the ReadModel.
 type Projector struct {
 	readModel ReadModel
+	// lastVersions tracks the highest event version applied per aggregate ID.
+	// This prevents stale events from background journal replay from
+	// resurrecting rows that were already deleted via a newer live event.
+	lastVersions sync.Map
 }
 
 // newProjector creates a Projector for the given ReadModel.
@@ -30,15 +35,31 @@ func (p *Projector) EventTypes() []event.Type {
 }
 
 // Handle processes a single event, updating the read model.
+// Events with a version <= the last applied version for their aggregate are
+// skipped — this prevents stale journal-replay events from resurrecting rows
+// that were already deleted via a newer live event.
 func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
-	switch evt.Type() {
-	case EventItemSynced:
-		return p.handleItemSynced(ctx, evt)
-	case EventItemDeleted:
-		return p.handleItemDeleted(ctx, evt)
-	case EventItemConflictFound:
+	aggID := evt.AggregateID().String()
+	version := evt.Version()
+
+	if last, ok := p.lastVersions.Load(aggID); ok && version <= last.(event.Version) {
 		return nil
 	}
+
+	switch evt.Type() {
+	case EventItemSynced:
+		if err := p.handleItemSynced(ctx, evt); err != nil {
+			return err
+		}
+	case EventItemDeleted:
+		if err := p.handleItemDeleted(ctx, evt); err != nil {
+			return err
+		}
+	case EventItemConflictFound:
+		// no-op — metadata event only
+	}
+
+	p.lastVersions.Store(aggID, version)
 
 	return nil
 }
