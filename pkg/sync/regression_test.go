@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -79,4 +80,31 @@ func TestRegression_Sync_ReconcileOptIn(t *testing.T) {
 			t.Errorf("expected 2 seen keys forwarded to Reconcile, got %d", len(store.reconcileSeen))
 		}
 	})
+}
+
+// TestRegression_Sync_ReconcileRefusesPartialFetch guards the data-loss safety
+// invariant: reconcile must NOT tombstone when the provider signals the fetch is
+// incomplete (HasMore=true). Otherwise a paginating fetch would wrongly declare
+// not-yet-fetched items as gone upstream.
+func TestRegression_Sync_ReconcileRefusesPartialFetch(t *testing.T) {
+	t.Parallel()
+
+	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
+	store := &mockSyncStore{reconcileResult: 9} // would tombstone 9 if allowed
+	p := &testutil.MockProvider{Items: items, HasMore: true}
+	syncer := NewSyncer(p, store, log.Default())
+
+	opts := testSyncOpts()
+	opts.Reconcile = true
+
+	res, err := syncer.Sync(context.Background(), opts)
+	testutil.MustNoError(t, err)
+
+	if store.reconcileCalled {
+		t.Error("reconcile must NOT run when the fetch is incomplete (HasMore=true)")
+	}
+
+	if res.Tombstoned != 0 {
+		t.Errorf("expected 0 tombstoned for a partial fetch, got %d", res.Tombstoned)
+	}
 }

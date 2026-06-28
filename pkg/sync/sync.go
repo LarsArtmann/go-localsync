@@ -134,7 +134,7 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 	valid := s.filterValidItems(result.Items, syncResult)
 
 	if len(valid) == 0 {
-		s.reconcile(ctx, opts, result.Items, syncResult)
+		s.reconcile(ctx, opts, result, syncResult)
 
 		s.logger.Info(
 			"Sync completed: no valid items",
@@ -159,7 +159,7 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 
 	s.reportProgress(opts, syncResult)
 
-	s.reconcile(ctx, opts, result.Items, syncResult)
+	s.reconcile(ctx, opts, result, syncResult)
 
 	s.logger.Info(
 		"Sync completed",
@@ -188,14 +188,32 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 // reconcile runs the opt-in upstream-gone reconciliation pass: live items for
 // the source that are absent from the fetched set are tombstoned. It is a no-op
 // unless opts.Reconcile is set, and best-effort (failures are logged, not fatal).
-func (s *Syncer) reconcile(ctx context.Context, opts *SyncOptions, items []*provider.Item, syncResult *SyncResult) {
+//
+// SAFETY: reconcile is refused when fetched.HasMore is true. Tombstoning assumes
+// the fetched set is the COMPLETE picture of what the provider holds; a partial
+// (still-paginating) fetch would wrongly declare still-present items as gone.
+func (s *Syncer) reconcile(
+	ctx context.Context,
+	opts *SyncOptions,
+	fetched *provider.FetchResult,
+	syncResult *SyncResult,
+) {
 	if !opts.Reconcile || ctx.Err() != nil {
 		return
 	}
 
-	seen := make([]model.Key, 0, len(items))
+	if fetched.HasMore {
+		s.logger.Warn(
+			"Skipping reconciliation: fetch was not complete (provider reports more pages)",
+			"source", opts.Source,
+		)
 
-	for _, item := range items {
+		return
+	}
+
+	seen := make([]model.Key, 0, len(fetched.Items))
+
+	for _, item := range fetched.Items {
 		seen = append(seen, model.Key{Source: item.Source, ExternalID: item.ExternalID})
 	}
 
