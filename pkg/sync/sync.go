@@ -24,19 +24,48 @@ type Syncer struct {
 	locks    map[string]*stdsync.Mutex
 }
 
-// NewSyncer creates a Syncer with the given provider, store, and optional logger.
-func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer {
-	if logger == nil {
-		logger = log.Default()
-	}
-
-	return &Syncer{
+// New constructs a Syncer for provider p writing to store, applying the given
+// options. Retry defaults to provider.DefaultRetryConfig and the logger defaults
+// to log.Default(); override either with WithRetry / WithLogger. This is the
+// preferred constructor; NewSyncer remains as a backwards-compatible wrapper.
+func New(p provider.Provider, store SyncStore, opts ...Option) *Syncer {
+	syncer := &Syncer{
 		provider: p,
 		store:    store,
-		logger:   logger,
+		logger:   log.Default(),
 		retry:    provider.DefaultRetryConfig,
 		locks:    make(map[string]*stdsync.Mutex),
 	}
+
+	for _, opt := range opts {
+		opt(syncer)
+	}
+
+	if syncer.logger == nil {
+		syncer.logger = log.Default()
+	}
+
+	return syncer
+}
+
+// Option configures a Syncer built with New.
+type Option func(*Syncer)
+
+// WithRetry sets the retry configuration applied to transient fetch errors.
+// Use this to tune MaxRetries / backoff per deployment (e.g. a rate-limited
+// mirror vs a LAN source).
+func WithRetry(cfg provider.RetryConfig) Option {
+	return func(s *Syncer) { s.retry = cfg }
+}
+
+// WithLogger sets the structured logger. A nil logger falls back to log.Default().
+func WithLogger(l *log.Logger) Option {
+	return func(s *Syncer) { s.logger = l }
+}
+
+// NewSyncer creates a Syncer with the given provider, store, and optional logger.
+func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer {
+	return New(p, store, WithLogger(logger))
 }
 
 func (s *Syncer) Store() SyncStore { //nolint:ireturn

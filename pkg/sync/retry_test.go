@@ -108,3 +108,22 @@ func TestRegression_Sync_DoesNotRetryPermanentError(t *testing.T) {
 		t.Errorf("permanent error must not be retried, got %d calls", p.calls)
 	}
 }
+
+// TestNew_WithRetry verifies the WithRetry option overrides the default retry
+// config, so consumers can tune backoff per deployment via the public New.
+func TestNew_WithRetry(t *testing.T) {
+	t.Parallel()
+
+	cfg := provider.RetryConfig{
+		Enabled:        false,
+		MaxRetries:     7,
+		InitialBackoff: 250 * time.Millisecond,
+		MaxBackoff:     2 * time.Second,
+	}
+
+	syncer := New(&testutil.MockProvider{}, &mockSyncStore{}, WithRetry(cfg))
+
+	if syncer.retry != cfg {
+		t.Errorf("WithRetry did not apply config: got %+v, want %+v", syncer.retry, cfg)
+	}
+}
