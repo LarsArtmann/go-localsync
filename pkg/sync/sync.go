@@ -76,6 +76,14 @@ func (s *Syncer) Store() SyncStore { //nolint:ireturn
 // same source. It prevents a TOCTOU race where two syncs read the "latest item"
 // timestamp concurrently and both process overlapping windows. Different
 // sources run in parallel.
+//
+// Entries persist for the lifetime of the Syncer (one *sync.Mutex per source).
+// This is a bounded cache, not a leak: the source set is the set of
+// provider/user identifiers the consumer mirrors, which is finite and small in
+// this SDK's pull-mirror domain. Deleting entries on release would be unsafe —
+// a finishing goroutine removing the entry while another holds the old mutex
+// reference would let a fresh goroutine create a second mutex and break the
+// serialization invariant. So we keep them.
 func (s *Syncer) lockSource(source string) func() {
 	s.sourceMu.Lock()
 
