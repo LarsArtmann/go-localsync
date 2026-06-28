@@ -77,7 +77,7 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 	testutil.AssertInt64(t, count, 1, "count")
 }
 
-func TestCQRSStack_DeleteItem(t *testing.T) {
+func TestCQRSStack_TombstoneItem(t *testing.T) {
 	t.Parallel()
 
 	stack := newMemoryStack(t)
@@ -91,14 +91,14 @@ func TestCQRSStack_DeleteItem(t *testing.T) {
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 1, "count")
 
-	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("123"), model.ReasonUpstreamGone))
 
 	count, err = stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 0, "count after delete")
+	testutil.AssertInt64(t, count, 0, "count after tombstone")
 }
 
-func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
+func TestCQRSStack_TombstoneThenResurrect(t *testing.T) {
 	t.Parallel()
 
 	stack := newMemoryStack(t)
@@ -107,10 +107,10 @@ func TestCQRSStack_DeleteThenResurrect(t *testing.T) {
 	ctx := context.Background()
 
 	syncTestItem(t, stack, ctx, "123", "PushEvent")
-	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("123")))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("123"), model.ReasonUpstreamGone))
 
 	count, _ := stack.Count(ctx, model.ItemFilter{})
-	testutil.AssertInt64(t, count, 0, "count after delete")
+	testutil.AssertInt64(t, count, 0, "count after tombstone")
 
 	syncTestItem(t, stack, ctx, "123", "IssueEvent")
 

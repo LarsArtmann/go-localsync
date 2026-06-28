@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/larsartmann/go-cqrs-lite/codec/v3"
 	"github.com/larsartmann/go-cqrs-lite/decider/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
@@ -13,28 +14,32 @@ import (
 )
 
 // SyncItemState is the aggregate state for a single sync item, reconstructed from events.
-// It wraps a *model.Item (nil when no events applied) plus a Deleted flag.
+// Item is nil before the first sync. A tombstone is carried on Item.Tombstone rather
+// than a separate flag, so the item's history is always preserved.
 type SyncItemState struct {
-	Item    *model.Item
-	Deleted bool
+	Item *model.Item
 }
 
 // InitialState is the zero state for a new SyncItem aggregate.
 //
 //nolint:gochecknoglobals // immutable zero-value sentinel, not mutable global state
-var InitialState = SyncItemState{
-	Item:    nil,
-	Deleted: false,
-}
+var InitialState = SyncItemState{Item: nil}
 
 // IsNew returns true if no events have been applied (Item is nil).
 func (s SyncItemState) IsNew() bool {
 	return s.Item == nil
 }
 
-// SkipDecision returns true if the state is deleted or new (no prior state to compare).
-func (s SyncItemState) SkipDecision() bool {
-	return s.Deleted || s.IsNew()
+// IsTombstoned reports whether the aggregate is currently hidden from the default view.
+func (s SyncItemState) IsTombstoned() bool {
+	return s.Item != nil && s.Item.IsTombstoned()
+}
+
+// ShouldResurrect reports whether an incoming sync should overwrite the current
+// state without a change comparison: a brand-new aggregate, or a tombstoned one
+// whose upstream version has reappeared (making it live again).
+func (s SyncItemState) ShouldResurrect() bool {
+	return s.IsNew() || s.IsTombstoned()
 }
 
 // fold applies a single event to the SyncItemState, returning the new state.
@@ -44,17 +49,14 @@ func fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 		return foldItemSynced(evt)
 	case EventItemConflictFound:
 		return state, nil
-	case EventItemDeleted:
-		state.Deleted = true
-		state.Item = nil
-
-		return state, nil
+	case EventItemTombstoned:
+		return foldItemTombstoned(state, evt)
 	default:
 		//nolint:err113 // dynamic error for unknown event type
 		return state, fmt.Errorf(
-			"fold: unknown event type %q in state{deleted=%v}",
+			"fold: unknown event type %q in state{tombstoned=%v}",
 			evt.Type(),
-			state.Deleted,
+			state.IsTombstoned(),
 		)
 	}
 }
@@ -65,7 +67,30 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 		return SyncItemState{}, err
 	}
 
-	return SyncItemState{Item: item, Deleted: false}, nil
+	return SyncItemState{Item: item}, nil
+}
+
+// foldItemTombstoned marks the aggregate's current item as tombstoned. The item
+// is kept (not nilled) so its history survives and a later sync can resurrect it.
+func foldItemTombstoned(state SyncItemState, evt event.Event) (SyncItemState, error) {
+	payload, err := event.DecodePayload[ItemTombstonedPayload](evt, codec.JSONCodec{})
+	if err != nil {
+		return SyncItemState{}, fmt.Errorf("decode ItemTombstonedPayload for event %s: %w", evt.ID(), err)
+	}
+
+	if state.Item == nil {
+		// Defensive: a tombstone with no prior live item is a no-op.
+		return state, nil
+	}
+
+	tombstoned := *state.Item
+	tombstoned.Tombstone = model.Tombstone{
+		Reason: model.ParseTombstoneReason(payload.Reason),
+		At:     fromUnixNano(payload.TombstonedAt),
+	}
+	state.Item = &tombstoned
+
+	return state, nil
 }
 
 // decideSync returns a decider.DecideFunc that syncs an incoming model.Item.
@@ -80,7 +105,7 @@ func decideSync(
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
-		if state.SkipDecision() {
+		if state.ShouldResurrect() {
 			return syncEvents(item, rawJSON, aggID, currentVersion, nil, opts...)
 		}
 
@@ -98,12 +123,14 @@ func decideSync(
 	}
 }
 
-// decideDelete returns a decider.DecideFunc that marks an item as deleted.
-func decideDelete(
-	source string, sourceID id.ExternalID,
+// decideTombstone returns a decider.DecideFunc that hides an item by emitting an
+// EventItemTombstoned with the given reason. It is a no-op for a brand-new
+// aggregate (nothing to hide) and idempotent for an already-tombstoned item.
+func decideTombstone(
+	source string, sourceID id.ExternalID, reason model.TombstoneReason,
 ) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
-		if state.SkipDecision() {
+		if state.IsNew() || state.IsTombstoned() {
 			return nil, nil
 		}
 
@@ -111,15 +138,17 @@ func decideDelete(
 
 		evts, err := event.NewEvents(
 			aggID, aggregateType, currentVersion,
-			[]event.Type{EventItemDeleted},
-			[]any{ItemDeletedPayload{
-				Source:   source,
-				SourceID: sourceID.Get(),
+			[]event.Type{EventItemTombstoned},
+			[]any{ItemTombstonedPayload{
+				Source:       source,
+				SourceID:     sourceID.Get(),
+				Reason:       string(reason),
+				TombstonedAt: unixNano(time.Now().UTC()),
 			}},
 		)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"create delete event for %s/%s (version=%d): %w",
+				"create tombstone event for %s/%s (version=%d): %w",
 				aggID,
 				sourceID,
 				currentVersion,

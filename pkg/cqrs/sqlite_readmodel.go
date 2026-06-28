@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -22,6 +23,9 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	repo_url TEXT NOT NULL DEFAULT '',
 	created_at DATETIME NOT NULL,
 	updated_at DATETIME NOT NULL,
+	tombstoned INTEGER NOT NULL DEFAULT 0,
+	tombstone_reason TEXT NOT NULL DEFAULT '',
+	tombstoned_at DATETIME,
 	PRIMARY KEY (source, source_id)
 )`
 
@@ -31,6 +35,31 @@ CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DE
 CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login);
 CREATE INDEX IF NOT EXISTS idx_sync_items_repo_name ON sync_items(repo_name);
 CREATE INDEX IF NOT EXISTS idx_sync_items_type_created ON sync_items(type, created_at DESC)`
+
+// syncItemsMigrations adds tombstone columns to databases created before they
+// existed. SQLite lacks IF NOT EXISTS for ADD COLUMN, so duplicate-column errors
+// (already-migrated DBs) are tolerated.
+const syncItemsMigrations = `
+ALTER TABLE sync_items ADD COLUMN tombstoned INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE sync_items ADD COLUMN tombstone_reason TEXT NOT NULL DEFAULT '';
+ALTER TABLE sync_items ADD COLUMN tombstoned_at DATETIME;`
+
+func migrateSyncItems(ctx context.Context, db *sql.DB) error {
+	for stmt := range strings.SplitSeq(syncItemsMigrations, ";") {
+		stmt = strings.TrimSpace(stmt)
+		if stmt == "" {
+			continue
+		}
+
+		if _, err := db.ExecContext(ctx, stmt); err != nil {
+			if !strings.Contains(err.Error(), "duplicate column name") {
+				return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("migrate sync_items: %v", err))
+			}
+		}
+	}
+
+	return nil
+}
 
 // SQLiteReadModel is a SQLite-backed implementation of ReadModel.
 type SQLiteReadModel struct {
@@ -51,6 +80,10 @@ func newSQLiteReadModel(ctx context.Context, db *sql.DB) (*SQLiteReadModel, erro
 		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items indexes: %v", err))
 	}
 
+	if err := migrateSyncItems(ctx, db); err != nil {
+		return nil, err
+	}
+
 	return &SQLiteReadModel{db: db}, nil
 }
 
@@ -59,7 +92,7 @@ func (m *SQLiteReadModel) Get(
 	source string,
 	sourceID id.ExternalID,
 ) (*model.Item, error) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at
 		FROM sync_items WHERE source = ? AND source_id = ?`
 
 	row := m.db.QueryRowContext(ctx, query, source, sourceID.Get())
@@ -137,7 +170,7 @@ func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilt
 }
 
 func (m *SQLiteReadModel) GetTypes(ctx context.Context) ([]string, error) {
-	query := "SELECT DISTINCT type FROM sync_items ORDER BY type"
+	query := "SELECT DISTINCT type FROM sync_items WHERE tombstoned = 0 ORDER BY type"
 
 	rows, err := m.db.QueryContext(ctx, query)
 	if err != nil {
@@ -172,9 +205,11 @@ func (m *SQLiteReadModel) GetTypes(ctx context.Context) ([]string, error) {
 }
 
 func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
+	// Tombstone columns reset to defaults on upsert: a sync event always writes a
+	// live item, so re-syncing a previously-tombstoned item resurrects it.
 	query := `INSERT OR REPLACE INTO sync_items
-		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '', NULL)`
 
 	_, err := m.db.ExecContext(
 		ctx, query,
@@ -189,19 +224,27 @@ func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 	return nil
 }
 
-func (m *SQLiteReadModel) Delete(
+func (m *SQLiteReadModel) Tombstone(
 	ctx context.Context,
 	source string,
 	sourceID id.ExternalID,
+	tombstone model.Tombstone,
 ) error {
+	var at any
+	if !tombstone.At.IsZero() {
+		at = tombstone.At
+	}
+
 	_, err := m.db.ExecContext(
 		ctx,
-		"DELETE FROM sync_items WHERE source = ? AND source_id = ?",
+		"UPDATE sync_items SET tombstoned = 1, tombstone_reason = ?, tombstoned_at = ? WHERE source = ? AND source_id = ?",
+		string(tombstone.Reason),
+		at,
 		source,
 		sourceID.Get(),
 	)
 	if err != nil {
-		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("delete item %s/%s: %v", source, sourceID, err))
+		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("tombstone item %s/%s: %v", source, sourceID, err))
 	}
 
 	return nil

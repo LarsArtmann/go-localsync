@@ -15,6 +15,9 @@ type ItemFilter struct {
 	Since      *time.Time
 	Limit      int
 	Offset     int
+	// IncludeTombstoned, when true, returns tombstoned (hidden) items too.
+	// The zero value (false) excludes them — the safe default for a live view.
+	IncludeTombstoned bool
 }
 
 // WithType returns a copy of f with Type set.
@@ -62,6 +65,13 @@ func (f ItemFilter) WithLimit(n int) ItemFilter {
 // WithOffset returns a copy of f with Offset set.
 func (f ItemFilter) WithOffset(n int) ItemFilter {
 	f.Offset = n
+
+	return f
+}
+
+// WithIncludeTombstoned returns a copy of f with IncludeTombstoned set.
+func (f ItemFilter) WithIncludeTombstoned(include bool) ItemFilter {
+	f.IncludeTombstoned = include
 
 	return f
 }

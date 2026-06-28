@@ -7,6 +7,7 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/codec/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -31,7 +32,7 @@ func (p *Projector) Name() string {
 
 // EventTypes returns the event types this projector handles.
 func (p *Projector) EventTypes() []event.Type {
-	return []event.Type{EventItemSynced, EventItemDeleted, EventItemConflictFound}
+	return []event.Type{EventItemSynced, EventItemTombstoned, EventItemConflictFound}
 }
 
 // Handle processes a single event, updating the read model.
@@ -42,7 +43,10 @@ func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
 	aggID := evt.AggregateID().String()
 	version := evt.Version()
 
-	if last, ok := p.lastVersions.Load(aggID); ok && version <= last.(event.Version) {
+	if last, ok := p.lastVersions.Load(
+		aggID,
+	); ok &&
+		version <= last.(event.Version) { //nolint:forcetypeassert // stored value is always event.Version
 		return nil
 	}
 
@@ -51,8 +55,8 @@ func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
 		if err := p.handleItemSynced(ctx, evt); err != nil {
 			return err
 		}
-	case EventItemDeleted:
-		if err := p.handleItemDeleted(ctx, evt); err != nil {
+	case EventItemTombstoned:
+		if err := p.handleItemTombstoned(ctx, evt); err != nil {
 			return err
 		}
 	case EventItemConflictFound:
@@ -73,13 +77,18 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 	return p.readModel.Upsert(ctx, item)
 }
 
-func (p *Projector) handleItemDeleted(ctx context.Context, evt event.Event) error {
-	payload, err := event.DecodePayload[ItemDeletedPayload](evt, codec.JSONCodec{})
+func (p *Projector) handleItemTombstoned(ctx context.Context, evt event.Event) error {
+	payload, err := event.DecodePayload[ItemTombstonedPayload](evt, codec.JSONCodec{})
 	if err != nil {
-		return fmt.Errorf("decode ItemDeletedPayload for event %s: %w", evt.ID(), err)
+		return fmt.Errorf("decode ItemTombstonedPayload for event %s: %w", evt.ID(), err)
 	}
 
-	return p.readModel.Delete(ctx, payload.Source, id.NewExternalID(payload.SourceID))
+	tombstone := model.Tombstone{
+		Reason: model.ParseTombstoneReason(payload.Reason),
+		At:     fromUnixNano(payload.TombstonedAt),
+	}
+
+	return p.readModel.Tombstone(ctx, payload.Source, id.NewExternalID(payload.SourceID), tombstone)
 }
 
 var _ event.Projection = (*Projector)(nil)

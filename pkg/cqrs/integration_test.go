@@ -116,7 +116,7 @@ func TestIntegration_DeleteAndResurrect(t *testing.T) {
 	stack.SyncItems(ctx, []*provider.Item{item})
 	waitForCount(t, stack, ctx, 1)
 
-	err := stack.DeleteItem(ctx, "github", id.NewExternalID("1"))
+	err := stack.TombstoneItem(ctx, "github", id.NewExternalID("1"), model.ReasonUpstreamGone)
 	testutil.MustNoError(t, err)
 	waitForCount(t, stack, ctx, 0)
 

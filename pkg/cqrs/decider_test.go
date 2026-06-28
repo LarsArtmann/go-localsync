@@ -50,8 +50,8 @@ func TestFold_ItemSynced(t *testing.T) {
 	testutil.AssertEqual(t, state.Item.Source.Get(), "github", "Source")
 	testutil.AssertExternalID(t, state.Item, "123")
 	testutil.AssertType(t, state.Item, "PushEvent")
-	if state.Deleted {
-		t.Error("expected Deleted=false")
+	if state.IsTombstoned() {
+		t.Error("expected not tombstoned")
 	}
 }
 
@@ -99,21 +99,31 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	}
 }
 
-func TestFold_ItemDeleted(t *testing.T) {
+func TestFold_ItemTombstoned(t *testing.T) {
 	t.Parallel()
 
 	existing := testActiveState("123", "")
 
-	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
+	evt := mustNewTestEvent(EventItemTombstoned, ItemTombstonedPayload{
+		Source:       "github",
+		SourceID:     "123",
+		Reason:       string(model.ReasonUpstreamGone),
+		TombstonedAt: time.Now().UnixNano(),
+	})
 
 	state, err := fold(existing, evt)
 	testutil.MustNoError(t, err)
 
-	if !state.Deleted {
-		t.Error("expected Deleted=true")
+	if !state.IsTombstoned() {
+		t.Fatal("expected tombstoned state")
 	}
-	if state.Item != nil {
-		t.Error("deleted state should not hold stale item reference")
+
+	if state.Item == nil {
+		t.Fatal("tombstoned state must keep the item for history")
+	}
+
+	if state.Item.Tombstone.Reason != model.ReasonUpstreamGone {
+		t.Errorf("expected reason upstream_gone, got %s", state.Item.Tombstone.Reason)
 	}
 }
 
@@ -225,12 +235,12 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 	}
 }
 
-func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
+func TestDecideSync_ResurrectTombstonedItem(t *testing.T) {
 	t.Parallel()
 
 	item := testDataItem("123", "PushEvent")
 
-	state := testDeletedState("123")
+	state := testTombstonedState("123")
 
 	events, err := decideSync(item, nil, nil)(state, 2)
 	testutil.MustNoError(t, err)
@@ -238,33 +248,33 @@ func TestDecideSync_ResurrectDeletedItem(t *testing.T) {
 	assertEventType(t, events[0], EventItemSynced)
 }
 
-func TestDecideDelete_ActiveItem(t *testing.T) {
+func TestDecideTombstone_ActiveItem(t *testing.T) {
 	t.Parallel()
 
 	state := testActiveState("123", "")
 
-	events, err := decideDelete("github", id.NewExternalID("123"))(state, 1)
+	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone)(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
-	assertEventType(t, events[0], EventItemDeleted)
+	assertEventType(t, events[0], EventItemTombstoned)
 }
 
-func TestDecideDelete_AlreadyDeleted(t *testing.T) {
+func TestDecideTombstone_AlreadyTombstoned(t *testing.T) {
 	t.Parallel()
 
-	state := testDeletedState("123")
+	state := testTombstonedState("123")
 
-	events, err := decideDelete("github", id.NewExternalID("123"))(state, 1)
+	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone)(state, 1)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
 	}
 }
 
-func TestDecideDelete_NewItem(t *testing.T) {
+func TestDecideTombstone_NewItem(t *testing.T) {
 	t.Parallel()
 
-	events, err := decideDelete("github", id.NewExternalID("123"))(InitialState, 0)
+	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone)(InitialState, 0)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))

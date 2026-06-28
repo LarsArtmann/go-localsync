@@ -1,33 +1,38 @@
+// Package crdt holds the conflict-resolution strategy for the sync pipeline.
+//
+// Despite the historical name, this package carries no CRDT or vector clock
+// machinery: go-localsync is a single-writer pull mirror, so there is no second
+// writer and no causal ordering to track. What remains is the genuinely used
+// conflict surface: [Conflict], [ConflictResolver], and the timestamp-based
+// [LWWResolver].
 package crdt
 
-import (
-	"encoding/json"
-	"time"
-)
+import "time"
 
-// Conflict represents a synchronization conflict between local and remote versions.
-// Type parameter T is the entity type being synced.
+// Conflict represents a synchronization conflict between a local and a remote
+// version of an entity. T is the entity type being synced (e.g. *model.Item).
+//
+// Resolution needs no causal metadata here: the provider is the sole writer per
+// aggregate, so the only question is which version to keep, decided by a
+// ConflictResolver (timestamp-based by default).
 type Conflict[T any] struct {
-	Local     T           `json:"local"`
-	Remote    T           `json:"remote"`
-	LocalVC   VectorClock `json:"localVc"`
-	RemoteVC  VectorClock `json:"remoteVc"`
-	Timestamp time.Time   `json:"timestamp"`
+	Local     T         `json:"local"`
+	Remote    T         `json:"remote"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
-// ConflictResolver determines the winner when sync conflicts occur.
-// Implementations can use different strategies: LWW, custom merge, CRDT, etc.
+// ConflictResolver determines the winner when a sync conflict occurs.
+// Implementations choose a strategy: last-write-wins, custom merge, etc.
 type ConflictResolver[T any] interface {
-	// Resolve determines the winning value for a conflict.
+	// Resolve returns the winning value for the conflict.
 	Resolve(conflict *Conflict[T]) (T, error)
 }
 
-// LWWResolver resolves conflicts using Last-Write-Wins strategy.
-// It compares vector clocks first (causal ordering), then falls back to timestamps.
-// If timestamps are equal, the tiebreaker function breaks the tie.
+// LWWResolver resolves conflicts with Last-Write-Wins: the entity whose
+// timestamp (extracted via TimestampFunc) is newer wins. Ties fall back to the
+// remote side, or to Tiebreaker when set.
 //
-// Type parameter T is the entity type. The TimestampFunc extracts the timestamp
-// used for LWW comparison from an entity.
+// T is the entity type. TimestampFunc extracts the comparison timestamp.
 type LWWResolver[T any] struct {
 	// TimestampFunc extracts the comparison timestamp from an entity.
 	TimestampFunc func(T) time.Time
@@ -36,8 +41,8 @@ type LWWResolver[T any] struct {
 	Tiebreaker func(local, remote T) bool
 }
 
-// NewLWWResolver creates a Last-Write-Wins resolver with the given timestamp extractor.
-// Returns ErrNilTimestampFunc if timestampFunc is nil.
+// NewLWWResolver creates a Last-Write-Wins resolver with the given timestamp
+// extractor. Returns ErrNilTimestampFunc if timestampFunc is nil.
 func NewLWWResolver[T any](timestampFunc func(T) time.Time) (*LWWResolver[T], error) {
 	if timestampFunc == nil {
 		return nil, ErrNilTimestampFunc
@@ -49,97 +54,23 @@ func NewLWWResolver[T any](timestampFunc func(T) time.Time) (*LWWResolver[T], er
 	}, nil
 }
 
-// Resolve implements ConflictResolver using vector clock comparison with LWW fallback.
+// Resolve implements ConflictResolver by comparing timestamps. The newer side
+// wins; on a tie the Tiebreaker decides (defaulting to remote).
 func (r *LWWResolver[T]) Resolve(conflict *Conflict[T]) (T, error) {
-	comparison := conflict.LocalVC.Cmp(conflict.RemoteVC)
+	localTime := r.TimestampFunc(conflict.Local)
+	remoteTime := r.TimestampFunc(conflict.Remote)
 
-	switch comparison {
-	case OrderBefore:
-		return conflict.Remote, nil
-	case OrderAfter:
+	if localTime.After(remoteTime) {
 		return conflict.Local, nil
-	case OrderConcurrent, OrderEqual:
-		localTime := r.TimestampFunc(conflict.Local)
-		remoteTime := r.TimestampFunc(conflict.Remote)
+	}
 
-		if localTime.After(remoteTime) {
-			return conflict.Local, nil
-		}
-
-		if remoteTime.After(localTime) {
-			return conflict.Remote, nil
-		}
-
-		if r.Tiebreaker != nil && r.Tiebreaker(conflict.Local, conflict.Remote) {
-			return conflict.Local, nil
-		}
-
-		return conflict.Remote, nil
-	default:
+	if remoteTime.After(localTime) {
 		return conflict.Remote, nil
 	}
-}
 
-// MergeResult represents the outcome of a CRDT merge.
-type MergeResult int
-
-const (
-	// MergeResultLocalWins means the local version was chosen.
-	MergeResultLocalWins MergeResult = iota
-	// MergeResultRemoteWins means the remote version was chosen.
-	MergeResultRemoteWins
-	// MergeResultMerged means a merged version was created.
-	MergeResultMerged
-	// MergeResultConflict means the conflict could not be auto-resolved.
-	MergeResultConflict
-)
-
-// String returns a human-readable name for the merge result.
-func (r MergeResult) String() string {
-	switch r {
-	case MergeResultLocalWins:
-		return "local_wins"
-	case MergeResultRemoteWins:
-		return "remote_wins"
-	case MergeResultMerged:
-		return "merged"
-	case MergeResultConflict:
-		return "conflict"
-	default:
-		return clockOrderUnknown
+	if r.Tiebreaker != nil && r.Tiebreaker(conflict.Local, conflict.Remote) {
+		return conflict.Local, nil
 	}
-}
 
-// SyncMessage is the envelope for sync protocol messages.
-type SyncMessage struct {
-	Type    SyncMessageType `json:"type"`
-	Payload json.RawMessage `json:"payload"`
-}
-
-// SyncContext contains shared fields for sync request and response.
-type SyncContext struct {
-	NodeID NodeID      `json:"nodeId"`
-	Clock  VectorClock `json:"clock"`
-}
-
-// NewSyncContext creates a new SyncContext with the given node ID and clock.
-func NewSyncContext(nodeID NodeID, clock VectorClock) SyncContext {
-	return SyncContext{
-		NodeID: nodeID,
-		Clock:  clock,
-	}
-}
-
-// SyncRequest requests sync from a peer.
-type SyncRequest struct {
-	SyncContext
-
-	Since time.Time `json:"since"`
-}
-
-// SyncResponse contains operations from a peer.
-type SyncResponse[T any] struct {
-	SyncContext
-
-	Operations []*Operation[T] `json:"operations"`
+	return conflict.Remote, nil
 }

@@ -31,7 +31,7 @@ func TestCQRSStack_SQLiteBackend_SyncAndDelete(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 2)
 
-	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("1")))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("1"), model.ReasonUpstreamGone))
 
 	waitForCount(t, stack, ctx, 1)
 }

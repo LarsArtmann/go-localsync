@@ -76,6 +76,8 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 			s.syncer.logger.Debug("Resolved conflict: local wins", "sourceID", r.SourceID)
 		case ActionUnchanged:
 			cr.Skipped++
+		case ActionTombstoned:
+			// Never produced by SyncItems; reconciliation tombstones outside this path.
 		case ActionError:
 			cr.Errors++
 

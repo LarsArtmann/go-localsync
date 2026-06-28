@@ -24,16 +24,19 @@ func TestCommandDispatcher_SyncItem_ThroughDispatcher(t *testing.T) {
 	}
 }
 
-func TestCommandDispatcher_DeleteItem_ThroughDispatcher(t *testing.T) {
+func TestCommandDispatcher_TombstoneItem_ThroughDispatcher(t *testing.T) {
 	stack, ctx := setupMemoryStack(t)
 
 	syncTestItem(t, stack, ctx, "dispatch-2", "PushEvent")
-	testutil.MustNoError(t, stack.DeleteItem(ctx, "github", id.NewExternalID("dispatch-2")))
+	testutil.MustNoError(
+		t,
+		stack.TombstoneItem(ctx, "github", id.NewExternalID("dispatch-2"), model.ReasonUpstreamGone),
+	)
 
 	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	if count != 0 {
-		t.Errorf("expected count=0 after DeleteItem through dispatcher, got %d", count)
+		t.Errorf("expected count=0 after TombstoneItem through dispatcher, got %d", count)
 	}
 }
 

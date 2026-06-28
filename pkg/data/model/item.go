@@ -24,6 +24,7 @@ type Item struct {
 	RepoName       id.RepoID
 	RepoURL        string
 	ContentHash    string
+	Tombstone      Tombstone
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	SchemaVersion  schema.Version
@@ -39,6 +40,11 @@ func (item Item) Key() Key {
 // IsZero reports whether the item is the zero value.
 func (item Item) IsZero() bool {
 	return item.ExternalID.IsZero() && item.Source.IsZero()
+}
+
+// IsTombstoned reports whether the item is hidden from the default read model.
+func (item Item) IsTombstoned() bool {
+	return !item.Tombstone.IsZero()
 }
 
 // ItemReader is the read-side contract for any storage backend that can

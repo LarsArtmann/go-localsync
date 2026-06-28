@@ -78,6 +78,10 @@ func (m *mockSyncStore) GetTypes(_ context.Context) ([]string, error) {
 
 func (m *mockSyncStore) Close() error { return nil }
 
+func (m *mockSyncStore) Reconcile(_ context.Context, _ string, _ []model.Key) (int, error) {
+	return 0, nil
+}
+
 func testItem(itemID, eventType string) *model.Item {
 	now := time.Now()
 

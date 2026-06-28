@@ -150,19 +150,64 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	})
 }
 
-// DeleteItem dispatches a DeleteItemCommand for the given source/externalID.
-func (s *CQRSStack) DeleteItem(
+// TombstoneItem dispatches a TombstoneItemCommand for the given source/externalID
+// and reason, hiding the item from the default read model while preserving its
+// history. A later sync resurrects it automatically.
+func (s *CQRSStack) TombstoneItem(
 	ctx context.Context,
 	source string,
 	sourceID id.ExternalID,
+	reason model.TombstoneReason,
 ) error {
 	aggID := AggregateID(source, sourceID)
 
-	return s.CommandDispatcher.Dispatch(ctx, &DeleteItemCommand{
-		BasicCommand: mustNewCommand(commandTypeDeleteItem, aggID),
+	return s.CommandDispatcher.Dispatch(ctx, &TombstoneItemCommand{
+		BasicCommand: mustNewCommand(commandTypeTombstone, aggID),
 		Source:       source,
 		SourceID:     sourceID,
+		Reason:       reason,
 	})
+}
+
+// Reconcile tombstones live items for source that are absent from seen,
+// detecting upstream deletions. It returns the number of items tombstoned.
+//
+// Only call this after a COMPLETE fetch (every item the provider currently
+// holds), since any live item not present in seen is assumed gone upstream and
+// will be tombstoned with ReasonUpstreamGone.
+func (s *CQRSStack) Reconcile(ctx context.Context, source string, seen []model.Key) (int, error) {
+	src := id.NewProviderID(source)
+
+	live, err := s.List(ctx, model.ItemFilter{Source: &src})
+	if err != nil {
+		return 0, fmt.Errorf("reconcile: list live items for %s: %w", source, err)
+	}
+
+	seenSet := make(map[string]struct{}, len(seen))
+
+	for _, k := range seen {
+		seenSet[itemKey(k.Source.Get(), k.ExternalID)] = struct{}{}
+	}
+
+	var tombstoned int
+
+	for _, item := range live {
+		if ctx.Err() != nil {
+			return tombstoned, ctx.Err()
+		}
+
+		if _, ok := seenSet[itemKey(item.Source.Get(), item.ExternalID)]; ok {
+			continue
+		}
+
+		if err := s.TombstoneItem(ctx, source, item.ExternalID, model.ReasonUpstreamGone); err != nil {
+			return tombstoned, fmt.Errorf("reconcile: tombstone %s/%s: %w", source, item.ExternalID, err)
+		}
+
+		tombstoned++
+	}
+
+	return tombstoned, nil
 }
 
 // SyncItems syncs a batch of items, returning a summary with per-item results.
@@ -226,7 +271,7 @@ func (s *CQRSStack) SyncItems(
 			if result.Action == synclib.ActionConflictRemote || result.Action == synclib.ActionConflictLocal {
 				summary.Conflicts++
 			}
-		case synclib.ActionUnchanged:
+		case synclib.ActionUnchanged, synclib.ActionTombstoned:
 		}
 
 		summary.Results = append(summary.Results, result)

@@ -1660,10 +1660,10 @@ func downgradeSpec(input any) {
 			}
 
 			if k == "contentEncoding" || k == "contentMediaType" {
-				m["x-" + k] = m[k]
+				m["x-"+k] = m[k]
 				delete(m, k)
 			}
-			
+
 			downgradeSpec(v)
 		}
 	case []any:

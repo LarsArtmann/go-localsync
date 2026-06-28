@@ -10,12 +10,14 @@ import (
 const aggregateType event.AggregateType = "sync_item"
 
 const (
-	// EventItemSynced is emitted when an item is created or updated.
+	// EventItemSynced is emitted when an item is created or updated. Folding it
+	// always yields a live item, so re-syncing a tombstoned item resurrects it.
 	EventItemSynced event.Type = "sync_item.synced"
 	// EventItemConflictFound is emitted when a conflict is detected (remote wins).
 	EventItemConflictFound event.Type = "sync_item.conflict_found"
-	// EventItemDeleted is emitted when an item is soft-deleted.
-	EventItemDeleted event.Type = "sync_item.deleted"
+	// EventItemTombstoned is emitted when an item is hidden from the default read
+	// model. The row is kept (history preserved); a later EventItemSynced resurrects.
+	EventItemTombstoned event.Type = "sync_item.tombstoned"
 )
 
 // ItemSyncedPayload is the event payload for ItemSynced events.
@@ -44,10 +46,12 @@ type ItemConflictFoundPayload struct {
 	Winner          string `json:"winner"`
 }
 
-// ItemDeletedPayload is the event payload for ItemDeleted events.
-type ItemDeletedPayload struct {
-	Source   string `json:"source"`
-	SourceID string `json:"sourceId"`
+// ItemTombstonedPayload is the event payload for ItemTombstoned events.
+type ItemTombstonedPayload struct {
+	Source       string `json:"source"`
+	SourceID     string `json:"sourceId"`
+	Reason       string `json:"reason"`
+	TombstonedAt int64  `json:"tombstonedAt"`
 }
 
 func unixNano(t time.Time) int64 {

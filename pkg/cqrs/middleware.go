@@ -25,10 +25,17 @@ func commandValidationMiddleware() command.Middleware {
 						errValidationFailed,
 					)
 				}
-			case *DeleteItemCommand:
+			case *TombstoneItemCommand:
 				if cmdTyped.Source == "" {
 					return fmt.Errorf(
-						"delete item command: source is empty: %w",
+						"tombstone item command: source is empty: %w",
+						errValidationFailed,
+					)
+				}
+
+				if cmdTyped.Reason == "" {
+					return fmt.Errorf(
+						"tombstone item command: reason is empty: %w",
 						errValidationFailed,
 					)
 				}

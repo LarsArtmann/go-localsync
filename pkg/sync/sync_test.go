@@ -18,11 +18,15 @@ import (
 type mockSyncStore struct {
 	testutil.SyncStoreListBehavior
 
-	synced    []*provider.Item
-	actions   []SyncAction
-	actionIdx int
-	countErr  error
-	closeErr  error
+	synced          []*provider.Item
+	actions         []SyncAction
+	actionIdx       int
+	countErr        error
+	closeErr        error
+	reconcileCalled bool
+	reconcileSeen   []model.Key
+	reconcileResult int
+	reconcileErr    error
 }
 
 func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
@@ -48,7 +52,7 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 			summary.Synced++
 		case ActionError:
 			summary.Errors++
-		case ActionUnchanged:
+		case ActionUnchanged, ActionTombstoned:
 		}
 	}
 
@@ -94,6 +98,17 @@ func (m *mockSyncStore) GetTypes(_ context.Context) ([]string, error) {
 }
 
 func (m *mockSyncStore) Close() error { return m.closeErr }
+
+func (m *mockSyncStore) Reconcile(_ context.Context, _ string, seen []model.Key) (int, error) {
+	m.reconcileCalled = true
+	m.reconcileSeen = seen
+
+	if m.reconcileErr != nil {
+		return 0, m.reconcileErr
+	}
+
+	return m.reconcileResult, nil
+}
 
 func testSyncOpts() *SyncOptions {
 	return &SyncOptions{Source: "testuser", MaxPages: 10}

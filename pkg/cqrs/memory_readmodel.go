@@ -119,15 +119,25 @@ func (m *MemoryReadModel) Upsert(_ context.Context, item *model.Item) error {
 	return nil
 }
 
-func (m *MemoryReadModel) Delete(
+func (m *MemoryReadModel) Tombstone(
 	_ context.Context,
 	source string,
 	sourceID id.ExternalID,
+	tombstone model.Tombstone,
 ) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	delete(m.items, itemKey(source, sourceID))
+	key := itemKey(source, sourceID)
+
+	item, ok := m.items[key]
+	if !ok {
+		return nil // idempotent: nothing to tombstone
+	}
+
+	tombstoned := *item
+	tombstoned.Tombstone = tombstone
+	m.items[key] = &tombstoned
 
 	return nil
 }
@@ -143,6 +153,10 @@ func (m *MemoryReadModel) Len() int {
 }
 
 func matchesFilter(item *model.Item, filter model.ItemFilter) bool {
+	if !filter.IncludeTombstoned && item.IsTombstoned() {
+		return false
+	}
+
 	if filter.Type != nil && item.Type.Get() != filter.Type.Get() {
 		return false
 	}

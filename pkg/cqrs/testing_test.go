@@ -109,10 +109,12 @@ func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) Syn
 	}
 }
 
-func testDeletedState(sourceID string) SyncItemState {
+func testTombstonedState(sourceID string) SyncItemState {
 	return SyncItemState{
-		Item:    &model.Item{ExternalID: id.NewExternalID(sourceID)},
-		Deleted: true,
+		Item: &model.Item{
+			ExternalID: id.NewExternalID(sourceID),
+			Tombstone:  model.NewTombstone(model.ReasonUpstreamGone),
+		},
 	}
 }
 

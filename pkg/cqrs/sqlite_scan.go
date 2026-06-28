@@ -11,14 +11,24 @@ import (
 
 type scannedItem struct {
 	itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
+	tombstoneReason                                                                       string
 	createdAt, updatedAt                                                                  time.Time
+	tombstoned                                                                            int
+	tombstonedAt                                                                          sql.NullTime
 }
 
-//nolint:exhaustruct // SchemaVersion not stored in read model schema
 func (si *scannedItem) toItem() (*model.Item, error) {
 	itemID, err := parseItemID(si.itemIDStr)
 	if err != nil {
 		return nil, fmt.Errorf("parse item ID from row: %w", err)
+	}
+
+	var tombstone model.Tombstone
+	if si.tombstoned != 0 {
+		tombstone = model.Tombstone{Reason: model.ParseTombstoneReason(si.tombstoneReason)}
+		if si.tombstonedAt.Valid {
+			tombstone.At = si.tombstonedAt.Time
+		}
 	}
 
 	return &model.Item{
@@ -30,6 +40,7 @@ func (si *scannedItem) toItem() (*model.Item, error) {
 		ActorAvatarURL: si.actorAvatarURL,
 		RepoName:       id.NewRepoID(si.repoName),
 		RepoURL:        si.repoURL,
+		Tombstone:      tombstone,
 		CreatedAt:      si.createdAt,
 		UpdatedAt:      si.updatedAt,
 	}, nil
@@ -37,16 +48,19 @@ func (si *scannedItem) toItem() (*model.Item, error) {
 
 func newScannedItem() *scannedItem {
 	return &scannedItem{
-		itemIDStr:      "",
-		source:         "",
-		sourceID:       "",
-		eventType:      "",
-		actorLogin:     "",
-		actorAvatarURL: "",
-		repoName:       "",
-		repoURL:        "",
-		createdAt:      time.Time{},
-		updatedAt:      time.Time{},
+		itemIDStr:       "",
+		source:          "",
+		sourceID:        "",
+		eventType:       "",
+		actorLogin:      "",
+		actorAvatarURL:  "",
+		repoName:        "",
+		repoURL:         "",
+		tombstoneReason: "",
+		createdAt:       time.Time{},
+		updatedAt:       time.Time{},
+		tombstoned:      0,
+		tombstonedAt:    sql.NullTime{},
 	}
 }
 
@@ -54,7 +68,8 @@ func scanItem(row *sql.Row) (*model.Item, error) {
 	si := newScannedItem()
 
 	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.actorLogin,
-		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt)
+		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt,
+		&si.tombstoned, &si.tombstoneReason, &si.tombstonedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -80,6 +95,9 @@ func scanItems(rows *sql.Rows) ([]*model.Item, error) {
 			&si.repoURL,
 			&si.createdAt,
 			&si.updatedAt,
+			&si.tombstoned,
+			&si.tombstoneReason,
+			&si.tombstonedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scan item: %w", err)

@@ -158,7 +158,7 @@ func TestSQLiteReadModel_GetTypes(t *testing.T) {
 	testutil.AssertLen(t, types, 2, "types")
 }
 
-func TestSQLiteReadModel_Delete(t *testing.T) {
+func TestSQLiteReadModel_Tombstone(t *testing.T) {
 	t.Parallel()
 
 	rm := newSQLiteTestDB(t)
@@ -166,11 +166,23 @@ func TestSQLiteReadModel_Delete(t *testing.T) {
 
 	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
 
-	testutil.MustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("1")))
+	testutil.MustNoError(
+		t,
+		rm.Tombstone(ctx, "github", id.NewExternalID("1"), model.NewTombstone(model.ReasonUpstreamGone)),
+	)
 
-	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
-	if got != nil {
-		t.Fatal("item should be nil after delete")
+	// Get returns the tombstoned item directly (key lookup, not the live view).
+	got, err := rm.Get(ctx, "github", id.NewExternalID("1"))
+	testutil.MustNoError(t, err)
+	if got == nil || !got.IsTombstoned() {
+		t.Fatal("expected tombstoned item")
+	}
+
+	// Default (live) view excludes the tombstoned item.
+	live, err := rm.Count(ctx, model.ItemFilter{})
+	testutil.MustNoError(t, err)
+	if live != 0 {
+		t.Errorf("expected live count=0, got %d", live)
 	}
 }
 

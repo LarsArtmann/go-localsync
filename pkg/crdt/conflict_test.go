@@ -23,82 +23,19 @@ func itemTimestamp(item testItem) time.Time {
 	return item.UpdatedAt
 }
 
-func newVCTestConflict(local, remote testItem) *Conflict[testItem] {
-	return &Conflict[testItem]{
-		Local:    local,
-		Remote:   remote,
-		LocalVC:  VectorClock{NodeID("a"): 1, NodeID("b"): 2},
-		RemoteVC: VectorClock{NodeID("a"): 2, NodeID("b"): 1},
-	}
-}
-
-func newTiedVCTestConflict(local, remote testItem) *Conflict[testItem] {
-	return &Conflict[testItem]{
-		Local:    local,
-		Remote:   remote,
-		LocalVC:  VectorClock{NodeID("a"): 1},
-		RemoteVC: VectorClock{NodeID("a"): 1},
-	}
-}
-
-func TestLWWResolver_WinsByVectorClock(t *testing.T) {
-	t.Parallel()
-
-	now := time.Now()
-	local := testItem{Name: "local", UpdatedAt: now}
-	remote := testItem{Name: "remote", UpdatedAt: now}
-
-	tests := []struct {
-		name         string
-		localVC      VectorClock
-		remoteVC     VectorClock
-		expectWinner string
-	}{
-		{
-			"remote wins with higher clock",
-			VectorClock{NodeID("node-a"): 1},
-			VectorClock{NodeID("node-a"): 3},
-			"remote",
-		},
-		{
-			"local wins with higher clock",
-			VectorClock{NodeID("node-a"): 5},
-			VectorClock{NodeID("node-a"): 2},
-			"local",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			resolver, _ := NewLWWResolver(itemTimestamp)
-
-			conflict := &Conflict[testItem]{
-				Local:    local,
-				Remote:   remote,
-				LocalVC:  tt.localVC,
-				RemoteVC: tt.remoteVC,
-			}
-
-			winner, err := resolver.Resolve(conflict)
-			if err != nil {
-				t.Fatalf("Resolve() error: %v", err)
-			}
-
-			assertWinner(t, winner, tt.expectWinner, "")
-		})
-	}
+func newTestConflict(local, remote testItem) *Conflict[testItem] {
+	return &Conflict[testItem]{Local: local, Remote: remote}
 }
 
 func TestLWWResolver_LocalWinsByTimestamp(t *testing.T) {
 	t.Parallel()
+
 	resolver, _ := NewLWWResolver(itemTimestamp)
 	now := time.Now()
 	local := testItem{Name: "local", UpdatedAt: now.Add(2 * time.Hour)}
 	remote := testItem{Name: "remote", UpdatedAt: now}
 
-	winner, err := resolver.Resolve(newVCTestConflict(local, remote))
+	winner, err := resolver.Resolve(newTestConflict(local, remote))
 	if err != nil {
 		t.Fatalf("Resolve() error: %v", err)
 	}
@@ -114,7 +51,7 @@ func TestLWWResolver_RemoteWinsByTimestamp(t *testing.T) {
 	local := testItem{Name: "local", UpdatedAt: now}
 	remote := testItem{Name: "remote", UpdatedAt: now.Add(2 * time.Hour)}
 
-	winner, err := resolver.Resolve(newVCTestConflict(local, remote))
+	winner, err := resolver.Resolve(newTestConflict(local, remote))
 	if err != nil {
 		t.Fatalf("Resolve() error: %v", err)
 	}
@@ -130,7 +67,7 @@ func TestLWWResolver_RemoteWinsOnTie_NoTiebreaker(t *testing.T) {
 	local := testItem{Name: "local", UpdatedAt: now}
 	remote := testItem{Name: "remote", UpdatedAt: now}
 
-	winner, err := resolver.Resolve(newTiedVCTestConflict(local, remote))
+	winner, err := resolver.Resolve(newTestConflict(local, remote))
 	if err != nil {
 		t.Fatalf("Resolve() error: %v", err)
 	}
@@ -167,13 +104,22 @@ func TestLWWResolver_Tiebreaker(t *testing.T) {
 			local := testItem{Name: tt.localName, UpdatedAt: now}
 			remote := testItem{Name: tt.remoteName, UpdatedAt: now}
 
-			winner, err := resolver.Resolve(newTiedVCTestConflict(local, remote))
+			winner, err := resolver.Resolve(newTestConflict(local, remote))
 			if err != nil {
 				t.Fatalf("Resolve() error: %v", err)
 			}
 
 			assertWinner(t, winner, tt.expectWinner, " via tiebreaker")
 		})
+	}
+}
+
+func TestLWWResolver_NilTimestampFunc(t *testing.T) {
+	t.Parallel()
+
+	_, err := NewLWWResolver[testItem](nil)
+	if err == nil {
+		t.Fatal("expected error for nil timestamp func")
 	}
 }
 
@@ -193,77 +139,21 @@ func TestConflict_JSON_RoundTrip(t *testing.T) {
 	conflict := Conflict[testItem]{
 		Local:     testItem{Name: "local", UpdatedAt: now},
 		Remote:    testItem{Name: "remote", UpdatedAt: now.Add(time.Hour)},
-		LocalVC:   VectorClock{NodeID("a"): 1},
-		RemoteVC:  VectorClock{NodeID("b"): 2},
 		Timestamp: now,
 	}
 
 	data, err := json.Marshal(conflict)
 	if err != nil {
-		t.Fatalf("Marshal: %v", err)
+		t.Fatalf("marshal: %v", err)
 	}
 
 	var decoded Conflict[testItem]
 	err = json.Unmarshal(data, &decoded)
 	if err != nil {
-		t.Fatalf("Unmarshal: %v", err)
+		t.Fatalf("unmarshal: %v", err)
 	}
 
-	if decoded.Local.Name != "local" {
-		t.Errorf("local name: got %q, want %q", decoded.Local.Name, "local")
-	}
-
-	if decoded.Remote.Name != "remote" {
-		t.Errorf("remote name: got %q, want %q", decoded.Remote.Name, "remote")
-	}
-
-	if decoded.LocalVC.Get(NodeID("a")) != 1 {
-		t.Errorf("local VC: got %d, want 1", decoded.LocalVC.Get(NodeID("a")))
-	}
-
-	if decoded.RemoteVC.Get(NodeID("b")) != 2 {
-		t.Errorf("remote VC: got %d, want 2", decoded.RemoteVC.Get(NodeID("b")))
-	}
-}
-
-func TestMergeResult_Values(t *testing.T) {
-	t.Parallel()
-
-	values := []MergeResult{
-		MergeResultLocalWins,
-		MergeResultRemoteWins,
-		MergeResultMerged,
-		MergeResultConflict,
-	}
-
-	for i, v := range values {
-		if int(v) != i {
-			t.Errorf("MergeResult value %d has unexpected ordinal %d", i, v)
-		}
-	}
-}
-
-func TestMergeResult_String(t *testing.T) {
-	t.Parallel()
-
-	tests := []struct {
-		result   MergeResult
-		expected string
-	}{
-		{MergeResultLocalWins, "local_wins"},
-		{MergeResultRemoteWins, "remote_wins"},
-		{MergeResultMerged, "merged"},
-		{MergeResultConflict, "conflict"},
-		{MergeResult(99), "unknown"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.expected, func(t *testing.T) {
-			t.Parallel()
-
-			if got := tt.result.String(); got != tt.expected {
-				t.Errorf("String() = %q, want %q", got, tt.expected)
-			}
-		})
+	if decoded.Local.Name != "local" || decoded.Remote.Name != "remote" {
+		t.Errorf("round-trip mismatch: local=%q remote=%q", decoded.Local.Name, decoded.Remote.Name)
 	}
 }

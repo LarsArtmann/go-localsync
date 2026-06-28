@@ -82,7 +82,7 @@ func TestMemoryReadModel_GetNotFound(t *testing.T) {
 	assertNotFound(t, err, got)
 }
 
-func TestMemoryReadModel_Delete(t *testing.T) {
+func TestMemoryReadModel_Tombstone(t *testing.T) {
 	t.Parallel()
 
 	rm := NewMemoryReadModel()
@@ -94,10 +94,31 @@ func TestMemoryReadModel_Delete(t *testing.T) {
 	}
 
 	testutil.MustNoError(t, rm.Upsert(ctx, item))
-	testutil.MustNoError(t, rm.Delete(ctx, "github", id.NewExternalID("123")))
+	testutil.MustNoError(
+		t,
+		rm.Tombstone(ctx, "github", id.NewExternalID("123"), model.NewTombstone(model.ReasonUserHidden)),
+	)
 
+	// Get returns the item itself (now tombstoned), since it is a direct key lookup.
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
-	assertNotFound(t, err, got)
+	testutil.MustNoError(t, err)
+	if !got.IsTombstoned() {
+		t.Error("expected tombstoned item")
+	}
+
+	// Default (live) view excludes tombstoned items.
+	live, err := rm.Count(ctx, model.ItemFilter{})
+	testutil.MustNoError(t, err)
+	if live != 0 {
+		t.Errorf("expected live count=0, got %d", live)
+	}
+
+	// IncludeTombstoned reveals it again.
+	withTomb, err := rm.Count(ctx, model.ItemFilter{IncludeTombstoned: true})
+	testutil.MustNoError(t, err)
+	if withTomb != 1 {
+		t.Errorf("expected count=1 including tombstoned, got %d", withTomb)
+	}
 }
 
 func TestMemoryReadModel_ListWithFilters(t *testing.T) {
@@ -192,7 +213,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 }
 
-func TestProjector_ItemDeleted(t *testing.T) {
+func TestProjector_ItemTombstoned(t *testing.T) {
 	t.Parallel()
 
 	ctx := context.Background()
@@ -202,11 +223,27 @@ func TestProjector_ItemDeleted(t *testing.T) {
 
 	proj := newProjector(rm)
 
-	evt := mustNewTestEvent(EventItemDeleted, ItemDeletedPayload{Source: "github", SourceID: "123"})
+	evt := mustNewTestEvent(EventItemTombstoned, ItemTombstonedPayload{
+		Source:       "github",
+		SourceID:     "123",
+		Reason:       string(model.ReasonUpstreamGone),
+		TombstonedAt: time.Now().UnixNano(),
+	})
 
 	testutil.MustNoError(t, proj.Handle(ctx, evt))
 
-	assertLen(t, rm, 0)
+	// Tombstoned item is hidden from the live view but still present.
+	live, err := rm.Count(ctx, model.ItemFilter{})
+	testutil.MustNoError(t, err)
+	if live != 0 {
+		t.Errorf("expected live count=0, got %d", live)
+	}
+
+	withTomb, err := rm.Count(ctx, model.ItemFilter{IncludeTombstoned: true})
+	testutil.MustNoError(t, err)
+	if withTomb != 1 {
+		t.Errorf("expected count=1 including tombstoned, got %d", withTomb)
+	}
 }
 
 func TestProjector_ItemConflictFound_NoStateChange(t *testing.T) {

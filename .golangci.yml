@@ -214,7 +214,7 @@ linters:
   exclusions:
     generated: lax
     rules:
-      - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache) is missing
+      - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache|model\.Item|model\.Tombstone|sync\.SyncResult|sync\.Syncer|cqrs\.Projector|sql\.NullTime) is missing
         linters:
           - exhaustruct
       - path: _test\.go

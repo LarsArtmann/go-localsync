@@ -128,7 +128,7 @@ func TestMemoryReadModel_ConcurrentUpsertDelete(t *testing.T) {
 		defer wg.Done()
 
 		for range 100 {
-			_ = rm.Delete(ctx, source, extID)
+			_ = rm.Tombstone(ctx, source, extID, model.NewTombstone(model.ReasonUserHidden))
 		}
 	}()
 

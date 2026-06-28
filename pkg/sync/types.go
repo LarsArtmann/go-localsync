@@ -18,6 +18,7 @@ const (
 	ActionConflictRemote SyncAction = "conflict_remote"
 	ActionConflictLocal  SyncAction = "conflict_local"
 	ActionUnchanged      SyncAction = "unchanged"
+	ActionTombstoned     SyncAction = "tombstoned"
 	ActionError          SyncAction = "error"
 )
 
@@ -52,7 +53,13 @@ func (a SyncAction) String() string { return string(a) }
 
 func (a SyncAction) IsValid() bool {
 	switch a {
-	case ActionCreated, ActionUpdated, ActionConflictRemote, ActionConflictLocal, ActionUnchanged, ActionError:
+	case ActionCreated,
+		ActionUpdated,
+		ActionConflictRemote,
+		ActionConflictLocal,
+		ActionUnchanged,
+		ActionTombstoned,
+		ActionError:
 		return true
 	default:
 		return false
@@ -61,9 +68,12 @@ func (a SyncAction) IsValid() bool {
 
 // SyncStore is the minimal interface that decouples sync logic from concrete storage.
 // *cqrs.CQRSStack implements this interface by embedding the cqrs ReadModel and
-// adding SyncItems + Close. The read-side methods come from model.ItemReader.
+// adding SyncItems + Reconcile + Close. The read-side methods come from model.ItemReader.
 type SyncStore interface {
 	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
+	// Reconcile tombstones live items for source that are absent from seen,
+	// detecting upstream deletions. Returns the number of items tombstoned.
+	Reconcile(ctx context.Context, source string, seen []model.Key) (int, error)
 	model.ItemReader
 	Close() error
 }

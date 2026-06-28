@@ -16,7 +16,7 @@ import (
 
 const commandTypeSyncItem command.Type = "sync_item.sync"
 
-const commandTypeDeleteItem command.Type = "sync_item.delete"
+const commandTypeTombstone command.Type = "sync_item.tombstone"
 
 func mustNewCommand(cmdType command.Type, aggID cqrsid.AggregateID) command.BasicCommand {
 	cmd, err := command.New(cmdType, aggID)
@@ -36,12 +36,13 @@ type SyncItemCommand struct {
 	Options []event.Option
 }
 
-// DeleteItemCommand dispatches a delete operation for a single item.
-type DeleteItemCommand struct {
+// TombstoneItemCommand dispatches a tombstone operation for a single item.
+type TombstoneItemCommand struct {
 	command.BasicCommand
 
 	Source   string
 	SourceID id.ExternalID
+	Reason   model.TombstoneReason
 }
 
 func wireCommandDispatcher(
@@ -67,12 +68,21 @@ func wireCommandDispatcher(
 		return nil, fmt.Errorf("register sync item command: %w", err)
 	}
 
-	deleteHandler := func(ctx context.Context, cmd *DeleteItemCommand) error {
-		return repo.Execute(ctx, cmd.AggregateID(), aggregateType, decideDelete(cmd.Source, cmd.SourceID))
+	tombstoneHandler := func(ctx context.Context, cmd *TombstoneItemCommand) error {
+		return repo.Execute(
+			ctx,
+			cmd.AggregateID(),
+			aggregateType,
+			decideTombstone(cmd.Source, cmd.SourceID, cmd.Reason),
+		)
 	}
 
-	if err := command.RegisterTyped[*DeleteItemCommand](dispatcher, commandTypeDeleteItem, deleteHandler); err != nil {
-		return nil, fmt.Errorf("register delete item command: %w", err)
+	if err := command.RegisterTyped[*TombstoneItemCommand](
+		dispatcher,
+		commandTypeTombstone,
+		tombstoneHandler,
+	); err != nil {
+		return nil, fmt.Errorf("register tombstone item command: %w", err)
 	}
 
 	return dispatcher, nil

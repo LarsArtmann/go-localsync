@@ -14,6 +14,6 @@ type ReadModel interface {
 	model.ItemReader
 	Get(ctx context.Context, source string, sourceID id.ExternalID) (*model.Item, error)
 	Upsert(ctx context.Context, item *model.Item) error
-	Delete(ctx context.Context, source string, sourceID id.ExternalID) error
+	Tombstone(ctx context.Context, source string, sourceID id.ExternalID, tombstone model.Tombstone) error
 	Close() error
 }

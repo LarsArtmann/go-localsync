@@ -2,7 +2,9 @@ package sync
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	stdsync "sync"
 	"time"
 
 	"charm.land/log/v2"
@@ -17,6 +19,9 @@ type Syncer struct {
 	provider provider.Provider
 	store    SyncStore
 	logger   *log.Logger
+	retry    provider.RetryConfig
+	sourceMu stdsync.Mutex
+	locks    map[string]*stdsync.Mutex
 }
 
 // NewSyncer creates a Syncer with the given provider, store, and optional logger.
@@ -29,11 +34,33 @@ func NewSyncer(p provider.Provider, store SyncStore, logger *log.Logger) *Syncer
 		provider: p,
 		store:    store,
 		logger:   logger,
+		retry:    provider.DefaultRetryConfig,
+		locks:    make(map[string]*stdsync.Mutex),
 	}
 }
 
 func (s *Syncer) Store() SyncStore { //nolint:ireturn
 	return s.store
+}
+
+// lockSource returns a release function that serializes concurrent syncs for the
+// same source. It prevents a TOCTOU race where two syncs read the "latest item"
+// timestamp concurrently and both process overlapping windows. Different
+// sources run in parallel.
+func (s *Syncer) lockSource(source string) func() {
+	s.sourceMu.Lock()
+
+	mu, ok := s.locks[source]
+	if !ok {
+		mu = &stdsync.Mutex{}
+		s.locks[source] = mu
+	}
+
+	s.sourceMu.Unlock()
+
+	mu.Lock()
+
+	return mu.Unlock
 }
 
 // SyncProgressFunc is called after each sync batch to report progress.
@@ -44,6 +71,12 @@ type SyncOptions struct {
 	Source     string
 	MaxPages   int
 	OnProgress SyncProgressFunc
+	// Reconcile, when true, runs an upstream-gone reconciliation pass after the
+	// items are synced: live items for Source absent from the fetched set are
+	// tombstoned (ReasonUpstreamGone). Only set this when the fetch was COMPLETE
+	// (every item the provider holds), otherwise still-present items would be
+	// wrongly tombstoned.
+	Reconcile bool
 }
 
 // Validate checks that required fields are set.
@@ -59,6 +92,7 @@ func (o *SyncOptions) Validate() error {
 type SyncResult struct {
 	Fetched    int
 	Skipped    int
+	Tombstoned int
 	Errors     int
 	ItemErrors []ItemSyncResult
 }
@@ -70,6 +104,10 @@ type Stats struct {
 	TypeCounts map[string]int64
 }
 
+// errCompletedWithErrors is a static sentinel wrapped when a sync finishes with
+// per-item failures, so callers can errors.Is it (and it satisfies err113).
+var errCompletedWithErrors = errors.New("sync completed with item errors")
+
 // Sync fetches all items from the provider and persists them.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	err := s.validateOpts(opts)
@@ -77,6 +115,15 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		return nil, err
 	}
 
+	defer s.lockSource(opts.Source)()
+
+	return s.runSync(ctx, opts)
+}
+
+// runSync is the lock-free full-sync body. Callers must already hold the source
+// lock (acquired by Sync / SyncIncremental) so concurrent syncs for one source
+// are serialized without re-entrant locking.
+func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	result, err := s.fetchItems(ctx, opts, "Starting sync", "sync")
 	if err != nil {
 		return nil, err
@@ -87,6 +134,8 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	valid := s.filterValidItems(result.Items, syncResult)
 
 	if len(valid) == 0 {
+		s.reconcile(ctx, opts, result.Items, syncResult)
+
 		s.logger.Info(
 			"Sync completed: no valid items",
 			"fetched",
@@ -110,30 +159,74 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 
 	s.reportProgress(opts, syncResult)
 
+	s.reconcile(ctx, opts, result.Items, syncResult)
+
 	s.logger.Info(
 		"Sync completed",
 		"fetched",
 		syncResult.Fetched,
 		"synced",
 		summary.Synced,
+		"tombstoned",
+		syncResult.Tombstoned,
 		"errors",
 		syncResult.Errors,
 	)
 
 	if syncResult.Errors > 0 {
-		return syncResult, fmt.Errorf("sync completed with %d errors out of %d items", syncResult.Errors, len(valid))
+		return syncResult, fmt.Errorf(
+			"%w: %d of %d items failed",
+			errCompletedWithErrors,
+			syncResult.Errors,
+			len(valid),
+		)
 	}
 
 	return syncResult, nil
 }
 
-// SyncIncremental fetches items and skips those already present based on the latest item timestamp.
+// reconcile runs the opt-in upstream-gone reconciliation pass: live items for
+// the source that are absent from the fetched set are tombstoned. It is a no-op
+// unless opts.Reconcile is set, and best-effort (failures are logged, not fatal).
+func (s *Syncer) reconcile(ctx context.Context, opts *SyncOptions, items []*provider.Item, syncResult *SyncResult) {
+	if !opts.Reconcile || ctx.Err() != nil {
+		return
+	}
+
+	seen := make([]model.Key, 0, len(items))
+
+	for _, item := range items {
+		seen = append(seen, model.Key{Source: item.Source, ExternalID: item.ExternalID})
+	}
+
+	tombstoned, err := s.store.Reconcile(ctx, opts.Source, seen)
+	if err != nil {
+		s.logger.Warn("Reconciliation failed", "source", opts.Source, "error", err)
+
+		return
+	}
+
+	syncResult.Tombstoned = tombstoned
+
+	if tombstoned > 0 {
+		s.logger.Info("Reconciliation tombstoned upstream-gone items", "source", opts.Source, "tombstoned", tombstoned)
+	}
+}
+
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	err := s.validateOpts(opts)
 	if err != nil {
 		return nil, err
 	}
 
+	defer s.lockSource(opts.Source)()
+
+	return s.runSyncIncremental(ctx, opts)
+}
+
+// runSyncIncremental is the lock-free incremental-sync body. It falls back to
+// runSync (not the public Sync) to avoid re-entrant source locking.
+func (s *Syncer) runSyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	source := id.NewProviderID(opts.Source)
 
 	items, err := s.store.List(
@@ -148,7 +241,7 @@ func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncR
 	}
 
 	if len(items) == 0 {
-		return s.Sync(ctx, opts)
+		return s.runSync(ctx, opts)
 	}
 
 	latestItem := items[0]
@@ -265,10 +358,9 @@ func (s *Syncer) fetchItems(
 ) (*provider.FetchResult, error) {
 	s.logger.Info(logMsg, "provider", s.provider.Name(), "source", opts.Source)
 
-	result, err := s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
-	if err != nil {
-		return nil, pkgerrors.Wrapf(
-			err,
+	wrapErr := func(e error) error {
+		return pkgerrors.Wrapf(
+			e,
 			"%s (%s) failed for source %q (maxPages=%d)",
 			errPrefix,
 			logMsg,
@@ -277,7 +369,63 @@ func (s *Syncer) fetchItems(
 		)
 	}
 
-	return result, nil
+	fetch := func() (*provider.FetchResult, error) {
+		return s.provider.FetchAll(ctx, opts.Source, opts.MaxPages)
+	}
+
+	result, err := fetch()
+	if err == nil {
+		return result, nil
+	}
+
+	cfg := s.retry
+	if !cfg.Enabled {
+		return nil, wrapErr(err)
+	}
+
+	lastErr := err
+
+	for attempt := 1; attempt <= cfg.MaxRetries; attempt++ {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
+
+		// Only retry errors the taxonomy marks retryable; permanent failures surface immediately.
+		if !pkgerrors.IsRetryable(lastErr) {
+			return nil, wrapErr(lastErr)
+		}
+
+		wait := backoff(cfg, attempt)
+
+		if ra, ok := lastErr.(retryAfterer); ok { // honor a server-advised Retry-After when present
+			if d := ra.RetryAfter(); d > 0 {
+				wait = d
+			}
+		}
+
+		if wait > cfg.MaxBackoff {
+			wait = cfg.MaxBackoff
+		}
+
+		s.logger.Warn(
+			"Retrying fetch after transient error",
+			"source", opts.Source, "attempt", attempt, "wait", wait, "error", lastErr,
+		)
+
+		sleepErr := sleepCtx(ctx, wait)
+		if sleepErr != nil {
+			return nil, sleepErr
+		}
+
+		result, err = fetch()
+		if err == nil {
+			return result, nil
+		}
+
+		lastErr = err
+	}
+
+	return nil, wrapErr(lastErr)
 }
 
 func (s *Syncer) reportProgress(opts *SyncOptions, syncResult *SyncResult) {

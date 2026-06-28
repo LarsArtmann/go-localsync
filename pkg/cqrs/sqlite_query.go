@@ -7,7 +7,7 @@ import (
 )
 
 func buildListQuery(filter model.ItemFilter) (string, []any) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at
 		FROM sync_items WHERE 1=1`
 
 	args := appendFilterArgs(&query, filter)
@@ -31,6 +31,10 @@ func buildListQuery(filter model.ItemFilter) (string, []any) {
 
 func appendFilterArgs(query *string, filter model.ItemFilter) []any {
 	var args []any
+
+	if !filter.IncludeTombstoned {
+		*query += " AND tombstoned = 0"
+	}
 
 	if filter.Type != nil {
 		*query += " AND type = ?"
