@@ -4,6 +4,13 @@
 **Date:** 2026-06-27
 **Deciders:** Lars Artmann
 
+> **Update (2026-06-28):** This review was performed before the delete→tombstone pivot
+> ([ADR-0005](0005-tombstone-over-delete.md)). The findings below are left as a historical
+> record of the state *at review time*: the event vocabulary is now `synced` /
+> `conflict_found` / `tombstoned`, and `SyncItemState` carries the tombstone on `Item` (no
+> `Deleted bool`). The scope decision itself is unchanged — the SDK remains a single-aggregate,
+> pull-only, flat-Item sync engine.
+
 ## Context
 
 An adoption review ([`docs/feedback/2026-06-23_discordsync-adoption-feedback.html`](../feedback/2026-06-23_discordsync-adoption-feedback.html)) evaluated whether [DiscordSync](https://github.com/larsartmann/discordsync) — a push-driven, multi-aggregate event-sourcing project — could adopt go-localsync as its consumer SDK. Both projects already share `go-cqrs-lite v3` as their CQRS foundation.

@@ -1,10 +1,10 @@
 # Go-LocalSync Agent Configuration
 
-**Updated:** 2026-06-27
+**Updated:** 2026-06-28
 
 ## Project Overview
 
-Go-LocalSync is a generic synchronization SDK with a pluggable provider-based architecture. It uses event-sourced CQRS via go-cqrs-lite for state management, pluggable conflict resolution via CRDT (`pkg/crdt/`), and branded IDs from go-branded-id for compile-time type safety.
+Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based architecture. It uses event-sourced CQRS via go-cqrs-lite for state management, pluggable conflict resolution (`pkg/crdt/`), tombstone-based soft-deletes with upstream reconciliation, and branded IDs from go-branded-id for compile-time type safety. There is no multi-writer/distributed CRDT machinery — the provider is the sole writer per aggregate.
 
 > **Scope boundary (ADR-0004):** The SDK is deliberately a **single-aggregate, pull-only, flat-Item sync engine** — one `sync_item` aggregate, three fixed events, one projection. The domain model is GitHub-activity-feed-shaped (`ActorLogin`, `RepoName`, `RepoURL`). Generalising it into a multi-aggregate event-sourcing framework was considered and **deferred** — see [`docs/adr/0004-multi-aggregate-generalisation-deferred.md`](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [`docs/feedback/`](docs/feedback/) adoption reviews. `go-cqrs-lite v3` is the cross-project sharing boundary. Do not widen the scope (multi-aggregate, push ingestion, consumer-defined events) without revisiting that ADR.
 
@@ -12,12 +12,12 @@ Go-LocalSync is a generic synchronization SDK with a pluggable provider-based ar
 
 | Package         | Purpose                                                                                                                                                                                                                                          |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pkg/crdt/`     | CRDT/sync primitives: VectorClock, Operation[T], ConflictResolver[T], LWWResolver[T] — **wired into DecideSync as pluggable conflict strategy**                                                                                                  |
+| `pkg/crdt/`     | Conflict resolution: `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` (timestamp-only) — **wired into DecideSync as pluggable conflict strategy**. No vector clocks/operations (a single-writer pull mirror needs none).                          |
 | `pkg/api/`      | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                     |
 | `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.1** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go)                                                    |
 | `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                           |
-| `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`                                                                                                         |
-| `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion`), `model.Key`, `model.ItemFilter`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
+| `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`, retry/backoff (`retry.go`), per-source mutex, opt-in reconciliation                                  |
+| `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
 | `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                               |
 | `pkg/errors/`   | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                         |
 
@@ -34,26 +34,29 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 ### Core Components
 
 - `aggregate_id.go` — deterministic SHA256→hex from (source, sourceID) with sync.Map cache, shared `itemKey` helper
-- `decider.go` — `SyncItemState{Item *model.Item, Deleted bool}`, pure Apply (the event applier) + DecideSync/DecideDelete, `HasChanged` checks UpdatedAt/Type/ActorLogin/RepoName/RepoURL
-- `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`
+- `decider.go` — `SyncItemState{Item *model.Item}` (tombstone lives on `Item.Tombstone`; no separate Deleted flag), pure Apply (the event applier) + DecideSync/DecideTombstone, `IsTombstoned()`/`ShouldResurrect()`, `HasChanged` checks UpdatedAt/Type/ActorLogin/RepoName/RepoURL
+- `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemTombstoned` (a sync event always means "live" → resurrects a tombstoned item automatically via projection upsert)
 - `readmodel.go` — `ReadModel` interface (embeds `model.ItemReader`) + `model.ItemFilter`, stores `*model.Item` directly
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
 - `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `event.Projection`, wired via direct bus subscription (live) + manual journal replay (persistence)
-- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, SQL snapshots, event logging middleware, correlation IDs
+- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, SQL snapshots, event logging middleware, correlation IDs. Public commands: `SyncItem`, `TombstoneItem`; `Reconcile(ctx, source, seenKeys)` tombstones upstream-gone items.
 - `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus background `replayJournal` (reads all persisted events via `Journal.ReadAll`) for SQLite catch-up. Replaces the deleted `projection.Runner` (go-cqrs-lite v3 dropped `projection/` — there is no `projection/v3` module).
-- `commands.go` + `queries.go` + `middleware.go` — typed `SyncItemCommand`/`DeleteItemCommand` via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
+- `commands.go` + `queries.go` + `middleware.go` — typed `SyncItemCommand`/`TombstoneItemCommand` (carries `model.TombstoneReason`) via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
 
 ### Key Properties
 
 - **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
 - **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
-- **Delete + resurrect**: deleted items reappear with updated state
+- **Tombstone + resurrect**: a tombstone is a soft-delete (keeps history on `Item.Tombstone`); re-syncing a tombstoned item overwrites the tombstone → it becomes live again (projection upsert resets the tombstone columns)
+- **Reconciliation**: opt-in `SyncOptions.Reconcile` tombstones items for `Source` absent from a complete fetch with `ReasonUpstreamGone` (best-effort; only safe after a COMPLETE fetch)
 - **Projection**: Live events delivered synchronously via `bus.SubscribeAll` (watermill `EventBus` with `BlockPublishUntilSubscriberAck` preserves read-your-writes). SQLite catch-up replays the full journal in a background goroutine (`runner.replayJournal`); the idempotent projection tolerates replay/live overlap, so no checkpoint store is needed.
 - **SQL persistence**: SQLite backend persists snapshots (`SQLSnapshotStore`) via `snapshot/v3` and `storage/v3` modules.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
-- **Command dispatch**: `SyncItem`/`DeleteItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
+- **Command dispatch**: `SyncItem`/`TombstoneItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
 - **Query dispatch**: Read model queries dispatched through `query.Dispatcher` with typed queries. Enables logging, metrics middleware.
+- **Resilient fetch**: `fetchItems` retries transient errors with exponential backoff + ±25% jitter, consults `errors.IsRetryable`, and honors an optional `retryAfterer` (Retry-After) hook. Permanent errors surface immediately.
+- **Per-source serialization**: a per-source mutex orders concurrent syncs of the same source (TOCTOU guard on the latest-timestamp read); different sources run in parallel. Internals are split into lock-free `runSync`/`runSyncIncremental` to avoid re-entrant deadlock when incremental falls back to full.
 - **Remote wins (default)**: on conflict with no resolver configured, the incoming item always overwrites (remote-wins LWW)
 - **Pluggable conflict resolution**: `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*model.Item]` — `LWWResolver`, custom merge, etc.
 
@@ -131,17 +134,17 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package           | Tests | Coverage | Status                                                                                                     |
 | ----------------- | ----- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`        | 89    | 81.4%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, CRDT Resolver, Concurrent Access |
-| `pkg/sync`        | 24    | 85.5%    | ✅ Syncer + ConflictAwareSyncer + reportProgress + invalid item error counting                             |
+| `pkg/cqrs`        | 93    | 81.9%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests      |
+| `pkg/sync`        | 28    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                         |
 | `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                 |
 | `pkg/errors`      | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                            |
 | `pkg/provider`    | 10    | 96.7%    | ✅ Item validation, RateLimitCache                                                                         |
 | `pkg/api`         | 14    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                           |
-| `pkg/crdt`        | 52    | 96.2%    | ✅ VectorClock, Operation, LWWResolver, Conflict, SyncMessage, example test                                |
-| `pkg/data/model`  | 10    | 100.0%   | ✅ Item, Key, Validate, ItemFilter builder                                                                 |
+| `pkg/crdt`        | 8     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                  |
+| `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                              |
 | `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                           |
 
-**224 total test functions** across 9 test packages.
+**188 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -179,6 +182,7 @@ Two tables managed by the CQRS stack:
 
 - `item_id`, `source`, `source_id`, `type`, `actor_login`, `actor_avatar_url`
 - `repo_name`, `repo_url`, `created_at`, `updated_at`, `raw_json`
+- `tombstoned`, `tombstone_reason`, `tombstoned_at` (soft-delete columns; `migrateSyncItems` adds them idempotently)
 - Primary key on `(source, source_id)`
 
 ## Dependencies

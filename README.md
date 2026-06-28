@@ -3,9 +3,9 @@
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 
-**A pluggable SDK for syncing data from any provider to local event-sourced storage.** Build local-first applications that work offline with full data fidelity, incremental sync, and CQRS-based state management.
+**A Go SDK for building a local, event-sourced mirror of data from any paginated REST provider.** Pull items into an idempotent, offline-first read model with full-fidelity storage, incremental sync, soft-deletes (tombstones), and CQRS-based state management.
 
-_go-localsync is a **pure contract library** — not a CLI and not a provider implementation._ It defines the `Provider` interface and the sync/CQRS engine. The reference consumer (GitHub provider + CLI) is [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
+_go-localsync is a **single-writer pull mirror**: the provider is the sole source of truth and there is no local mutation or multi-writer merge. It is a **pure contract library** — not a CLI and not a provider implementation._ It defines the `Provider` interface and the sync/CQRS engine. The reference consumer (GitHub provider + CLI) is [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
 
 ## Overview
 
@@ -13,8 +13,9 @@ _go-localsync is a **pure contract library** — not a CLI and not a provider im
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)                                        |
 | **CQRS Stack**          | Event-sourced architecture via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) v3 — Decider, ReadModel, Projection |
-| **Sync Engine**         | Full and incremental sync with pagination, configurable rate limiting and retry                                                |
-| **Conflict-Aware Sync** | Timestamp-based conflict detection with remote-wins strategy, emitted as domain events                                         |
+| **Sync Engine**          | Full and incremental sync with pagination, rate limiting, retry with backoff, and per-source serialization                      |
+| **Tombstones**           | Soft-delete with reasons (upstream-gone, user-hidden); optional reconciliation tombstones items the provider stopped returning |
+| **Conflict Resolution**  | Detects when a re-synced item changed since last sync; remote-wins by default, pluggable `crdt.ConflictResolver`                 |
 | **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)                                               |
 | **SQLite Backend**      | SQLite event store with snapshots and pure-Go driver (no CGo)                                                                  |
 
@@ -26,7 +27,7 @@ This SDK is for Go developers building applications that need:
 - **Offline dashboards** that aggregate data from multiple services
 - **Custom sync logic** tailored to specific use cases
 - **Event sourcing** with full audit trail and replay capability
-- **Conflict detection** for multi-device or multi-source synchronization
+- **Detecting upstream changes** — know when a re-synced item differs from what you already mirror
 
 ## Installation
 
@@ -151,8 +152,8 @@ The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/
 
 | Component        | Description                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Decider**      | Pure Apply/DecideSync/DecideDelete — single authority for state transitions (`SyncItemState{Item *model.Item}`)             |
-| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemDeleted`                                                                            |
+| **Decider**      | Pure Apply/DecideSync/DecideTombstone — single authority for state transitions (`SyncItemState{Item *model.Item}`)           |
+| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`                                                                          |
 | **Projection**   | Live events via synchronous `bus.SubscribeAll`; SQLite catch-up via background `runner.replayJournal` (no checkpoint store) |
 | **Read Model**   | In-memory or SQLite with filter/pagination, stores `*model.Item`                                                            |
 | **Aggregate ID** | Deterministic SHA256→hex from (source, sourceID) for idempotency                                                            |
@@ -161,10 +162,13 @@ The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/
 
 - **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
 - **Deterministic IDs**: SHA256→hex from (source, sourceID) with sync.Map cache
-- **Delete + resurrect**: deleted items reappear with updated state when synced again
+- **Tombstone + resurrect**: hidden items keep their history; re-syncing a tombstoned item makes it live again
+- **Reconciliation**: opt-in `SyncOptions.Reconcile` tombstones items the provider stopped returning (`upstream_gone`)
 - **Conflict detection**: `DecideSync` compares fields and emits `ItemConflictFound` events
 - **Remote wins**: on conflict, incoming item overwrites (remote-wins LWW)
 - **Pluggable conflict resolution**: inject any `crdt.ConflictResolver[*model.Item]` for custom merge logic
+- **Resilient fetch**: exponential backoff with jitter, honors `errors.IsRetryable`, optional Retry-After
+- **Per-source serialization**: concurrent syncs of the same source are ordered; different sources run in parallel
 - **Projection**: synchronous live subscription + background journal replay (idempotent, no checkpoint store needed)
 - **Snapshots**: caps replay cost by persisting aggregate state every N events
 - **Correlation IDs**: unique per sync run for cross-event tracing and debugging
@@ -185,13 +189,20 @@ result, err := conflictSyncer.SyncWithConflictDetection(ctx, &sync.SyncOptions{
 
 ## Pluggable Conflict Resolution
 
-Inject a custom `crdt.ConflictResolver[T]` for domain-specific merge logic:
+Inject a custom `crdt.ConflictResolver[T]` for domain-specific merge logic. `NewLWWResolver` takes a timestamp extractor and returns `(resolver, error)`:
 
 ```go
+resolver, err := crdt.NewLWWResolver[*model.Item](func(i *model.Item) time.Time {
+	return i.UpdatedAt
+})
+if err != nil {
+	log.Fatal(err)
+}
+
 stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
 	Backend:          "sqlite",
 	DBPath:           "/path/to/local.db",
-	ConflictResolver: crdt.NewLWWResolver[*model.Item](),
+	ConflictResolver: resolver,
 })
 ```
 
@@ -213,7 +224,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 | Feature            | Status  | Description                                                  |
 | ------------------ | ------- | ------------------------------------------------------------ |
 | CQRS Stack         | ✅ Done | Event store, bus, decider repository, read model, projection |
-| Decider Pattern    | ✅ Done | Pure Apply/DecideSync/DecideDelete with SyncItemState        |
+| Decider Pattern    | ✅ Done | Pure Apply/DecideSync/DecideTombstone with SyncItemState     |
 | Incremental Sync   | ✅ Done | Only fetch new items since last sync — no duplicate data     |
 | Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation                   |
 | Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution           |
@@ -221,17 +232,19 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 | SQLite Backend     | ✅ Done | SQLite event store + read model + snapshots (no CGo)         |
 | No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                   |
 | Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow              |
-| Retry Logic        | ✅ Done | Exponential backoff retry with configurable limits           |
+| Retry Logic        | ✅ Done | Exponential backoff + jitter, honors IsRetryable, optional Retry-After |
 | Snapshots          | ✅ Done | Aggregate state persistence caps replay cost across restarts |
 | Correlation IDs    | ✅ Done | Unique per sync run for cross-event tracing and debugging    |
 | Event Logging      | ✅ Done | Structured logging of all domain events via middleware       |
-| Delete + Resurrect | ✅ Done | Deleted items reappear with updated state when synced again  |
+| Tombstone + Resurrect | ✅ Done | Soft-delete keeps history; re-syncing a tombstoned item resurrects it |
+| Upstream Reconciliation | ✅ Done | Tombstone items the provider stopped returning (opt-in per sync)    |
+| Per-source Locking   | ✅ Done | Concurrent syncs of one source are ordered; sources run in parallel |
 
 ## Development
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (224 tests across 9 packages)
+go test ./... -count=1                # Run tests (188 tests across 9 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -249,7 +262,7 @@ pkg/
 │   ├── model/        # Domain entity: Item, Key, ItemFilter, ItemReader
 │   └── schema/       # Schema Version (V1/V2) for event upcasting
 ├── id/               # Branded ID types (go-branded-id)
-├── crdt/             # CRDT primitives: VectorClock, LWWResolver, ConflictResolver
+├── crdt/             # Conflict resolution: Conflict, ConflictResolver, LWWResolver
 ├── errors/           # Structured errors via go-error-family constructors
 ├── api/              # HTTP API server (Huma v2)
 └── testutil/         # Shared test helpers (MockProvider, SyncStore double)
@@ -257,19 +270,19 @@ pkg/
 
 ## Testing
 
-224 test functions across 9 packages:
+188 test functions across 9 packages:
 
-| Package           | Tests | Coverage | Description                                                     |
-| ----------------- | ----- | -------- | --------------------------------------------------------------- |
-| `pkg/cqrs`        | 89    | 81.4%    | Decider, ReadModel, Projection, Stack, SQLite RM, CRDT Resolver |
-| `pkg/sync`        | 24    | 85.5%    | Syncer + ConflictAwareSyncer + reportProgress                   |
-| `pkg/crdt`        | 52    | 96.2%    | VectorClock, Operation, LWWResolver, Conflict, SyncMessage      |
-| `pkg/id`          | 12    | 100.0%   | ID construction, roundtrip, zero, equal                         |
-| `pkg/errors`      | 9     | 100.0%   | Sentinel errors, wrapping, classification, IsRetryable          |
-| `pkg/provider`    | 10    | 96.7%    | Item validation, RateLimitCache                                 |
-| `pkg/api`         | 14    | 94.0%    | Server, routes, handlers, health/stats/items/sync endpoints     |
-| `pkg/data/model`  | 10    | 100.0%   | Item, Key, Validate, ItemFilter builder                         |
-| `pkg/data/schema` | 4     | 100.0%   | Schema Version (V1/V2), CurrentVersion, Valid                   |
+| Package           | Tests | Coverage | Description                                                              |
+| ----------------- | ----- | -------- | ------------------------------------------------------------------------ |
+| `pkg/cqrs`        | 93    | 81.9%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression  |
+| `pkg/sync`        | 28    | 84.5%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression            |
+| `pkg/crdt`        | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                  |
+| `pkg/id`          | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                  |
+| `pkg/errors`      | 9     | 100.0%   | Sentinel errors, wrapping, classification, IsRetryable                   |
+| `pkg/provider`    | 10    | 96.7%    | Item validation, RateLimitCache                                          |
+| `pkg/api`         | 14    | 94.0%    | Server, routes, handlers, health/stats/items/sync endpoints              |
+| `pkg/data/model`  | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                               |
+| `pkg/data/schema` | 4     | 100.0%   | Schema Version (V1/V2), CurrentVersion, Valid                            |
 
 ## Related Projects
 

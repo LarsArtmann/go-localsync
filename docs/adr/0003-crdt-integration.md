@@ -1,8 +1,17 @@
 # ADR-003: Pluggable CRDT Conflict Resolution
 
-**Status:** Accepted
+**Status:** Accepted (revised 2026-06-28)
 **Date:** 2026-05-29
 **Deciders:** Lars Artmann
+
+> **Revision (2026-06-28):** The conflict surface was simplified to match what the SDK
+> actually is — a single-writer pull mirror with no causal ordering to track. The
+> `ConflictResult[T]` wrapper was removed: `Resolve` now returns the winner directly as
+> `(T, error)`. The `Conflict[T]` struct dropped its vector-clock fields (`Local`/`Remote`/
+> `Timestamp` only). The unused `VectorClock`, `Operation[T]`, `SyncMessage`, `NodeID`, and
+> `OperationID` types were deleted as dead code (see [ADR-0005](0005-tombstone-over-delete.md)
+> for the related delete→tombstone pivot). The decision below stands; only the code shape
+> changed.
 
 ## Context
 
@@ -14,7 +23,7 @@ We made conflict resolution **pluggable** via the `crdt.ConflictResolver[T]` int
 
 ```go
 type ConflictResolver[T any] interface {
-    Resolve(conflict *Conflict[T]) (*ConflictResult[T], error)
+    Resolve(conflict *Conflict[T]) (T, error)
 }
 ```
 
@@ -40,10 +49,14 @@ resolver, _ := crdt.NewLWWResolver[*model.Item](func(i *model.Item) time.Time {
 
 ### Negative
 
-- Vector clocks are currently empty in conflict payloads (not yet tracking causal history)
 - Custom resolvers can't see the full event history — only the two conflicting items
 - Error in resolver falls back to remote-wins silently
+- No causal-history tracking: a single-writer pull mirror has no second writer to order
+  against, so vector clocks were removed rather than left as a lie (see revision note above)
 
 ### Future
 
-When multi-node sync is implemented, vector clocks will be populated and the CRDT package's `VectorClock`, `Operation[T]`, and `SyncMessage` types will be used for causal tracking and protocol serialization.
+If a genuine multi-writer/multi-node sync mode is ever added, causal metadata
+(vector clocks or hybrid logical clocks) would belong on `Conflict[T]` and a real CRDT
+package would be reintroduced. For the current single-writer pull mirror this is explicitly
+**not** needed.
