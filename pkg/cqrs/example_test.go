@@ -96,3 +96,59 @@ func ExampleSyncer() {
 	// evt-2 WatchEvent by octocat
 	// tombstoned: false
 }
+
+// ExampleTombstoneAndResurrect shows the soft-delete lifecycle: an item is
+// tombstoned (hidden from the default view but not destroyed), then a later
+// sync of the same item resurrects it automatically — no special-case call.
+func ExampleSyncer_tombstoneResurrect() {
+	ctx := context.Background()
+
+	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory"})
+	if err != nil {
+		panic(err)
+	}
+	defer func() { _ = stack.Close() }()
+
+	src := id.NewProviderID("example")
+	now := time.Date(2026, 6, 28, 9, 0, 0, 0, time.UTC)
+	p := exampleProvider{items: []*provider.Item{{
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID("evt-1"),
+		Source:     src,
+		Type:       id.NewEventTypeID("PushEvent"),
+		ActorLogin: id.NewActorLogin("octocat"),
+		RepoName:   id.NewRepoID("octocat/Hello-World"),
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}}}
+	syncer := synclib.NewSyncer(p, stack, nil)
+
+	// 1) Sync: the item is live.
+	if _, err := syncer.Sync(ctx, &synclib.SyncOptions{Source: "example", MaxPages: 1}); err != nil {
+		panic(err)
+	}
+
+	// 2) Tombstone it: history is kept, but it leaves the default view.
+	if err := stack.TombstoneItem(ctx, "example", id.NewExternalID("evt-1"), model.ReasonUserHidden); err != nil {
+		panic(err)
+	}
+
+	hidden, _ := stack.List(ctx, model.ItemFilter{Source: &src, IncludeTombstoned: true})
+	fmt.Println("after tombstone:", hidden[0].IsTombstoned())
+
+	live, _ := stack.List(ctx, model.ItemFilter{Source: &src})
+	fmt.Println("live items:", len(live))
+
+	// 3) Sync the same item again: a sync event means "live", so it resurrects.
+	if _, err := syncer.Sync(ctx, &synclib.SyncOptions{Source: "example", MaxPages: 1}); err != nil {
+		panic(err)
+	}
+
+	resurrected, _ := stack.List(ctx, model.ItemFilter{Source: &src})
+	fmt.Println("after re-sync:", resurrected[0].IsTombstoned())
+
+	// Output:
+	// after tombstone: true
+	// live items: 0
+	// after re-sync: false
+}
