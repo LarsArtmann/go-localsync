@@ -230,11 +230,19 @@ func syncEvents(
 }
 
 // hasChanged returns true if the remote item differs from the local item
-// in any tracked field (UpdatedAt, Type, ActorLogin, RepoName, RepoURL).
+// in any tracked field, including avatar URL and content hash (RawJSON fingerprint).
+// ContentHash comparison is skipped when either side is empty (backward compat
+// with events persisted before ContentHash was introduced).
 func hasChanged(local, remote *model.Item) bool {
-	return !local.UpdatedAt.Equal(remote.UpdatedAt) ||
+	contentChanged := local.ContentHash != "" &&
+		remote.ContentHash != "" &&
+		local.ContentHash != remote.ContentHash
+
+	return contentChanged ||
+		!local.UpdatedAt.Equal(remote.UpdatedAt) ||
 		local.Type.Get() != remote.Type.Get() ||
 		local.ActorLogin.Get() != remote.ActorLogin.Get() ||
+		local.ActorAvatarURL != remote.ActorAvatarURL ||
 		local.RepoName.Get() != remote.RepoName.Get() ||
 		local.RepoURL != remote.RepoURL
 }

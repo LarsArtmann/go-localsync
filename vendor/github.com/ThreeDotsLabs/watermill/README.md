@@ -1,5 +1,4 @@
 # Watermill
-
 <img align="right" width="300" src="https://watermill.io/img/gopher.svg">
 
 [![CI Status](https://github.com/ThreeDotsLabs/watermill/actions/workflows/master.yml/badge.svg)](https://github.com/ThreeDotsLabs/watermill/actions/workflows/master.yml)
@@ -14,11 +13,11 @@ implementations like Kafka or RabbitMQ, but also HTTP or PostgreSQL if that fits
 
 ## Goals
 
-- **Easy** to understand.
-- **Universal** - event-driven architecture, messaging, stream processing, CQRS - use it for whatever you need.
-- **Fast** (see [Benchmarks](#benchmarks)).
-- **Flexible** with middlewares, plugins and Pub/Sub configurations.
-- **Resilient** - using proven technologies and passing stress tests (see [Stability](#stability)).
+* **Easy** to understand.
+* **Universal** - event-driven architecture, messaging, stream processing, CQRS - use it for whatever you need.
+* **Fast** (see [Benchmarks](#benchmarks)).
+* **Flexible** with middlewares, plugins and Pub/Sub configurations.
+* **Resilient** - using proven technologies and passing stress tests (see [Stability](#stability)).
 
 ## Getting Started
 
@@ -33,37 +32,37 @@ Pick what you like the best or see in order:
 
 Go Event-Driven goes beyond Watermill Quickstart. You'll learn industry standard concepts and patterns like:
 
-- Handling at-least-once delivery
-- Asynchronous read models
-- Events & Commands
-- Observability
-- Message ordering
-- Sagas
+* Handling at-least-once delivery
+* Asynchronous read models
+* Events & Commands
+* Observability
+* Message ordering
+* Sagas
 
 <a href="https://threedots.tech/event-driven/?utm_source=watermill-readme"><img align="center" width="400" src="https://threedots.tech/event-driven-banner.png"></a>
 
 ## Examples
 
-- Basic
-  - [Your first app](_examples/basic/1-your-first-app) - **start here!**
-  - [Realtime feed](_examples/basic/2-realtime-feed)
-  - [Router](_examples/basic/3-router)
-  - [Metrics](_examples/basic/4-metrics)
-  - [CQRS with protobuf](_examples/basic/5-cqrs-protobuf)
-- [Pub/Subs usage](_examples/pubsubs)
-  - These examples are part of the [Getting started guide](https://watermill.io/learn/getting-started/) and show usage of a single Pub/Sub at a time.
-- Real-world examples
-  - [Exactly-once delivery counter](_examples/real-world-examples/exactly-once-delivery-counter)
-  - [Receiving webhooks](_examples/real-world-examples/receiving-webhooks)
-  - [Sending webhooks](_examples/real-world-examples/sending-webhooks)
-  - [Synchronizing Databases](_examples/real-world-examples/synchronizing-databases)
-  - [Persistent Event Log](_examples/real-world-examples/persistent-event-log)
-  - [Transactional Events](_examples/real-world-examples/transactional-events)
-  - [Real-time HTTP updates with Server-Sent Events](_examples/real-world-examples/server-sent-events)
-  - [Real-time HTTP updates with Server-Sent Events and htmx](_examples/real-world-examples/server-sent-events-htmx)
-- Complete projects
-  - [NATS example with live code reloading](https://github.com/ThreeDotsLabs/nats-example)
-  - [RabbitMQ, webhooks and Kafka integration](https://github.com/ThreeDotsLabs/event-driven-example)
+* Basic
+    * [Your first app](_examples/basic/1-your-first-app) - **start here!**
+    * [Realtime feed](_examples/basic/2-realtime-feed)
+    * [Router](_examples/basic/3-router)
+    * [Metrics](_examples/basic/4-metrics)
+    * [CQRS with protobuf](_examples/basic/5-cqrs-protobuf)
+* [Pub/Subs usage](_examples/pubsubs)
+    * These examples are part of the [Getting started guide](https://watermill.io/learn/getting-started/) and show usage of a single Pub/Sub at a time.
+* Real-world examples
+    * [Exactly-once delivery counter](_examples/real-world-examples/exactly-once-delivery-counter)
+    * [Receiving webhooks](_examples/real-world-examples/receiving-webhooks)
+    * [Sending webhooks](_examples/real-world-examples/sending-webhooks)
+    * [Synchronizing Databases](_examples/real-world-examples/synchronizing-databases)
+    * [Persistent Event Log](_examples/real-world-examples/persistent-event-log)
+    * [Transactional Events](_examples/real-world-examples/transactional-events)
+    * [Real-time HTTP updates with Server-Sent Events](_examples/real-world-examples/server-sent-events)
+    * [Real-time HTTP updates with Server-Sent Events and htmx](_examples/real-world-examples/server-sent-events-htmx)
+* Complete projects
+    * [NATS example with live code reloading](https://github.com/ThreeDotsLabs/nats-example)
+    * [RabbitMQ, webhooks and Kafka integration](https://github.com/ThreeDotsLabs/event-driven-example)
 
 ## Background
 
@@ -77,7 +76,6 @@ the tools needed to begin working with event-driven architecture and allows you 
 on the go.
 
 At the heart of Watermill there is one simple interface:
-
 ```go
 func(*Message) ([]*Message, error)
 ```
@@ -85,7 +83,7 @@ func(*Message) ([]*Message, error)
 Your handler receives a message and decides whether to publish new message(s) or return
 an error. What happens next is up to the middlewares you've chosen.
 
-You can find more about our motivations in our [_Introducing Watermill_ blog post](https://threedots.tech/post/introducing-watermill/).
+You can find more about our motivations in our [*Introducing Watermill* blog post](https://threedots.tech/post/introducing-watermill/).
 
 ## Pub/Subs
 
@@ -135,7 +133,7 @@ Please check our [contributing guide](CONTRIBUTING.md).
 Watermill v1.0.0 has been released and is production-ready. The public API is stable and will not change without changing the major version.
 
 To ensure that all Pub/Subs are stable and safe to use in production, we created a [set of tests](https://github.com/ThreeDotsLabs/watermill/blob/master/pubsub/tests/test_pubsub.go#L34) that need to pass for each of the implementations before merging to master.
-All tests are also executed in [_stress_](https://github.com/ThreeDotsLabs/watermill/blob/master/pubsub/tests/test_pubsub.go#L171) mode - that means that we are running all the tests **20x** in parallel.
+All tests are also executed in [*stress*](https://github.com/ThreeDotsLabs/watermill/blob/master/pubsub/tests/test_pubsub.go#L171) mode - that means that we are running all the tests **20x** in parallel.
 
 All tests are run with the race condition detector enabled (`-race` flag in tests).
 
@@ -153,7 +151,7 @@ Keep in mind that the results can be vastly different, depending on the setup an
 Here's the short version for message size of 16 bytes.
 
 | Pub/Sub                         | Publish (messages / s) | Subscribe (messages / s) |
-| ------------------------------- | ---------------------- | ------------------------ |
+|---------------------------------|------------------------|--------------------------|
 | GoChannel                       | 315,776                | 138,743                  |
 | Redis Streams                   | 59,158                 | 12,134                   |
 | NATS Jetstream (16 Subscribers) | 50,668                 | 34,713                   |

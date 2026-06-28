@@ -3,6 +3,7 @@ package cqrs
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"strconv"
 	"sync"
 
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
@@ -10,8 +11,10 @@ import (
 )
 
 // itemKey returns the composite key for a source+externalID pair.
+// Uses length-prefixed encoding to prevent delimiter-injection collisions
+// (e.g., source="github:" + externalID="42" vs source="github" + externalID=":42").
 func itemKey(source string, externalID id.ExternalID) string {
-	return source + ":" + externalID.Get()
+	return strconv.Itoa(len(source)) + ":" + source + externalID.Get()
 }
 
 // aggIDCache caches deterministic AggregateID computations to avoid

@@ -28,6 +28,7 @@ type ItemSyncedPayload struct {
 	ActorAvatarURL string          `json:"actorAvatarUrl,omitempty"`
 	RepoName       string          `json:"repoName,omitempty"`
 	RepoURL        string          `json:"repoUrl,omitempty"`
+	ContentHash    string          `json:"contentHash,omitempty"`
 	CreatedAt      int64           `json:"createdAt"`
 	UpdatedAt      int64           `json:"updatedAt"`
 	RawJSON        json.RawMessage `json:"rawJson,omitempty"`

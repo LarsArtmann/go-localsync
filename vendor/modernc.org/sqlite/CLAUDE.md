@@ -35,7 +35,6 @@ make clean               # removes log-*, *.test, *.out, go.work*
 Single test: `go test -v -run TestScalar` (pattern is a regexp; tests live in `all_test.go`, `module_test.go`, `func_test.go`, `pre_update_hook_test.go`, `vec_test.go`, `leak_test.go`, `fcntl_test.go`, `backup_test.go`, `null_test.go`). VFS tests: `go test ./vfs/...`.
 
 Build/debug tags:
-
 - `-tags=sqlite.dmesg` — enables this package's `dmesg(...)` (writes to `/tmp/libc.log`); see `dmesg.go` / `nodmesg.go`.
 - `-tags=libc.dmesg` — enables debug logs from `modernc.org/libc` (must be combined with patching `libc` itself — see the worked example in `doc.go`).
 - `GO_GENERATE=-DSQLITE_DEBUG,-DSQLITE_MEM_DEBUG` for `go generate` to produce a debug-instrumented transpilation (requires `modernc.org/ccgo/v4` installed locally).

@@ -23,6 +23,7 @@ type Item struct {
 	ActorAvatarURL string
 	RepoName       id.RepoID
 	RepoURL        string
+	ContentHash    string
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 	SchemaVersion  schema.Version

@@ -75,7 +75,6 @@ This release focuses on improving the integration experience with pull-based met
 Otter v2 has been completely redesigned for better performance and usability.
 
 Key improvements:
-
 - Completely rethought API for greater flexibility
 - Added [loading](https://maypok86.github.io/otter/user-guide/v2/features/loading/) and [refreshing](https://maypok86.github.io/otter/user-guide/v2/features/refresh/) features ([#26](https://github.com/maypok86/otter/issues/26))
 - Added [entry pinning](https://maypok86.github.io/otter/user-guide/v2/features/eviction/#pinning-entries)
@@ -98,55 +97,55 @@ Key improvements:
    - The ability to create a cache with any combination of features
 
 2. **Cache API Changes**
-   - `Get` method renamed to `GetIfPresent`
-   - `Set` method signature changed to return both value and bool
-   - `SetIfAbsent` method signature changed to return both value and bool
-   - `Delete` method renamed to `Invalidate`
-   - `Clear` method renamed to `InvalidateAll`
-   - `Size` method renamed to `EstimatedSize`
-   - `Capacity` method renamed to `GetMaximum`
-   - `Range` method removed in favor of `All` iterator
-   - `Has` method removed
-   - `DeleteByFunc` method removed
-   - `Stats` method removed in favor of `stats.Recorder` interface
-   - `Close` method removed
+    - `Get` method renamed to `GetIfPresent`
+    - `Set` method signature changed to return both value and bool
+    - `SetIfAbsent` method signature changed to return both value and bool
+    - `Delete` method renamed to `Invalidate`
+    - `Clear` method renamed to `InvalidateAll`
+    - `Size` method renamed to `EstimatedSize`
+    - `Capacity` method renamed to `GetMaximum`
+    - `Range` method removed in favor of `All` iterator
+    - `Has` method removed
+    - `DeleteByFunc` method removed
+    - `Stats` method removed in favor of `stats.Recorder` interface
+    - `Close` method removed
 
 3. **Expiration**
-   - Expiration API is now more flexible with `ExpiryCalculator` interface
-   - `ExpiryCreating`, `ExpiryWriting` and `ExpiryAccessing` functions introduced
+    - Expiration API is now more flexible with `ExpiryCalculator` interface
+    - `ExpiryCreating`, `ExpiryWriting` and `ExpiryAccessing` functions introduced
 
 4. **Statistics**
-   - Moved statistics to a separate package `stats`
-   - `stats.Recorder` interface and `stats.Counter` struct introduced
+    - Moved statistics to a separate package `stats`
+    - `stats.Recorder` interface and `stats.Counter` struct introduced
 
 5. **Extension**
-   - `Extension` struct removed in favor of methods from `Cache`
+    - `Extension` struct removed in favor of methods from `Cache`
 
 ### ✨Features
 
 1. **Loading**
-   - Added `Get` method for obtaining values if necessary
-   - Added `Loader` interface for retrieving values from the data source
-   - Added `ErrNotFound` error for indicating missing entries
+    - Added `Get` method for obtaining values if necessary
+    - Added `Loader` interface for retrieving values from the data source
+    - Added `ErrNotFound` error for indicating missing entries
 
 2. **Refresh**
-   - Added flexible refresh API with `RefreshCalculator` interface
+    - Added flexible refresh API with `RefreshCalculator` interface
    - `RefreshCreating`, `RefreshWriting` functions introduced
    - Added `Refresh` method for refreshing values asynchronously
 
 3. **Bulk Operations**
-   - Added `BulkGet` for loading multiple values at once
-   - Added `BulkRefresh` for refreshing multiple values asynchronously
-   - Added `BulkLoader` interface for retrieving multiple values from the data source at once
+    - Added `BulkGet` for loading multiple values at once
+    - Added `BulkRefresh` for refreshing multiple values asynchronously
+    - Added `BulkLoader` interface for retrieving multiple values from the data source at once
 
 4. **Cache Methods**
-   - Added `All` method for iterating over all entries
-   - Added `CleanUp` method for performing pending maintenance operations
-   - Added `WeightedSize` method for weight-based caches
+    - Added `All` method for iterating over all entries
+    - Added `CleanUp` method for performing pending maintenance operations
+    - Added `WeightedSize` method for weight-based caches
 
 5. **Enhanced Configuration**
-   - Added `Executor` option for customizing async operations
-   - Added `Logger` interface for custom logging
+    - Added `Executor` option for customizing async operations
+    - Added `Logger` interface for custom logging
 
 6. **Entry Management**
    - Added `SetExpiresAfter` and `SetRefreshableAfter` for per-entry time control
@@ -160,10 +159,10 @@ Key improvements:
    - Added `DeletionEvent` struct
 
 8. **Performance Improvements**
-   - Replaced `S3-FIFO` with adaptive `W-TinyLFU`
-   - Added more efficient write buffer
-   - Added auto-configurable lossy read buffer
-   - The task scheduling mechanism has been completely reworked, allowing users to manage it themselves when needed.
+    - Replaced `S3-FIFO` with adaptive `W-TinyLFU`
+    - Added more efficient write buffer
+    - Added auto-configurable lossy read buffer
+    - The task scheduling mechanism has been completely reworked, allowing users to manage it themselves when needed.
 
 ### 🚀 Improvements
 

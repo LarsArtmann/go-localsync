@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- RetryNotify\* and RetryWithData functions. Only single Retry function remains.
+- RetryNotify* and RetryWithData functions. Only single Retry function remains.
 - Optional arguments from ExponentialBackoff constructor.
 - Clock and Timer interfaces.
 

@@ -1,6 +1,8 @@
 package cqrs
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/codec/v3"
@@ -27,10 +29,21 @@ func toDataItem(p *provider.Item) *model.Item {
 		ActorAvatarURL: p.ActorAvatarURL,
 		RepoName:       p.RepoName,
 		RepoURL:        p.RepoURL,
+		ContentHash:    hashRawJSON(p.RawJSON),
 		CreatedAt:      p.CreatedAt,
 		UpdatedAt:      p.UpdatedAt,
 		SchemaVersion:  schema.CurrentVersion(),
 	}
+}
+
+func hashRawJSON(raw []byte) string {
+	if len(raw) == 0 {
+		return ""
+	}
+
+	h := sha256.Sum256(raw)
+
+	return hex.EncodeToString(h[:])
 }
 
 // dataItemFromPayload reconstructs a data.Item from an event payload.
@@ -54,6 +67,7 @@ func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 		ActorAvatarURL: payload.ActorAvatarURL,
 		RepoName:       id.NewRepoID(payload.RepoName),
 		RepoURL:        payload.RepoURL,
+		ContentHash:    payload.ContentHash,
 		CreatedAt:      fromUnixNano(payload.CreatedAt),
 		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
 		SchemaVersion:  schemaVer,
@@ -82,6 +96,7 @@ func dataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 		ActorAvatarURL: item.ActorAvatarURL,
 		RepoName:       item.RepoName.Get(),
 		RepoURL:        item.RepoURL,
+		ContentHash:    item.ContentHash,
 		CreatedAt:      unixNano(item.CreatedAt),
 		UpdatedAt:      unixNano(item.UpdatedAt),
 		RawJSON:        rawJSON,

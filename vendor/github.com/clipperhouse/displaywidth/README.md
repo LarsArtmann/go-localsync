@@ -7,7 +7,6 @@ A high-performance Go package for measuring the monospace display width of strin
 [![Fuzz](https://github.com/clipperhouse/displaywidth/actions/workflows/gofuzz.yml/badge.svg)](https://github.com/clipperhouse/displaywidth/actions/workflows/gofuzz.yml)
 
 ## Install
-
 ```bash
 go get github.com/clipperhouse/displaywidth
 ```
@@ -38,7 +37,7 @@ For most purposes, you should use the `String` or `Bytes` methods. They sum
 the widths of grapheme clusters in the string or byte slice.
 
 > Note: in your application, iterating over runes to measure width is likely incorrect;
-> the smallest unit of display is a grapheme, not a rune.
+the smallest unit of display is a grapheme, not a rune.
 
 ### Iterating over graphemes
 
@@ -100,14 +99,15 @@ When `false` (default), East Asian Ambiguous characters are treated as width 1.
 When `true`, they are treated as width 2.
 
 You may wish to configure this based on environment variables or locale.
-`go-runewidth`, for example, does so
-[during package initialization](https://github.com/mattn/go-runewidth/blob/master/runewidth.go#L26C1-L45C2). `displaywidth` does not do this automatically, we prefer to leave it to you.
+ `go-runewidth`, for example, does so
+ [during package initialization](https://github.com/mattn/go-runewidth/blob/master/runewidth.go#L26C1-L45C2). `displaywidth` does not do this automatically, we prefer to leave it to you.
+
 
 ## Technical standards and compatibility
 
 This package implements the Unicode East Asian Width standard
 ([UAX #11](https://www.unicode.org/reports/tr11/tr11-43.html)), and handles
-[version selectors](<https://en.wikipedia.org/wiki/Variation_Selectors_(Unicode_block)>),
+[version selectors](https://en.wikipedia.org/wiki/Variation_Selectors_(Unicode_block)),
 and [regional indicator pairs](https://en.wikipedia.org/wiki/Regional_indicator_symbol)
 (flags). We implement [Unicode TR51](https://www.unicode.org/reports/tr51/tr51-27.html)
 for emojis. We are keeping an eye on
