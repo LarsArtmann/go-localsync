@@ -47,16 +47,16 @@ func backoff(cfg provider.RetryConfig, attempt int) time.Duration {
 	return clampNonNeg(delay+jitter, cfg.MaxBackoff)
 }
 
-func clampNonNeg(d, max time.Duration) time.Duration {
-	if d < 0 {
+func clampNonNeg(duration, ceiling time.Duration) time.Duration {
+	if duration < 0 {
 		return 0
 	}
 
-	if max > 0 {
-		return min(d, max)
+	if ceiling > 0 {
+		return min(duration, ceiling)
 	}
 
-	return d
+	return duration
 }
 
 // sleepCtx sleeps for d, returning ctx.Err() early if the context is cancelled.
