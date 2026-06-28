@@ -180,6 +180,10 @@ func (s *CQRSStack) SyncItems(
 	corrID := cqrsid.NewCorrelationID()
 
 	for _, item := range items {
+		if ctx.Err() != nil {
+			break
+		}
+
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 		dataItem := toDataItem(item)
 

@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"charm.land/log/v2"
@@ -56,9 +57,10 @@ func (o *SyncOptions) Validate() error {
 
 // SyncResult holds the result of a sync operation.
 type SyncResult struct {
-	Fetched int
-	Skipped int
-	Errors  int
+	Fetched    int
+	Skipped    int
+	Errors     int
+	ItemErrors []ItemSyncResult
 }
 
 // Stats holds aggregate statistics about synced items.
@@ -100,6 +102,12 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 	syncResult.Errors += summary.Errors
 	syncResult.Skipped = len(valid) - summary.Synced - summary.Errors
 
+	for _, r := range summary.Results {
+		if r.Action == ActionError {
+			syncResult.ItemErrors = append(syncResult.ItemErrors, r)
+		}
+	}
+
 	s.reportProgress(opts, syncResult)
 
 	s.logger.Info(
@@ -111,6 +119,10 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 		"errors",
 		syncResult.Errors,
 	)
+
+	if syncResult.Errors > 0 {
+		return syncResult, fmt.Errorf("sync completed with %d errors out of %d items", syncResult.Errors, len(valid))
+	}
 
 	return syncResult, nil
 }
