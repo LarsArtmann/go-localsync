@@ -13,9 +13,9 @@ _go-localsync is a **single-writer pull mirror**: the provider is the sole sourc
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)                                        |
 | **CQRS Stack**          | Event-sourced architecture via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) v3 — Decider, ReadModel, Projection |
-| **Sync Engine**          | Full and incremental sync with pagination, rate limiting, retry with backoff, and per-source serialization                      |
-| **Tombstones**           | Soft-delete with reasons (upstream-gone, user-hidden); optional reconciliation tombstones items the provider stopped returning |
-| **Conflict Resolution**  | Detects when a re-synced item changed since last sync; remote-wins by default, pluggable `crdt.ConflictResolver`                 |
+| **Sync Engine**         | Full and incremental sync with pagination, rate limiting, retry with backoff, and per-source serialization                     |
+| **Tombstones**          | Soft-delete with reasons (upstream-gone, user-hidden); optional reconciliation tombstones items the provider stopped returning |
+| **Conflict Resolution** | Detects when a re-synced item changed since last sync; remote-wins by default, pluggable `crdt.ConflictResolver`               |
 | **Branded IDs**         | Type-safe IDs from [go-branded-id](https://github.com/larsartmann/go-branded-id)                                               |
 | **SQLite Backend**      | SQLite event store with snapshots and pure-Go driver (no CGo)                                                                  |
 
@@ -152,8 +152,8 @@ The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/
 
 | Component        | Description                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Decider**      | Pure Apply/DecideSync/DecideTombstone — single authority for state transitions (`SyncItemState{Item *model.Item}`)           |
-| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`                                                                          |
+| **Decider**      | Pure Apply/DecideSync/DecideTombstone — single authority for state transitions (`SyncItemState{Item *model.Item}`)          |
+| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`                                                                         |
 | **Projection**   | Live events via synchronous `bus.SubscribeAll`; SQLite catch-up via background `runner.replayJournal` (no checkpoint store) |
 | **Read Model**   | In-memory or SQLite with filter/pagination, stores `*model.Item`                                                            |
 | **Aggregate ID** | Deterministic SHA256→hex from (source, sourceID) for idempotency                                                            |
@@ -221,24 +221,24 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ## Features
 
-| Feature            | Status  | Description                                                  |
-| ------------------ | ------- | ------------------------------------------------------------ |
-| CQRS Stack         | ✅ Done | Event store, bus, decider repository, read model, projection |
-| Decider Pattern    | ✅ Done | Pure Apply/DecideSync/DecideTombstone with SyncItemState     |
-| Incremental Sync   | ✅ Done | Only fetch new items since last sync — no duplicate data     |
-| Full Fidelity      | ✅ Done | Raw JSON stored for 100% data preservation                   |
-| Conflict Detection | ✅ Done | Timestamp-based comparison, remote-wins resolution           |
-| Branded IDs        | ✅ Done | Compile-time type-safe identifiers                           |
-| SQLite Backend     | ✅ Done | SQLite event store + read model + snapshots (no CGo)         |
-| No CGO             | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                   |
-| Rate Limiting      | ✅ Done | Configurable rate limiting wired into sync flow              |
-| Retry Logic        | ✅ Done | Exponential backoff + jitter, honors IsRetryable, optional Retry-After |
-| Snapshots          | ✅ Done | Aggregate state persistence caps replay cost across restarts |
-| Correlation IDs    | ✅ Done | Unique per sync run for cross-event tracing and debugging    |
-| Event Logging      | ✅ Done | Structured logging of all domain events via middleware       |
-| Tombstone + Resurrect | ✅ Done | Soft-delete keeps history; re-syncing a tombstoned item resurrects it |
-| Upstream Reconciliation | ✅ Done | Tombstone items the provider stopped returning (opt-in per sync)    |
-| Per-source Locking   | ✅ Done | Concurrent syncs of one source are ordered; sources run in parallel |
+| Feature                 | Status  | Description                                                            |
+| ----------------------- | ------- | ---------------------------------------------------------------------- |
+| CQRS Stack              | ✅ Done | Event store, bus, decider repository, read model, projection           |
+| Decider Pattern         | ✅ Done | Pure Apply/DecideSync/DecideTombstone with SyncItemState               |
+| Incremental Sync        | ✅ Done | Only fetch new items since last sync — no duplicate data               |
+| Full Fidelity           | ✅ Done | Raw JSON stored for 100% data preservation                             |
+| Conflict Detection      | ✅ Done | Timestamp-based comparison, remote-wins resolution                     |
+| Branded IDs             | ✅ Done | Compile-time type-safe identifiers                                     |
+| SQLite Backend          | ✅ Done | SQLite event store + read model + snapshots (no CGo)                   |
+| No CGO                  | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                             |
+| Rate Limiting           | ✅ Done | Configurable rate limiting wired into sync flow                        |
+| Retry Logic             | ✅ Done | Exponential backoff + jitter, honors IsRetryable, optional Retry-After |
+| Snapshots               | ✅ Done | Aggregate state persistence caps replay cost across restarts           |
+| Correlation IDs         | ✅ Done | Unique per sync run for cross-event tracing and debugging              |
+| Event Logging           | ✅ Done | Structured logging of all domain events via middleware                 |
+| Tombstone + Resurrect   | ✅ Done | Soft-delete keeps history; re-syncing a tombstoned item resurrects it  |
+| Upstream Reconciliation | ✅ Done | Tombstone items the provider stopped returning (opt-in per sync)       |
+| Per-source Locking      | ✅ Done | Concurrent syncs of one source are ordered; sources run in parallel    |
 
 ## Development
 
@@ -272,17 +272,17 @@ pkg/
 
 188 test functions across 9 packages:
 
-| Package           | Tests | Coverage | Description                                                              |
-| ----------------- | ----- | -------- | ------------------------------------------------------------------------ |
-| `pkg/cqrs`        | 93    | 81.9%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression  |
-| `pkg/sync`        | 28    | 84.5%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression            |
-| `pkg/crdt`        | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                  |
-| `pkg/id`          | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                  |
-| `pkg/errors`      | 9     | 100.0%   | Sentinel errors, wrapping, classification, IsRetryable                   |
-| `pkg/provider`    | 10    | 96.7%    | Item validation, RateLimitCache                                          |
-| `pkg/api`         | 14    | 94.0%    | Server, routes, handlers, health/stats/items/sync endpoints              |
-| `pkg/data/model`  | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                               |
-| `pkg/data/schema` | 4     | 100.0%   | Schema Version (V1/V2), CurrentVersion, Valid                            |
+| Package           | Tests | Coverage | Description                                                             |
+| ----------------- | ----- | -------- | ----------------------------------------------------------------------- |
+| `pkg/cqrs`        | 93    | 81.9%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
+| `pkg/sync`        | 28    | 84.5%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
+| `pkg/crdt`        | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
+| `pkg/id`          | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                 |
+| `pkg/errors`      | 9     | 100.0%   | Sentinel errors, wrapping, classification, IsRetryable                  |
+| `pkg/provider`    | 10    | 96.7%    | Item validation, RateLimitCache                                         |
+| `pkg/api`         | 14    | 94.0%    | Server, routes, handlers, health/stats/items/sync endpoints             |
+| `pkg/data/model`  | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                              |
+| `pkg/data/schema` | 4     | 100.0%   | Schema Version (V1/V2), CurrentVersion, Valid                           |
 
 ## Related Projects
 

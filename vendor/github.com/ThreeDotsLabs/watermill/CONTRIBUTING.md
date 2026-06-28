@@ -18,13 +18,13 @@ You can pick one of the existing issues. Most of the issues should have an estim
 If you have an idea to create a Pub/Sub based on some technology and it is not listed yet in our issues (because we don't know it, or it is just some crazy idea, like physical mail based Pub/Sub), feel free to add your own implementation.
 You can do it in your private repository or if you want, we can move it to `ThreeDotsLabs/watermill-[name]`.
 
-*Please keep in mind that you will not be able to push changes directly to the master branch in a project in our organization*.
+_Please keep in mind that you will not be able to push changes directly to the master branch in a project in our organization_.
 
 When adding a new Pub/Sub implementation, you should start with this guide: [https://watermill.io/docs/pub-sub-implementing/](https://watermill.io/docs/pub-sub-implementing/).
 
 ### New ideas
 
-If you have any idea that is not covered in the issues list, please post a new issue describing it. 
+If you have any idea that is not covered in the issues list, please post a new issue describing it.
 It's recommended to discuss your idea on [Discord](https://discord.gg/QV6VFg4YQE)/GitHub before creating production-ready implementation - in some situations, it may save a lot of your time before implementing something that can be simplified or done more easily. :)
 
 In general, it's helpful to discuss a Proof of Concept to align with the idea.
@@ -34,6 +34,7 @@ In general, it's helpful to discuss a Proof of Concept to align with the idea.
 Makefile and docker-compose (for Pub/Subs) are your friends. You can run all tests locally (they are running in CI in the same way).
 
 Useful commands:
+
 - `make up` - docker-compose up
 - `make test` - tests
 - `make test_short` - run short tests (useful to perform a very fast check after changes)

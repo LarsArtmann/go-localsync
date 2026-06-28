@@ -15,10 +15,10 @@ This had four problems, all rooted in the same lie — that "deleted" means "gon
 
 1. **History was destroyed.** A nil `Item` discards the actor, repo, timestamps, and raw
    JSON the moment the item disappears upstream. The event journal still exists, but the
-   aggregate's *current* state — the thing the read model and queries serve — became empty.
+   aggregate's _current_ state — the thing the read model and queries serve — became empty.
 2. **"Gone upstream" was indistinguishable from "never fetched".** A paginated pull mirror's
-   central question is *"the provider stopped returning this item — should I drop it?"* With
-   a hard delete there was no way to record *why* an item vanished, nor to show it quietly
+   central question is _"the provider stopped returning this item — should I drop it?"_ With
+   a hard delete there was no way to record _why_ an item vanished, nor to show it quietly
    hidden rather than fully erased.
 3. **No reason, no audit.** An item can disappear for different reasons (deleted upstream,
    hidden by the user, redacted). A hard delete has no field for that.
@@ -72,7 +72,7 @@ Three design rules follow from the data model:
   — automatic, no special-case code path.
 - **Reasons are explicit and queryable.** `upstream_gone`, `user_hidden`, `redacted` (with
   `ParseTombstoneReason` defaulting unknowns to `upstream_gone`, the safe "hidden" default).
-- **Upstream-gone detection is honest.** The reconciliation pass records *why* an item
+- **Upstream-gone detection is honest.** The reconciliation pass records _why_ an item
   disappeared instead of silently dropping it.
 - **No schema upcasting needed.** Tombstone is a read-model column + a new event type, not a
   field on `ItemSyncedPayload`, so V2 payloads are unchanged.

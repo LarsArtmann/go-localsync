@@ -7,10 +7,11 @@ In v1.0.0 we introduced a couple of breaking changes, to keep a stable API until
 All Pub/Subs (excluding go-channel implementation) were moved to separated repositories.
 You can replace all import paths, with provided `sed`:
 
-	find . -type f -iname '*.go' -exec sed -i -E "s/github\.com\/ThreeDotsLabs\/watermill\/message\/infrastructure\/(amqp|googlecloud|http|io|kafka|nats|sql)/github.com\/ThreeDotsLabs\/watermill-\1\/pkg\/\1/" "{}" +;
-	find . -type f -iname '*.go' -exec sed -i -E "s/github\.com\/ThreeDotsLabs\/watermill\/message\/infrastructure\/gochannel/github\.com\/ThreeDotsLabs\/watermill\/pubsub\/gochannel/" "{}" +;
+    find . -type f -iname '*.go' -exec sed -i -E "s/github\.com\/ThreeDotsLabs\/watermill\/message\/infrastructure\/(amqp|googlecloud|http|io|kafka|nats|sql)/github.com\/ThreeDotsLabs\/watermill-\1\/pkg\/\1/" "{}" +;
+    find . -type f -iname '*.go' -exec sed -i -E "s/github\.com\/ThreeDotsLabs\/watermill\/message\/infrastructure\/gochannel/github\.com\/ThreeDotsLabs\/watermill\/pubsub\/gochannel/" "{}" +;
 
 # Breaking changes
+
 - `message.PubSub` interface was removed
 - `message.NewPubSub` constructor was removed
 - `message.NoPublishHandlerFunc` is now passed to `message.Router.AddNoPublisherHandler`, instead of `message.HandlerFunc`.

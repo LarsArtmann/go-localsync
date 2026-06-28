@@ -404,15 +404,15 @@ fg := s.GetForeground() // returns color.Color
 
 ### New style methods
 
-| Method | Description |
-|---|---|
-| `UnderlineStyle(Underline)` | Set underline style (single, double, curly, etc.) |
-| `UnderlineColor(color.Color)` | Set underline color |
-| `PaddingChar(rune)` | Set the character used for padding fill |
-| `MarginChar(rune)` | Set the character used for margin fill |
-| `Hyperlink(link, params...)` | Set a clickable hyperlink |
-| `BorderForegroundBlend(...color.Color)` | Apply gradient colors to borders |
-| `BorderForegroundBlendOffset(int)` | Set the offset for border gradient |
+| Method                                  | Description                                       |
+| --------------------------------------- | ------------------------------------------------- |
+| `UnderlineStyle(Underline)`             | Set underline style (single, double, curly, etc.) |
+| `UnderlineColor(color.Color)`           | Set underline color                               |
+| `PaddingChar(rune)`                     | Set the character used for padding fill           |
+| `MarginChar(rune)`                      | Set the character used for margin fill            |
+| `Hyperlink(link, params...)`            | Set a clickable hyperlink                         |
+| `BorderForegroundBlend(...color.Color)` | Apply gradient colors to borders                  |
+| `BorderForegroundBlendOffset(int)`      | Set the offset for border gradient                |
 
 Each has a corresponding `Get*`, `Unset*`, and where applicable `Get*`
 accessor.
@@ -445,25 +445,25 @@ New methods:
 The following types and functions no longer exist in v2. This table shows each
 removed symbol and its replacement.
 
-| v1 Symbol | v2 Replacement |
-|---|---|
-| `type Renderer` | Removed entirely |
-| `DefaultRenderer()` | Not needed |
-| `SetDefaultRenderer(r)` | Not needed |
-| `NewRenderer(w, opts...)` | Not needed |
-| `ColorProfile()` | `colorprofile.Detect(w, env)` |
-| `SetColorProfile(p)` | Set `lipgloss.Writer.Profile` |
+| v1 Symbol                       | v2 Replacement                        |
+| ------------------------------- | ------------------------------------- |
+| `type Renderer`                 | Removed entirely                      |
+| `DefaultRenderer()`             | Not needed                            |
+| `SetDefaultRenderer(r)`         | Not needed                            |
+| `NewRenderer(w, opts...)`       | Not needed                            |
+| `ColorProfile()`                | `colorprofile.Detect(w, env)`         |
+| `SetColorProfile(p)`            | Set `lipgloss.Writer.Profile`         |
 | `HasDarkBackground()` (no args) | `lipgloss.HasDarkBackground(in, out)` |
-| `SetHasDarkBackground(b)` | Not needed — pass bool to `LightDark` |
-| `type TerminalColor` | `image/color.Color` |
-| `type Color string` | `func Color(string) color.Color` |
-| `type ANSIColor uint` | `type ANSIColor = ansi.IndexedColor` |
-| `type AdaptiveColor` | `compat.AdaptiveColor` or `LightDark` |
-| `type CompleteColor` | `compat.CompleteColor` or `Complete` |
-| `type CompleteAdaptiveColor` | `compat.CompleteAdaptiveColor` |
-| `WithWhitespaceForeground(c)` | `WithWhitespaceStyle(s)` |
-| `WithWhitespaceBackground(c)` | `WithWhitespaceStyle(s)` |
-| `renderer.NewStyle()` | `lipgloss.NewStyle()` |
+| `SetHasDarkBackground(b)`       | Not needed — pass bool to `LightDark` |
+| `type TerminalColor`            | `image/color.Color`                   |
+| `type Color string`             | `func Color(string) color.Color`      |
+| `type ANSIColor uint`           | `type ANSIColor = ansi.IndexedColor`  |
+| `type AdaptiveColor`            | `compat.AdaptiveColor` or `LightDark` |
+| `type CompleteColor`            | `compat.CompleteColor` or `Complete`  |
+| `type CompleteAdaptiveColor`    | `compat.CompleteAdaptiveColor`        |
+| `WithWhitespaceForeground(c)`   | `WithWhitespaceStyle(s)`              |
+| `WithWhitespaceBackground(c)`   | `WithWhitespaceStyle(s)`              |
+| `renderer.NewStyle()`           | `lipgloss.NewStyle()`                 |
 
 ---
 
@@ -471,19 +471,19 @@ removed symbol and its replacement.
 
 A side-by-side summary for common patterns:
 
-| Task | v1 | v2 |
-|---|---|---|
-| Import | `"github.com/charmbracelet/lipgloss"` | `"charm.land/lipgloss/v2"` |
-| Create style | `lipgloss.NewStyle()` | `lipgloss.NewStyle()` |
-| Hex color | `lipgloss.Color("#ff00ff")` | `lipgloss.Color("#ff00ff")` |
-| ANSI color | `lipgloss.Color("5")` | `lipgloss.Color("5")` or `lipgloss.Magenta` |
-| Adaptive color | `lipgloss.AdaptiveColor{Light: "#fff", Dark: "#000"}` | `compat.AdaptiveColor{Light: lipgloss.Color("#fff"), Dark: lipgloss.Color("#000")}` |
-| Set foreground | `s.Foreground(lipgloss.Color("5"))` | `s.Foreground(lipgloss.Color("5"))` |
-| Print with downsampling | `fmt.Println(s.Render("hi"))` | `lipgloss.Println(s.Render("hi"))` |
-| Detect dark bg | `lipgloss.HasDarkBackground()` | `lipgloss.HasDarkBackground(os.Stdin, os.Stdout)` |
-| Light/dark color | `lipgloss.AdaptiveColor{...}` | `lipgloss.LightDark(isDark)(light, dark)` |
-| Whitespace styling | `WithWhitespaceForeground(c)` | `WithWhitespaceStyle(lipgloss.NewStyle().Foreground(c))` |
-| Underline | `s.Underline(true)` | `s.Underline(true)` or `s.UnderlineStyle(lipgloss.UnderlineCurly)` |
+| Task                    | v1                                                    | v2                                                                                  |
+| ----------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Import                  | `"github.com/charmbracelet/lipgloss"`                 | `"charm.land/lipgloss/v2"`                                                          |
+| Create style            | `lipgloss.NewStyle()`                                 | `lipgloss.NewStyle()`                                                               |
+| Hex color               | `lipgloss.Color("#ff00ff")`                           | `lipgloss.Color("#ff00ff")`                                                         |
+| ANSI color              | `lipgloss.Color("5")`                                 | `lipgloss.Color("5")` or `lipgloss.Magenta`                                         |
+| Adaptive color          | `lipgloss.AdaptiveColor{Light: "#fff", Dark: "#000"}` | `compat.AdaptiveColor{Light: lipgloss.Color("#fff"), Dark: lipgloss.Color("#000")}` |
+| Set foreground          | `s.Foreground(lipgloss.Color("5"))`                   | `s.Foreground(lipgloss.Color("5"))`                                                 |
+| Print with downsampling | `fmt.Println(s.Render("hi"))`                         | `lipgloss.Println(s.Render("hi"))`                                                  |
+| Detect dark bg          | `lipgloss.HasDarkBackground()`                        | `lipgloss.HasDarkBackground(os.Stdin, os.Stdout)`                                   |
+| Light/dark color        | `lipgloss.AdaptiveColor{...}`                         | `lipgloss.LightDark(isDark)(light, dark)`                                           |
+| Whitespace styling      | `WithWhitespaceForeground(c)`                         | `WithWhitespaceStyle(lipgloss.NewStyle().Foreground(c))`                            |
+| Underline               | `s.Underline(true)`                                   | `s.Underline(true)` or `s.UnderlineStyle(lipgloss.UnderlineCurly)`                  |
 
 ---
 

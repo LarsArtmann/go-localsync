@@ -32,16 +32,16 @@ linters:
       rules:
         auto/sdk:
           files:
-            - '!internal/global/trace.go'
+            - "!internal/global/trace.go"
             - ~internal/global/trace_test.go
           deny:
             - pkg: go.opentelemetry.io/auto/sdk
               desc: Do not use SDK from automatic instrumentation.
         non-tests:
           files:
-            - '!$test'
-            - '!**/*test/*.go'
-            - '!**/internal/matchers/*.go'
+            - "!$test"
+            - "!**/*test/*.go"
+            - "!**/internal/matchers/*.go"
           deny:
             - pkg: testing
             - pkg: github.com/stretchr/testify
@@ -50,20 +50,20 @@ linters:
             - pkg: crypto/**/pkix
         otel-internal:
           files:
-            - '**/sdk/*.go'
-            - '**/sdk/**/*.go'
-            - '**/exporters/*.go'
-            - '**/exporters/**/*.go'
-            - '**/schema/*.go'
-            - '**/schema/**/*.go'
-            - '**/metric/*.go'
-            - '**/metric/**/*.go'
-            - '**/bridge/*.go'
-            - '**/bridge/**/*.go'
-            - '**/trace/*.go'
-            - '**/trace/**/*.go'
-            - '**/log/*.go'
-            - '**/log/**/*.go'
+            - "**/sdk/*.go"
+            - "**/sdk/**/*.go"
+            - "**/exporters/*.go"
+            - "**/exporters/**/*.go"
+            - "**/schema/*.go"
+            - "**/schema/**/*.go"
+            - "**/metric/*.go"
+            - "**/metric/**/*.go"
+            - "**/bridge/*.go"
+            - "**/bridge/**/*.go"
+            - "**/trace/*.go"
+            - "**/trace/**/*.go"
+            - "**/log/*.go"
+            - "**/log/**/*.go"
           deny:
             - pkg: go.opentelemetry.io/otel/internal$
               desc: Do not use cross-module internal packages.
@@ -71,21 +71,21 @@ linters:
               desc: Do not use cross-module internal packages.
         otlp-internal:
           files:
-            - '!**/exporters/otlp/internal/**/*.go'
+            - "!**/exporters/otlp/internal/**/*.go"
           deny:
             - pkg: go.opentelemetry.io/otel/exporters/otlp/internal
               desc: Do not use cross-module internal packages.
         otlpmetric-internal:
           files:
-            - '!**/exporters/otlp/otlpmetric/internal/*.go'
-            - '!**/exporters/otlp/otlpmetric/internal/**/*.go'
+            - "!**/exporters/otlp/otlpmetric/internal/*.go"
+            - "!**/exporters/otlp/otlpmetric/internal/**/*.go"
           deny:
             - pkg: go.opentelemetry.io/otel/exporters/otlp/otlpmetric/internal
               desc: Do not use cross-module internal packages.
         otlptrace-internal:
           files:
-            - '!**/exporters/otlp/otlptrace/*.go'
-            - '!**/exporters/otlp/otlptrace/internal/**.go'
+            - "!**/exporters/otlp/otlptrace/*.go"
+            - "!**/exporters/otlp/otlptrace/internal/**.go"
           deny:
             - pkg: go.opentelemetry.io/otel/exporters/otlp/otlptrace/internal
               desc: Do not use cross-module internal packages.
@@ -143,7 +143,7 @@ linters:
         - name: constant-logical-expr
         - name: context-as-argument
           arguments:
-            - allow-types-before: '*testing.T'
+            - allow-types-before: "*testing.T"
           disabled: true
         - name: context-keys-type
         - name: deep-exit
@@ -257,12 +257,12 @@ linters:
       # as we commonly use it in tests and examples.
       - linters:
           - gosec
-        text: 'G404:'
+        text: "G404:"
       # Ignoring gosec G402: TLS MinVersion too low
       # as the https://pkg.go.dev/crypto/tls#Config handles MinVersion default well.
       - linters:
           - gosec
-        text: 'G402: TLS MinVersion too low.'
+        text: "G402: TLS MinVersion too low."
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0

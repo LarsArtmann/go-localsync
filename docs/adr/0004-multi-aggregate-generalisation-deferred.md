@@ -6,7 +6,7 @@
 
 > **Update (2026-06-28):** This review was performed before the delete→tombstone pivot
 > ([ADR-0005](0005-tombstone-over-delete.md)). The findings below are left as a historical
-> record of the state *at review time*: the event vocabulary is now `synced` /
+> record of the state _at review time_: the event vocabulary is now `synced` /
 > `conflict_found` / `tombstoned`, and `SyncItemState` carries the tombstone on `Item` (no
 > `Deleted bool`). The scope decision itself is unchanged — the SDK remains a single-aggregate,
 > pull-only, flat-Item sync engine.

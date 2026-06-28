@@ -786,26 +786,43 @@
   <body>
     <div class="layout">
       <main class="content">
-
         <div class="hero">
           <div class="hero-shapes"></div>
           <div class="hero-badge">Brutal Self-Review · Snapshot</div>
           <h1>What did I forget? What's stupid?</h1>
           <p class="hero-subtitle">
-            An honest audit of the Session 21 tombstone pivot, CRDT cleanup, resilience layer,
-            and docs-honesty pass. Verified against the code at <code>master</code> —
-            <code>go build</code> green, 188 tests pass, 0 lint issues.
-            Every claim below was checked with <code>grep</code>, not guessed.
+            An honest audit of the Session 21 tombstone pivot, CRDT cleanup, resilience layer, and
+            docs-honesty pass. Verified against the code at <code>master</code> —
+            <code>go build</code> green, 188 tests pass, 0 lint issues. Every claim below was
+            checked with <code>grep</code>, not guessed.
           </p>
         </div>
 
         <div class="stat-grid">
-          <div class="stat-card stat-bad"><div class="stat-value">4</div><div class="stat-label">Real issues found</div></div>
-          <div class="stat-card stat-good"><div class="stat-value">0</div><div class="stat-label">Ghost systems</div></div>
-          <div class="stat-card stat-warn"><div class="stat-value">2</div><div class="stat-label">Split-brain smells</div></div>
-          <div class="stat-card stat-good"><div class="stat-value">5</div><div class="stat-label">Quick wins (this session)</div></div>
-          <div class="stat-card"><div class="stat-value">188</div><div class="stat-label">Tests passing</div></div>
-          <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Lint issues</div></div>
+          <div class="stat-card stat-bad">
+            <div class="stat-value">4</div>
+            <div class="stat-label">Real issues found</div>
+          </div>
+          <div class="stat-card stat-good">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Ghost systems</div>
+          </div>
+          <div class="stat-card stat-warn">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Split-brain smells</div>
+          </div>
+          <div class="stat-card stat-good">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Quick wins (this session)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">188</div>
+            <div class="stat-label">Tests passing</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">0</div>
+            <div class="stat-label">Lint issues</div>
+          </div>
         </div>
 
         <section id="forget">
@@ -826,9 +843,9 @@
             <h3>No example for the headline feature</h3>
             <p>
               The tombstone→resurrect loop is the SDK's most distinctive behavior, and I wrote a
-              whole ADR about it — but <code>pkg/cqrs/example_test.go</code> only shows the happy-path
-              sync. A reader who wants to <em>see</em> a tombstone come back to life has to read the
-              test suite. The example undersells the product.
+              whole ADR about it — but <code>pkg/cqrs/example_test.go</code> only shows the
+              happy-path sync. A reader who wants to <em>see</em> a tombstone come back to life has
+              to read the test suite. The example undersells the product.
             </p>
           </div>
         </section>
@@ -840,10 +857,12 @@
             <p>
               Every file in that package has to alias the standard library:
               <code>stdsync "sync"</code>. I hit this exact footgun myself this session and spent a
-              cycle on it. It is a self-inflicted wound baked into the import path. The fix
-              (<code>pkg/sync</code> → <code>pkg/synclib</code>) is mechanical but breaking for the
-              one consumer (<code>github-local-sync</code>), so I deferred it. That is the right call
-              for now — but it stays on the list.
+              cycle on it. It is a self-inflicted wound baked into the import path. The fix (<code
+                >pkg/sync</code
+              >
+              → <code>pkg/synclib</code>) is mechanical but breaking for the one consumer
+              (<code>github-local-sync</code>), so I deferred it. That is the right call for now —
+              but it stays on the list.
             </p>
           </div>
           <div class="card card-problem">
@@ -864,19 +883,20 @@
             <p>
               The session reminder insisted the build was broken and uncommitted. A 5-second
               <code>git status</code> showed a clean tree with everything already in
-              <code>8c0847f</code>. I should have verified state <em>first</em>, always — the tree is
-              the source of truth, never a summary of it.
+              <code>8c0847f</code>. I should have verified state <em>first</em>, always — the tree
+              is the source of truth, never a summary of it.
             </p>
           </div>
           <div class="card card-warning">
             <h3>Retry config is a sealed box</h3>
             <p>
               <code>NewSyncer</code> hard-codes <code>provider.DefaultRetryConfig</code> with no
-              setter. The plumbing (<code>RetryConfig{Enabled, MaxRetries, InitialBackoff,
-              MaxBackoff}</code>) is correctly honored — I verified <code>fetchItems</code> checks
-              both <code>Enabled</code> and <code>MaxRetries</code> — but a consumer cannot reach it.
-              For a "superb SDK" the caller must control backoff (a rate-limited GitHub mirror is not
-              a LAN GitLab). This is the single highest-impact API gap.
+              setter. The plumbing (<code
+                >RetryConfig{Enabled, MaxRetries, InitialBackoff, MaxBackoff}</code
+              >) is correctly honored — I verified <code>fetchItems</code> checks both
+              <code>Enabled</code> and <code>MaxRetries</code> — but a consumer cannot reach it. For
+              a "superb SDK" the caller must control backoff (a rate-limited GitHub mirror is not a
+              LAN GitLab). This is the single highest-impact API gap.
             </p>
           </div>
         </section>
@@ -886,19 +906,22 @@
           <div class="card card-problem">
             <h3>Two result types with overlapping semantics</h3>
             <p>
-              <code>sync.SyncResult</code> has <code>Fetched, Skipped, Tombstoned, Errors,
-              ItemErrors</code>. <code>sync.ConflictResult</code> has <code>Fetched, Upserted,
-              Skipped, Conflicts, Errors</code> — and is <strong>missing
-              <code>Tombstoned</code> and <code>ItemErrors</code></strong>. The conflict-aware path
-              silently drops the tombstone count and per-item error detail. That is a real
-              inconsistency: two shapes describing the same operation, one of them lossy.
+              <code>sync.SyncResult</code> has
+              <code>Fetched, Skipped, Tombstoned, Errors, ItemErrors</code>.
+              <code>sync.ConflictResult</code> has
+              <code>Fetched, Upserted, Skipped, Conflicts, Errors</code> — and is
+              <strong>missing <code>Tombstoned</code> and <code>ItemErrors</code></strong
+              >. The conflict-aware path silently drops the tombstone count and per-item error
+              detail. That is a real inconsistency: two shapes describing the same operation, one of
+              them lossy.
             </p>
           </div>
           <div class="card card-warning">
             <h3>Status report said "2 commits" — I made 3</h3>
             <p>
-              The report was drafted before I split the lint fix from the docs commit. A snapshot, so
-              not worth re-writing, but it is a small honesty lapse worth noting: write the report
+              The report was drafted before I split the lint fix from the docs commit. A snapshot,
+              so not worth re-writing, but it is a small honesty lapse worth noting: write the
+              report
               <em>after</em> the final commit, or re-read it before pushing.
             </p>
           </div>
@@ -910,11 +933,13 @@
             <h3>No ghost systems found</h3>
             <p>
               I verified every "suspicious" export: <code>Syncer.Store()</code> is used by the API
-              server; <code>Stats</code>/<code>GetStats</code> feeds the <code>/stats</code> handler;
-              <code>SyncSummary</code> is the <code>SyncStore.SyncItems</code> contract;
-              <code>ActionUnchanged</code>/<code>ActionError</code> are emitted by the stack adapter
-              and validated by <code>IsValid()</code>. <code>pkg/testutil</code> is heavily used
-              across both test suites. Nothing is dead.
+              server; <code>Stats</code>/<code>GetStats</code> feeds the
+              <code>/stats</code> handler; <code>SyncSummary</code> is the
+              <code>SyncStore.SyncItems</code> contract; <code>ActionUnchanged</code>/<code
+                >ActionError</code
+              >
+              are emitted by the stack adapter and validated by <code>IsValid()</code>.
+              <code>pkg/testutil</code> is heavily used across both test suites. Nothing is dead.
             </p>
           </div>
           <div class="card card-solution">
@@ -935,8 +960,8 @@
               188 tests, 9 packages, lint clean — good. But <code>pkg/data/model</code> dropped to
               80.5% (the new <code>Tombstone</code>/<code>ParseTombstoneReason</code> paths are
               thin), and <strong>there is no test that reconcile refuses a partial fetch</strong>
-              (because that guard doesn't exist yet — see issue #1). The retry/resurrect behaviors are
-              well covered; the gap is the safety invariant I forgot to enforce.
+              (because that guard doesn't exist yet — see issue #1). The retry/resurrect behaviors
+              are well covered; the gap is the safety invariant I forgot to enforce.
             </p>
           </div>
         </section>
@@ -947,51 +972,80 @@
             <h3>Not about the code — one stale report number</h3>
             <p>
               Every code/build/test claim verified true. The only inaccuracy is the "2 commits" line
-              in the status report (it was 3). I checked the <code>RetryConfig.Enabled</code>
-              "split brain" suspicion against the source before publishing it — it is correctly
-              honored, so I am <em>not</em> claiming it as a bug. Honesty check: passed.
+              in the status report (it was 3). I checked the <code>RetryConfig.Enabled</code> "split
+              brain" suspicion against the source before publishing it — it is correctly honored, so
+              I am <em>not</em> claiming it as a bug. Honesty check: passed.
             </p>
           </div>
         </section>
 
         <section id="plan">
           <h2>Execution plan — sorted by impact ÷ effort</h2>
-          <p class="muted">Each step is a self-contained commit. Work top-down; stop when value drops.</p>
+          <p class="muted">
+            Each step is a self-contained commit. Work top-down; stop when value drops.
+          </p>
 
           <div class="card card-problem">
             <h3><span class="num">1</span> Gate reconcile on a complete fetch</h3>
             <p><span class="badge">High impact</span> · Low effort · ~20min</p>
-            <p>Refuse to tombstone when <code>result.HasMore</code> is true. Reuses an existing field — no new types. Adds the missing regression test. <strong>Fixes a data-loss footgun.</strong></p>
+            <p>
+              Refuse to tombstone when <code>result.HasMore</code> is true. Reuses an existing field
+              — no new types. Adds the missing regression test.
+              <strong>Fixes a data-loss footgun.</strong>
+            </p>
           </div>
 
           <div class="card card-problem">
-            <h3><span class="num">2</span> Make retry configurable: <code>WithRetry</code> options</h3>
+            <h3>
+              <span class="num">2</span> Make retry configurable: <code>WithRetry</code> options
+            </h3>
             <p><span class="badge">High impact</span> · Med effort · ~30min</p>
-            <p>Add functional-options constructor <code>New(...)</code> keeping <code>NewSyncer</code> as a thin wrapper. Non-breaking. Unblocks per-deployment backoff tuning.</p>
+            <p>
+              Add functional-options constructor <code>New(...)</code> keeping
+              <code>NewSyncer</code> as a thin wrapper. Non-breaking. Unblocks per-deployment
+              backoff tuning.
+            </p>
           </div>
 
           <div class="card card-warning">
             <h3><span class="num">3</span> Stop the <code>lockSource</code> map leak</h3>
             <p><span class="badge">Med impact</span> · Low effort · ~15min</p>
-            <p>Delete the map entry on release when no waiter holds it. Tiny, safe, removes the only unbounded-growth structure in the syncer.</p>
+            <p>
+              Delete the map entry on release when no waiter holds it. Tiny, safe, removes the only
+              unbounded-growth structure in the syncer.
+            </p>
           </div>
 
           <div class="card card-warning">
-            <h3><span class="num">4</span> Align <code>ConflictResult</code> with <code>SyncResult</code></h3>
+            <h3>
+              <span class="num">4</span> Align <code>ConflictResult</code> with
+              <code>SyncResult</code>
+            </h3>
             <p><span class="badge">Med impact</span> · Low effort · ~20min</p>
-            <p>Add <code>Tombstoned</code> + <code>ItemErrors</code> so the conflict path stops silently dropping data. Removes the split-brain.</p>
+            <p>
+              Add <code>Tombstoned</code> + <code>ItemErrors</code> so the conflict path stops
+              silently dropping data. Removes the split-brain.
+            </p>
           </div>
 
           <div class="card card-solution">
             <h3><span class="num">5</span> Add a tombstone→resurrect example test</h3>
             <p><span class="badge">Low impact</span> · Low effort · ~15min</p>
-            <p>Show the headline feature working. Reuses the existing <code>exampleProvider</code>.</p>
+            <p>
+              Show the headline feature working. Reuses the existing <code>exampleProvider</code>.
+            </p>
           </div>
 
           <div class="card card-warning">
-            <h3><span class="num">6</span> Rename <code>pkg/sync</code> → <code>pkg/synclib</code> (deferred)</h3>
+            <h3>
+              <span class="num">6</span> Rename <code>pkg/sync</code> →
+              <code>pkg/synclib</code> (deferred)
+            </h3>
             <p><span class="badge">Med impact</span> · High effort · breaking</p>
-            <p>Kills the stdlib collision footgun. Breaking for <code>github-local-sync</code>; coordinate that consumer first. <strong>Deferred</strong> — do not do blind.</p>
+            <p>
+              Kills the stdlib collision footgun. Breaking for <code>github-local-sync</code>;
+              coordinate that consumer first. <strong>Deferred</strong> — do not do blind.
+            </p>
           </div>
         </section>
 
@@ -1003,7 +1057,6 @@ go test ./... -count=1      ✅ 188 tests / 9 packages
 golangci-lint run ./...     ✅ 0 issues</code></pre>
           </div>
         </section>
-
       </main>
     </div>
   </body>
