@@ -136,3 +136,27 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 	testutil.AssertInt(t, result.Errors, 2, "Errors")
 	testutil.AssertInt(t, result.Upserted, 0, "Upserted")
 }
+
+// TestConflictAwareSyncer_RetainsItemErrors guards the split-brain fix: the
+// conflict-aware path must retain per-item error detail in ItemErrors (it
+// previously only counted them), matching what SyncResult already does.
+func TestConflictAwareSyncer_RetainsItemErrors(t *testing.T) {
+	t.Parallel()
+
+	items := testSyncItems("1", "PushEvent", "2", "IssueEvent")
+	syncer, store := newTestSyncer(items)
+	store.actions = []SyncAction{ActionCreated, ActionError}
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	result, err := cas.SyncWithConflictDetection(context.Background(), testSyncOpts())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	testutil.AssertInt(t, result.Errors, 1, "Errors")
+
+	if len(result.ItemErrors) != 1 {
+		t.Fatalf("expected 1 per-item error retained, got %d", len(result.ItemErrors))
+	}
+}

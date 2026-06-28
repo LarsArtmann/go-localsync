@@ -23,13 +23,18 @@ func (s *ConflictAwareSyncer) Close() error {
 	return s.syncer.Close()
 }
 
-// ConflictResult holds the result of a conflict-aware sync operation.
+// ConflictResult holds the result of a conflict-aware sync operation. Its
+// surface mirrors SyncResult so the two sync paths report the same data:
+// per-item errors are retained in ItemErrors, and Tombstoned reflects the
+// optional reconciliation pass (run when SyncOptions.Reconcile is set).
 type ConflictResult struct {
-	Fetched   int
-	Upserted  int
-	Skipped   int
-	Conflicts int
-	Errors    int
+	Fetched    int
+	Upserted   int
+	Skipped    int
+	Conflicts  int
+	Tombstoned int
+	Errors     int
+	ItemErrors []ItemSyncResult
 }
 
 // SyncWithConflictDetection fetches items and syncs them, tracking conflicts separately.
@@ -58,7 +63,30 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	}
 
 	summary := s.syncer.store.SyncItems(ctx, valid)
+	s.classify(summary, cr)
 
+	// Reuse the guarded reconciliation helper (refuses incomplete fetches) so the
+	// conflict-aware path has the same upstream-gone detection as the base Syncer.
+	reconcileResult := &SyncResult{}
+	s.syncer.reconcile(ctx, opts, result, reconcileResult)
+	cr.Tombstoned = reconcileResult.Tombstoned
+
+	s.syncer.logger.Info(
+		"Conflict-aware sync completed",
+		"fetched", cr.Fetched,
+		"upserted", cr.Upserted,
+		"conflicts", cr.Conflicts,
+		"skipped", cr.Skipped,
+		"tombstoned", cr.Tombstoned,
+		"errors", cr.Errors,
+	)
+
+	return cr, nil
+}
+
+// classify folds a SyncSummary into a ConflictResult, counting upserts,
+// conflicts, skips, and errors while retaining per-item error detail.
+func (s *ConflictAwareSyncer) classify(summary *SyncSummary, cr *ConflictResult) {
 	for _, r := range summary.Results {
 		switch r.Action {
 		case ActionCreated:
@@ -77,22 +105,12 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		case ActionUnchanged:
 			cr.Skipped++
 		case ActionTombstoned:
-			// Never produced by SyncItems; reconciliation tombstones outside this path.
+			// Never produced by SyncItems; only reconciliation tombstones, handled by reconcile().
 		case ActionError:
 			cr.Errors++
+			cr.ItemErrors = append(cr.ItemErrors, r)
 
 			s.syncer.logger.Warn("Failed to sync item", "sourceID", r.SourceID, "error", r.Error)
 		}
 	}
-
-	s.syncer.logger.Info(
-		"Conflict-aware sync completed",
-		"fetched", cr.Fetched,
-		"upserted", cr.Upserted,
-		"conflicts", cr.Conflicts,
-		"skipped", cr.Skipped,
-		"errors", cr.Errors,
-	)
-
-	return cr, nil
 }
