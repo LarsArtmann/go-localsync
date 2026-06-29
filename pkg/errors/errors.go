@@ -62,15 +62,15 @@ var errorEntries = []errorEntry{
 		"rate_limited",
 		"Too many requests — rate limit exceeded.",
 		"The external API has received too many requests from this client.",
-		"Wait for the rate limit window to reset and retry.",
-		"Use --verbose to see the reset time.",
+		"Wait for the rate-limit window to reset and retry.",
+		"Inspect the rate-limit reset time returned by the provider.",
 	),
 	makeEntry(
 		"invalid_token",
 		"The provided authentication token is invalid.",
 		"The token is missing, expired, or does not have the required permissions.",
-		"Set a valid token via GITHUB_TOKEN or the -token flag.",
-		"Generate a new personal access token on GitHub.",
+		"Set a valid authentication token via your provider's configuration.",
+		"Generate a fresh access token for your provider.",
 	),
 	makeEntry(
 		"user_not_found",
@@ -84,7 +84,7 @@ var errorEntries = []errorEntry{
 		"The synchronization operation failed.",
 		"An unexpected error occurred while fetching or storing items.",
 		"Check network connectivity and provider status.",
-		"Run with --verbose for detailed error information.",
+		"Inspect the error detail for diagnostic information.",
 	),
 	makeEntry(
 		"database",
@@ -104,15 +104,15 @@ var errorEntries = []errorEntry{
 		"unknown_backend",
 		"The specified storage backend is not supported.",
 		"Only 'memory' and 'sqlite' backends are currently supported.",
-		"Use --backend memory or --backend sqlite.",
-		"Check the documentation for supported backends.",
+		"Use a supported backend name ('memory' or 'sqlite').",
+		"Check the backend configuration.",
 	),
 	makeEntry(
 		"db_nil",
 		"The database connection is nil.",
 		"The SQLite backend was selected but no database path was provided.",
-		"Set a database path via --db or DB_PATH.",
-		"Use --backend memory if you do not need persistence.",
+		"Provide a database path when using the sqlite backend.",
+		"Use the memory backend if persistence is not required.",
 	),
 }
 
