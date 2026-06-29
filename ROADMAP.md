@@ -61,8 +61,8 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 
 ### CI/CD
 
-- [ ] **Rework CI build & release jobs for a pure library**
-      The `build` job cross-compiles the deleted `./cmd/examples/github-sync` path (now in `github-local-sync`), and `release` depends on it — both fail. A pure library has no binary to build; rework to a library-appropriate release flow (or remove these jobs). **High priority.**
+- [x] **Rework CI build & release jobs for a pure library**
+      The `build` job cross-compiles the deleted `./cmd/examples/github-sync` path (now in `github-local-sync`), and `release` depends on it — both fail. A pure library has no binary to build; rework to a library-appropriate release flow (or remove these jobs). **High priority.** — **Done (2026-06-29):** `build` now verifies cross-platform library compilation; `release` creates a binary-free GitHub release.
 
 ### Code Quality
 

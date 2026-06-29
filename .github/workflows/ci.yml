@@ -66,7 +66,7 @@ jobs:
           args: --timeout=5m
 
   build:
-    name: Build
+    name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
     runs-on: ubuntu-latest
     needs: [test, lint]
     strategy:
@@ -86,20 +86,10 @@ jobs:
           go-version: ${{ env.GO_VERSION }}
           cache: true
 
-      - name: Build
+      - name: Verify library compiles on ${{ matrix.goos }}/${{ matrix.goarch }}
         run: |
-          OUTPUT_NAME="gh-sync-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            OUTPUT_NAME="${OUTPUT_NAME}.exe"
-          fi
           GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} CGO_ENABLED=${{ env.CGO_ENABLED }} \
-            go build -ldflags="-s -w" -o "bin/${OUTPUT_NAME}" ./cmd/examples/github-sync
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gh-sync-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: bin/gh-sync-${{ matrix.goos }}-${{ matrix.goarch }}*
+            go build ./...
 
   release:
     name: Release
@@ -112,24 +102,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          cache: true
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: bin
-
-      - name: List artifacts
-        run: ls -la bin/
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: bin/**/*.exe
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
