@@ -170,3 +170,35 @@ func TestCQRSStack_SQLiteCheckpoint_PersistsAcrossRestarts(t *testing.T) {
 		t.Fatal("expected at least one checkpoint row after restart catch-up + close, got 0")
 	}
 }
+
+// TestCQRSStack_Close_WaitsForProjectionDrain guards the lifecycle invariant
+// that Close blocks until the projection-host drain goroutine has finished
+// (regression for a Close/Close race where the db could be closed while the
+// drain was still projecting in-flight events). After Close returns, the drain
+// channel must be closed — proving the goroutine exited before the db did.
+func TestCQRSStack_Close_WaitsForProjectionDrain(t *testing.T) {
+	t.Parallel()
+
+	stack := newSQLiteMemoryStack(t)
+	ctx := context.Background()
+
+	for i := range 10 {
+		testutil.MustNoError(t, stack.SyncItem(ctx, testItem("drain-"+string(rune('a'+i)), "PushEvent")))
+	}
+	waitForCount(t, stack, ctx, 10)
+
+	drainDone := stack.drainDone
+	if drainDone == nil {
+		t.Fatal("expected a non-nil drainDone channel on the stack")
+	}
+
+	testutil.MustNoError(t, stack.Close())
+
+	select {
+	case <-drainDone:
+		// drain completed before Close returned — correct.
+	default:
+		t.Fatal("Close returned before the projection drain goroutine finished (drainDone still open)")
+	}
+}
+

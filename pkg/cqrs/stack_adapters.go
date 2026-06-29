@@ -66,6 +66,15 @@ func (s *CQRSStack) Close() error {
 		s.cancelRunner()
 	}
 
+	// Wait for the projection-host drain goroutine (started in runner.go) to
+	// finish before closing the read model / store. Without this, Close could
+	// close the SQLite db while the drain is still projecting in-flight events,
+	// racing on a closed handle. host.Stop has its own internal timeout, so this
+	// wait is bounded and cannot hang Close indefinitely.
+	if s.drainDone != nil {
+		<-s.drainDone
+	}
+
 	if s.ReadModel != nil {
 		if err := s.ReadModel.Close(); err != nil {
 			errs = append(errs, err)

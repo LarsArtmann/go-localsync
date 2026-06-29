@@ -28,9 +28,9 @@ import (
 func startProjectionRunner(
 	sr storeResult,
 	proj projection.Projection,
-) (context.CancelFunc, error) {
+) (context.CancelFunc, <-chan struct{}, error) {
 	if subErr := sr.bus.SubscribeAll(proj.Handle); subErr != nil {
-		return nil, fmt.Errorf("subscribe projection: %w", subErr)
+		return nil, nil, fmt.Errorf("subscribe projection: %w", subErr)
 	}
 
 	host, err := projectionhost.New(
@@ -42,11 +42,11 @@ func startProjectionRunner(
 		projectionhost.WithDeadLetterStore(projectionhost.NewMemoryDeadLetterStore(), 3),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("create projection host: %w", err)
+		return nil, nil, fmt.Errorf("create projection host: %w", err)
 	}
 
 	if regErr := host.Register(proj); regErr != nil {
-		return nil, fmt.Errorf("register projection with host: %w", regErr)
+		return nil, nil, fmt.Errorf("register projection with host: %w", regErr)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -54,22 +54,26 @@ func startProjectionRunner(
 	if startErr := host.Start(ctx); startErr != nil {
 		cancel()
 
-		return nil, fmt.Errorf("start projection host: %w", startErr)
+		return nil, nil, fmt.Errorf("start projection host: %w", startErr)
 	}
 
-	go drainHostOnCancel(ctx, host)
+	drainDone := make(chan struct{})
+	go drainHostOnCancel(ctx, host, drainDone)
 
-	return cancel, nil
+	return cancel, drainDone, nil
 }
 
 // drainHostOnCancel waits for the runner context to be cancelled (Close or
 // shutdown) and then gracefully drains the projection host, waiting up to 30s
 // for in-flight events to finish. Errors are logged, not fatal — a slow drain
-// must not block stack Close beyond the host's own timeout.
-func drainHostOnCancel(ctx context.Context, host *projectionhost.Host) {
+// must not block stack Close beyond the host's own timeout. drainDone is closed
+// on exit so Close can wait for the drain to finish before closing the db.
+func drainHostOnCancel(ctx context.Context, host *projectionhost.Host, drainDone chan<- struct{}) {
 	<-ctx.Done()
 
 	if err := host.Stop(); err != nil {
 		log.Error("projection host graceful drain failed", "error", err)
 	}
+
+	close(drainDone)
 }

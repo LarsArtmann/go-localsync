@@ -57,6 +57,7 @@ type CQRSStack struct {
 	conflictResolver  crdt.ConflictResolver[*model.Item]
 	db                *sql.DB
 	cancelRunner      context.CancelFunc
+	drainDone         <-chan struct{}
 }
 
 var _ synclib.SyncStore = (*CQRSStack)(nil)
@@ -83,7 +84,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, fmt.Errorf("wire event logging middleware: %w", err)
 	}
 
-	cancelRunner, err := startProjectionRunner(sr, proj)
+	cancelRunner, drainDone, err := startProjectionRunner(sr, proj)
 	if err != nil {
 		return nil, fmt.Errorf("start projection runner: %w", err)
 	}
@@ -127,6 +128,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		conflictResolver:  cfg.ConflictResolver,
 		db:                sr.db,
 		cancelRunner:      cancelRunner,
+		drainDone:         drainDone,
 	}, nil
 }
 
