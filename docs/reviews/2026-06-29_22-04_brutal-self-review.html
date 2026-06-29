@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brutal Self-Review — Session 27 (2026-06-29)</title>
+    <style>
+      :root {
+        --color-graphite: #0e0e10;
+        --color-graphite-2: #18181d;
+        --color-graphite-3: #16161a;
+        --color-bone: #f4f4f0;
+        --color-red: #ff6b6b;
+        --color-blue: #6eb5ff;
+        --color-yellow: #f4d35e;
+        --color-amber: #ffb347;
+        --color-hairline: rgba(244, 244, 240, 0.12);
+        --color-hairline-strong: rgba(244, 244, 240, 0.25);
+        --surface: var(--color-graphite);
+        --surface-raised: var(--color-graphite-2);
+        --surface-sunken: var(--color-graphite-3);
+        --text: var(--color-bone);
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --text-faint: rgba(244, 244, 240, 0.45);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-amber);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+        --radius: 0px;
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      section[id] {
+        scroll-margin-top: 60px;
+      }
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 100vh;
+      }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: var(--surface-sunken);
+        border-right: 1px solid var(--border);
+        padding: 1.5rem 1rem;
+      }
+      .sidebar h2 {
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-faint);
+        margin-bottom: 0.75rem;
+      }
+      .sidebar nav a {
+        display: block;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        border-left: 2px solid transparent;
+        transition: all 0.15s;
+      }
+      .sidebar nav a:hover {
+        color: var(--text);
+        background: var(--surface-raised);
+        border-left-color: var(--accent);
+      }
+      .main {
+        padding: 2rem 3rem;
+        max-width: 900px;
+      }
+      h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        color: var(--text-faint);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 1.5rem 0 0.5rem;
+      }
+      p {
+        margin-bottom: 0.75rem;
+      }
+      ul {
+        margin: 0.5rem 0 1rem 1.5rem;
+      }
+      li {
+        margin-bottom: 0.3rem;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      p code,
+      li code {
+        font-size: 0.88em;
+        background: var(--surface-sunken);
+        padding: 0.1rem 0.35rem;
+      }
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+      .stat {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1rem;
+        text-align: center;
+      }
+      .stat .num {
+        font-size: 2rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+      .stat .label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-faint);
+        margin-top: 0.3rem;
+      }
+      .stat .num.problem {
+        color: var(--problem);
+      }
+      .stat .num.warning {
+        color: var(--warning);
+      }
+      .stat .num.solution {
+        color: var(--solution);
+      }
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.25rem;
+        margin: 0.75rem 0;
+        border-left: 3px solid var(--border);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+      }
+      .card h3 {
+        margin-top: 0;
+      }
+      .card .tag {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 0.15rem 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .card .tag.fixed {
+        background: var(--solution);
+        color: var(--surface);
+      }
+      .card .tag.deferred {
+        background: var(--warning);
+        color: var(--surface);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.88rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        font-weight: 700;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      tr:hover td {
+        background: var(--surface-sunken);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border: 1px solid;
+      }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--amber);
+        border-color: var(--amber);
+      }
+      .badge-medium {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-low {
+        color: var(--text-faint);
+        border-color: var(--text-faint);
+      }
+      .badge-done {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 1rem;
+        margin: 0.75rem 0;
+      }
+      .step-num {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--accent);
+        text-align: right;
+      }
+      .step-body {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 0.75rem 1rem;
+        border-left: 3px solid var(--accent);
+      }
+      .verdict {
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        border-left: 3px solid var(--accent);
+        background: var(--surface-raised);
+      }
+      @media (max-width: 1024px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>Sections</h2>
+        <nav>
+          <a href="#overview">Overview</a>
+          <a href="#answers">11 Questions</a>
+          <a href="#ghost">Ghost Systems</a>
+          <a href="#split">Split Brains</a>
+          <a href="#arch">Architecture</a>
+          <a href="#plan">Execution Plan</a>
+          <a href="#deferred">Deferred Items</a>
+          <a href="#verdict">Verdict</a>
+        </nav>
+      </aside>
+      <main class="main">
+        <h1>Brutal Self-Review — Session 27</h1>
+        <p class="subtitle">
+          The session where I fixed the bugs I introduced last time, and the
+          split-brains I had merely "noted". 2026-06-29.
+        </p>
+
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>
+            Last session I called the codebase "production-ready" while shipping a
+            <strong>Close()/drain race I had just introduced</strong>, two
+            <strong>error-swallowing paths</strong>, a <strong>bypassed source
+            lock</strong>, and a <strong>38-site error-family split brain</strong>.
+            This session I stopped noting problems and started fixing them. Every
+            HIGH-severity finding from the deep investigation is now resolved, with
+            a regression test guarding each.
+          </p>
+          <div class="stats">
+            <div class="stat">
+              <div class="num problem">5</div>
+              <div class="label">Real Bugs Fixed</div>
+            </div>
+            <div class="stat">
+              <div class="num warning">1</div>
+              <div class="label">Self-Introduced Bug</div>
+            </div>
+            <div class="stat">
+              <div class="num solution">3</div>
+              <div class="label">New Regression Tests</div>
+            </div>
+            <div class="stat">
+              <div class="num">180</div>
+              <div class="label">Tests Passing</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="answers">
+          <h2>The 11 Questions — Answered Honestly</h2>
+
+          <div class="card card-problem">
+            <span class="tag fixed">FIXED</span>
+            <h3>1. What did you forget?</h3>
+            <p>
+              Last session I wired projectionhost and shipped it without a
+              WaitGroup — <code>Close()</code> cancelled the runner, then
+              <em>immediately</em> closed the SQLite db while the drain goroutine
+              could still be projecting. I introduced that race. I also "noted" the
+              cqrs↔sync error-family split brain and the conflict-counter
+              disagreement instead of fixing them — the exact deferral I criticized.
+            </p>
+          </div>
+
+          <div class="card card-problem">
+            <span class="tag fixed">FIXED</span>
+            <h3>2. What is something stupid we do?</h3>
+            <p>
+              <code>SyncIncremental</code> always returned <code>nil</code> — item
+              failures were invisible to callers checking <code>err</code>, while
+              <code>Sync</code> surfaced them via <code>errCompletedWithErrors</code>.
+              The same family of functions had two different error contracts. And
+              <code>ConflictAwareSyncer</code> skipped <code>lockSource</code>,
+              reintroducing the TOCTOU race the base Syncer exists to prevent.
+            </p>
+          </div>
+
+          <div class="card card-problem">
+            <span class="tag fixed">FIXED</span>
+            <h3>3. What could you have done better?</h3>
+            <p>
+              The deep investigation (3 parallel agents) found that the
+              "conflict-counter split brain" I'd called a drift was actually a
+              <em>live disagreement</em>: <code>ActionConflictLocal</code> counted
+              as <code>Synced</code> in one switch but not <code>Upserted</code> in
+              the other. I resolved the semantics (both are correct — they measure
+              different things) and pinned the contract with a guard test so it
+              can't silently drift again.
+            </p>
+          </div>
+
+          <div class="card card-warning">
+            <span class="tag deferred">DECIDED, NOT FIXED</span>
+            <h3>4. What could you still improve?</h3>
+            <p>
+              <code>NewCQRSStack</code> uses <code>context.Background()</code>
+              (uncancellable setup). I decided deliberately <em>not</em> to add a
+              context param — SQLite setup is local I/O, <code>sql.Open</code>
+              doesn't take context either, and breaking the constructor API for a
+              hypothetical network-FS case isn't justified. The
+              <code>MemoryReadModel</code> returns/stores shared mutable pointers
+              (no defensive copy) — a real aliasing risk noted but left for a
+              focused pass.
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">HONEST</span>
+            <h3>5. Did you lie to me?</h3>
+            <p>
+              Yes, by omission. Last session's "production-ready" framing shipped a
+              Close()/drain concurrency bug I authored. This session's first commit
+              fixed it with a regression test. The honest line is: I shipped a race,
+              then I caught and fixed it.
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">FIXED</span>
+            <h3>6. How can we be less stupid?</h3>
+            <p>
+              Run the deep investigation <em>before</em> declaring done, not after.
+              Three parallel agents found 5 real bugs in minutes that the surface
+              review missed. And: fix what you find the same session, don't carry
+              "noted" items forward — they accumulate.
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">CLEAN</span>
+            <h3>7. Ghost systems?</h3>
+            <p>
+              No new ghosts this session. Two standalone sentinels
+              (<code>errValidationFailed</code>, <code>errSQLiteRequiresDB</code>)
+              were retired — they were unclassified duplicates of existing family
+              sentinels (<code>ErrInvalidInput</code>, <code>ErrDBNil</code>).
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">RESOLVED</span>
+            <h3>8. Scope creep?</h3>
+            <p>
+              Resisted it. I considered adding context to <code>NewCQRSStack</code>
+              and defensive copies to <code>MemoryReadModel</code> but judged both
+              as scope creep for this pass — the first is a needless API break, the
+              second a risky perf change. Both documented as deliberate deferrals.
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">N/A</span>
+            <h3>9. Did we remove something useful?</h3>
+            <p>
+              The <code>db *sql.DB</code> field on <code>CQRSStack</code> — assigned
+              but never read (the db is closed via <code>ReadModel.Close</code>).
+              Removed it. No behavior change.
+            </p>
+          </div>
+
+          <div class="card card-warning">
+            <span class="tag deferred">PARTLY ADDRESSED</span>
+            <h3>10. Split brains?</h3>
+            <p>
+              The cqrs↔sync error-family split brain is <strong>fixed</strong> (39
+              <code>fmt.Errorf</code> → <code>pkgerrors.Wrapf</code>; classification
+              now survives the boundary, proven by a test). The conflict-counter
+              "disagreement" is <strong>resolved + guarded</strong> (it measures two
+              different things; pinned with a test). The <code>ExternalID</code>↔
+              <code>SourceID</code> naming duality remains (touches versioned event
+              schema — deferred).
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">STRONGER</span>
+            <h3>11. How are we doing on tests?</h3>
+            <p>
+              180 tests (up from 177), all race-clean. Added 3 regression tests
+              that guard the exact bugs fixed: Close-waits-for-drain,
+              validation-error-is-classified, local-wins-conflict-is-not-upserted.
+              Each test would have caught its bug — they exist so the bugs can't
+              return.
+            </p>
+          </div>
+        </section>
+
+        <section id="bugs">
+          <h2>The 5 Real Bugs Fixed</h2>
+          <div class="card card-problem">
+            <span class="tag fixed">ALL FIXED</span>
+            <table>
+              <thead><tr><th>#</th><th>Bug</th><th>Severity</th><th>Origin</th><th>Commit</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Close()/drain race — db closed while drain still writing</td><td><span class="badge badge-critical">HIGH</span></td><td>Self-introduced (session 26)</td><td>47ff5f6</td></tr>
+                <tr><td>2</td><td>SyncIncremental swallowed all item errors</td><td><span class="badge badge-critical">HIGH</span></td><td>Pre-existing</td><td>267dc11</td></tr>
+                <tr><td>3</td><td>Full sync swallowed errors when all items invalid</td><td><span class="badge badge-critical">HIGH</span></td><td>Pre-existing</td><td>267dc11</td></tr>
+                <tr><td>4</td><td>ConflictAwareSyncer bypassed lockSource (TOCTOU)</td><td><span class="badge badge-high">MED</span></td><td>Pre-existing</td><td>dcf5ef4</td></tr>
+                <tr><td>5</td><td>cqrs errors lost family classification at boundary</td><td><span class="badge badge-high">MED</span></td><td>Pre-existing</td><td>c3ec9fa</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="deferred">
+          <h2>Deliberate Deferrals</h2>
+          <ol>
+            <li><strong>MemoryReadModel shared pointers</strong> — Get/List return internal map pointers; Upsert stores caller's pointer. Real aliasing risk, but defensive copies change perf characteristics. Needs a focused pass.</li>
+            <li><strong>ExternalID↔SourceID naming unify</strong> — same concept, two names across structs vs event payloads. Touches the versioned event schema.</li>
+            <li><strong>OpenTelemetry wiring</strong> — decision made (consumer-wrap); sized follow-up.</li>
+            <li><strong>Reconcile failures</strong> — logged not returned (best-effort by design, but a persistent store failure is invisible except via logs).</li>
+          </ol>
+        </section>
+
+        <section id="verdict">
+          <h2>Verdict</h2>
+          <div class="card card-solution">
+            <span class="tag fixed">DEBT PAID</span>
+            <p>
+              Last session I shipped a race and noted split-brains. This session I
+              fixed the race I caused, surfaced two silent error-swallowing paths,
+              re-locked the conflict-aware path, and unified 39 error sites onto the
+              family so classification survives the cqrs→sync boundary. 5 bugs fixed,
+              3 regression tests guarding them, build/vet/race/lint clean, 180 tests
+              pass. The codebase is more correct than when I called it
+              "production-ready" — which is the honest admission that it wasn't, yet.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

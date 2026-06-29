@@ -145,7 +145,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                         |
 | `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                      |
 
-**177 total test functions** across 9 test packages.
+**180 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
