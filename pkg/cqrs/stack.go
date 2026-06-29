@@ -61,7 +61,7 @@ type CQRSStack struct {
 var _ synclib.SyncStore = (*CQRSStack)(nil)
 
 // NewCQRSStack creates a fully wired CQRS stack based on the given config.
-func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) {
+func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonamedreturns
 	ctx := context.Background()
 
 	sr, storeErr := createStoreAndBus(ctx, cfg)
@@ -72,25 +72,32 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) {
 	// Track resources opened during construction so the defer can release them
 	// if any subsequent step fails — preventing store/bus/db/goroutine leaks.
 	var rm ReadModel
+
 	var cancelRunner context.CancelFunc
+
 	var drainDone <-chan struct{}
 
 	defer func() {
 		if err == nil {
 			return
 		}
+
 		if cancelRunner != nil {
 			cancelRunner()
 		}
+
 		if drainDone != nil {
 			<-drainDone
 		}
+
 		if rm != nil {
 			_ = rm.Close()
 		}
+
 		if c, ok := sr.store.(io.Closer); ok {
 			_ = c.Close()
 		}
+
 		if c, ok := sr.bus.(io.Closer); ok {
 			_ = c.Close()
 		}
@@ -120,18 +127,21 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) {
 	}
 
 	var snapshotStore snapshot.SnapshotStore
+
 	snapshotStore, err = createSnapshotStore(cfg, sr.db)
 	if err != nil {
 		return nil, err
 	}
 
 	var snapshotStrategy snapshot.SnapshotStrategy
+
 	snapshotStrategy, err = snapshot.EveryNEvents(10)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "create snapshot strategy")
 	}
 
 	var repo *decider.Repository[SyncItemState]
+
 	repo, err = decider.NewRepository(
 		sr.store, sr.bus, deciderSpec,
 		decider.WithSnapshotStore[SyncItemState](snapshotStore),
@@ -143,6 +153,7 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) {
 	}
 
 	var commandDispatcher *command.Dispatcher
+
 	commandDispatcher, err = wireCommandDispatcher(repo, cfg.ConflictResolver)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "wire command dispatcher")
