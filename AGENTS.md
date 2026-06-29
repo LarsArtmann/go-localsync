@@ -14,8 +14,8 @@ Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based 
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/crdt/`     | Conflict resolution: `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` (timestamp-only) — **wired into DecideSync as pluggable conflict strategy**. No vector clocks/operations (a single-writer pull mirror needs none).                                                                                                     |
 | `pkg/api/`      | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                                                                                                       |
-| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, sqlite\_\*.go)                                                                                                                                      |
-| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RetryConfig`) and `RateLimitInfo`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                             |
+| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, sqlite\_\*.go)                                                                                                                                                  |
+| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RetryConfig`) and `RateLimitInfo`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                                                                |
 | `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`, retry/backoff (`retry.go`), per-source mutex, opt-in reconciliation                                                                                                                      |
 | `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
 | `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                 |
@@ -190,26 +190,26 @@ Two tables managed by the CQRS stack:
 
 ## Dependencies
 
-| Dependency                         | Version | Purpose                                                              |
-| ---------------------------------- | ------- | -------------------------------------------------------------------- |
-| `go-cqrs-lite/event/v3`            | v3.4.0  | Event types, Store, Bus, Journal, `Version` (uint64)                 |
-| `go-cqrs-lite/command/v3`          | v3.4.0  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()` |
+| Dependency                         | Version | Purpose                                                                                                         |
+| ---------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `go-cqrs-lite/event/v3`            | v3.4.0  | Event types, Store, Bus, Journal, `Version` (uint64)                                                            |
+| `go-cqrs-lite/command/v3`          | v3.4.0  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()`                                            |
 | `go-cqrs-lite/query/v3`            | v3.4.0  | Unused since QueryDispatcher removal; stays in go.mod until `go mod tidy` is unblocked (vendor mode unaffected) |
-| `go-cqrs-lite/decider/v3`          | v3.3.0  | Decider (`Apply` field), Repository, snapshot/codec options          |
-| `go-cqrs-lite/id/v3`               | v3.3.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)          |
-| `go-cqrs-lite/codec/v3`            | v3.3.0  | Codec interface, JSONCodec                                           |
-| `go-cqrs-lite/projection/v3`       | v3.4.0  | Projection interface (moved from `event/` in v3.2, ADR-0037)         |
-| `go-cqrs-lite/projectionhost/v3`   | v3.4.0  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)   |
-| `go-cqrs-lite/snapshot/v3`         | v3.4.0  | SnapshotStore, EveryNEvents strategy                                 |
-| `go-cqrs-lite/storage/memory/v3`   | v3.4.0  | In-memory event store + snapshot store (bus deleted in v3)           |
-| `go-cqrs-lite/middleware/v3`       | v3.4.0  | EventLogging + CommandRetry middleware                               |
-| `go-cqrs-lite/watermill/v3`        | v3.3.0  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)       |
-| `go-cqrs-lite/storage/v3`          | v3.4.0  | SQLite event store, snapshot, KV store                               |
-| `go-branded-id`                    | v0.3.1  | Branded phantom-type IDs for compile-time safety                     |
-| `go-error-family`                  | v0.5.1  | Structured error classification + user-facing message templates      |
-| `modernc.org/sqlite`               | v1.53.0 | Pure-Go SQLite driver (no CGo)                                       |
-| `charm.land/log/v2`                | v2.0.0  | Structured logging                                                   |
-| `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter        |
+| `go-cqrs-lite/decider/v3`          | v3.3.0  | Decider (`Apply` field), Repository, snapshot/codec options                                                     |
+| `go-cqrs-lite/id/v3`               | v3.3.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)                                                     |
+| `go-cqrs-lite/codec/v3`            | v3.3.0  | Codec interface, JSONCodec                                                                                      |
+| `go-cqrs-lite/projection/v3`       | v3.4.0  | Projection interface (moved from `event/` in v3.2, ADR-0037)                                                    |
+| `go-cqrs-lite/projectionhost/v3`   | v3.4.0  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)                                              |
+| `go-cqrs-lite/snapshot/v3`         | v3.4.0  | SnapshotStore, EveryNEvents strategy                                                                            |
+| `go-cqrs-lite/storage/memory/v3`   | v3.4.0  | In-memory event store + snapshot store (bus deleted in v3)                                                      |
+| `go-cqrs-lite/middleware/v3`       | v3.4.0  | EventLogging + CommandRetry middleware                                                                          |
+| `go-cqrs-lite/watermill/v3`        | v3.3.0  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                                  |
+| `go-cqrs-lite/storage/v3`          | v3.4.0  | SQLite event store, snapshot, KV store                                                                          |
+| `go-branded-id`                    | v0.3.1  | Branded phantom-type IDs for compile-time safety                                                                |
+| `go-error-family`                  | v0.5.1  | Structured error classification + user-facing message templates                                                 |
+| `modernc.org/sqlite`               | v1.53.0 | Pure-Go SQLite driver (no CGo)                                                                                  |
+| `charm.land/log/v2`                | v2.0.0  | Structured logging                                                                                              |
+| `github.com/danielgtaylor/huma/v2` | v2.38.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter                                                   |
 
 ### Test Dependencies
 
@@ -232,7 +232,7 @@ Two tables managed by the CQRS stack:
 | Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                               | `event.Store` + `event.Bus` via storage/memory + watermill modules                |
 | Conflict       | `DecideSync` produces ItemConflictFound events                                                                  | Error taxonomy with 5 families                                                    |
 | Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                                    | Projected from events via custom `Projector` implementing `projection.Projection` |
-| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`)                   | `sync.SyncStore` interface defined in consumer package                            |
+| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`)                    | `sync.SyncStore` interface defined in consumer package                            |
 | SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                           | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                     |
 | Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                                | Eliminates all manual json.Marshal/Unmarshal                                      |
 | Projection     | Direct `bus.SubscribeAll` (sync) + `projectionhost.Host` (managed catch-up with checkpoint + DLQ); see ADR-0006 | `projectionhost/v3` adopted in v3.4; interface from `projection/v3` (ADR-0037)    |

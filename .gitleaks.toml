@@ -6,6 +6,4 @@ useDefault = true
 
 [allowlist]
 description = "Ignore vendored third-party code (e.g. modernc.org/sqlite generated amalgamation triggers generic-api-key false positives)."
-paths = [
-    '''vendor/.*''',
-]
+paths = ['''vendor/.*''']

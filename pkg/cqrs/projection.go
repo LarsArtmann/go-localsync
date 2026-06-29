@@ -14,7 +14,7 @@ import (
 
 // Projector projects domain events onto the ReadModel.
 type Projector struct {
-	mu sync.Mutex
+	mu        sync.Mutex
 	readModel ReadModel
 	// lastVersions tracks the highest event version applied per aggregate ID.
 	// This prevents stale events from background journal replay from

@@ -13,6 +13,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/id/v3 v3.3.0
 	github.com/larsartmann/go-cqrs-lite/middleware/v3 v3.4.0
 	github.com/larsartmann/go-cqrs-lite/projection/v3 v3.4.0
+	github.com/larsartmann/go-cqrs-lite/projectionhost/v3 v3.4.0
 	github.com/larsartmann/go-cqrs-lite/query/v3 v3.4.0
 	github.com/larsartmann/go-cqrs-lite/snapshot/v3 v3.4.0
 	github.com/larsartmann/go-cqrs-lite/storage/memory/v3 v3.4.0
@@ -47,7 +48,6 @@ require (
 	github.com/larsartmann/go-cqrs-lite/kv/v3 v3.3.1 // indirect
 	github.com/larsartmann/go-cqrs-lite/listing/v3 v3.4.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/otel/v3 v3.3.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/projectionhost/v3 v3.4.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect

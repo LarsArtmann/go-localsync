@@ -325,24 +325,24 @@
       <main class="main">
         <h1>Brutal Self-Review — Session 28</h1>
         <p class="subtitle">
-          The session where three parallel agents found a projection race, a
-          resource leak, and a validation gap that two prior sessions of
-          "production-ready" self-review had missed. 2026-06-29.
+          The session where three parallel agents found a projection race, a resource leak, and a
+          validation gap that two prior sessions of "production-ready" self-review had missed.
+          2026-06-29.
         </p>
 
         <section id="overview">
           <h2>Overview</h2>
           <p>
-            Sessions 26-27 removed ghost systems and fixed five bugs. The deep
-            investigation this session ran <strong>three agents in parallel</strong>
+            Sessions 26-27 removed ghost systems and fixed five bugs. The deep investigation this
+            session ran <strong>three agents in parallel</strong>
             (ghost systems, split brains, correctness bugs) against the codebase
-            <em>as it stands now</em>. They surfaced <strong>2 CRITICAL races,
-            3 HIGH correctness gaps, 5 MEDIUM divergences</strong>, plus
-            <strong>27 ghost-system findings</strong> and <strong>10 split brains</strong>.
-            The two prior sessions declared "production-ready" without catching a
-            projection TOCTOU race that can resurrect tombstoned rows, a constructor
-            that leaks SQLite connections on every error path, and a validation gap
-            that lets zero-<code>UpdatedAt</code> items poison aggregates.
+            <em>as it stands now</em>. They surfaced
+            <strong>2 CRITICAL races, 3 HIGH correctness gaps, 5 MEDIUM divergences</strong>, plus
+            <strong>27 ghost-system findings</strong> and <strong>10 split brains</strong>. The two
+            prior sessions declared "production-ready" without catching a projection TOCTOU race
+            that can resurrect tombstoned rows, a constructor that leaks SQLite connections on every
+            error path, and a validation gap that lets zero-<code>UpdatedAt</code> items poison
+            aggregates.
           </p>
           <div class="stats">
             <div class="stat">
@@ -371,14 +371,12 @@
             <span class="tag">FOUND</span>
             <h3>1. What did you forget?</h3>
             <p>
-              The projection's version gate (<code>projection.go:43-69</code>) uses
-              two separate <code>sync.Map</code> ops — <code>Load</code> to check,
-              <code>Store</code> after applying. That is a classic check-then-act
-              race: a stale journal-replay event (v1) can pass the gate between a
-              live tombstone (v3) loading and storing, <strong>resurrecting a
-              tombstoned row</strong>. Two sessions of "production-ready" review
-              called the projection "idempotent" without noticing the gate isn't
-              atomic.
+              The projection's version gate (<code>projection.go:43-69</code>) uses two separate
+              <code>sync.Map</code> ops — <code>Load</code> to check, <code>Store</code> after
+              applying. That is a classic check-then-act race: a stale journal-replay event (v1) can
+              pass the gate between a live tombstone (v3) loading and storing,
+              <strong>resurrecting a tombstoned row</strong>. Two sessions of "production-ready"
+              review called the projection "idempotent" without noticing the gate isn't atomic.
             </p>
           </div>
 
@@ -386,16 +384,18 @@
             <span class="tag">FOUND</span>
             <h3>2. What is something stupid that we do?</h3>
             <p>
-              <code>NewCQRSStack</code> has <strong>seven error-return sites after
-              store+bus creation</strong>, none with cleanup. If the read-model
-              migration, projection runner, snapshot store, or command dispatcher
-              fails, the SQLite connection pool and the projection goroutine leak
-              forever. It's the textbook "constructor without defer cleanup"
-              anti-pattern. We also <strong>validate <code>provider.Item</code>
-              without checking <code>UpdatedAt</code></strong> — but
-              <code>model.Item.Validate()</code> <em>does</em> require it, so a
-              zero-<code>UpdatedAt</code> item sails through the entry filter only
-              to poison its own aggregate on the next fold.
+              <code>NewCQRSStack</code> has
+              <strong>seven error-return sites after store+bus creation</strong>, none with cleanup.
+              If the read-model migration, projection runner, snapshot store, or command dispatcher
+              fails, the SQLite connection pool and the projection goroutine leak forever. It's the
+              textbook "constructor without defer cleanup" anti-pattern. We also
+              <strong
+                >validate <code>provider.Item</code> without checking <code>UpdatedAt</code></strong
+              >
+              — but <code>model.Item.Validate()</code> <em>does</em> require it, so a zero-<code
+                >UpdatedAt</code
+              >
+              item sails through the entry filter only to poison its own aggregate on the next fold.
             </p>
           </div>
 
@@ -403,11 +403,11 @@
             <span class="tag">FOUND</span>
             <h3>3. What could you have done better?</h3>
             <p>
-              Run the three-agent deep investigation with <em>specific correctness
-              mandates</em> (not just "find ghosts"). This session's bug agent had a
-              concurrency checklist and found the projection race in minutes. Prior
-              sessions dispatched agents for ghosts and naming but never for races
-              and resource leaks — which is exactly where the real damage hides.
+              Run the three-agent deep investigation with
+              <em>specific correctness mandates</em> (not just "find ghosts"). This session's bug
+              agent had a concurrency checklist and found the projection race in minutes. Prior
+              sessions dispatched agents for ghosts and naming but never for races and resource
+              leaks — which is exactly where the real damage hides.
             </p>
           </div>
 
@@ -415,14 +415,13 @@
             <span class="tag deferred">THIS SESSION</span>
             <h3>4. What could you still improve?</h3>
             <p>
-              <code>MemoryReadModel</code> returns/stores shared mutable pointers
-              (no defensive copy — a real aliasing risk). The <code>Since</code>
-              filter is <strong>inclusive in memory, exclusive in SQLite</strong>
-              — switching backends silently changes boundary results. SQLite error
-              wrapping uses <code>fmt.Sprintf("…: %v", err)</code> which
-              <strong>severs the error chain</strong> — <code>errors.Is</code> /
-              <code>errors.As</code> can never reach the root cause. All addressed
-              this session or documented below.
+              <code>MemoryReadModel</code> returns/stores shared mutable pointers (no defensive copy
+              — a real aliasing risk). The <code>Since</code> filter is
+              <strong>inclusive in memory, exclusive in SQLite</strong> — switching backends
+              silently changes boundary results. SQLite error wrapping uses
+              <code>fmt.Sprintf("…: %v", err)</code> which <strong>severs the error chain</strong> —
+              <code>errors.Is</code> / <code>errors.As</code> can never reach the root cause. All
+              addressed this session or documented below.
             </p>
           </div>
 
@@ -430,12 +429,11 @@
             <span class="tag">HONEST</span>
             <h3>5. Did you lie to me?</h3>
             <p>
-              Yes. Sessions 26-27 declared the projection "idempotent" and the
-              codebase "production-ready." The projection race, the constructor
-              leak, and the validation gap were all present then — I just didn't
-              look for them. The honest line: "idempotent under sequential delivery,
-              racy under concurrent live+replay." That's a material difference I
-              glossed over twice.
+              Yes. Sessions 26-27 declared the projection "idempotent" and the codebase
+              "production-ready." The projection race, the constructor leak, and the validation gap
+              were all present then — I just didn't look for them. The honest line: "idempotent
+              under sequential delivery, racy under concurrent live+replay." That's a material
+              difference I glossed over twice.
             </p>
           </div>
 
@@ -444,10 +442,9 @@
             <h3>6. How can we be less stupid?</h3>
             <p>
               Mandate a dedicated <strong>concurrency + resource-leak</strong>
-              investigation pass before any "production-ready" claim — separate from
-              ghost-hunting and naming. Also: when a comment says "idempotent" or
-              "tolerates overlap," write the test that proves it under concurrent
-              delivery, not just sequential re-delivery.
+              investigation pass before any "production-ready" claim — separate from ghost-hunting
+              and naming. Also: when a comment says "idempotent" or "tolerates overlap," write the
+              test that proves it under concurrent delivery, not just sequential re-delivery.
             </p>
           </div>
 
@@ -455,14 +452,12 @@
             <span class="tag">27 FOUND</span>
             <h3>7. Ghost systems?</h3>
             <p>
-              Yes — 27. The most impactful: <code>ConflictAwareSyncer</code> (entire
-              file, zero production callers), <code>Provider.Fetch()</code> /
-              <code>FetchOptions</code> / <code>GetRateLimit()</code> /
-              <code>RateLimitInfo</code> (dead interface surface), the
+              Yes — 27. The most impactful: <code>ConflictAwareSyncer</code> (entire file, zero
+              production callers), <code>Provider.Fetch()</code> / <code>FetchOptions</code> /
+              <code>GetRateLimit()</code> / <code>RateLimitInfo</code> (dead interface surface), the
               <code>CQRSStack.conflictResolver</code> field (set, never read),
-              <code>ActionTombstoned</code> (defined, parsed, never produced), and
-              8 <code>WithXxx()</code> filter builders used only in their own test.
-              Full list below.
+              <code>ActionTombstoned</code> (defined, parsed, never produced), and 8
+              <code>WithXxx()</code> filter builders used only in their own test. Full list below.
             </p>
           </div>
 
@@ -470,11 +465,11 @@
             <span class="tag">FOCUSED</span>
             <h3>8. Scope creep?</h3>
             <p>
-              Resisted it. The <code>ExternalID</code>↔<code>SourceID</code> naming
-              duality and the <code>source string</code> → <code>id.ProviderID</code>
-              widening both touch versioned event schemas or large public surfaces.
-              They're real split brains but fixing them blindly risks data
-              corruption. Deferred with explicit rationale.
+              Resisted it. The <code>ExternalID</code>↔<code>SourceID</code> naming duality and the
+              <code>source string</code> → <code>id.ProviderID</code>
+              widening both touch versioned event schemas or large public surfaces. They're real
+              split brains but fixing them blindly risks data corruption. Deferred with explicit
+              rationale.
             </p>
           </div>
 
@@ -482,9 +477,9 @@
             <span class="tag">N/A</span>
             <h3>9. Did we remove something useful?</h3>
             <p>
-              Not yet this session — but the ghost cleanup (Step 8) removes
-              ~20 methods/types/constants whose only callers were their own tests.
-              Nothing production-facing is lost.
+              Not yet this session — but the ghost cleanup (Step 8) removes ~20
+              methods/types/constants whose only callers were their own tests. Nothing
+              production-facing is lost.
             </p>
           </div>
 
@@ -492,12 +487,15 @@
             <span class="tag">10 FOUND</span>
             <h3>10. Split brains?</h3>
             <p>
-              Ten. The worst: <strong>SQLite silently drops
-              <code>ContentHash</code> and <code>SchemaVersion</code></strong> on
-              every round-trip (no columns in the DDL). <strong>Two validation
-              functions</strong> (<code>provider.Item.Validate</code> vs
-              <code>model.Item.Validate</code>) check different fields and use
-              different error conventions. <strong>Tombstone reconstruction</strong>
+              Ten. The worst:
+              <strong
+                >SQLite silently drops <code>ContentHash</code> and
+                <code>SchemaVersion</code></strong
+              >
+              on every round-trip (no columns in the DDL).
+              <strong>Two validation functions</strong> (<code>provider.Item.Validate</code> vs
+              <code>model.Item.Validate</code>) check different fields and use different error
+              conventions. <strong>Tombstone reconstruction</strong>
               is copy-pasted between decider and projection. Full list below.
             </p>
           </div>
@@ -507,11 +505,10 @@
             <h3>11. How are we doing on tests?</h3>
             <p>
               180 tests pass, race-clean. But every SQLite test uses
-              <code>:memory:</code> with <code>SetMaxOpenConns(1)</code> — which
-              serializes all queries and <strong>structurally hides
-              concurrency bugs</strong>. The projection race would never reproduce
-              under those tests. This session adds regression tests that target the
-              concurrent paths explicitly.
+              <code>:memory:</code> with <code>SetMaxOpenConns(1)</code> — which serializes all
+              queries and <strong>structurally hides concurrency bugs</strong>. The projection race
+              would never reproduce under those tests. This session adds regression tests that
+              target the concurrent paths explicitly.
             </p>
           </div>
         </section>
@@ -521,15 +518,78 @@
           <div class="card card-problem">
             <span class="tag">PRE-EXISTING</span>
             <table>
-              <thead><tr><th>#</th><th>Bug</th><th>Severity</th><th>Location</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Bug</th>
+                  <th>Severity</th>
+                  <th>Location</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td>1</td><td>Projection version-gate TOCTOU race — concurrent live+replay can resurrect tombstoned rows; Store can regress the cached version</td><td><span class="badge badge-critical">CRITICAL</span></td><td>projection.go:43-69</td></tr>
-                <tr><td>2</td><td>NewCQRSStack leaks store/bus/db/goroutine on every error path after createStoreAndBus</td><td><span class="badge badge-critical">CRITICAL</span></td><td>stack.go:64-129</td></tr>
-                <tr><td>3</td><td>provider.Item.Validate() omits UpdatedAt — zero-UpdatedAt items pass entry filter, poison aggregate on fold</td><td><span class="badge badge-high">HIGH</span></td><td>provider.go:55-75</td></tr>
-                <tr><td>4</td><td>AggregateID discards ParseAggregateID error AND caches the zero value permanently</td><td><span class="badge badge-high">HIGH</span></td><td>aggregate_id.go:38</td></tr>
-                <tr><td>5</td><td>SQLite error wrapping uses %v, severing the error chain — errors.Is/As can't reach root cause</td><td><span class="badge badge-high">HIGH</span></td><td>sqlite_readmodel.go (11 sites)</td></tr>
-                <tr><td>6</td><td>Since filter is inclusive (memory) vs exclusive (SQLite) — backend switch silently changes results</td><td><span class="badge badge-medium">MED</span></td><td>memory_readmodel.go:155 / sqlite_query.go:64</td></tr>
-                <tr><td>7</td><td>retryAfterer uses direct type assertion, not errors.As — wrapped rate-limit errors never match</td><td><span class="badge badge-medium">MED</span></td><td>sync.go:458</td></tr>
+                <tr>
+                  <td>1</td>
+                  <td>
+                    Projection version-gate TOCTOU race — concurrent live+replay can resurrect
+                    tombstoned rows; Store can regress the cached version
+                  </td>
+                  <td><span class="badge badge-critical">CRITICAL</span></td>
+                  <td>projection.go:43-69</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    NewCQRSStack leaks store/bus/db/goroutine on every error path after
+                    createStoreAndBus
+                  </td>
+                  <td><span class="badge badge-critical">CRITICAL</span></td>
+                  <td>stack.go:64-129</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>
+                    provider.Item.Validate() omits UpdatedAt — zero-UpdatedAt items pass entry
+                    filter, poison aggregate on fold
+                  </td>
+                  <td><span class="badge badge-high">HIGH</span></td>
+                  <td>provider.go:55-75</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>
+                    AggregateID discards ParseAggregateID error AND caches the zero value
+                    permanently
+                  </td>
+                  <td><span class="badge badge-high">HIGH</span></td>
+                  <td>aggregate_id.go:38</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>
+                    SQLite error wrapping uses %v, severing the error chain — errors.Is/As can't
+                    reach root cause
+                  </td>
+                  <td><span class="badge badge-high">HIGH</span></td>
+                  <td>sqlite_readmodel.go (11 sites)</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>
+                    Since filter is inclusive (memory) vs exclusive (SQLite) — backend switch
+                    silently changes results
+                  </td>
+                  <td><span class="badge badge-medium">MED</span></td>
+                  <td>memory_readmodel.go:155 / sqlite_query.go:64</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>
+                    retryAfterer uses direct type assertion, not errors.As — wrapped rate-limit
+                    errors never match
+                  </td>
+                  <td><span class="badge badge-medium">MED</span></td>
+                  <td>sync.go:458</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -541,29 +601,119 @@
             <span class="tag">DEAD CODE</span>
             <p>Verified by grep: each has zero non-test production callers.</p>
             <table>
-              <thead><tr><th>Symbol</th><th>Location</th><th>Verdict</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Location</th>
+                  <th>Verdict</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td>ConflictAwareSyncer (entire file)</td><td>sync/conflict_aware.go</td><td>Design decision (see Deferred)</td></tr>
-                <tr><td>Provider.Fetch() + FetchOptions</td><td>provider/provider.go:114,78</td><td>Public API — deferred</td></tr>
-                <tr><td>Provider.GetRateLimit() + RateLimitInfo</td><td>provider/provider.go:121,99</td><td>Public API — deferred</td></tr>
-                <tr><td>FetchResult.RateLimit field</td><td>provider/provider.go:95</td><td>Public API — deferred</td></tr>
-                <tr><td>CQRSStack.conflictResolver field</td><td>cqrs/stack.go:56</td><td>DELETE (internal)</td></tr>
-                <tr><td>ActionTombstoned constant</td><td>sync/types.go:21</td><td>DELETE (never produced)</td></tr>
-                <tr><td>retryAfterer interface + check</td><td>sync/retry.go:16, sync.go:458</td><td>FIX (errors.As) this session</td></tr>
-                <tr><td>NewUpdatedAtLWWResolver()</td><td>cqrs/conflict_resolver.go:23</td><td>Integrate as default or delete</td></tr>
-                <tr><td>ErrSyncFailed sentinel</td><td>errors/errors.go:22</td><td>Integrate or delete</td></tr>
-                <tr><td>WithUserDetail()</td><td>errors/errors.go:143</td><td>DELETE</td></tr>
-                <tr><td>MustParseItemID()</td><td>id/ids.go:61</td><td>DELETE</td></tr>
-                <tr><td>NewTombstone()</td><td>model/tombstone.go:49</td><td>Integrate into decider/projection</td></tr>
-                <tr><td>model.ItemKey()</td><td>model/key.go:34</td><td>DELETE (zero callers)</td></tr>
-                <tr><td>Item.Key(), Item.IsZero()</td><td>model/item.go:36,41</td><td>DELETE</td></tr>
-                <tr><td>Key.IsZero(), Key.Equals()</td><td>model/key.go:25,29</td><td>DELETE</td></tr>
-                <tr><td>MemoryReadModel.Len()</td><td>cqrs/memory_readmodel.go:127</td><td>DELETE</td></tr>
-                <tr><td>8× WithXxx() filter builders</td><td>model/item_filter.go:24-77</td><td>DELETE (test-only)</td></tr>
-                <tr><td>4× .String() methods</td><td>sync/types.go, provider.go:46</td><td>DELETE</td></tr>
-                <tr><td>RegisterErrorTemplates()</td><td>errors/errors.go:35</td><td>Integrate (call at startup)</td></tr>
-                <tr><td>Version.Valid()</td><td>schema/version.go:25</td><td>Integrate or delete</td></tr>
-                <tr><td>ReasonRedacted</td><td>model/tombstone.go:20</td><td>Keep if planned</td></tr>
+                <tr>
+                  <td>ConflictAwareSyncer (entire file)</td>
+                  <td>sync/conflict_aware.go</td>
+                  <td>Design decision (see Deferred)</td>
+                </tr>
+                <tr>
+                  <td>Provider.Fetch() + FetchOptions</td>
+                  <td>provider/provider.go:114,78</td>
+                  <td>Public API — deferred</td>
+                </tr>
+                <tr>
+                  <td>Provider.GetRateLimit() + RateLimitInfo</td>
+                  <td>provider/provider.go:121,99</td>
+                  <td>Public API — deferred</td>
+                </tr>
+                <tr>
+                  <td>FetchResult.RateLimit field</td>
+                  <td>provider/provider.go:95</td>
+                  <td>Public API — deferred</td>
+                </tr>
+                <tr>
+                  <td>CQRSStack.conflictResolver field</td>
+                  <td>cqrs/stack.go:56</td>
+                  <td>DELETE (internal)</td>
+                </tr>
+                <tr>
+                  <td>ActionTombstoned constant</td>
+                  <td>sync/types.go:21</td>
+                  <td>DELETE (never produced)</td>
+                </tr>
+                <tr>
+                  <td>retryAfterer interface + check</td>
+                  <td>sync/retry.go:16, sync.go:458</td>
+                  <td>FIX (errors.As) this session</td>
+                </tr>
+                <tr>
+                  <td>NewUpdatedAtLWWResolver()</td>
+                  <td>cqrs/conflict_resolver.go:23</td>
+                  <td>Integrate as default or delete</td>
+                </tr>
+                <tr>
+                  <td>ErrSyncFailed sentinel</td>
+                  <td>errors/errors.go:22</td>
+                  <td>Integrate or delete</td>
+                </tr>
+                <tr>
+                  <td>WithUserDetail()</td>
+                  <td>errors/errors.go:143</td>
+                  <td>DELETE</td>
+                </tr>
+                <tr>
+                  <td>MustParseItemID()</td>
+                  <td>id/ids.go:61</td>
+                  <td>DELETE</td>
+                </tr>
+                <tr>
+                  <td>NewTombstone()</td>
+                  <td>model/tombstone.go:49</td>
+                  <td>Integrate into decider/projection</td>
+                </tr>
+                <tr>
+                  <td>model.ItemKey()</td>
+                  <td>model/key.go:34</td>
+                  <td>DELETE (zero callers)</td>
+                </tr>
+                <tr>
+                  <td>Item.Key(), Item.IsZero()</td>
+                  <td>model/item.go:36,41</td>
+                  <td>DELETE</td>
+                </tr>
+                <tr>
+                  <td>Key.IsZero(), Key.Equals()</td>
+                  <td>model/key.go:25,29</td>
+                  <td>DELETE</td>
+                </tr>
+                <tr>
+                  <td>MemoryReadModel.Len()</td>
+                  <td>cqrs/memory_readmodel.go:127</td>
+                  <td>DELETE</td>
+                </tr>
+                <tr>
+                  <td>8× WithXxx() filter builders</td>
+                  <td>model/item_filter.go:24-77</td>
+                  <td>DELETE (test-only)</td>
+                </tr>
+                <tr>
+                  <td>4× .String() methods</td>
+                  <td>sync/types.go, provider.go:46</td>
+                  <td>DELETE</td>
+                </tr>
+                <tr>
+                  <td>RegisterErrorTemplates()</td>
+                  <td>errors/errors.go:35</td>
+                  <td>Integrate (call at startup)</td>
+                </tr>
+                <tr>
+                  <td>Version.Valid()</td>
+                  <td>schema/version.go:25</td>
+                  <td>Integrate or delete</td>
+                </tr>
+                <tr>
+                  <td>ReasonRedacted</td>
+                  <td>model/tombstone.go:20</td>
+                  <td>Keep if planned</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -574,18 +724,81 @@
           <div class="card card-warning">
             <span class="tag">DIVERGENCE</span>
             <table>
-              <thead><tr><th>#</th><th>Split Brain</th><th>Severity</th><th>Action</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Split Brain</th>
+                  <th>Severity</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr><td>1</td><td>SQLite drops ContentHash + SchemaVersion on every round-trip (no DDL columns)</td><td><span class="badge badge-high">HIGH</span></td><td>Fix: add columns + migration</td></tr>
-                <tr><td>2</td><td>Two validation functions check different fields + different error conventions</td><td><span class="badge badge-high">HIGH</span></td><td>Fix: add UpdatedAt + unify errors</td></tr>
-                <tr><td>3</td><td>Tombstone reconstruction copy-pasted in decider + projection</td><td><span class="badge badge-medium">MED</span></td><td>Extract shared helper</td></tr>
-                <tr><td>4</td><td>model.Validate() returns unclassified errors; provider.Validate() uses pkgerrors</td><td><span class="badge badge-medium">MED</span></td><td>Fix: route through pkgerrors</td></tr>
-                <tr><td>5</td><td>source string vs id.ProviderID on 10+ function signatures</td><td><span class="badge badge-medium">MED</span></td><td>Deferred (large surface)</td></tr>
-                <tr><td>6</td><td>ExternalID vs SourceID naming duality across structs vs payloads</td><td><span class="badge badge-medium">MED</span></td><td>Deferred (touches schema)</td></tr>
-                <tr><td>7</td><td>Redundant tombstoned INTEGER column alongside tombstone_reason</td><td><span class="badge badge-medium">MED</span></td><td>Deferred (migration risk)</td></tr>
-                <tr><td>8</td><td>ConflictWinner (cqrs) overlaps SyncAction conflict values (sync)</td><td><span class="badge badge-low">LOW</span></td><td>Accept (layered by design)</td></tr>
-                <tr><td>9</td><td>Three outcome layers (SyncAction / ConflictWinner / SyncOutcome)</td><td><span class="badge badge-low">LOW</span></td><td>Accept (layered by design)</td></tr>
-                <tr><td>10</td><td>time.Now() in tests vs time.Now().UTC() in production</td><td><span class="badge badge-low">LOW</span></td><td>Standardize test helpers</td></tr>
+                <tr>
+                  <td>1</td>
+                  <td>
+                    SQLite drops ContentHash + SchemaVersion on every round-trip (no DDL columns)
+                  </td>
+                  <td><span class="badge badge-high">HIGH</span></td>
+                  <td>Fix: add columns + migration</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    Two validation functions check different fields + different error conventions
+                  </td>
+                  <td><span class="badge badge-high">HIGH</span></td>
+                  <td>Fix: add UpdatedAt + unify errors</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Tombstone reconstruction copy-pasted in decider + projection</td>
+                  <td><span class="badge badge-medium">MED</span></td>
+                  <td>Extract shared helper</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td>
+                    model.Validate() returns unclassified errors; provider.Validate() uses pkgerrors
+                  </td>
+                  <td><span class="badge badge-medium">MED</span></td>
+                  <td>Fix: route through pkgerrors</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td>source string vs id.ProviderID on 10+ function signatures</td>
+                  <td><span class="badge badge-medium">MED</span></td>
+                  <td>Deferred (large surface)</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td>ExternalID vs SourceID naming duality across structs vs payloads</td>
+                  <td><span class="badge badge-medium">MED</span></td>
+                  <td>Deferred (touches schema)</td>
+                </tr>
+                <tr>
+                  <td>7</td>
+                  <td>Redundant tombstoned INTEGER column alongside tombstone_reason</td>
+                  <td><span class="badge badge-medium">MED</span></td>
+                  <td>Deferred (migration risk)</td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>ConflictWinner (cqrs) overlaps SyncAction conflict values (sync)</td>
+                  <td><span class="badge badge-low">LOW</span></td>
+                  <td>Accept (layered by design)</td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>Three outcome layers (SyncAction / ConflictWinner / SyncOutcome)</td>
+                  <td><span class="badge badge-low">LOW</span></td>
+                  <td>Accept (layered by design)</td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>time.Now() in tests vs time.Now().UTC() in production</td>
+                  <td><span class="badge badge-low">LOW</span></td>
+                  <td>Standardize test helpers</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -600,14 +813,21 @@
               <div class="migration-num">1</div>
               <div class="migration-content">
                 <h4>Fix projection version-gate race</h4>
-                <p>Guard the check-apply-store sequence with a single mutex so concurrent Handle calls for the same aggregate serialize. Add a regression test that delivers a tombstone + stale sync concurrently.</p>
+                <p>
+                  Guard the check-apply-store sequence with a single mutex so concurrent Handle
+                  calls for the same aggregate serialize. Add a regression test that delivers a
+                  tombstone + stale sync concurrently.
+                </p>
               </div>
             </div>
             <div class="migration-step">
               <div class="migration-num">2</div>
               <div class="migration-content">
                 <h4>Fix NewCQRSStack resource leak</h4>
-                <p>Add a defer that closes store/bus/db/cancels runner on any error path after creation. Build into a local stack, return only on full success.</p>
+                <p>
+                  Add a defer that closes store/bus/db/cancels runner on any error path after
+                  creation. Build into a local stack, return only on full success.
+                </p>
               </div>
             </div>
           </div>
@@ -618,14 +838,20 @@
               <div class="migration-num">3</div>
               <div class="migration-content">
                 <h4>Add UpdatedAt validation to provider.Item.Validate()</h4>
-                <p>One check, matching model.Item.Validate(). Stops poison events at the entry filter.</p>
+                <p>
+                  One check, matching model.Item.Validate(). Stops poison events at the entry
+                  filter.
+                </p>
               </div>
             </div>
             <div class="migration-step">
               <div class="migration-num">4</div>
               <div class="migration-content">
                 <h4>Stop swallowing AggregateID parse error</h4>
-                <p>Panic on parse failure (impossible with correct SHA256 output) and never cache a zero value.</p>
+                <p>
+                  Panic on parse failure (impossible with correct SHA256 output) and never cache a
+                  zero value.
+                </p>
               </div>
             </div>
           </div>
@@ -650,7 +876,10 @@
               <div class="migration-num">7</div>
               <div class="migration-content">
                 <h4>Preserve SQLite error chains</h4>
-                <p>Replace <code>fmt.Sprintf("…: %v", err)</code> with proper wrapping so errors.Is/As survive.</p>
+                <p>
+                  Replace <code>fmt.Sprintf("…: %v", err)</code> with proper wrapping so
+                  errors.Is/As survive.
+                </p>
               </div>
             </div>
           </div>
@@ -661,7 +890,11 @@
               <div class="migration-num">8</div>
               <div class="migration-content">
                 <h4>Delete internal ghosts</h4>
-                <p>conflictResolver field, dead model methods (Key/IsZero/Equals/ItemKey), Len(), ActionTombstoned, MustParseItemID, WithUserDetail, 8 builders, 4 String() methods. No public API change.</p>
+                <p>
+                  conflictResolver field, dead model methods (Key/IsZero/Equals/ItemKey), Len(),
+                  ActionTombstoned, MustParseItemID, WithUserDetail, 8 builders, 4 String() methods.
+                  No public API change.
+                </p>
               </div>
             </div>
           </div>
@@ -672,14 +905,20 @@
               <div class="migration-num">9</div>
               <div class="migration-content">
                 <h4>Unify validation error convention</h4>
-                <p>Route model.Validate() through pkgerrors.ErrInvalidInput. Kill the unclassified-sentinel split brain.</p>
+                <p>
+                  Route model.Validate() through pkgerrors.ErrInvalidInput. Kill the
+                  unclassified-sentinel split brain.
+                </p>
               </div>
             </div>
             <div class="migration-step">
               <div class="migration-num">10</div>
               <div class="migration-content">
                 <h4>Add ContentHash + SchemaVersion to SQLite read model</h4>
-                <p>Stop silent data loss on every round-trip. Add columns, migration, Upsert, and scan wiring.</p>
+                <p>
+                  Stop silent data loss on every round-trip. Add columns, migration, Upsert, and
+                  scan wiring.
+                </p>
               </div>
             </div>
           </div>
@@ -688,14 +927,41 @@
         <section id="deferred">
           <h2>Deliberate Deferrals</h2>
           <ol>
-            <li><strong>ConflictAwareSyncer</strong> — zero production callers but provides a richer ConflictResult (per-item details) the base Syncer doesn't. Decision needed: integrate into base Syncer vs delete vs keep as opt-in. Has a latent bug (always returns nil error) that's moot if deleted.</li>
-            <li><strong>Provider interface pruning</strong> (Fetch/FetchOptions/GetRateLimit/RateLimitInfo) — public API change affecting every consumer implementor. Defer to a major-version bump.</li>
-            <li><strong>ExternalID ↔ SourceID naming unify</strong> — touches the versioned event JSON schema. Requires an upcasting migration.</li>
-            <li><strong>source string → id.ProviderID</strong> on 10+ function signatures — breaking change across cqrs/sync/provider. Defer.</li>
-            <li><strong>MemoryReadModel defensive copies</strong> — real aliasing risk but changes allocation profile. Needs a benchmark pass.</li>
-            <li><strong>Redundant tombstoned column</strong> — SQLite has both a boolean and a reason; the model uses only reason. Migration risk.</li>
-            <li><strong>OpenTelemetry wiring</strong> — decision made (consumer-wrap); sized follow-up.</li>
-            <li><strong>SQLite tests all use :memory:</strong> — structurally hides concurrency bugs. Add file-backed + WAL integration tests.</li>
+            <li>
+              <strong>ConflictAwareSyncer</strong> — zero production callers but provides a richer
+              ConflictResult (per-item details) the base Syncer doesn't. Decision needed: integrate
+              into base Syncer vs delete vs keep as opt-in. Has a latent bug (always returns nil
+              error) that's moot if deleted.
+            </li>
+            <li>
+              <strong>Provider interface pruning</strong>
+              (Fetch/FetchOptions/GetRateLimit/RateLimitInfo) — public API change affecting every
+              consumer implementor. Defer to a major-version bump.
+            </li>
+            <li>
+              <strong>ExternalID ↔ SourceID naming unify</strong> — touches the versioned event JSON
+              schema. Requires an upcasting migration.
+            </li>
+            <li>
+              <strong>source string → id.ProviderID</strong> on 10+ function signatures — breaking
+              change across cqrs/sync/provider. Defer.
+            </li>
+            <li>
+              <strong>MemoryReadModel defensive copies</strong> — real aliasing risk but changes
+              allocation profile. Needs a benchmark pass.
+            </li>
+            <li>
+              <strong>Redundant tombstoned column</strong> — SQLite has both a boolean and a reason;
+              the model uses only reason. Migration risk.
+            </li>
+            <li>
+              <strong>OpenTelemetry wiring</strong> — decision made (consumer-wrap); sized
+              follow-up.
+            </li>
+            <li>
+              <strong>SQLite tests all use :memory:</strong> — structurally hides concurrency bugs.
+              Add file-backed + WAL integration tests.
+            </li>
           </ol>
         </section>
 
@@ -704,15 +970,16 @@
           <div class="card card-problem">
             <span class="tag">NOT DONE YET</span>
             <p>
-              Two prior sessions declared "production-ready" while a projection race,
-              a constructor leak, and a validation gap sat in the code. This session's
-              three-agent investigation caught them. The plan above fixes every
-              CRITICAL and HIGH bug, plus the actionable MEDIUMs and the internal
-              ghosts — each as a self-contained commit with a regression test where
-              the bug is reproducible. The honest claim after execution will be
-              narrower and truer than "production-ready": <em>correct under
-              concurrent delivery, leak-free on error paths, validated at the
-              boundary.</em>
+              Two prior sessions declared "production-ready" while a projection race, a constructor
+              leak, and a validation gap sat in the code. This session's three-agent investigation
+              caught them. The plan above fixes every CRITICAL and HIGH bug, plus the actionable
+              MEDIUMs and the internal ghosts — each as a self-contained commit with a regression
+              test where the bug is reproducible. The honest claim after execution will be narrower
+              and truer than "production-ready":
+              <em
+                >correct under concurrent delivery, leak-free on error paths, validated at the
+                boundary.</em
+              >
             </p>
           </div>
         </section>

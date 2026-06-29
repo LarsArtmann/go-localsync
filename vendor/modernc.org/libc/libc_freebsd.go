@@ -1777,7 +1777,7 @@ oom:
 
 var (
 	_senv_alloced   uintptr /* setenv.c:7:14: */
-	_senv_alloced_n size_t  /* setenv.c:8:16: */)
+	_senv_alloced_n size_t /* setenv.c:8:16: */)
 
 func X__env_rm_add(tls *TLS, old, new uintptr) { /* setenv.c:5:6: */
 	if __ccgo_strace {

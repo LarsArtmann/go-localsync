@@ -556,7 +556,7 @@ type Tfloat_t = float32
 type Tdouble_t = float64
 
 var (
-	_k    = uint32(1799)                /* constant for reduction */
+	_k    = uint32(1799) /* constant for reduction */
 	_kln2 = float64(1246.9717778273416) /* k * ln2 */)
 
 // C documentation
@@ -633,7 +633,7 @@ func X__ldexp_cexp(tls *TLS, z complex128, expt int32) (r complex128) {
 }
 
 var (
-	_k1    = uint32(235)                     /* constant for reduction */
+	_k1    = uint32(235) /* constant for reduction */
 	_kln21 = Float32FromFloat32(162.8895874) /* k * ln2 */)
 
 // C documentation
@@ -99774,7 +99774,7 @@ var (
 	_C0  = -Float64FromFloat64(0.499999997251031)    /* -0.499999997251031003120 */
 	_C11 = float64(0.04166662332373906)              /*  0.0416666233237390631894 */
 	_C21 = -Float64FromFloat64(0.001388676377460993) /* -0.00138867637746099294692 */
-	_C31 = float64(2.439044879627741e-05)            /*  0.0000243904487962774090654 */)
+	_C31 = float64(2.439044879627741e-05) /*  0.0000243904487962774090654 */)
 
 func X__cosdf(tls *TLS, x float64) (r1 float32) {
 	if __ccgo_strace {
@@ -100097,7 +100097,7 @@ var (
 	_pio2_2  = float64(6.077100506303966e-11)  /* 0x3DD0B461, 0x1A600000 */
 	_pio2_2t = float64(2.0222662487959506e-21) /* 0x3BA3198A, 0x2E037073 */
 	_pio2_3  = float64(2.0222662487111665e-21) /* 0x3BA3198A, 0x2E000000 */
-	_pio2_3t = float64(8.4784276603689e-32)    /* 0x397B839A, 0x252049C1 */)
+	_pio2_3t = float64(8.4784276603689e-32) /* 0x397B839A, 0x252049C1 */)
 
 // C documentation
 //
@@ -100791,8 +100791,8 @@ const DBL_EPSILON3 = 2.220446049250313e-16
 var (
 	_toint1   = Float64FromFloat64(1.5) / Float64FromFloat64(2.220446049250313e-16)
 	_pio41    = float64(0.7853981852531433)
-	_invpio21 = float64(0.6366197723675814)     /* 0x3FE45F30, 0x6DC9C883 */
-	_pio2_11  = float64(1.5707963109016418)     /* 0x3FF921FB, 0x50000000 */
+	_invpio21 = float64(0.6366197723675814) /* 0x3FE45F30, 0x6DC9C883 */
+	_pio2_11  = float64(1.5707963109016418) /* 0x3FF921FB, 0x50000000 */
 	_pio2_1t1 = float64(1.5893254773528196e-08) /* 0x3E5110b4, 0x611A6263 */)
 
 func X__rem_pio2f(tls *TLS, x float32, y uintptr) (r int32) {
@@ -100925,7 +100925,7 @@ var (
 	_S3 = -Float64FromFloat64(0.0001984126982985795)  /* 0xBF2A01A0, 0x19C161D5 */
 	_S4 = float64(2.7557313707070068e-06)             /* 0x3EC71DE3, 0x57B1FE7D */
 	_S5 = -Float64FromFloat64(2.5050760253406863e-08) /* 0xBE5AE5E6, 0x8A2B9CEB */
-	_S6 = float64(1.58969099521155e-10)               /* 0x3DE5D93A, 0x5ACFD57C */)
+	_S6 = float64(1.58969099521155e-10) /* 0x3DE5D93A, 0x5ACFD57C */)
 
 func X__sin(tls *TLS, x, y float64, iy int32) (r1 float64) {
 	if __ccgo_strace {
@@ -100954,7 +100954,7 @@ var (
 	_S11 = -Float64FromFloat64(0.16666666641626524)    /* -0.166666666416265235595 */
 	_S21 = float64(0.008333329385889463)               /*  0.0083333293858894631756 */
 	_S31 = -Float64FromFloat64(0.00019839334836096632) /* -0.000198393348360966317347 */
-	_S41 = float64(2.718311493989822e-06)              /*  0.0000027183114939898219064 */)
+	_S41 = float64(2.718311493989822e-06) /*  0.0000027183114939898219064 */)
 
 func X__sindf(tls *TLS, x float64) (r1 float32) {
 	if __ccgo_strace {
@@ -100988,7 +100988,7 @@ var _T = [13]float64{
 }
 
 var (
-	_pio42  = float64(0.7853981633974483)    /* 3FE921FB, 54442D18 */
+	_pio42  = float64(0.7853981633974483) /* 3FE921FB, 54442D18 */
 	_pio4lo = float64(3.061616997868383e-17) /* 3C81A626, 33145C07 */)
 
 func X__tan(tls *TLS, x, y float64, odd int32) (r1 float64) {
@@ -101112,7 +101112,7 @@ var (
 	_qS1     = -Float64FromFloat64(2.403394911734414)   /* 0xC0033A27, 0x1C8A2D4B */
 	_qS2     = float64(2.0209457602335057)              /* 0x40002AE5, 0x9C598AC8 */
 	_qS3     = -Float64FromFloat64(0.6882839716054533)  /* 0xBFE6066C, 0x1B8D0159 */
-	_qS4     = float64(0.07703815055590194)             /* 0x3FB3B8C5, 0xB12E9282 */)
+	_qS4     = float64(0.07703815055590194) /* 0x3FB3B8C5, 0xB12E9282 */)
 
 func _R(tls *TLS, z float64) (r float64) {
 	var p, q Tdouble_t
@@ -101337,7 +101337,7 @@ var (
 	_qS12 = -Float64FromFloat64(2.403394911734414)   /* 0xC0033A27, 0x1C8A2D4B */
 	_qS21 = float64(2.0209457602335057)              /* 0x40002AE5, 0x9C598AC8 */
 	_qS31 = -Float64FromFloat64(0.6882839716054533)  /* 0xBFE6066C, 0x1B8D0159 */
-	_qS41 = float64(0.07703815055590194)             /* 0x3FB3B8C5, 0xB12E9282 */)
+	_qS41 = float64(0.07703815055590194) /* 0x3FB3B8C5, 0xB12E9282 */)
 
 func _R2(tls *TLS, z float64) (r float64) {
 	var p, q Tdouble_t
@@ -101713,7 +101713,7 @@ func Xatan(tls *TLS, x3 float64) (r float64) {
 }
 
 var (
-	_pi    = float64(3.141592653589793)      /* 0x400921FB, 0x54442D18 */
+	_pi    = float64(3.141592653589793) /* 0x400921FB, 0x54442D18 */
 	_pi_lo = float64(1.2246467991473532e-16) /* 0x3CA1A626, 0x33145C07 */)
 
 func Xatan2(tls *TLS, y, x float64) (r float64) {
@@ -101836,7 +101836,7 @@ _2:
 }
 
 var (
-	_pi1    = float32(3.141592741)                           /* 0x40490fdb */
+	_pi1    = float32(3.141592741) /* 0x40490fdb */
 	_pi_lo1 = float32(-Float64FromFloat64(8.7422776573e-08)) /* 0xb3bbbd2e */)
 
 func Xatan2f(tls *TLS, y, x float32) (r float32) {
@@ -102227,7 +102227,7 @@ var (
 	_P1 = -Float64FromFloat64(1.8849797954337717) /* 0xbffe28e0, 0x92f02420 */
 	_P2 = float64(1.6214297201053545)             /* 0x3ff9f160, 0x4a49d6c2 */
 	_P3 = -Float64FromFloat64(0.758397934778766)  /* 0xbfe844cb, 0xbee751d9 */
-	_P4 = float64(0.14599619288661245)            /* 0x3fc2b000, 0xd4e4edd7 */)
+	_P4 = float64(0.14599619288661245) /* 0x3fc2b000, 0xd4e4edd7 */)
 
 func Xcbrt(tls *TLS, x float64) (r1 float64) {
 	if __ccgo_strace {
@@ -102959,7 +102959,7 @@ var (
 	_sb4 = float64(3199.8582195085955)             /* 0x40A8FFB7, 0x688C246A */
 	_sb5 = float64(2553.0504064331644)             /* 0x40A3F219, 0xCEDF3BE6 */
 	_sb6 = float64(474.52854120695537)             /* 0x407DA874, 0xE79FE763 */
-	_sb7 = -Float64FromFloat64(22.44095244658582)  /* 0xC03670E2, 0x42712D62 */)
+	_sb7 = -Float64FromFloat64(22.44095244658582) /* 0xC03670E2, 0x42712D62 */)
 
 func _erfc1(tls *TLS, x float64) (r float64) {
 	var P, Q, s Tdouble_t
@@ -103145,7 +103145,7 @@ var (
 	_sb41 = float32(3199.8581543)                        /* 0x4547fdbb */
 	_sb51 = float32(2553.050293)                         /* 0x451f90ce */
 	_sb61 = float32(474.52853394)                        /* 0x43ed43a7 */
-	_sb71 = float32(-Float64FromFloat64(22.440952301))   /* 0xc1b38712 */)
+	_sb71 = float32(-Float64FromFloat64(22.440952301)) /* 0xc1b38712 */)
 
 func _erfc11(tls *TLS, x float32) (r float32) {
 	var P, Q, s Tfloat_t
@@ -103912,10 +103912,10 @@ var (
 	_ln2_lo      = float64(1.9082149292705877e-10) /* 0x3dea39ef, 0x35793c76 */
 	_invln2      = float64(1.4426950408889634)     /* 0x3ff71547, 0x652b82fe */
 	/* Scaled Q's: Qn_here = 2**n * Qn_above, for R(2*z) where z = hxs = x*x/2: */
-	_Q1 = -Float64FromFloat64(0.03333333333333313)    /* BFA11111 111110F4 */
-	_Q2 = float64(0.0015873015872548146)              /* 3F5A01A0 19FE5585 */
-	_Q3 = -Float64FromFloat64(7.93650757867488e-05)   /* BF14CE19 9EAADBB7 */
-	_Q4 = float64(4.008217827329362e-06)              /* 3ED0CFCA 86E65239 */
+	_Q1 = -Float64FromFloat64(0.03333333333333313)  /* BFA11111 111110F4 */
+	_Q2 = float64(0.0015873015872548146)            /* 3F5A01A0 19FE5585 */
+	_Q3 = -Float64FromFloat64(7.93650757867488e-05) /* BF14CE19 9EAADBB7 */
+	_Q4 = float64(4.008217827329362e-06)            /* 3ED0CFCA 86E65239 */
 	_Q5 = -Float64FromFloat64(2.0109921818362437e-07) /* BE8AFDB7 6E09C32D */)
 
 func Xexpm1(tls *TLS, x3 float64) (r float64) {
@@ -104061,7 +104061,7 @@ var (
 	 * Scaled coefficients: Qn_here = 2**n * Qn_for_q (see s_expm1.c):
 	 */
 	_Q11 = float32(-Float64FromFloat64(0.033333212137)) /* -0x888868.0p-28 */
-	_Q21 = float32(0.0015807170421)                     /*  0xcf3010.0p-33 */)
+	_Q21 = float32(0.0015807170421) /*  0xcf3010.0p-33 */)
 
 func Xexpm1f(tls *TLS, x3 float32) (r float32) {
 	if __ccgo_strace {
@@ -105794,7 +105794,7 @@ var (
 	_S01 = float64(0.015619102946489001)               /* 0x3F8FFCE8, 0x82C8C2A4 */
 	_S02 = float64(0.00011692678466333745)             /* 0x3F1EA6D2, 0xDD57DBF4 */
 	_S03 = float64(5.135465502073181e-07)              /* 0x3EA13B54, 0xCE84D5A9 */
-	_S04 = float64(1.1661400333379e-09)                /* 0x3E1408BC, 0xF4745D8F */)
+	_S04 = float64(1.1661400333379e-09) /* 0x3E1408BC, 0xF4745D8F */)
 
 func Xj0(tls *TLS, x float64) (r1 float64) {
 	if __ccgo_strace {
@@ -105843,7 +105843,7 @@ var (
 	_v01 = float64(0.01273048348341237)                /* 0x3F8A1270, 0x91C9C71A */
 	_v02 = float64(7.600686273503533e-05)              /* 0x3F13ECBB, 0xF578C6C1 */
 	_v03 = float64(2.591508518404578e-07)              /* 0x3E91642D, 0x7FF202FD */
-	_v04 = float64(4.4111031133267547e-10)             /* 0x3DFE5018, 0x3BD6D9EF */)
+	_v04 = float64(4.4111031133267547e-10) /* 0x3DFE5018, 0x3BD6D9EF */)
 
 func Xy0(tls *TLS, x float64) (r float64) {
 	if __ccgo_strace {
@@ -106149,7 +106149,7 @@ var (
 	_S011 = float32(0.015619102865)                        /* 0x3c7fe744 */
 	_S021 = float32(0.00011692678527)                      /* 0x38f53697 */
 	_S031 = float32(5.1354652442e-07)                      /* 0x3509daa6 */
-	_S041 = float32(1.1661400734e-09)                      /* 0x30a045e8 */)
+	_S041 = float32(1.1661400734e-09) /* 0x30a045e8 */)
 
 func Xj0f(tls *TLS, x float32) (r1 float32) {
 	if __ccgo_strace {
@@ -106193,7 +106193,7 @@ var (
 	_v011 = float32(0.012730483897)                        /* 0x3c509385 */
 	_v021 = float32(7.6006865129e-05)                      /* 0x389f65e0 */
 	_v031 = float32(2.5915085189e-07)                      /* 0x348b216c */
-	_v041 = float32(4.4111031494e-10)                      /* 0x2ff280c2 */)
+	_v041 = float32(4.4111031494e-10) /* 0x2ff280c2 */)
 
 func Xy0f(tls *TLS, x float32) (r float32) {
 	if __ccgo_strace {
@@ -106503,7 +106503,7 @@ var (
 	_s02 = float64(0.00018594678558863092)            /* 0x3F285F56, 0xB9CDF664 */
 	_s03 = float64(1.1771846404262368e-06)            /* 0x3EB3BFF8, 0x333F8498 */
 	_s04 = float64(5.0463625707621704e-09)            /* 0x3E35AC88, 0xC97DFF2C */
-	_s05 = float64(1.2354227442613791e-11)            /* 0x3DAB2ACF, 0xCFB97ED8 */)
+	_s05 = float64(1.2354227442613791e-11) /* 0x3DAB2ACF, 0xCFB97ED8 */)
 
 func Xj1(tls *TLS, x float64) (r1 float64) {
 	if __ccgo_strace {
@@ -106850,7 +106850,7 @@ var (
 	_s021 = float32(0.00018594678841)                      /* 0x3942fab6 */
 	_s031 = float32(1.1771846857e-06)                      /* 0x359dffc2 */
 	_s041 = float32(5.046362439e-09)                       /* 0x31ad6446 */
-	_s051 = float32(1.2354227016e-11)                      /* 0x2d59567e */)
+	_s051 = float32(1.2354227016e-11) /* 0x2d59567e */)
 
 func Xj1f(tls *TLS, x float32) (r1 float32) {
 	if __ccgo_strace {
@@ -107770,7 +107770,7 @@ var (
 	_w3  = float64(0.0007936505586430196)              /* 0x3F4A019F, 0x98CF38B6 */
 	_w4  = -Float64FromFloat64(0.00059518755745034)    /* 0xBF4380CB, 0x8C0FE741 */
 	_w5  = float64(0.0008363399189962821)              /* 0x3F4B67BA, 0x4CDAD5D1 */
-	_w6  = -Float64FromFloat64(0.0016309293409657527)  /* 0xBF5AB89D, 0x0B9E43E4 */)
+	_w6  = -Float64FromFloat64(0.0016309293409657527) /* 0xBF5AB89D, 0x0B9E43E4 */)
 
 // C documentation
 //
@@ -108027,7 +108027,7 @@ var (
 	_w31  = float32(0.00079365057172)                      /* 0x3a500cfd */
 	_w41  = float32(-Float64FromFloat64(0.00059518753551)) /* 0xba1c065c */
 	_w51  = float32(0.00083633989561)                      /* 0x3a5b3dd2 */
-	_w61  = float32(-Float64FromFloat64(0.0016309292987))  /* 0xbad5c4e8 */)
+	_w61  = float32(-Float64FromFloat64(0.0016309292987)) /* 0xbad5c4e8 */)
 
 // C documentation
 //
@@ -108424,7 +108424,7 @@ var (
 	_Lg4       = float64(0.22222198432149784)    /* 3FCC71C5 1D8E78AF */
 	_Lg5       = float64(0.1818357216161805)     /* 3FC74664 96CB03DE */
 	_Lg6       = float64(0.15313837699209373)    /* 3FC39A09 D078C69F */
-	_Lg7       = float64(0.14798198605116586)    /* 3FC2F112 DF3E5244 */)
+	_Lg7       = float64(0.14798198605116586) /* 3FC2F112 DF3E5244 */)
 
 func Xlog10(tls *TLS, x float64) (r float64) {
 	if __ccgo_strace {
@@ -108607,7 +108607,7 @@ var (
 	_Lg42    = float64(0.22222198432149784)    /* 3FCC71C5 1D8E78AF */
 	_Lg51    = float64(0.1818357216161805)     /* 3FC74664 96CB03DE */
 	_Lg61    = float64(0.15313837699209373)    /* 3FC39A09 D078C69F */
-	_Lg71    = float64(0.14798198605116586)    /* 3FC2F112 DF3E5244 */)
+	_Lg71    = float64(0.14798198605116586) /* 3FC2F112 DF3E5244 */)
 
 func Xlog1p(tls *TLS, x3 float64) (r float64) {
 	if __ccgo_strace {
@@ -112514,6 +112514,7 @@ var (
 		12: float64(2.5066282746310002),
 	}
 )
+
 var _Sden = [13]float64{
 	1:  Float64FromInt32(39916800),
 	2:  Float64FromInt32(120543840),
