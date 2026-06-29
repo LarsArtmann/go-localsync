@@ -47,6 +47,11 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		return nil, err
 	}
 
+	// Acquire the per-source lock so two concurrent conflict-aware syncs for the
+	// same source can't interleave a fetch+store window (the same TOCTOU guard
+	// the base Syncer uses). Different sources still run in parallel.
+	defer s.syncer.lockSource(opts.Source)()
+
 	result, err := s.syncer.fetchItems(ctx, opts, "Starting conflict-aware sync", "conflict-aware sync")
 	if err != nil {
 		return nil, err
