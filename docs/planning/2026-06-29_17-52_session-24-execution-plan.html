@@ -1,0 +1,569 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Execution Plan — Session 24 (2026-06-29)</title>
+    <style>
+      :root {
+        --color-graphite: #0e0e10;
+        --color-graphite-2: #18181d;
+        --color-graphite-3: #16161a;
+        --color-bone: #f4f4f0;
+        --color-red: #ff6b6b;
+        --color-blue: #6eb5ff;
+        --color-yellow: #f4d35e;
+        --color-amber: #ffb347;
+        --color-hairline: rgba(244, 244, 240, 0.12);
+        --color-hairline-strong: rgba(244, 244, 240, 0.25);
+        --surface: var(--color-graphite);
+        --surface-raised: var(--color-graphite-2);
+        --surface-sunken: var(--color-graphite-3);
+        --text: var(--color-bone);
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --text-faint: rgba(244, 244, 240, 0.45);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-amber);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+        --radius: 0px;
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .main {
+        padding: 2rem 3rem;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        color: var(--text-faint);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 1.5rem 0 0.5rem;
+      }
+      p {
+        margin-bottom: 0.75rem;
+      }
+      ul {
+        margin: 0.5rem 0 1rem 1.5rem;
+      }
+      li {
+        margin-bottom: 0.3rem;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      p code,
+      li code {
+        font-size: 0.88em;
+        background: var(--surface-sunken);
+        padding: 0.1rem 0.35rem;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+      .stat {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1rem;
+        text-align: center;
+      }
+      .stat .num {
+        font-size: 2.2rem;
+        font-weight: 900;
+        line-height: 1;
+        color: var(--accent);
+      }
+      .stat .label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-faint);
+        margin-top: 0.3rem;
+      }
+      .stat .num.solution {
+        color: var(--solution);
+      }
+      .stat .num.warning {
+        color: var(--warning);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.86rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.55rem 0.7rem;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      th {
+        font-weight: 700;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      tr:hover td {
+        background: var(--surface-sunken);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border: 1px solid;
+        white-space: nowrap;
+      }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--amber);
+        border-color: var(--amber);
+      }
+      .badge-medium {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-low {
+        color: var(--text-faint);
+        border-color: var(--text-faint);
+      }
+      .badge-done {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
+      .badge-deferred {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .tier {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        padding: 1rem 1.25rem;
+        margin: 1rem 0;
+      }
+      .tier-label {
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+      }
+      .verdict {
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        border-left: 3px solid var(--solution);
+        background: var(--surface-raised);
+      }
+      @media (max-width: 768px) {
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="main">
+      <h1>Execution Plan — Session 24</h1>
+      <p class="subtitle">
+        2026-06-29 · Post v3.4 upgrade follow-up · Pareto-sorted by impact ↑ / effort ↓
+      </p>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="num solution">12</div>
+          <div class="label">Tasks Done</div>
+        </div>
+        <div class="stat">
+          <div class="num warning">5</div>
+          <div class="label">Deferred</div>
+        </div>
+        <div class="stat">
+          <div class="num">0</div>
+          <div class="label">Lint Issues</div>
+        </div>
+      </div>
+
+      <h2>Approach</h2>
+      <p>
+        The plan was built by answering the brutal-self-review's 11 questions, then sorting every
+        item by <strong>impact-to-effort ratio</strong> (Pareto). The 1% that delivers 51%: fixing
+        the dirty tree + root cause (vendor formatter exclusion). The 20% that delivers 80%: the
+        three architectural fixes (context smuggling, explicit conflict, ghost resolution).
+        Everything else is medium-impact documentation and CI.
+      </p>
+
+      <h2>Phase A — Stop the Bleeding (Critical)</h2>
+      <div class="tier">
+        <div class="tier-label">1% → 51% impact</div>
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Task</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td>1</td>
+            <td>Restore pristine vendored code (re-vendor to undo ~140 reformatted files)</td>
+            <td><span class="badge badge-critical">Critical</span></td>
+            <td>6m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>
+              Fix <code>.golangci.yml</code>: add <code>vendor/</code> to
+              formatters.exclusions.paths (root cause)
+            </td>
+            <td><span class="badge badge-critical">Critical</span></td>
+            <td>3m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>
+              Verify <code>golangci-lint fmt</code> no longer touches vendor; commit clean tree
+            </td>
+            <td><span class="badge badge-critical">Critical</span></td>
+            <td>3m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Phase B — Architectural Debt (High Impact)</h2>
+      <div class="tier">
+        <div class="tier-label">20% → 80% impact</div>
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Task</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>
+              Add <code>outcome</code> field to <code>SyncItemCommand</code> (replace
+              <code>context.Value</code> smuggling)
+            </td>
+            <td><span class="badge badge-high">High</span></td>
+            <td>4m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>
+              Wire <code>cmd.outcome</code> in <code>SyncItems</code> + handler; delete
+              context-value helpers
+            </td>
+            <td><span class="badge badge-high">High</span></td>
+            <td>5m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>
+              Add explicit <code>ConflictDetected</code> to <code>SyncOutcome</code>; set by event
+              type, not count
+            </td>
+            <td><span class="badge badge-high">High</span></td>
+            <td>5m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>
+              <code>classifyAction</code> uses explicit flag (not
+              <code>eventCount&gt;1</code> inference)
+            </td>
+            <td><span class="badge badge-high">High</span></td>
+            <td>4m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>
+              Update <code>TestClassifyAction</code> table test to new struct signature; run full
+              suite + lint
+            </td>
+            <td><span class="badge badge-high">High</span></td>
+            <td>6m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Phase C — Ghost System Resolution (Data-Driven)</h2>
+      <div class="tier">
+        <div class="tier-label">4% → 64% impact (knowledge)</div>
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Task</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td>Benchmark <code>QueryDispatcher</code> vs direct ReadModel (List + Count)</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td>6m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>10</td>
+            <td>
+              Document the bypass with measured data; reframe ghost as optional observability path
+            </td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td>8m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+        </table>
+        <p>
+          <strong>Result:</strong> Direct path is 1.6× faster on List, 5.5× faster on Count (0 vs
+          127 allocs). The bypass is data-proven.
+        </p>
+      </div>
+
+      <h2>Phase D — Documentation Drift (Medium)</h2>
+      <div class="tier">
+        <div class="tier-label">Medium impact, low effort</div>
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Task</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td>11</td>
+            <td>
+              Fix FEATURES.md doc-drift (<code>ItemDeleted</code>→<code>ItemTombstoned</code>,
+              <code>DecideDelete</code>→<code>DecideTombstone</code>,
+              <code>event.Projection</code>→<code>projection.Projection</code>)
+            </td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td>8m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>11b</td>
+            <td>Fix DOMAIN_LANGUAGE.md (tombstone names, remove stale Turso/Outbox refs)</td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td>4m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Phase E — CI Repair (Medium)</h2>
+      <div class="tier">
+        <div class="tier-label">Medium impact, medium effort</div>
+        <table>
+          <tr>
+            <th>#</th>
+            <th>Task</th>
+            <th>Impact</th>
+            <th>Effort</th>
+            <th>Status</th>
+          </tr>
+          <tr>
+            <td>12</td>
+            <td>
+              Rework broken CI build/release jobs (library has no binary → cross-platform compile
+              verify + binary-free release)
+            </td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td>8m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+          <tr>
+            <td>12b</td>
+            <td>
+              Update FEATURES.md CI rows (BROKEN → FULLY_FUNCTIONAL), TODO_LIST.md + ROADMAP.md
+              (mark done)
+            </td>
+            <td><span class="badge badge-medium">Medium</span></td>
+            <td>4m</td>
+            <td><span class="badge badge-done">DONE</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <h2>Deferred Items (Need Verification or Design Decision)</h2>
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Task</th>
+          <th>Impact</th>
+          <th>Effort</th>
+          <th>Status</th>
+          <th>Reason</th>
+        </tr>
+        <tr>
+          <td>D1</td>
+          <td><code>encoding/json</code> v1 → v2 migration (10 files)</td>
+          <td><span class="badge badge-medium">Medium</span></td>
+          <td>4h</td>
+          <td><span class="badge badge-deferred">DEFERRED</span></td>
+          <td>
+            v2 is experiment-gated (GOEXPERIMENT=jsonv2); migrating now risks breakage. Wait for
+            stable default.
+          </td>
+        </tr>
+        <tr>
+          <td>D2</td>
+          <td>OpenTelemetry instrumentation (<code>otel/v3</code> is vendored but unwired)</td>
+          <td><span class="badge badge-high">High</span></td>
+          <td>4-8h</td>
+          <td><span class="badge badge-deferred">DEFERRED</span></td>
+          <td>
+            Needs design decision: SDK-level vs consumer-level observability. Biggest feature gap.
+          </td>
+        </tr>
+        <tr>
+          <td>D3</td>
+          <td>Pre-commit hook OOM on vendor (buildflow scans ~400 sqlite files)</td>
+          <td><span class="badge badge-low">Low</span></td>
+          <td>1h</td>
+          <td><span class="badge badge-deferred">DEFERRED</span></td>
+          <td>
+            Formatter exclusion (this session) prevents pollution, but hook still scans vendor. Fix
+            buildflow config.
+          </td>
+        </tr>
+        <tr>
+          <td>D4</td>
+          <td><code>projectionhost/v3</code> evaluation (replace hand-rolled replayJournal)</td>
+          <td><span class="badge badge-low">Low</span></td>
+          <td>4-8h</td>
+          <td><span class="badge badge-deferred">DEFERRED</span></td>
+          <td>
+            Would add crash-restart + checkpoint + DLQ. Needs ADR + proving custom ReadModel compat.
+          </td>
+        </tr>
+        <tr>
+          <td>D5</td>
+          <td>Make <code>go-cqrs-lite</code> public</td>
+          <td><span class="badge badge-high">High</span></td>
+          <td>1h</td>
+          <td><span class="badge badge-deferred">DEFERRED</span></td>
+          <td>
+            External decision (repo visibility). Eliminates the entire vendor-pollution class of
+            bugs.
+          </td>
+        </tr>
+      </table>
+
+      <h2>Verification Summary</h2>
+      <ul>
+        <li><strong>Build:</strong> <code>go build ./...</code> — clean</li>
+        <li><strong>Tests:</strong> 190 test functions, 9 packages — all pass</li>
+        <li><strong>Lint:</strong> <code>golangci-lint run ./...</code> — 0 issues</li>
+        <li><strong>BuildFlow:</strong> 27/27 steps pass on every commit</li>
+        <li><strong>Working tree:</strong> clean after every commit (verified)</li>
+      </ul>
+
+      <h2>Git Log (This Session)</h2>
+      <table>
+        <tr>
+          <th>Commit</th>
+          <th>Message</th>
+        </tr>
+        <tr>
+          <td><code>5114e4f</code></td>
+          <td>Stop golangci-lint fmt from reformatting vendored third-party code</td>
+        </tr>
+        <tr>
+          <td><code>2f8c270</code></td>
+          <td>Remove context.Value outcome smuggling and make conflict detection explicit</td>
+        </tr>
+        <tr>
+          <td><code>019f7b0</code></td>
+          <td>Justify QueryDispatcher bypass with benchmark data, not speculation</td>
+        </tr>
+        <tr>
+          <td><code>babe493</code></td>
+          <td>Fix doc-drift in FEATURES.md and DOMAIN_LANGUAGE.md</td>
+        </tr>
+        <tr>
+          <td><code>a855cba</code></td>
+          <td>Rework broken CI build/release jobs for a pure library</td>
+        </tr>
+        <tr>
+          <td><code>6a26637</code></td>
+          <td>Add brutal self-review report for session 24</td>
+        </tr>
+      </table>
+
+      <div class="verdict">
+        12/12 planned tasks complete. 5 items deferred with clear rationale (not procrastination).
+        The codebase is cleaner, the CI works, the docs are accurate, and the architecture has less
+        implicit coupling. Build is green, lint is zero, tree is clean.
+      </div>
+    </main>
+  </body>
+</html>
