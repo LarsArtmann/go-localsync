@@ -58,7 +58,7 @@ func wireQueryDispatcher(rm ReadModel) (*query.Dispatcher, error) {
 
 	dispatcher.Use(middleware.QueryLogging(newSlogLogger()))
 
-	if err := query.RegisterTyped[*ListItemsQuery, []*model.Item](
+	if err := query.RegisterTyped(
 		dispatcher, queryTypeListItem,
 		func(ctx context.Context, q *ListItemsQuery) ([]*model.Item, error) {
 			return rm.List(ctx, q.Filter)
@@ -67,7 +67,7 @@ func wireQueryDispatcher(rm ReadModel) (*query.Dispatcher, error) {
 		return nil, fmt.Errorf("register list items query: %w", err)
 	}
 
-	if err := query.RegisterTyped[*GetItemQuery, *model.Item](
+	if err := query.RegisterTyped(
 		dispatcher, queryTypeGetItem,
 		func(ctx context.Context, q *GetItemQuery) (*model.Item, error) {
 			return rm.Get(ctx, q.Source, q.SourceID)
@@ -76,7 +76,7 @@ func wireQueryDispatcher(rm ReadModel) (*query.Dispatcher, error) {
 		return nil, fmt.Errorf("register get item query: %w", err)
 	}
 
-	if err := query.RegisterTyped[*CountItemsQuery, int64](
+	if err := query.RegisterTyped(
 		dispatcher, queryTypeCountItem,
 		func(ctx context.Context, q *CountItemsQuery) (int64, error) {
 			return rm.Count(ctx, q.Filter)
@@ -85,7 +85,7 @@ func wireQueryDispatcher(rm ReadModel) (*query.Dispatcher, error) {
 		return nil, fmt.Errorf("register count items query: %w", err)
 	}
 
-	if err := query.RegisterTyped[*GetTypesQuery, []string](
+	if err := query.RegisterTyped(
 		dispatcher, queryTypeGetTypes,
 		func(ctx context.Context, _ *GetTypesQuery) ([]string, error) {
 			return rm.GetTypes(ctx)

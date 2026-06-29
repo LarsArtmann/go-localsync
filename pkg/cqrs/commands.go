@@ -64,7 +64,7 @@ func wireCommandDispatcher(
 		)
 	}
 
-	if err := command.RegisterTyped[*SyncItemCommand](dispatcher, commandTypeSyncItem, syncItemHandler); err != nil {
+	if err := command.RegisterTyped(dispatcher, commandTypeSyncItem, syncItemHandler); err != nil {
 		return nil, fmt.Errorf("register sync item command: %w", err)
 	}
 
@@ -77,7 +77,7 @@ func wireCommandDispatcher(
 		)
 	}
 
-	if err := command.RegisterTyped[*TombstoneItemCommand](
+	if err := command.RegisterTyped(
 		dispatcher,
 		commandTypeTombstone,
 		tombstoneHandler,

@@ -105,7 +105,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, fmt.Errorf("create snapshot strategy: %w", stratErr)
 	}
 
-	repo, err := decider.NewRepository[SyncItemState](
+	repo, err := decider.NewRepository(
 		sr.store, sr.bus, deciderSpec,
 		decider.WithSnapshotStore[SyncItemState](snapshotStore),
 		decider.WithCodec[SyncItemState](codec.JSONCodec{}),
