@@ -21,10 +21,9 @@ A Unified Language for the local-sync domain — shared across users, developers
 | **Remote Wins**  | The default conflict resolution strategy: provider version overwrites local                           | Conflict resolution |
 | **Sync Action**  | Classification of what happened to an item during sync: Created, Updated, Conflict, Unchanged, Error  | Metrics             |
 | **Read Model**   | The query-side projection of synced items, filterable and paginated                                   | CQRS                |
-| **Event Store**  | The append-only log of all domain events (ItemSynced, ItemConflictFound, ItemDeleted)                 | Event sourcing      |
-| **Outbox**       | The transactional outbox pattern for crash-safe event publishing                                      | Infrastructure      |
-| **Backend**      | The storage implementation: "memory" (testing) or "turso" (SQLite/Turso)                              | Configuration       |
-| **Push/Pull**    | Turso-specific remote sync operations for multi-device data replication                               | Infrastructure      |
+| **Event Store**  | The append-only log of all domain events (ItemSynced, ItemConflictFound, ItemTombstoned)              | Event sourcing      |
+| **Event Bus**    | The in-process synchronous event bus (watermill EventBus) that delivers events to the projection      | Infrastructure      |
+| **Push/Pull**    | Sync direction: this SDK is pull-only (it fetches from a provider); there is no push ingestion        | Infrastructure      |
 
 ---
 
@@ -60,11 +59,11 @@ Immutable objects defined by attributes.
 
 Domain events emitted by the event store.
 
-| Event                 | Definition                                           | Trigger                                    |
-| --------------------- | ---------------------------------------------------- | ------------------------------------------ |
-| **ItemSynced**        | An item was successfully synced (created or updated) | `DecideSync` when item is new or changed   |
-| **ItemConflictFound** | A conflict was detected and resolved (remote wins)   | `DecideSync` when local and remote differ  |
-| **ItemDeleted**       | An item was marked as deleted                        | `DecideDelete` when deleting a synced item |
+| Event                 | Definition                                           | Trigger                                     |
+| --------------------- | ---------------------------------------------------- | ------------------------------------------- |
+| **ItemSynced**        | An item was successfully synced (created or updated) | `DecideSync` when item is new or changed    |
+| **ItemConflictFound** | A conflict was detected and resolved (remote wins)   | `DecideSync` when local and remote differ   |
+| **ItemTombstoned**    | An item was soft-deleted (hidden from default view)  | `DecideTombstone` when hiding a synced item |
 
 ---
 
@@ -72,10 +71,10 @@ Domain events emitted by the event store.
 
 Actions the system can perform.
 
-| Command        | Definition                         | Handler                             |
-| -------------- | ---------------------------------- | ----------------------------------- |
-| **SyncItem**   | Sync a single item from a provider | `handleSyncItem` → `DecideSync`     |
-| **DeleteItem** | Mark a synced item as deleted      | `handleDeleteItem` → `DecideDelete` |
+| Command           | Definition                         | Handler                                    |
+| ----------------- | ---------------------------------- | ------------------------------------------ |
+| **SyncItem**      | Sync a single item from a provider | `SyncItemCommand` → `DecideSync`           |
+| **TombstoneItem** | Soft-delete (hide) a synced item   | `TombstoneItemCommand` → `DecideTombstone` |
 
 ---
 

@@ -1,6 +1,6 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-06-27
+**Updated:** 2026-06-29
 
 > The SDK is a **pure contract library**. It defines the `Provider` interface, the CQRS sync engine, and CRDT primitives — but ships **no provider implementations and no CLI binary**. The reference consumer application — GitHub provider + CLI — lives in [`github.com/larsartmann/github-local-sync`](https://github.com/larsartmann/github-local-sync). New providers (GitLab, Jira, …) are built the same way, in their own consumer apps.
 >
@@ -19,15 +19,15 @@
 
 ## Core Architecture
 
-| #   | Feature                     | Status           | Package    | Description                                                                                                                                                                                                        |
-| --- | --------------------------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | CQRS Stack                  | FULLY_FUNCTIONAL | `pkg/cqrs` | Full event-sourced architecture: event store, bus, decider repository, read model, projection. Wired via `NewCQRSStack` with backend selection.                                                                    |
-| 2   | Decider Pattern             | FULLY_FUNCTIONAL | `pkg/cqrs` | Pure `Apply`/`DecideSync`/`DecideDelete` with `SyncItemState{Item *model.Item}`. Single authority for all state transitions.                                                                                       |
-| 3   | Event Sourcing              | FULLY_FUNCTIONAL | `pkg/cqrs` | 3 domain events: `ItemSynced`, `ItemConflictFound`, `ItemDeleted`. All state changes via events. No legacy CRUD.                                                                                                   |
-| 4   | Projection                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `Projector` implements `event.Projection`. Live delivery via `bus.SubscribeAll`; SQLite catch-up via background `runner.replayJournal`. No checkpoint store (idempotent projection tolerates replay/live overlap). |
-| 5   | Deterministic Aggregate IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | SHA256→hex from (source, sourceID) with `sync.Map` cache. Same inputs always produce the same ID.                                                                                                                  |
-| 6   | JSON Codec                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `codec.JSONCodec` + `DecodePayload[T]` + `NewEvents` for type-safe event serialization. No manual json.Marshal/Unmarshal.                                                                                          |
-| 7   | provider→model Adapter      | FULLY_FUNCTIONAL | `pkg/cqrs` | `item_adapter.go` converts `*provider.Item` (DTO) → `*model.Item` (domain entity) at the boundary. Decider, read model, events, and resolver all use `*model.Item`.                                                |
+| #   | Feature                     | Status           | Package    | Description                                                                                                                                                                                                                                                                            |
+| --- | --------------------------- | ---------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | CQRS Stack                  | FULLY_FUNCTIONAL | `pkg/cqrs` | Full event-sourced architecture: event store, bus, decider repository, read model, projection. Wired via `NewCQRSStack` with backend selection.                                                                                                                                        |
+| 2   | Decider Pattern             | FULLY_FUNCTIONAL | `pkg/cqrs` | Pure `Apply`/`DecideSync`/`DecideTombstone` with `SyncItemState{Item *model.Item}`. Single authority for all state transitions.                                                                                                                                                        |
+| 3   | Event Sourcing              | FULLY_FUNCTIONAL | `pkg/cqrs` | 3 domain events: `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`. All state changes via events. No legacy CRUD.                                                                                                                                                                    |
+| 4   | Projection                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `Projector` implements `projection.Projection` (moved from `event.Projection` in go-cqrs-lite v3.2, ADR-0037). Live delivery via `bus.SubscribeAll`; SQLite catch-up via background `runner.replayJournal`. No checkpoint store (idempotent projection tolerates replay/live overlap). |
+| 5   | Deterministic Aggregate IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | SHA256→hex from (source, sourceID) with `sync.Map` cache. Same inputs always produce the same ID.                                                                                                                                                                                      |
+| 6   | JSON Codec                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `codec.JSONCodec` + `DecodePayload[T]` + `NewEvents` for type-safe event serialization. No manual json.Marshal/Unmarshal.                                                                                                                                                              |
+| 7   | provider→model Adapter      | FULLY_FUNCTIONAL | `pkg/cqrs` | `item_adapter.go` converts `*provider.Item` (DTO) → `*model.Item` (domain entity) at the boundary. Decider, read model, events, and resolver all use `*model.Item`.                                                                                                                    |
 
 ## Storage Backends
 
@@ -81,12 +81,12 @@
 
 ## Command & Query Dispatch
 
-| #   | Feature                       | Status           | Package    | Description                                                                                                                      |
-| --- | ----------------------------- | ---------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 33  | Command Dispatcher            | FULLY_FUNCTIONAL | `pkg/cqrs` | `command.Dispatcher` with typed `SyncItemCommand`/`DeleteItemCommand`. Dispatched through `CQRSStack.SyncItem()`/`DeleteItem()`. |
-| 34  | Query Dispatcher              | FULLY_FUNCTIONAL | `pkg/cqrs` | `query.Dispatcher` with typed queries: `ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`.                     |
-| 35  | Command Validation Middleware | FULLY_FUNCTIONAL | `pkg/cqrs` | Validates commands before dispatch (nil item check, empty source check).                                                         |
-| 36  | Command/Query Logging         | FULLY_FUNCTIONAL | `pkg/cqrs` | Logs all command/query dispatches with type, duration, and error status.                                                         |
+| #   | Feature                       | Status           | Package    | Description                                                                                                                            |
+| --- | ----------------------------- | ---------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 33  | Command Dispatcher            | FULLY_FUNCTIONAL | `pkg/cqrs` | `command.Dispatcher` with typed `SyncItemCommand`/`TombstoneItemCommand`. Dispatched through `CQRSStack.SyncItem()`/`TombstoneItem()`. |
+| 34  | Query Dispatcher              | FULLY_FUNCTIONAL | `pkg/cqrs` | `query.Dispatcher` with typed queries: `ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`.                           |
+| 35  | Command Validation Middleware | FULLY_FUNCTIONAL | `pkg/cqrs` | Validates commands before dispatch (nil item check, empty source check).                                                               |
+| 36  | Command/Query Logging         | FULLY_FUNCTIONAL | `pkg/cqrs` | Logs all command/query dispatches with type, duration, and error status.                                                               |
 
 ## Event Infrastructure
 
