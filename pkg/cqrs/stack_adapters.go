@@ -3,14 +3,19 @@
 // The List / Count / GetTypes methods below deliberately bypass the
 // QueryDispatcher and call the ReadModel directly. Reasons:
 //
-//  1. Hot path performance: these read endpoints are called for every
-//     GET /items, GET /stats, and every SyncItems result. Routing them
-//     through the dispatcher would add reflection / middleware overhead
-//     with no behavioral benefit at the call sites.
+//  1. Hot path performance (measured, see BenchmarkReadDirect_* vs
+//     BenchmarkReadDispatcher_* in query_dispatch_bench_test.go): routing
+//     reads through the dispatcher adds 127-130 allocations and 1.6x latency
+//     on List, and 5.5x latency on Count (21µs → 116µs) because the
+//     dispatcher's middleware chain + any-boxing dominates a read that is
+//     otherwise allocation-free. These endpoints serve every GET /items,
+//     GET /stats, and every SyncItems result.
 //
 //  2. The query.Dispatcher is still wired (see stack.go:wireQueryDispatcher)
 //     and registered in tests for verifying handler resolution and
-//     middleware behavior. It is intentionally not used at runtime.
+//     middleware behavior. It is the optional observability path: consumers
+//     who want QueryLogging on a specific read can dispatch a typed query
+//     through stack.QueryDispatcher directly.
 //
 //  3. The dispatcher's `query.ListItemsHandler` (queries.go) remains the
 //     single source of truth for the read-side query contract — these
