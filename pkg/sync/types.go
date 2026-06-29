@@ -51,21 +51,6 @@ func (s SyncSummary) String() string {
 
 func (a SyncAction) String() string { return string(a) }
 
-func (a SyncAction) IsValid() bool {
-	switch a {
-	case ActionCreated,
-		ActionUpdated,
-		ActionConflictRemote,
-		ActionConflictLocal,
-		ActionUnchanged,
-		ActionTombstoned,
-		ActionError:
-		return true
-	default:
-		return false
-	}
-}
-
 // SyncStore is the minimal interface that decouples sync logic from concrete storage.
 // *cqrs.CQRSStack implements this interface by embedding the cqrs ReadModel and
 // adding SyncItems + Reconcile + Close. The read-side methods come from model.ItemReader.
