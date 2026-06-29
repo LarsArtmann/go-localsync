@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"encoding/json"
+	"sync"
 	"testing"
 	"time"
 
@@ -150,6 +151,61 @@ func TestRegression_Projection_VersionGate_PreventsResurrect(t *testing.T) {
 	testutil.MustNoError(t, err)
 	if live != 0 {
 		t.Fatalf("stale replay resurrected the tombstoned item; live count=%d", live)
+	}
+}
+
+// TestRegression_Projection_VersionGate_ConcurrentNoResurrect guards the
+// session-28 fix: the version-gate check-apply-store sequence must be atomic.
+// Under the old sync.Map implementation, a concurrent live tombstone (v2) and
+// stale journal-replay sync (v1) for the same aggregate could both pass the
+// gate and both apply — resurrecting a tombstoned row if the sync applied last.
+// The mutex fix serializes Handle calls so this is impossible.
+func TestRegression_Projection_VersionGate_ConcurrentNoResurrect(t *testing.T) {
+	t.Parallel()
+
+	const iterations = 200
+
+	for range iterations {
+		ctx := context.Background()
+		rm := NewMemoryReadModel()
+		proj := newProjector(rm)
+
+		aggID := AggregateID("github", id.NewExternalID("1"))
+		now := time.Now().UnixNano()
+
+		synced := testSyncedPayload("1", "PushEvent")
+		synced.CreatedAt = now
+		synced.UpdatedAt = now
+
+		tomb := ItemTombstonedPayload{
+			Source:       "github",
+			SourceID:     "1",
+			Reason:       string(model.ReasonUpstreamGone),
+			TombstonedAt: now,
+		}
+
+		syncEvt := newVersionedTestEvent(t, EventItemSynced, aggID, 1, synced)
+		tombEvt := newVersionedTestEvent(t, EventItemTombstoned, aggID, 2, tomb)
+
+		var wg sync.WaitGroup
+		wg.Add(2)
+
+		go func() {
+			defer wg.Done()
+			_ = proj.Handle(ctx, syncEvt)
+		}()
+		go func() {
+			defer wg.Done()
+			_ = proj.Handle(ctx, tombEvt)
+		}()
+
+		wg.Wait()
+
+		live, err := rm.Count(ctx, model.ItemFilter{})
+		testutil.MustNoError(t, err)
+		if live != 0 {
+			t.Fatalf("concurrent delivery resurrected tombstoned item; live count=%d", live)
+		}
 	}
 }
 

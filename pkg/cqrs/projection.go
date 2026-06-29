@@ -14,16 +14,19 @@ import (
 
 // Projector projects domain events onto the ReadModel.
 type Projector struct {
+	mu sync.Mutex
 	readModel ReadModel
 	// lastVersions tracks the highest event version applied per aggregate ID.
 	// This prevents stale events from background journal replay from
 	// resurrecting rows that were already deleted via a newer live event.
-	lastVersions sync.Map
+	// Guarded by mu — the check-apply-store sequence in Handle must be atomic
+	// to prevent a concurrent live event and stale replay from both applying.
+	lastVersions map[string]event.Version
 }
 
 // newProjector creates a Projector for the given ReadModel.
 func newProjector(rm ReadModel) *Projector {
-	return &Projector{readModel: rm}
+	return &Projector{readModel: rm, lastVersions: make(map[string]event.Version)}
 }
 
 // Name returns the projection name.
@@ -41,13 +44,13 @@ func (p *Projector) EventTypes() []event.Type {
 // skipped — this prevents stale journal-replay events from resurrecting rows
 // that were already deleted via a newer live event.
 func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	aggID := evt.AggregateID().String()
 	version := evt.Version()
 
-	if last, ok := p.lastVersions.Load(
-		aggID,
-	); ok &&
-		version <= last.(event.Version) { //nolint:forcetypeassert // stored value is always event.Version
+	if last, ok := p.lastVersions[aggID]; ok && version <= last {
 		return nil
 	}
 
@@ -64,7 +67,7 @@ func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
 		// no-op — metadata event only
 	}
 
-	p.lastVersions.Store(aggID, version)
+	p.lastVersions[aggID] = version
 
 	return nil
 }
