@@ -201,4 +201,3 @@ func TestCQRSStack_Close_WaitsForProjectionDrain(t *testing.T) {
 		t.Fatal("Close returned before the projection drain goroutine finished (drainDone still open)")
 	}
 }
-
