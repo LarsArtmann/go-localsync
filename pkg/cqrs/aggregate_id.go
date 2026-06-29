@@ -3,6 +3,7 @@ package cqrs
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"strconv"
 	"sync"
 
@@ -34,8 +35,16 @@ func AggregateID(source string, externalID id.ExternalID) cqrsid.AggregateID {
 	}
 
 	h := sha256.Sum256([]byte(key))
+	hexID := hex.EncodeToString(h[:16])
 
-	result, _ := cqrsid.ParseAggregateID(hex.EncodeToString(h[:16]))
+	result, err := cqrsid.ParseAggregateID(hexID)
+	if err != nil {
+		// ParseAggregateID only fails on empty input. A SHA256 hex of 16
+		// bytes is always 32 chars, so this is unreachable — fail fast
+		// rather than caching a zero AggregateID that would collide every
+		// subsequent call for different keys.
+		panic(fmt.Sprintf("cqrs: ParseAggregateID failed for valid hex %q: %v", hexID, err))
+	}
 
 	aggIDCache.Store(key, result)
 
