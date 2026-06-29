@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -202,6 +203,50 @@ func TestDecideSync_ConflictResolution(t *testing.T) {
 	testutil.RequireLen(t, events, 2)
 	assertEventType(t, events[0], EventItemConflictFound)
 	assertEventType(t, events[1], EventItemSynced)
+}
+
+// TestDecideSync_ConflictTimestampIsUTC locks the invariant that the
+// conflict-detection timestamp handed to a resolver is UTC, matching every
+// other persisted timestamp in the system. A non-UTC host would otherwise feed
+// a local-time value to custom resolvers that read Conflict.Timestamp.
+func TestDecideSync_ConflictTimestampIsUTC(t *testing.T) {
+	t.Parallel()
+
+	local := testDataItem("123", "PushEvent")
+	local.UpdatedAt = time.Now().Add(-time.Hour).UTC()
+
+	remote := testDataItem("123", "PushEvent")
+	remote.UpdatedAt = time.Now().UTC()
+
+	state := SyncItemState{Item: local}
+
+	var captured time.Time
+
+	capturing := conflictCapturingResolver{onResolve: func(c *crdt.Conflict[*model.Item]) {
+		captured = c.Timestamp
+	}}
+
+	_, err := decideSync(remote, nil, capturing)(state, 1)
+	testutil.MustNoError(t, err)
+
+	if captured.IsZero() {
+		t.Fatal("resolver was never called, conflict not detected")
+	}
+
+	if captured.Location() != time.UTC {
+		t.Errorf("Conflict.Timestamp must be UTC, got %s", captured.Location())
+	}
+}
+
+// conflictCapturingResolver is a test ConflictResolver that records the
+// conflict and lets the remote side win.
+type conflictCapturingResolver struct {
+	onResolve func(*crdt.Conflict[*model.Item])
+}
+
+func (r conflictCapturingResolver) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
+	r.onResolve(c)
+	return c.Remote, nil
 }
 
 func TestDecideSync_ConflictTimestamps(t *testing.T) {

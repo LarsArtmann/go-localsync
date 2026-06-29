@@ -201,7 +201,7 @@ func resolveConflict(
 	conflict := &crdt.Conflict[*model.Item]{
 		Local:     local,
 		Remote:    remote,
-		Timestamp: time.Now(),
+		Timestamp: time.Now().UTC(),
 	}
 
 	winner, err := resolver.Resolve(conflict)
