@@ -5,27 +5,26 @@ import (
 	"fmt"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	"github.com/larsartmann/go-cqrs-lite/projection/v3"
+	"github.com/larsartmann/go-cqrs-lite/projectionhost/v3"
 )
 
-// startProjectionRunner wires the read-model projector to the event bus and,
-// for persistent backends, replays historical events from the journal.
+// startProjectionRunner wires the read-model projector to the event bus for
+// live delivery and to a projectionhost.Host for resilient catch-up.
 //
-// Delivery model:
+// Delivery model (see ADR-0006):
 //   - Live events are delivered synchronously by the watermill EventBus
 //     (BlockPublishUntilSubscriberAck), preserving read-your-writes after each
 //     repo.Execute.
-//   - Historical replay runs in a background goroutine. The projection is
-//     idempotent (Upsert/Delete keyed by source+source_id), so overlap between
-//     the replay tail and live delivery is harmless and needs no checkpoint or
-//     dedup set.
+//   - Catch-up runs in a projectionhost.Host worker: it drains the
+//     SeekableJournal from the last checkpoint (bounded replay), auto-restarts
+//     on crash with backoff, and captures poison messages to a dead-letter
+//     queue so a single bad event can never block catch-up.
 //
-// go-cqrs-lite v3.2 re-introduced the projection/ module (ADR-0037), moving
-// the Projection interface from event/ to projection/. This in-process replay
-// still avoids the full stack.Materialize + watermill.CatchUpSubscriber
-// machinery, which would require re-encoding go-localsync's custom ReadModel
-// into a kv.TypedStore.
+// The projection is idempotent (Upsert/Delete keyed by source+source_id), so
+// overlap between the catch-up tail and live delivery is harmless. The
+// checkpoint is an optimization + resilience boundary, not a correctness
+// requirement — it bounds replay work and survives failure.
 func startProjectionRunner(
 	sr storeResult,
 	proj projection.Projection,
@@ -34,44 +33,39 @@ func startProjectionRunner(
 		return nil, fmt.Errorf("subscribe projection: %w", subErr)
 	}
 
-	if sr.loader == nil {
-		return func() {}, nil
+	host, err := projectionhost.New(
+		sr.journal, sr.cpStore,
+		projectionhost.WithLogger(newSlogLogger()),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("create projection host: %w", err)
+	}
+
+	if regErr := host.Register(proj); regErr != nil {
+		return nil, fmt.Errorf("register projection with host: %w", regErr)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	go replayJournal(ctx, sr.loader, proj)
+	if startErr := host.Start(ctx); startErr != nil {
+		cancel()
+
+		return nil, fmt.Errorf("start projection host: %w", startErr)
+	}
+
+	go drainHostOnCancel(ctx, host)
 
 	return cancel, nil
 }
 
-// replayJournal loads every persisted event and forwards the ones the
-// projection cares about to proj.Handle. Errors are logged, not fatal: a single
-// bad event must not block catch-up of the rest.
-func replayJournal(ctx context.Context, loader event.Journal, proj projection.Projection) {
-	events, err := loader.ReadAll(ctx)
-	if err != nil {
-		log.Error("projection journal replay failed", "error", err)
+// drainHostOnCancel waits for the runner context to be cancelled (Close or
+// shutdown) and then gracefully drains the projection host, waiting up to 30s
+// for in-flight events to finish. Errors are logged, not fatal — a slow drain
+// must not block stack Close beyond the host's own timeout.
+func drainHostOnCancel(ctx context.Context, host *projectionhost.Host) {
+	<-ctx.Done()
 
-		return
-	}
-
-	wanted := make(map[event.Type]struct{}, len(proj.EventTypes()))
-	for _, t := range proj.EventTypes() {
-		wanted[t] = struct{}{}
-	}
-
-	for _, evt := range events {
-		if ctx.Err() != nil {
-			return
-		}
-
-		if _, ok := wanted[evt.Type()]; !ok {
-			continue
-		}
-
-		if err := proj.Handle(ctx, evt); err != nil {
-			log.Error("projection replay handler failed", "eventID", evt.ID(), "error", err)
-		}
+	if err := host.Stop(); err != nil {
+		log.Error("projection host graceful drain failed", "error", err)
 	}
 }

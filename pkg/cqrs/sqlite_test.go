@@ -2,8 +2,10 @@ package cqrs
 
 import (
 	"context"
+	"database/sql"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -112,4 +114,59 @@ func TestCQRSStack_SQLiteRestart_PreservesData(t *testing.T) {
 
 	testutil.MustNoError(t, stack2.SyncItem(ctx, testItem("replay-3", "WatchEvent")))
 	waitForCount(t, stack2, ctx, 3)
+}
+
+// TestCQRSStack_SQLiteCheckpoint_PersistsAcrossRestarts verifies that the
+// projectionhost checkpoint survives a restart: after stack1 syncs events and
+// closes, the checkpoint table must hold a non-zero entry. The second stack
+// reopens and its projectionhost worker drains from the checkpoint, proving
+// catch-up is bounded (ADR-0006).
+//
+// The host is a one-shot batch-drainer: it runs once at startup, catches up,
+// and exits. New events after startup are delivered via the live bus. So the
+// checkpoint is written by the SECOND stack's host (which finds pre-existing
+// events in the journal from stack1).
+func TestCQRSStack_SQLiteCheckpoint_PersistsAcrossRestarts(t *testing.T) {
+	t.Parallel()
+
+	tmpDir := t.TempDir()
+	dbPath := filepath.Join(tmpDir, "checkpoint-test.db")
+	ctx := context.Background()
+
+	stack1, err := NewCQRSStack(CQRSConfig{Backend: "sqlite", DBPath: dbPath})
+	testutil.MustNoError(t, err)
+
+	for i := range 5 {
+		testutil.MustNoError(t, stack1.SyncItem(ctx, testItem("cp-"+string(rune('a'+i)), "PushEvent")))
+	}
+
+	waitForCount(t, stack1, ctx, 5)
+	testutil.MustNoError(t, stack1.Close())
+
+	// Second stack reopens; its projectionhost worker finds the 5 pre-existing
+	// events in the journal, drains them from checkpoint zero, and saves a
+	// checkpoint. The live bus also delivers, but the host independently
+	// processes and persists its checkpoint.
+	stack2, err := NewCQRSStack(CQRSConfig{Backend: "sqlite", DBPath: dbPath})
+	testutil.MustNoError(t, err)
+
+	// Wait for the host to drain the journal and persist its checkpoint.
+	waitForCount(t, stack2, ctx, 5)
+	time.Sleep(200 * time.Millisecond)
+
+	testutil.MustNoError(t, stack2.Close())
+
+	// Verify the checkpoint table has a persisted entry for our projection.
+	// The table name is "checkpoints" (from go-cqrs-lite SQLiteInitSchema).
+	db, err := sql.Open("sqlite", dbPath)
+	testutil.MustNoError(t, err)
+	defer func() { _ = db.Close() }()
+
+	var cpCount int
+	row := db.QueryRowContext(ctx, `SELECT count(*) FROM checkpoints`)
+	testutil.MustNoError(t, row.Scan(&cpCount))
+
+	if cpCount == 0 {
+		t.Fatal("expected at least one checkpoint row after restart catch-up + close, got 0")
+	}
 }

@@ -19,15 +19,15 @@
 
 ## Core Architecture
 
-| #   | Feature                     | Status           | Package    | Description                                                                                                                                                                                                                                                                            |
-| --- | --------------------------- | ---------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | CQRS Stack                  | FULLY_FUNCTIONAL | `pkg/cqrs` | Full event-sourced architecture: event store, bus, decider repository, read model, projection. Wired via `NewCQRSStack` with backend selection.                                                                                                                                        |
-| 2   | Decider Pattern             | FULLY_FUNCTIONAL | `pkg/cqrs` | Pure `Apply`/`DecideSync`/`DecideTombstone` with `SyncItemState{Item *model.Item}`. Single authority for all state transitions.                                                                                                                                                        |
-| 3   | Event Sourcing              | FULLY_FUNCTIONAL | `pkg/cqrs` | 3 domain events: `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`. All state changes via events. No legacy CRUD.                                                                                                                                                                    |
-| 4   | Projection                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `Projector` implements `projection.Projection` (moved from `event.Projection` in go-cqrs-lite v3.2, ADR-0037). Live delivery via `bus.SubscribeAll`; SQLite catch-up via background `runner.replayJournal`. No checkpoint store (idempotent projection tolerates replay/live overlap). |
-| 5   | Deterministic Aggregate IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | SHA256→hex from (source, sourceID) with `sync.Map` cache. Same inputs always produce the same ID.                                                                                                                                                                                      |
-| 6   | JSON Codec                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `codec.JSONCodec` + `DecodePayload[T]` + `NewEvents` for type-safe event serialization. No manual json.Marshal/Unmarshal.                                                                                                                                                              |
-| 7   | provider→model Adapter      | FULLY_FUNCTIONAL | `pkg/cqrs` | `item_adapter.go` converts `*provider.Item` (DTO) → `*model.Item` (domain entity) at the boundary. Decider, read model, events, and resolver all use `*model.Item`.                                                                                                                    |
+| #   | Feature                     | Status           | Package    | Description                                                                                                                                                                                                        |
+| --- | --------------------------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | CQRS Stack                  | FULLY_FUNCTIONAL | `pkg/cqrs` | Full event-sourced architecture: event store, bus, decider repository, read model, projection. Wired via `NewCQRSStack` with backend selection.                                                                    |
+| 2   | Decider Pattern             | FULLY_FUNCTIONAL | `pkg/cqrs` | Pure `Apply`/`DecideSync`/`DecideTombstone` with `SyncItemState{Item *model.Item}`. Single authority for all state transitions.                                                                                    |
+| 3   | Event Sourcing              | FULLY_FUNCTIONAL | `pkg/cqrs` | 3 domain events: `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`. All state changes via events. No legacy CRUD.                                                                                                |
+| 4   | Projection                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `Projector` implements `projection.Projection` (ADR-0037). Live delivery via `bus.SubscribeAll`; resilient SQLite catch-up via `projectionhost.Host` (checkpoint persistence, crash auto-restart, DLQ — ADR-0006). |
+| 5   | Deterministic Aggregate IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | SHA256→hex from (source, sourceID) with `sync.Map` cache. Same inputs always produce the same ID.                                                                                                                  |
+| 6   | JSON Codec                  | FULLY_FUNCTIONAL | `pkg/cqrs` | `codec.JSONCodec` + `DecodePayload[T]` + `NewEvents` for type-safe event serialization. No manual json.Marshal/Unmarshal.                                                                                          |
+| 7   | provider→model Adapter      | FULLY_FUNCTIONAL | `pkg/cqrs` | `item_adapter.go` converts `*provider.Item` (DTO) → `*model.Item` (domain entity) at the boundary. Decider, read model, events, and resolver all use `*model.Item`.                                                |
 
 ## Storage Backends
 
@@ -155,7 +155,7 @@
 - Provider abstraction is genuinely pluggable — new providers only implement the interface
 - Error taxonomy gives smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
-- Projection via synchronous `bus.SubscribeAll` + background journal replay (no checkpoint store needed)
+- Projection via synchronous `bus.SubscribeAll` (live) + `projectionhost.Host` (managed catch-up with checkpoint, crash-restart, DLQ — ADR-0006)
 - 190 tests with good coverage across all packages
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 - Clear DTO/domain boundary: `provider.Item` (DTO) → `model.Item` (domain entity) via `item_adapter.go`

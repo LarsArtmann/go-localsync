@@ -41,7 +41,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `projection.Projection` (moved from `event.Projection` in go-cqrs-lite v3.2), wired via direct bus subscription (live) + manual journal replay (persistence)
 - `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, SQL snapshots, event logging middleware, correlation IDs. Public commands: `SyncItem`, `TombstoneItem`; `Reconcile(ctx, source, seenKeys)` tombstones upstream-gone items.
-- `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus background `replayJournal` (reads all persisted events via `Journal.ReadAll`) for SQLite catch-up. Uses the re-introduced `projection/v3` interface (ADR-0037) but avoids the full `stack.Materialize` + `CatchUpSubscriber` machinery.
+- `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus `projectionhost.Host` (managed batch-drainer with checkpoint persistence, crash auto-restart, and dead-letter queue) for resilient SQLite catch-up. See ADR-0006.
 - `commands.go` + `queries.go` + `middleware.go` — typed `SyncItemCommand`/`TombstoneItemCommand` (carries `model.TombstoneReason`) via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
 
 ### Key Properties
@@ -50,7 +50,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
 - **Tombstone + resurrect**: a tombstone is a soft-delete (keeps history on `Item.Tombstone`); re-syncing a tombstoned item overwrites the tombstone → it becomes live again (projection upsert resets the tombstone columns)
 - **Reconciliation**: opt-in `SyncOptions.Reconcile` tombstones items for `Source` absent from a complete fetch with `ReasonUpstreamGone` (best-effort; only safe after a COMPLETE fetch)
-- **Projection**: Live events delivered synchronously via `bus.SubscribeAll` (watermill `EventBus` with `BlockPublishUntilSubscriberAck` preserves read-your-writes). SQLite catch-up replays the full journal in a background goroutine (`runner.replayJournal`); the idempotent projection tolerates replay/live overlap, so no checkpoint store is needed.
+- **Projection**: Live events delivered synchronously via `bus.SubscribeAll` (watermill `EventBus` with `BlockPublishUntilSubscriberAck` preserves read-your-writes). SQLite catch-up runs via `projectionhost.Host` (ADR-0006): a managed batch-drainer that reads from the last checkpoint (bounded replay), auto-restarts on crash with backoff, and captures poison messages to a dead-letter queue. The idempotent projection tolerates replay/live overlap; the checkpoint bounds work and survives failure.
 - **SQL persistence**: SQLite backend persists snapshots (`SQLSnapshotStore`) via `snapshot/v3` and `storage/v3` modules.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Command dispatch**: `SyncItem`/`TombstoneItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
@@ -198,6 +198,7 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/id/v3`               | v3.3.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)          |
 | `go-cqrs-lite/codec/v3`            | v3.3.0  | Codec interface, JSONCodec                                           |
 | `go-cqrs-lite/projection/v3`       | v3.4.0  | Projection interface (moved from `event/` in v3.2, ADR-0037)         |
+| `go-cqrs-lite/projectionhost/v3`   | v3.4.0  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)   |
 | `go-cqrs-lite/snapshot/v3`         | v3.4.0  | SnapshotStore, EveryNEvents strategy                                 |
 | `go-cqrs-lite/storage/memory/v3`   | v3.4.0  | In-memory event store + snapshot store (bus deleted in v3)           |
 | `go-cqrs-lite/middleware/v3`       | v3.4.0  | EventLogging + CommandRetry middleware                               |
@@ -224,18 +225,18 @@ Two tables managed by the CQRS stack:
 
 ## go-cqrs-lite Integration
 
-| Area           | go-localsync                                                                                             | go-cqrs-lite                                                                      |
-| -------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                 | `id.Of[T]` — same memory layout                                                   |
-| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                        | `event.Store` + `event.Bus` via storage/memory + watermill modules                |
-| Conflict       | `DecideSync` produces ItemConflictFound events                                                           | Error taxonomy with 5 families                                                    |
-| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                             | Projected from events via custom `Projector` implementing `projection.Projection` |
-| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`, `GetTypes`) | `sync.SyncStore` interface defined in consumer package                            |
-| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                    | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                     |
-| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                         | Eliminates all manual json.Marshal/Unmarshal                                      |
-| Projection     | Direct `bus.SubscribeAll` (sync) + background `replayJournal` (SQLite catch-up); no checkpoint store     | `projection/v3` re-introduced in v3.2 (ADR-0037); interface moved from `event/`   |
-| Snapshots      | `SQLiteSnapshotStore` (SQLite) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                | Caps replay cost, persists across restarts                                        |
-| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                 | Unique per sync run for debugging                                                 |
-| Logging        | `middleware.EventLogging` via charm log adapter                                                          | Structured logging of all domain events                                           |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                          | Smart retry classification for provider errors                                    |
-| Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                     | `int` → `uint64` in v3; no `int()` casts needed                                   |
+| Area           | go-localsync                                                                                                    | go-cqrs-lite                                                                      |
+| -------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                        | `id.Of[T]` — same memory layout                                                   |
+| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                               | `event.Store` + `event.Bus` via storage/memory + watermill modules                |
+| Conflict       | `DecideSync` produces ItemConflictFound events                                                                  | Error taxonomy with 5 families                                                    |
+| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                                    | Projected from events via custom `Projector` implementing `projection.Projection` |
+| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`, `GetTypes`)        | `sync.SyncStore` interface defined in consumer package                            |
+| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                           | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                     |
+| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                                | Eliminates all manual json.Marshal/Unmarshal                                      |
+| Projection     | Direct `bus.SubscribeAll` (sync) + `projectionhost.Host` (managed catch-up with checkpoint + DLQ); see ADR-0006 | `projectionhost/v3` adopted in v3.4; interface from `projection/v3` (ADR-0037)    |
+| Snapshots      | `SQLiteSnapshotStore` (SQLite) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                       | Caps replay cost, persists across restarts                                        |
+| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                        | Unique per sync run for debugging                                                 |
+| Logging        | `middleware.EventLogging` via charm log adapter                                                                 | Structured logging of all domain events                                           |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                                 | Smart retry classification for provider errors                                    |
+| Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                            | `int` → `uint64` in v3; no `int()` casts needed                                   |

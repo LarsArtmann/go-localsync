@@ -17,20 +17,24 @@ import (
 var errSQLiteRequiresDB = errors.New("sqlite backend requires database connection")
 
 type storeResult struct {
-	store  event.Store
-	bus    event.Bus
-	db     *sql.DB
-	loader event.Journal
+	store   event.Store
+	bus     event.Bus
+	db      *sql.DB
+	journal event.SeekableJournal
+	cpStore event.CheckpointStore
 }
 
 func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error) {
 	switch cfg.Backend {
 	case backendMemory, "":
+		memStore := cqrsmemory.NewMemoryStore()
+
 		return storeResult{
-			store:  cqrsmemory.NewMemoryStore(),
-			bus:    cqrswatermill.NewEventBus(),
-			db:     nil,
-			loader: nil,
+			store:   memStore,
+			bus:     cqrswatermill.NewEventBus(),
+			db:      nil,
+			journal: memStore,
+			cpStore: cqrsmemory.NewMemoryCheckpointStore(),
 		}, nil
 	case backendSQLite:
 		return createSQLiteStore(ctx, cfg)
@@ -73,13 +77,21 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 		return storeResult{}, fmt.Errorf("enable WAL mode: %w", walErr)
 	}
 
+	cpStore, cpErr := cqrsstorage.NewSQLiteCheckpointStore(db)
+	if cpErr != nil {
+		_ = db.Close()
+
+		return storeResult{}, fmt.Errorf("create checkpoint store: %w", cpErr)
+	}
+
 	configureSQLitePool(dbPath, db)
 
 	return storeResult{
-		store:  store,
-		bus:    cqrswatermill.NewEventBus(),
-		db:     db,
-		loader: store,
+		store:   store,
+		bus:     cqrswatermill.NewEventBus(),
+		db:      db,
+		journal: store,
+		cpStore: cpStore,
 	}, nil
 }
 
