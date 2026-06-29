@@ -2,6 +2,7 @@ package cqrs
 
 import (
 	"context"
+	"io"
 	"log/slog"
 
 	"charm.land/log/v2"
@@ -61,28 +62,55 @@ type CQRSStack struct {
 var _ synclib.SyncStore = (*CQRSStack)(nil)
 
 // NewCQRSStack creates a fully wired CQRS stack based on the given config.
-func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
+func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) {
 	ctx := context.Background()
 
-	sr, err := createStoreAndBus(ctx, cfg)
-	if err != nil {
-		return nil, err
+	sr, storeErr := createStoreAndBus(ctx, cfg)
+	if storeErr != nil {
+		return nil, storeErr
 	}
 
-	rm, err := createReadModel(ctx, cfg, sr)
+	// Track resources opened during construction so the defer can release them
+	// if any subsequent step fails — preventing store/bus/db/goroutine leaks.
+	var rm ReadModel
+	var cancelRunner context.CancelFunc
+	var drainDone <-chan struct{}
+
+	defer func() {
+		if err == nil {
+			return
+		}
+		if cancelRunner != nil {
+			cancelRunner()
+		}
+		if drainDone != nil {
+			<-drainDone
+		}
+		if rm != nil {
+			_ = rm.Close()
+		}
+		if c, ok := sr.store.(io.Closer); ok {
+			_ = c.Close()
+		}
+		if c, ok := sr.bus.(io.Closer); ok {
+			_ = c.Close()
+		}
+	}()
+
+	rm, err = createReadModel(ctx, cfg, sr)
 	if err != nil {
 		return nil, err
 	}
 
 	proj := newProjector(rm)
 
-	if err := sr.bus.Use(
+	if err = sr.bus.Use(
 		middleware.EventLogging(newSlogLogger()),
 	); err != nil {
 		return nil, pkgerrors.Wrap(err, "wire event logging middleware")
 	}
 
-	cancelRunner, drainDone, err := startProjectionRunner(sr, proj)
+	cancelRunner, drainDone, err = startProjectionRunner(sr, proj)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "start projection runner")
 	}
@@ -92,17 +120,20 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		Apply:   fold,
 	}
 
-	snapshotStore, stratStoreErr := createSnapshotStore(cfg, sr.db)
-	if stratStoreErr != nil {
-		return nil, stratStoreErr
+	var snapshotStore snapshot.SnapshotStore
+	snapshotStore, err = createSnapshotStore(cfg, sr.db)
+	if err != nil {
+		return nil, err
 	}
 
-	snapshotStrategy, stratErr := snapshot.EveryNEvents(10)
-	if stratErr != nil {
-		return nil, pkgerrors.Wrap(stratErr, "create snapshot strategy")
+	var snapshotStrategy snapshot.SnapshotStrategy
+	snapshotStrategy, err = snapshot.EveryNEvents(10)
+	if err != nil {
+		return nil, pkgerrors.Wrap(err, "create snapshot strategy")
 	}
 
-	repo, err := decider.NewRepository(
+	var repo *decider.Repository[SyncItemState]
+	repo, err = decider.NewRepository(
 		sr.store, sr.bus, deciderSpec,
 		decider.WithSnapshotStore[SyncItemState](snapshotStore),
 		decider.WithCodec[SyncItemState](codec.JSONCodec{}),
@@ -112,7 +143,8 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, pkgerrors.Wrap(err, "create decider repository")
 	}
 
-	commandDispatcher, err := wireCommandDispatcher(repo, cfg.ConflictResolver)
+	var commandDispatcher *command.Dispatcher
+	commandDispatcher, err = wireCommandDispatcher(repo, cfg.ConflictResolver)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "wire command dispatcher")
 	}

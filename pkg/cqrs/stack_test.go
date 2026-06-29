@@ -2,6 +2,7 @@ package cqrs
 
 import (
 	"context"
+	"runtime"
 	"testing"
 	"time"
 
@@ -160,6 +161,30 @@ func TestCQRSStack_InvalidBackend(t *testing.T) {
 	_, err := NewCQRSStack(CQRSConfig{Backend: "postgres"})
 	if err == nil {
 		t.Fatal("expected error for invalid backend")
+	}
+}
+
+// TestCQRSStack_Close_NoGoroutineLeak guards the session-28 fix: creating a
+// stack starts a projection-runner goroutine; Close must drain it so the
+// goroutine count returns to baseline. Before the fix, the constructor's
+// error paths could also leak store/bus/goroutine resources.
+func TestCQRSStack_Close_NoGoroutineLeak(t *testing.T) {
+	t.Parallel()
+
+	before := runtime.NumGoroutine()
+
+	for range 5 {
+		stack := newMemoryStack(t)
+		testutil.MustNoError(t, stack.Close())
+	}
+
+	// Allow projection goroutines to exit after Close's drain.
+	time.Sleep(100 * time.Millisecond)
+	runtime.GC()
+
+	after := runtime.NumGoroutine()
+	if after > before+2 {
+		t.Fatalf("goroutine leak: before=%d after=%d", before, after)
 	}
 }
 
