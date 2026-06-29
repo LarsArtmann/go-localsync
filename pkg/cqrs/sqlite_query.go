@@ -61,7 +61,7 @@ func appendFilterArgs(query *string, filter model.ItemFilter) []any {
 	}
 
 	if filter.Since != nil {
-		*query += " AND created_at > ?"
+		*query += " AND created_at >= ?"
 
 		args = append(args, filter.Since.Format(time.RFC3339Nano))
 	}
