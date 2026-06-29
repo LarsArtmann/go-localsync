@@ -13,7 +13,6 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
 	"github.com/larsartmann/go-cqrs-lite/middleware/v3"
-	"github.com/larsartmann/go-cqrs-lite/query/v3"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v3"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
@@ -55,7 +54,6 @@ type CQRSStack struct {
 
 	Repo              *decider.Repository[SyncItemState]
 	CommandDispatcher *command.Dispatcher
-	QueryDispatcher   *query.Dispatcher
 	conflictResolver  crdt.ConflictResolver[*model.Item]
 	db                *sql.DB
 	cancelRunner      context.CancelFunc
@@ -120,18 +118,12 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		return nil, fmt.Errorf("wire command dispatcher: %w", err)
 	}
 
-	queryDispatcher, err := wireQueryDispatcher(rm)
-	if err != nil {
-		return nil, fmt.Errorf("wire query dispatcher: %w", err)
-	}
-
 	return &CQRSStack{
 		Store:             sr.store,
 		Bus:               sr.bus,
 		Repo:              repo,
 		ReadModel:         rm,
 		CommandDispatcher: commandDispatcher,
-		QueryDispatcher:   queryDispatcher,
 		conflictResolver:  cfg.ConflictResolver,
 		db:                sr.db,
 		cancelRunner:      cancelRunner,

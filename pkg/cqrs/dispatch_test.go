@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/larsartmann/go-cqrs-lite/command/v3"
-	"github.com/larsartmann/go-cqrs-lite/query/v3"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -92,92 +91,5 @@ func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
 	})
 	if err == nil {
 		t.Error("expected validation error for empty source")
-	}
-}
-
-func TestQueryDispatcher_ListItems_ThroughDispatcher(t *testing.T) {
-	stack, ctx := setupMemoryStack(t)
-	syncTestItem(t, stack, ctx, "q-1", "PushEvent")
-
-	result, err := stack.QueryDispatcher.Dispatch(ctx, &ListItemsQuery{
-		BasicQuery: mustNewQuery(queryTypeListItem),
-		Filter:     model.ItemFilter{},
-	})
-	testutil.MustNoError(t, err)
-
-	items, ok := result.([]*model.Item)
-	if !ok {
-		t.Fatalf("expected []*model.Item, got %T", result)
-	}
-	if len(items) != 1 {
-		t.Errorf("expected 1 item, got %d", len(items))
-	}
-}
-
-func TestQueryDispatcher_GetItem_ThroughDispatcher(t *testing.T) {
-	stack, ctx := setupMemoryStack(t)
-	syncTestItem(t, stack, ctx, "q-2", "PushEvent")
-
-	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetItemQuery{
-		BasicQuery: mustNewQuery(queryTypeGetItem),
-		Source:     "github",
-		SourceID:   id.NewExternalID("q-2"),
-	})
-	testutil.MustNoError(t, err)
-
-	item, ok := result.(*model.Item)
-	if !ok {
-		t.Fatalf("expected *model.Item, got %T", result)
-	}
-	if item.ExternalID.Get() != "q-2" {
-		t.Errorf("expected item id q-2, got %s", item.ExternalID.Get())
-	}
-}
-
-func TestQueryDispatcher_CountItems_ThroughDispatcher(t *testing.T) {
-	stack, ctx := setupMemoryStack(t)
-	syncTestItem(t, stack, ctx, "q-3", "PushEvent")
-
-	result, err := stack.QueryDispatcher.Dispatch(ctx, &CountItemsQuery{
-		BasicQuery: mustNewQuery(queryTypeCountItem),
-		Filter:     model.ItemFilter{},
-	})
-	testutil.MustNoError(t, err)
-
-	count, ok := result.(int64)
-	if !ok {
-		t.Fatalf("expected int64, got %T", result)
-	}
-	if count != 1 {
-		t.Errorf("expected count=1, got %d", count)
-	}
-}
-
-func TestQueryDispatcher_GetTypes_ThroughDispatcher(t *testing.T) {
-	stack, ctx := setupMemoryStack(t)
-	syncTestItem(t, stack, ctx, "q-4", "PushEvent")
-
-	result, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
-		BasicQuery: mustNewQuery(queryTypeGetTypes),
-	})
-	testutil.MustNoError(t, err)
-
-	types, ok := result.([]string)
-	if !ok {
-		t.Fatalf("expected []string, got %T", result)
-	}
-	if len(types) != 1 {
-		t.Errorf("expected 1 type, got %d", len(types))
-	}
-}
-
-func TestQueryDispatcher_UnknownQueryType(t *testing.T) {
-	stack, ctx := setupMemoryStack(t)
-
-	_, err := stack.QueryDispatcher.Dispatch(ctx, &GetTypesQuery{
-		BasicQuery: mustNewQuery(query.Type("unknown.query")),
-	})
-	if err == nil {
-		t.Error("expected error for unregistered query type")
 	}
 }

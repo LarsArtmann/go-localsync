@@ -1,30 +1,10 @@
 // stack_adapters.go bridges CQRSStack to synclib.SyncStore.
 //
-// The List / Count / GetTypes methods below deliberately bypass the
-// QueryDispatcher and call the ReadModel directly. Reasons:
-//
-//  1. Hot path performance (measured, see BenchmarkReadDirect_* vs
-//     BenchmarkReadDispatcher_* in query_dispatch_bench_test.go): routing
-//     reads through the dispatcher adds 127-130 allocations and 1.6x latency
-//     on List, and 5.5x latency on Count (21µs → 116µs) because the
-//     dispatcher's middleware chain + any-boxing dominates a read that is
-//     otherwise allocation-free. These endpoints serve every GET /items,
-//     GET /stats, and every SyncItems result.
-//
-//  2. The query.Dispatcher is still wired (see stack.go:wireQueryDispatcher)
-//     and registered in tests for verifying handler resolution and
-//     middleware behavior. It is the optional observability path: consumers
-//     who want QueryLogging on a specific read can dispatch a typed query
-//     through stack.QueryDispatcher directly.
-//
-//  3. The dispatcher's `query.ListItemsHandler` (queries.go) remains the
-//     single source of truth for the read-side query contract — these
-//     adapters just happen to be the direct implementation it would
-//     delegate to.
-//
-// If you are adding a new read endpoint, prefer extending this adapter
-// file over creating a new dispatcher handler unless the endpoint needs
-// the cross-cutting middleware chain (logging, metrics, retry).
+// The read-side methods (List / Count / CountByType) call the ReadModel
+// directly. The ReadModel IS the read side of this CQRS stack: queries are
+// allocation-free point-to-point calls, so there is no query dispatcher to
+// route through. The command side remains dispatched (see stack.go:
+// wireCommandDispatcher) for logging, retry, and validation middleware.
 
 package cqrs
 
@@ -82,12 +62,6 @@ func (s *CQRSStack) Close() error {
 
 	if s.CommandDispatcher != nil {
 		if err := s.CommandDispatcher.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if s.QueryDispatcher != nil {
-		if err := s.QueryDispatcher.Close(); err != nil {
 			errs = append(errs, err)
 		}
 	}
