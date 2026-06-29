@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
 type scannedItem struct {
 	itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-	tombstoneReason                                                                       string
+	contentHash, tombstoneReason                                                          string
 	createdAt, updatedAt                                                                  time.Time
-	tombstoned                                                                            int
+	tombstoned, schemaVersion                                                             int
 	tombstonedAt                                                                          sql.NullTime
 }
 
@@ -40,9 +41,11 @@ func (si *scannedItem) toItem() (*model.Item, error) {
 		ActorAvatarURL: si.actorAvatarURL,
 		RepoName:       id.NewRepoID(si.repoName),
 		RepoURL:        si.repoURL,
+		ContentHash:    si.contentHash,
 		Tombstone:      tombstone,
 		CreatedAt:      si.createdAt,
 		UpdatedAt:      si.updatedAt,
+		SchemaVersion:  schema.Version(si.schemaVersion),
 	}, nil
 }
 
@@ -56,11 +59,13 @@ func newScannedItem() *scannedItem {
 		actorAvatarURL:  "",
 		repoName:        "",
 		repoURL:         "",
+		contentHash:     "",
 		tombstoneReason: "",
 		createdAt:       time.Time{},
 		updatedAt:       time.Time{},
 		tombstoned:      0,
 		tombstonedAt:    sql.NullTime{},
+		schemaVersion:   0,
 	}
 }
 
@@ -69,7 +74,7 @@ func scanItem(row *sql.Row) (*model.Item, error) {
 
 	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.actorLogin,
 		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt,
-		&si.tombstoned, &si.tombstoneReason, &si.tombstonedAt)
+		&si.tombstoned, &si.tombstoneReason, &si.tombstonedAt, &si.contentHash, &si.schemaVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +103,8 @@ func scanItems(rows *sql.Rows) ([]*model.Item, error) {
 			&si.tombstoned,
 			&si.tombstoneReason,
 			&si.tombstonedAt,
+			&si.contentHash,
+			&si.schemaVersion,
 		)
 		if err != nil {
 			return nil, pkgerrors.Wrap(err, "scan item")

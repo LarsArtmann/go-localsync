@@ -8,6 +8,7 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/storage/v3"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -65,6 +66,8 @@ func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 	ctx := context.Background()
 
 	item := sqliteTestItem(t, "github", "123", "PushEvent", "alice", "org/repo")
+	item.ContentHash = "abc123hash"
+	item.SchemaVersion = schema.V2
 
 	testutil.MustNoError(t, rm.Upsert(ctx, item))
 
@@ -80,8 +83,9 @@ func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 	}
 
 	testutil.AssertEqual(t, got.ExternalID.Get(), "123", "ExternalID")
-
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
+	testutil.AssertEqual(t, got.ContentHash, "abc123hash", "ContentHash")
+	testutil.AssertEqual(t, got.SchemaVersion.Int(), schema.V2.Int(), "SchemaVersion")
 }
 
 func TestSQLiteReadModel_Get_NotFound(t *testing.T) {

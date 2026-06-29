@@ -7,7 +7,7 @@ import (
 )
 
 func buildListQuery(filter model.ItemFilter) (string, []any) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
 		FROM sync_items WHERE 1=1`
 
 	args := appendFilterArgs(&query, filter)

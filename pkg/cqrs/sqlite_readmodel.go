@@ -21,11 +21,13 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	actor_avatar_url TEXT NOT NULL DEFAULT '',
 	repo_name TEXT NOT NULL DEFAULT '',
 	repo_url TEXT NOT NULL DEFAULT '',
+	content_hash TEXT NOT NULL DEFAULT '',
 	created_at DATETIME NOT NULL,
 	updated_at DATETIME NOT NULL,
 	tombstoned INTEGER NOT NULL DEFAULT 0,
 	tombstone_reason TEXT NOT NULL DEFAULT '',
 	tombstoned_at DATETIME,
+	schema_version INTEGER NOT NULL DEFAULT 1,
 	PRIMARY KEY (source, source_id)
 )`
 
@@ -52,7 +54,9 @@ func wrapDBErr(original error, detail string) error {
 const syncItemsMigrations = `
 ALTER TABLE sync_items ADD COLUMN tombstoned INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE sync_items ADD COLUMN tombstone_reason TEXT NOT NULL DEFAULT '';
-ALTER TABLE sync_items ADD COLUMN tombstoned_at DATETIME;`
+ALTER TABLE sync_items ADD COLUMN tombstoned_at DATETIME;
+ALTER TABLE sync_items ADD COLUMN content_hash TEXT NOT NULL DEFAULT '';
+ALTER TABLE sync_items ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 1;`
 
 func migrateSyncItems(ctx context.Context, db *sql.DB) error {
 	for stmt := range strings.SplitSeq(syncItemsMigrations, ";") {
@@ -102,7 +106,7 @@ func (m *SQLiteReadModel) Get(
 	source string,
 	sourceID id.ExternalID,
 ) (*model.Item, error) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at
+	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
 		FROM sync_items WHERE source = ? AND source_id = ?`
 
 	row := m.db.QueryRowContext(ctx, query, source, sourceID.Get())
@@ -183,14 +187,14 @@ func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 	// Tombstone columns reset to defaults on upsert: a sync event always writes a
 	// live item, so re-syncing a previously-tombstoned item resurrects it.
 	query := `INSERT OR REPLACE INTO sync_items
-		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '', NULL)`
+		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, content_hash, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, schema_version)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '', NULL, ?)`
 
 	_, err := m.db.ExecContext(
 		ctx, query,
 		item.ID.String(), item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
 		item.ActorLogin.Get(), item.ActorAvatarURL, item.RepoName.Get(),
-		item.RepoURL, item.CreatedAt, item.UpdatedAt,
+		item.RepoURL, item.ContentHash, item.CreatedAt, item.UpdatedAt, item.SchemaVersion.Int(),
 	)
 	if err != nil {
 		return wrapDBErr(err, "upsert item")
