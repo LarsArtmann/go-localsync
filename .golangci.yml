@@ -319,6 +319,7 @@ formatters:
     generated: lax
     paths:
       - _templ\.go$
+      - vendor/
 issues:
   max-issues-per-linter: 50
   max-same-issues: 10
