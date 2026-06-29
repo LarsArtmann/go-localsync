@@ -68,3 +68,6 @@ result-*
 .envrc
 .direnv/
 # <<< buildflow-managed (.gitignore) <<<
+
+# BuildFlow resume state (should never be committed)
+.buildflow-resume.json
