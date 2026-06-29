@@ -176,24 +176,6 @@ func TestMemoryReadModel_Count(t *testing.T) {
 	testutil.AssertInt64(t, count, 1, "count")
 }
 
-func TestMemoryReadModel_GetTypes(t *testing.T) {
-	t.Parallel()
-
-	rm := NewMemoryReadModel()
-	ctx := context.Background()
-
-	upsertTestItem(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
-	upsertTestItem(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
-	upsertTestItem(t, rm, ctx, "github", "3", "PushEvent", "charlie", "org/repo2")
-
-	result, err := rm.GetTypes(ctx)
-	testutil.MustNoError(t, err)
-	testutil.AssertLen(t, result, 2, "types")
-	if result[0] != "IssueEvent" || result[1] != "PushEvent" {
-		t.Errorf("expected [IssueEvent, PushEvent], got %v", result)
-	}
-}
-
 func TestProjector_ItemSynced(t *testing.T) {
 	t.Parallel()
 

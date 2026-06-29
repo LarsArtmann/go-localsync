@@ -28,8 +28,6 @@ type mockSyncStore struct {
 	testutil.SyncStoreListBehavior
 
 	countErr error
-	typesErr error
-	types    []string
 }
 
 func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *synclib.SyncSummary {
@@ -66,14 +64,6 @@ func (m *mockSyncStore) CountByType(_ context.Context, _ model.ItemFilter) (map[
 	}
 
 	return counts, nil
-}
-
-func (m *mockSyncStore) GetTypes(_ context.Context) ([]string, error) {
-	if m.typesErr != nil {
-		return nil, m.typesErr
-	}
-
-	return m.types, nil
 }
 
 func (m *mockSyncStore) Close() error { return nil }
@@ -174,7 +164,6 @@ func TestGetStats(t *testing.T) {
 				testItem("2", "IssueEvent"),
 			},
 		},
-		types: []string{"PushEvent", "IssueEvent"},
 	}
 
 	server := newTestServer(store)

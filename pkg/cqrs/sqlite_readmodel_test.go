@@ -143,21 +143,6 @@ func TestSQLiteReadModel_Count(t *testing.T) {
 	testutil.AssertInt64(t, count, 1, "filtered Count")
 }
 
-func TestSQLiteReadModel_GetTypes(t *testing.T) {
-	t.Parallel()
-
-	rm := newSQLiteTestDB(t)
-	ctx := context.Background()
-
-	sqliteSeed(t, rm, ctx, "github", "1", "PushEvent", "alice", "org/repo")
-	sqliteSeed(t, rm, ctx, "github", "2", "IssueEvent", "bob", "org/repo")
-	sqliteSeed(t, rm, ctx, "github", "3", "PushEvent", "charlie", "org/repo2")
-
-	types, err := rm.GetTypes(ctx)
-	testutil.MustNoError(t, err)
-	testutil.AssertLen(t, types, 2, "types")
-}
-
 func TestSQLiteReadModel_Tombstone(t *testing.T) {
 	t.Parallel()
 

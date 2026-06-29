@@ -95,7 +95,6 @@ func TestMemoryReadModel_ConcurrentReadDuringWrites(t *testing.T) {
 			for range readsPerReader {
 				_, _ = rm.List(ctx, model.ItemFilter{})
 				_, _ = rm.Count(ctx, model.ItemFilter{})
-				_, _ = rm.GetTypes(ctx)
 			}
 		}()
 	}

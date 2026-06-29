@@ -169,41 +169,6 @@ func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilt
 	return counts, nil
 }
 
-func (m *SQLiteReadModel) GetTypes(ctx context.Context) ([]string, error) {
-	query := "SELECT DISTINCT type FROM sync_items WHERE tombstoned = 0 ORDER BY type"
-
-	rows, err := m.db.QueryContext(ctx, query)
-	if err != nil {
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("get types: %v", err))
-	}
-
-	defer func() { _ = rows.Close() }()
-
-	var types []string
-
-	for rows.Next() {
-		var t string
-
-		err := rows.Scan(&t)
-		if err != nil {
-			return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("scan type: %v", err))
-		}
-
-		types = append(types, t)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("iterate types: %v", err))
-	}
-
-	if types == nil {
-		types = []string{}
-	}
-
-	return types, nil
-}
-
 func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 	// Tombstone columns reset to defaults on upsert: a sync event always writes a
 	// live item, so re-syncing a previously-tombstoned item resurrects it.

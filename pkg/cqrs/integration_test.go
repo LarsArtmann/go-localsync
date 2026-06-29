@@ -37,12 +37,6 @@ func TestIntegration_SyncItemsPipeline(t *testing.T) {
 		t.Fatalf("expected 2 items in read model, got %d", len(list))
 	}
 
-	types, err := stack.GetTypes(ctx)
-	testutil.MustNoError(t, err)
-	if len(types) != 2 {
-		t.Errorf("expected 2 types, got %d", len(types))
-	}
-
 	for _, item := range list {
 		if item.Source.IsZero() {
 			t.Errorf("expected non-zero Source for item %s", item.ExternalID.Get())

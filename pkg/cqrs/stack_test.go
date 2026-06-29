@@ -27,12 +27,6 @@ func TestCQRSStack_SyncNewItem(t *testing.T) {
 	if count != 1 {
 		t.Errorf("expected count=1, got %d", count)
 	}
-
-	resultTypes, err := stack.GetTypes(ctx)
-	testutil.MustNoError(t, err)
-	if len(resultTypes) != 1 || resultTypes[0] != "PushEvent" {
-		t.Errorf("expected [PushEvent], got %v", resultTypes)
-	}
 }
 
 func TestCQRSStack_SyncMultipleItems(t *testing.T) {
@@ -52,12 +46,6 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 3, "count")
-
-	resultTypes, err := stack.GetTypes(ctx)
-	testutil.MustNoError(t, err)
-	if len(resultTypes) != 2 {
-		t.Errorf("expected 2 types, got %v", resultTypes)
-	}
 }
 
 func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {

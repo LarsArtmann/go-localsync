@@ -89,27 +89,6 @@ func (m *MemoryReadModel) CountByType(_ context.Context, filter model.ItemFilter
 	return counts, nil
 }
 
-func (m *MemoryReadModel) GetTypes(_ context.Context) ([]string, error) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	seen := make(map[string]struct{})
-
-	for _, item := range m.items {
-		seen[item.Type.Get()] = struct{}{}
-	}
-
-	types := make([]string, 0, len(seen))
-
-	for t := range seen {
-		types = append(types, t)
-	}
-
-	sort.Strings(types)
-
-	return types, nil
-}
-
 func (m *MemoryReadModel) Upsert(_ context.Context, item *model.Item) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()

@@ -53,10 +53,6 @@ func (s *CQRSStack) CountByType(ctx context.Context, filter model.ItemFilter) (m
 	return s.ReadModel.CountByType(ctx, filter)
 }
 
-func (s *CQRSStack) GetTypes(ctx context.Context) ([]string, error) {
-	return s.ReadModel.GetTypes(ctx)
-}
-
 func (s *CQRSStack) Close() error {
 	var errs []error
 

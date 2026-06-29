@@ -81,22 +81,6 @@ func (m *mockSyncStore) CountByType(_ context.Context, _ model.ItemFilter) (map[
 	return counts, nil
 }
 
-func (m *mockSyncStore) GetTypes(_ context.Context) ([]string, error) {
-	seen := make(map[string]bool)
-
-	for _, item := range m.synced {
-		seen[item.Type.Get()] = true
-	}
-
-	types := make([]string, 0, len(seen))
-
-	for t := range seen {
-		types = append(types, t)
-	}
-
-	return types, nil
-}
-
 func (m *mockSyncStore) Close() error { return m.closeErr }
 
 func (m *mockSyncStore) Reconcile(_ context.Context, _ string, seen []model.Key) (int, error) {
