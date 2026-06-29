@@ -31,10 +31,20 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 
 const syncItemsIndexes = `
 CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
+CREATE INDEX IF NOT EXISTS idx_sync_items_type_created ON sync_items(type, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login);
-CREATE INDEX IF NOT EXISTS idx_sync_items_repo_name ON sync_items(repo_name);
-CREATE INDEX IF NOT EXISTS idx_sync_items_type_created ON sync_items(type, created_at DESC)`
+CREATE INDEX IF NOT EXISTS idx_sync_items_repo_name ON sync_items(repo_name);`
+
+// wrapDBErr wraps a database driver error with the Database sentinel while
+// preserving the original error chain. Callers can use errors.Is(result,
+// pkgerrors.ErrDatabase) for classification AND errors.As/Is on the root
+// cause (e.g. sql.ErrConnDone, constraint-violation errors). Without this,
+// fmt.Sprintf("…: %v", err) severs the chain and root-cause diagnosis is
+// impossible from caller code.
+func wrapDBErr(original error, detail string) error {
+	return fmt.Errorf("%s: %w: %w", detail, original, pkgerrors.ErrDatabase)
+}
 
 // syncItemsMigrations adds tombstone columns to databases created before they
 // existed. SQLite lacks IF NOT EXISTS for ADD COLUMN, so duplicate-column errors
@@ -53,7 +63,7 @@ func migrateSyncItems(ctx context.Context, db *sql.DB) error {
 
 		if _, err := db.ExecContext(ctx, stmt); err != nil {
 			if !strings.Contains(err.Error(), "duplicate column name") {
-				return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("migrate sync_items: %v", err))
+				return wrapDBErr(err, "migrate sync_items")
 			}
 		}
 	}
@@ -73,11 +83,11 @@ func newSQLiteReadModel(ctx context.Context, db *sql.DB) (*SQLiteReadModel, erro
 	}
 
 	if _, err := db.ExecContext(ctx, syncItemsDDL); err != nil {
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items table: %v", err))
+		return nil, wrapDBErr(err, "create sync_items table")
 	}
 
 	if _, err := db.ExecContext(ctx, syncItemsIndexes); err != nil {
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("create sync_items indexes: %v", err))
+		return nil, wrapDBErr(err, "create sync_items indexes")
 	}
 
 	if err := migrateSyncItems(ctx, db); err != nil {
@@ -103,7 +113,7 @@ func (m *SQLiteReadModel) Get(
 			return nil, pkgerrors.ErrNotFound
 		}
 
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("get item %s/%s: %v", source, sourceID, err))
+		return nil, wrapDBErr(err, fmt.Sprintf("get item %s/%s", source, sourceID))
 	}
 
 	return item, nil
@@ -114,7 +124,7 @@ func (m *SQLiteReadModel) List(ctx context.Context, filter model.ItemFilter) ([]
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("list items: %v", err))
+		return nil, wrapDBErr(err, "list items")
 	}
 
 	defer func() { _ = rows.Close() }()
@@ -130,7 +140,7 @@ func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (i
 
 	err := m.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
-		return count, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("count items (count=%d): %v", count, err))
+		return count, wrapDBErr(err, fmt.Sprintf("count items (count=%d)", count))
 	}
 
 	return count, nil
@@ -143,7 +153,7 @@ func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilt
 
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("count by type: %v", err))
+		return nil, wrapDBErr(err, "count by type")
 	}
 
 	defer func() { _ = rows.Close() }()
@@ -156,14 +166,14 @@ func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilt
 		var count int64
 
 		if err := rows.Scan(&itemType, &count); err != nil {
-			return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("scan count by type: %v", err))
+			return nil, wrapDBErr(err, "scan count by type")
 		}
 
 		counts[itemType] = count
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("iterate count by type: %v", err))
+		return nil, wrapDBErr(err, "iterate count by type")
 	}
 
 	return counts, nil
@@ -183,7 +193,7 @@ func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 		item.RepoURL, item.CreatedAt, item.UpdatedAt,
 	)
 	if err != nil {
-		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("upsert item: %v", err))
+		return wrapDBErr(err, "upsert item")
 	}
 
 	return nil
@@ -209,7 +219,7 @@ func (m *SQLiteReadModel) Tombstone(
 		sourceID.Get(),
 	)
 	if err != nil {
-		return pkgerrors.Wrap(pkgerrors.ErrDatabase, fmt.Sprintf("tombstone item %s/%s: %v", source, sourceID, err))
+		return wrapDBErr(err, fmt.Sprintf("tombstone item %s/%s", source, sourceID))
 	}
 
 	return nil

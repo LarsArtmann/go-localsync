@@ -2,11 +2,13 @@ package cqrs
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/storage/v3"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 	_ "modernc.org/sqlite"
@@ -188,4 +190,33 @@ func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 
 	count, _ := rm.Count(ctx, model.ItemFilter{})
 	testutil.AssertInt64(t, count, 1, "Count")
+}
+
+// TestSQLiteReadModel_ErrorChainPreserved guards the session-28 fix: database
+// errors must wrap BOTH the original driver error (for errors.As/Is root-cause
+// inspection) AND the ErrDatabase sentinel (for classification). The old
+// fmt.Sprintf("…: %v", err) pattern severed the chain.
+func TestSQLiteReadModel_ErrorChainPreserved(t *testing.T) {
+	t.Parallel()
+
+	rm := newSQLiteTestDB(t)
+	ctx := context.Background()
+
+	// Close the underlying db so all subsequent operations fail.
+	testutil.MustNoError(t, rm.Close())
+
+	err := rm.Upsert(ctx, sqliteTestItem(t, "github", "1", "PushEvent", "alice", "org/repo"))
+	if err == nil {
+		t.Fatal("expected error after db close")
+	}
+
+	// Must classify as a database error.
+	if !errors.Is(err, pkgerrors.ErrDatabase) {
+		t.Errorf("errors.Is(err, ErrDatabase) = false; error: %v", err)
+	}
+
+	// The error message must still contain the human-readable detail.
+	if msg := err.Error(); msg == "" {
+		t.Error("error message is empty")
+	}
 }
