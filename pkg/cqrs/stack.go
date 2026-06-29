@@ -54,7 +54,6 @@ type CQRSStack struct {
 
 	Repo              *decider.Repository[SyncItemState]
 	CommandDispatcher *command.Dispatcher
-	conflictResolver  crdt.ConflictResolver[*model.Item]
 	cancelRunner      context.CancelFunc
 	drainDone         <-chan struct{}
 }
@@ -155,7 +154,6 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) {
 		Repo:              repo,
 		ReadModel:         rm,
 		CommandDispatcher: commandDispatcher,
-		conflictResolver:  cfg.ConflictResolver,
 		cancelRunner:      cancelRunner,
 		drainDone:         drainDone,
 	}, nil
