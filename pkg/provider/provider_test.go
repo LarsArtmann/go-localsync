@@ -25,6 +25,7 @@ func TestItem_Validate(t *testing.T) {
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 
 	t.Run("valid item passes", func(t *testing.T) {
@@ -55,6 +56,12 @@ func TestItem_Validate(t *testing.T) {
 	t.Run("rejects zero CreatedAt", func(t *testing.T) {
 		item := *validItem
 		item.CreatedAt = time.Time{}
+		assertValidationError(t, &item)
+	})
+
+	t.Run("rejects zero UpdatedAt", func(t *testing.T) {
+		item := *validItem
+		item.UpdatedAt = time.Time{}
 		assertValidationError(t, &item)
 	})
 

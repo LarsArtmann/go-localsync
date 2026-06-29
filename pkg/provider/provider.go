@@ -71,6 +71,10 @@ func (item *Item) Validate() error {
 		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.CreatedAt is required"))
 	}
 
+	if item.UpdatedAt.IsZero() {
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.UpdatedAt is required"))
+	}
+
 	return stderrors.Join(errs...)
 }
 
