@@ -65,10 +65,39 @@ jobs:
           version: latest
           args: --timeout=5m
 
+  security:
+    name: Security (govulncheck + gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Full history so gitleaks can scan the entire commit graph.
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      # gosec (SAST) already runs as part of the golangci-lint job above.
+      - name: Run gitleaks (secret detection)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
+
+      - name: Run govulncheck (dependency vulnerabilities)
+        uses: golang/govulncheck-action@v1
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          go-package: ./...
+
   build:
     name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test, lint, security]
     strategy:
       matrix:
         goos: [linux, darwin]

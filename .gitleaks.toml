@@ -1,0 +1,11 @@
+title = "go-localsync gitleaks config"
+
+# Use the built-in default rule set, then layer our allowlist on top.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Ignore vendored third-party code (e.g. modernc.org/sqlite generated amalgamation triggers generic-api-key false positives)."
+paths = [
+    '''vendor/.*''',
+]
