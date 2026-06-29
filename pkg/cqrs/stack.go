@@ -147,6 +147,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 		Item:         toDataItem(item),
 		RawJSON:      item.RawJSON,
 		Options:      nil,
+		outcome:      nil,
 	})
 }
 
@@ -241,19 +242,18 @@ func (s *CQRSStack) SyncItems(
 			Item:         dataItem,
 			RawJSON:      item.RawJSON,
 			Options:      syncOpts,
+			outcome:      &outcome,
 		}
 
-		itemCtx := contextWithSyncOutcome(ctx, &outcome)
-
-		err := s.CommandDispatcher.Dispatch(itemCtx, cmd)
+		err := s.CommandDispatcher.Dispatch(ctx, cmd)
 		if err != nil {
 			err = fmt.Errorf("sync %s/%s: %w", item.Source.Get(), item.ExternalID.Get(), err)
 		}
 
-		action := classifyAction(err, outcome.EventCount, outcome.WasNew, outcome.ConflictWinner)
+		action := classifyAction(err, outcome)
 
 		if err != nil {
-			err = fmt.Errorf("eventCount=%d, conflictWinner=%s: %w", outcome.EventCount, outcome.ConflictWinner, err)
+			err = fmt.Errorf("eventCount=%d, conflict=%v: %w", outcome.EventCount, outcome.ConflictDetected, err)
 		}
 
 		result := synclib.ItemSyncResult{

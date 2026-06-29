@@ -28,12 +28,18 @@ func mustNewCommand(cmdType command.Type, aggID cqrsid.AggregateID) command.Basi
 }
 
 // SyncItemCommand dispatches a sync operation for a single item.
+//
+// outcome is an optional out-parameter: SyncItems sets it so the command
+// handler can record what the decider decided (new/conflict/unchanged), which
+// SyncItems then reads to classify the result. It is nil for the single-item
+// SyncItem path, which does not need classification.
 type SyncItemCommand struct {
 	command.BasicCommand
 
 	Item    *model.Item
 	RawJSON []byte
 	Options []event.Option
+	outcome *SyncOutcome
 }
 
 // TombstoneItemCommand dispatches a tombstone operation for a single item.
@@ -56,11 +62,9 @@ func wireCommandDispatcher(
 	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
 
 	syncItemHandler := func(ctx context.Context, cmd *SyncItemCommand) error {
-		outcome := syncOutcomeFromContext(ctx)
-
 		return repo.Execute(
 			ctx, cmd.AggregateID(), aggregateType,
-			decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, outcome, cmd.Options...),
+			decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, cmd.outcome, cmd.Options...),
 		)
 	}
 

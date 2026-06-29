@@ -32,24 +32,24 @@ import (
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
-func classifyAction(err error, eventCount int, wasNew bool, conflictWinner ConflictWinner) synclib.SyncAction {
+func classifyAction(err error, outcome SyncOutcome) synclib.SyncAction {
 	if err != nil {
 		return synclib.ActionError
 	}
 
-	if eventCount > 1 {
-		if conflictWinner == ConflictWinnerLocal {
+	if outcome.ConflictDetected {
+		if outcome.ConflictWinner == ConflictWinnerLocal {
 			return synclib.ActionConflictLocal
 		}
 
 		return synclib.ActionConflictRemote
 	}
 
-	if eventCount == 1 && wasNew {
+	if outcome.EventCount == 1 && outcome.WasNew {
 		return synclib.ActionCreated
 	}
 
-	if eventCount == 1 {
+	if outcome.EventCount == 1 {
 		return synclib.ActionUpdated
 	}
 

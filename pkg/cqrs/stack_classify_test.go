@@ -16,56 +16,60 @@ func TestClassifyAction(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name           string
-		err            error
-		eventCount     int
-		wasNew         bool
-		conflictWinner ConflictWinner
-		want           synclib.SyncAction
+		name    string
+		err     error
+		outcome SyncOutcome
+		want    synclib.SyncAction
 	}{
 		{
-			name:       "error_returns_action_error",
-			err:        errors.New("some error"),
-			eventCount: 0,
-			wasNew:     false,
-			want:       synclib.ActionError,
+			name:    "error_returns_action_error",
+			err:     errors.New("some error"),
+			outcome: SyncOutcome{},
+			want:    synclib.ActionError,
 		},
 		{
-			name:           "multiple_events_conflict_remote",
-			err:            nil,
-			eventCount:     2,
-			wasNew:         false,
-			conflictWinner: ConflictWinnerRemote,
-			want:           synclib.ActionConflictRemote,
+			name: "conflict_detected_remote_wins",
+			err:  nil,
+			outcome: SyncOutcome{
+				ConflictDetected: true,
+				ConflictWinner:   ConflictWinnerRemote,
+				EventCount:       2,
+			},
+			want: synclib.ActionConflictRemote,
 		},
 		{
-			name:           "multiple_events_conflict_local",
-			err:            nil,
-			eventCount:     2,
-			wasNew:         false,
-			conflictWinner: ConflictWinnerLocal,
-			want:           synclib.ActionConflictLocal,
+			name: "conflict_detected_local_wins",
+			err:  nil,
+			outcome: SyncOutcome{
+				ConflictDetected: true,
+				ConflictWinner:   ConflictWinnerLocal,
+				EventCount:       2,
+			},
+			want: synclib.ActionConflictLocal,
 		},
 		{
-			name:       "one_event_new_item_created",
-			err:        nil,
-			eventCount: 1,
-			wasNew:     true,
-			want:       synclib.ActionCreated,
+			name: "one_event_new_item_created",
+			err:  nil,
+			outcome: SyncOutcome{
+				EventCount: 1,
+				WasNew:     true,
+			},
+			want: synclib.ActionCreated,
 		},
 		{
-			name:       "one_event_existing_item_updated",
-			err:        nil,
-			eventCount: 1,
-			wasNew:     false,
-			want:       synclib.ActionUpdated,
+			name: "one_event_existing_item_updated",
+			err:  nil,
+			outcome: SyncOutcome{
+				EventCount: 1,
+				WasNew:     false,
+			},
+			want: synclib.ActionUpdated,
 		},
 		{
-			name:       "zero_events_unchanged",
-			err:        nil,
-			eventCount: 0,
-			wasNew:     false,
-			want:       synclib.ActionUnchanged,
+			name:    "zero_events_unchanged",
+			err:     nil,
+			outcome: SyncOutcome{},
+			want:    synclib.ActionUnchanged,
 		},
 	}
 
@@ -73,7 +77,7 @@ func TestClassifyAction(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := classifyAction(tt.err, tt.eventCount, tt.wasNew, tt.conflictWinner)
+			got := classifyAction(tt.err, tt.outcome)
 			if got != tt.want {
 				t.Errorf("classifyAction() = %v, want %v", got, tt.want)
 			}
