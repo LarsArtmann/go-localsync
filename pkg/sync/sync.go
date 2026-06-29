@@ -145,6 +145,18 @@ type Stats struct {
 // per-item failures, so callers can errors.Is it (and it satisfies err113).
 var errCompletedWithErrors = errors.New("sync completed with item errors")
 
+// errIfFailed wraps errCompletedWithErrors when result records item failures,
+// so the same error contract is surfaced from every sync entry point (full,
+// validation-only-failure, and incremental). total is the number of items
+// attempted, reported in the message for context.
+func errIfFailed(result *SyncResult, total int) error {
+	if result.Errors == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("%w: %d of %d items failed", errCompletedWithErrors, result.Errors, total)
+}
+
 // Sync fetches all items from the provider and persists them.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
 	err := s.validateOpts(opts)
@@ -181,7 +193,7 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 			syncResult.Errors,
 		)
 
-		return syncResult, nil
+		return syncResult, errIfFailed(syncResult, len(result.Items))
 	}
 
 	summary := s.store.SyncItems(ctx, valid)
@@ -210,16 +222,7 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 		syncResult.Errors,
 	)
 
-	if syncResult.Errors > 0 {
-		return syncResult, fmt.Errorf(
-			"%w: %d of %d items failed",
-			errCompletedWithErrors,
-			syncResult.Errors,
-			len(valid),
-		)
-	}
-
-	return syncResult, nil
+	return syncResult, errIfFailed(syncResult, len(valid))
 }
 
 // reconcile runs the opt-in upstream-gone reconciliation pass: live items for
@@ -320,7 +323,7 @@ func (s *Syncer) runSyncIncremental(ctx context.Context, opts *SyncOptions) (*Sy
 		syncResult.Errors,
 	)
 
-	return syncResult, nil
+	return syncResult, errIfFailed(syncResult, syncResult.Fetched)
 }
 
 // GetStats returns aggregate statistics including per-type counts.

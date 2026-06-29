@@ -191,8 +191,8 @@ func TestSyncer_Sync_InvalidItem(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := syncer.Sync(ctx, testSyncOpts())
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, errCompletedWithErrors) {
+		t.Fatalf("expected errCompletedWithErrors when all items are invalid, got: %v", err)
 	}
 	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
 	testutil.AssertInt(t, result.Errors, 1, "Errors")
