@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -75,23 +76,23 @@ func validateIdentity(
 	var errs []error
 
 	if externalID.IsZero() {
-		errs = append(errs, errMissingExternalID)
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "externalID is required"))
 	}
 
 	if source.IsZero() {
-		errs = append(errs, errMissingSource)
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "source is required"))
 	}
 
 	if eventType.IsZero() {
-		errs = append(errs, errMissingType)
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "type is required"))
 	}
 
 	if createdAt.IsZero() {
-		errs = append(errs, errMissingCreatedAt)
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "createdAt is required"))
 	}
 
 	if updatedAt.IsZero() {
-		errs = append(errs, errMissingUpdatedAt)
+		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "updatedAt is required"))
 	}
 
 	return errors.Join(errs...)

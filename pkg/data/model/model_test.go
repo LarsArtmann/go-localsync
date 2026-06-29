@@ -1,10 +1,12 @@
 package model
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -209,6 +211,12 @@ func TestValidate_CollectsAllFieldErrors(t *testing.T) {
 	err := Item{}.Validate()
 	if err == nil {
 		t.Fatal("Validate() on zero item should fail")
+	}
+
+	// Model validation errors must classify as ErrInvalidInput so callers
+	// can use errors.Is for retry/mapping decisions (session-28 fix).
+	if !errors.Is(err, pkgerrors.ErrInvalidInput) {
+		t.Errorf("errors.Is(err, ErrInvalidInput) = false; err: %v", err)
 	}
 
 	msg := err.Error()
