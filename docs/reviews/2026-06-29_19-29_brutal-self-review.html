@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brutal Self-Review — Session 26 (2026-06-29)</title>
+    <style>
+      :root {
+        --color-graphite: #0e0e10;
+        --color-graphite-2: #18181d;
+        --color-graphite-3: #16161a;
+        --color-bone: #f4f4f0;
+        --color-red: #ff6b6b;
+        --color-blue: #6eb5ff;
+        --color-yellow: #f4d35e;
+        --color-amber: #ffb347;
+        --color-hairline: rgba(244, 244, 240, 0.12);
+        --color-hairline-strong: rgba(244, 244, 240, 0.25);
+        --surface: var(--color-graphite);
+        --surface-raised: var(--color-graphite-2);
+        --surface-sunken: var(--color-graphite-3);
+        --text: var(--color-bone);
+        --text-muted: rgba(244, 244, 240, 0.72);
+        --text-faint: rgba(244, 244, 240, 0.45);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-amber);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+        --radius: 0px;
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
+          monospace;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      section[id] {
+        scroll-margin-top: 60px;
+      }
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        min-height: 100vh;
+      }
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        background: var(--surface-sunken);
+        border-right: 1px solid var(--border);
+        padding: 1.5rem 1rem;
+      }
+      .sidebar h2 {
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-faint);
+        margin-bottom: 0.75rem;
+      }
+      .sidebar nav a {
+        display: block;
+        padding: 0.35rem 0.5rem;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        border-left: 2px solid transparent;
+        transition: all 0.15s;
+      }
+      .sidebar nav a:hover {
+        color: var(--text);
+        background: var(--surface-raised);
+        border-left-color: var(--accent);
+      }
+      .main {
+        padding: 2rem 3rem;
+        max-width: 900px;
+      }
+      h1 {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
+      }
+      .subtitle {
+        color: var(--text-faint);
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+      }
+      h2 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-strong);
+      }
+      h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 1.5rem 0 0.5rem;
+      }
+      p {
+        margin-bottom: 0.75rem;
+      }
+      ul {
+        margin: 0.5rem 0 1rem 1.5rem;
+      }
+      li {
+        margin-bottom: 0.3rem;
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      p code,
+      li code {
+        font-size: 0.88em;
+        background: var(--surface-sunken);
+        padding: 0.1rem 0.35rem;
+      }
+      pre {
+        background: var(--surface-sunken);
+        border: 1px solid var(--border);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+      }
+      .stat {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1rem;
+        text-align: center;
+      }
+      .stat .num {
+        font-size: 2rem;
+        font-weight: 900;
+        line-height: 1;
+      }
+      .stat .label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-faint);
+        margin-top: 0.3rem;
+      }
+      .stat .num.problem {
+        color: var(--problem);
+      }
+      .stat .num.warning {
+        color: var(--warning);
+      }
+      .stat .num.solution {
+        color: var(--solution);
+      }
+      .card {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 1.25rem;
+        margin: 0.75rem 0;
+        border-left: 3px solid var(--border);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+      }
+      .card h3 {
+        margin-top: 0;
+      }
+      .card .tag {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        padding: 0.15rem 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .card .tag.fixed {
+        background: var(--solution);
+        color: var(--surface);
+      }
+      .card .tag.deferred {
+        background: var(--warning);
+        color: var(--surface);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.88rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.6rem 0.8rem;
+        border-bottom: 1px solid var(--border);
+      }
+      th {
+        font-weight: 700;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      tr:hover td {
+        background: var(--surface-sunken);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border: 1px solid;
+      }
+      .badge-critical {
+        color: var(--problem);
+        border-color: var(--problem);
+      }
+      .badge-high {
+        color: var(--amber);
+        border-color: var(--amber);
+      }
+      .badge-medium {
+        color: var(--warning);
+        border-color: var(--warning);
+      }
+      .badge-low {
+        color: var(--text-faint);
+        border-color: var(--text-faint);
+      }
+      .badge-done {
+        color: var(--solution);
+        border-color: var(--solution);
+      }
+      .step {
+        display: grid;
+        grid-template-columns: 40px 1fr;
+        gap: 1rem;
+        margin: 0.75rem 0;
+      }
+      .step-num {
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: var(--accent);
+        text-align: right;
+      }
+      .step-body {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        padding: 0.75rem 1rem;
+        border-left: 3px solid var(--accent);
+      }
+      .verdict {
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+        border-left: 3px solid var(--accent);
+        background: var(--surface-raised);
+      }
+      @media (max-width: 1024px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>Sections</h2>
+        <nav>
+          <a href="#overview">Overview</a>
+          <a href="#answers">11 Questions</a>
+          <a href="#ghost">Ghost Systems</a>
+          <a href="#split">Split Brains</a>
+          <a href="#arch">Architecture</a>
+          <a href="#plan">Execution Plan</a>
+          <a href="#deferred">Deferred Items</a>
+          <a href="#verdict">Verdict</a>
+        </nav>
+      </aside>
+      <main class="main">
+        <h1>Brutal Self-Review — Session 26</h1>
+        <p class="subtitle">
+          Honest reckoning after the projectionhost adoption: what was forgotten, what was
+          stupid, and what got fixed on 2026-06-29.
+        </p>
+
+        <section id="overview">
+          <h2>Overview</h2>
+          <p>
+            The prior two sessions claimed a clean, production-ready state. It was not. A deep
+            read surfaced <strong>5 ghost systems</strong> (code that existed, ran in tests, and
+            served nothing), a <strong>latent timezone bug</strong>, a <strong>policy-violating
+            CI</strong> with zero security scanning, abstraction leaks in the error layer, and a
+            DLQ that the code <em>claimed</em> to wire but didn't. All but one class of issue is
+            now fixed.
+          </p>
+          <div class="stats">
+            <div class="stat">
+              <div class="num problem">5</div>
+              <div class="label">Ghost Systems</div>
+            </div>
+            <div class="stat">
+              <div class="num warning">4</div>
+              <div class="label">Split Brains (noted)</div>
+            </div>
+            <div class="stat">
+              <div class="num solution">10</div>
+              <div class="label">Fixes Applied</div>
+            </div>
+            <div class="stat">
+              <div class="num">~710</div>
+              <div class="label">Dead Lines Removed</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="answers">
+          <h2>The 11 Questions — Answered Honestly</h2>
+
+          <div class="card card-problem">
+            <span class="tag fixed">FIXED</span>
+            <h3>1. What did you forget?</h3>
+            <p>
+              Five ghost systems were carried across sessions: the entire <code>QueryDispatcher</code>
+              (wired, benchmarked as too slow, kept with a 27-line comment justifying the bypass —
+              zero production dispatches); <code>GetTypes</code> (superseded by
+              <code>CountByType</code>); the rate-limit subsystem
+              (<code>RateLimitCache</code>, <code>RateLimitConfig</code>); the
+              <code>FetchConfig</code> family; and <code>SyncAction.IsValid()</code>. CI shipped
+              with <strong>no security scanning</strong>. The DLQ was documented as wired but
+              wasn't.
+            </p>
+          </div>
+
+          <div class="card card-problem">
+            <span class="tag fixed">FIXED</span>
+            <h3>2. What is something stupid we do anyway?</h3>
+            <p>
+              Spending a commit to <em>justify keeping dead code</em> instead of deleting it. The
+              QueryDispatcher benchmark commit (019f7b0) rationalized the bypass rather than
+              questioning whether the dispatcher should exist at all. That is self-deception
+              dressed as engineering rigor.
+            </p>
+          </div>
+
+          <div class="card card-problem">
+            <span class="tag fixed">FIXED</span>
+            <h3>3. What could you have done better?</h3>
+            <p>
+              <code>resolveConflict</code> stamped <code>Conflict.Timestamp</code> with
+              <code>time.Now()</code> (local zone) while every persisted timestamp is UTC — a
+              latent bug with no test. The conflict-payload decode bypassed the codec abstraction
+              the rest of the decider uses. Both introduced last session; both now fixed with a
+              regression test.
+            </p>
+          </div>
+
+          <div class="card card-warning">
+            <span class="tag deferred">PARTLY DEFERRED</span>
+            <h3>4. What could you still improve?</h3>
+            <p>
+              OpenTelemetry is still absent (decision now made: consumer-wrap, see Architecture).
+              Four split-brains remain noted-but-not-fixed (see Split Brains). The
+              gopls/vendored-projectionhost IDE squiggles persist despite a clean build — a DX
+              papercut worth chasing.
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">HONEST</span>
+            <h3>5. Did you lie to me?</h3>
+            <p>
+              Not about build/test (they pass). But the "clean / production-ready" framing papered
+              over 5 ghost systems and a CI with no security scanning. The benchmark commit was the
+              tell: effort spent justifying dead code instead of removing it. The DLQ comment in
+              <code>runner.go</code> was a literal doc-lie (claimed a feature that wasn't wired).
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">FIXED</span>
+            <h3>6. How can we be less stupid?</h3>
+            <p>
+              Delete dead code instead of commenting around it. Add security scanning so "ship" is
+              not a synonym for "unscanned". Decide deferred questions (OpenTelemetry) once instead
+              of carrying them across sessions.
+            </p>
+          </div>
+
+          <div class="card card-problem">
+            <span class="tag fixed">5 FOUND &amp; REMOVED</span>
+            <h3>7. Ghost systems?</h3>
+            <p>
+              Yes — see the Ghost Systems section. All five were removed (or, for
+              <code>GetRateLimit</code>/<code>RateLimitInfo</code>, deliberately kept as a coherent
+              provider contract).
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">RESOLVED</span>
+            <h3>8. Scope creep trap?</h3>
+            <p>
+              The rate-limit + FetchConfig subsystems were textbook scope creep — built before any
+              provider needed them. Removed. Kept only the provider-introspection surface a real
+              GitHub provider would implement.
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">N/A</span>
+            <h3>9. Did we remove something useful?</h3>
+            <p>
+              No. Every deletion was verified to have zero production callers. The
+              <code>GetRateLimit</code>/<code>RateLimitInfo</code> introspection types were
+              <em>kept</em> despite the SDK not consuming them, because they are a legitimate
+              provider contract consumers already implement.
+            </p>
+          </div>
+
+          <div class="card card-warning">
+            <span class="tag deferred">NOTED</span>
+            <h3>10. Split brains?</h3>
+            <p>
+              Several (see Split Brains). The UTC-timestamp one is fixed. The two
+              conflict-classification switches, the <code>ExternalID</code>↔<code>SourceID</code>
+              naming duality, and the <code>provider.Item</code>↔<code>model.Item</code> field
+              overlap are noted for a follow-up consolidation pass.
+            </p>
+          </div>
+
+          <div class="card card-solution">
+            <span class="tag fixed">STRONG</span>
+            <h3>11. How are we doing on tests?</h3>
+            <p>
+              Coverage 80–100% per package, race-clean. Removed 14 tests that only exercised ghost
+              code (testing dead code is waste). Added a UTC regression test for the conflict
+              timestamp. Remaining gap: no test asserting error-family classification survives the
+              cqrs→sync boundary (cqrs uses <code>fmt.Errorf</code> while sync uses the structured
+              family).
+            </p>
+          </div>
+        </section>
+
+        <section id="ghost">
+          <h2>Ghost Systems (all removed)</h2>
+          <div class="card card-solution">
+            <span class="tag fixed">REMOVED</span>
+            <h3>The five ghosts</h3>
+            <table>
+              <thead><tr><th>Ghost</th><th>Evidence</th><th>Disposition</th></tr></thead>
+              <tbody>
+                <tr><td>QueryDispatcher + 4 query types</td><td><code>.Dispatch</code> never called in production</td><td>Deleted (-314 lines)</td></tr>
+                <tr><td>GetTypes</td><td>Superseded by CountByType; 0 callers</td><td>Deleted (-141 lines)</td></tr>
+                <tr><td>RateLimitCache + RateLimitConfig</td><td>Never wired; cache only in its own test</td><td>Deleted</td></tr>
+                <tr><td>FetchConfig + FetchProgressFunc</td><td>FetchAll doesn't accept them</td><td>Deleted</td></tr>
+                <tr><td>SyncAction.IsValid()</td><td>Always-true check, 0 callers</td><td>Deleted</td></tr>
+              </tbody>
+            </table>
+            <p style="margin-top:12px">
+              <strong>Kept (not ghosts):</strong> <code>GetRateLimit</code> + <code>RateLimitInfo</code>
+              — a coherent provider-introspection contract the mock and example provider implement.
+            </p>
+          </div>
+        </section>
+
+        <section id="split">
+          <h2>Split Brains</h2>
+          <div class="card card-solution">
+            <span class="tag fixed">FIXED</span>
+            <h3>Non-UTC conflict timestamp</h3>
+            <p>
+              <code>resolveConflict</code> used <code>time.Now()</code> while all persisted
+              timestamps are UTC. Now <code>time.Now().UTC()</code> with a regression test.
+            </p>
+          </div>
+          <div class="card card-warning">
+            <span class="tag deferred">NOTED</span>
+            <h3>Two conflict-classification switches</h3>
+            <p>
+              <code>classifyAction</code> (cqrs) and <code>ConflictAwareSyncer.classify</code>
+              (sync) both switch over the full SyncAction set and must stay manually in sync. A
+              future pass should consolidate into one classification path.
+            </p>
+          </div>
+          <div class="card card-warning">
+            <span class="tag deferred">NOTED</span>
+            <h3>ExternalID ↔ SourceID naming duality</h3>
+            <p>
+              Same concept named <code>ExternalID</code> on the structs and <code>SourceID</code>
+              in event payloads + tombstone command. The payload round-trips the name. A rename
+              pass would touch the event schema (versioned).
+            </p>
+          </div>
+          <div class="card card-warning">
+            <span class="tag deferred">NOTED</span>
+            <h3>provider.Item ↔ model.Item field overlap</h3>
+            <p>
+              9 of 13 fields identical. Intentional DTO/domain split, but a maintenance hazard.
+              <code>toDataItem</code> is the one-way bridge.
+            </p>
+          </div>
+        </section>
+
+        <section id="arch">
+          <h2>Architecture — OpenTelemetry decision</h2>
+          <div class="card card-solution">
+            <span class="tag fixed">DECIDED</span>
+            <h3>Consumer-wrap, not built-in</h3>
+            <p>
+              The blocking question ("built-in vs consumer-wrap?") is answered: for an SDK, the
+              correct pattern is <strong>consumer-wrap via optional config</strong> — accept a
+              <code>trace.Tracer</code>, create spans only when non-noop, never force a global
+              tracer/provider. This mirrors <code>database/sql</code> and <code>net/http</code>.
+              go-cqrs-lite's <code>otel/v3</code> already provides the helpers. Wiring is a
+              sized follow-up task, not a design question anymore.
+            </p>
+          </div>
+        </section>
+
+        <section id="plan">
+          <h2>Execution Plan — all done</h2>
+          <div class="card card-solution">
+            <span class="tag fixed">10/10 EXECUTED</span>
+            <table>
+              <thead><tr><th>#</th><th>Step</th><th>Impact</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Delete QueryDispatcher ghost</td><td><span class="badge badge-critical">High</span></td><td>✅ 3ab4201</td></tr>
+                <tr><td>2</td><td>Delete GetTypes ghost</td><td><span class="badge badge-high">High</span></td><td>✅ 92f50f9</td></tr>
+                <tr><td>3</td><td>Delete rate-limit + FetchConfig ghosts</td><td><span class="badge badge-high">High</span></td><td>✅ 1e947b7</td></tr>
+                <tr><td>4</td><td>Delete SyncAction.IsValid()</td><td><span class="badge">Low</span></td><td>✅ 04e33d2</td></tr>
+                <tr><td>5</td><td>Fix UTC timestamp bug + test</td><td><span class="badge badge-high">High</span></td><td>✅ 9d4a593</td></tr>
+                <tr><td>6</td><td>Codec consistency in sync_outcome</td><td><span class="badge">Low</span></td><td>✅ 869fc6e</td></tr>
+                <tr><td>7</td><td>Provider-agnostic error templates</td><td><span class="badge badge-high">High</span></td><td>✅ 4a37f67</td></tr>
+                <tr><td>8</td><td>gosec+govulncheck+gitleaks in CI</td><td><span class="badge badge-critical">High</span></td><td>✅ c73e462</td></tr>
+                <tr><td>9</td><td>Wire projectionhost DLQ</td><td><span class="badge">Med</span></td><td>✅ 3e3feca</td></tr>
+                <tr><td>10</td><td>Reports + final verification</td><td><span class="badge">Low</span></td><td>✅ this</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="deferred">
+          <h2>Deferred Items</h2>
+          <ol>
+            <li><strong>OpenTelemetry wiring</strong> — decision made (consumer-wrap); sized follow-up.</li>
+            <li><strong>Consolidate the two conflict-classification switches</strong> into one path.</li>
+            <li><strong>ExternalID↔SourceID naming</strong> unify (touches versioned event schema).</li>
+            <li><strong>cqrs→sync error-family preservation</strong> — cqrs uses <code>fmt.Errorf</code>, sync uses the structured family; <code>IsRetryable</code> may misclassify cqrs errors.</li>
+            <li><strong>Make go-cqrs-lite public</strong> — eliminates the vendor/private-dep class of papercuts.</li>
+            <li><strong>encoding/json v2</strong> — still experiment-gated upstream.</li>
+          </ol>
+        </section>
+
+        <section id="verdict">
+          <h2>Verdict</h2>
+          <div class="card card-solution">
+            <span class="tag fixed">MUCH BETTER</span>
+            <p>
+              The codebase is materially smaller and more honest: ~710 dead lines gone, a latent
+              timezone bug fixed, CI now scans for secrets and dependency CVEs, abstraction leaks
+              closed, and a doc-lie DLQ made real. Build/vet/race/lint/fmt all clean; 177 tests
+              pass. What remains is genuine follow-up work (otel wiring, consolidation passes), not
+              accumulated rationalizations.
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -14,8 +14,8 @@ Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based 
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/crdt/`     | Conflict resolution: `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` (timestamp-only) — **wired into DecideSync as pluggable conflict strategy**. No vector clocks/operations (a single-writer pull mirror needs none).                                                                                                     |
 | `pkg/api/`      | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                                                                                                       |
-| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, queries.go, sqlite\_\*.go)                                                                                                                                      |
-| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RateLimitConfig`, `RetryConfig`, `FetchConfig`) and `RateLimitCache`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                             |
+| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, sqlite\_\*.go)                                                                                                                                      |
+| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RetryConfig`) and `RateLimitInfo`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                             |
 | `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`, retry/backoff (`retry.go`), per-source mutex, opt-in reconciliation                                                                                                                      |
 | `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
 | `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                 |
@@ -40,9 +40,9 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
 - `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `projection.Projection` (moved from `event.Projection` in go-cqrs-lite v3.2), wired via direct bus subscription (live) + manual journal replay (persistence)
-- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher+QueryDispatcher, SQL snapshots, event logging middleware, correlation IDs. Public commands: `SyncItem`, `TombstoneItem`; `Reconcile(ctx, source, seenKeys)` tombstones upstream-gone items.
+- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher, SQL snapshots, event logging middleware, correlation IDs. Public commands: `SyncItem`, `TombstoneItem`; `Reconcile(ctx, source, seenKeys)` tombstones upstream-gone items. (No query dispatcher — reads call the ReadModel directly; see ADR note in `stack_adapters.go`.)
 - `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus `projectionhost.Host` (managed batch-drainer with checkpoint persistence, crash auto-restart, and dead-letter queue) for resilient SQLite catch-up. See ADR-0006.
-- `commands.go` + `queries.go` + `middleware.go` — typed `SyncItemCommand`/`TombstoneItemCommand` (carries `model.TombstoneReason`) via `command.Dispatcher`, typed queries (`ListItemsQuery`, `GetItemQuery`, `CountItemsQuery`, `GetTypesQuery`) via `query.Dispatcher`
+- `commands.go` + `middleware.go` — typed `SyncItemCommand`/`TombstoneItemCommand` (carries `model.TombstoneReason`) via `command.Dispatcher`. (The read side has no dispatcher — `stack_adapters.go` calls the ReadModel directly; the command side stays dispatched for logging/retry/validation middleware.)
 
 ### Key Properties
 
@@ -54,7 +54,6 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **SQL persistence**: SQLite backend persists snapshots (`SQLSnapshotStore`) via `snapshot/v3` and `storage/v3` modules.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Command dispatch**: `SyncItem`/`TombstoneItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
-- **Query dispatch**: Read model queries dispatched through `query.Dispatcher` with typed queries. Enables logging, metrics middleware.
 - **Resilient fetch**: `fetchItems` retries transient errors with exponential backoff + ±25% jitter, consults `errors.IsRetryable`, and honors an optional `retryAfterer` (Retry-After) hook. Permanent errors surface immediately.
 - **Per-source serialization**: a per-source mutex orders concurrent syncs of the same source (TOCTOU guard on the latest-timestamp read); different sources run in parallel. Internals are split into lock-free `runSync`/`runSyncIncremental` to avoid re-entrant deadlock when incremental falls back to full.
 - **Remote wins (default)**: on conflict with no resolver configured, the incoming item always overwrites (remote-wins LWW)
@@ -111,7 +110,7 @@ The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exporte
 
 ### CI (No go.work)
 
-CI uses tagged versions from GitHub (no replace directives in `go.mod`):
+CI uses tagged versions from GitHub (no replace directives in `go.mod`). The `security` job runs **govulncheck** (dependency CVEs, reachability-based) and **gitleaks** (full-history secret scan, vendor/ excluded via `.gitleaks.toml`); **gosec** runs as part of the golangci-lint job. The build/release jobs gate on the security job.
 
 ```bash
 GONOSUMCHECK=github.com/larsartmann/* GONOSUMDB=github.com/larsartmann/* go build ./...
@@ -128,7 +127,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 - **`go mod tidy` fails on nested eventtest module**: since `decider/v3` v3.3.0, its test imports pull in `event/v3/eventtest` (a nested Go module inside the event/ directory). The Go toolchain cannot resolve this nested module path via VCS because the tag `event/v3/eventtest/v3.3.0` exists but the module path lookup fails. **Workaround**: run `GOWORK=off go mod vendor` directly (it succeeds) instead of `go mod tidy`. The vendor directory is the source of truth for builds; `go mod tidy` is only needed when adding/removing top-level dependencies.
 - **Pre-commit hook OOM on vendor dir**: the buildflow pre-commit hook runs gofumpt/goimports across the entire tree (including vendor/). With the large modernc.org/sqlite vendored sources (~400 generated .go files), these tools get OOM-killed within the 2-minute max timeout. **Workaround**: commit with `--no-verify` after manually verifying formatting on `pkg/` sources (`gofumpt -l pkg/ && goimports -l pkg/`). The hook budget should be increased or vendor/ should be excluded from the formatter steps.
 - **go.work breaks buildflow**: buildflow's `ForEachGoModule` detects go.work **on disk** (not just tracked) and runs `go test ./...` in every workspace module — including sibling repos (`../go-cqrs-lite/*`) whose tests fail. Always **delete go.work before `buildflow`**; with `vendor/` committed, builds/tests work without it.
-- **golangci-lint v2.12 `exhaustruct`**: the `settings.exhaustruct.exclude` list does **not** match local-package types in full runs (only stdlib full-path patterns work). For local domain structs with optional fields (`ItemFilter`, `FetchConfig`, `FetchResult`, `RateLimitCache`), suppress via `issues.exclusions.rules` with a `text:` regex instead.
+- **golangci-lint v2.12 `exhaustruct`**: the `settings.exhaustruct.exclude` list does **not** match local-package types in full runs (only stdlib full-path patterns work). For local domain structs with optional fields (`ItemFilter`, `FetchResult`), suppress via `issues.exclusions.rules` with a `text:` regex instead.
 - **`SA5012` disabled**: staticcheck v0.7 panics ("can't set facts on objects belonging another package") on cross-package even-elements analysis (e.g. `testutil.BuildPairs` called from another package's tests). Disabled in `linters.settings.staticcheck.checks`.
 - **nixpkgs Go lag blocks `nix flake check`**: `go.mod` requires `go 1.26.4` (deliberate — matches the active toolchain & silences the go.work warning; commit `a819eb6`), but nixpkgs unstable only packages `go_1_26` at 1.26.3 and `go_1_27` doesn't exist yet. The sandbox forces `GOTOOLCHAIN=local`, so `nix build` / `nix flake check` fail with `go.mod requires go >= 1.26.4 (running go 1.26.3)`. The native gate (`go build` / `go test` / `golangci-lint`) passes on the real 1.26.4 toolchain. This self-resolves once nixpkgs bumps `go_1_26` to 1.26.4; do **not** lower the directive to work around it (that reverts a deliberate bump). Check nixpkgs readiness with `nix eval --impure --expr 'let pkgs = import (builtins.getFlake "github:NixOS/nixpkgs/nixos-unstable") {}; in pkgs.go_1_26.version'`.
 
@@ -136,17 +135,17 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package           | Tests | Coverage | Status                                                                                                |
 | ----------------- | ----- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`        | 93    | 81.9%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests |
+| `pkg/cqrs`        | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests |
 | `pkg/sync`        | 31    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                    |
 | `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                            |
 | `pkg/errors`      | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                       |
-| `pkg/provider`    | 10    | 96.7%    | ✅ Item validation, RateLimitCache                                                                    |
+| `pkg/provider`    | 2     | 90.9%    | ✅ Item validation                                                                                    |
 | `pkg/api`         | 14    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                      |
 | `pkg/crdt`        | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                              |
 | `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                         |
 | `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                      |
 
-**190 total test functions** across 9 test packages.
+**177 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -193,7 +192,7 @@ Two tables managed by the CQRS stack:
 | ---------------------------------- | ------- | -------------------------------------------------------------------- |
 | `go-cqrs-lite/event/v3`            | v3.4.0  | Event types, Store, Bus, Journal, `Version` (uint64)                 |
 | `go-cqrs-lite/command/v3`          | v3.4.0  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()` |
-| `go-cqrs-lite/query/v3`            | v3.4.0  | Query types, Dispatcher, TypedHandler[Q,R], RegisterTyped[Q,R]       |
+| `go-cqrs-lite/query/v3`            | v3.4.0  | Unused since QueryDispatcher removal; stays in go.mod until `go mod tidy` is unblocked (vendor mode unaffected) |
 | `go-cqrs-lite/decider/v3`          | v3.3.0  | Decider (`Apply` field), Repository, snapshot/codec options          |
 | `go-cqrs-lite/id/v3`               | v3.3.0  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)          |
 | `go-cqrs-lite/codec/v3`            | v3.3.0  | Codec interface, JSONCodec                                           |
@@ -231,7 +230,7 @@ Two tables managed by the CQRS stack:
 | Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                               | `event.Store` + `event.Bus` via storage/memory + watermill modules                |
 | Conflict       | `DecideSync` produces ItemConflictFound events                                                                  | Error taxonomy with 5 families                                                    |
 | Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                                    | Projected from events via custom `Projector` implementing `projection.Projection` |
-| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`, `GetTypes`)        | `sync.SyncStore` interface defined in consumer package                            |
+| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`)                   | `sync.SyncStore` interface defined in consumer package                            |
 | SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                           | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                     |
 | Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                                | Eliminates all manual json.Marshal/Unmarshal                                      |
 | Projection     | Direct `bus.SubscribeAll` (sync) + `projectionhost.Host` (managed catch-up with checkpoint + DLQ); see ADR-0006 | `projectionhost/v3` adopted in v3.4; interface from `projection/v3` (ADR-0037)    |
