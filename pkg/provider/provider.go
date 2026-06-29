@@ -105,25 +105,6 @@ type RateLimitInfo struct {
 	ResetAt time.Time
 }
 
-// FetchProgressFunc is called after each page is fetched in FetchAll.
-// page is the page number (1-indexed), total is the maximum page count,
-// and fetched is the cumulative item count so far.
-type FetchProgressFunc func(page, total, fetched int)
-
-// FetchConfig configures multi-page fetch behavior for FetchAll.
-type FetchConfig struct {
-	// MaxConcurrentFetches controls how many pages are fetched in parallel.
-	// 0 or 1 means sequential fetching. Defaults to 3 when unset.
-	MaxConcurrentFetches int
-	// OnProgress is an optional callback invoked after each page completes.
-	OnProgress FetchProgressFunc
-}
-
-// DefaultFetchConfig provides sensible defaults for multi-page fetching.
-var DefaultFetchConfig = FetchConfig{
-	MaxConcurrentFetches: 3,
-}
-
 // Provider defines the interface for a data source that can be synced.
 type Provider interface {
 	// Name returns the provider identifier (e.g., "github", "gitlab").
@@ -138,23 +119,6 @@ type Provider interface {
 	// GetRateLimit returns current rate limit information.
 	// Returns nil if the provider doesn't have rate limiting.
 	GetRateLimit(ctx context.Context) (*RateLimitInfo, error)
-}
-
-// RateLimitConfig configures rate limit handling behavior.
-type RateLimitConfig struct {
-	// Enabled controls whether rate limit checking is performed.
-	Enabled bool
-	// MinRemaining is the minimum remaining calls before waiting.
-	MinRemaining int
-	// MaxWait is the maximum time to wait for rate limit reset.
-	MaxWait time.Duration
-}
-
-// DefaultRateLimitConfig provides sensible defaults for rate limit handling.
-var DefaultRateLimitConfig = RateLimitConfig{
-	Enabled:      true,
-	MinRemaining: 10,
-	MaxWait:      15 * time.Minute,
 }
 
 // RetryConfig configures retry behavior for transient errors.
