@@ -92,6 +92,34 @@ func TestConflictAwareSyncer_Conflicts(t *testing.T) {
 	testutil.AssertInt(t, result.Skipped, 1, "Skipped")
 }
 
+// TestConflictAwareSyncer_LocalWinsConflictIsNotUpserted pins the contract
+// that a LOCAL-wins conflict is counted as a conflict but NOT an upsert: when
+// the resolver keeps the existing item, no new remote data is written, so
+// Upserted must stay 0. This guards the intentional difference between
+// SyncSummary.Synced (an event is emitted to re-confirm local) and
+// ConflictResult.Upserted (remote data persisted) — the two metrics legitimately
+// diverge for ActionConflictLocal, and this test prevents either side drifting.
+func TestConflictAwareSyncer_LocalWinsConflictIsNotUpserted(t *testing.T) {
+	t.Parallel()
+
+	items := testSyncItems("1", "PushEvent")
+
+	store := &mockSyncStore{actions: []SyncAction{ActionConflictLocal}}
+	mockProv := &testutil.MockProvider{Items: items}
+	syncer := NewSyncer(mockProv, store, log.Default())
+	cas := NewConflictAwareSyncer(syncer)
+	defer func() { _ = cas.Close() }()
+
+	result, err := cas.SyncWithConflictDetection(context.Background(), testSyncOpts())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	testutil.AssertInt(t, result.Conflicts, 1, "Conflicts (local-wins is a conflict)")
+	testutil.AssertInt(t, result.Upserted, 0, "Upserted (local-wins writes no remote data)")
+	testutil.AssertInt(t, result.Errors, 0, "Errors")
+}
+
 func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
 	t.Parallel()
 
