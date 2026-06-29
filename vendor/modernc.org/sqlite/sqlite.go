@@ -56,7 +56,6 @@ const (
 func init() {
 	sql.Register(driverName, newDriver())
 	sqlite3.PatchIssue199() // https://gitlab.com/cznic/sqlite/-/issues/199
-
 }
 
 // Inspired by mattn/go-sqlite3: https://github.com/mattn/go-sqlite3/blob/ab91e934/sqlite3.go#L210-L226
@@ -131,6 +130,77 @@ func getVFSName(query string) (r string, err error) {
 	}
 
 	return r, nil
+}
+
+// applyDQSConfig consults the _dqs DSN query parameter and, when set to a
+// false value, disables SQLite's double-quoted string literal compatibility
+// quirk on the connection by calling sqlite3_db_config with both
+// SQLITE_DBCONFIG_DQS_DDL and SQLITE_DBCONFIG_DQS_DML. Absence or a true
+// value leaves SQLite's default (DQS enabled) untouched.
+//
+// Called from newConn after sqlite3_open_v2 and before applyQueryParams.
+// The DBCONFIG_DQS_* flags are required to be set before any statement is
+// prepared on the connection, and applyQueryParams runs user-supplied
+// PRAGMA statements, so this must come first.
+//
+// See https://www.sqlite.org/quirks.html#dblquote and
+// https://gitlab.com/cznic/sqlite/-/issues/61.
+func applyDQSConfig(c *conn, query string) error {
+	q, err := url.ParseQuery(query)
+	if err != nil {
+		return err
+	}
+	v := q.Get("_dqs")
+	if v == "" {
+		return nil
+	}
+	on, err := strconv.ParseBool(v)
+	if err != nil {
+		return fmt.Errorf("invalid _dqs value %q: %w", v, err)
+	}
+	if on {
+		// _dqs=1 is the SQLite default; nothing to do.
+		return nil
+	}
+	for _, op := range []int32{
+		sqlite3.SQLITE_DBCONFIG_DQS_DDL,
+		sqlite3.SQLITE_DBCONFIG_DQS_DML,
+	} {
+		if rc := c.dbConfigBool(op, false); rc != sqlite3.SQLITE_OK {
+			return fmt.Errorf("sqlite3_db_config(op=%d, off) returned %d", op, rc)
+		}
+	}
+	return nil
+}
+
+// getErrorRcMode reads the _error_rc DSN query parameter and returns
+// the parsed boolean. Called from newConn before sqlite3_open_v2 so
+// open-time failures get the conditional errmsg treatment too: the
+// temporary db handle that openV2 may leave behind on failure carries
+// a stale errmsg from earlier initialisation, and the legacy
+// "errstr: errmsg" form surfaces that as a misleading message.
+//
+// Absent parameter or false value preserves the SQLite-default error
+// reporting byte-for-byte (legacy behavior). A true value switches
+// the connection into the conditional mode described on
+// errstrForDB. An unparseable value is reported as a descriptive
+// error.
+//
+// See #230.
+func getErrorRcMode(query string) (bool, error) {
+	q, err := url.ParseQuery(query)
+	if err != nil {
+		return false, err
+	}
+	v := q.Get("_error_rc")
+	if v == "" {
+		return false, nil
+	}
+	on, err := strconv.ParseBool(v)
+	if err != nil {
+		return false, fmt.Errorf("invalid _error_rc value %q: %w", v, err)
+	}
+	return on, nil
 }
 
 func applyQueryParams(c *conn, query string) error {
@@ -524,7 +594,6 @@ func registerFunction(
 	zFuncName string,
 	impl *FunctionImpl,
 ) error {
-
 	if _, ok := d.udfs[zFuncName]; ok {
 		return fmt.Errorf("a function named %q is already registered", zFuncName)
 	}
@@ -892,7 +961,6 @@ func funcTrampoline(tls *libc.TLS, ctx uintptr, argc int32, argv uintptr) {
 	sp := functionArgs(tls, argc, argv, entry.volatile)
 	defer releaseUDFArgs(sp)
 	res, err := entry.fn(&FunctionContext{}, *sp)
-
 	if err != nil {
 		setErrorResult(err)
 		return
@@ -1022,7 +1090,7 @@ func collationTrampoline(tls *libc.TLS, pApp uintptr, nLeft int32, zLeft uintptr
 // the particular instance of 'c', so getting a new connection only to pass it
 // to Limit is possibly not useful above querying what are the various
 // configured default values.
-func Limit(c *sql.Conn, id int, newVal int) (r int, err error) {
+func Limit(c *sql.Conn, id, newVal int) (r int, err error) {
 	err = c.Raw(func(driverConn any) error {
 		switch dc := driverConn.(type) {
 		case *conn:
@@ -1033,7 +1101,6 @@ func Limit(c *sql.Conn, id int, newVal int) (r int, err error) {
 		}
 	})
 	return r, err
-
 }
 
 // ColumnInfo describes one output column of a prepared SQL statement.

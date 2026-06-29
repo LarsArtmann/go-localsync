@@ -7,6 +7,7 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/codec/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-cqrs-lite/projection/v3"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
@@ -91,4 +92,4 @@ func (p *Projector) handleItemTombstoned(ctx context.Context, evt event.Event) e
 	return p.readModel.Tombstone(ctx, payload.Source, id.NewExternalID(payload.SourceID), tombstone)
 }
 
-var _ event.Projection = (*Projector)(nil)
+var _ projection.Projection = (*Projector)(nil)

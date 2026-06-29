@@ -10,6 +10,7 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/command/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	cqrsotel "github.com/larsartmann/go-cqrs-lite/otel/v3"
 	"github.com/larsartmann/go-cqrs-lite/query/v3"
 )
 
@@ -25,8 +26,17 @@ func NewRetry[M any](adapter MessageAdapter[M], config RetryConfig, opts ...Opti
 
 	return func(next Handler[M]) Handler[M] {
 		return func(ctx context.Context, msg M) error {
-			return retry(ctx, config, cfg.logger, adapter.ExtractType(msg), func() error {
-				return next(ctx, msg)
+			entry := DeadLetterEntry{ //nolint:exhaustruct // fields set incrementally during retry loop
+				Kind: adapter.Kind,
+				Type: adapter.ExtractType(msg),
+			}
+
+			if adapter.ExtractID != nil {
+				entry.AggregateID = adapter.ExtractID(msg)
+			}
+
+			return retry(ctx, config, cfg.logger, entry, func(attemptCtx context.Context) error {
+				return next(attemptCtx, msg)
 			})
 		}
 	}
@@ -54,16 +64,30 @@ func retry(
 	ctx context.Context,
 	config RetryConfig,
 	logger *slog.Logger,
-	opName string,
-	fn func() error,
+	entry DeadLetterEntry,
+	fn func(context.Context) error,
 ) error {
 	var err error
 
 	for attempt := 1; attempt <= config.MaxAttempts; attempt++ {
-		err = fn()
+		attemptCtx, attemptSpan := cqrsotel.StartSpan(
+			ctx, retryTracer(), fmt.Sprintf("retry.attempt.%d", attempt),
+			cqrsotel.SpanKindInternal,
+			cqrsotel.WithAttributes(
+				cqrsotel.AttrInt("cqrs.retry.attempt", attempt),
+				cqrsotel.AttrInt("cqrs.retry.max_attempts", config.MaxAttempts),
+			),
+		)
+
+		err = fn(attemptCtx)
 		if err == nil {
+			attemptSpan.End()
+
 			return nil
 		}
+
+		cqrsotel.RecordError(attemptSpan, err)
+		attemptSpan.End()
 
 		if !config.IsRetryable(err) {
 			return err
@@ -78,7 +102,7 @@ func retry(
 		if logger != nil {
 			logger.Warn(
 				"retry attempt",
-				"operation", opName,
+				"operation", entry.Type,
 				"attempt", attempt,
 				"maxAttempts", config.MaxAttempts,
 				"delay", delay,
@@ -94,14 +118,21 @@ func retry(
 			timer.Stop()
 
 			return event.WrapInfrastructure(ErrRetryCanceled, "middleware.retry_canceled",
-				opName+": retry canceled").WithCause(err)
+				entry.Type+": retry canceled").WithCause(err)
 		}
 
 		timer.Stop()
 	}
 
+	if config.OnDeadLetter != nil {
+		entry.Error = err
+		entry.Attempts = config.MaxAttempts
+		entry.FailedAt = time.Now()
+		config.OnDeadLetter(ctx, entry)
+	}
+
 	return event.WrapInfrastructure(ErrRetryExhausted, "middleware.retry_exhausted",
-		fmt.Sprintf("all %d attempts failed for %s", config.MaxAttempts, opName)).WithCause(err)
+		fmt.Sprintf("all %d attempts failed for %s", config.MaxAttempts, entry.Type)).WithCause(err)
 }
 
 func backoff(config RetryConfig, attempt int) time.Duration {

@@ -19,7 +19,10 @@ type PersistedCommand struct {
 	metadata     Metadata
 }
 
-var _ fmt.Stringer = (*PersistedCommand)(nil)
+var (
+	_ fmt.Stringer = (*PersistedCommand)(nil)
+	_ Command      = (*PersistedCommand)(nil)
+)
 
 func (c *PersistedCommand) ID() id.CommandID             { return c.id }
 func (c *PersistedCommand) Type() Type                   { return c.cmdType }
@@ -47,7 +50,7 @@ func WithReceivedAt(t time.Time) PersistOption {
 	return func(c *PersistedCommand) { c.receivedAt = t }
 }
 
-func WithCommandID(cmdID id.CommandID) PersistOption {
+func WithPersistedCommandID(cmdID id.CommandID) PersistOption {
 	return func(c *PersistedCommand) { c.id = cmdID }
 }
 

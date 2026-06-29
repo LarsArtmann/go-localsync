@@ -69,7 +69,7 @@ func startSignalHandler() {
 }
 
 // sighandler_t signal(int signum, sighandler_t handler);
-func Xsignal(t *TLS, signum int32, handler uintptr) uintptr { //TODO use sigaction?
+func Xsignal(t *TLS, signum int32, handler uintptr) uintptr { // TODO use sigaction?
 	if __ccgo_strace {
 		trc("t=%v signum=%v handler=%v, (%v:)", t, signum, handler, origin(2))
 	}
@@ -157,7 +157,14 @@ func Xpathconf(t *TLS, path uintptr, name int32) long {
 }
 
 // ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockaddr *src_addr, socklen_t *addrlen);
-func Xrecvfrom(t *TLS, sockfd int32, buf uintptr, len types.Size_t, flags int32, src_addr, addrlen uintptr) types.Ssize_t {
+func Xrecvfrom(
+	t *TLS,
+	sockfd int32,
+	buf uintptr,
+	len types.Size_t,
+	flags int32,
+	src_addr, addrlen uintptr,
+) types.Ssize_t {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v buf=%v len=%v flags=%v addrlen=%v, (%v:)", t, sockfd, buf, len, flags, addrlen, origin(2))
 	}
@@ -165,9 +172,27 @@ func Xrecvfrom(t *TLS, sockfd int32, buf uintptr, len types.Size_t, flags int32,
 }
 
 // ssize_t sendto(int sockfd, const void *buf, size_t len, int flags, const struct sockaddr *dest_addr, socklen_t addrlen);
-func Xsendto(t *TLS, sockfd int32, buf uintptr, len types.Size_t, flags int32, src_addr uintptr, addrlen socklen_t) types.Ssize_t {
+func Xsendto(
+	t *TLS,
+	sockfd int32,
+	buf uintptr,
+	len types.Size_t,
+	flags int32,
+	src_addr uintptr,
+	addrlen socklen_t,
+) types.Ssize_t {
 	if __ccgo_strace {
-		trc("t=%v sockfd=%v buf=%v len=%v flags=%v src_addr=%v addrlen=%v, (%v:)", t, sockfd, buf, len, flags, src_addr, addrlen, origin(2))
+		trc(
+			"t=%v sockfd=%v buf=%v len=%v flags=%v src_addr=%v addrlen=%v, (%v:)",
+			t,
+			sockfd,
+			buf,
+			len,
+			flags,
+			src_addr,
+			addrlen,
+			origin(2),
+		)
 	}
 	panic(todo(""))
 }
@@ -320,13 +345,7 @@ func Xfdopen(t *TLS, fd int32, mode uintptr) uintptr {
 	}
 	m := strings.ReplaceAll(GoString(mode), "b", "")
 	switch m {
-	case
-		"a",
-		"a+",
-		"r",
-		"r+",
-		"w",
-		"w+":
+	case "a", "a+", "r", "r+", "w", "w+":
 	default:
 		t.setErrno(errno.EINVAL)
 		return 0
@@ -558,7 +577,15 @@ func Xgetgrgid_r(t *TLS, gid uint32, pGrp, buf uintptr, buflen types.Size_t, res
 	return 0
 }
 
-func initPasswd2(t *TLS, buf uintptr, buflen types.Size_t, p *pwd.Passwd, name, pwd string, uid, gid uint32, gecos, dir, shell string) bool {
+func initPasswd2(
+	t *TLS,
+	buf uintptr,
+	buflen types.Size_t,
+	p *pwd.Passwd,
+	name, pwd string,
+	uid, gid uint32,
+	gecos, dir, shell string,
+) bool {
 	p.Fpw_name, buf, buflen = bufString(buf, buflen, name)
 	if buf == 0 {
 		return false
@@ -966,16 +993,19 @@ func Xuuid_unparse(t *TLS, uu, out uintptr) {
 	*(*byte)(unsafe.Pointer(out + uintptr(len(s)))) = 0
 }
 
-// no longer used?
-// var staticRandomData = &rand.Rand{}
-
 // char *initstate(unsigned seed, char *state, size_t size);
 func Xinitstate(t *TLS, seed uint32, statebuf uintptr, statelen types.Size_t) uintptr {
 	if __ccgo_strace {
 		trc("t=%v seed=%v statebuf=%v statelen=%v, (%v:)", t, seed, statebuf, statelen, origin(2))
 	}
-	// staticRandomData = rand.New(rand.NewSource(int64(seed)))
-	_ = rand.New(rand.NewSource(int64(seed)))
+	// random(3) is modeled here by a single global math/rand generator (see
+	// randomGen / Xrandom), so the caller-supplied state buffer cannot be
+	// honored. Mirror musl's primary effect by (re)seeding that generator,
+	// matching Xsrandomdev. NULL is returned as there is no previous state
+	// buffer to hand back.
+	randomMu.Lock()
+	randomGen.Seed(int64(seed))
+	randomMu.Unlock()
 	return 0
 }
 
@@ -984,8 +1014,11 @@ func Xsetstate(t *TLS, state uintptr) uintptr {
 	if __ccgo_strace {
 		trc("t=%v state=%v, (%v:)", t, state, origin(2))
 	}
-	t.setErrno(errno.EINVAL) //TODO
-	return 0
+	// random(3) is modeled by a single global generator (see randomGen /
+	// Xrandom), so there is no independent saved stream to switch to. Treat
+	// setstate as a no-op rather than failing the caller; return the passed
+	// pointer (non-NULL) to signal success.
+	return state
 }
 
 // The initstate_r() function is like initstate(3) except that it initializes
@@ -1204,7 +1237,16 @@ func Xpread(t *TLS, fd int32, buf uintptr, count types.Size_t, offset types.Off_
 // int sysctlbyname(const char *name, void *oldp, size_t *oldlenp, void *newp, size_t newlen);
 func Xsysctlbyname(t *TLS, name, oldp, oldlenp, newp uintptr, newlen types.Size_t) int32 {
 	if __ccgo_strace {
-		trc("t=%v name=%q oldp=%#0x oldlenp=%v newp=%v newlen=%v, (%v:)", t, GoString(name), oldp, *(*types.Size_t)(unsafe.Pointer(oldlenp)), newp, newlen, origin(2))
+		trc(
+			"t=%v name=%q oldp=%#0x oldlenp=%v newp=%v newlen=%v, (%v:)",
+			t,
+			GoString(name),
+			oldp,
+			*(*types.Size_t)(unsafe.Pointer(oldlenp)),
+			newp,
+			newlen,
+			origin(2),
+		)
 	}
 	oldlen := *(*types.Size_t)(unsafe.Pointer(oldlenp))
 	switch GoString(name) {
@@ -1269,7 +1311,7 @@ var _days_in_month = [12]int8{
 
 var x___utc = [4]int8{'U', 'T', 'C'}
 
-func Xstrftime(tls *TLS, s uintptr, n size_t, f uintptr, tm uintptr) (r size_t) {
+func Xstrftime(tls *TLS, s uintptr, n size_t, f, tm uintptr) (r size_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v f=%v tm=%v, (%v:)", tls, s, n, f, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -1297,7 +1339,6 @@ func Xstrftime(tls *TLS, s uintptr, n size_t, f uintptr, tm uintptr) (r size_t) 
 		*(*byte)(unsafe.Pointer(s + uintptr(r))) = 0
 	}
 	return r
-
 }
 
 func x___secs_to_tm(tls *TLS, t int64, tm uintptr) (r int32) {
@@ -1305,7 +1346,8 @@ func x___secs_to_tm(tls *TLS, t int64, tm uintptr) (r int32) {
 	var days, secs, years int64
 	_, _, _, _, _, _, _, _, _, _, _, _, _ = c_cycles, days, leap, months, q_cycles, qc_cycles, remdays, remsecs, remyears, secs, wday, yday, years
 	/* Reject time_t values whose year would overflow int */
-	if t < int64(-Int32FromInt32(1)-Int32FromInt32(0x7fffffff))*Int64FromInt64(31622400) || t > Int64FromInt32(limits.INT_MAX)*Int64FromInt64(31622400) {
+	if t < int64(-Int32FromInt32(1)-Int32FromInt32(0x7fffffff))*Int64FromInt64(31622400) ||
+		t > Int64FromInt32(limits.INT_MAX)*Int64FromInt64(31622400) {
 		return -int32(1)
 	}
 	secs = t - (Int64FromInt64(946684800) + int64(Int32FromInt32(86400)*(Int32FromInt32(31)+Int32FromInt32(29))))
@@ -1360,7 +1402,8 @@ func x___secs_to_tm(tls *TLS, t int64, tm uintptr) (r int32) {
 		months -= int32(12)
 		years++
 	}
-	if years+int64(100) > int64(limits.INT_MAX) || years+int64(100) < int64(-Int32FromInt32(1)-Int32FromInt32(0x7fffffff)) {
+	if years+int64(100) > int64(limits.INT_MAX) ||
+		years+int64(100) < int64(-Int32FromInt32(1)-Int32FromInt32(0x7fffffff)) {
 		return -int32(1)
 	}
 	(*ctime.Tm)(unsafe.Pointer(tm)).Ftm_year = int32(years + int64(100))

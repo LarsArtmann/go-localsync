@@ -50,18 +50,18 @@
 
 ## Conflict Detection & Resolution
 
-| #   | Feature                   | Status           | Package    | Description                                                                                                                                            |
-| --- | ------------------------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 17  | Change Detection          | FULLY_FUNCTIONAL | `pkg/cqrs` | `HasChanged()` compares UpdatedAt, Type, ActorLogin, RepoName, RepoURL. Uses `.Equal()` for timestamps (not `!=`).                                     |
-| 18  | Conflict Events           | FULLY_FUNCTIONAL | `pkg/cqrs` | `DecideSync` emits `ItemConflictFound` + `ItemSynced` when item has changed. Conflict payload includes local/remote timestamps and winner.             |
-| 19  | Remote-Wins LWW (Default) | FULLY_FUNCTIONAL | `pkg/cqrs` | Default strategy when no resolver configured. Incoming item always overwrites local state.                                                             |
-| 20  | Pluggable CRDT Resolution | FULLY_FUNCTIONAL | `pkg/cqrs` | `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*model.Item]`. Injected into `DecideSync` via `resolveConflict` helper.               |
-| 21  | Action Classification     | FULLY_FUNCTIONAL | `pkg/cqrs` | `classifyAction()` categorizes results as Created, Updated, ConflictRemote, ConflictLocal, Unchanged, or Error.                                        |
-| 22  | Exported Winner Constants | FULLY_FUNCTIONAL | `pkg/cqrs` | `ConflictWinnerRemote`/`ConflictWinnerLocal` constants + `ParseConflictWinner` (unknown values default to remote-wins) for safe payload→enum decoding. |
-| 23  | LWW Resolver              | FULLY_FUNCTIONAL | `pkg/crdt` | `LWWResolver[T]` picks item with later timestamp. Used for `*model.Item` conflict resolution.                                                          |
-| 24  | Vector Clock              | FULLY_FUNCTIONAL | `pkg/crdt` | `VectorClock` (map-based) with increment, merge, compare operations. Foundation for distributed sync.                                                  |
-| 25  | CRDT Operations           | FULLY_FUNCTIONAL | `pkg/crdt` | `Operation[T]` with ID, vector clock, value. `SyncMessage` for protocol serialization.                                                                 |
-| 26  | Conflict Types            | FULLY_FUNCTIONAL | `pkg/crdt` | `Conflict[T]` with Local, Remote, LocalTimestamp, RemoteTimestamp, VectorClock. Passed to `ConflictResolver.Resolve()`.                                |
+| #   | Feature                   | Status           | Package    | Description                                                                                                                                                |
+| --- | ------------------------- | ---------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 17  | Change Detection          | FULLY_FUNCTIONAL | `pkg/cqrs` | `HasChanged()` compares UpdatedAt, Type, ActorLogin, RepoName, RepoURL. Uses `.Equal()` for timestamps (not `!=`).                                         |
+| 18  | Conflict Events           | FULLY_FUNCTIONAL | `pkg/cqrs` | `DecideSync` emits `ItemConflictFound` + `ItemSynced` when item has changed. Conflict payload includes local/remote timestamps and winner.                 |
+| 19  | Remote-Wins LWW (Default) | FULLY_FUNCTIONAL | `pkg/cqrs` | Default strategy when no resolver configured. Incoming item always overwrites local state.                                                                 |
+| 20  | Pluggable CRDT Resolution | FULLY_FUNCTIONAL | `pkg/cqrs` | `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*model.Item]`. Injected into `DecideSync` via `resolveConflict` helper.                   |
+| 21  | Action Classification     | FULLY_FUNCTIONAL | `pkg/cqrs` | `classifyAction()` categorizes results as Created, Updated, ConflictRemote, ConflictLocal, Unchanged, or Error.                                            |
+| 22  | Exported Winner Constants | FULLY_FUNCTIONAL | `pkg/cqrs` | `ConflictWinnerRemote`/`ConflictWinnerLocal` constants + `ParseConflictWinner` (unknown values default to remote-wins) for safe payload→enum decoding.     |
+| 23  | LWW Resolver              | FULLY_FUNCTIONAL | `pkg/crdt` | `LWWResolver[T]` picks item with later timestamp. Used for `*model.Item` conflict resolution.                                                              |
+| 24  | Vector Clock              | NOT_APPLICABLE   | `pkg/crdt` | **Removed.** A single-writer pull mirror has no second writer and no causal ordering to track. Vector clocks were deleted in the tombstone/scope refactor. |
+| 25  | CRDT Operations           | NOT_APPLICABLE   | `pkg/crdt` | **Removed.** `Operation[T]`, `SyncMessage`, and the distributed-sync protocol types were deleted — out of scope for a single-writer pull mirror.           |
+| 26  | Conflict Types            | FULLY_FUNCTIONAL | `pkg/crdt` | `Conflict[T]` with Local, Remote, Timestamp. Passed to `ConflictResolver.Resolve()`. No causal metadata (single-writer).                                   |
 
 ## Provider System
 
@@ -135,7 +135,7 @@
 
 | #   | Feature      | Status           | Package        | Description                                                                                                                                  |
 | --- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 55  | Test Suite   | FULLY_FUNCTIONAL | all            | 224 test functions across 9 packages, all passing. Run: `go test ./... -count=1`.                                                            |
+| 55  | Test Suite   | FULLY_FUNCTIONAL | all            | 190 test functions across 9 packages, all passing. Run: `go test ./... -count=1`.                                                            |
 | 56  | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.) |
 
 ## Quality
@@ -156,7 +156,7 @@
 - Error taxonomy gives smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
 - Projection via synchronous `bus.SubscribeAll` + background journal replay (no checkpoint store needed)
-- 224 tests with good coverage across all packages
+- 190 tests with good coverage across all packages
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 - Clear DTO/domain boundary: `provider.Item` (DTO) → `model.Item` (domain entity) via `item_adapter.go`
 

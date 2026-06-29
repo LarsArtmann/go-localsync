@@ -2,7 +2,7 @@
 
 **Project:** go-localsync
 **Last Updated:** 2026-06-27
-**Tests:** 224 passing, 9 packages | **Lint:** 0 issues (golangci-lint v2)
+**Tests:** 190 passing, 9 packages | **Lint:** 0 issues (golangci-lint v2)
 
 ## Overview
 

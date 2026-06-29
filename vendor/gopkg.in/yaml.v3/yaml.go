@@ -219,7 +219,7 @@ func Marshal(in interface{}) (out []byte, err error) {
 	e.marshalDoc("", reflect.ValueOf(in))
 	e.finish()
 	out = e.out
-	return
+	return out, err
 }
 
 // An Encoder writes YAML values to an output stream.
@@ -414,7 +414,8 @@ type Node struct {
 // IsZero returns whether the node has all of its fields unset.
 func (n *Node) IsZero() bool {
 	return n.Kind == 0 && n.Style == 0 && n.Tag == "" && n.Value == "" && n.Anchor == "" && n.Alias == nil && n.Content == nil &&
-		n.HeadComment == "" && n.LineComment == "" && n.FootComment == "" && n.Line == 0 && n.Column == 0
+		n.HeadComment == "" && n.LineComment == "" && n.FootComment == "" && n.Line == 0 &&
+		n.Column == 0
 }
 
 // LongTag returns the long form of the tag that indicates the data type for
@@ -510,9 +511,11 @@ type fieldInfo struct {
 	Inline []int
 }
 
-var structMap = make(map[reflect.Type]*structInfo)
-var fieldMapMutex sync.RWMutex
-var unmarshalerType reflect.Type
+var (
+	structMap       = make(map[reflect.Type]*structInfo)
+	fieldMapMutex   sync.RWMutex
+	unmarshalerType reflect.Type
+)
 
 func init() {
 	var v Unmarshaler

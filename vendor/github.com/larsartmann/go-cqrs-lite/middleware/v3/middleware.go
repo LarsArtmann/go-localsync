@@ -11,6 +11,12 @@ import (
 )
 
 // MetricsRecorder records handler execution metrics.
+//
+// Deprecated: Use TypedMetricsRecorder with attribute.KeyValue pairs instead.
+// The string-label Observe accepts alternating key-value pairs that silently
+// drop malformed (odd-length) input. Prefer TypedMetricsRecorder and the
+// CommandTypedMetrics/EventTypedMetrics/QueryTypedMetrics constructors for
+// compile-time safety.
 type MetricsRecorder interface {
 	Observe(ctx context.Context, name string, duration time.Duration, labels ...string)
 }
@@ -21,7 +27,8 @@ type RetryConfig struct {
 	InitialDelay time.Duration
 	MaxDelay     time.Duration
 	Multiplier   float64
-	IsRetryable  func(error) bool // defaults to event.IsRetryable (classifies via error taxonomy)
+	IsRetryable  func(error) bool  // defaults to event.IsRetryable (classifies via error taxonomy)
+	OnDeadLetter DeadLetterHandler // optional; called when retries are exhausted
 }
 
 const (
@@ -33,7 +40,7 @@ const (
 
 // DefaultRetryConfig returns sensible defaults for retry.
 func DefaultRetryConfig() RetryConfig {
-	return RetryConfig{
+	return RetryConfig{ //nolint:exhaustruct // OnDeadLetter is optional, defaults to nil
 		MaxAttempts:  defaultMaxRetryAttempts,
 		InitialDelay: defaultRetryInitDelay,
 		MaxDelay:     defaultRetryMaxDelay,

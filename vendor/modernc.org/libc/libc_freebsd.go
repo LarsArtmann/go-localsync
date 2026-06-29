@@ -43,14 +43,14 @@ import (
 	"modernc.org/libc/uuid"
 )
 
-var (
-	in6_addr_any in.In6_addr
-)
+var in6_addr_any in.In6_addr
 
 // // Keep these outside of the var block otherwise go generate will miss them.
-var X__stderrp = Xstdout
-var X__stdinp = Xstdin
-var X__stdoutp = Xstdout
+var (
+	X__stderrp = Xstdout
+	X__stdinp  = Xstdin
+	X__stdoutp = Xstdout
+)
 
 // include/stdio.h:486:extern int __isthreaded;
 var X__isthreaded int32
@@ -59,7 +59,7 @@ var X__isthreaded int32
 var X__mb_sb_limit int32 = 128 // UTF-8
 
 // include/runetype.h:94:extern _Thread_local const _RuneLocale *_ThreadRuneLocale;
-var X_ThreadRuneLocale uintptr //TODO initialize and implement _Thread_local semantics.
+var X_ThreadRuneLocale uintptr // TODO initialize and implement _Thread_local semantics.
 
 // include/xlocale/_ctype.h:54:_RuneLocale	*__runes_for_locale(locale_t, int*);
 func X__runes_for_locale(t *TLS, l locale_t, p uintptr) uintptr {
@@ -131,7 +131,7 @@ func fwrite(fd int32, b []byte) (int, error) {
 	// if dmesgs {
 	// 	dmesg("%v: fd %v: %s", origin(1), fd, b)
 	// }
-	return unix.Write(int(fd), b) //TODO use Xwrite
+	return unix.Write(int(fd), b) // TODO use Xwrite
 }
 
 func Xclearerr(tls *TLS, f uintptr) {
@@ -293,7 +293,7 @@ func Xopen64(t *TLS, pathname uintptr, flags int32, args uintptr) int32 {
 	}
 	var mode types.Mode_t
 	if args != 0 {
-		mode = (types.Mode_t)(VaUint32(&args))
+		mode = types.Mode_t(VaUint32(&args))
 	}
 	fdcwd := fcntl.AT_FDCWD
 	n, _, err := unix.Syscall6(unix.SYS_OPENAT, uintptr(fdcwd), pathname, uintptr(flags), uintptr(mode), 0, 0)
@@ -743,7 +743,7 @@ func Xshutdown(t *TLS, sockfd, how int32) int32 {
 }
 
 // int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-func Xgetpeername(t *TLS, sockfd int32, addr uintptr, addrlen uintptr) int32 {
+func Xgetpeername(t *TLS, sockfd int32, addr, addrlen uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -810,7 +810,7 @@ func Xlisten(t *TLS, sockfd, backlog int32) int32 {
 }
 
 // int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-func Xaccept(t *TLS, sockfd int32, addr uintptr, addrlen uintptr) int32 {
+func Xaccept(t *TLS, sockfd int32, addr, addrlen uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -895,7 +895,7 @@ func Xsetvbuf(t *TLS, stream, buf uintptr, mode int32, size types.Size_t) int32 
 	if __ccgo_strace {
 		trc("t=%v buf=%v mode=%v size=%v, (%v:)", t, buf, mode, size, origin(2))
 	}
-	return 0 //TODO
+	return 0 // TODO
 }
 
 // int raise(int sig);
@@ -1139,7 +1139,7 @@ func Xtzset(t *TLS) {
 	if __ccgo_strace {
 		trc("t=%v, (%v:)", t, origin(2))
 	}
-	//TODO
+	// TODO
 }
 
 var strerrorBuf [100]byte
@@ -1275,7 +1275,7 @@ func Xsetlocale(t *TLS, category int32, locale uintptr) uintptr {
 	if __ccgo_strace {
 		trc("t=%v category=%v locale=%v, (%v:)", t, category, locale, origin(2))
 	}
-	return uintptr(unsafe.Pointer(&emptyStr)) //TODO
+	return uintptr(unsafe.Pointer(&emptyStr)) // TODO
 }
 
 // char *nl_langinfo(nl_item item);
@@ -1283,7 +1283,7 @@ func Xnl_langinfo(t *TLS, item langinfo.Nl_item) uintptr {
 	if __ccgo_strace {
 		trc("t=%v item=%v, (%v:)", t, item, origin(2))
 	}
-	return uintptr(unsafe.Pointer(&emptyStr)) //TODO
+	return uintptr(unsafe.Pointer(&emptyStr)) // TODO
 }
 
 // FILE *popen(const char *command, const char *type);
@@ -1364,7 +1364,7 @@ func Xfflush(t *TLS, stream uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v stream=%v, (%v:)", t, stream, origin(2))
 	}
-	return 0 //TODO
+	return 0 // TODO
 }
 
 // size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
@@ -1666,7 +1666,7 @@ func X__strchrnul(tls *TLS, s uintptr, c int32) uintptr { /* strchrnul.c:10:6: *
 var _soldenv uintptr /* putenv.c:22:14: */
 
 // int setenv(const char *name, const char *value, int overwrite);
-func Xsetenv(tls *TLS, var1 uintptr, value uintptr, overwrite int32) int32 { /* setenv.c:26:5: */
+func Xsetenv(tls *TLS, var1, value uintptr, overwrite int32) int32 { /* setenv.c:26:5: */
 	if __ccgo_strace {
 		trc("tls=%v var1=%v value=%v overwrite=%v, (%v:)", tls, var1, value, overwrite, origin(2))
 	}
@@ -1674,7 +1674,8 @@ func Xsetenv(tls *TLS, var1 uintptr, value uintptr, overwrite int32) int32 { /* 
 	var l1 size_t
 	var l2 size_t
 
-	if !(var1 != 0) || !(int32(assignSizeT(&l1, size_t((int64(X__strchrnul(tls, var1, '='))-int64(var1))/1))) != 0) || *(*int8)(unsafe.Pointer(var1 + uintptr(l1))) != 0 {
+	if !(var1 != 0) || !(int32(assignSizeT(&l1, size_t((int64(X__strchrnul(tls, var1, '='))-int64(var1))/1))) != 0) ||
+		*(*int8)(unsafe.Pointer(var1 + uintptr(l1))) != 0 {
 		*(*int32)(unsafe.Pointer(X___errno_location(tls))) = 22
 		return -1
 	}
@@ -1700,13 +1701,13 @@ func X__putenv(tls *TLS, s uintptr, l size_t, r uintptr) int32 { /* putenv.c:8:5
 	var i size_t
 	var newenv uintptr
 	var tmp uintptr
-	//TODO for (char **e = __environ; *e; e++, i++)
+	// TODO for (char **e = __environ; *e; e++, i++)
 	var e uintptr
 	i = size_t(0)
 	if !(Environ() != 0) {
 		goto __1
 	}
-	//TODO for (char **e = __environ; *e; e++, i++)
+	// TODO for (char **e = __environ; *e; e++, i++)
 	e = Environ()
 __2:
 	if !(*(*uintptr)(unsafe.Pointer(e)) != 0) {
@@ -1774,14 +1775,15 @@ oom:
 	return -1
 }
 
-var _senv_alloced uintptr  /* setenv.c:7:14: */
-var _senv_alloced_n size_t /* setenv.c:8:16: */
+var (
+	_senv_alloced   uintptr /* setenv.c:7:14: */
+	_senv_alloced_n size_t  /* setenv.c:8:16: */)
 
-func X__env_rm_add(tls *TLS, old uintptr, new uintptr) { /* setenv.c:5:6: */
+func X__env_rm_add(tls *TLS, old, new uintptr) { /* setenv.c:5:6: */
 	if __ccgo_strace {
 		trc("tls=%v old=%v new=%v, (%v:)", tls, old, new, origin(2))
 	}
-	//TODO for (size_t i=0; i < env_alloced_n; i++)
+	// TODO for (size_t i=0; i < env_alloced_n; i++)
 	var i size_t = size_t(0)
 	for ; i < _senv_alloced_n; i++ {
 		if *(*uintptr)(unsafe.Pointer(_senv_alloced + uintptr(i)*unsafe.Sizeof(uintptr(0)))) == old {
@@ -1861,7 +1863,7 @@ func X__swbuf(t *TLS, n int32, file uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v n=%v file=%v, (%v:)", t, n, file, origin(2))
 	}
-	return Xfputc(t, n, file) //TODO improve performance, use a real buffer.
+	return Xfputc(t, n, file) // TODO improve performance, use a real buffer.
 }
 
 // int rmdir(const char *pathname);
@@ -1893,7 +1895,11 @@ func Xreaddir(t *TLS, dir uintptr) uintptr {
 	}
 
 	if (*darwinDir)(unsafe.Pointer(dir)).l == (*darwinDir)(unsafe.Pointer(dir)).h {
-		n, err := unix.Getdirentries((*darwinDir)(unsafe.Pointer(dir)).fd, (*darwinDir)(unsafe.Pointer(dir)).buf[:], nil)
+		n, err := unix.Getdirentries(
+			(*darwinDir)(unsafe.Pointer(dir)).fd,
+			(*darwinDir)(unsafe.Pointer(dir)).buf[:],
+			nil,
+		)
 		// trc("must read: %v %v", n, err)
 		if n == 0 {
 			if err != nil && err != io.EOF {
@@ -1990,25 +1996,11 @@ func X__inet_ntoa(t *TLS, in1 in.In_addr) uintptr {
 	panic(todo(""))
 }
 
-func Xmmap(t *TLS, addr uintptr, length types.Size_t, prot, flags, fd int32, offset types.Off_t) uintptr {
-	if __ccgo_strace {
-		trc("t=%v addr=%v length=%v fd=%v offset=%v, (%v:)", t, addr, length, fd, offset, origin(2))
-	}
-	// Cannot avoid the syscall here, addr sometimes matter.
-	data, _, err := unix.Syscall6(unix.SYS_MMAP, addr, uintptr(length), uintptr(prot), uintptr(flags), uintptr(fd), uintptr(offset))
-	if err != 0 {
-		if dmesgs {
-			dmesg("%v: %v FAIL", origin(1), err)
-		}
-		t.setErrno(err)
-		return ^uintptr(0) // (void*)-1
-	}
-
-	if dmesgs {
-		dmesg("%v: %#x", origin(1), data)
-	}
-	return data
-}
+// Xmmap is defined per-arch in libc_freebsd_{amd64,arm64,386,arm}.go: the
+// freebsd mmap(2) syscall encodes the 64-bit off_t differently on 32-bit targets
+// (the off_t spans two argument words and, on arm, needs a PAD word for EABI
+// alignment), so Syscall6 truncates/misaligns it and the mapping faults (SIGBUS,
+// e.g. the SQLite WAL-index). Matches golang.org/x/sys/unix's own per-arch mmap.
 
 const PTHREAD_MUTEX_DEFAULT = 0
 
@@ -2016,7 +2008,7 @@ func X__ccgo_pthreadMutexattrGettype(tls *TLS, a uintptr) int32 { /* pthread_att
 	if __ccgo_strace {
 		trc("tls=%v a=%v, (%v:)", tls, a, origin(2))
 	}
-	return (int32((*pthread_mutexattr_t)(unsafe.Pointer(a)).F__attr & uint32(3)))
+	return int32((*pthread_mutexattr_t)(unsafe.Pointer(a)).F__attr & uint32(3))
 }
 
 func X__ccgo_getMutexType(tls *TLS, m uintptr) int32 { /* pthread_mutex_lock.c:3:5: */
@@ -2068,7 +2060,7 @@ func Xpthread_mutex_init(t *TLS, pMutex, pAttr uintptr) int32 {
 	return 0
 }
 
-func Xpthread_attr_getdetachstate(tls *TLS, a uintptr, state uintptr) int32 { /* pthread_attr_get.c:7:5: */
+func Xpthread_attr_getdetachstate(tls *TLS, a, state uintptr) int32 { /* pthread_attr_get.c:7:5: */
 	if __ccgo_strace {
 		trc("tls=%v a=%v state=%v, (%v:)", tls, a, state, origin(2))
 	}
@@ -2114,7 +2106,7 @@ func Xpthread_mutexattr_settype(tls *TLS, a uintptr, type1 int32) int32 { /* pth
 }
 
 // int uuid_parse( char *in, uuid_t uu);
-func Xuuid_parse(t *TLS, in uintptr, uu uintptr) int32 {
+func Xuuid_parse(t *TLS, in, uu uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v in=%v uu=%v, (%v:)", t, in, uu, origin(2))
 	}
@@ -2245,7 +2237,7 @@ func Xgetprogname(t *TLS) uintptr {
 	return progname
 }
 
-func Xstrncasecmp(tls *TLS, _l uintptr, _r uintptr, n types.Size_t) int32 { /* strncasecmp.c:4:5: */
+func Xstrncasecmp(tls *TLS, _l, _r uintptr, n types.Size_t) int32 { /* strncasecmp.c:4:5: */
 	var l uintptr = _l
 	var r uintptr = _r
 	pre := n
@@ -2419,7 +2411,7 @@ func ftw(dirpath string, callback goFtwFunc, nopenfd int) int {
 	return -1 // General error return
 }
 
-func Xftw(tls *TLS, path uintptr, fn uintptr, fd_limit int32) (r int32) {
+func Xftw(tls *TLS, path, fn uintptr, fd_limit int32) (r int32) {
 	statp := tls.Alloc(int(unsafe.Sizeof(unix.Stat_t{})))
 
 	defer tls.Free(int(unsafe.Sizeof(unix.Stat_t{})))
@@ -2432,13 +2424,20 @@ func Xftw(tls *TLS, path uintptr, fn uintptr, fd_limit int32) (r int32) {
 			defer Xfree(tls, cs)
 
 			Xstat(tls, cs, statp)
-			return int((*(*func(*TLS, uintptr, uintptr, int32) int32)(unsafe.Pointer(&struct{ uintptr }{fn})))(tls, cs, statp, int32(typeflag)))
+			return int(
+				(*(*func(*TLS, uintptr, uintptr, int32) int32)(unsafe.Pointer(&struct{ uintptr }{fn})))(
+					tls,
+					cs,
+					statp,
+					int32(typeflag),
+				),
+			)
 		},
 		int(fd_limit),
 	))
 }
 
-func Xexecve(tls *TLS, path uintptr, argv uintptr, envp uintptr) (r int32) {
+func Xexecve(tls *TLS, path, argv, envp uintptr) (r int32) {
 	goPath := GoString(path)
 	var goArgv, goEnvp []string
 	for p := *(*uintptr)(unsafe.Pointer(argv)); p != 0; p = *(*uintptr)(unsafe.Pointer(argv)) {

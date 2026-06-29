@@ -29,7 +29,7 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 - [x] **projection.Runner removal** — go-cqrs-lite v3 dropped `projection/`. Replaced with direct `bus.SubscribeAll` (synchronous live delivery) + background `runner.replayJournal` (SQLite catch-up). Idempotent projection tolerates replay/live overlap, so no checkpoint store is needed.
 - [x] **Exported ConflictWinner** — `ConflictWinnerRemote`/`ConflictWinnerLocal` constants + `ParseConflictWinner` for safe payload→enum decoding.
 - [x] **DTO/domain boundary** — `provider.Item` (DTO) ↔ `model.Item` (domain entity) via `item_adapter.go`. Decider, read model, events, and resolver all use `*model.Item`.
-- [x] **224 tests passing** — 9 packages, 0 lint issues.
+- [x] **190 tests passing** — 9 packages, 0 lint issues.
 
 ---
 
@@ -53,7 +53,7 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 
 - [ ] **Conflict resolution per-sync override** — `SyncOptions.ConflictResolver` for per-sync strategy.
 
-- [ ] **Real-time sync protocol** — `SyncRequest`/`SyncResponse` from `pkg/crdt/` for live multi-node sync.
+- [ ] **Real-time sync protocol** — live multi-node sync. The former `SyncRequest`/`SyncResponse` types were removed when the CRDT machinery was deleted; this would need to be built from scratch and is out of scope per [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md).
 
 ---
 

@@ -287,7 +287,6 @@ func (e yaml_event_type_t) String() string {
 
 // The event structure.
 type yaml_event_t struct {
-
 	// The event type.
 	typ yaml_event_type_t
 
@@ -329,9 +328,11 @@ type yaml_event_t struct {
 	style yaml_style_t
 }
 
-func (e *yaml_event_t) scalar_style() yaml_scalar_style_t     { return yaml_scalar_style_t(e.style) }
+func (e *yaml_event_t) scalar_style() yaml_scalar_style_t { return yaml_scalar_style_t(e.style) }
+
 func (e *yaml_event_t) sequence_style() yaml_sequence_style_t { return yaml_sequence_style_t(e.style) }
-func (e *yaml_event_t) mapping_style() yaml_mapping_style_t   { return yaml_mapping_style_t(e.style) }
+
+func (e *yaml_event_t) mapping_style() yaml_mapping_style_t { return yaml_mapping_style_t(e.style) }
 
 // Nodes
 
@@ -407,12 +408,10 @@ type yaml_node_t struct {
 
 	start_mark yaml_mark_t // The beginning of the node.
 	end_mark   yaml_mark_t // The end of the node.
-
 }
 
 // The document structure.
 type yaml_document_t struct {
-
 	// The document nodes.
 	nodes []yaml_node_t
 
@@ -555,7 +554,6 @@ type yaml_alias_data_t struct {
 // All members are internal. Manage the structure using the
 // yaml_parser_ family of functions.
 type yaml_parser_t struct {
-
 	// Error handling
 
 	error yaml_error_type_t // Error type.
@@ -703,7 +701,6 @@ const (
 // All members are internal.  Manage the structure using the @c yaml_emitter_
 // family of functions.
 type yaml_emitter_t struct {
-
 	// Error handling
 
 	error   yaml_error_type_t // Error type.

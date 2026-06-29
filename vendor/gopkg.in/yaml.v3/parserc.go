@@ -137,7 +137,13 @@ func yaml_parser_set_parser_error(parser *yaml_parser_t, problem string, problem
 	return false
 }
 
-func yaml_parser_set_parser_error_context(parser *yaml_parser_t, context string, context_mark yaml_mark_t, problem string, problem_mark yaml_mark_t) bool {
+func yaml_parser_set_parser_error_context(
+	parser *yaml_parser_t,
+	context string,
+	context_mark yaml_mark_t,
+	problem string,
+	problem_mark yaml_mark_t,
+) bool {
 	parser.error = yaml_PARSER_ERROR
 	parser.context = context
 	parser.context_mark = context_mark
@@ -257,7 +263,6 @@ func yaml_parser_parse_stream_start(parser *yaml_parser_t, event *yaml_event_t) 
 //
 //	*************************
 func yaml_parser_parse_document_start(parser *yaml_parser_t, event *yaml_event_t, implicit bool) bool {
-
 	token := peek_token(parser)
 	if token == nil {
 		return false
@@ -1191,8 +1196,8 @@ var default_tag_directives = []yaml_tag_directive_t{
 // Parse directives.
 func yaml_parser_process_directives(parser *yaml_parser_t,
 	version_directive_ref **yaml_version_directive_t,
-	tag_directives_ref *[]yaml_tag_directive_t) bool {
-
+	tag_directives_ref *[]yaml_tag_directive_t,
+) bool {
 	var version_directive *yaml_version_directive_t
 	var tag_directives []yaml_tag_directive_t
 
@@ -1251,7 +1256,12 @@ func yaml_parser_process_directives(parser *yaml_parser_t,
 }
 
 // Append a tag directive to the directives stack.
-func yaml_parser_append_tag_directive(parser *yaml_parser_t, value yaml_tag_directive_t, allow_duplicates bool, mark yaml_mark_t) bool {
+func yaml_parser_append_tag_directive(
+	parser *yaml_parser_t,
+	value yaml_tag_directive_t,
+	allow_duplicates bool,
+	mark yaml_mark_t,
+) bool {
 	for i := range parser.tag_directives {
 		if bytes.Equal(value.handle, parser.tag_directives[i].handle) {
 			if allow_duplicates {

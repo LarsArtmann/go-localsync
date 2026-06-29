@@ -6,6 +6,7 @@ import (
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-cqrs-lite/projection/v3"
 )
 
 // startProjectionRunner wires the read-model projector to the event bus and,
@@ -20,13 +21,14 @@ import (
 //     the replay tail and live delivery is harmless and needs no checkpoint or
 //     dedup set.
 //
-// go-cqrs-lite v3 deleted the projection/ module (ADR-0030). This in-process
-// replay replaces projection.Runner without pulling in the full
-// stack.Materialize + watermill.CatchUpSubscriber machinery, which would
-// require re-encoding go-localsync's custom ReadModel into a kv.TypedStore.
+// go-cqrs-lite v3.2 re-introduced the projection/ module (ADR-0037), moving
+// the Projection interface from event/ to projection/. This in-process replay
+// still avoids the full stack.Materialize + watermill.CatchUpSubscriber
+// machinery, which would require re-encoding go-localsync's custom ReadModel
+// into a kv.TypedStore.
 func startProjectionRunner(
 	sr storeResult,
-	proj event.Projection,
+	proj projection.Projection,
 ) (context.CancelFunc, error) {
 	if subErr := sr.bus.SubscribeAll(proj.Handle); subErr != nil {
 		return nil, fmt.Errorf("subscribe projection: %w", subErr)
@@ -46,7 +48,7 @@ func startProjectionRunner(
 // replayJournal loads every persisted event and forwards the ones the
 // projection cares about to proj.Handle. Errors are logged, not fatal: a single
 // bad event must not block catch-up of the rest.
-func replayJournal(ctx context.Context, loader event.Journal, proj event.Projection) {
+func replayJournal(ctx context.Context, loader event.Journal, proj projection.Projection) {
 	events, err := loader.ReadAll(ctx)
 	if err != nil {
 		log.Error("projection journal replay failed", "error", err)

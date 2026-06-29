@@ -46,7 +46,8 @@ const (
 // Check if the character at the specified position is an alphabetical
 // character, a digit, '_', or '-'.
 func is_alpha(b []byte, i int) bool {
-	return b[i] >= '0' && b[i] <= '9' || b[i] >= 'A' && b[i] <= 'Z' || b[i] >= 'a' && b[i] <= 'z' || b[i] == '_' || b[i] == '-'
+	return b[i] >= '0' && b[i] <= '9' || b[i] >= 'A' && b[i] <= 'Z' || b[i] >= 'a' && b[i] <= 'z' || b[i] == '_' ||
+		b[i] == '-'
 }
 
 // Check if the character at the specified position is a digit.
@@ -194,5 +195,4 @@ func width(b byte) int {
 		return 4
 	}
 	return 0
-
 }

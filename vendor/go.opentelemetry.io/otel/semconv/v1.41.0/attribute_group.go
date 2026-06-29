@@ -3644,7 +3644,7 @@ func ContainerImageTags(val ...string) attribute.KeyValue {
 // ContainerLabel returns an attribute KeyValue conforming to the
 // "container.label" semantic conventions. It represents the container labels,
 // `<key>` being the label name, the value being the label value.
-func ContainerLabel(key string, val string) attribute.KeyValue {
+func ContainerLabel(key, val string) attribute.KeyValue {
 	return attribute.String("container.label."+key, val)
 }
 
@@ -4000,7 +4000,7 @@ func DBOperationName(val string) attribute.KeyValue {
 // "db.operation.parameter" semantic conventions. It represents a database
 // operation parameter, with `<key>` being the parameter name, and the attribute
 // value being a string representation of the parameter value.
-func DBOperationParameter(key string, val string) attribute.KeyValue {
+func DBOperationParameter(key, val string) attribute.KeyValue {
 	return attribute.String("db.operation.parameter."+key, val)
 }
 
@@ -4008,7 +4008,7 @@ func DBOperationParameter(key string, val string) attribute.KeyValue {
 // "db.query.parameter" semantic conventions. It represents a database query
 // parameter, with `<key>` being the parameter name, and the attribute value
 // being a string representation of the parameter value.
-func DBQueryParameter(key string, val string) attribute.KeyValue {
+func DBQueryParameter(key, val string) attribute.KeyValue {
 	return attribute.String("db.query.parameter."+key, val)
 }
 
@@ -10080,7 +10080,7 @@ func K8SContainerStatusLastTerminatedReason(val string) attribute.KeyValue {
 // "k8s.cronjob.annotation" semantic conventions. It represents the cronjob
 // annotation placed on the CronJob, the `<key>` being the annotation name, the
 // value being the annotation value.
-func K8SCronJobAnnotation(key string, val string) attribute.KeyValue {
+func K8SCronJobAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.cronjob.annotation."+key, val)
 }
 
@@ -10088,7 +10088,7 @@ func K8SCronJobAnnotation(key string, val string) attribute.KeyValue {
 // "k8s.cronjob.label" semantic conventions. It represents the label placed on
 // the CronJob, the `<key>` being the label name, the value being the label
 // value.
-func K8SCronJobLabel(key string, val string) attribute.KeyValue {
+func K8SCronJobLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.cronjob.label."+key, val)
 }
 
@@ -10109,7 +10109,7 @@ func K8SCronJobUID(val string) attribute.KeyValue {
 // "k8s.daemonset.annotation" semantic conventions. It represents the annotation
 // placed on the DaemonSet, the `<key>` being the annotation name, the value
 // being the annotation value, even if the value is empty.
-func K8SDaemonSetAnnotation(key string, val string) attribute.KeyValue {
+func K8SDaemonSetAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.daemonset.annotation."+key, val)
 }
 
@@ -10117,7 +10117,7 @@ func K8SDaemonSetAnnotation(key string, val string) attribute.KeyValue {
 // "k8s.daemonset.label" semantic conventions. It represents the label placed on
 // the DaemonSet, the `<key>` being the label name, the value being the label
 // value, even if the value is empty.
-func K8SDaemonSetLabel(key string, val string) attribute.KeyValue {
+func K8SDaemonSetLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.daemonset.label."+key, val)
 }
 
@@ -10139,7 +10139,7 @@ func K8SDaemonSetUID(val string) attribute.KeyValue {
 // "k8s.deployment.annotation" semantic conventions. It represents the annotation
 // placed on the Deployment, the `<key>` being the annotation name, the value
 // being the annotation value, even if the value is empty.
-func K8SDeploymentAnnotation(key string, val string) attribute.KeyValue {
+func K8SDeploymentAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.deployment.annotation."+key, val)
 }
 
@@ -10147,7 +10147,7 @@ func K8SDeploymentAnnotation(key string, val string) attribute.KeyValue {
 // "k8s.deployment.label" semantic conventions. It represents the label placed on
 // the Deployment, the `<key>` being the label name, the value being the label
 // value, even if the value is empty.
-func K8SDeploymentLabel(key string, val string) attribute.KeyValue {
+func K8SDeploymentLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.deployment.label."+key, val)
 }
 
@@ -10216,7 +10216,7 @@ func K8SHugepageSize(val string) attribute.KeyValue {
 // "k8s.job.annotation" semantic conventions. It represents the annotation placed
 // on the Job, the `<key>` being the annotation name, the value being the
 // annotation value, even if the value is empty.
-func K8SJobAnnotation(key string, val string) attribute.KeyValue {
+func K8SJobAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.job.annotation."+key, val)
 }
 
@@ -10224,7 +10224,7 @@ func K8SJobAnnotation(key string, val string) attribute.KeyValue {
 // semantic conventions. It represents the label placed on the Job, the `<key>`
 // being the label name, the value being the label value, even if the value is
 // empty.
-func K8SJobLabel(key string, val string) attribute.KeyValue {
+func K8SJobLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.job.label."+key, val)
 }
 
@@ -10244,7 +10244,7 @@ func K8SJobUID(val string) attribute.KeyValue {
 // "k8s.namespace.annotation" semantic conventions. It represents the annotation
 // placed on the Namespace, the `<key>` being the annotation name, the value
 // being the annotation value, even if the value is empty.
-func K8SNamespaceAnnotation(key string, val string) attribute.KeyValue {
+func K8SNamespaceAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.namespace.annotation."+key, val)
 }
 
@@ -10252,7 +10252,7 @@ func K8SNamespaceAnnotation(key string, val string) attribute.KeyValue {
 // "k8s.namespace.label" semantic conventions. It represents the label placed on
 // the Namespace, the `<key>` being the label name, the value being the label
 // value, even if the value is empty.
-func K8SNamespaceLabel(key string, val string) attribute.KeyValue {
+func K8SNamespaceLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.namespace.label."+key, val)
 }
 
@@ -10267,7 +10267,7 @@ func K8SNamespaceName(val string) attribute.KeyValue {
 // "k8s.node.annotation" semantic conventions. It represents the annotation
 // placed on the Node, the `<key>` being the annotation name, the value being the
 // annotation value, even if the value is empty.
-func K8SNodeAnnotation(key string, val string) attribute.KeyValue {
+func K8SNodeAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.node.annotation."+key, val)
 }
 
@@ -10275,7 +10275,7 @@ func K8SNodeAnnotation(key string, val string) attribute.KeyValue {
 // semantic conventions. It represents the label placed on the Node, the `<key>`
 // being the label name, the value being the label value, even if the value is
 // empty.
-func K8SNodeLabel(key string, val string) attribute.KeyValue {
+func K8SNodeLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.node.label."+key, val)
 }
 
@@ -10302,7 +10302,7 @@ func K8SNodeUID(val string) attribute.KeyValue {
 // "k8s.persistentvolume.annotation" semantic conventions. It represents the
 // annotation placed on the PersistentVolume, the `<key>` being the annotation
 // name, the value being the annotation value, even if the value is empty.
-func K8SPersistentvolumeAnnotation(key string, val string) attribute.KeyValue {
+func K8SPersistentvolumeAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.persistentvolume.annotation."+key, val)
 }
 
@@ -10310,7 +10310,7 @@ func K8SPersistentvolumeAnnotation(key string, val string) attribute.KeyValue {
 // "k8s.persistentvolume.label" semantic conventions. It represents the label
 // placed on the PersistentVolume, the `<key>` being the label name, the value
 // being the label value, even if the value is empty.
-func K8SPersistentvolumeLabel(key string, val string) attribute.KeyValue {
+func K8SPersistentvolumeLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.persistentvolume.label."+key, val)
 }
 
@@ -10333,7 +10333,7 @@ func K8SPersistentvolumeUID(val string) attribute.KeyValue {
 // the annotation placed on the PersistentVolumeClaim, the `<key>` being the
 // annotation name, the value being the annotation value, even if the value is
 // empty.
-func K8SPersistentvolumeclaimAnnotation(key string, val string) attribute.KeyValue {
+func K8SPersistentvolumeclaimAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.persistentvolumeclaim.annotation."+key, val)
 }
 
@@ -10341,7 +10341,7 @@ func K8SPersistentvolumeclaimAnnotation(key string, val string) attribute.KeyVal
 // "k8s.persistentvolumeclaim.label" semantic conventions. It represents the
 // label placed on the PersistentVolumeClaim, the `<key>` being the label name,
 // the value being the label value, even if the value is empty.
-func K8SPersistentvolumeclaimLabel(key string, val string) attribute.KeyValue {
+func K8SPersistentvolumeclaimLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.persistentvolumeclaim.label."+key, val)
 }
 
@@ -10363,7 +10363,7 @@ func K8SPersistentvolumeclaimUID(val string) attribute.KeyValue {
 // "k8s.pod.annotation" semantic conventions. It represents the annotation placed
 // on the Pod, the `<key>` being the annotation name, the value being the
 // annotation value.
-func K8SPodAnnotation(key string, val string) attribute.KeyValue {
+func K8SPodAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.pod.annotation."+key, val)
 }
 
@@ -10383,7 +10383,7 @@ func K8SPodIP(val string) attribute.KeyValue {
 // K8SPodLabel returns an attribute KeyValue conforming to the "k8s.pod.label"
 // semantic conventions. It represents the label placed on the Pod, the `<key>`
 // being the label name, the value being the label value.
-func K8SPodLabel(key string, val string) attribute.KeyValue {
+func K8SPodLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.pod.label."+key, val)
 }
 
@@ -10410,7 +10410,7 @@ func K8SPodUID(val string) attribute.KeyValue {
 // "k8s.replicaset.annotation" semantic conventions. It represents the annotation
 // placed on the ReplicaSet, the `<key>` being the annotation name, the value
 // being the annotation value, even if the value is empty.
-func K8SReplicaSetAnnotation(key string, val string) attribute.KeyValue {
+func K8SReplicaSetAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.replicaset.annotation."+key, val)
 }
 
@@ -10418,7 +10418,7 @@ func K8SReplicaSetAnnotation(key string, val string) attribute.KeyValue {
 // "k8s.replicaset.label" semantic conventions. It represents the label placed on
 // the ReplicaSet, the `<key>` being the label name, the value being the label
 // value, even if the value is empty.
-func K8SReplicaSetLabel(key string, val string) attribute.KeyValue {
+func K8SReplicaSetLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.replicaset.label."+key, val)
 }
 
@@ -10475,7 +10475,7 @@ func K8SResourceQuotaUID(val string) attribute.KeyValue {
 // "k8s.service.annotation" semantic conventions. It represents the annotation
 // placed on the Service, the `<key>` being the annotation name, the value being
 // the annotation value, even if the value is empty.
-func K8SServiceAnnotation(key string, val string) attribute.KeyValue {
+func K8SServiceAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.service.annotation."+key, val)
 }
 
@@ -10490,7 +10490,7 @@ func K8SServiceEndpointZone(val string) attribute.KeyValue {
 // "k8s.service.label" semantic conventions. It represents the label placed on
 // the Service, the `<key>` being the label name, the value being the label
 // value, even if the value is empty.
-func K8SServiceLabel(key string, val string) attribute.KeyValue {
+func K8SServiceLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.service.label."+key, val)
 }
 
@@ -10512,7 +10512,7 @@ func K8SServicePublishNotReadyAddresses(val bool) attribute.KeyValue {
 // "k8s.service.selector" semantic conventions. It represents the selector
 // key-value pair placed on the Service, the `<key>` being the selector key, the
 // value being the selector value.
-func K8SServiceSelector(key string, val string) attribute.KeyValue {
+func K8SServiceSelector(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.service.selector."+key, val)
 }
 
@@ -10533,7 +10533,7 @@ func K8SServiceUID(val string) attribute.KeyValue {
 // "k8s.statefulset.annotation" semantic conventions. It represents the
 // annotation placed on the StatefulSet, the `<key>` being the annotation name,
 // the value being the annotation value, even if the value is empty.
-func K8SStatefulSetAnnotation(key string, val string) attribute.KeyValue {
+func K8SStatefulSetAnnotation(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.statefulset.annotation."+key, val)
 }
 
@@ -10541,7 +10541,7 @@ func K8SStatefulSetAnnotation(key string, val string) attribute.KeyValue {
 // "k8s.statefulset.label" semantic conventions. It represents the label placed
 // on the StatefulSet, the `<key>` being the label name, the value being the
 // label value, even if the value is empty.
-func K8SStatefulSetLabel(key string, val string) attribute.KeyValue {
+func K8SStatefulSetLabel(key, val string) attribute.KeyValue {
 	return attribute.String("k8s.statefulset.label."+key, val)
 }
 
@@ -13989,7 +13989,7 @@ func ProcessCreationTime(val string) attribute.KeyValue {
 // "process.environment_variable" semantic conventions. It represents the process
 // environment variables, `<key>` being the environment variable name, the value
 // being the environment variable value.
-func ProcessEnvironmentVariable(key string, val string) attribute.KeyValue {
+func ProcessEnvironmentVariable(key, val string) attribute.KeyValue {
 	return attribute.String("process.environment_variable."+key, val)
 }
 

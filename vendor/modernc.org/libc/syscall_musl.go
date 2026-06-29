@@ -13,7 +13,7 @@ import (
 )
 
 func ___syscall_cp(tls *TLS, n, a, b, c, d, e, f long) long {
-	r1, _, err := (unix.Syscall6(uintptr(n), uintptr(a), uintptr(b), uintptr(c), uintptr(d), uintptr(e), uintptr(f)))
+	r1, _, err := unix.Syscall6(uintptr(n), uintptr(a), uintptr(b), uintptr(c), uintptr(d), uintptr(e), uintptr(f))
 	if err != 0 {
 		return long(-err)
 	}
@@ -82,7 +82,15 @@ func X__syscall5(tls *TLS, n, a1, a2, a3, a4, a5 long) long {
 }
 
 func X__syscall6(tls *TLS, n, a1, a2, a3, a4, a5, a6 long) long {
-	r1, _, err := unix.Syscall6(uintptr(n), uintptr(a1), uintptr(a2), uintptr(a3), uintptr(a4), uintptr(a5), uintptr(a6))
+	r1, _, err := unix.Syscall6(
+		uintptr(n),
+		uintptr(a1),
+		uintptr(a2),
+		uintptr(a3),
+		uintptr(a4),
+		uintptr(a5),
+		uintptr(a6),
+	)
 	if err != 0 {
 		return long(-err)
 	}

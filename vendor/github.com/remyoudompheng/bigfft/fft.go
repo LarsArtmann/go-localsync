@@ -62,7 +62,8 @@ func fftmul(x, y nat) nat {
 
 // fftSizeThreshold[i] is the maximal size (in bits) where we should use
 // fft size i.
-var fftSizeThreshold = [...]int64{0, 0, 0,
+var fftSizeThreshold = [...]int64{
+	0, 0, 0,
 	4 << 10, 8 << 10, 16 << 10, // 5
 	32 << 10, 64 << 10, 1 << 18, 1 << 20, 3 << 20, // 10
 	8 << 20, 30 << 20, 100 << 20, 300 << 20, 600 << 20,
@@ -84,7 +85,7 @@ func fftSize(x, y nat) (k uint, m int) {
 	// The 1<<k chunks of m words must have N bits so that
 	// 2^N-1 is larger than x*y. That is, m<<k > words
 	m = words>>k + 1
-	return
+	return k, m
 }
 
 // valueSize returns the length (in words) to use for polynomial
@@ -299,7 +300,7 @@ func (v *polValues) InvNTransform() poly {
 // fourier performs an unnormalized Fourier transform
 // of src, a length 1<<k vector of numbers modulo b^n+1
 // where b = 1<<_W.
-func fourier(dst []fermat, src []fermat, backward bool, n int, k uint) {
+func fourier(dst, src []fermat, backward bool, n int, k uint) {
 	var rec func(dst, src []fermat, size uint)
 	tmp := make(fermat, n+1)  // pre-allocate temporary variables.
 	tmp2 := make(fermat, n+1) // pre-allocate temporary variables.
@@ -366,5 +367,5 @@ func (p *polValues) Mul(q *polValues) (r polValues) {
 		z := buf.Mul(p.values[i], q.values[i])
 		copy(r.values[i], z)
 	}
-	return
+	return r
 }

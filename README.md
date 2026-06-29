@@ -244,7 +244,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (188 tests across 9 packages)
+go test ./... -count=1                # Run tests (190 tests across 9 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -270,13 +270,13 @@ pkg/
 
 ## Testing
 
-188 test functions across 9 packages:
+190 test functions across 9 packages:
 
 | Package           | Tests | Coverage | Description                                                             |
 | ----------------- | ----- | -------- | ----------------------------------------------------------------------- |
 | `pkg/cqrs`        | 93    | 81.9%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
-| `pkg/sync`        | 28    | 84.5%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
-| `pkg/crdt`        | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
+| `pkg/sync`        | 31    | 84.5%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
+| `pkg/crdt`        | 7     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/id`          | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                 |
 | `pkg/errors`      | 9     | 100.0%   | Sentinel errors, wrapping, classification, IsRetryable                  |
 | `pkg/provider`    | 10    | 96.7%    | Item validation, RateLimitCache                                         |

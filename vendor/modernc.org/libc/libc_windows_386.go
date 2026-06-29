@@ -378,7 +378,6 @@ func Xunlink(t *TLS, pathname uintptr) int32 {
 	}
 
 	return 0
-
 }
 
 // int rmdir(const char *pathname);
@@ -506,7 +505,7 @@ func Xfopen64(t *TLS, pathname, mode uintptr) uintptr {
 		panic(m)
 	}
 	//TODO- flags |= fcntl.O_LARGEFILE
-	h, err := windows.Open(GoString(pathname), int(flags), uint32(0666))
+	h, err := windows.Open(GoString(pathname), int(flags), uint32(0o666))
 	if err != nil {
 		t.setErrno(err)
 		return 0
@@ -548,7 +547,7 @@ func Xshutdown(t *TLS, sockfd uint32, how int32) int32 {
 	// 	return 0
 }
 
-func Xgetpeername(t *TLS, sockfd uint32, addr uintptr, addrlen uintptr) int32 {
+func Xgetpeername(t *TLS, sockfd uint32, addr, addrlen uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -590,7 +589,7 @@ func Xlisten(t *TLS, sockfd uint32, backlog int32) int32 {
 	panic(todo(""))
 }
 
-func Xaccept(t *TLS, sockfd uint32, addr uintptr, addrlen uintptr) uint32 {
+func Xaccept(t *TLS, sockfd uint32, addr, addrlen uintptr) uint32 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -689,21 +688,21 @@ func X_fstat(t *TLS, fd int32, buffer uintptr) int32 {
 		return -1
 	}
 
-	var bStat32 = (*stat.X_stat32)(unsafe.Pointer(buffer))
-	var accessTime = int64(d.LastAccessTime.HighDateTime)<<32 + int64(d.LastAccessTime.LowDateTime)
+	bStat32 := (*stat.X_stat32)(unsafe.Pointer(buffer))
+	accessTime := int64(d.LastAccessTime.HighDateTime)<<32 + int64(d.LastAccessTime.LowDateTime)
 	bStat32.Fst_atime = int32(WindowsTickToUnixSeconds(accessTime))
-	var modTime = int64(d.LastWriteTime.HighDateTime)<<32 + int64(d.LastWriteTime.LowDateTime)
+	modTime := int64(d.LastWriteTime.HighDateTime)<<32 + int64(d.LastWriteTime.LowDateTime)
 	bStat32.Fst_mtime = int32(WindowsTickToUnixSeconds(modTime))
-	var crTime = int64(d.CreationTime.HighDateTime)<<32 + int64(d.CreationTime.LowDateTime)
+	crTime := int64(d.CreationTime.HighDateTime)<<32 + int64(d.CreationTime.LowDateTime)
 	bStat32.Fst_ctime = int32(WindowsTickToUnixSeconds(crTime))
-	var fSz = int64(d.FileSizeHigh)<<32 + int64(d.FileSizeLow)
+	fSz := int64(d.FileSizeHigh)<<32 + int64(d.FileSizeLow)
 	bStat32.Fst_size = int32(fSz)
 	bStat32.Fst_mode = WindowsAttrbiutesToStat(d.FileAttributes)
 
 	return 0
 }
 
-func Xstrspn(tls *TLS, s uintptr, c uintptr) size_t { /* strspn.c:6:8: */
+func Xstrspn(tls *TLS, s, c uintptr) size_t { /* strspn.c:6:8: */
 	if __ccgo_strace {
 		trc("tls=%v s=%v c=%v, (%v:)", tls, s, c, origin(2))
 	}
@@ -730,9 +729,9 @@ func Xstrspn(tls *TLS, s uintptr, c uintptr) size_t { /* strspn.c:6:8: */
 }
 
 // Defined in libc_windows_386.s
-func callStrtod(fn uintptr, s uintptr, p uintptr) float64
+func callStrtod(fn, s, p uintptr) float64
 
-func Xstrtod(t *TLS, s uintptr, p uintptr) float64 {
+func Xstrtod(t *TLS, s, p uintptr) float64 {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", t, s, p, origin(2))
 	}

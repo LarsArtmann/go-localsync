@@ -36,19 +36,19 @@ import (
 	"modernc.org/libc/uuid"
 )
 
-var (
-	in6_addr_any in.In6_addr
-)
+var in6_addr_any in.In6_addr
 
 type syscallErrno = unix.Errno
 
 // // Keep these outside of the var block otherwise go generate will miss them.
-var X__stderrp = Xstdout
-var X__stdinp = Xstdin
-var X__stdoutp = Xstdout
-var X__sF [3]stdio.FILE
-var X_tolower_tab_ = Xmalloc(nil, 2*65537)
-var X_toupper_tab_ = Xmalloc(nil, 2*65537)
+var (
+	X__stderrp     = Xstdout
+	X__stdinp      = Xstdin
+	X__stdoutp     = Xstdout
+	X__sF          [3]stdio.FILE
+	X_tolower_tab_ = Xmalloc(nil, 2*65537)
+	X_toupper_tab_ = Xmalloc(nil, 2*65537)
+)
 
 func init() {
 	for c := rune(0); c < 0xffff; c++ {
@@ -76,7 +76,7 @@ var X__isthreaded int32
 var X__mb_sb_limit int32 = 128 // UTF-8
 
 // include/runetype.h:94:extern _Thread_local const _RuneLocale *_ThreadRuneLocale;
-var X_ThreadRuneLocale uintptr //TODO initialize and implement _Thread_local semantics.
+var X_ThreadRuneLocale uintptr // TODO initialize and implement _Thread_local semantics.
 
 // include/xlocale/_ctype.h:54:_RuneLocale	*__runes_for_locale(locale_t, int*);
 func X__runes_for_locale(t *TLS, l locale_t, p uintptr) uintptr {
@@ -143,7 +143,7 @@ func fwrite(fd int32, b []byte) (int, error) {
 	// if dmesgs {
 	// 	dmesg("%v: fd %v: %s", origin(1), fd, b)
 	// }
-	return unix.Write(int(fd), b) //TODO use Xwrite
+	return unix.Write(int(fd), b) // TODO use Xwrite
 }
 
 // unsigned long	___runetype(__ct_rune_t) __pure;
@@ -282,7 +282,7 @@ func Xopen64(t *TLS, pathname uintptr, flags int32, args uintptr) int32 {
 	}
 	var mode types.Mode_t
 	if args != 0 {
-		mode = (types.Mode_t)(VaUint32(&args))
+		mode = types.Mode_t(VaUint32(&args))
 	}
 	fdcwd := fcntl.AT_FDCWD
 	n, _, err := unix.Syscall6(unix.SYS_OPENAT, uintptr(fdcwd), pathname, uintptr(flags), uintptr(mode), 0, 0)
@@ -731,7 +731,7 @@ func Xshutdown(t *TLS, sockfd, how int32) int32 {
 }
 
 // int getpeername(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-func Xgetpeername(t *TLS, sockfd int32, addr uintptr, addrlen uintptr) int32 {
+func Xgetpeername(t *TLS, sockfd int32, addr, addrlen uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -798,7 +798,7 @@ func Xlisten(t *TLS, sockfd, backlog int32) int32 {
 }
 
 // int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-func Xaccept(t *TLS, sockfd int32, addr uintptr, addrlen uintptr) int32 {
+func Xaccept(t *TLS, sockfd int32, addr, addrlen uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -884,7 +884,7 @@ func Xsetvbuf(t *TLS, stream, buf uintptr, mode int32, size types.Size_t) int32 
 	if __ccgo_strace {
 		trc("t=%v buf=%v mode=%v size=%v, (%v:)", t, buf, mode, size, origin(2))
 	}
-	return 0 //TODO
+	return 0 // TODO
 }
 
 // int raise(int sig);
@@ -1128,7 +1128,7 @@ func Xtzset(t *TLS) {
 	if __ccgo_strace {
 		trc("t=%v, (%v:)", t, origin(2))
 	}
-	//TODO
+	// TODO
 }
 
 var strerrorBuf [100]byte
@@ -1264,7 +1264,7 @@ func Xsetlocale(t *TLS, category int32, locale uintptr) uintptr {
 	if __ccgo_strace {
 		trc("t=%v category=%v locale=%v, (%v:)", t, category, locale, origin(2))
 	}
-	return uintptr(unsafe.Pointer(&emptyStr)) //TODO
+	return uintptr(unsafe.Pointer(&emptyStr)) // TODO
 }
 
 // char *nl_langinfo(nl_item item);
@@ -1272,7 +1272,7 @@ func Xnl_langinfo(t *TLS, item langinfo.Nl_item) uintptr {
 	if __ccgo_strace {
 		trc("t=%v item=%v, (%v:)", t, item, origin(2))
 	}
-	return uintptr(unsafe.Pointer(&emptyStr)) //TODO
+	return uintptr(unsafe.Pointer(&emptyStr)) // TODO
 }
 
 // FILE *popen(const char *command, const char *type);
@@ -1333,20 +1333,35 @@ func Xabort(t *TLS) {
 	if __ccgo_strace {
 		trc("t=%v, (%v:)", t, origin(2))
 	}
-	panic(todo("")) //TODO
-	// if dmesgs {
-	// 	dmesg("%v:", origin(1))
-	// }
-	// p := Xcalloc(t, 1, types.Size_t(unsafe.Sizeof(signal.Sigaction{})))
-	// if p == 0 {
-	// 	panic("OOM")
-	// }
-
-	// (*signal.Sigaction)(unsafe.Pointer(p)).F__sigaction_u.F__sa_handler = signal.SIG_DFL
-	// Xsigaction(t, signal.SIGABRT, p, 0)
-	// Xfree(t, p)
-	// unix.Kill(unix.Getpid(), unix.Signal(signal.SIGABRT))
-	// panic(todo("unrechable"))
+	if dmesgs {
+		dmesg("%v:", origin(1))
+	}
+	// NetBSD's Xabort was a stub, so C abort(3) didn't terminate by signal — callers
+	// such as SQLite's crash tests (writecrash.test) require the process to be killed
+	// BY SIGABRT. Three things are needed on netbsd:
+	//  1. Reset SIGABRT to SIG_DFL — the Go runtime otherwise intercepts a delivered
+	//     SIGABRT and exit(2)s instead of dying by signal. Done via the raw
+	//     __sigaction_sigtramp(2) syscall (an all-zero struct sigaction = SIG_DFL; the
+	//     trampoline/version args are unused for SIG_DFL). x/sys/unix has no high-level
+	//     Sigaction on netbsd and Xsigaction is unimplemented here.
+	//  2. Unblock SIGABRT on the calling thread so a blocked mask can't defeat abort().
+	//     __sigprocmask14(SIG_UNBLOCK, {SIGABRT}, NULL) — syscall 293, not exported by
+	//     x/sys/unix for netbsd.
+	//  3. Deliver SIGABRT SYNCHRONOUSLY and thread-directed via _lwp_kill(_lwp_self())
+	//     (the primitive the Go runtime's raise() uses). A process-directed kill(2) is
+	//     async — the calling thread can race ahead and exit the wrong way before the
+	//     signal lands (observed as a rare writecrash failure). With SIG_DFL the kernel
+	//     terminates the process here; the kill(2) and panic below are unreachable
+	//     fallbacks.
+	var sa [5]uint64 // >= sizeof(struct sigaction); zero value == SIG_DFL
+	unix.Syscall6(unix.SYS___SIGACTION_SIGTRAMP, uintptr(unix.SIGABRT), uintptr(unsafe.Pointer(&sa)), 0, 0, 0, 0)
+	var set [4]uint32
+	set[0] = uint32(1) << (uint(unix.SIGABRT) - 1) // SIGABRT==6 -> bit 5
+	unix.Syscall(293 /* SYS___sigprocmask14 */, 2 /* SIG_UNBLOCK */, uintptr(unsafe.Pointer(&set)), 0)
+	lwp, _, _ := unix.Syscall(unix.SYS__LWP_SELF, 0, 0, 0)
+	unix.Syscall(unix.SYS__LWP_KILL, lwp, uintptr(unix.SIGABRT), 0)
+	unix.Kill(unix.Getpid(), unix.SIGABRT)
+	panic(todo("unreachable"))
 }
 
 // int fflush(FILE *stream);
@@ -1354,7 +1369,7 @@ func Xfflush(t *TLS, stream uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v stream=%v, (%v:)", t, stream, origin(2))
 	}
-	return 0 //TODO
+	return 0 // TODO
 }
 
 // size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
@@ -1691,7 +1706,7 @@ func X__swbuf(t *TLS, n int32, file uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v n=%v file=%v, (%v:)", t, n, file, origin(2))
 	}
-	return Xfputc(t, n, file) //TODO improve performance, use a real buffer.
+	return Xfputc(t, n, file) // TODO improve performance, use a real buffer.
 }
 
 // int rmdir(const char *pathname);
@@ -1723,7 +1738,11 @@ func Xreaddir(t *TLS, dir uintptr) uintptr {
 	}
 
 	if (*darwinDir)(unsafe.Pointer(dir)).l == (*darwinDir)(unsafe.Pointer(dir)).h {
-		n, err := unix.Getdirentries((*darwinDir)(unsafe.Pointer(dir)).fd, (*darwinDir)(unsafe.Pointer(dir)).buf[:], nil)
+		n, err := unix.Getdirentries(
+			(*darwinDir)(unsafe.Pointer(dir)).fd,
+			(*darwinDir)(unsafe.Pointer(dir)).buf[:],
+			nil,
+		)
 		// trc("must read: %v %v", n, err)
 		if n == 0 {
 			if err != nil && err != io.EOF {
@@ -1843,8 +1862,31 @@ func Xmmap(t *TLS, addr uintptr, length types.Size_t, prot, flags, fd int32, off
 	if __ccgo_strace {
 		trc("t=%v addr=%v length=%v fd=%v offset=%v, (%v:)", t, addr, length, fd, offset, origin(2))
 	}
-	// Cannot avoid the unix here, addr sometimes matter.
-	data, _, err := unix.Syscall6(unix.SYS_MMAP, addr, uintptr(length), uintptr(prot), uintptr(flags), uintptr(fd), uintptr(offset))
+	// NetBSD mmap(2) is
+	//
+	//	mmap(void *addr, size_t len, int prot, int flags, int fd, long PAD, off_t pos)
+	//
+	// i.e. there is a `long PAD` argument before `off_t pos`. The offset must
+	// therefore be passed as the 7th syscall argument (Syscall9), not the 6th
+	// (Syscall6): with Syscall6 the offset lands in the PAD slot and `pos` is
+	// left as stack garbage, so the kernel maps at a garbage file offset and
+	// returns an unaligned/unbacked pointer that faults on first access (e.g.
+	// the SQLite WAL-index shm). On 32-bit (netbsd/arm) off_t additionally spans
+	// two argument words, so pass offset>>32 as the high word; it is read on
+	// 32-bit and ignored on 64-bit. Matches golang.org/x/sys/unix's own per-arch
+	// netbsd mmap.
+	data, _, err := unix.Syscall9(
+		unix.SYS_MMAP,
+		addr,
+		uintptr(length),
+		uintptr(prot),
+		uintptr(flags),
+		uintptr(fd),
+		0,
+		uintptr(offset),
+		uintptr(offset>>32),
+		0,
+	)
 	if err != 0 {
 		if dmesgs {
 			dmesg("%v: %v FAIL", origin(1), err)
@@ -1870,7 +1912,7 @@ func X__ccgo_pthreadMutexattrGettype(tls *TLS, a uintptr) int32 { /* pthread_att
 	if __ccgo_strace {
 		trc("tls=%v a=%v, (%v:)", tls, a, origin(2))
 	}
-	return (int32((*pthread_mutexattr_t)(unsafe.Pointer(a)).F__attr & uint32(3)))
+	return int32((*pthread_mutexattr_t)(unsafe.Pointer(a)).F__attr & uint32(3))
 }
 
 func X__ccgo_getMutexType(tls *TLS, m uintptr) int32 { /* pthread_mutex_lock.c:3:5: */
@@ -1887,7 +1929,7 @@ func X__ccgo_pthreadAttrGetDetachState(tls *TLS, a uintptr) int32 { /* pthread_a
 	return *(*int32)(unsafe.Pointer((a /* &.__u */ /* &.__i */) + 6*4))
 }
 
-func Xpthread_attr_getdetachstate(tls *TLS, a uintptr, state uintptr) int32 { /* pthread_attr_get.c:7:5: */
+func Xpthread_attr_getdetachstate(tls *TLS, a, state uintptr) int32 { /* pthread_attr_get.c:7:5: */
 	if __ccgo_strace {
 		trc("tls=%v a=%v state=%v, (%v:)", tls, a, state, origin(2))
 	}
@@ -1933,7 +1975,7 @@ func Xpthread_mutexattr_settype(tls *TLS, a uintptr, type1 int32) int32 { /* pth
 }
 
 // int uuid_parse( char *in, uuid_t uu);
-func Xuuid_parse(t *TLS, in uintptr, uu uintptr) int32 {
+func Xuuid_parse(t *TLS, in, uu uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v in=%v uu=%v, (%v:)", t, in, uu, origin(2))
 	}
