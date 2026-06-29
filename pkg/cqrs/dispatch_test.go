@@ -1,10 +1,12 @@
 package cqrs
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/larsartmann/go-cqrs-lite/command/v3"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
@@ -76,6 +78,32 @@ func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
 	})
 	if err == nil {
 		t.Error("expected validation error for nil item")
+	}
+}
+
+// TestCommandDispatcher_ValidationError_IsClassified guards the error-family
+// contract: a validation failure must surface as a Rejection (ErrInvalidInput)
+// so a consumer can classify it. Before the migration this was an unclassified
+// standalone sentinel; it must now report non-retryable via the family.
+func TestCommandDispatcher_ValidationError_IsClassified(t *testing.T) {
+	stack, ctx := setupMemoryStack(t)
+	aggID := AggregateID("github", id.NewExternalID("classified"))
+
+	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
+		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
+		Item:         nil,
+	})
+
+	if err == nil {
+		t.Fatal("expected validation error for nil item")
+	}
+
+	if !errors.Is(err, pkgerrors.ErrInvalidInput) {
+		t.Errorf("validation error must wrap ErrInvalidInput (got %T: %v)", err, err)
+	}
+
+	if pkgerrors.IsRetryable(err) {
+		t.Error("validation error must be non-retryable (Rejection family)")
 	}
 }
 

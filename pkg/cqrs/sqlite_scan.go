@@ -2,10 +2,10 @@ package cqrs
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -20,7 +20,7 @@ type scannedItem struct {
 func (si *scannedItem) toItem() (*model.Item, error) {
 	itemID, err := parseItemID(si.itemIDStr)
 	if err != nil {
-		return nil, fmt.Errorf("parse item ID from row: %w", err)
+		return nil, pkgerrors.Wrap(err, "parse item ID from row")
 	}
 
 	var tombstone model.Tombstone
@@ -100,19 +100,19 @@ func scanItems(rows *sql.Rows) ([]*model.Item, error) {
 			&si.tombstonedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("scan item: %w", err)
+			return nil, pkgerrors.Wrap(err, "scan item")
 		}
 
 		item, err := si.toItem()
 		if err != nil {
-			return nil, fmt.Errorf("convert row to item: %w", err)
+			return nil, pkgerrors.Wrap(err, "convert row to item")
 		}
 
 		items = append(items, item)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("iterate items: %w", err)
+		return nil, pkgerrors.Wrap(err, "iterate items")
 	}
 
 	return items, nil

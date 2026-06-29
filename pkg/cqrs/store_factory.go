@@ -3,8 +3,6 @@ package cqrs
 import (
 	"context"
 	"database/sql"
-	"errors"
-	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v3"
@@ -13,8 +11,6 @@ import (
 	cqrswatermill "github.com/larsartmann/go-cqrs-lite/watermill/v3"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
-
-var errSQLiteRequiresDB = errors.New("sqlite backend requires database connection")
 
 type storeResult struct {
 	store   event.Store
@@ -39,10 +35,10 @@ func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 	case backendSQLite:
 		return createSQLiteStore(ctx, cfg)
 	default:
-		return storeResult{}, fmt.Errorf(
-			"unknown backend: %s: %w",
-			cfg.Backend,
+		return storeResult{}, pkgerrors.Wrapf(
 			pkgerrors.ErrUnknownBackend,
+			"unknown backend: %s",
+			cfg.Backend,
 		)
 	}
 }
@@ -55,33 +51,33 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 
 	db, err := cqrsstorage.OpenSQLite(dbPath)
 	if err != nil {
-		return storeResult{}, fmt.Errorf("open sqlite database: %w", err)
+		return storeResult{}, pkgerrors.Wrap(err, "open sqlite database")
 	}
 
 	if err := cqrsstorage.SQLiteInitSchema(ctx, db); err != nil {
 		_ = db.Close()
 
-		return storeResult{}, fmt.Errorf("init schema: %w", err)
+		return storeResult{}, pkgerrors.Wrap(err, "init schema")
 	}
 
 	store, storeErr := cqrsstorage.NewSQLiteEventStore(db)
 	if storeErr != nil {
 		_ = db.Close()
 
-		return storeResult{}, fmt.Errorf("create event store: %w", storeErr)
+		return storeResult{}, pkgerrors.Wrap(storeErr, "create event store")
 	}
 
 	if walErr := cqrsstorage.SQLiteEnableWAL(ctx, db); walErr != nil {
 		_ = db.Close()
 
-		return storeResult{}, fmt.Errorf("enable WAL mode: %w", walErr)
+		return storeResult{}, pkgerrors.Wrap(walErr, "enable WAL mode")
 	}
 
 	cpStore, cpErr := cqrsstorage.NewSQLiteCheckpointStore(db)
 	if cpErr != nil {
 		_ = db.Close()
 
-		return storeResult{}, fmt.Errorf("create checkpoint store: %w", cpErr)
+		return storeResult{}, pkgerrors.Wrap(cpErr, "create checkpoint store")
 	}
 
 	configureSQLitePool(dbPath, db)
@@ -116,7 +112,7 @@ func createReadModel(ctx context.Context, cfg CQRSConfig, sr storeResult) (ReadM
 			return newSQLiteReadModel(ctx, sr.db)
 		}
 
-		return nil, errSQLiteRequiresDB
+		return nil, pkgerrors.ErrDBNil
 	}
 
 	return NewMemoryReadModel(), nil

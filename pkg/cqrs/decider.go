@@ -1,7 +1,6 @@
 package cqrs
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/codec/v3"
@@ -10,6 +9,7 @@ import (
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -52,8 +52,10 @@ func fold(state SyncItemState, evt event.Event) (SyncItemState, error) {
 	case EventItemTombstoned:
 		return foldItemTombstoned(state, evt)
 	default:
-		//nolint:err113 // dynamic error for unknown event type
-		return state, fmt.Errorf(
+		// A corrupt or poison event stream: classify as Infrastructure so a
+		// caller can distinguish a store/journal problem from a normal error.
+		return state, pkgerrors.Wrapf(
+			pkgerrors.ErrDatabase,
 			"fold: unknown event type %q in state{tombstoned=%v}",
 			evt.Type(),
 			state.IsTombstoned(),
@@ -75,7 +77,7 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 func foldItemTombstoned(state SyncItemState, evt event.Event) (SyncItemState, error) {
 	payload, err := event.DecodePayload[ItemTombstonedPayload](evt, codec.JSONCodec{})
 	if err != nil {
-		return SyncItemState{}, fmt.Errorf("decode ItemTombstonedPayload for event %s: %w", evt.ID(), err)
+		return SyncItemState{}, pkgerrors.Wrapf(err, "decode ItemTombstonedPayload for event %s", evt.ID())
 	}
 
 	if state.Item == nil {
@@ -147,12 +149,12 @@ func decideTombstone(
 			}},
 		)
 		if err != nil {
-			return nil, fmt.Errorf(
-				"create tombstone event for %s/%s (version=%d): %w",
+			return nil, pkgerrors.Wrapf(
+				err,
+				"create tombstone event for %s/%s (version=%d)",
 				aggID,
 				sourceID,
 				currentVersion,
-				err,
 			)
 		}
 
@@ -243,13 +245,13 @@ func syncEvents(
 
 	evts, err := event.NewEvents(aggID, aggregateType, version, eventTypes, payloads, opts...)
 	if err != nil {
-		return nil, fmt.Errorf(
-			"create events for %s/%s (version=%d, conflict=%v): %w",
+		return nil, pkgerrors.Wrapf(
+			err,
+			"create events for %s/%s (version=%d, conflict=%v)",
 			aggID,
 			item.ExternalID.Get(),
 			version,
 			conflict,
-			err,
 		)
 	}
 

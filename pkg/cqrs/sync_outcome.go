@@ -1,12 +1,11 @@
 package cqrs
 
 import (
-	"fmt"
-
 	"github.com/larsartmann/go-cqrs-lite/codec/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
 // SyncOutcome captures what the decider decided for a single item sync, so the
@@ -50,7 +49,7 @@ func decideWithOutcome(
 
 				cp, err := event.DecodePayload[ItemConflictFoundPayload](events[0], codec.JSONCodec{})
 				if err != nil {
-					return nil, fmt.Errorf("decode ItemConflictFoundPayload for event %s: %w", events[0].ID(), err)
+					return nil, pkgerrors.Wrapf(err, "decode ItemConflictFoundPayload for event %s", events[0].ID())
 				}
 
 				outcome.ConflictWinner = ParseConflictWinner(cp.Winner)

@@ -3,12 +3,12 @@ package cqrs
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/codec/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -74,7 +74,7 @@ func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 	}
 
 	if err := item.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid item from payload: %w", err)
+		return nil, pkgerrors.Wrap(err, "invalid item from payload")
 	}
 
 	return item, nil
@@ -109,12 +109,12 @@ func dataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 func decodeItemFromEvent(evt event.Event) (*model.Item, error) {
 	payload, err := event.DecodePayload[ItemSyncedPayload](evt, codec.JSONCodec{})
 	if err != nil {
-		return nil, fmt.Errorf("decode ItemSyncedPayload for event %s: %w", evt.ID(), err)
+		return nil, pkgerrors.Wrapf(err, "decode ItemSyncedPayload for event %s", evt.ID())
 	}
 
 	item, err := dataItemFromPayload(payload)
 	if err != nil {
-		return nil, fmt.Errorf("reconstruct item from payload: %w", err)
+		return nil, pkgerrors.Wrap(err, "reconstruct item from payload")
 	}
 
 	return item, nil

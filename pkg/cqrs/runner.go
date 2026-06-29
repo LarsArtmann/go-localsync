@@ -2,11 +2,11 @@ package cqrs
 
 import (
 	"context"
-	"fmt"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-cqrs-lite/projection/v3"
 	"github.com/larsartmann/go-cqrs-lite/projectionhost/v3"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
 // startProjectionRunner wires the read-model projector to the event bus for
@@ -30,7 +30,7 @@ func startProjectionRunner(
 	proj projection.Projection,
 ) (context.CancelFunc, <-chan struct{}, error) {
 	if subErr := sr.bus.SubscribeAll(proj.Handle); subErr != nil {
-		return nil, nil, fmt.Errorf("subscribe projection: %w", subErr)
+		return nil, nil, pkgerrors.Wrap(subErr, "subscribe projection")
 	}
 
 	host, err := projectionhost.New(
@@ -42,11 +42,11 @@ func startProjectionRunner(
 		projectionhost.WithDeadLetterStore(projectionhost.NewMemoryDeadLetterStore(), 3),
 	)
 	if err != nil {
-		return nil, nil, fmt.Errorf("create projection host: %w", err)
+		return nil, nil, pkgerrors.Wrap(err, "create projection host")
 	}
 
 	if regErr := host.Register(proj); regErr != nil {
-		return nil, nil, fmt.Errorf("register projection with host: %w", regErr)
+		return nil, nil, pkgerrors.Wrap(regErr, "register projection with host")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -54,7 +54,7 @@ func startProjectionRunner(
 	if startErr := host.Start(ctx); startErr != nil {
 		cancel()
 
-		return nil, nil, fmt.Errorf("start projection host: %w", startErr)
+		return nil, nil, pkgerrors.Wrap(startErr, "start projection host")
 	}
 
 	drainDone := make(chan struct{})

@@ -11,6 +11,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/middleware/v3"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -69,7 +70,7 @@ func wireCommandDispatcher(
 	}
 
 	if err := command.RegisterTyped(dispatcher, commandTypeSyncItem, syncItemHandler); err != nil {
-		return nil, fmt.Errorf("register sync item command: %w", err)
+		return nil, pkgerrors.Wrap(err, "register sync item command")
 	}
 
 	tombstoneHandler := func(ctx context.Context, cmd *TombstoneItemCommand) error {
@@ -86,7 +87,7 @@ func wireCommandDispatcher(
 		commandTypeTombstone,
 		tombstoneHandler,
 	); err != nil {
-		return nil, fmt.Errorf("register tombstone item command: %w", err)
+		return nil, pkgerrors.Wrap(err, "register tombstone item command")
 	}
 
 	return dispatcher, nil

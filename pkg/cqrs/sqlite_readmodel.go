@@ -69,7 +69,7 @@ type SQLiteReadModel struct {
 // newSQLiteReadModel creates a SQLiteReadModel, initializing the schema.
 func newSQLiteReadModel(ctx context.Context, db *sql.DB) (*SQLiteReadModel, error) {
 	if db == nil {
-		return nil, fmt.Errorf("sqlite read model: %w", pkgerrors.ErrDBNil)
+		return nil, pkgerrors.Wrap(pkgerrors.ErrDBNil, "sqlite read model")
 	}
 
 	if _, err := db.ExecContext(ctx, syncItemsDDL); err != nil {

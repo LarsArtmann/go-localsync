@@ -3,7 +3,6 @@ package cqrs
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log/slog"
 
 	"charm.land/log/v2"
@@ -16,6 +15,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v3"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -81,12 +81,12 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 	if err := sr.bus.Use(
 		middleware.EventLogging(newSlogLogger()),
 	); err != nil {
-		return nil, fmt.Errorf("wire event logging middleware: %w", err)
+		return nil, pkgerrors.Wrap(err, "wire event logging middleware")
 	}
 
 	cancelRunner, drainDone, err := startProjectionRunner(sr, proj)
 	if err != nil {
-		return nil, fmt.Errorf("start projection runner: %w", err)
+		return nil, pkgerrors.Wrap(err, "start projection runner")
 	}
 
 	deciderSpec := decider.Decider[SyncItemState]{
@@ -101,7 +101,7 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 
 	snapshotStrategy, stratErr := snapshot.EveryNEvents(10)
 	if stratErr != nil {
-		return nil, fmt.Errorf("create snapshot strategy: %w", stratErr)
+		return nil, pkgerrors.Wrap(stratErr, "create snapshot strategy")
 	}
 
 	repo, err := decider.NewRepository(
@@ -111,12 +111,12 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("create decider repository: %w", err)
+		return nil, pkgerrors.Wrap(err, "create decider repository")
 	}
 
 	commandDispatcher, err := wireCommandDispatcher(repo, cfg.ConflictResolver)
 	if err != nil {
-		return nil, fmt.Errorf("wire command dispatcher: %w", err)
+		return nil, pkgerrors.Wrap(err, "wire command dispatcher")
 	}
 
 	return &CQRSStack{
@@ -175,7 +175,7 @@ func (s *CQRSStack) Reconcile(ctx context.Context, source string, seen []model.K
 
 	live, err := s.List(ctx, model.ItemFilter{Source: &src})
 	if err != nil {
-		return 0, fmt.Errorf("reconcile: list live items for %s: %w", source, err)
+		return 0, pkgerrors.Wrapf(err, "reconcile: list live items for %s", source)
 	}
 
 	seenSet := make(map[string]struct{}, len(seen))
@@ -196,7 +196,7 @@ func (s *CQRSStack) Reconcile(ctx context.Context, source string, seen []model.K
 		}
 
 		if err := s.TombstoneItem(ctx, source, item.ExternalID, model.ReasonUpstreamGone); err != nil {
-			return tombstoned, fmt.Errorf("reconcile: tombstone %s/%s: %w", source, item.ExternalID, err)
+			return tombstoned, pkgerrors.Wrapf(err, "reconcile: tombstone %s/%s", source, item.ExternalID)
 		}
 
 		tombstoned++
@@ -241,13 +241,13 @@ func (s *CQRSStack) SyncItems(
 
 		err := s.CommandDispatcher.Dispatch(ctx, cmd)
 		if err != nil {
-			err = fmt.Errorf("sync %s/%s: %w", item.Source.Get(), item.ExternalID.Get(), err)
+			err = pkgerrors.Wrapf(err, "sync %s/%s", item.Source.Get(), item.ExternalID.Get())
 		}
 
 		action := classifyAction(err, outcome)
 
 		if err != nil {
-			err = fmt.Errorf("eventCount=%d, conflict=%v: %w", outcome.EventCount, outcome.ConflictDetected, err)
+			err = pkgerrors.Wrapf(err, "eventCount=%d, conflict=%v", outcome.EventCount, outcome.ConflictDetected)
 		}
 
 		result := synclib.ItemSyncResult{

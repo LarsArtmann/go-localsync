@@ -2,13 +2,10 @@ package cqrs
 
 import (
 	"context"
-	stderrors "errors"
-	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/command/v3"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
-
-var errValidationFailed = stderrors.New("command validation failed")
 
 func commandValidationMiddleware() command.Middleware {
 	return func(next command.Handler) command.Handler {
@@ -16,28 +13,19 @@ func commandValidationMiddleware() command.Middleware {
 			switch cmdTyped := cmd.(type) {
 			case *SyncItemCommand:
 				if cmdTyped.Item == nil {
-					return fmt.Errorf("sync item command: item is nil: %w", errValidationFailed)
+					return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "sync item command: item is nil")
 				}
 
 				if cmdTyped.Item.Source.Get() == "" {
-					return fmt.Errorf(
-						"sync item command: source is empty: %w",
-						errValidationFailed,
-					)
+					return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "sync item command: source is empty")
 				}
 			case *TombstoneItemCommand:
 				if cmdTyped.Source == "" {
-					return fmt.Errorf(
-						"tombstone item command: source is empty: %w",
-						errValidationFailed,
-					)
+					return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "tombstone item command: source is empty")
 				}
 
 				if cmdTyped.Reason == "" {
-					return fmt.Errorf(
-						"tombstone item command: reason is empty: %w",
-						errValidationFailed,
-					)
+					return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "tombstone item command: reason is empty")
 				}
 			}
 
