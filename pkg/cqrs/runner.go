@@ -36,6 +36,10 @@ func startProjectionRunner(
 	host, err := projectionhost.New(
 		sr.journal, sr.cpStore,
 		projectionhost.WithLogger(newSlogLogger()),
+		// Capture events that fail to project more than 3 times so a single
+		// poison message can never permanently block catch-up. The capture is
+		// logged via the host logger; the checkpoint then advances past it.
+		projectionhost.WithDeadLetterStore(projectionhost.NewMemoryDeadLetterStore(), 3),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("create projection host: %w", err)
