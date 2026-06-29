@@ -40,7 +40,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
 - `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
 - `projection.go` — `Projector` implements `projection.Projection` (moved from `event.Projection` in go-cqrs-lite v3.2), wired via direct bus subscription (live) + manual journal replay (persistence)
-- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher, SQL snapshots, event logging middleware, correlation IDs. Public commands: `SyncItem`, `TombstoneItem`; `Reconcile(ctx, source, seenKeys)` tombstones upstream-gone items. (No query dispatcher — reads call the ReadModel directly; see ADR note in `stack_adapters.go`.)
+- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher, SQL snapshots, event logging middleware, correlation IDs. `NewCQRSStack` uses named returns + a cleanup defer so any error path after store creation releases store/bus/db/goroutine resources. Public commands: `SyncItem`, `TombstoneItem`; `Reconcile(ctx, source, seenKeys)` tombstones upstream-gone items. (No query dispatcher — reads call the ReadModel directly; see ADR note in `stack_adapters.go`.)
 - `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus `projectionhost.Host` (managed batch-drainer with checkpoint persistence, crash auto-restart, and dead-letter queue) for resilient SQLite catch-up. See ADR-0006.
 - `commands.go` + `middleware.go` — typed `SyncItemCommand`/`TombstoneItemCommand` (carries `model.TombstoneReason`) via `command.Dispatcher`. (The read side has no dispatcher — `stack_adapters.go` calls the ReadModel directly; the command side stays dispatched for logging/retry/validation middleware.)
 
@@ -50,7 +50,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
 - **Tombstone + resurrect**: a tombstone is a soft-delete (keeps history on `Item.Tombstone`); re-syncing a tombstoned item overwrites the tombstone → it becomes live again (projection upsert resets the tombstone columns)
 - **Reconciliation**: opt-in `SyncOptions.Reconcile` tombstones items for `Source` absent from a complete fetch with `ReasonUpstreamGone` (best-effort; only safe after a COMPLETE fetch)
-- **Projection**: Live events delivered synchronously via `bus.SubscribeAll` (watermill `EventBus` with `BlockPublishUntilSubscriberAck` preserves read-your-writes). SQLite catch-up runs via `projectionhost.Host` (ADR-0006): a managed batch-drainer that reads from the last checkpoint (bounded replay), auto-restarts on crash with backoff, and captures poison messages to a dead-letter queue. The idempotent projection tolerates replay/live overlap; the checkpoint bounds work and survives failure.
+- **Projection**: Live events delivered synchronously via `bus.SubscribeAll` (watermill `EventBus` with `BlockPublishUntilSubscriberAck` preserves read-your-writes). SQLite catch-up runs via `projectionhost.Host` (ADR-0006): a managed batch-drainer that reads from the last checkpoint (bounded replay), auto-restarts on crash with backoff, and captures poison messages to a dead-letter queue. The version-gate (skip events with version ≤ last applied per aggregate) is **mutex-guarded** so concurrent live+replay delivery for the same aggregate serializes — preventing stale events from resurrecting tombstoned rows. The checkpoint bounds work and survives failure.
 - **SQL persistence**: SQLite backend persists snapshots (`SQLSnapshotStore`) via `snapshot/v3` and `storage/v3` modules.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Command dispatch**: `SyncItem`/`TombstoneItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
@@ -58,6 +58,8 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **Per-source serialization**: a per-source mutex orders concurrent syncs of the same source (TOCTOU guard on the latest-timestamp read); different sources run in parallel. Internals are split into lock-free `runSync`/`runSyncIncremental` to avoid re-entrant deadlock when incremental falls back to full.
 - **Remote wins (default)**: on conflict with no resolver configured, the incoming item always overwrites (remote-wins LWW)
 - **Pluggable conflict resolution**: `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*model.Item]` — `LWWResolver`, custom merge, etc.
+- **Validated at boundary**: both `provider.Item.Validate()` and `model.Item.Validate()` require the same fields (including `UpdatedAt`) and route through `pkgerrors.ErrInvalidInput` so classification is consistent.
+- **Error-chain-preserving SQLite**: all read-model errors use multi-`%w` wrapping (`wrapDBErr`) so `errors.Is(err, ErrDatabase)` AND `errors.As(err, &driverErr)` both work.
 
 ### Conflict Flow
 
@@ -136,7 +138,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | Package           | Tests | Coverage | Status                                                                                                |
 | ----------------- | ----- | -------- | ----------------------------------------------------------------------------------------------------- |
 | `pkg/cqrs`        | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests |
-| `pkg/sync`        | 31    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                    |
+| `pkg/sync`        | 32    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                    |
 | `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                            |
 | `pkg/errors`      | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                       |
 | `pkg/provider`    | 2     | 90.9%    | ✅ Item validation                                                                                    |
@@ -145,7 +147,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                         |
 | `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                      |
 
-**180 total test functions** across 9 test packages.
+**186 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
