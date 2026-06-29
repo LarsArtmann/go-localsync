@@ -1,9 +1,9 @@
 package cqrs
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/larsartmann/go-cqrs-lite/codec/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
@@ -48,9 +48,9 @@ func decideWithOutcome(
 			if hasConflictEvent(events) {
 				outcome.ConflictDetected = true
 
-				var cp ItemConflictFoundPayload
-				if err := json.Unmarshal(events[0].Payload(), &cp); err != nil {
-					return nil, fmt.Errorf("decode conflict payload: %w", err)
+				cp, err := event.DecodePayload[ItemConflictFoundPayload](events[0], codec.JSONCodec{})
+				if err != nil {
+					return nil, fmt.Errorf("decode ItemConflictFoundPayload for event %s: %w", events[0].ID(), err)
 				}
 
 				outcome.ConflictWinner = ParseConflictWinner(cp.Winner)
