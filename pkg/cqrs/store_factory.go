@@ -101,6 +101,7 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 // so MaxOpenConns is pinned to 1 for both in-memory and file-backed databases.
 func configureSQLitePool(dbPath string, db *sql.DB) {
 	_ = dbPath
+
 	db.SetMaxOpenConns(1)
 }
 
