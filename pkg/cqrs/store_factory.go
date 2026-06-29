@@ -92,16 +92,15 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 }
 
 // configureSQLitePool sets connection pool size and PRAGMAs based on whether
-// the database is in-memory or file-backed.
+// configureSQLitePool constrains the connection pool for the SQLite driver.
 //
-// In-memory databases MUST use a single connection (each connection gets its
-// own private database). File-backed databases use WAL mode with multiple
-// reader connections for concurrent read access.
-func configureSQLitePool(_ string, db *sql.DB) {
-	// SQLite with database/sql requires a single connection to ensure
-	// PRAGMAs (like busy_timeout) apply consistently. Multiple connections
-	// would each need their own PRAGMA setup, and in-memory databases
-	// require exactly 1 connection to share state.
+// SQLite via database/sql requires a single connection so PRAGMAs (busy_timeout,
+// journal_mode) apply consistently to all statements, and so an in-memory
+// database (:memory:) shares its state across queries. A second connection would
+// get a fresh private database for :memory: and would need its own PRAGMA setup,
+// so MaxOpenConns is pinned to 1 for both in-memory and file-backed databases.
+func configureSQLitePool(dbPath string, db *sql.DB) {
+	_ = dbPath
 	db.SetMaxOpenConns(1)
 }
 

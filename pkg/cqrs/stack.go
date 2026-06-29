@@ -2,7 +2,6 @@ package cqrs
 
 import (
 	"context"
-	"database/sql"
 	"log/slog"
 
 	"charm.land/log/v2"
@@ -55,7 +54,6 @@ type CQRSStack struct {
 	Repo              *decider.Repository[SyncItemState]
 	CommandDispatcher *command.Dispatcher
 	conflictResolver  crdt.ConflictResolver[*model.Item]
-	db                *sql.DB
 	cancelRunner      context.CancelFunc
 	drainDone         <-chan struct{}
 }
@@ -126,7 +124,6 @@ func NewCQRSStack(cfg CQRSConfig) (*CQRSStack, error) {
 		ReadModel:         rm,
 		CommandDispatcher: commandDispatcher,
 		conflictResolver:  cfg.ConflictResolver,
-		db:                sr.db,
 		cancelRunner:      cancelRunner,
 		drainDone:         drainDone,
 	}, nil
