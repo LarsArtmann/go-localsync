@@ -7,6 +7,7 @@ import (
 	"charm.land/log/v2"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
@@ -21,6 +22,10 @@ type Server struct {
 
 // NewServer creates an HTTP API server backed by the given syncer.
 func NewServer(syncer *synclib.Syncer, logger *log.Logger) *Server {
+	// Populate the user-facing error templates so HandleErrorDetailed can render
+	// What/Why/Fix/WayOut for any error surfaced at this boundary. Idempotent.
+	pkgerrors.RegisterErrorTemplates()
+
 	if logger == nil {
 		logger = log.Default()
 	}

@@ -217,20 +217,18 @@ func TestRegisteredTemplates(t *testing.T) {
 	}
 }
 
-// TestTemplatesRegisteredOnImport guards the init() auto-registration: templates
-// must be populated by simply importing this package, without any caller action.
-// Removing init() (or the sync.Once guard) breaks user-facing messages in every
-// binary that does not call RegisterErrorTemplates explicitly.
-func TestTemplatesRegisteredOnImport(t *testing.T) {
+// TestRegisterErrorTemplatesIsIdempotent guards the sync.Once guard: calling
+// RegisterErrorTemplates repeatedly must be safe and must populate templates
+// (production wiring is api.NewServer, which calls this once).
+func TestRegisterErrorTemplatesIsIdempotent(t *testing.T) {
 	t.Parallel()
 
-	// Intentionally do NOT call RegisterErrorTemplates here — init() must have done it.
-	result := errorfamily.HandleErrorDetailed(ErrNotFound)
-	if result == nil {
-		t.Fatal("expected non-nil HandleResult")
-	}
+	// Must not panic on the second call.
+	RegisterErrorTemplates()
+	RegisterErrorTemplates()
 
-	if result.Message == "" {
-		t.Error("expected templates to be registered automatically on package import")
+	result := errorfamily.HandleErrorDetailed(ErrNotFound)
+	if result == nil || result.Message == "" {
+		t.Error("expected templates to remain populated after repeated registration")
 	}
 }

@@ -35,22 +35,20 @@ var (
 
 // templatesRegistered guarantees RegisterErrorTemplates runs exactly once, so the
 // global template table is populated exactly once even under concurrent first use.
+//
+//nolint:gochecknoglobals // Package-level idempotency guard; initialized once, never mutated thereafter.
 var templatesRegistered sync.Once
 
 // RegisterErrorTemplates registers user-facing message templates for all error codes.
-// Safe to call any number of times. It also runs automatically via init() on package
-// import, so templates are always available wherever this package is used without any
-// caller action. Exposed for tests and consumers that drive a non-default registry.
+// Safe to call any number of times. It is invoked from api.NewServer so every
+// production binary populates the template table without any other caller action;
+// tests and non-server consumers may call it directly.
 func RegisterErrorTemplates() {
 	templatesRegistered.Do(func() {
 		for _, e := range errorEntries {
 			errorfamily.RegisterTemplate(e.code, e.tmpl)
 		}
 	})
-}
-
-func init() {
-	RegisterErrorTemplates()
 }
 
 type errorEntry struct {
