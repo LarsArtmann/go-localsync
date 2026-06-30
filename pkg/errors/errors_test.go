@@ -20,7 +20,7 @@ func TestSentinelErrors(t *testing.T) {
 		{"ErrRateLimited", ErrRateLimited, "[transient:rate_limited] rate limited"},
 		{"ErrInvalidToken", ErrInvalidToken, "[rejection:invalid_token] invalid token"},
 		{"ErrUserNotFound", ErrUserNotFound, "[rejection:user_not_found] user not found"},
-		{"ErrSyncFailed", ErrSyncFailed, "[transient:sync_failed] sync failed"},
+		{"ErrPartialSync", ErrPartialSync, "[transient:partial_sync] sync completed with item errors"},
 		{"ErrDatabase", ErrDatabase, "[infrastructure:database] database error"},
 		{"ErrInvalidInput", ErrInvalidInput, "[rejection:invalid_input] invalid input"},
 		{"ErrUnknownBackend", ErrUnknownBackend, "[rejection:unknown_backend] unknown backend"},
@@ -67,13 +67,13 @@ func TestWithUserDetail(t *testing.T) {
 func TestWrap(t *testing.T) {
 	t.Parallel()
 
-	err := Wrap(ErrSyncFailed, "sync interrupted")
+	err := Wrap(ErrPartialSync, "sync interrupted")
 	if err == nil {
 		t.Fatal("expected non-nil error")
 	}
 
-	if !errors.Is(err, ErrSyncFailed) {
-		t.Error("expected err to match ErrSyncFailed via errors.Is")
+	if !errors.Is(err, ErrPartialSync) {
+		t.Error("expected err to match ErrPartialSync via errors.Is")
 	}
 }
 
@@ -89,7 +89,7 @@ func TestErrorClassification(t *testing.T) {
 		{ErrRateLimited, event.Transient, true},
 		{ErrInvalidToken, event.Rejection, false},
 		{ErrUserNotFound, event.Rejection, false},
-		{ErrSyncFailed, event.Transient, true},
+		{ErrPartialSync, event.Transient, true},
 		{ErrDatabase, event.Infrastructure, false},
 		{ErrInvalidInput, event.Rejection, false},
 		{ErrUnknownBackend, event.Rejection, false},
@@ -119,13 +119,13 @@ func TestErrorClassification_ThroughWrapping(t *testing.T) {
 		t.Errorf("Classify(wrapped ErrNotFound) = %v, want Rejection", got)
 	}
 
-	wrappedSync := Wrapf(ErrSyncFailed, "attempt %d", 3)
+	wrappedSync := Wrapf(ErrPartialSync, "attempt %d", 3)
 	if got := event.Classify(wrappedSync); got != event.Transient {
-		t.Errorf("Classify(wrapped ErrSyncFailed) = %v, want Transient", got)
+		t.Errorf("Classify(wrapped ErrPartialSync) = %v, want Transient", got)
 	}
 
 	if !event.IsRetryable(wrappedSync) {
-		t.Error("IsRetryable(wrapped ErrSyncFailed) = false, want true")
+		t.Error("IsRetryable(wrapped ErrPartialSync) = false, want true")
 	}
 }
 
@@ -170,7 +170,7 @@ func TestIsRetryable(t *testing.T) {
 		{"transient error", ErrRateLimited, true},
 		{"rejection error", ErrNotFound, false},
 		{"infrastructure error", ErrDatabase, false},
-		{"wrapped transient", Wrap(ErrSyncFailed, "context"), true},
+		{"wrapped transient", Wrap(ErrPartialSync, "context"), true},
 		{"wrapped rejection", WithDetail(ErrInvalidToken, "detail"), false},
 	}
 
@@ -194,7 +194,7 @@ func TestRegisteredTemplates(t *testing.T) {
 		"rate_limited",
 		"invalid_token",
 		"user_not_found",
-		"sync_failed",
+		"partial_sync",
 		"database",
 		"invalid_input",
 		"unknown_backend",

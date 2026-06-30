@@ -19,8 +19,10 @@ var (
 	ErrInvalidToken = errorfamily.NewRejection("invalid_token", "invalid token")
 	// ErrUserNotFound indicates the specified user does not exist.
 	ErrUserNotFound = errorfamily.NewRejection("user_not_found", "user not found")
-	// ErrSyncFailed indicates a sync operation failed.
-	ErrSyncFailed = errorfamily.NewTransient("sync_failed", "sync failed")
+	// ErrPartialSync indicates a sync run completed but some individual items failed to persist.
+	// Transient (retryable): re-running the sync retries the failed items. Consumers can detect
+	// this outcome with errors.Is(err, ErrPartialSync).
+	ErrPartialSync = errorfamily.NewTransient("partial_sync", "sync completed with item errors")
 	// ErrDatabase indicates a storage backend error.
 	ErrDatabase = errorfamily.NewInfrastructure("database", "database error")
 	// ErrInvalidInput indicates a required field is missing or invalid.
@@ -93,11 +95,11 @@ var errorEntries = []errorEntry{
 		"Try a different username or verify the account exists.",
 	),
 	makeEntry(
-		"sync_failed",
-		"The synchronization operation failed.",
-		"An unexpected error occurred while fetching or storing items.",
-		"Check network connectivity and provider status.",
-		"Inspect the error detail for diagnostic information.",
+		"partial_sync",
+		"The synchronization finished, but some items could not be stored.",
+		"One or more items failed validation or persistence during the sync run.",
+		"Re-run the sync; only the failed items are retried.",
+		"Inspect the per-item errors returned in the sync result.",
 	),
 	makeEntry(
 		"database",

@@ -10,6 +10,7 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -191,8 +192,8 @@ func TestSyncer_Sync_InvalidItem(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := syncer.Sync(ctx, testSyncOpts())
-	if !errors.Is(err, errCompletedWithErrors) {
-		t.Fatalf("expected errCompletedWithErrors when all items are invalid, got: %v", err)
+	if !errors.Is(err, pkgerrors.ErrPartialSync) {
+		t.Fatalf("expected ErrPartialSync when all items are invalid, got: %v", err)
 	}
 	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
 	testutil.AssertInt(t, result.Errors, 1, "Errors")

@@ -3,7 +3,6 @@ package sync
 import (
 	"context"
 	"errors"
-	"fmt"
 	stdsync "sync"
 	"time"
 
@@ -141,20 +140,17 @@ type Stats struct {
 	TypeCounts map[string]int64
 }
 
-// errCompletedWithErrors is a static sentinel wrapped when a sync finishes with
-// per-item failures, so callers can errors.Is it (and it satisfies err113).
-var errCompletedWithErrors = errors.New("sync completed with item errors")
-
-// errIfFailed wraps errCompletedWithErrors when result records item failures,
-// so the same error contract is surfaced from every sync entry point (full,
-// validation-only-failure, and incremental). total is the number of items
-// attempted, reported in the message for context.
+// errIfFailed wraps pkgerrors.ErrPartialSync when result records item failures, so the
+// same error contract is surfaced from every sync entry point (full,
+// validation-only-failure, and incremental) and consumers can detect it via
+// errors.Is(err, pkgerrors.ErrPartialSync). total is the number of items attempted,
+// reported in the message for context.
 func errIfFailed(result *SyncResult, total int) error {
 	if result.Errors == 0 {
 		return nil
 	}
 
-	return fmt.Errorf("%w: %d of %d items failed", errCompletedWithErrors, result.Errors, total)
+	return pkgerrors.Wrapf(pkgerrors.ErrPartialSync, "%d of %d items failed", result.Errors, total)
 }
 
 // Sync fetches all items from the provider and persists them.
