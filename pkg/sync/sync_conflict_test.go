@@ -2,9 +2,11 @@ package sync
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"charm.land/log/v2"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
@@ -62,8 +64,8 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 		context.Background(),
 		testSyncOpts(),
 	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, pkgerrors.ErrPartialSync) {
+		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
 	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
 	testutil.AssertInt(t, result.Errors, 1, "Errors")
@@ -133,8 +135,8 @@ func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
 
 	ctx := context.Background()
 	result, err := cas.SyncWithConflictDetection(ctx, testSyncOpts())
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, pkgerrors.ErrPartialSync) {
+		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
 	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
 	testutil.AssertInt(t, result.Upserted, 1, "Upserted")
@@ -157,8 +159,8 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 		context.Background(),
 		testSyncOpts(),
 	)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, pkgerrors.ErrPartialSync) {
+		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
 	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
 	testutil.AssertInt(t, result.Errors, 2, "Errors")
@@ -178,8 +180,8 @@ func TestConflictAwareSyncer_RetainsItemErrors(t *testing.T) {
 	defer func() { _ = cas.Close() }()
 
 	result, err := cas.SyncWithConflictDetection(context.Background(), testSyncOpts())
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
+	if !errors.Is(err, pkgerrors.ErrPartialSync) {
+		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
 
 	testutil.AssertInt(t, result.Errors, 1, "Errors")

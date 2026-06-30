@@ -140,17 +140,23 @@ type Stats struct {
 	TypeCounts map[string]int64
 }
 
-// errIfFailed wraps pkgerrors.ErrPartialSync when result records item failures, so the
-// same error contract is surfaced from every sync entry point (full,
-// validation-only-failure, and incremental) and consumers can detect it via
-// errors.Is(err, pkgerrors.ErrPartialSync). total is the number of items attempted,
-// reported in the message for context.
-func errIfFailed(result *SyncResult, total int) error {
-	if result.Errors == 0 {
+// partialSyncError returns ErrPartialSync (Transient) when failed > 0, embedding
+// the failed/attempted counts in the message. It is the single partial-failure
+// contract shared by the full-sync and conflict-aware paths, so both surface the
+// same retryable, errors.Is(err, pkgerrors.ErrPartialSync)-checkable error. This
+// shared helper exists precisely so the two paths cannot diverge again (which is
+// how the conflict-aware path previously dropped partial failures silently).
+func partialSyncError(failed, total int) error {
+	if failed == 0 {
 		return nil
 	}
 
-	return pkgerrors.Wrapf(pkgerrors.ErrPartialSync, "%d of %d items failed", result.Errors, total)
+	return pkgerrors.Wrapf(pkgerrors.ErrPartialSync, "%d of %d items failed", failed, total)
+}
+
+// errIfFailed surfaces the partial-sync error when result records item failures.
+func errIfFailed(result *SyncResult, total int) error {
+	return partialSyncError(result.Errors, total)
 }
 
 // Sync fetches all items from the provider and persists them.

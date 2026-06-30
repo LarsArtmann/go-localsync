@@ -64,7 +64,7 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	cr.Errors += validationResult.Errors
 
 	if len(valid) == 0 {
-		return cr, nil
+		return cr, partialSyncError(cr.Errors, len(result.Items))
 	}
 
 	summary := s.syncer.store.SyncItems(ctx, valid)
@@ -86,7 +86,7 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		"errors", cr.Errors,
 	)
 
-	return cr, nil
+	return cr, partialSyncError(cr.Errors, len(result.Items))
 }
 
 // classify folds a SyncSummary into a ConflictResult, counting upserts,
