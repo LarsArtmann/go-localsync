@@ -189,7 +189,6 @@ func TestRegisteredTemplates(t *testing.T) {
 	t.Parallel()
 
 	RegisterErrorTemplates()
-
 	codes := []string{
 		"not_found",
 		"rate_limited",
@@ -215,5 +214,23 @@ func TestRegisteredTemplates(t *testing.T) {
 				t.Errorf("expected non-empty Message for code %q", code)
 			}
 		})
+	}
+}
+
+// TestTemplatesRegisteredOnImport guards the init() auto-registration: templates
+// must be populated by simply importing this package, without any caller action.
+// Removing init() (or the sync.Once guard) breaks user-facing messages in every
+// binary that does not call RegisterErrorTemplates explicitly.
+func TestTemplatesRegisteredOnImport(t *testing.T) {
+	t.Parallel()
+
+	// Intentionally do NOT call RegisterErrorTemplates here — init() must have done it.
+	result := errorfamily.HandleErrorDetailed(ErrNotFound)
+	if result == nil {
+		t.Fatal("expected non-nil HandleResult")
+	}
+
+	if result.Message == "" {
+		t.Error("expected templates to be registered automatically on package import")
 	}
 }

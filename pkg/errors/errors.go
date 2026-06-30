@@ -3,6 +3,7 @@ package errors
 import (
 	stderrors "errors"
 	"fmt"
+	"sync"
 
 	errorfamily "github.com/larsartmann/go-error-family"
 )
@@ -30,12 +31,24 @@ var (
 	ErrDBNil = errorfamily.NewRejection("db_nil", "database is nil")
 )
 
+// templatesRegistered guarantees RegisterErrorTemplates runs exactly once, so the
+// global template table is populated exactly once even under concurrent first use.
+var templatesRegistered sync.Once
+
 // RegisterErrorTemplates registers user-facing message templates for all error codes.
-// Call once at application startup.
+// Safe to call any number of times. It also runs automatically via init() on package
+// import, so templates are always available wherever this package is used without any
+// caller action. Exposed for tests and consumers that drive a non-default registry.
 func RegisterErrorTemplates() {
-	for _, e := range errorEntries {
-		errorfamily.RegisterTemplate(e.code, e.tmpl)
-	}
+	templatesRegistered.Do(func() {
+		for _, e := range errorEntries {
+			errorfamily.RegisterTemplate(e.code, e.tmpl)
+		}
+	})
+}
+
+func init() {
+	RegisterErrorTemplates()
 }
 
 type errorEntry struct {
