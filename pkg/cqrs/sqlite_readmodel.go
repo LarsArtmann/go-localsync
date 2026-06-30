@@ -144,7 +144,7 @@ func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (i
 
 	err := m.db.QueryRowContext(ctx, query, args...).Scan(&count)
 	if err != nil {
-		return count, wrapDBErr(err, fmt.Sprintf("count items (count=%d)", count))
+		return 0, wrapDBErr(err, "count items")
 	}
 
 	return count, nil
