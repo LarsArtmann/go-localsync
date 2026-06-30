@@ -12,8 +12,9 @@ import (
 // server-advised wait duration (e.g. a parsed Retry-After header on a 429).
 // When present, the retry loop waits that long instead of its computed backoff.
 // This is forward-compatible: providers that don't implement it simply use the
-// exponential backoff.
+// exponential backoff. It embeds error so it can be used with errors.AsType[T].
 type retryAfterer interface {
+	error
 	RetryAfter() time.Duration
 }
 

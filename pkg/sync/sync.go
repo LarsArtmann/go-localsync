@@ -457,9 +457,7 @@ func (s *Syncer) fetchItems(
 
 		wait := backoff(cfg, attempt)
 
-		var ra retryAfterer
-
-		if errors.As(lastErr, &ra) { // honor a server-advised Retry-After when present
+		if ra, ok := errors.AsType[retryAfterer](lastErr); ok { // honor a server-advised Retry-After when present
 			if d := ra.RetryAfter(); d > 0 {
 				wait = d
 			}
