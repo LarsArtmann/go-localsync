@@ -23,6 +23,13 @@ func TestMapSyncError(t *testing.T) {
 		{"database error maps to 500", pkgerrors.ErrDatabase, http.StatusInternalServerError},
 		{"invalid input maps to 400", pkgerrors.ErrInvalidInput, http.StatusBadRequest},
 		{"unknown backend maps to 500", pkgerrors.ErrUnknownBackend, http.StatusInternalServerError},
+		{"db nil maps to 400 (family fallback)", pkgerrors.ErrDBNil, http.StatusBadRequest},
+		{"partial sync maps to 503 (family fallback)", pkgerrors.ErrPartialSync, http.StatusServiceUnavailable},
+		{
+			"wrapped error keeps override status",
+			pkgerrors.Wrap(pkgerrors.ErrNotFound, "source=github"),
+			http.StatusNotFound,
+		},
 		{"unknown error maps to 503", errors.New("something unexpected"), http.StatusServiceUnavailable},
 	}
 

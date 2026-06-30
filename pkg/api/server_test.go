@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,6 +12,7 @@ import (
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
@@ -207,7 +207,7 @@ func TestGetStats_CountError(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			store := &mockSyncStore{countErr: errors.New(tc.errMsg)}
+			store := &mockSyncStore{countErr: pkgerrors.Wrap(pkgerrors.ErrDatabase, tc.errMsg)}
 			server := newTestServer(store)
 
 			req := newGETRequest(t, "/stats")
@@ -269,7 +269,11 @@ func TestListItems_WithFilter(t *testing.T) {
 func TestListItems_StoreError(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{SyncStoreListBehavior: testutil.SyncStoreListBehavior{ListErr: errors.New("list failed")}}
+	store := &mockSyncStore{
+		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
+			ListErr: pkgerrors.Wrap(pkgerrors.ErrDatabase, "list failed"),
+		},
+	}
 	server := newTestServer(store)
 
 	req := newGETRequest(t, "/items")
@@ -314,6 +318,52 @@ func TestTriggerSync(t *testing.T) {
 	}
 }
 
+// TestTriggerSync_PartialFailureReturns200 verifies that a sync with per-item
+// failures (ErrPartialSync) still returns 200 with the populated result, instead
+// of discarding the successfully-synced items behind an error status. The error
+// count is surfaced in the response body.
+func TestTriggerSync_PartialFailureReturns200(t *testing.T) {
+	t.Parallel()
+
+	now := time.Now()
+	valid := &provider.Item{
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID("1"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
+		ActorLogin: id.NewActorLogin("testuser"),
+		RepoName:   id.NewRepoID("test/repo"),
+		CreatedAt:  now,
+		UpdatedAt:  now,
+	}
+	// Invalid: missing every required field, so Validate fails -> counted as an error.
+	invalid := &provider.Item{ID: id.NewItemID()}
+
+	prov := &testutil.MockProvider{Items: []*provider.Item{valid, invalid}}
+	store := &mockSyncStore{}
+	syncer := synclib.NewSyncer(prov, store, log.Default())
+	server := NewServer(syncer, log.Default())
+
+	req := newJSONRequest(t, http.MethodPost, "/sync", syncInputBody{Source: "testuser", MaxPages: 1})
+	rec := httptest.NewRecorder()
+
+	server.ServeHTTP(rec, req)
+
+	testutil.AssertStatusOK(t, rec)
+
+	var body struct {
+		Errors int `json:"errors"`
+	}
+	err := json.Unmarshal(rec.Body.Bytes(), &body)
+	if err != nil {
+		t.Fatalf("failed to unmarshal response: %v", err)
+	}
+
+	if body.Errors != 1 {
+		t.Errorf("expected errors=1 (one invalid item), got %d", body.Errors)
+	}
+}
+
 func TestListItems_CountError(t *testing.T) {
 	t.Parallel()
 
@@ -321,7 +371,7 @@ func TestListItems_CountError(t *testing.T) {
 		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
 			Items: []*model.Item{testItem("1", "PushEvent")},
 		},
-		countErr: errors.New("count failed"),
+		countErr: pkgerrors.Wrap(pkgerrors.ErrDatabase, "count failed"),
 	}
 	server := newTestServer(store)
 

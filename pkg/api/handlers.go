@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"net/http"
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
@@ -43,12 +44,12 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 
 	items, err := s.store.List(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, mapSyncError(err)
 	}
 
 	total, err := s.store.Count(ctx, filter)
 	if err != nil {
-		return nil, err
+		return nil, mapSyncError(err)
 	}
 
 	var resp ListItemsOutput
@@ -66,7 +67,7 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 func (s *Server) getStats(ctx context.Context, _ *struct{}) (*StatsOutput, error) {
 	stats, err := s.syncer.GetStats(ctx)
 	if err != nil {
-		return nil, err
+		return nil, mapSyncError(err)
 	}
 
 	var resp StatsOutput
@@ -86,12 +87,17 @@ func (s *Server) triggerSync(ctx context.Context, input *SyncInput) (*SyncOutput
 
 	err := opts.Validate()
 	if err != nil {
-		return nil, huma.Error400BadRequest("invalid sync options", err)
+		return nil, mapSyncError(err)
 	}
 
 	result, err := s.syncer.Sync(ctx, &opts)
 	if err != nil {
-		return nil, mapSyncError(err)
+		// A partial sync (some items failed) still returns a populated result;
+		// surface it as 200 with the per-item error count rather than discarding
+		// the successfully-synced items. Any other error is mapped to its status.
+		if !errors.Is(err, pkgerrors.ErrPartialSync) || result == nil {
+			return nil, mapSyncError(err)
+		}
 	}
 
 	var resp SyncOutput
@@ -116,23 +122,13 @@ func (s *Server) healthCheck(ctx context.Context, _ *struct{}) (*HealthOutput, e
 	return &resp, nil
 }
 
+// mapSyncError translates a domain error into a huma StatusError using the central
+// pkgerrors.HTTPStatus mapping (per-sentinel overrides + error-family fallback).
+// It is the single HTTP-boundary translator: every handler routes errors here so
+// status codes stay consistent and newly added sentinels map automatically instead
+// of silently hitting a brittle catch-all default.
 func mapSyncError(err error) error {
-	switch {
-	case errors.Is(err, pkgerrors.ErrNotFound):
-		return huma.Error404NotFound("not found", err)
-	case errors.Is(err, pkgerrors.ErrRateLimited):
-		return huma.Error429TooManyRequests("rate limited", err)
-	case errors.Is(err, pkgerrors.ErrInvalidToken):
-		return huma.Error401Unauthorized("invalid token", err)
-	case errors.Is(err, pkgerrors.ErrUserNotFound):
-		return huma.Error404NotFound("user not found", err)
-	case errors.Is(err, pkgerrors.ErrDatabase):
-		return huma.Error500InternalServerError("database error", err)
-	case errors.Is(err, pkgerrors.ErrInvalidInput):
-		return huma.Error400BadRequest("invalid input", err)
-	case errors.Is(err, pkgerrors.ErrUnknownBackend):
-		return huma.Error500InternalServerError("unknown backend", err)
-	default:
-		return huma.Error503ServiceUnavailable("sync failed", err)
-	}
+	status := pkgerrors.HTTPStatus(err)
+
+	return huma.NewError(status, http.StatusText(status), err)
 }
