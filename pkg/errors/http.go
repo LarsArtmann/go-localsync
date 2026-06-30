@@ -1,11 +1,18 @@
 package errors
 
 import (
+	"context"
 	"errors"
 	"net/http"
 
 	errorfamily "github.com/larsartmann/go-error-family"
 )
+
+// StatusClientClosedRequest is the (nginx-origin) status used when the client
+// disconnects before the response is written. It is non-standard but widely
+// understood by proxies and observability tooling, and crucially signals "not a
+// server fault" — unlike the 503 the Transient fallback would otherwise produce.
+const StatusClientClosedRequest = 499
 
 // httpStatusOverrides maps sentinels to HTTP statuses that are more precise than
 // their family-level default. go-error-family's Family.HTTPStatus maps every
@@ -38,6 +45,15 @@ var httpStatusOverrides = map[error]int{
 func HTTPStatus(err error) int {
 	if err == nil {
 		return http.StatusOK
+	}
+
+	// Client-driven cancellation is not a server fault: distinguish it from the
+	// Transient(503) fallback so observability and clients read it correctly.
+	switch {
+	case errors.Is(err, context.Canceled):
+		return StatusClientClosedRequest // 499
+	case errors.Is(err, context.DeadlineExceeded):
+		return http.StatusGatewayTimeout // 504
 	}
 
 	for sentinel, status := range httpStatusOverrides {

@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"testing"
@@ -31,6 +32,10 @@ func TestHTTPStatus(t *testing.T) {
 		{"db nil -> family Rejection default 400", ErrDBNil, http.StatusBadRequest},
 		// Unclassified errors default to Transient (fail-open) -> 503.
 		{"plain error -> 503", errors.New("boom"), http.StatusServiceUnavailable},
+		// Client cancellation is not a server fault.
+		{"context canceled -> 499", context.Canceled, StatusClientClosedRequest},
+		{"context deadline -> 504", context.DeadlineExceeded, http.StatusGatewayTimeout},
+		{"wrapped cancel keeps 499", Wrap(context.Canceled, "during list"), StatusClientClosedRequest},
 		{"nil -> 200", nil, http.StatusOK},
 	}
 
