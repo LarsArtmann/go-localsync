@@ -172,3 +172,26 @@ func Wrap(err error, message string) error {
 func Wrapf(err error, format string, args ...any) error {
 	return wrapPreservingFamily(err, fmt.Sprintf(format, args...))
 }
+
+// WithCtx attaches a structured key/value pair to err, preserving the error
+// family, code, and errors.Is identity. Unlike WithDetail (which mashes context
+// into the message string), WithCtx stores it as structured data reachable via
+// (*errorfamily.Error).ErrorContext(), so it flows to structured logs and message
+// templates. The underlying sentinel is never mutated — errorfamily clones on
+// attach. Plain (non-errorfamily) errors fall back to a "key=value" message wrap.
+func WithCtx(err error, key, value string) error {
+	if e, ok := stderrors.AsType[*errorfamily.Error](err); ok {
+		return e.WithContext(key, value)
+	}
+
+	return wrapPreservingFamily(err, key+"="+value)
+}
+
+// WithCtxf is the formatted variant of WithCtx.
+func WithCtxf(err error, key, format string, args ...any) error {
+	if e, ok := stderrors.AsType[*errorfamily.Error](err); ok {
+		return e.WithContextf(key, format, args...)
+	}
+
+	return wrapPreservingFamily(err, key+"="+fmt.Sprintf(format, args...))
+}

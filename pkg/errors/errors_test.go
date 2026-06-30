@@ -64,6 +64,45 @@ func TestWithDetail_PreservesIs(t *testing.T) {
 	}
 }
 
+func TestWithCtx_AttachesStructuredContext(t *testing.T) {
+	t.Parallel()
+
+	err := WithCtx(ErrNotFound, "source", "github")
+
+	// errors.Is identity is preserved through context attachment.
+	if !errors.Is(err, ErrNotFound) {
+		t.Fatal("expected err to match ErrNotFound via errors.Is")
+	}
+
+	ef, ok := errors.AsType[*errorfamily.Error](err)
+	if !ok {
+		t.Fatal("expected an *errorfamily.Error to read context")
+	}
+
+	if got := ef.ErrorContext()["source"]; got != "github" {
+		t.Errorf("expected context[source]=github, got %q", got)
+	}
+
+	// The original sentinel must not be mutated by attaching context.
+	if len(ErrNotFound.ErrorContext()) != 0 {
+		t.Error("attaching context mutated the shared ErrNotFound sentinel")
+	}
+}
+
+func TestWithCtxf(t *testing.T) {
+	t.Parallel()
+
+	err := WithCtxf(ErrDatabase, "attempt", "%d of %d", 2, 3)
+	ef, ok := errors.AsType[*errorfamily.Error](err)
+	if !ok {
+		t.Fatal("expected an *errorfamily.Error to read context")
+	}
+
+	if got := ef.ErrorContext()["attempt"]; got != "2 of 3" {
+		t.Errorf("expected context[attempt]='2 of 3', got %q", got)
+	}
+}
+
 func TestWrap(t *testing.T) {
 	t.Parallel()
 
