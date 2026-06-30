@@ -152,11 +152,6 @@ func WithDetail(err error, detail string) error {
 	return wrapPreservingFamily(err, detail)
 }
 
-// WithUserDetail is a convenience function to add username context.
-func WithUserDetail(err error, username string) error {
-	return wrapPreservingFamily(err, "username="+username)
-}
-
 // Wrap wraps an error with additional context.
 func Wrap(err error, message string) error {
 	return wrapPreservingFamily(err, message)

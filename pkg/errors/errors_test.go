@@ -51,10 +51,10 @@ func TestWithDetail(t *testing.T) {
 	}
 }
 
-func TestWithUserDetail(t *testing.T) {
+func TestWithDetail_PreservesIs(t *testing.T) {
 	t.Parallel()
 
-	err := WithUserDetail(ErrUserNotFound, "octocat")
+	err := WithDetail(ErrUserNotFound, "username=octocat")
 	if err == nil {
 		t.Fatal("expected non-nil error")
 	}
@@ -140,7 +140,6 @@ func TestWrapping_NonErrorFamily(t *testing.T) {
 		wantMsg string
 	}{
 		{"WithDetail", WithDetail(baseErr, "extra context"), "extra context: base error"},
-		{"WithUserDetail", WithUserDetail(baseErr, "octocat"), "username=octocat: base error"},
 		{"Wrap", Wrap(baseErr, "context"), "context: base error"},
 		{"Wrapf", Wrapf(baseErr, "attempt %d", 3), "attempt 3: base error"},
 	}
