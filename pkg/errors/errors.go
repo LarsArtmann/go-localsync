@@ -127,6 +127,17 @@ var errorEntries = []errorEntry{
 		"Provide a database path when using the sqlite backend.",
 		"Use the memory backend if persistence is not required.",
 	),
+	// Template for the crdt-owned sentinel crdt.ErrNilTimestampFunc (code below).
+	// The sentinel stays in pkg/crdt to keep that package dependency-light; the
+	// user-facing message lives here in the central catalog, per the errorfamily
+	// "sentinel anywhere, messages centralized" pattern.
+	makeEntry(
+		"sync.resolver.nil_timestamp_func",
+		"The conflict resolver was misconfigured.",
+		"An LWW resolver was created without a timestamp function, so it cannot order conflicting versions.",
+		"Provide a non-nil timestamp function when constructing the resolver.",
+		"Use crdt.NewLWWResolver with a valid TimestampFunc.",
+	),
 }
 
 // IsRetryable reports whether the error is worth retrying.

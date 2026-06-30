@@ -198,6 +198,7 @@ func TestRegisteredTemplates(t *testing.T) {
 		"invalid_input",
 		"unknown_backend",
 		"db_nil",
+		"sync.resolver.nil_timestamp_func",
 	}
 
 	for _, code := range codes {
