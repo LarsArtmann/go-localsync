@@ -103,6 +103,25 @@ func TestWithCtxf(t *testing.T) {
 	}
 }
 
+func TestInvalidField(t *testing.T) {
+	t.Parallel()
+
+	err := InvalidField("externalId", "item.ExternalID is required")
+
+	if !errors.Is(err, ErrInvalidInput) {
+		t.Error("expected InvalidField to match ErrInvalidInput")
+	}
+
+	ef, ok := errors.AsType[*errorfamily.Error](err)
+	if !ok {
+		t.Fatal("expected an *errorfamily.Error to read context")
+	}
+
+	if got := ef.ErrorContext()["field"]; got != "externalId" {
+		t.Errorf("expected context[field]=externalId, got %q", got)
+	}
+}
+
 func TestWrap(t *testing.T) {
 	t.Parallel()
 

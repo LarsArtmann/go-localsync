@@ -195,3 +195,12 @@ func WithCtxf(err error, key, format string, args ...any) error {
 
 	return wrapPreservingFamily(err, key+"="+fmt.Sprintf(format, args...))
 }
+
+// InvalidField wraps ErrInvalidInput with a human-readable reason and a
+// structured "field" key. Callers can display reason via Error() while handlers
+// can programmatically locate the offending field via ErrorContext()["field"].
+// Use it from model/provider Validate functions so every validation error is
+// both human-readable and field-addressable.
+func InvalidField(field, reason string) error {
+	return WithCtx(WithDetail(ErrInvalidInput, reason), "field", field)
+}

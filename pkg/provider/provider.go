@@ -56,23 +56,23 @@ func (item *Item) Validate() error {
 	var errs []error
 
 	if item.ExternalID.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.ExternalID is required"))
+		errs = append(errs, pkgerrors.InvalidField("externalId", "item.ExternalID is required"))
 	}
 
 	if item.Source.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.Source is required"))
+		errs = append(errs, pkgerrors.InvalidField("source", "item.Source is required"))
 	}
 
 	if item.Type.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.Type is required"))
+		errs = append(errs, pkgerrors.InvalidField("type", "item.Type is required"))
 	}
 
 	if item.CreatedAt.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.CreatedAt is required"))
+		errs = append(errs, pkgerrors.InvalidField("createdAt", "item.CreatedAt is required"))
 	}
 
 	if item.UpdatedAt.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "item.UpdatedAt is required"))
+		errs = append(errs, pkgerrors.InvalidField("updatedAt", "item.UpdatedAt is required"))
 	}
 
 	return stderrors.Join(errs...)

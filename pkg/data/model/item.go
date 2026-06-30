@@ -76,23 +76,23 @@ func validateIdentity(
 	var errs []error
 
 	if externalID.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "externalID is required"))
+		errs = append(errs, pkgerrors.InvalidField("externalID", "externalID is required"))
 	}
 
 	if source.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "source is required"))
+		errs = append(errs, pkgerrors.InvalidField("source", "source is required"))
 	}
 
 	if eventType.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "type is required"))
+		errs = append(errs, pkgerrors.InvalidField("type", "type is required"))
 	}
 
 	if createdAt.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "createdAt is required"))
+		errs = append(errs, pkgerrors.InvalidField("createdAt", "createdAt is required"))
 	}
 
 	if updatedAt.IsZero() {
-		errs = append(errs, pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "updatedAt is required"))
+		errs = append(errs, pkgerrors.InvalidField("updatedAt", "updatedAt is required"))
 	}
 
 	return errors.Join(errs...)
