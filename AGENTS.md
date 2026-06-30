@@ -54,12 +54,15 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 - **SQL persistence**: SQLite backend persists snapshots (`SQLSnapshotStore`) via `snapshot/v3` and `storage/v3` modules.
 - **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
 - **Command dispatch**: `SyncItem`/`TombstoneItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
-- **Resilient fetch**: `fetchItems` retries transient errors with exponential backoff + ±25% jitter, consults `errors.IsRetryable`, and honors an optional `retryAfterer` (Retry-After) hook. Permanent errors surface immediately.
+- **Resilient fetch**: `fetchItems` retries transient errors with exponential backoff + ±25% jitter, consults `errors.IsRetryable`, and honors an optional `retryAfterer` (Retry-After) hook. Permanent errors surface immediately. Unclassified provider errors classify as Transient (fail-open) so they are retried — providers that know an error is permanent should return an errorfamily-classified (Rejection) error.
+- **Partial sync**: when some items fail validation/persistence but the run completes, the sync returns a populated result **and** `pkgerrors.ErrPartialSync` (Transient); consumers detect it via `errors.Is`. The HTTP layer maps it to 200-with-result rather than discarding successfully-synced items.
 - **Per-source serialization**: a per-source mutex orders concurrent syncs of the same source (TOCTOU guard on the latest-timestamp read); different sources run in parallel. Internals are split into lock-free `runSync`/`runSyncIncremental` to avoid re-entrant deadlock when incremental falls back to full.
 - **Remote wins (default)**: on conflict with no resolver configured, the incoming item always overwrites (remote-wins LWW)
 - **Pluggable conflict resolution**: `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*model.Item]` — `LWWResolver`, custom merge, etc.
-- **Validated at boundary**: both `provider.Item.Validate()` and `model.Item.Validate()` require the same fields (including `UpdatedAt`) and route through `pkgerrors.ErrInvalidInput` so classification is consistent.
+- **Validated at boundary**: both `provider.Item.Validate()` and `model.Item.Validate()` require the same fields (including `UpdatedAt`) and route through `pkgerrors.InvalidField(field, reason)` (→ `ErrInvalidInput`) so classification is consistent **and** the offending field is attached as structured context (`ErrorContext()["field"]`) for programmatic handling.
 - **Error-chain-preserving SQLite**: all read-model errors use multi-`%w` wrapping (`wrapDBErr`) so `errors.Is(err, ErrDatabase)` AND `errors.As(err, &driverErr)` both work.
+
+- **Centralized HTTP mapping**: `pkgerrors.HTTPStatus(err)` is the single error→status translator (per-sentinel overrides where the family default is too coarse, then `errorfamily.Classify(err).HTTPStatus()`). `context.Canceled`→499, `context.DeadlineExceeded`→504. The API layer routes every handler through it; new sentinels inherit their family's status automatically — no brittle catch-all default.
 
 ### Conflict Flow
 
@@ -140,14 +143,14 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/cqrs`        | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests |
 | `pkg/sync`        | 32    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                    |
 | `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                            |
-| `pkg/errors`      | 9     | 100.0%   | ✅ Sentinel errors, wrapping, classification, IsRetryable, registered templates                       |
+| `pkg/errors`      | 16    | 100.0%   | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
 | `pkg/provider`    | 2     | 90.9%    | ✅ Item validation                                                                                    |
-| `pkg/api`         | 14    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error path tests                      |
+| `pkg/api`         | 15    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                                        |
 | `pkg/crdt`        | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                              |
 | `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                         |
 | `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                      |
 
-**186 total test functions** across 9 test packages.
+**194 total test functions** across 9 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -239,5 +242,5 @@ Two tables managed by the CQRS stack:
 | Snapshots      | `SQLiteSnapshotStore` (SQLite) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                       | Caps replay cost, persists across restarts                                        |
 | Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                        | Unique per sync run for debugging                                                 |
 | Logging        | `middleware.EventLogging` via charm log adapter                                                                 | Structured logging of all domain events                                           |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `event.IsRetryable`                                 | Smart retry classification for provider errors                                    |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `pkgerrors.HTTPStatus` (status) + `WithCtx`/`InvalidField` (structured context) | Smart retry classification, error→HTTP, and field-addressable validation errors |
 | Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                            | `int` → `uint64` in v3; no `int()` casts needed                                   |
