@@ -84,7 +84,10 @@ func TestMemoryReadModel_ConcurrentReadDuringWrites(t *testing.T) {
 
 		for range readers * readsPerReader {
 			newItem := concurrentTestItem("github", "new", "PushEvent")
-			_ = rm.Upsert(ctx, newItem)
+			err := rm.Upsert(ctx, newItem)
+			if err != nil {
+				t.Errorf("background upsert: %v", err)
+			}
 		}
 	}()
 
@@ -93,8 +96,14 @@ func TestMemoryReadModel_ConcurrentReadDuringWrites(t *testing.T) {
 			defer wg.Done()
 
 			for range readsPerReader {
-				_, _ = rm.List(ctx, model.ItemFilter{})
-				_, _ = rm.Count(ctx, model.ItemFilter{})
+				_, err := rm.List(ctx, model.ItemFilter{})
+				if err != nil {
+					t.Errorf("concurrent list: %v", err)
+				}
+				_, err = rm.Count(ctx, model.ItemFilter{})
+				if err != nil {
+					t.Errorf("concurrent count: %v", err)
+				}
 			}
 		}()
 	}
@@ -119,7 +128,10 @@ func TestMemoryReadModel_ConcurrentUpsertDelete(t *testing.T) {
 
 		for range 100 {
 			item := concurrentTestItem(source, extID.Get(), "PushEvent")
-			_ = rm.Upsert(ctx, item)
+			err := rm.Upsert(ctx, item)
+			if err != nil {
+				t.Errorf("concurrent upsert: %v", err)
+			}
 		}
 	}()
 
@@ -127,7 +139,10 @@ func TestMemoryReadModel_ConcurrentUpsertDelete(t *testing.T) {
 		defer wg.Done()
 
 		for range 100 {
-			_ = rm.Tombstone(ctx, source, extID, model.NewTombstone(model.ReasonUserHidden))
+			err := rm.Tombstone(ctx, source, extID, model.NewTombstone(model.ReasonUserHidden))
+			if err != nil {
+				t.Errorf("concurrent tombstone: %v", err)
+			}
 		}
 	}()
 
