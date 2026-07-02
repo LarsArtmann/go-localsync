@@ -161,12 +161,12 @@ func errIfFailed(result *SyncResult, total int) error {
 
 // Sync fetches all items from the provider and persists them.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	err := s.validateOpts(opts)
+	release, err := s.lockAndValidate(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	defer s.lockSource(opts.Source)()
+	defer release()
 
 	return s.runSync(ctx, opts)
 }
@@ -274,12 +274,12 @@ func (s *Syncer) reconcile(
 }
 
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	err := s.validateOpts(opts)
+	release, err := s.lockAndValidate(opts)
 	if err != nil {
 		return nil, err
 	}
 
-	defer s.lockSource(opts.Source)()
+	defer release()
 
 	return s.runSyncIncremental(ctx, opts)
 }
@@ -492,6 +492,19 @@ func (s *Syncer) reportProgress(opts *SyncOptions, syncResult *SyncResult) {
 	if opts.OnProgress != nil {
 		opts.OnProgress(syncResult.Fetched, syncResult.Skipped, syncResult.Errors)
 	}
+}
+
+// lockAndValidate validates opts and acquires the per-source lock. The returned
+// release function must be deferred by the caller to drop the lock on return.
+// If validation fails, the lock is NOT acquired and the error is returned.
+// This consolidates the validate-then-lock pattern shared by Sync,
+// SyncIncremental, and ConflictAwareSyncer.SyncWithConflictDetection.
+func (s *Syncer) lockAndValidate(opts *SyncOptions) (release func(), err error) {
+	if err := s.validateOpts(opts); err != nil {
+		return nil, err
+	}
+
+	return s.lockSource(opts.Source), nil
 }
 
 func (s *Syncer) validateOpts(opts *SyncOptions) error {

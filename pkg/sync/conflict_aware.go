@@ -42,7 +42,7 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	ctx context.Context,
 	opts *SyncOptions,
 ) (*ConflictResult, error) {
-	err := s.syncer.validateOpts(opts)
+	release, err := s.syncer.lockAndValidate(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	// Acquire the per-source lock so two concurrent conflict-aware syncs for the
 	// same source can't interleave a fetch+store window (the same TOCTOU guard
 	// the base Syncer uses). Different sources still run in parallel.
-	defer s.syncer.lockSource(opts.Source)()
+	defer release()
 
 	result, err := s.syncer.fetchItems(ctx, opts, "Starting conflict-aware sync", "conflict-aware sync")
 	if err != nil {
