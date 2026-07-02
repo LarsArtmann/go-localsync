@@ -21,7 +21,7 @@ import (
 //	** Whether or not the file does end up memory mapped of course depends on
 //	** the specific VFS implementation.
 //	*/
-func _vdbeSorterExtendFile(tls *libc.TLS, db, pFd uintptr, _nByte Ti64) {
+func _vdbeSorterExtendFile(tls *libc.TLS, db uintptr, pFd uintptr, _nByte Ti64) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	*(*Ti64)(unsafe.Pointer(bp)) = _nByte

@@ -22,7 +22,7 @@ const _POSIX_VERSION = 200112
 //	** On success, return SQLITE_OK.  Return SQLITE_ERROR if the time and date
 //	** cannot be found.
 //	*/
-func _unixCurrentTimeInt64(tls *libc.TLS, NotUsed, piNow uintptr) (r int32) {
+func _unixCurrentTimeInt64(tls *libc.TLS, NotUsed uintptr, piNow uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32

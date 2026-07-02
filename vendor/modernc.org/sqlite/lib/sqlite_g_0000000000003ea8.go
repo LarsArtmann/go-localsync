@@ -52,7 +52,7 @@ func _closeUnixFile(tls *libc.TLS, id uintptr) (r int32) {
 //	** Page references obtained by calling this function should be released
 //	** by calling pagerReleaseMapPage().
 //	*/
-func _pagerAcquireMapPage(tls *libc.TLS, pPager uintptr, pgno TPgno, pData, ppPage uintptr) (r int32) {
+func _pagerAcquireMapPage(tls *libc.TLS, pPager uintptr, pgno TPgno, pData uintptr, ppPage uintptr) (r int32) {
 	var p, v1 uintptr
 	_, _ = p, v1 /* Memory mapped page to return */
 	if (*TPager)(unsafe.Pointer(pPager)).FpMmapFreelist != 0 {
@@ -93,7 +93,7 @@ func _pagerAcquireMapPage(tls *libc.TLS, pPager uintptr, pgno TPgno, pData, ppPa
 //	** On success, return SQLITE_OK.  Return SQLITE_ERROR if the time and date
 //	** cannot be found.
 //	*/
-func _unixCurrentTimeInt64(tls *libc.TLS, NotUsed, piNow uintptr) (r int32) {
+func _unixCurrentTimeInt64(tls *libc.TLS, NotUsed uintptr, piNow uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32
@@ -113,7 +113,7 @@ func _unixCurrentTimeInt64(tls *libc.TLS, NotUsed, piNow uintptr) (r int32) {
 //	** bytes were read successfully and SQLITE_IOERR if anything goes
 //	** wrong.
 //	*/
-func _unixRead(tls *libc.TLS, id, pBuf uintptr, amt int32, offset Tsqlite3_int64) (r int32) {
+func _unixRead(tls *libc.TLS, id uintptr, pBuf uintptr, amt int32, offset Tsqlite3_int64) (r int32) {
 	var got, nCopy int32
 	var pFile uintptr
 	_, _, _ = got, nCopy, pFile
@@ -181,7 +181,7 @@ func _unixRead(tls *libc.TLS, id, pBuf uintptr, amt int32, offset Tsqlite3_int64
 //	**       Each record consists of a varint followed by a blob of data (the
 //	**       key). The varint is the number of bytes in the blob of data.
 //	*/
-func _vdbeSorterListToPMA(tls *libc.TLS, pTask, pList uintptr) (r int32) {
+func _vdbeSorterListToPMA(tls *libc.TLS, pTask uintptr, pList uintptr) (r int32) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var db, p, pNext uintptr

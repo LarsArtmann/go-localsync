@@ -15,7 +15,7 @@ import (
 //	/*
 //	** Find the mode, uid and gid of file zFile.
 //	*/
-func _getFileMode(tls *libc.TLS, zFile, pMode, pUid, pGid uintptr) (r int32) {
+func _getFileMode(tls *libc.TLS, zFile uintptr, pMode uintptr, pUid uintptr, pGid uintptr) (r int32) {
 	bp := tls.Alloc(128)
 	defer tls.Free(128)
 	var rc int32
@@ -23,7 +23,7 @@ func _getFileMode(tls *libc.TLS, zFile, pMode, pUid, pGid uintptr) (r int32) {
 	_ = rc /* Output of stat() on database file */
 	rc = SQLITE_OK
 	if 0 == (*(*func(*libc.TLS, uintptr, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(4)].FpCurrent})))(tls, zFile, bp) {
-		**(**Tmode_t)(__ccgo_up(pMode)) = (**(**Tstat)(__ccgo_up(bp))).Fst_mode & uint32(0o777)
+		**(**Tmode_t)(__ccgo_up(pMode)) = (**(**Tstat)(__ccgo_up(bp))).Fst_mode & uint32(0777)
 		**(**Tuid_t)(__ccgo_up(pUid)) = (**(**Tstat)(__ccgo_up(bp))).Fst_uid
 		**(**Tgid_t)(__ccgo_up(pGid)) = (**(**Tstat)(__ccgo_up(bp))).Fst_gid
 	} else {

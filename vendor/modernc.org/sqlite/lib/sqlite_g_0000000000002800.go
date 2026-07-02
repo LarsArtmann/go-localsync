@@ -17,7 +17,7 @@ const __FP_FAST_FMAL = 1
 //	/*
 //	** Append a single path element to the DbPath under construction
 //	*/
-func _appendOnePathElement(tls *libc.TLS, pPath, zName uintptr, nName int32) {
+func _appendOnePathElement(tls *libc.TLS, pPath uintptr, zName uintptr, nName int32) {
 	bp := tls.Alloc(4256)
 	defer tls.Free(4256)
 	var got Tssize_t

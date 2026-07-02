@@ -15,7 +15,7 @@ import (
 //	/*
 //	** Add a single segment and its associated events.
 //	*/
-func _geopolyAddOneSegment(tls *libc.TLS, p uintptr, x0, y0, x1, y1 TGeoCoord, side uint8, idx uint32) {
+func _geopolyAddOneSegment(tls *libc.TLS, p uintptr, x0 TGeoCoord, y0 TGeoCoord, x1 TGeoCoord, y1 TGeoCoord, side uint8, idx uint32) {
 	var pEvent, pSeg uintptr
 	var t TGeoCoord
 	_, _, _ = pEvent, pSeg, t

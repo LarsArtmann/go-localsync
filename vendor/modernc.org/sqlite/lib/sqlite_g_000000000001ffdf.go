@@ -10,7 +10,7 @@ import (
 	"modernc.org/libc"
 )
 
-func _cellOverlap(tls *libc.TLS, pRtree, p, aCell uintptr, nCell int32) (r TRtreeDValue) {
+func _cellOverlap(tls *libc.TLS, pRtree uintptr, p uintptr, aCell uintptr, nCell int32) (r TRtreeDValue) {
 	var ii, jj int32
 	var o, overlap, x1, x2 TRtreeDValue
 	var v3, v4, v5, v6, v7 float64

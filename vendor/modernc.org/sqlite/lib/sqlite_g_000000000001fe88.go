@@ -15,7 +15,7 @@ import (
 //	/*
 //	** Implementation of bm25() function.
 //	*/
-func _fts5Bm25Function(tls *libc.TLS, pApi, pFts, pCtx uintptr, nVal int32, apVal uintptr) {
+func _fts5Bm25Function(tls *libc.TLS, pApi uintptr, pFts uintptr, pCtx uintptr, nVal int32, apVal uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var D, b, k1, score, w, v2 float64
@@ -92,7 +92,7 @@ func _fts5Bm25Function(tls *libc.TLS, pApi, pFts, pCtx uintptr, nVal int32, apVa
 //	/*
 //	** Determine the overlap between two polygons
 //	*/
-func _geopolyOverlap(tls *libc.TLS, p1, p2 uintptr) (r int32) {
+func _geopolyOverlap(tls *libc.TLS, p1 uintptr, p2 uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var iMask, needSort, rc, v1 int32

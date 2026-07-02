@@ -267,7 +267,7 @@ func _dotlockClose(tls *libc.TLS, id uintptr) (r int32) {
 //	** So, we always use fdatasync() if it is available, regardless of
 //	** the value of the dataOnly flag.
 //	*/
-func _full_fsync(tls *libc.TLS, fd, fullSync, dataOnly int32) (r int32) {
+func _full_fsync(tls *libc.TLS, fd int32, fullSync int32, dataOnly int32) (r int32) {
 	var rc int32
 	_ = rc
 	/* The following "ifdef/elif/else/" block has the same structure as

@@ -27,7 +27,7 @@ import (
 //	** and pId2 is the id.  If the left side is just "id" then pId1 is the
 //	** id and pId2 is any empty string.
 //	*/
-func _sqlite3Pragma(tls *libc.TLS, pParse, pId1, pId2, pValue uintptr, minusFlag int32) {
+func _sqlite3Pragma(tls *libc.TLS, pParse uintptr, pId1 uintptr, pId2 uintptr, pValue uintptr, minusFlag int32) {
 	bp := tls.Alloc(240)
 	defer tls.Free(240)
 	var a1, a11, addr, addr1, addrCkFault, addrCkOk, addrOk, addrTop, b, bStrict, ckUniq, cnt, doTypeCheck, eAuto, eMode, eMode1, eMode2, i, i1, i10, i2, i3, i4, i5, i6, i7, i8, i9, iAddr, iAddr1, iBt, iCol, iCol1, iCookie, iDb, iDbLast, iEnd, iIdxDb, iLevel, iReg, iTab, iTabCur, iTabDb, iTabDb1, ii, ii1, ii2, ii3, ii4, initNCol, isHidden, isQuick, j2, j3, j4, jmp, jmp2, jmp21, jmp3, jmp4, jmp5, jmp6, jmp61, jmp7, k, k3, kk, label6, labelError, labelOk, loopTop, mx, mxCol, n, nBtree, nCheck, nHidden, nIdx, nIndex, nLimit, p11, p3, p4, r1, r11, r2, rc, regResult, regRow, showInternFunc, size, size1, size2, uniqOk, x1, v2 int32
@@ -2351,7 +2351,7 @@ func _sqlite3Pragma(tls *libc.TLS, pParse, pId1, pId2, pValue uintptr, minusFlag
 					if nLimit != 0 {
 						v2 = int32(0x02)
 					} else {
-						v2 = 0o0
+						v2 = 00
 					}
 					_sqlite3VdbeAddOp4(tls, v, int32(OP_SqlExec), v2, nLimit, 0, zSubSql, -int32(7))
 				}

@@ -59,7 +59,7 @@ func _compare2pow63(tls *libc.TLS, zNum uintptr, incr int32) (r int32) {
 //	**
 //	** Return 1 if there is a parsing error and 0 on success.
 //	*/
-func _parseHhMmSs(tls *libc.TLS, zDate, p uintptr) (r int32) {
+func _parseHhMmSs(tls *libc.TLS, zDate uintptr, p uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var ms, rScale float64
@@ -126,7 +126,7 @@ func _parseHhMmSs(tls *libc.TLS, zDate, p uintptr) (r int32) {
 //	**
 //	** A missing specifier is not considered an error.
 //	*/
-func _parseTimezone(tls *libc.TLS, zDate, p uintptr) (r int32) {
+func _parseTimezone(tls *libc.TLS, zDate uintptr, p uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var c, sgn int32
@@ -188,7 +188,7 @@ zulu_time:
 //	** on success and 1 if the input string is not a well-formed
 //	** date.
 //	*/
-func _parseYyyyMmDd(tls *libc.TLS, zDate, p uintptr) (r int32) {
+func _parseYyyyMmDd(tls *libc.TLS, zDate uintptr, p uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var neg, v1 int32

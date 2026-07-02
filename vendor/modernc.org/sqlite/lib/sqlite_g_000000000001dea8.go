@@ -52,7 +52,7 @@ import (
 //	** If aOvflSpace is set to a null pointer, this function returns
 //	** SQLITE_NOMEM.
 //	*/
-func _balance_nonroot(tls *libc.TLS, pParent uintptr, iParentIdx int32, aOvflSpace uintptr, isRoot, bBulk int32) (r1 int32) {
+func _balance_nonroot(tls *libc.TLS, pParent uintptr, iParentIdx int32, aOvflSpace uintptr, isRoot int32, bBulk int32) (r1 int32) {
 	bp := tls.Alloc(208)
 	defer tls.Free(208)
 	var aData, aSpace1, p, pBt, pCell, pCell1, pNew1, pNew2, pOld, pOld1, pOld2, pRight, pSrcEnd, pTemp, pTemp1, piCell, piEnd, v17 uintptr
@@ -936,7 +936,7 @@ balance_cleanup:
 //	** The pIdxKey->eqSeen field is set to 1 if there
 //	** exists an entry in the table that exactly matches pIdxKey.
 //	*/
-func _sqlite3BtreeIndexMoveto(tls *libc.TLS, pCur, pIdxKey, pRes uintptr) (r int32) {
+func _sqlite3BtreeIndexMoveto(tls *libc.TLS, pCur uintptr, pIdxKey uintptr, pRes uintptr) (r int32) {
 	var c, c1, idx, lwr, nCell, nOverrun, rc, upr, v1 int32
 	var chldPg TPgno
 	var pCell, pCellBody, pCellKey, pPage, v3 uintptr
@@ -1159,7 +1159,7 @@ moveto_index_finish:
 //	** key values and pX->aMem can be used instead of pX->pKey to avoid having
 //	** to decode the key.
 //	*/
-func _sqlite3BtreeInsert(tls *libc.TLS, pCur, pX uintptr, flags, seekResult int32) (r int32) {
+func _sqlite3BtreeInsert(tls *libc.TLS, pCur uintptr, pX uintptr, flags int32, seekResult int32) (r int32) {
 	bp := tls.Alloc(160)
 	defer tls.Free(160)
 	var idx int32
@@ -1448,7 +1448,7 @@ end_insert:
 //	**    16: Checksum-1.
 //	**    20: Checksum-2.
 //	*/
-func _walEncodeFrame(tls *libc.TLS, pWal uintptr, iPage, nTruncate Tu32, aData, aFrame uintptr) {
+func _walEncodeFrame(tls *libc.TLS, pWal uintptr, iPage Tu32, nTruncate Tu32, aData uintptr, aFrame uintptr) {
 	var aCksum uintptr
 	var nativeCksum int32
 	_, _ = aCksum, nativeCksum /* True for native byte-order checksums */

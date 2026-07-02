@@ -434,7 +434,7 @@ func _sqlite3DefaultMutex(tls *libc.TLS) (r uintptr) {
 // C documentation
 //
 //	/* Get the results of the thread */
-func _sqlite3ThreadJoin(tls *libc.TLS, p, ppOut uintptr) (r int32) {
+func _sqlite3ThreadJoin(tls *libc.TLS, p uintptr, ppOut uintptr) (r int32) {
 	if p == uintptr(0) {
 		return int32(SQLITE_NOMEM)
 	}

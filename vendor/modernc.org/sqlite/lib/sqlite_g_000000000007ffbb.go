@@ -76,7 +76,7 @@ func _first_valueStepFunc(tls *libc.TLS, pCtx uintptr, nArg int32, apArg uintptr
 	_ = apArg
 }
 
-func _fixBoundingBox(tls *libc.TLS, pRtree, pNode uintptr) (r int32) {
+func _fixBoundingBox(tls *libc.TLS, pRtree uintptr, pNode uintptr) (r int32) {
 	bp := tls.Alloc(112)
 	defer tls.Free(112)
 	var nCell, rc int32
@@ -166,7 +166,7 @@ func _fts5DlidxIterFree(tls *libc.TLS, pIter uintptr) {
 	}
 }
 
-func _fts5WriteDlidxClear(tls *libc.TLS, p, pWriter uintptr, bFlush int32) {
+func _fts5WriteDlidxClear(tls *libc.TLS, p uintptr, pWriter uintptr, bFlush int32) {
 	var i int32
 	var pDlidx uintptr
 	_, _ = i, pDlidx
@@ -238,7 +238,7 @@ func _mallocWithAlarm(tls *libc.TLS, n int32, pp uintptr) {
 	**(**uintptr)(__ccgo_up(pp)) = p
 }
 
-func _reinsertNodeContent(tls *libc.TLS, pRtree, pNode uintptr) (r int32) {
+func _reinsertNodeContent(tls *libc.TLS, pRtree uintptr, pNode uintptr) (r int32) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var ii, nCell, rc, rc2 int32

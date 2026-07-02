@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/larsartmann/go-cqrs-lite/command/v3"
@@ -93,16 +92,14 @@ func NewOTelBundle(
 		opt(cfg)
 	}
 
-	b := &OTelBundle{
+	b := &OTelBundle{ //nolint:exhaustruct // recorder set conditionally below
 		tracer:         tracer,
 		metricsEnabled: cfg.metricsEnabled,
 	}
 
 	if cfg.metricsEnabled {
 		if meter == nil {
-			return nil, errors.New(
-				"meter is required when metrics are enabled (pass WithMetricsDisabled for tracing-only)",
-			)
+			return nil, ErrMeterRequired
 		}
 
 		recorder, err := NewOTelMetricsRecorder(meter)

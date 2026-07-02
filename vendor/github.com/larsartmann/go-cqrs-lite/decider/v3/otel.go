@@ -8,18 +8,11 @@ import (
 
 const deciderComponent = "decider"
 
-var (
-	tracerOnce   sync.Once
-	cachedTracer cqrsotel.Tracer
-)
-
 // tracer returns a cached OpenTelemetry tracer for the decider module.
-// The tracer is created once via sync.Once to avoid repeated allocations
+// The tracer is created once via sync.OnceValue to avoid repeated allocations
 // on every Repository.Execute call.
-func tracer() cqrsotel.Tracer {
-	tracerOnce.Do(func() {
-		cachedTracer = cqrsotel.NewTracer(deciderComponent)
-	})
-
-	return cachedTracer
-}
+var tracer = sync.OnceValue( //nolint:gochecknoglobals // lazy init pattern
+	func() cqrsotel.Tracer {
+		return cqrsotel.NewTracer(deciderComponent)
+	},
+)

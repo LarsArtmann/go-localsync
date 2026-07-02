@@ -1,16 +1,19 @@
-# gobreaker
+gobreaker
+=========
 
 [![GoDoc](https://godoc.org/github.com/sony/gobreaker?status.svg)](https://godoc.org/github.com/sony/gobreaker)
 
 [gobreaker][repo-url] implements the [Circuit Breaker pattern](https://msdn.microsoft.com/en-us/library/dn589784.aspx) in Go.
 
-## Installation
+Installation
+------------
 
 ```
 go get github.com/sony/gobreaker
 ```
 
-## Usage
+Usage
+-----
 
 The struct `CircuitBreaker` is a state machine to prevent sending requests that are likely to fail.
 The function `NewCircuitBreaker` creates a new `CircuitBreaker`.
@@ -87,7 +90,8 @@ Otherwise, `Execute` returns the result of the request.
 If a panic occurs in the request, `CircuitBreaker` handles it as an error
 and causes the same panic again.
 
-## Example
+Example
+-------
 
 ```go
 var cb *breaker.CircuitBreaker
@@ -117,10 +121,12 @@ func Get(url string) ([]byte, error) {
 
 See [example](https://github.com/sony/gobreaker/blob/master/example) for details.
 
-## License
+License
+-------
 
 The MIT License (MIT)
 
 See [LICENSE](https://github.com/sony/gobreaker/blob/master/LICENSE) for details.
+
 
 [repo-url]: https://github.com/sony/gobreaker

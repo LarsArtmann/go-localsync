@@ -35,7 +35,7 @@ import (
 //	** words, at most 13 bytes. Hence the pSpace buffer must be at
 //	** least 13 bytes in size.
 //	*/
-func _balance_quick(tls *libc.TLS, pParent, pPage, pSpace uintptr) (r int32) {
+func _balance_quick(tls *libc.TLS, pParent uintptr, pPage uintptr, pSpace uintptr) (r int32) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var pBt, pOut, pStop, v1, v3 uintptr
@@ -226,7 +226,7 @@ cleardatabasepage_out:
 //	** Otherwise, if an error is encountered (i.e. an IO error or database
 //	** corruption) an SQLite error code is returned.
 //	*/
-func _sqlite3BtreeCount(tls *libc.TLS, db, pCur, pnEntry uintptr) (r int32) {
+func _sqlite3BtreeCount(tls *libc.TLS, db uintptr, pCur uintptr, pnEntry uintptr) (r int32) {
 	var iIdx, rc int32
 	var nEntry Ti64
 	var pPage uintptr
@@ -510,7 +510,7 @@ func _sqlite3BtreeDelete(tls *libc.TLS, pCur uintptr, flags Tu8) (r int32) {
 //	** in pZ.  nChar must be non-negative.  Surrogate pairs count as a single
 //	** character.
 //	*/
-func _sqlite3Utf16ByteLen(tls *libc.TLS, zIn uintptr, nByte, nChar int32) (r int32) {
+func _sqlite3Utf16ByteLen(tls *libc.TLS, zIn uintptr, nByte int32, nChar int32) (r int32) {
 	var c, n int32
 	var z, zEnd uintptr
 	_, _, _, _ = c, n, z, zEnd
@@ -538,7 +538,7 @@ func _sqlite3Utf16ByteLen(tls *libc.TLS, zIn uintptr, nByte, nChar int32) (r int
 //	** in aData[] is valid.  If it is a valid frame, fill *piPage and
 //	** *pnTruncate and return true.  Return if the frame is not valid.
 //	*/
-func _walDecodeFrame(tls *libc.TLS, pWal, piPage, pnTruncate, aData, aFrame uintptr) (r int32) {
+func _walDecodeFrame(tls *libc.TLS, pWal uintptr, piPage uintptr, pnTruncate uintptr, aData uintptr, aFrame uintptr) (r int32) {
 	var aCksum uintptr
 	var nativeCksum int32
 	var pgno Tu32

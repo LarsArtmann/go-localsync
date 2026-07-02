@@ -22,7 +22,7 @@ import (
 //	** The op is given by p->op.  The xN is p->iCoord-th coordinate in
 //	** pCellData.  $val is given by p->u.rValue.
 //	*/
-func _rtreeLeafConstraint(tls *libc.TLS, p uintptr, eInt int32, pCellData, peWithin uintptr) {
+func _rtreeLeafConstraint(tls *libc.TLS, p uintptr, eInt int32, pCellData uintptr, peWithin uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var xN TRtreeDValue
@@ -75,7 +75,7 @@ func _rtreeLeafConstraint(tls *libc.TLS, p uintptr, eInt int32, pCellData, peWit
 //	** If this constraint cannot be satisfied by any child within the node,
 //	** set *peWithin to NOT_WITHIN.
 //	*/
-func _rtreeNonleafConstraint(tls *libc.TLS, p uintptr, eInt int32, pCellData, peWithin uintptr) {
+func _rtreeNonleafConstraint(tls *libc.TLS, p uintptr, eInt int32, pCellData uintptr, peWithin uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var val, v1 Tsqlite3_rtree_dbl

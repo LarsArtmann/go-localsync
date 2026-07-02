@@ -22,7 +22,7 @@ import (
 //	** Instead, the entire table should be passed to sqlite3_free_table() when
 //	** the calling procedure is finished using it.
 //	*/
-func Xsqlite3_get_table(tls *libc.TLS, db, zSql, pazResult, pnRow, pnColumn, pzErrMsg uintptr) (r int32) {
+func Xsqlite3_get_table(tls *libc.TLS, db uintptr, zSql uintptr, pazResult uintptr, pnRow uintptr, pnColumn uintptr, pzErrMsg uintptr) (r int32) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var azNew uintptr
@@ -184,7 +184,7 @@ func _fts5NextMethod(tls *libc.TLS, pCursor uintptr) (r int32) {
 //	** Any virtual table module for which xConnect and xCreate are the same
 //	** method can have an eponymous virtual table instance.
 //	*/
-func _sqlite3VtabEponymousTableInit(tls *libc.TLS, pParse, pMod uintptr) (r int32) {
+func _sqlite3VtabEponymousTableInit(tls *libc.TLS, pParse uintptr, pMod uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var db, pModule, pTab uintptr
@@ -248,7 +248,7 @@ func _sqlite3VtabEponymousTableInit(tls *libc.TLS, pParse, pMod uintptr) (r int3
 //	** caller to eventually free p->idxStr if p->needToFreeIdxStr indicates
 //	** that this is required.
 //	*/
-func _vtabBestIndex(tls *libc.TLS, pParse, pTab, p uintptr) (r int32) {
+func _vtabBestIndex(tls *libc.TLS, pParse uintptr, pTab uintptr, p uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pVtab uintptr

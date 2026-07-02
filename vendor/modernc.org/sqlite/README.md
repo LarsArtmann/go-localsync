@@ -1,9 +1,9 @@
 The repository you are currently viewing might be a mirror. Please review the guidelines below based on where you are viewing this:
 
-| Platform   | Role               | Contributing Guidelines                                                                                                                                                                                                                  |
-| :--------- | :----------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **GitLab** | **Primary Source** | This is the canonical repository (`cznic/sqlite`). CI pipelines and main development happen here.                                                                                                                                        |
-| **GitHub** | **Mirror**         | This is a mirror (`modernc-org/sqlite`). We **do accept** Issues and Pull Requests here for your convenience! <br> _Note: PRs submitted here will be manually merged into the GitLab source, so please allow extra time for processing._ |
+| Platform | Role | Contributing Guidelines |
+| :--- | :--- | :--- |
+| **GitLab** | **Primary Source** | This is the canonical repository (`cznic/sqlite`). CI pipelines and main development happen here. |
+| **GitHub** | **Mirror** | This is a mirror (`modernc-org/sqlite`). We **do accept** Issues and Pull Requests here for your convenience! <br> *Note: PRs submitted here will be manually merged into the GitLab source, so please allow extra time for processing.* |
 
 [![Go Reference](https://pkg.go.dev/badge/modernc.org/sqlite.svg)](https://pkg.go.dev/modernc.org/sqlite)
 [![LiberaPay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/jnml/donate)
@@ -13,7 +13,7 @@ The repository you are currently viewing might be a mirror. Please review the gu
 ---
 
 ![heart](sponsors/heart.png "heart")
-[Github Sponsors Account](https://github.com/sponsors/j-modernc-org) / j-modernc-org
+[Github Sponsors Account](https://github.com/sponsors/j-modernc-org) /  j-modernc-org
 
 ### Enterprise Infrastructure Tier Sponsor
 
@@ -33,7 +33,8 @@ The repository you are currently viewing might be a mirror. Please review the gu
 
 ---
 
-## Virtual Tables (vtab)
+Virtual Tables (vtab)
+---------------------
 
 The driver exposes a Go API to implement SQLite virtual table modules in pure Go via the `modernc.org/sqlite/vtab` package. This lets you back SQL tables with arbitrary data sources (e.g., vector indexes, CSV files, remote APIs) and integrate with SQLite’s planner.
 
@@ -47,7 +48,8 @@ The driver exposes a Go API to implement SQLite virtual table modules in pure Go
 - Operators: Common SQLite operators map to `ConstraintOp` (EQ/NE/GT/GE/LT/LE/MATCH/IS/ISNOT/ISNULL/ISNOTNULL/LIKE/GLOB/REGEXP/FUNCTION/LIMIT/OFFSET). Unknown operators map to `OpUnknown`.
 - Errors: Returning an error from vtab methods surfaces a descriptive message to SQLite (e.g., `zErrMsg` for xCreate/xConnect/xBestIndex/xFilter; `sqlite3_result_error` for xColumn).
 
-## Examples
+Examples
+--------
 
 - Vector search (sqlite-vec style):
   - `CREATE VIRTUAL TABLE vec_docs USING vec(dim=128, metric="cosine")`
@@ -59,7 +61,8 @@ The driver exposes a Go API to implement SQLite virtual table modules in pure Go
 
 See `vtab` package docs for full API details.
 
-## Generated sources (deduplication)
+Generated sources (deduplication)
+---------------------------------
 
 The transpiled SQLite C amalgamation in `lib/` and the `sqlite-vec` extension in
 `vec/` ship one generated Go file per `GOOS`/`GOARCH`. Declarations that are

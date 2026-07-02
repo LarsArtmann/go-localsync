@@ -18,7 +18,7 @@ import (
 //	** to a non-zero value otherwise *pResOut is set to zero.  The return value
 //	** is set to SQLITE_OK unless an I/O error occurs during lock checking.
 //	*/
-func _unixCheckReservedLock(tls *libc.TLS, id, pResOut uintptr) (r int32) {
+func _unixCheckReservedLock(tls *libc.TLS, id uintptr, pResOut uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var pFile uintptr
@@ -89,7 +89,7 @@ func _unixCheckReservedLock(tls *libc.TLS, id, pResOut uintptr) (r int32) {
 //	** Zero is returned if the call completes successfully, or -1 if a call
 //	** to fcntl() fails. In this case, errno is set appropriately (by fcntl()).
 //	*/
-func _unixFileLock(tls *libc.TLS, pFile, pLock uintptr) (r int32) {
+func _unixFileLock(tls *libc.TLS, pFile uintptr, pLock uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var pInode uintptr
@@ -127,7 +127,7 @@ func _unixFileLock(tls *libc.TLS, pFile, pLock uintptr) (r int32) {
 //	** Locks block if the mask is exactly UNIX_SHM_C and are non-blocking
 //	** otherwise.
 //	*/
-func _unixShmSystemLock(tls *libc.TLS, pFile uintptr, lockType, ofst, n int32) (r int32) {
+func _unixShmSystemLock(tls *libc.TLS, pFile uintptr, lockType int32, ofst int32, n int32) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var pShmNode uintptr

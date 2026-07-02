@@ -19,7 +19,7 @@ const SIG_ATOMIC_MIN = -2147483648
 //	** lower 64-bits of the result into *pLo, and return the high-order
 //	** 64 bits.
 //	*/
-func _sqlite3Multiply128(tls *libc.TLS, a, b Tu64, pLo uintptr) (r Tu64) {
+func _sqlite3Multiply128(tls *libc.TLS, a Tu64, b Tu64, pLo uintptr) (r Tu64) {
 	var a0, a0b0, a0b1, a1, a1b0, a1b1, b0, b1, t Tu64
 	_, _, _, _, _, _, _, _, _ = a0, a0b0, a0b1, a1, a1b0, a1b1, b0, b1, t
 	a0 = uint64(uint32(a))

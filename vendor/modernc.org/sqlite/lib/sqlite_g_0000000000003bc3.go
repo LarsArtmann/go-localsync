@@ -226,7 +226,7 @@ func Xsqlite3_blob_reopen(tls *libc.TLS, pBlob uintptr, iRow Tsqlite3_int64) (r 
 //	** A global function must exist in order for name resolution to work
 //	** properly.
 //	*/
-func Xsqlite3_overload_function(tls *libc.TLS, db, zName uintptr, nArg int32) (r int32) {
+func Xsqlite3_overload_function(tls *libc.TLS, db uintptr, zName uintptr, nArg int32) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32
@@ -279,7 +279,7 @@ func Xsqlite3_set_errmsg(tls *libc.TLS, db uintptr, errcode int32, zMsg uintptr)
 //	/*
 //	** Provide a database schema to the changegroup object.
 //	*/
-func Xsqlite3changegroup_schema(tls *libc.TLS, pGrp, db, zDb uintptr) (r int32) {
+func Xsqlite3changegroup_schema(tls *libc.TLS, pGrp uintptr, db uintptr, zDb uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32
@@ -300,7 +300,7 @@ func Xsqlite3changegroup_schema(tls *libc.TLS, pGrp, db, zDb uintptr) (r int32) 
 	return rc
 }
 
-func _fts5PrepareStatement(tls *libc.TLS, ppStmt, pConfig, zFmt, va uintptr) (r int32) {
+func _fts5PrepareStatement(tls *libc.TLS, ppStmt uintptr, pConfig uintptr, zFmt uintptr, va uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var ap Tva_list
@@ -332,7 +332,7 @@ func _fts5PrepareStatement(tls *libc.TLS, ppStmt, pConfig, zFmt, va uintptr) (r 
 //	** to the pathname in zPath. zOut is guaranteed to point to a buffer
 //	** of at least (INST_MAX_PATHNAME+1) bytes.
 //	*/
-func _memdbFullPathname(tls *libc.TLS, pVfs, zPath uintptr, nOut int32, zOut uintptr) (r int32) {
+func _memdbFullPathname(tls *libc.TLS, pVfs uintptr, zPath uintptr, nOut int32, zOut uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	_ = pVfs
@@ -352,7 +352,7 @@ func _memdbFullPathname(tls *libc.TLS, pVfs, zPath uintptr, nOut int32, zOut uin
 //	** point to a buffer containing an error message. It is the responsibility
 //	** of the caller to (eventually) free this buffer using sqlite3_free().
 //	*/
-func _prepareAndCollectError(tls *libc.TLS, db, ppStmt, pzErrmsg, zSql uintptr) (r int32) {
+func _prepareAndCollectError(tls *libc.TLS, db uintptr, ppStmt uintptr, pzErrmsg uintptr, zSql uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32
@@ -374,7 +374,7 @@ func _prepareAndCollectError(tls *libc.TLS, db, ppStmt, pzErrmsg, zSql uintptr) 
 //	** rbu handle error code is not already set, set the error code and error
 //	** message accordingly.
 //	*/
-func _rbuFinalize(tls *libc.TLS, p, pStmt uintptr) {
+func _rbuFinalize(tls *libc.TLS, p uintptr, pStmt uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var db uintptr
@@ -388,7 +388,7 @@ func _rbuFinalize(tls *libc.TLS, p, pStmt uintptr) {
 	}
 }
 
-func _rbuOpenDbhandle(tls *libc.TLS, p, zName uintptr, bUseVfs int32) (r uintptr) {
+func _rbuOpenDbhandle(tls *libc.TLS, p uintptr, zName uintptr, bUseVfs int32) (r uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var flags int32
@@ -423,7 +423,7 @@ func _rbuOpenDbhandle(tls *libc.TLS, p, zName uintptr, bUseVfs int32) (r uintptr
 //	** containing an error message. It is the responsibility of the caller
 //	** to eventually free this buffer using sqlite3_free().
 //	*/
-func _resetAndCollectError(tls *libc.TLS, pStmt, pzErrmsg uintptr) (r int32) {
+func _resetAndCollectError(tls *libc.TLS, pStmt uintptr, pzErrmsg uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32
@@ -435,7 +435,7 @@ func _resetAndCollectError(tls *libc.TLS, pStmt, pzErrmsg uintptr) (r int32) {
 	return rc
 }
 
-func _sessionPrepare(tls *libc.TLS, db, pp, pzErrmsg, zSql uintptr) (r int32) {
+func _sessionPrepare(tls *libc.TLS, db uintptr, pp uintptr, pzErrmsg uintptr, zSql uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32

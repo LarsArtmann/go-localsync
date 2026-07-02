@@ -15,7 +15,7 @@ import (
 //	/*
 //	** Compile the UTF-16 encoded SQL statement zSql into a statement handle.
 //	*/
-func _sqlite3Prepare16(tls *libc.TLS, db, zSql uintptr, nBytes int32, prepFlags Tu32, ppStmt, pzTail uintptr) (r int32) {
+func _sqlite3Prepare16(tls *libc.TLS, db uintptr, zSql uintptr, nBytes int32, prepFlags Tu32, ppStmt uintptr, pzTail uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var chars_parsed, rc, sz, sz1 int32

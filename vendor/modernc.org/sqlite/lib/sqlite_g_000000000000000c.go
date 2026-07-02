@@ -270,7 +270,7 @@ var _aNanInfName = [5]TNanInfName{
 //	** the text passed to the MATCH operator are used as  the special query
 //	** parameters.
 //	*/
-func _fts5SpecialMatch(tls *libc.TLS, pTab, pCsr, zQuery uintptr) (r int32) {
+func _fts5SpecialMatch(tls *libc.TLS, pTab uintptr, pCsr uintptr, zQuery uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var n, rc int32
@@ -340,7 +340,7 @@ func _getTempStore(tls *libc.TLS, z uintptr) (r int32) {
 //	** pParse must be initialized to an empty parse object prior to calling
 //	** this routine.
 //	*/
-func _jsonConvertTextToBlob(tls *libc.TLS, pParse, pCtx uintptr) (r int32) {
+func _jsonConvertTextToBlob(tls *libc.TLS, pParse uintptr, pCtx uintptr) (r int32) {
 	var i int32
 	var zJson uintptr
 	_, _ = i, zJson
@@ -413,7 +413,7 @@ func _rbuCreateVfs(tls *libc.TLS, p uintptr) {
 //	** sub-routine is currently stored in pParse->zErrMsg. This function
 //	** adds context to the error message and then stores it in pCtx.
 //	*/
-func _renameColumnParseError(tls *libc.TLS, pCtx, zWhen, pType, pObject, pParse uintptr) {
+func _renameColumnParseError(tls *libc.TLS, pCtx uintptr, zWhen uintptr, pType uintptr, pObject uintptr, pParse uintptr) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var zErr, zN, zT, v1 uintptr
@@ -502,7 +502,7 @@ func _soundexFunc(tls *libc.TLS, context uintptr, argc int32, argv uintptr) {
 	}
 }
 
-func _sqlite3Fts5ParseSetDistance(tls *libc.TLS, pParse, pNear, p uintptr) {
+func _sqlite3Fts5ParseSetDistance(tls *libc.TLS, pParse uintptr, pNear uintptr, p uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var c int8
@@ -543,7 +543,7 @@ func _sqlite3Fts5ParseSetDistance(tls *libc.TLS, pParse, pNear, p uintptr) {
 //	** Append to pStr text that is the SQL literal representation of the
 //	** value contained in pValue.
 //	*/
-func _sqlite3QuoteValue(tls *libc.TLS, pStr, pValue uintptr, bEscape int32) {
+func _sqlite3QuoteValue(tls *libc.TLS, pStr uintptr, pValue uintptr, bEscape int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var i int32

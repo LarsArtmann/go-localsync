@@ -2,7 +2,6 @@ package projectionhost
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"maps"
 	"sync"
@@ -15,6 +14,11 @@ import (
 // Host manages the lifecycle of multiple projection workers. Each worker reads
 // events from a shared journal, applies them to a registered Projection, and
 // tracks its checkpoint independently.
+//
+// Workers are batch-drainers: they catch up from the last checkpoint and exit
+// when no more events remain. They auto-restart on crash with backoff. This
+// host is NOT a live stream consumer — for continuous tailing, pair it with
+// watermill.CatchUpSubscriber (see example/projectionhost).
 type Host struct {
 	journal event.SeekableJournal
 	cpStore event.CheckpointStore
@@ -35,11 +39,17 @@ func New(
 	opts ...HostOption,
 ) (*Host, error) {
 	if journal == nil {
-		return nil, errors.New("projectionhost: journal must not be nil")
+		return nil, event.NewRejection(
+			"projectionhost.journal_required",
+			"projectionhost: journal must not be nil",
+		)
 	}
 
 	if cpStore == nil {
-		return nil, errors.New("projectionhost: checkpoint store must not be nil")
+		return nil, event.NewRejection(
+			"projectionhost.checkpoint_store_required",
+			"projectionhost: checkpoint store must not be nil",
+		)
 	}
 
 	o := defaultOptions()
@@ -62,12 +72,18 @@ func (h *Host) Register(p projection.Projection) error {
 	defer h.mu.Unlock()
 
 	if h.started {
-		return errors.New("projectionhost: cannot register after Start")
+		return event.NewRejection(
+			"projectionhost.register_after_start",
+			"projectionhost: cannot register after Start",
+		)
 	}
 
 	name := p.Name()
 	if name == "" {
-		return errors.New("projectionhost: projection name must not be empty")
+		return event.NewRejection(
+			"projectionhost.empty_projection_name",
+			"projectionhost: projection name must not be empty",
+		)
 	}
 
 	if _, exists := h.workers[name]; exists {
@@ -92,15 +108,25 @@ func (h *Host) Register(p projection.Projection) error {
 	return nil
 }
 
-// Start begins processing for all registered projections. It blocks until
-// Stop is called or the context is cancelled. Each worker runs in its own
-// goroutine with independent crash-restart logic.
+// Start launches a goroutine per registered projection and returns immediately.
+// Each worker drains the journal from its last checkpoint until caught up
+// (ReadFrom returns zero events), then exits. Workers auto-restart on crash
+// with exponential backoff up to maxRestarts.
+//
+// For continuous live tailing, pair this host with watermill.CatchUpSubscriber
+// or poll periodically by re-calling Start on a fresh Host. This host is a
+// batch-drainer with crash-restart semantics, not a live stream consumer.
+//
+// Returns an error if already started.
 func (h *Host) Start(ctx context.Context) error {
 	h.mu.Lock()
 	if h.started {
 		h.mu.Unlock()
 
-		return errors.New("projectionhost: already started")
+		return event.NewRejection(
+			"projectionhost.already_started",
+			"projectionhost: already started",
+		)
 	}
 
 	h.started = true
@@ -150,7 +176,10 @@ func (h *Host) Stop() error {
 	case <-done:
 		return nil
 	case <-time.After(30 * time.Second):
-		return errors.New("projectionhost: graceful shutdown timed out after 30s")
+		return event.NewInfrastructure(
+			"projectionhost.shutdown_timeout",
+			"projectionhost: graceful shutdown timed out after 30s",
+		)
 	}
 }
 
@@ -165,6 +194,26 @@ func (h *Host) Status() []WorkerState {
 	}
 
 	return result
+}
+
+// LastProcessedAt returns the wall-clock time of the most recently processed
+// event across all workers, or the zero time if no worker has processed any
+// event yet. Useful for projection-lag gauges: compare against the last event
+// capture time to detect if projections are falling behind.
+func (h *Host) LastProcessedAt() time.Time {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	var latest time.Time
+
+	for _, w := range h.workers {
+		ts := w.lastProcessedAt()
+		if ts.After(latest) {
+			latest = ts
+		}
+	}
+
+	return latest
 }
 
 // RegisterAndWait is a convenience that registers a projection, starts the
@@ -215,7 +264,10 @@ func (h *Host) ReplayDeadLetters(ctx context.Context, projectionName string) (Re
 	h.mu.Unlock()
 
 	if dlq == nil {
-		return ReplayResult{}, errors.New("projectionhost: no dead-letter store configured")
+		return ReplayResult{}, event.NewRejection(
+			"projectionhost.no_dead_letter_store",
+			"projectionhost: no dead-letter store configured",
+		)
 	}
 
 	entries, err := dlq.List(ctx, projectionName)

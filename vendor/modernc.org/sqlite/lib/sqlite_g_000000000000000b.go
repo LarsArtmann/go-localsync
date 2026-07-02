@@ -22,7 +22,7 @@ import (
 //	** argument to xCallback().  If xCallback=NULL then no callback
 //	** is invoked, even for queries.
 //	*/
-func Xsqlite3_exec(tls *libc.TLS, db, zSql uintptr, __ccgo_fp_xCallback Tsqlite3_callback, pArg, pzErrMsg uintptr) (r int32) {
+func Xsqlite3_exec(tls *libc.TLS, db uintptr, zSql uintptr, __ccgo_fp_xCallback Tsqlite3_callback, pArg uintptr, pzErrMsg uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var azCols, azVals uintptr
@@ -246,7 +246,7 @@ func _jsonAppendControlChar(tls *libc.TLS, p uintptr, c Tu8) {
 //	** and set the type to INTEGER or FLOAT. "Quoted" integers or floats are those
 //	** that contain '_' characters that must be removed before further processing.
 //	*/
-func _sqlite3DequoteNumber(tls *libc.TLS, pParse, p uintptr) {
+func _sqlite3DequoteNumber(tls *libc.TLS, pParse uintptr, p uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var bHex int32
@@ -629,7 +629,7 @@ func _timediffFunc(tls *libc.TLS, context uintptr, NotUsed1 int32, argv uintptr)
 //	** (in this case, MAX_PATHNAME bytes). The full-path is written to
 //	** this buffer before returning.
 //	*/
-func _unixFullPathname(tls *libc.TLS, pVfs, zPath uintptr, nOut int32, zOut uintptr) (r int32) {
+func _unixFullPathname(tls *libc.TLS, pVfs uintptr, zPath uintptr, nOut int32, zOut uintptr) (r int32) {
 	bp := tls.Alloc(1056)
 	defer tls.Free(1056)
 	var _ /* path at bp+0 */ TDbPath

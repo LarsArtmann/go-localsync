@@ -179,7 +179,7 @@ func _compoundHasDifferentAffinities(tls *libc.TLS, p uintptr) (r int32) {
 //	** Return true if all expressions in the expression-list passed as the
 //	** only argument are both constant and have no affinity.
 //	*/
-func _exprListIsNoAffinity(tls *libc.TLS, pParse, pRow uintptr) (r int32) {
+func _exprListIsNoAffinity(tls *libc.TLS, pParse uintptr, pRow uintptr) (r int32) {
 	var ii int32
 	var pExpr uintptr
 	_, _ = ii, pExpr
@@ -213,7 +213,7 @@ func _exprListIsNoAffinity(tls *libc.TLS, pParse, pRow uintptr) (r int32) {
 //	** for pTab.  regBase itself holds the rowid.  regBase+1 holds the first
 //	** column.  regBase+2 holds the second column, and so forth.
 //	*/
-func _exprTableRegister(tls *libc.TLS, pParse, pTab uintptr, regBase int32, iCol Ti16) (r uintptr) {
+func _exprTableRegister(tls *libc.TLS, pParse uintptr, pTab uintptr, regBase int32, iCol Ti16) (r uintptr) {
 	var db, pCol, pExpr, zColl uintptr
 	_, _, _, _ = db, pCol, pExpr, zColl
 	db = (*TParse)(unsafe.Pointer(pParse)).Fdb
@@ -247,7 +247,7 @@ func _exprTableRegister(tls *libc.TLS, pParse, pTab uintptr, regBase int32, iCol
 //	** If there are zero parameters (if even argv[0] is undefined)
 //	** then assume a default value of "now" for argv[0].
 //	*/
-func _isDate(tls *libc.TLS, context uintptr, argc int32, argv, p uintptr) (r int32) {
+func _isDate(tls *libc.TLS, context uintptr, argc int32, argv uintptr, p uintptr) (r int32) {
 	var eType, i, n, v1 int32
 	var z uintptr
 	_, _, _, _, _ = eType, i, n, z, v1
@@ -498,7 +498,7 @@ func _renderLogMsg(tls *libc.TLS, iErrCode int32, zFormat uintptr, ap Tva_list) 
 //	** was omitted at that point because identifiers had not yet been resolved.
 //	** This routine is called after identifier resolution.
 //	*/
-func _selectAddSubqueryTypeInfo(tls *libc.TLS, pWalker, p uintptr) {
+func _selectAddSubqueryTypeInfo(tls *libc.TLS, pWalker uintptr, p uintptr) {
 	var i int32
 	var pFrom, pParse, pSel, pTab, pTabList uintptr
 	_, _, _, _, _, _ = i, pFrom, pParse, pSel, pTab, pTabList
@@ -539,7 +539,7 @@ func _selectAddSubqueryTypeInfo(tls *libc.TLS, pWalker, p uintptr) {
 //	** If an OOM condition is encountered, set *pRc to SQLITE_NOMEM before
 //	** returning.
 //	*/
-func _sessionAppendIdent(tls *libc.TLS, p, zStr, pRc uintptr) {
+func _sessionAppendIdent(tls *libc.TLS, p uintptr, zStr uintptr, pRc uintptr) {
 	var nStr int32
 	var zIn, zOut, v1, v2 uintptr
 	_, _, _, _, _ = nStr, zIn, zOut, v1, v2
@@ -572,7 +572,7 @@ func _sessionAppendIdent(tls *libc.TLS, p, zStr, pRc uintptr) {
 	}
 }
 
-func _sqlite3DbStrNDup(tls *libc.TLS, db, z uintptr, n Tu64) (r uintptr) {
+func _sqlite3DbStrNDup(tls *libc.TLS, db uintptr, z uintptr, n Tu64) (r uintptr) {
 	var zNew, v1 uintptr
 	_, _ = zNew, v1
 	if z != 0 {
@@ -640,7 +640,7 @@ func _sqlite3InsertBuiltinFuncs(tls *libc.TLS, aDef uintptr, nDef int32) {
 //	** argument matches if zCol is a rowid alias. If it is not NULL, (*pbRowid)
 //	** is set to 1 if there is this kind of match.
 //	*/
-func _sqlite3MatchEName(tls *libc.TLS, pItem, zCol, zTab, zDb, pbRowid uintptr) (r int32) {
+func _sqlite3MatchEName(tls *libc.TLS, pItem uintptr, zCol uintptr, zTab uintptr, zDb uintptr, pbRowid uintptr) (r int32) {
 	var eEName, n int32
 	var zSpan uintptr
 	_, _, _ = eEName, n, zSpan
@@ -706,7 +706,7 @@ func _sqlite3MatchEName(tls *libc.TLS, pItem, zCol, zTab, zDb, pbRowid uintptr) 
 //	**      SQL functions.  In other words, it is not possible to override a
 //	**      built-in function.
 //	*/
-func _sqlite3NestedParse(tls *libc.TLS, pParse, zFormat, va uintptr) {
+func _sqlite3NestedParse(tls *libc.TLS, pParse uintptr, zFormat uintptr, va uintptr) {
 	bp := tls.Alloc(80)
 	defer tls.Free(80)
 	var ap Tva_list
@@ -752,7 +752,7 @@ func _sqlite3NestedParse(tls *libc.TLS, pParse, zFormat, va uintptr) {
 //	/*
 //	** Compile the UTF-16 encoded SQL statement zSql into a statement handle.
 //	*/
-func _sqlite3Prepare16(tls *libc.TLS, db, zSql uintptr, nBytes int32, prepFlags Tu32, ppStmt, pzTail uintptr) (r int32) {
+func _sqlite3Prepare16(tls *libc.TLS, db uintptr, zSql uintptr, nBytes int32, prepFlags Tu32, ppStmt uintptr, pzTail uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var chars_parsed, rc, sz, sz1 int32
@@ -829,7 +829,7 @@ func _sqlite3TableColumnAffinity(tls *libc.TLS, pTab uintptr, iCol int32) (r int
 	return (**(**TColumn)(__ccgo_up((*TTable)(unsafe.Pointer(pTab)).FaCol + uintptr(iCol)*12))).Faffinity
 }
 
-func _unicodeSetCategories(tls *libc.TLS, p, zCat uintptr) (r int32) {
+func _unicodeSetCategories(tls *libc.TLS, p uintptr, zCat uintptr) (r int32) {
 	var z uintptr
 	_ = z
 	z = zCat
@@ -894,7 +894,7 @@ func _vdbeMemAddTerminator(tls *libc.TLS, pMem uintptr) (r int32) {
 //	** If X is not the INTEGER PRIMARY KEY then X must be compatible with
 //	** index pIdx.
 //	*/
-func _whereScanInit(tls *libc.TLS, pScan, pWC uintptr, iCur, iColumn int32, opMask Tu32, pIdx uintptr) (r uintptr) {
+func _whereScanInit(tls *libc.TLS, pScan uintptr, pWC uintptr, iCur int32, iColumn int32, opMask Tu32, pIdx uintptr) (r uintptr) {
 	var j int32
 	_ = j
 	(*TWhereScan)(unsafe.Pointer(pScan)).FpOrigWC = pWC

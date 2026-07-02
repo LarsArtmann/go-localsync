@@ -52,7 +52,7 @@ func _fileHasMoved(tls *libc.TLS, pFile uintptr) (r int32) {
 //	**
 //	** Return an appropriate error code.
 //	*/
-func _findInodeInfo(tls *libc.TLS, pFile, ppInode uintptr) (r int32) {
+func _findInodeInfo(tls *libc.TLS, pFile uintptr, ppInode uintptr) (r int32) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var fd, rc int32
@@ -180,7 +180,7 @@ func _findReusableFd(tls *libc.TLS, zPath uintptr, flags int32) (r uintptr) {
 //	**
 //	** Otherwise return 0.
 //	*/
-func _unixAccess(tls *libc.TLS, NotUsed, zPath uintptr, flags int32, pResOut uintptr) (r int32) {
+func _unixAccess(tls *libc.TLS, NotUsed uintptr, zPath uintptr, flags int32, pResOut uintptr) (r int32) {
 	bp := tls.Alloc(128)
 	defer tls.Free(128)
 	var _ /* buf at bp+0 */ Tstat
@@ -200,7 +200,7 @@ func _unixAccess(tls *libc.TLS, NotUsed, zPath uintptr, flags int32, pResOut uin
 //	/*
 //	** Determine the current size of a file in bytes
 //	*/
-func _unixFileSize(tls *libc.TLS, id, pSize uintptr) (r int32) {
+func _unixFileSize(tls *libc.TLS, id uintptr, pSize uintptr) (r int32) {
 	bp := tls.Alloc(128)
 	defer tls.Free(128)
 	var rc int32
@@ -280,7 +280,7 @@ func _unixTempFileDir(tls *libc.TLS) (r uintptr) {
 	i = uint32(0)
 	zDir = Xsqlite3_temp_directory
 	for int32(1) != 0 {
-		if zDir != uintptr(0) && (*(*func(*libc.TLS, uintptr, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(4)].FpCurrent})))(tls, zDir, bp) == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_mode&uint32(S_IFMT) == uint32(S_IFDIR) && (*(*func(*libc.TLS, uintptr, int32) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(2)].FpCurrent})))(tls, zDir, int32(0o3)) == 0 {
+		if zDir != uintptr(0) && (*(*func(*libc.TLS, uintptr, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(4)].FpCurrent})))(tls, zDir, bp) == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_mode&uint32(S_IFMT) == uint32(S_IFDIR) && (*(*func(*libc.TLS, uintptr, int32) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(2)].FpCurrent})))(tls, zDir, int32(03)) == 0 {
 			return zDir
 		}
 		if uint64(i) >= libc.Uint64FromInt64(48)/libc.Uint64FromInt64(8) {

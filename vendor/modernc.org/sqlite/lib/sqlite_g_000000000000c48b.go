@@ -256,7 +256,7 @@ func _applyAffinity(tls *libc.TLS, pRec uintptr, affinity int8, enc Tu8) {
 //	** a key to search the index. Hence the first byte in the returned affinity
 //	** string in this example would be set to SQLITE_AFF_BLOB.
 //	*/
-func _codeAllEqualityTerms(tls *libc.TLS, pParse, pLevel uintptr, bRev, nExtraReg int32, pzAff uintptr) (r int32) {
+func _codeAllEqualityTerms(tls *libc.TLS, pParse uintptr, pLevel uintptr, bRev int32, nExtraReg int32, pzAff uintptr) (r int32) {
 	var iIdxCur, j, nReg, r1, regBase, v1 int32
 	var nEq, nSkip Tu16
 	var pIdx, pLoop, pRight, pTerm, v, zAff uintptr
@@ -392,7 +392,7 @@ func _codeAllEqualityTerms(tls *libc.TLS, pParse, pLevel uintptr, bRev, nExtraRe
 //	** is managed along with the rest of the Index structure. It will be
 //	** released when sqlite3DeleteIndex() is called.
 //	*/
-func _computeIndexAffStr(tls *libc.TLS, db, pIdx uintptr) (r uintptr) {
+func _computeIndexAffStr(tls *libc.TLS, db uintptr, pIdx uintptr) (r uintptr) {
 	var aff int8
 	var n int32
 	var pTab uintptr
@@ -445,7 +445,7 @@ func _computeIndexAffStr(tls *libc.TLS, db, pIdx uintptr) (r uintptr) {
 //	** This routine has to do some additional checks before completing the
 //	** insert.
 //	*/
-func _constInsert(tls *libc.TLS, pConst, pColumn, pValue, pExpr uintptr) {
+func _constInsert(tls *libc.TLS, pConst uintptr, pColumn uintptr, pValue uintptr, pExpr uintptr) {
 	var i int32
 	var pE2 uintptr
 	_, _ = i, pE2
@@ -497,7 +497,7 @@ func _constInsert(tls *libc.TLS, pConst, pColumn, pValue, pExpr uintptr) {
 //	** It is the responsibility of the caller to ensure that the returned
 //	** string is eventually freed using sqlite3DbFree().
 //	*/
-func _exprINAffinity(tls *libc.TLS, pParse, pExpr uintptr) (r uintptr) {
+func _exprINAffinity(tls *libc.TLS, pParse uintptr, pExpr uintptr) (r uintptr) {
 	var a int8
 	var i, nVal int32
 	var pA, pLeft, pSelect, zRet, v1 uintptr
@@ -689,7 +689,7 @@ func _hexFunc(tls *libc.TLS, context uintptr, argc int32, argv uintptr) {
 //	** or "NOCASE") used by the comparison in pTerm. If it is not compatible
 //	** with affinity idxaff, NULL is returned.
 //	*/
-func _indexInAffinityOk(tls *libc.TLS, pParse, pTerm uintptr, idxaff Tu8) (r uintptr) {
+func _indexInAffinityOk(tls *libc.TLS, pParse uintptr, pTerm uintptr, idxaff Tu8) (r uintptr) {
 	bp := tls.Alloc(80)
 	defer tls.Free(80)
 	var iField int32
@@ -734,7 +734,7 @@ func _indexInAffinityOk(tls *libc.TLS, pParse, pTerm uintptr, idxaff Tu8) (r uin
 //	** collating sequence for the column on the LHS must be appropriate for
 //	** the operator.
 //	*/
-func _isLikeOrGlob(tls *libc.TLS, pParse, pExpr, ppPrefix, pisComplete, pnoCase uintptr) (r int32) {
+func _isLikeOrGlob(tls *libc.TLS, pParse uintptr, pExpr uintptr, ppPrefix uintptr, pisComplete uintptr, pnoCase uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var c, v1 Tu8
@@ -893,7 +893,7 @@ func _isLikeOrGlob(tls *libc.TLS, pParse, pExpr, ppPrefix, pisComplete, pnoCase 
 // C documentation
 //
 //	/* Return the value of a column */
-func _jsonEachColumn(tls *libc.TLS, cur, ctx uintptr, iColumn int32) (r int32) {
+func _jsonEachColumn(tls *libc.TLS, cur uintptr, ctx uintptr, iColumn int32) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var eType Tu8
@@ -1262,7 +1262,7 @@ json_type_done:
 //	** a couple of kilobytes or so - potentially larger than the page
 //	** size.
 //	*/
-func _pager_delsuper(tls *libc.TLS, pPager, zSuper uintptr) (r int32) {
+func _pager_delsuper(tls *libc.TLS, pPager uintptr, zSuper uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var c, flags, flags1, rc int32
@@ -1399,7 +1399,7 @@ delsuper_out:
 //	**
 //	** This routine is usually quick, but can be N**2 in the worst case.
 //	*/
-func _patternCompare(tls *libc.TLS, _zPattern, _zString, pInfo uintptr, matchOther Tu32) (r int32) {
+func _patternCompare(tls *libc.TLS, _zPattern uintptr, _zString uintptr, pInfo uintptr, matchOther Tu32) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	*(*uintptr)(unsafe.Pointer(bp)) = _zPattern
@@ -1625,7 +1625,7 @@ func _patternCompare(tls *libc.TLS, _zPattern, _zString, pInfo uintptr, matchOth
 //	**     children is a column that matches one of the columns in
 //	**     pWalker->u.pConst.
 //	*/
-func _propagateConstantExprRewrite(tls *libc.TLS, pWalker, pExpr uintptr) (r int32) {
+func _propagateConstantExprRewrite(tls *libc.TLS, pWalker uintptr, pExpr uintptr) (r int32) {
 	var pConst uintptr
 	_ = pConst
 	pConst = *(*uintptr)(unsafe.Pointer(pWalker + 40))
@@ -1654,7 +1654,7 @@ func _propagateConstantExprRewrite(tls *libc.TLS, pWalker, pExpr uintptr) (r int
 //	** if argument bIgnoreAffBlob is non-zero and the affinity of pExpr
 //	** is SQLITE_AFF_BLOB.
 //	*/
-func _propagateConstantExprRewriteOne(tls *libc.TLS, pConst, pExpr uintptr, bIgnoreAffBlob int32) (r int32) {
+func _propagateConstantExprRewriteOne(tls *libc.TLS, pConst uintptr, pExpr uintptr, bIgnoreAffBlob int32) (r int32) {
 	var i int32
 	var pColumn uintptr
 	_, _ = i, pColumn
@@ -1748,7 +1748,7 @@ func _rbuDeltaOutputSize(tls *libc.TLS, _zDelta uintptr, _lenDelta int32) (r int
 //	** If an error occurs while reading from the journal file, an SQLite
 //	** error code is returned.
 //	*/
-func _readSuperJournal(tls *libc.TLS, pJrnl, zSuper uintptr, nSuper Tu64) (r int32) {
+func _readSuperJournal(tls *libc.TLS, pJrnl uintptr, zSuper uintptr, nSuper Tu64) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var rc, v1, v2, v4, v6, v8 int32
@@ -1826,7 +1826,7 @@ func _readSuperJournal(tls *libc.TLS, pJrnl, zSuper uintptr, nSuper Tu64) (r int
 //	** an appropriate error message might be left in pParse.  (OOM errors
 //	** excepted.)
 //	*/
-func _resolveOrderGroupBy(tls *libc.TLS, pNC, pSelect, pOrderBy, zType uintptr) (r int32) {
+func _resolveOrderGroupBy(tls *libc.TLS, pNC uintptr, pSelect uintptr, pOrderBy uintptr, zType uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var i, j, nResult int32
@@ -1916,7 +1916,7 @@ func _resolveOrderGroupBy(tls *libc.TLS, pNC, pSelect, pOrderBy, zType uintptr) 
 //	/*
 //	** Add a new CHECK constraint to the table currently under construction.
 //	*/
-func _sqlite3AddCheckConstraint(tls *libc.TLS, pParse, pCheckExpr, zStart, zEnd uintptr) {
+func _sqlite3AddCheckConstraint(tls *libc.TLS, pParse uintptr, pCheckExpr uintptr, zStart uintptr, zEnd uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var db, pTab uintptr
@@ -1988,7 +1988,7 @@ func _sqlite3AddCheckConstraint(tls *libc.TLS, pParse, pCheckExpr, zStart, zEnd 
 //	** integer.  In that case, add an OP_RealAffinity opcode to make sure
 //	** it has been converted into REAL.
 //	*/
-func _sqlite3ColumnDefault(tls *libc.TLS, v, pTab uintptr, i, iReg int32) {
+func _sqlite3ColumnDefault(tls *libc.TLS, v uintptr, pTab uintptr, i int32, iReg int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var enc Tu8
@@ -2016,7 +2016,7 @@ func _sqlite3ColumnDefault(tls *libc.TLS, v, pTab uintptr, i, iReg int32) {
 //	** SQL statement.  Make a copy of this phrase in space obtained form
 //	** sqlite3DbMalloc().  Omit leading and trailing whitespace.
 //	*/
-func _sqlite3DbSpanDup(tls *libc.TLS, db, zStart, zEnd uintptr) (r uintptr) {
+func _sqlite3DbSpanDup(tls *libc.TLS, db uintptr, zStart uintptr, zEnd uintptr) (r uintptr) {
 	var n int32
 	_ = n
 	for libc.Int32FromUint8(_sqlite3CtypeMap[libc.Uint8FromInt8(**(**int8)(__ccgo_up(zStart)))])&int32(0x01) != 0 {
@@ -2128,7 +2128,7 @@ func _sqlite3ExprAffinity(tls *libc.TLS, pExpr uintptr) (r int8) {
 //	** Generate code that will compute the value of generated column pCol
 //	** and store the result in register regOut
 //	*/
-func _sqlite3ExprCodeGeneratedColumn(tls *libc.TLS, pParse, pTab, pCol uintptr, regOut int32) {
+func _sqlite3ExprCodeGeneratedColumn(tls *libc.TLS, pParse uintptr, pTab uintptr, pCol uintptr, regOut int32) {
 	var iAddr, nErr, p3 int32
 	var v uintptr
 	_, _, _, _ = iAddr, nErr, p3, v
@@ -2183,7 +2183,7 @@ func _sqlite3ExprCodeGeneratedColumn(tls *libc.TLS, pParse, pTab, pCol uintptr, 
 //	** See the separate in-operator.md documentation file in the canonical
 //	** SQLite source tree for additional information.
 //	*/
-func _sqlite3ExprCodeIN(tls *libc.TLS, pParse, pExpr uintptr, destIfFalse, destIfNull int32) {
+func _sqlite3ExprCodeIN(tls *libc.TLS, pParse uintptr, pExpr uintptr, destIfFalse int32, destIfNull int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var addrTop, addrTruthOp, destNotNull, destStep2, destStep6, eType, i, ii, labelOk, nVector, op, op1, r2, r3, rLhs, rLhsOrig, regCkNull, v3 int32
@@ -2476,7 +2476,7 @@ sqlite3ExprCodeIN_oom_error:
 //	** COLLATE operators take first precedence.  Left operands take
 //	** precedence over right operands.
 //	*/
-func _sqlite3ExprCollSeq(tls *libc.TLS, pParse, pExpr uintptr) (r uintptr) {
+func _sqlite3ExprCollSeq(tls *libc.TLS, pParse uintptr, pExpr uintptr) (r uintptr) {
 	var db, p, pColl, pNext, zColl uintptr
 	var i, j, op, v1 int32
 	_, _, _, _, _, _, _, _, _ = db, i, j, op, p, pColl, pNext, zColl, v1
@@ -2637,7 +2637,7 @@ func _sqlite3ExprDataType(tls *libc.TLS, pExpr uintptr) (r int32) {
 //	**    iif(x,y,NULL)
 //	**    iif(x,y,false)
 //	*/
-func _sqlite3ExprIsIIF(tls *libc.TLS, db, pExpr uintptr) (r int32) {
+func _sqlite3ExprIsIIF(tls *libc.TLS, db uintptr, pExpr uintptr) (r int32) {
 	var pDef, pList, z uintptr
 	_, _, _ = pDef, pList, z
 	if libc.Int32FromUint8((*TExpr)(unsafe.Pointer(pExpr)).Fop) == int32(TK_FUNCTION) {
@@ -2687,7 +2687,7 @@ func _sqlite3ExprIsIIF(tls *libc.TLS, db, pExpr uintptr) (r int32) {
 //	** GLOB. If successful, SQLITE_OK is returned. Otherwise, an SQLite error
 //	** code.
 //	*/
-func _sqlite3Fts5ExprPattern(tls *libc.TLS, pConfig uintptr, bGlob, iCol int32, zText, pp uintptr) (r int32) {
+func _sqlite3Fts5ExprPattern(tls *libc.TLS, pConfig uintptr, bGlob int32, iCol int32, zText uintptr, pp uintptr) (r int32) {
 	var aSpec [3]int8
 	var bAnd, i, iFirst, iOut, jj, rc, v1 int32
 	var nText Ti64
@@ -2779,7 +2779,7 @@ func _sqlite3Fts5ExprPattern(tls *libc.TLS, pConfig uintptr, bGlob, iCol int32, 
 //	** Return true if pTab is a virtual table and zName is a shadow table name
 //	** for that virtual table.
 //	*/
-func _sqlite3IsShadowTableOf(tls *libc.TLS, db, pTab, zName uintptr) (r int32) {
+func _sqlite3IsShadowTableOf(tls *libc.TLS, db uintptr, pTab uintptr, zName uintptr) (r int32) {
 	var nName int32
 	var pMod uintptr
 	_, _ = nName, pMod /* Module for the virtual table */
@@ -2818,7 +2818,7 @@ func _sqlite3IsShadowTableOf(tls *libc.TLS, db, pTab, zName uintptr) (r int32) {
 //	** tables within the same schema looking for shadow tables of pTab, and mark
 //	** any shadow tables seen using the TF_Shadow flag.
 //	*/
-func _sqlite3MarkAllShadowTablesOf(tls *libc.TLS, db, pTab uintptr) {
+func _sqlite3MarkAllShadowTablesOf(tls *libc.TLS, db uintptr, pTab uintptr) {
 	var k, pMod, pOther uintptr
 	var nName int32
 	_, _, _, _ = k, nName, pMod, pOther /* For looping through the symbol table */
@@ -2898,7 +2898,7 @@ func _sqlite3MarkAllShadowTablesOf(tls *libc.TLS, db, pTab uintptr) {
 //	** error if a value cannot be extracted from pExpr. If an error does
 //	** occur, an SQLite error code is returned.
 //	*/
-func _sqlite3Stat4ProbeSetValue(tls *libc.TLS, pParse, pIdx, ppRec, pExpr uintptr, nElem, iVal int32, pnExtract uintptr) (r int32) {
+func _sqlite3Stat4ProbeSetValue(tls *libc.TLS, pParse uintptr, pIdx uintptr, ppRec uintptr, pExpr uintptr, nElem int32, iVal int32, pnExtract uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var aff Tu8
@@ -2949,7 +2949,7 @@ func _sqlite3Stat4ProbeSetValue(tls *libc.TLS, pParse, pIdx, ppRec, pExpr uintpt
 //	** from sqlite3DbMalloc().  The caller is responsible for freeing
 //	** the space when done.
 //	*/
-func _sqlite3TableAffinityStr(tls *libc.TLS, db, pTab uintptr) (r uintptr) {
+func _sqlite3TableAffinityStr(tls *libc.TLS, db uintptr, pTab uintptr) (r uintptr) {
 	var i, j, v2, v3 int32
 	var zColAff uintptr
 	_, _, _, _, _ = i, j, zColAff, v2, v3
@@ -2987,7 +2987,7 @@ func _sqlite3TableAffinityStr(tls *libc.TLS, db, pTab uintptr) (r uintptr) {
 //	** Return the number of the variable named zName, if it is in VList.
 //	** or return 0 if there is no such variable.
 //	*/
-func _sqlite3VListNameToNum(tls *libc.TLS, pIn, zName uintptr, nName int32) (r int32) {
+func _sqlite3VListNameToNum(tls *libc.TLS, pIn uintptr, zName uintptr, nName int32) (r int32) {
 	var i, mx int32
 	var z uintptr
 	_, _, _ = i, mx, z
@@ -3031,7 +3031,7 @@ func _sqlite3VListNameToNum(tls *libc.TLS, pIn, zName uintptr, nName int32) (r i
 //	** Print into memory obtained from sqliteMalloc().  Use the internal
 //	** %-conversion extensions.
 //	*/
-func _sqlite3VMPrintf(tls *libc.TLS, db, zFormat uintptr, ap Tva_list) (r uintptr) {
+func _sqlite3VMPrintf(tls *libc.TLS, db uintptr, zFormat uintptr, ap Tva_list) (r uintptr) {
 	bp := tls.Alloc(112)
 	defer tls.Free(112)
 	var z uintptr
@@ -3101,7 +3101,7 @@ func _sqlite3VdbeMemZeroTerminateIfAble(tls *libc.TLS, pMem uintptr) (r int32) {
 //	** to begin iterating through the sub-query results. It is used to allocate
 //	** and initialize registers and cursors used by sqlite3WindowCodeStep().
 //	*/
-func _sqlite3WindowCodeInit(tls *libc.TLS, pParse, pSelect uintptr) {
+func _sqlite3WindowCodeInit(tls *libc.TLS, pParse uintptr, pSelect uintptr) {
 	var nEphExpr, nExpr, v1 int32
 	var p, pKeyInfo, pList, pMWin, pWin, v, v2 uintptr
 	_, _, _, _, _, _, _, _, _, _ = nEphExpr, nExpr, p, pKeyInfo, pList, pMWin, pWin, v, v1, v2
@@ -3199,7 +3199,7 @@ func _sqlite3WindowCodeInit(tls *libc.TLS, pParse, pSelect uintptr) {
 //	** could be used with an index to access pSrc, assuming an appropriate
 //	** index existed.
 //	*/
-func _termCanDriveIndex(tls *libc.TLS, pTerm, pSrc uintptr, notReady TBitmask) (r int32) {
+func _termCanDriveIndex(tls *libc.TLS, pTerm uintptr, pSrc uintptr, notReady TBitmask) (r int32) {
 	var aff int8
 	var leftCol int32
 	_, _ = aff, leftCol
@@ -3238,7 +3238,7 @@ func _termCanDriveIndex(tls *libc.TLS, pTerm, pSrc uintptr, notReady TBitmask) (
 //	** the code reduces register pressure and helps the common case
 //	** to run faster.
 //	*/
-func _vdbeColumnFromOverflow(tls *libc.TLS, pC uintptr, iCol int32, t Tu32, iOffset Ti64, cacheStatus, colCacheCtr Tu32, pDest uintptr) (r int32) {
+func _vdbeColumnFromOverflow(tls *libc.TLS, pC uintptr, iCol int32, t Tu32, iOffset Ti64, cacheStatus Tu32, colCacheCtr Tu32, pDest uintptr) (r int32) {
 	var db, pBuf, pCache, v1 uintptr
 	var encoding, len1, rc int32
 	_, _, _, _, _, _, _ = db, encoding, len1, pBuf, pCache, rc, v1
@@ -3319,7 +3319,7 @@ func _vdbeColumnFromOverflow(tls *libc.TLS, pC uintptr, iCol int32, t Tu32, iOff
 //	** will know to replace occurrences of the indexed expression with
 //	** references to the corresponding column of the index.
 //	*/
-func _whereAddIndexedExpr(tls *libc.TLS, pParse, pIdx uintptr, iIdxCur int32, pTabItem uintptr) {
+func _whereAddIndexedExpr(tls *libc.TLS, pParse uintptr, pIdx uintptr, iIdxCur int32, pTabItem uintptr) {
 	var i, j int32
 	var p, pArg, pExpr, pTab uintptr
 	_, _, _, _, _, _ = i, j, p, pArg, pExpr, pTab
@@ -3396,7 +3396,7 @@ func _whereAddIndexedExpr(tls *libc.TLS, pParse, pIdx uintptr, iIdxCur int32, pT
 //	** to the Parse.pIdxPartExpr list for each column that can be replaced
 //	** by a constant.
 //	*/
-func _wherePartIdxExpr(tls *libc.TLS, pParse, pIdx, pPart, pMask uintptr, iIdxCur int32, pItem uintptr) {
+func _wherePartIdxExpr(tls *libc.TLS, pParse uintptr, pIdx uintptr, pPart uintptr, pMask uintptr, iIdxCur int32, pItem uintptr) {
 	var aff Tu8
 	var bNullRow int32
 	var db, p, pArg, pLeft, pRight uintptr
@@ -3486,7 +3486,7 @@ func _wherePartIdxExpr(tls *libc.TLS, pParse, pIdx, pPart, pMask uintptr, iIdxCu
 //	** If an error occurs, an SQLite error code is returned. Otherwise,
 //	** SQLITE_OK.
 //	*/
-func _whereRangeSkipScanEst(tls *libc.TLS, pParse, pLower, pUpper, pLoop, pbDone uintptr) (r int32) {
+func _whereRangeSkipScanEst(tls *libc.TLS, pParse uintptr, pLower uintptr, pUpper uintptr, pLoop uintptr, pbDone uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var aff Tu8
@@ -3791,7 +3791,7 @@ func _whereScanNext(tls *libc.TLS, pScan uintptr) (r uintptr) {
 //	** If zSuper is a NULL pointer (occurs for a single database transaction),
 //	** this call is a no-op.
 //	*/
-func _writeSuperJournal(tls *libc.TLS, pPager, zSuper uintptr) (r int32) {
+func _writeSuperJournal(tls *libc.TLS, pPager uintptr, zSuper uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var cksum Tu32
@@ -3895,7 +3895,7 @@ func _writeSuperJournal(tls *libc.TLS, pPager, zSuper uintptr) (r int32) {
 //	**
 //	** This optimization is particularly useful at making VACUUM run faster.
 //	*/
-func _xferOptimization(tls *libc.TLS, pParse, pDest, pSelect uintptr, onError, iDbDest int32) (r int32) {
+func _xferOptimization(tls *libc.TLS, pParse uintptr, pDest uintptr, pSelect uintptr, onError int32, iDbDest int32) (r int32) {
 	var addr1, addr2, destHasUniqueIdx, emptyDestTest, emptySrcTest, i, iDbSrc, iDest, iSrc, regAutoinc, regData, regRowid, v4 int32
 	var db, pDestCol, pDestExpr, pDestIdx, pEList, pItem, pSrc, pSrcCol, pSrcExpr, pSrcIdx, v, zColl, v5 uintptr
 	var idxInsFlags, insFlags Tu8

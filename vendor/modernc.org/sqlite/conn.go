@@ -1072,7 +1072,7 @@ func (c *conn) Prepare(query string) (ds driver.Stmt, err error) {
 }
 
 func (c *conn) prepare(ctx context.Context, query string) (s driver.Stmt, err error) {
-	// TODO use ctx
+	//TODO use ctx
 	return newStmt(c, query)
 }
 
@@ -1180,15 +1180,7 @@ func (c *conn) Deserialize(buf []byte) (err error) {
 		return fmt.Errorf("failed to get main db name")
 	}
 
-	rc := sqlite3.Xsqlite3_deserialize(
-		c.tls,
-		c.db,
-		zSchema,
-		pBuf,
-		int64(bufLen),
-		int64(bufLen),
-		sqlite3.SQLITE_DESERIALIZE_RESIZEABLE|sqlite3.SQLITE_DESERIALIZE_FREEONCLOSE,
-	)
+	rc := sqlite3.Xsqlite3_deserialize(c.tls, c.db, zSchema, pBuf, int64(bufLen), int64(bufLen), sqlite3.SQLITE_DESERIALIZE_RESIZEABLE|sqlite3.SQLITE_DESERIALIZE_FREEONCLOSE)
 	if rc != sqlite3.SQLITE_OK {
 		return c.errstr(rc)
 	}
@@ -1257,7 +1249,7 @@ func (c *conn) backup(remoteConn *conn, restore bool) (_ *Backup, finalErr error
 // C documentation
 //
 //	int sqlite3_limit(sqlite3*, int id, int newVal);
-func (c *conn) limit(id, newVal int) int {
+func (c *conn) limit(id int, newVal int) int {
 	return int(sqlite3.Xsqlite3_limit(c.tls, c.db, int32(id), int32(newVal)))
 }
 

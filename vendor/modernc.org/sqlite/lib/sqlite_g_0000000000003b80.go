@@ -21,7 +21,7 @@ import (
 //	** connection and no other process already holds a lock, return
 //	** SQLITE_READONLY_CANTINIT and set pShmNode->isUnlocked=1.
 //	*/
-func _unixLockSharedMemory(tls *libc.TLS, pDbFd, pShmNode uintptr) (r int32) {
+func _unixLockSharedMemory(tls *libc.TLS, pDbFd uintptr, pShmNode uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var rc int32

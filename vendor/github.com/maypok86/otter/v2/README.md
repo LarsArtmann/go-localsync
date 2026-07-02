@@ -46,7 +46,7 @@ Otter also provides a highly configurable caching API, enabling any combination 
 - [Automatic loading](https://maypok86.github.io/otter/user-guide/v2/features/loading/) of entries into the cache
 - [Asynchronously refresh](https://maypok86.github.io/otter/user-guide/v2/features/refresh/) when the first stale request for an entry occurs
 - [Writes propagated](https://maypok86.github.io/otter/user-guide/v2/features/compute/) to an external resource
-- Accumulation of cache access [statistics](https://maypok86.github.io/otter/user-guide/v2/features/statistics/)
+-  Accumulation of cache access [statistics](https://maypok86.github.io/otter/user-guide/v2/features/statistics/)
 - [Saving cache](https://maypok86.github.io/otter/user-guide/v2/features/persistence/) to a file and loading cache from a file
 
 ## 📚 Usage <a id="usage" />
@@ -84,7 +84,6 @@ Otter uses a plain `Options` struct for cache configuration. Check out [otter.Op
 Note that all features are optional. You can create a cache that acts as a simple hash table wrapper, with near-zero memory overhead for unused features — thanks to [node code generation](https://github.com/maypok86/otter/blob/main/cmd/generator/main.go).
 
 **API Usage Example**
-
 ```go
 package main
 
@@ -190,7 +189,6 @@ You can find results [here](https://maypok86.github.io/otter/performance/through
 ### 🎯 Hit ratio <a id="hit-ratio" />
 
 The hit ratio simulator tests caches on various traces:
-
 1. Synthetic (Zipf distribution)
 2. Traditional (widely known and used in various projects and papers)
 

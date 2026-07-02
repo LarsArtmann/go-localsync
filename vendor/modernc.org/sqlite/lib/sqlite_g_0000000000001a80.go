@@ -289,7 +289,7 @@ end_of_check:
 //	** Create a new collating function for database "db".  The name is zName
 //	** and the encoding is enc.
 //	*/
-func _createCollation(tls *libc.TLS, db, zName uintptr, enc Tu8, pCtx, __ccgo_fp_xCompare, __ccgo_fp_xDel uintptr) (r int32) {
+func _createCollation(tls *libc.TLS, db uintptr, zName uintptr, enc Tu8, pCtx uintptr, __ccgo_fp_xCompare uintptr, __ccgo_fp_xDel uintptr) (r int32) {
 	var aColl, p, pColl uintptr
 	var enc2, j int32
 	_, _, _, _, _ = aColl, enc2, j, p, pColl
@@ -362,7 +362,7 @@ func _createCollation(tls *libc.TLS, db, zName uintptr, enc Tu8, pCtx, __ccgo_fp
 //	** that if a malloc() fails in sqlite3_create_function(), an error code
 //	** is returned and the mallocFailed flag cleared.
 //	*/
-func _sqlite3CreateFunc(tls *libc.TLS, db, zFunctionName uintptr, nArg, enc int32, pUserData, __ccgo_fp_xSFunc, __ccgo_fp_xStep, __ccgo_fp_xFinal, __ccgo_fp_xValue, __ccgo_fp_xInverse, pDestructor uintptr) (r int32) {
+func _sqlite3CreateFunc(tls *libc.TLS, db uintptr, zFunctionName uintptr, nArg int32, enc int32, pUserData uintptr, __ccgo_fp_xSFunc uintptr, __ccgo_fp_xStep uintptr, __ccgo_fp_xFinal uintptr, __ccgo_fp_xValue uintptr, __ccgo_fp_xInverse uintptr, pDestructor uintptr) (r int32) {
 	var extraFlags, rc int32
 	var p, v1 uintptr
 	_, _, _, _ = extraFlags, p, rc, v1

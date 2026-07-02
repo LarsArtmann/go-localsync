@@ -48,7 +48,7 @@ func Xsqlite3_complete16(tls *libc.TLS, zSql uintptr) (r int32) {
 /************** End of rtree.h ***********************************************/
 /************** Continuing where we left off in main.c ***********************/
 
-func Xsqlite3_create_function16(tls *libc.TLS, db, zFunctionName uintptr, nArg, eTextRep int32, p, __ccgo_fp_xSFunc, __ccgo_fp_xStep, __ccgo_fp_xFinal uintptr) (r int32) {
+func Xsqlite3_create_function16(tls *libc.TLS, db uintptr, zFunctionName uintptr, nArg int32, eTextRep int32, p uintptr, __ccgo_fp_xSFunc uintptr, __ccgo_fp_xStep uintptr, __ccgo_fp_xFinal uintptr) (r int32) {
 	var rc int32
 	var zFunc8 uintptr
 	_, _ = rc, zFunc8
@@ -61,7 +61,7 @@ func Xsqlite3_create_function16(tls *libc.TLS, db, zFunctionName uintptr, nArg, 
 	return rc
 }
 
-func Xsqlite3_result_error16(tls *libc.TLS, pCtx, z uintptr, n int32) {
+func Xsqlite3_result_error16(tls *libc.TLS, pCtx uintptr, z uintptr, n int32) {
 	(*Tsqlite3_context)(unsafe.Pointer(pCtx)).FisError = int32(SQLITE_ERROR)
 	_sqlite3VdbeMemSetStr(tls, (*Tsqlite3_context)(unsafe.Pointer(pCtx)).FpOut, z, int64(n), uint8(SQLITE_UTF16LE), uintptr(-libc.Int32FromInt32(1)))
 }
@@ -76,7 +76,7 @@ func Xsqlite3_value_text16(tls *libc.TLS, pVal uintptr) (r uintptr) {
 
 const __BYTE_ORDER__ = 1234
 
-func _readCoord(tls *libc.TLS, p, pCoord uintptr) {
+func _readCoord(tls *libc.TLS, p uintptr, pCoord uintptr) {
 	*(*Tu32)(unsafe.Pointer(pCoord)) = uint32(**(**Tu8)(__ccgo_up(p)))<<libc.Int32FromInt32(24) + uint32(**(**Tu8)(__ccgo_up(p + 1)))<<libc.Int32FromInt32(16) + uint32(**(**Tu8)(__ccgo_up(p + 2)))<<libc.Int32FromInt32(8) + uint32(**(**Tu8)(__ccgo_up(p + 3)))<<libc.Int32FromInt32(0)
 }
 
@@ -87,7 +87,7 @@ func _sqlite3Put4byte(tls *libc.TLS, p uintptr, v Tu32) {
 	**(**uint8)(__ccgo_up(p + 3)) = uint8(v)
 }
 
-func _writeCoord(tls *libc.TLS, p, pCoord uintptr) (r int32) {
+func _writeCoord(tls *libc.TLS, p uintptr, pCoord uintptr) (r int32) {
 	var i Tu32
 	_ = i
 	i = *(*Tu32)(unsafe.Pointer(pCoord))

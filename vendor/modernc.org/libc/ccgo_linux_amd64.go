@@ -10,482 +10,478 @@ import (
 	"unsafe"
 )
 
-var (
-	_ = math.Pi
-	_ reflect.Type
-	_ unsafe.Pointer
-)
+var _ = math.Pi
+var _ reflect.Type
+var _ unsafe.Pointer
 
-const (
-	BIG_ENDIAN                         = 4321
-	BYTE_ORDER                         = 1234
-	DBL_DECIMAL_DIG                    = 17
-	DBL_DIG                            = 15
-	DBL_EPSILON                        = 0
-	DBL_HAS_SUBNORM                    = 1
-	DBL_MANT_DIG                       = 53
-	DBL_MAX                            = 0
-	DBL_MAX_10_EXP                     = 308
-	DBL_MAX_EXP                        = 1024
-	DBL_MIN                            = 0
-	DBL_MIN_10_EXP                     = -307
-	DBL_MIN_EXP                        = -1021
-	DBL_TRUE_MIN                       = 0
-	DECIMAL_DIG                        = 17
-	FLT_DECIMAL_DIG                    = 9
-	FLT_DIG                            = 6
-	FLT_EPSILON                        = 0
-	FLT_EVAL_METHOD                    = 0
-	FLT_HAS_SUBNORM                    = 1
-	FLT_MANT_DIG                       = 24
-	FLT_MAX                            = 0
-	FLT_MAX_10_EXP                     = 38
-	FLT_MAX_EXP                        = 128
-	FLT_MIN                            = 0
-	FLT_MIN_10_EXP                     = -37
-	FLT_MIN_EXP                        = -125
-	FLT_RADIX                          = 2
-	FLT_ROUNDS                         = 0
-	FLT_TRUE_MIN                       = 0
-	FP_ILOGB0                          = -2147483648
-	FP_ILOGBNAN                        = -2147483648
-	FP_INFINITE                        = 1
-	FP_NAN                             = 0
-	FP_NORMAL                          = 4
-	FP_SUBNORMAL                       = 3
-	FP_ZERO                            = 2
-	HUGE_VALF                          = 0
-	I                                  = 0
-	INFINITY                           = 0
-	INT16_MAX                          = 32767
-	INT16_MIN                          = -32768
-	INT32_MAX                          = 2147483647
-	INT32_MIN                          = -2147483648
-	INT64_MAX                          = 9223372036854775807
-	INT64_MIN                          = -9223372036854775808
-	INT8_MAX                           = 127
-	INT8_MIN                           = -128
-	INTMAX_MAX                         = 9223372036854775807
-	INTMAX_MIN                         = -9223372036854775808
-	INTPTR_MAX                         = 9223372036854775807
-	INTPTR_MIN                         = -9223372036854775808
-	INT_FAST16_MAX                     = 2147483647
-	INT_FAST16_MIN                     = -2147483648
-	INT_FAST32_MAX                     = 2147483647
-	INT_FAST32_MIN                     = -2147483648
-	INT_FAST64_MAX                     = 9223372036854775807
-	INT_FAST64_MIN                     = -9223372036854775808
-	INT_FAST8_MAX                      = 127
-	INT_FAST8_MIN                      = -128
-	INT_LEAST16_MAX                    = 32767
-	INT_LEAST16_MIN                    = -32768
-	INT_LEAST32_MAX                    = 2147483647
-	INT_LEAST32_MIN                    = -2147483648
-	INT_LEAST64_MAX                    = 9223372036854775807
-	INT_LEAST64_MIN                    = -9223372036854775808
-	INT_LEAST8_MAX                     = 127
-	INT_LEAST8_MIN                     = -128
-	LDBL_DECIMAL_DIG                   = 17
-	LDBL_DIG                           = 15
-	LDBL_EPSILON                       = 0
-	LDBL_HAS_SUBNORM                   = 1
-	LDBL_MANT_DIG                      = 53
-	LDBL_MAX                           = 0
-	LDBL_MAX_10_EXP                    = 308
-	LDBL_MAX_EXP                       = 1024
-	LDBL_MIN                           = 0
-	LDBL_MIN_10_EXP                    = -307
-	LDBL_MIN_EXP                       = -1021
-	LDBL_TRUE_MIN                      = 0
-	LITTLE_ENDIAN                      = 1234
-	MATH_ERREXCEPT                     = 2
-	MATH_ERRNO                         = 1
-	M_1_PI                             = 0
-	M_2_PI                             = 0
-	M_2_SQRTPI                         = 0
-	M_E                                = 0
-	M_LN10                             = 0
-	M_LN2                              = 0
-	M_LOG10E                           = 0
-	M_LOG2E                            = 0
-	M_PI                               = 0
-	M_PI_2                             = 0
-	M_PI_4                             = 0
-	M_SQRT1_2                          = 0
-	M_SQRT2                            = 0
-	NAN                                = 0
-	NDEBUG                             = 1
-	PDP_ENDIAN                         = 3412
-	PTRDIFF_MAX                        = 9223372036854775807
-	PTRDIFF_MIN                        = -9223372036854775808
-	SIG_ATOMIC_MAX                     = 2147483647
-	SIG_ATOMIC_MIN                     = -2147483648
-	SIZE_MAX                           = 18446744073709551615
-	TOINT_INTRINSICS                   = 0
-	UINT16_MAX                         = 65535
-	UINT32_MAX                         = 4294967295
-	UINT64_MAX                         = 18446744073709551615
-	UINT8_MAX                          = 255
-	UINTMAX_MAX                        = 18446744073709551615
-	UINTPTR_MAX                        = 18446744073709551615
-	UINT_FAST16_MAX                    = 4294967295
-	UINT_FAST32_MAX                    = 4294967295
-	UINT_FAST64_MAX                    = 18446744073709551615
-	UINT_FAST8_MAX                     = 255
-	UINT_LEAST16_MAX                   = 65535
-	UINT_LEAST32_MAX                   = 4294967295
-	UINT_LEAST64_MAX                   = 18446744073709551615
-	UINT_LEAST8_MAX                    = 255
-	WANT_ROUNDING                      = 1
-	WANT_SNAN                          = 0
-	WCHAR_MAX                          = 2147483647
-	WCHAR_MIN                          = -2147483648
-	WINT_MAX                           = 4294967295
-	WINT_MIN                           = 0
-	_Complex_I                         = 0
-	_LP64                              = 1
-	_XOPEN_SOURCE                      = 700
-	__ATOMIC_ACQUIRE                   = 2
-	__ATOMIC_ACQ_REL                   = 4
-	__ATOMIC_CONSUME                   = 1
-	__ATOMIC_HLE_ACQUIRE               = 65536
-	__ATOMIC_HLE_RELEASE               = 131072
-	__ATOMIC_RELAXED                   = 0
-	__ATOMIC_RELEASE                   = 3
-	__ATOMIC_SEQ_CST                   = 5
-	__BIGGEST_ALIGNMENT__              = 16
-	__BIG_ENDIAN                       = 4321
-	__BYTE_ORDER                       = 1234
-	__BYTE_ORDER__                     = 1234
-	__CCGO__                           = 1
-	__CHAR_BIT__                       = 8
-	__DBL_DECIMAL_DIG__                = 17
-	__DBL_DIG__                        = 15
-	__DBL_HAS_DENORM__                 = 1
-	__DBL_HAS_INFINITY__               = 1
-	__DBL_HAS_QUIET_NAN__              = 1
-	__DBL_IS_IEC_60559__               = 2
-	__DBL_MANT_DIG__                   = 53
-	__DBL_MAX_10_EXP__                 = 308
-	__DBL_MAX_EXP__                    = 1024
-	__DBL_MIN_10_EXP__                 = -307
-	__DBL_MIN_EXP__                    = -1021
-	__DEC128_EPSILON__                 = 0
-	__DEC128_MANT_DIG__                = 34
-	__DEC128_MAX_EXP__                 = 6145
-	__DEC128_MAX__                     = 0
-	__DEC128_MIN_EXP__                 = -6142
-	__DEC128_MIN__                     = 0
-	__DEC128_SUBNORMAL_MIN__           = 0
-	__DEC32_EPSILON__                  = 0
-	__DEC32_MANT_DIG__                 = 7
-	__DEC32_MAX_EXP__                  = 97
-	__DEC32_MAX__                      = 0
-	__DEC32_MIN_EXP__                  = -94
-	__DEC32_MIN__                      = 0
-	__DEC32_SUBNORMAL_MIN__            = 0
-	__DEC64_EPSILON__                  = 0
-	__DEC64_MANT_DIG__                 = 16
-	__DEC64_MAX_EXP__                  = 385
-	__DEC64_MAX__                      = 0
-	__DEC64_MIN_EXP__                  = -382
-	__DEC64_MIN__                      = 0
-	__DEC64_SUBNORMAL_MIN__            = 0
-	__DECIMAL_BID_FORMAT__             = 1
-	__DECIMAL_DIG__                    = 17
-	__DEC_EVAL_METHOD__                = 2
-	__ELF__                            = 1
-	__FINITE_MATH_ONLY__               = 0
-	__FLOAT_WORD_ORDER__               = 1234
-	__FLT128_DECIMAL_DIG__             = 36
-	__FLT128_DENORM_MIN__              = 0
-	__FLT128_DIG__                     = 33
-	__FLT128_EPSILON__                 = 0
-	__FLT128_HAS_DENORM__              = 1
-	__FLT128_HAS_INFINITY__            = 1
-	__FLT128_HAS_QUIET_NAN__           = 1
-	__FLT128_IS_IEC_60559__            = 2
-	__FLT128_MANT_DIG__                = 113
-	__FLT128_MAX_10_EXP__              = 4932
-	__FLT128_MAX_EXP__                 = 16384
-	__FLT128_MAX__                     = 0
-	__FLT128_MIN_10_EXP__              = -4931
-	__FLT128_MIN_EXP__                 = -16381
-	__FLT128_MIN__                     = 0
-	__FLT128_NORM_MAX__                = 0
-	__FLT16_DECIMAL_DIG__              = 5
-	__FLT16_DENORM_MIN__               = 0
-	__FLT16_DIG__                      = 3
-	__FLT16_EPSILON__                  = 0
-	__FLT16_HAS_DENORM__               = 1
-	__FLT16_HAS_INFINITY__             = 1
-	__FLT16_HAS_QUIET_NAN__            = 1
-	__FLT16_IS_IEC_60559__             = 2
-	__FLT16_MANT_DIG__                 = 11
-	__FLT16_MAX_10_EXP__               = 4
-	__FLT16_MAX_EXP__                  = 16
-	__FLT16_MAX__                      = 0
-	__FLT16_MIN_10_EXP__               = -4
-	__FLT16_MIN_EXP__                  = -13
-	__FLT16_MIN__                      = 0
-	__FLT16_NORM_MAX__                 = 0
-	__FLT32X_DECIMAL_DIG__             = 17
-	__FLT32X_DENORM_MIN__              = 0
-	__FLT32X_DIG__                     = 15
-	__FLT32X_EPSILON__                 = 0
-	__FLT32X_HAS_DENORM__              = 1
-	__FLT32X_HAS_INFINITY__            = 1
-	__FLT32X_HAS_QUIET_NAN__           = 1
-	__FLT32X_IS_IEC_60559__            = 2
-	__FLT32X_MANT_DIG__                = 53
-	__FLT32X_MAX_10_EXP__              = 308
-	__FLT32X_MAX_EXP__                 = 1024
-	__FLT32X_MAX__                     = 0
-	__FLT32X_MIN_10_EXP__              = -307
-	__FLT32X_MIN_EXP__                 = -1021
-	__FLT32X_MIN__                     = 0
-	__FLT32X_NORM_MAX__                = 0
-	__FLT32_DECIMAL_DIG__              = 9
-	__FLT32_DENORM_MIN__               = 0
-	__FLT32_DIG__                      = 6
-	__FLT32_EPSILON__                  = 0
-	__FLT32_HAS_DENORM__               = 1
-	__FLT32_HAS_INFINITY__             = 1
-	__FLT32_HAS_QUIET_NAN__            = 1
-	__FLT32_IS_IEC_60559__             = 2
-	__FLT32_MANT_DIG__                 = 24
-	__FLT32_MAX_10_EXP__               = 38
-	__FLT32_MAX_EXP__                  = 128
-	__FLT32_MAX__                      = 0
-	__FLT32_MIN_10_EXP__               = -37
-	__FLT32_MIN_EXP__                  = -125
-	__FLT32_MIN__                      = 0
-	__FLT32_NORM_MAX__                 = 0
-	__FLT64X_DECIMAL_DIG__             = 36
-	__FLT64X_DENORM_MIN__              = 0
-	__FLT64X_DIG__                     = 33
-	__FLT64X_EPSILON__                 = 0
-	__FLT64X_HAS_DENORM__              = 1
-	__FLT64X_HAS_INFINITY__            = 1
-	__FLT64X_HAS_QUIET_NAN__           = 1
-	__FLT64X_IS_IEC_60559__            = 2
-	__FLT64X_MANT_DIG__                = 113
-	__FLT64X_MAX_10_EXP__              = 4932
-	__FLT64X_MAX_EXP__                 = 16384
-	__FLT64X_MAX__                     = 0
-	__FLT64X_MIN_10_EXP__              = -4931
-	__FLT64X_MIN_EXP__                 = -16381
-	__FLT64X_MIN__                     = 0
-	__FLT64X_NORM_MAX__                = 0
-	__FLT64_DECIMAL_DIG__              = 17
-	__FLT64_DENORM_MIN__               = 0
-	__FLT64_DIG__                      = 15
-	__FLT64_EPSILON__                  = 0
-	__FLT64_HAS_DENORM__               = 1
-	__FLT64_HAS_INFINITY__             = 1
-	__FLT64_HAS_QUIET_NAN__            = 1
-	__FLT64_IS_IEC_60559__             = 2
-	__FLT64_MANT_DIG__                 = 53
-	__FLT64_MAX_10_EXP__               = 308
-	__FLT64_MAX_EXP__                  = 1024
-	__FLT64_MAX__                      = 0
-	__FLT64_MIN_10_EXP__               = -307
-	__FLT64_MIN_EXP__                  = -1021
-	__FLT64_MIN__                      = 0
-	__FLT64_NORM_MAX__                 = 0
-	__FLT_DECIMAL_DIG__                = 9
-	__FLT_DENORM_MIN__                 = 0
-	__FLT_DIG__                        = 6
-	__FLT_EPSILON__                    = 0
-	__FLT_EVAL_METHOD_TS_18661_3__     = 0
-	__FLT_EVAL_METHOD__                = 0
-	__FLT_HAS_DENORM__                 = 1
-	__FLT_HAS_INFINITY__               = 1
-	__FLT_HAS_QUIET_NAN__              = 1
-	__FLT_IS_IEC_60559__               = 2
-	__FLT_MANT_DIG__                   = 24
-	__FLT_MAX_10_EXP__                 = 38
-	__FLT_MAX_EXP__                    = 128
-	__FLT_MAX__                        = 0
-	__FLT_MIN_10_EXP__                 = -37
-	__FLT_MIN_EXP__                    = -125
-	__FLT_MIN__                        = 0
-	__FLT_NORM_MAX__                   = 0
-	__FLT_RADIX__                      = 2
-	__FUNCTION__                       = 0
-	__FXSR__                           = 1
-	__GCC_ASM_FLAG_OUTPUTS__           = 1
-	__GCC_ATOMIC_BOOL_LOCK_FREE        = 2
-	__GCC_ATOMIC_CHAR16_T_LOCK_FREE    = 2
-	__GCC_ATOMIC_CHAR32_T_LOCK_FREE    = 2
-	__GCC_ATOMIC_CHAR_LOCK_FREE        = 2
-	__GCC_ATOMIC_INT_LOCK_FREE         = 2
-	__GCC_ATOMIC_LLONG_LOCK_FREE       = 2
-	__GCC_ATOMIC_LONG_LOCK_FREE        = 2
-	__GCC_ATOMIC_POINTER_LOCK_FREE     = 2
-	__GCC_ATOMIC_SHORT_LOCK_FREE       = 2
-	__GCC_ATOMIC_TEST_AND_SET_TRUEVAL  = 1
-	__GCC_ATOMIC_WCHAR_T_LOCK_FREE     = 2
-	__GCC_CONSTRUCTIVE_SIZE            = 64
-	__GCC_DESTRUCTIVE_SIZE             = 64
-	__GCC_HAVE_DWARF2_CFI_ASM          = 1
-	__GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 = 1
-	__GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 = 1
-	__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 = 1
-	__GCC_HAVE_SYNC_COMPARE_AND_SWAP_8 = 1
-	__GCC_IEC_559                      = 2
-	__GCC_IEC_559_COMPLEX              = 2
-	__GNUC_EXECUTION_CHARSET_NAME      = "UTF-8"
-	__GNUC_MINOR__                     = 2
-	__GNUC_PATCHLEVEL__                = 0
-	__GNUC_STDC_INLINE__               = 1
-	__GNUC_WIDE_EXECUTION_CHARSET_NAME = "UTF-32LE"
-	__GNUC__                           = 12
-	__GXX_ABI_VERSION                  = 1017
-	__HAVE_SPECULATION_SAFE_VALUE      = 1
-	__INT16_MAX__                      = 32767
-	__INT32_MAX__                      = 2147483647
-	__INT32_TYPE__                     = 0
-	__INT64_MAX__                      = 9223372036854775807
-	__INT8_MAX__                       = 127
-	__INTMAX_MAX__                     = 9223372036854775807
-	__INTMAX_WIDTH__                   = 64
-	__INTPTR_MAX__                     = 9223372036854775807
-	__INTPTR_WIDTH__                   = 64
-	__INT_FAST16_MAX__                 = 9223372036854775807
-	__INT_FAST16_WIDTH__               = 64
-	__INT_FAST32_MAX__                 = 9223372036854775807
-	__INT_FAST32_WIDTH__               = 64
-	__INT_FAST64_MAX__                 = 9223372036854775807
-	__INT_FAST64_WIDTH__               = 64
-	__INT_FAST8_MAX__                  = 127
-	__INT_FAST8_WIDTH__                = 8
-	__INT_LEAST16_MAX__                = 32767
-	__INT_LEAST16_WIDTH__              = 16
-	__INT_LEAST32_MAX__                = 2147483647
-	__INT_LEAST32_TYPE__               = 0
-	__INT_LEAST32_WIDTH__              = 32
-	__INT_LEAST64_MAX__                = 9223372036854775807
-	__INT_LEAST64_WIDTH__              = 64
-	__INT_LEAST8_MAX__                 = 127
-	__INT_LEAST8_WIDTH__               = 8
-	__INT_MAX__                        = 2147483647
-	__INT_WIDTH__                      = 32
-	__LDBL_DECIMAL_DIG__               = 17
-	__LDBL_DENORM_MIN__                = 0
-	__LDBL_DIG__                       = 15
-	__LDBL_EPSILON__                   = 0
-	__LDBL_HAS_DENORM__                = 1
-	__LDBL_HAS_INFINITY__              = 1
-	__LDBL_HAS_QUIET_NAN__             = 1
-	__LDBL_IS_IEC_60559__              = 2
-	__LDBL_MANT_DIG__                  = 53
-	__LDBL_MAX_10_EXP__                = 308
-	__LDBL_MAX_EXP__                   = 1024
-	__LDBL_MAX__                       = 0
-	__LDBL_MIN_10_EXP__                = -307
-	__LDBL_MIN_EXP__                   = -1021
-	__LDBL_MIN__                       = 0
-	__LDBL_NORM_MAX__                  = 0
-	__LITTLE_ENDIAN                    = 1234
-	__LONG_DOUBLE_64__                 = 1
-	__LONG_LONG_MAX__                  = 9223372036854775807
-	__LONG_LONG_WIDTH__                = 64
-	__LONG_MAX                         = 9223372036854775807
-	__LONG_MAX__                       = 9223372036854775807
-	__LONG_WIDTH__                     = 64
-	__LP64__                           = 1
-	__MMX_WITH_SSE__                   = 1
-	__MMX__                            = 1
-	__NO_INLINE__                      = 1
-	__ORDER_BIG_ENDIAN__               = 4321
-	__ORDER_LITTLE_ENDIAN__            = 1234
-	__ORDER_PDP_ENDIAN__               = 3412
-	__PDP_ENDIAN                       = 3412
-	__PIC__                            = 2
-	__PIE__                            = 2
-	__PRAGMA_REDEFINE_EXTNAME          = 1
-	__PRETTY_FUNCTION__                = 0
-	__PTRDIFF_MAX__                    = 9223372036854775807
-	__PTRDIFF_WIDTH__                  = 64
-	__SCHAR_MAX__                      = 127
-	__SCHAR_WIDTH__                    = 8
-	__SEG_FS                           = 1
-	__SEG_GS                           = 1
-	__SHRT_MAX__                       = 32767
-	__SHRT_WIDTH__                     = 16
-	__SIG_ATOMIC_MAX__                 = 2147483647
-	__SIG_ATOMIC_MIN__                 = -2147483648
-	__SIG_ATOMIC_TYPE__                = 0
-	__SIG_ATOMIC_WIDTH__               = 32
-	__SIZEOF_DOUBLE__                  = 8
-	__SIZEOF_FLOAT128__                = 16
-	__SIZEOF_FLOAT80__                 = 16
-	__SIZEOF_FLOAT__                   = 4
-	__SIZEOF_INT128__                  = 16
-	__SIZEOF_INT__                     = 4
-	__SIZEOF_LONG_DOUBLE__             = 8
-	__SIZEOF_LONG_LONG__               = 8
-	__SIZEOF_LONG__                    = 8
-	__SIZEOF_POINTER__                 = 8
-	__SIZEOF_PTRDIFF_T__               = 8
-	__SIZEOF_SHORT__                   = 2
-	__SIZEOF_SIZE_T__                  = 8
-	__SIZEOF_WCHAR_T__                 = 4
-	__SIZEOF_WINT_T__                  = 4
-	__SIZE_MAX__                       = 18446744073709551615
-	__SIZE_WIDTH__                     = 64
-	__SSE2_MATH__                      = 1
-	__SSE2__                           = 1
-	__SSE_MATH__                       = 1
-	__SSE__                            = 1
-	__STDC_HOSTED__                    = 0
-	__STDC_VERSION__                   = 199901
-	__STDC__                           = 1
-	__STRICT_ANSI__                    = 1
-	__UINT16_MAX__                     = 65535
-	__UINT32_MAX__                     = 4294967295
-	__UINT64_MAX__                     = 18446744073709551615
-	__UINT8_MAX__                      = 255
-	__UINTMAX_MAX__                    = 18446744073709551615
-	__UINTPTR_MAX__                    = 18446744073709551615
-	__UINT_FAST16_MAX__                = 18446744073709551615
-	__UINT_FAST32_MAX__                = 18446744073709551615
-	__UINT_FAST64_MAX__                = 18446744073709551615
-	__UINT_FAST8_MAX__                 = 255
-	__UINT_LEAST16_MAX__               = 65535
-	__UINT_LEAST32_MAX__               = 4294967295
-	__UINT_LEAST64_MAX__               = 18446744073709551615
-	__UINT_LEAST8_MAX__                = 255
-	__USE_TIME_BITS64                  = 1
-	__VERSION__                        = "12.2.0"
-	__WCHAR_MAX__                      = 2147483647
-	__WCHAR_MIN__                      = -2147483648
-	__WCHAR_TYPE__                     = 0
-	__WCHAR_WIDTH__                    = 32
-	__WINT_MAX__                       = 4294967295
-	__WINT_MIN__                       = 0
-	__WINT_WIDTH__                     = 32
-	__amd64                            = 1
-	__amd64__                          = 1
-	__code_model_small__               = 1
-	__gnu_linux__                      = 1
-	__inline                           = 0
-	__k8                               = 1
-	__k8__                             = 1
-	__linux                            = 1
-	__linux__                          = 1
-	__pic__                            = 2
-	__pie__                            = 2
-	__restrict                         = 0
-	__restrict_arr                     = 0
-	__unix                             = 1
-	__unix__                           = 1
-	__x86_64                           = 1
-	__x86_64__                         = 1
-	complex1                           = 0
-	math_errhandling                   = 2
-)
+const BIG_ENDIAN = 4321
+const BYTE_ORDER = 1234
+const DBL_DECIMAL_DIG = 17
+const DBL_DIG = 15
+const DBL_EPSILON = 0
+const DBL_HAS_SUBNORM = 1
+const DBL_MANT_DIG = 53
+const DBL_MAX = 0
+const DBL_MAX_10_EXP = 308
+const DBL_MAX_EXP = 1024
+const DBL_MIN = 0
+const DBL_MIN_10_EXP = -307
+const DBL_MIN_EXP = -1021
+const DBL_TRUE_MIN = 0
+const DECIMAL_DIG = 17
+const FLT_DECIMAL_DIG = 9
+const FLT_DIG = 6
+const FLT_EPSILON = 0
+const FLT_EVAL_METHOD = 0
+const FLT_HAS_SUBNORM = 1
+const FLT_MANT_DIG = 24
+const FLT_MAX = 0
+const FLT_MAX_10_EXP = 38
+const FLT_MAX_EXP = 128
+const FLT_MIN = 0
+const FLT_MIN_10_EXP = -37
+const FLT_MIN_EXP = -125
+const FLT_RADIX = 2
+const FLT_ROUNDS = 0
+const FLT_TRUE_MIN = 0
+const FP_ILOGB0 = -2147483648
+const FP_ILOGBNAN = -2147483648
+const FP_INFINITE = 1
+const FP_NAN = 0
+const FP_NORMAL = 4
+const FP_SUBNORMAL = 3
+const FP_ZERO = 2
+const HUGE_VALF = 0
+const I = 0
+const INFINITY = 0
+const INT16_MAX = 32767
+const INT16_MIN = -32768
+const INT32_MAX = 2147483647
+const INT32_MIN = -2147483648
+const INT64_MAX = 9223372036854775807
+const INT64_MIN = -9223372036854775808
+const INT8_MAX = 127
+const INT8_MIN = -128
+const INTMAX_MAX = 9223372036854775807
+const INTMAX_MIN = -9223372036854775808
+const INTPTR_MAX = 9223372036854775807
+const INTPTR_MIN = -9223372036854775808
+const INT_FAST16_MAX = 2147483647
+const INT_FAST16_MIN = -2147483648
+const INT_FAST32_MAX = 2147483647
+const INT_FAST32_MIN = -2147483648
+const INT_FAST64_MAX = 9223372036854775807
+const INT_FAST64_MIN = -9223372036854775808
+const INT_FAST8_MAX = 127
+const INT_FAST8_MIN = -128
+const INT_LEAST16_MAX = 32767
+const INT_LEAST16_MIN = -32768
+const INT_LEAST32_MAX = 2147483647
+const INT_LEAST32_MIN = -2147483648
+const INT_LEAST64_MAX = 9223372036854775807
+const INT_LEAST64_MIN = -9223372036854775808
+const INT_LEAST8_MAX = 127
+const INT_LEAST8_MIN = -128
+const LDBL_DECIMAL_DIG = 17
+const LDBL_DIG = 15
+const LDBL_EPSILON = 0
+const LDBL_HAS_SUBNORM = 1
+const LDBL_MANT_DIG = 53
+const LDBL_MAX = 0
+const LDBL_MAX_10_EXP = 308
+const LDBL_MAX_EXP = 1024
+const LDBL_MIN = 0
+const LDBL_MIN_10_EXP = -307
+const LDBL_MIN_EXP = -1021
+const LDBL_TRUE_MIN = 0
+const LITTLE_ENDIAN = 1234
+const MATH_ERREXCEPT = 2
+const MATH_ERRNO = 1
+const M_1_PI = 0
+const M_2_PI = 0
+const M_2_SQRTPI = 0
+const M_E = 0
+const M_LN10 = 0
+const M_LN2 = 0
+const M_LOG10E = 0
+const M_LOG2E = 0
+const M_PI = 0
+const M_PI_2 = 0
+const M_PI_4 = 0
+const M_SQRT1_2 = 0
+const M_SQRT2 = 0
+const NAN = 0
+const NDEBUG = 1
+const PDP_ENDIAN = 3412
+const PTRDIFF_MAX = 9223372036854775807
+const PTRDIFF_MIN = -9223372036854775808
+const SIG_ATOMIC_MAX = 2147483647
+const SIG_ATOMIC_MIN = -2147483648
+const SIZE_MAX = 18446744073709551615
+const TOINT_INTRINSICS = 0
+const UINT16_MAX = 65535
+const UINT32_MAX = 4294967295
+const UINT64_MAX = 18446744073709551615
+const UINT8_MAX = 255
+const UINTMAX_MAX = 18446744073709551615
+const UINTPTR_MAX = 18446744073709551615
+const UINT_FAST16_MAX = 4294967295
+const UINT_FAST32_MAX = 4294967295
+const UINT_FAST64_MAX = 18446744073709551615
+const UINT_FAST8_MAX = 255
+const UINT_LEAST16_MAX = 65535
+const UINT_LEAST32_MAX = 4294967295
+const UINT_LEAST64_MAX = 18446744073709551615
+const UINT_LEAST8_MAX = 255
+const WANT_ROUNDING = 1
+const WANT_SNAN = 0
+const WCHAR_MAX = 2147483647
+const WCHAR_MIN = -2147483648
+const WINT_MAX = 4294967295
+const WINT_MIN = 0
+const _Complex_I = 0
+const _LP64 = 1
+const _XOPEN_SOURCE = 700
+const __ATOMIC_ACQUIRE = 2
+const __ATOMIC_ACQ_REL = 4
+const __ATOMIC_CONSUME = 1
+const __ATOMIC_HLE_ACQUIRE = 65536
+const __ATOMIC_HLE_RELEASE = 131072
+const __ATOMIC_RELAXED = 0
+const __ATOMIC_RELEASE = 3
+const __ATOMIC_SEQ_CST = 5
+const __BIGGEST_ALIGNMENT__ = 16
+const __BIG_ENDIAN = 4321
+const __BYTE_ORDER = 1234
+const __BYTE_ORDER__ = 1234
+const __CCGO__ = 1
+const __CHAR_BIT__ = 8
+const __DBL_DECIMAL_DIG__ = 17
+const __DBL_DIG__ = 15
+const __DBL_HAS_DENORM__ = 1
+const __DBL_HAS_INFINITY__ = 1
+const __DBL_HAS_QUIET_NAN__ = 1
+const __DBL_IS_IEC_60559__ = 2
+const __DBL_MANT_DIG__ = 53
+const __DBL_MAX_10_EXP__ = 308
+const __DBL_MAX_EXP__ = 1024
+const __DBL_MIN_10_EXP__ = -307
+const __DBL_MIN_EXP__ = -1021
+const __DEC128_EPSILON__ = 0
+const __DEC128_MANT_DIG__ = 34
+const __DEC128_MAX_EXP__ = 6145
+const __DEC128_MAX__ = 0
+const __DEC128_MIN_EXP__ = -6142
+const __DEC128_MIN__ = 0
+const __DEC128_SUBNORMAL_MIN__ = 0
+const __DEC32_EPSILON__ = 0
+const __DEC32_MANT_DIG__ = 7
+const __DEC32_MAX_EXP__ = 97
+const __DEC32_MAX__ = 0
+const __DEC32_MIN_EXP__ = -94
+const __DEC32_MIN__ = 0
+const __DEC32_SUBNORMAL_MIN__ = 0
+const __DEC64_EPSILON__ = 0
+const __DEC64_MANT_DIG__ = 16
+const __DEC64_MAX_EXP__ = 385
+const __DEC64_MAX__ = 0
+const __DEC64_MIN_EXP__ = -382
+const __DEC64_MIN__ = 0
+const __DEC64_SUBNORMAL_MIN__ = 0
+const __DECIMAL_BID_FORMAT__ = 1
+const __DECIMAL_DIG__ = 17
+const __DEC_EVAL_METHOD__ = 2
+const __ELF__ = 1
+const __FINITE_MATH_ONLY__ = 0
+const __FLOAT_WORD_ORDER__ = 1234
+const __FLT128_DECIMAL_DIG__ = 36
+const __FLT128_DENORM_MIN__ = 0
+const __FLT128_DIG__ = 33
+const __FLT128_EPSILON__ = 0
+const __FLT128_HAS_DENORM__ = 1
+const __FLT128_HAS_INFINITY__ = 1
+const __FLT128_HAS_QUIET_NAN__ = 1
+const __FLT128_IS_IEC_60559__ = 2
+const __FLT128_MANT_DIG__ = 113
+const __FLT128_MAX_10_EXP__ = 4932
+const __FLT128_MAX_EXP__ = 16384
+const __FLT128_MAX__ = 0
+const __FLT128_MIN_10_EXP__ = -4931
+const __FLT128_MIN_EXP__ = -16381
+const __FLT128_MIN__ = 0
+const __FLT128_NORM_MAX__ = 0
+const __FLT16_DECIMAL_DIG__ = 5
+const __FLT16_DENORM_MIN__ = 0
+const __FLT16_DIG__ = 3
+const __FLT16_EPSILON__ = 0
+const __FLT16_HAS_DENORM__ = 1
+const __FLT16_HAS_INFINITY__ = 1
+const __FLT16_HAS_QUIET_NAN__ = 1
+const __FLT16_IS_IEC_60559__ = 2
+const __FLT16_MANT_DIG__ = 11
+const __FLT16_MAX_10_EXP__ = 4
+const __FLT16_MAX_EXP__ = 16
+const __FLT16_MAX__ = 0
+const __FLT16_MIN_10_EXP__ = -4
+const __FLT16_MIN_EXP__ = -13
+const __FLT16_MIN__ = 0
+const __FLT16_NORM_MAX__ = 0
+const __FLT32X_DECIMAL_DIG__ = 17
+const __FLT32X_DENORM_MIN__ = 0
+const __FLT32X_DIG__ = 15
+const __FLT32X_EPSILON__ = 0
+const __FLT32X_HAS_DENORM__ = 1
+const __FLT32X_HAS_INFINITY__ = 1
+const __FLT32X_HAS_QUIET_NAN__ = 1
+const __FLT32X_IS_IEC_60559__ = 2
+const __FLT32X_MANT_DIG__ = 53
+const __FLT32X_MAX_10_EXP__ = 308
+const __FLT32X_MAX_EXP__ = 1024
+const __FLT32X_MAX__ = 0
+const __FLT32X_MIN_10_EXP__ = -307
+const __FLT32X_MIN_EXP__ = -1021
+const __FLT32X_MIN__ = 0
+const __FLT32X_NORM_MAX__ = 0
+const __FLT32_DECIMAL_DIG__ = 9
+const __FLT32_DENORM_MIN__ = 0
+const __FLT32_DIG__ = 6
+const __FLT32_EPSILON__ = 0
+const __FLT32_HAS_DENORM__ = 1
+const __FLT32_HAS_INFINITY__ = 1
+const __FLT32_HAS_QUIET_NAN__ = 1
+const __FLT32_IS_IEC_60559__ = 2
+const __FLT32_MANT_DIG__ = 24
+const __FLT32_MAX_10_EXP__ = 38
+const __FLT32_MAX_EXP__ = 128
+const __FLT32_MAX__ = 0
+const __FLT32_MIN_10_EXP__ = -37
+const __FLT32_MIN_EXP__ = -125
+const __FLT32_MIN__ = 0
+const __FLT32_NORM_MAX__ = 0
+const __FLT64X_DECIMAL_DIG__ = 36
+const __FLT64X_DENORM_MIN__ = 0
+const __FLT64X_DIG__ = 33
+const __FLT64X_EPSILON__ = 0
+const __FLT64X_HAS_DENORM__ = 1
+const __FLT64X_HAS_INFINITY__ = 1
+const __FLT64X_HAS_QUIET_NAN__ = 1
+const __FLT64X_IS_IEC_60559__ = 2
+const __FLT64X_MANT_DIG__ = 113
+const __FLT64X_MAX_10_EXP__ = 4932
+const __FLT64X_MAX_EXP__ = 16384
+const __FLT64X_MAX__ = 0
+const __FLT64X_MIN_10_EXP__ = -4931
+const __FLT64X_MIN_EXP__ = -16381
+const __FLT64X_MIN__ = 0
+const __FLT64X_NORM_MAX__ = 0
+const __FLT64_DECIMAL_DIG__ = 17
+const __FLT64_DENORM_MIN__ = 0
+const __FLT64_DIG__ = 15
+const __FLT64_EPSILON__ = 0
+const __FLT64_HAS_DENORM__ = 1
+const __FLT64_HAS_INFINITY__ = 1
+const __FLT64_HAS_QUIET_NAN__ = 1
+const __FLT64_IS_IEC_60559__ = 2
+const __FLT64_MANT_DIG__ = 53
+const __FLT64_MAX_10_EXP__ = 308
+const __FLT64_MAX_EXP__ = 1024
+const __FLT64_MAX__ = 0
+const __FLT64_MIN_10_EXP__ = -307
+const __FLT64_MIN_EXP__ = -1021
+const __FLT64_MIN__ = 0
+const __FLT64_NORM_MAX__ = 0
+const __FLT_DECIMAL_DIG__ = 9
+const __FLT_DENORM_MIN__ = 0
+const __FLT_DIG__ = 6
+const __FLT_EPSILON__ = 0
+const __FLT_EVAL_METHOD_TS_18661_3__ = 0
+const __FLT_EVAL_METHOD__ = 0
+const __FLT_HAS_DENORM__ = 1
+const __FLT_HAS_INFINITY__ = 1
+const __FLT_HAS_QUIET_NAN__ = 1
+const __FLT_IS_IEC_60559__ = 2
+const __FLT_MANT_DIG__ = 24
+const __FLT_MAX_10_EXP__ = 38
+const __FLT_MAX_EXP__ = 128
+const __FLT_MAX__ = 0
+const __FLT_MIN_10_EXP__ = -37
+const __FLT_MIN_EXP__ = -125
+const __FLT_MIN__ = 0
+const __FLT_NORM_MAX__ = 0
+const __FLT_RADIX__ = 2
+const __FUNCTION__ = 0
+const __FXSR__ = 1
+const __GCC_ASM_FLAG_OUTPUTS__ = 1
+const __GCC_ATOMIC_BOOL_LOCK_FREE = 2
+const __GCC_ATOMIC_CHAR16_T_LOCK_FREE = 2
+const __GCC_ATOMIC_CHAR32_T_LOCK_FREE = 2
+const __GCC_ATOMIC_CHAR_LOCK_FREE = 2
+const __GCC_ATOMIC_INT_LOCK_FREE = 2
+const __GCC_ATOMIC_LLONG_LOCK_FREE = 2
+const __GCC_ATOMIC_LONG_LOCK_FREE = 2
+const __GCC_ATOMIC_POINTER_LOCK_FREE = 2
+const __GCC_ATOMIC_SHORT_LOCK_FREE = 2
+const __GCC_ATOMIC_TEST_AND_SET_TRUEVAL = 1
+const __GCC_ATOMIC_WCHAR_T_LOCK_FREE = 2
+const __GCC_CONSTRUCTIVE_SIZE = 64
+const __GCC_DESTRUCTIVE_SIZE = 64
+const __GCC_HAVE_DWARF2_CFI_ASM = 1
+const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_1 = 1
+const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_2 = 1
+const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4 = 1
+const __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8 = 1
+const __GCC_IEC_559 = 2
+const __GCC_IEC_559_COMPLEX = 2
+const __GNUC_EXECUTION_CHARSET_NAME = "UTF-8"
+const __GNUC_MINOR__ = 2
+const __GNUC_PATCHLEVEL__ = 0
+const __GNUC_STDC_INLINE__ = 1
+const __GNUC_WIDE_EXECUTION_CHARSET_NAME = "UTF-32LE"
+const __GNUC__ = 12
+const __GXX_ABI_VERSION = 1017
+const __HAVE_SPECULATION_SAFE_VALUE = 1
+const __INT16_MAX__ = 32767
+const __INT32_MAX__ = 2147483647
+const __INT32_TYPE__ = 0
+const __INT64_MAX__ = 9223372036854775807
+const __INT8_MAX__ = 127
+const __INTMAX_MAX__ = 9223372036854775807
+const __INTMAX_WIDTH__ = 64
+const __INTPTR_MAX__ = 9223372036854775807
+const __INTPTR_WIDTH__ = 64
+const __INT_FAST16_MAX__ = 9223372036854775807
+const __INT_FAST16_WIDTH__ = 64
+const __INT_FAST32_MAX__ = 9223372036854775807
+const __INT_FAST32_WIDTH__ = 64
+const __INT_FAST64_MAX__ = 9223372036854775807
+const __INT_FAST64_WIDTH__ = 64
+const __INT_FAST8_MAX__ = 127
+const __INT_FAST8_WIDTH__ = 8
+const __INT_LEAST16_MAX__ = 32767
+const __INT_LEAST16_WIDTH__ = 16
+const __INT_LEAST32_MAX__ = 2147483647
+const __INT_LEAST32_TYPE__ = 0
+const __INT_LEAST32_WIDTH__ = 32
+const __INT_LEAST64_MAX__ = 9223372036854775807
+const __INT_LEAST64_WIDTH__ = 64
+const __INT_LEAST8_MAX__ = 127
+const __INT_LEAST8_WIDTH__ = 8
+const __INT_MAX__ = 2147483647
+const __INT_WIDTH__ = 32
+const __LDBL_DECIMAL_DIG__ = 17
+const __LDBL_DENORM_MIN__ = 0
+const __LDBL_DIG__ = 15
+const __LDBL_EPSILON__ = 0
+const __LDBL_HAS_DENORM__ = 1
+const __LDBL_HAS_INFINITY__ = 1
+const __LDBL_HAS_QUIET_NAN__ = 1
+const __LDBL_IS_IEC_60559__ = 2
+const __LDBL_MANT_DIG__ = 53
+const __LDBL_MAX_10_EXP__ = 308
+const __LDBL_MAX_EXP__ = 1024
+const __LDBL_MAX__ = 0
+const __LDBL_MIN_10_EXP__ = -307
+const __LDBL_MIN_EXP__ = -1021
+const __LDBL_MIN__ = 0
+const __LDBL_NORM_MAX__ = 0
+const __LITTLE_ENDIAN = 1234
+const __LONG_DOUBLE_64__ = 1
+const __LONG_LONG_MAX__ = 9223372036854775807
+const __LONG_LONG_WIDTH__ = 64
+const __LONG_MAX = 9223372036854775807
+const __LONG_MAX__ = 9223372036854775807
+const __LONG_WIDTH__ = 64
+const __LP64__ = 1
+const __MMX_WITH_SSE__ = 1
+const __MMX__ = 1
+const __NO_INLINE__ = 1
+const __ORDER_BIG_ENDIAN__ = 4321
+const __ORDER_LITTLE_ENDIAN__ = 1234
+const __ORDER_PDP_ENDIAN__ = 3412
+const __PDP_ENDIAN = 3412
+const __PIC__ = 2
+const __PIE__ = 2
+const __PRAGMA_REDEFINE_EXTNAME = 1
+const __PRETTY_FUNCTION__ = 0
+const __PTRDIFF_MAX__ = 9223372036854775807
+const __PTRDIFF_WIDTH__ = 64
+const __SCHAR_MAX__ = 127
+const __SCHAR_WIDTH__ = 8
+const __SEG_FS = 1
+const __SEG_GS = 1
+const __SHRT_MAX__ = 32767
+const __SHRT_WIDTH__ = 16
+const __SIG_ATOMIC_MAX__ = 2147483647
+const __SIG_ATOMIC_MIN__ = -2147483648
+const __SIG_ATOMIC_TYPE__ = 0
+const __SIG_ATOMIC_WIDTH__ = 32
+const __SIZEOF_DOUBLE__ = 8
+const __SIZEOF_FLOAT128__ = 16
+const __SIZEOF_FLOAT80__ = 16
+const __SIZEOF_FLOAT__ = 4
+const __SIZEOF_INT128__ = 16
+const __SIZEOF_INT__ = 4
+const __SIZEOF_LONG_DOUBLE__ = 8
+const __SIZEOF_LONG_LONG__ = 8
+const __SIZEOF_LONG__ = 8
+const __SIZEOF_POINTER__ = 8
+const __SIZEOF_PTRDIFF_T__ = 8
+const __SIZEOF_SHORT__ = 2
+const __SIZEOF_SIZE_T__ = 8
+const __SIZEOF_WCHAR_T__ = 4
+const __SIZEOF_WINT_T__ = 4
+const __SIZE_MAX__ = 18446744073709551615
+const __SIZE_WIDTH__ = 64
+const __SSE2_MATH__ = 1
+const __SSE2__ = 1
+const __SSE_MATH__ = 1
+const __SSE__ = 1
+const __STDC_HOSTED__ = 0
+const __STDC_VERSION__ = 199901
+const __STDC__ = 1
+const __STRICT_ANSI__ = 1
+const __UINT16_MAX__ = 65535
+const __UINT32_MAX__ = 4294967295
+const __UINT64_MAX__ = 18446744073709551615
+const __UINT8_MAX__ = 255
+const __UINTMAX_MAX__ = 18446744073709551615
+const __UINTPTR_MAX__ = 18446744073709551615
+const __UINT_FAST16_MAX__ = 18446744073709551615
+const __UINT_FAST32_MAX__ = 18446744073709551615
+const __UINT_FAST64_MAX__ = 18446744073709551615
+const __UINT_FAST8_MAX__ = 255
+const __UINT_LEAST16_MAX__ = 65535
+const __UINT_LEAST32_MAX__ = 4294967295
+const __UINT_LEAST64_MAX__ = 18446744073709551615
+const __UINT_LEAST8_MAX__ = 255
+const __USE_TIME_BITS64 = 1
+const __VERSION__ = "12.2.0"
+const __WCHAR_MAX__ = 2147483647
+const __WCHAR_MIN__ = -2147483648
+const __WCHAR_TYPE__ = 0
+const __WCHAR_WIDTH__ = 32
+const __WINT_MAX__ = 4294967295
+const __WINT_MIN__ = 0
+const __WINT_WIDTH__ = 32
+const __amd64 = 1
+const __amd64__ = 1
+const __code_model_small__ = 1
+const __gnu_linux__ = 1
+const __inline = 0
+const __k8 = 1
+const __k8__ = 1
+const __linux = 1
+const __linux__ = 1
+const __pic__ = 2
+const __pie__ = 2
+const __restrict = 0
+const __restrict_arr = 0
+const __unix = 1
+const __unix__ = 1
+const __x86_64 = 1
+const __x86_64__ = 1
+const complex1 = 0
+const math_errhandling = 2
 
 type t__builtin_va_list = uintptr
 
@@ -555,9 +551,8 @@ type Tfloat_t = float32
 
 type Tdouble_t = float64
 
-var (
-	_k    = uint32(1799) /* constant for reduction */
-	_kln2 = float64(1246.9717778273416) /* k * ln2 */)
+var _k = uint32(1799)                   /* constant for reduction */
+var _kln2 = float64(1246.9717778273416) /* k * ln2 */
 
 // C documentation
 //
@@ -632,9 +627,8 @@ func X__ldexp_cexp(tls *TLS, z complex128, expt int32) (r complex128) {
 	return *(*complex128)(unsafe.Pointer(&v3))
 }
 
-var (
-	_k1    = uint32(235) /* constant for reduction */
-	_kln21 = Float32FromFloat32(162.8895874) /* k * ln2 */)
+var _k1 = uint32(235)                        /* constant for reduction */
+var _kln21 = Float32FromFloat32(162.8895874) /* k * ln2 */
 
 // C documentation
 //
@@ -986,16 +980,12 @@ func Xcasinl(tls *TLS, z complex128) (r complex128) {
 	return Complex128FromComplex128(Xcasin(tls, Complex128FromComplex128(z)))
 }
 
-const (
-	MAXNUM = 0
-	M_PI1  = 3.141592653589793
-)
+const MAXNUM = 0
+const M_PI1 = 3.141592653589793
 
-var (
-	_DP1 = float64(3.141592651605606)
-	_DP2 = float64(1.9841871479187034e-09)
-	_DP3 = float64(1.1442377452219664e-17)
-)
+var _DP1 = float64(3.141592651605606)
+var _DP2 = float64(1.9841871479187034e-09)
+var _DP3 = float64(1.1442377452219664e-17)
 
 func __redupi(tls *TLS, x float64) (r float64) {
 	var i int64
@@ -1042,11 +1032,9 @@ func Xcatan(tls *TLS, z complex128) (r complex128) {
 
 const MAXNUMF = 0
 
-var (
-	_DP11 = float64(3.140625)
-	_DP21 = float64(0.0009675025939941406)
-	_DP31 = float64(1.5099579909783765e-07)
-)
+var _DP11 = float64(3.140625)
+var _DP21 = float64(0.0009675025939941406)
+var _DP31 = float64(1.5099579909783765e-07)
 
 var _float_pi = float32(3.141592653589793)
 
@@ -1478,9 +1466,8 @@ func Xccosl(tls *TLS, z complex128) (r complex128) {
 	return Complex128FromComplex128(Xccos(tls, Complex128FromComplex128(z)))
 }
 
-var (
-	_exp_ovfl  = uint32(0x40862e42) /* high bits of MAX_EXP * ln2 ~= 710 */
-	_cexp_ovfl = uint32(0x4096b8e4) /* (MAX_EXP - MIN_DENORM_EXP) * ln2 */)
+var _exp_ovfl = uint32(0x40862e42)  /* high bits of MAX_EXP * ln2 ~= 710 */
+var _cexp_ovfl = uint32(0x4096b8e4) /* (MAX_EXP - MIN_DENORM_EXP) * ln2 */
 
 func Xcexp(tls *TLS, z complex128) (r complex128) {
 	if __ccgo_strace {
@@ -1564,9 +1551,8 @@ func Xcexp(tls *TLS, z complex128) (r complex128) {
 	return r
 }
 
-var (
-	_exp_ovfl1  = uint32(0x42b17218) /* MAX_EXP * ln2 ~= 88.722839355 */
-	_cexp_ovfl1 = uint32(0x43400074) /* (MAX_EXP - MIN_DENORM_EXP) * ln2 */)
+var _exp_ovfl1 = uint32(0x42b17218)  /* MAX_EXP * ln2 ~= 88.722839355 */
+var _cexp_ovfl1 = uint32(0x43400074) /* (MAX_EXP - MIN_DENORM_EXP) * ln2 */
 
 func Xcexpf(tls *TLS, z complex64) (r complex64) {
 	if __ccgo_strace {
@@ -1772,7 +1758,7 @@ func Xconjl(tls *TLS, z complex128) (r complex128) {
 
 /* pow(z, c) = exp(c log(z)), See C99 G.6.4.1 */
 
-func Xcpow(tls *TLS, z, c complex128) (r complex128) {
+func Xcpow(tls *TLS, z complex128, c complex128) (r complex128) {
 	if __ccgo_strace {
 		trc("tls=%v z=%v c=%v, (%v:)", tls, z, c, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -1780,7 +1766,7 @@ func Xcpow(tls *TLS, z, c complex128) (r complex128) {
 	return Xcexp(tls, c*Xclog(tls, z))
 }
 
-func Xcpowf(tls *TLS, z, c complex64) (r complex64) {
+func Xcpowf(tls *TLS, z complex64, c complex64) (r complex64) {
 	if __ccgo_strace {
 		trc("tls=%v z=%v c=%v, (%v:)", tls, z, c, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -1788,7 +1774,7 @@ func Xcpowf(tls *TLS, z, c complex64) (r complex64) {
 	return Xcexpf(tls, c*Xclogf(tls, z))
 }
 
-func Xcpowl(tls *TLS, z, c complex128) (r complex128) {
+func Xcpowl(tls *TLS, z complex128, c complex128) (r complex128) {
 	if __ccgo_strace {
 		trc("tls=%v z=%v c=%v, (%v:)", tls, z, c, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -2747,416 +2733,414 @@ func Xctanl(tls *TLS, z complex128) (r complex128) {
 	return Complex128FromComplex128(Xctan(tls, Complex128FromComplex128(z)))
 }
 
-const (
-	BUFSIZ                              = 1024
-	E2BIG                               = 7
-	EACCES                              = 13
-	EADDRINUSE                          = 98
-	EADDRNOTAVAIL                       = 99
-	EADV                                = 68
-	EAFNOSUPPORT                        = 97
-	EAGAIN                              = 11
-	EALREADY                            = 114
-	EBADE                               = 52
-	EBADF                               = 9
-	EBADFD                              = 77
-	EBADMSG                             = 74
-	EBADR                               = 53
-	EBADRQC                             = 56
-	EBADSLT                             = 57
-	EBFONT                              = 59
-	EBUSY                               = 16
-	ECANCELED                           = 125
-	ECHILD                              = 10
-	ECHRNG                              = 44
-	ECOMM                               = 70
-	ECONNABORTED                        = 103
-	ECONNREFUSED                        = 111
-	ECONNRESET                          = 104
-	EDEADLK                             = 35
-	EDEADLOCK                           = 35
-	EDESTADDRREQ                        = 89
-	EDOM                                = 33
-	EDOTDOT                             = 73
-	EDQUOT                              = 122
-	EEXIST                              = 17
-	EFAULT                              = 14
-	EFBIG                               = 27
-	EHOSTDOWN                           = 112
-	EHOSTUNREACH                        = 113
-	EHWPOISON                           = 133
-	EIDRM                               = 43
-	EILSEQ                              = 84
-	EINPROGRESS                         = 115
-	EINTR                               = 4
-	EINVAL                              = 22
-	EIO                                 = 5
-	EISCONN                             = 106
-	EISDIR                              = 21
-	EISNAM                              = 120
-	EKEYEXPIRED                         = 127
-	EKEYREJECTED                        = 129
-	EKEYREVOKED                         = 128
-	EL2HLT                              = 51
-	EL2NSYNC                            = 45
-	EL3HLT                              = 46
-	EL3RST                              = 47
-	ELIBACC                             = 79
-	ELIBBAD                             = 80
-	ELIBEXEC                            = 83
-	ELIBMAX                             = 82
-	ELIBSCN                             = 81
-	ELNRNG                              = 48
-	ELOOP                               = 40
-	EMEDIUMTYPE                         = 124
-	EMFILE                              = 24
-	EMLINK                              = 31
-	EMSGSIZE                            = 90
-	EMULTIHOP                           = 72
-	ENAMETOOLONG                        = 36
-	ENAVAIL                             = 119
-	ENETDOWN                            = 100
-	ENETRESET                           = 102
-	ENETUNREACH                         = 101
-	ENFILE                              = 23
-	ENOANO                              = 55
-	ENOBUFS                             = 105
-	ENOCSI                              = 50
-	ENODATA                             = 61
-	ENODEV                              = 19
-	ENOENT                              = 2
-	ENOEXEC                             = 8
-	ENOKEY                              = 126
-	ENOLCK                              = 37
-	ENOLINK                             = 67
-	ENOMEDIUM                           = 123
-	ENOMEM                              = 12
-	ENOMSG                              = 42
-	ENONET                              = 64
-	ENOPKG                              = 65
-	ENOPROTOOPT                         = 92
-	ENOSPC                              = 28
-	ENOSR                               = 63
-	ENOSTR                              = 60
-	ENOSYS                              = 38
-	ENOTBLK                             = 15
-	ENOTCONN                            = 107
-	ENOTDIR                             = 20
-	ENOTEMPTY                           = 39
-	ENOTNAM                             = 118
-	ENOTRECOVERABLE                     = 131
-	ENOTSOCK                            = 88
-	ENOTSUP                             = 95
-	ENOTTY                              = 25
-	ENOTUNIQ                            = 76
-	ENXIO                               = 6
-	EOPNOTSUPP                          = 95
-	EOVERFLOW                           = 75
-	EOWNERDEAD                          = 130
-	EPERM                               = 1
-	EPFNOSUPPORT                        = 96
-	EPIPE                               = 32
-	EPROTO                              = 71
-	EPROTONOSUPPORT                     = 93
-	EPROTOTYPE                          = 91
-	ERANGE                              = 34
-	EREMCHG                             = 78
-	EREMOTE                             = 66
-	EREMOTEIO                           = 121
-	ERESTART                            = 85
-	ERFKILL                             = 132
-	EROFS                               = 30
-	ESHUTDOWN                           = 108
-	ESOCKTNOSUPPORT                     = 94
-	ESPIPE                              = 29
-	ESRCH                               = 3
-	ESRMNT                              = 69
-	ESTALE                              = 116
-	ESTRPIPE                            = 86
-	ETIME                               = 62
-	ETIMEDOUT                           = 110
-	ETOOMANYREFS                        = 109
-	ETXTBSY                             = 26
-	EUCLEAN                             = 117
-	EUNATCH                             = 49
-	EUSERS                              = 87
-	EWOULDBLOCK                         = 11
-	EXDEV                               = 18
-	EXFULL                              = 54
-	FILENAME_MAX                        = 4096
-	FOPEN_MAX                           = 1000
-	F_LOCK                              = 1
-	F_OK                                = 0
-	F_TEST                              = 3
-	F_TLOCK                             = 2
-	F_ULOCK                             = 0
-	L_ctermid                           = 20
-	L_tmpnam                            = 20
-	POSIX_CLOSE_RESTART                 = 0
-	P_tmpdir                            = "/tmp"
-	R_OK                                = 4
-	SEEK_DATA                           = 3
-	SEEK_HOLE                           = 4
-	STDERR_FILENO                       = 2
-	STDIN_FILENO                        = 0
-	STDOUT_FILENO                       = 1
-	TMP_MAX                             = 10000
-	W_OK                                = 2
-	X_OK                                = 1
-	_CS_GNU_LIBC_VERSION                = 2
-	_CS_GNU_LIBPTHREAD_VERSION          = 3
-	_CS_PATH                            = 0
-	_CS_POSIX_V5_WIDTH_RESTRICTED_ENVS  = 4
-	_CS_POSIX_V6_ILP32_OFF32_CFLAGS     = 1116
-	_CS_POSIX_V6_ILP32_OFF32_LDFLAGS    = 1117
-	_CS_POSIX_V6_ILP32_OFF32_LIBS       = 1118
-	_CS_POSIX_V6_ILP32_OFF32_LINTFLAGS  = 1119
-	_CS_POSIX_V6_ILP32_OFFBIG_CFLAGS    = 1120
-	_CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS   = 1121
-	_CS_POSIX_V6_ILP32_OFFBIG_LIBS      = 1122
-	_CS_POSIX_V6_ILP32_OFFBIG_LINTFLAGS = 1123
-	_CS_POSIX_V6_LP64_OFF64_CFLAGS      = 1124
-	_CS_POSIX_V6_LP64_OFF64_LDFLAGS     = 1125
-	_CS_POSIX_V6_LP64_OFF64_LIBS        = 1126
-	_CS_POSIX_V6_LP64_OFF64_LINTFLAGS   = 1127
-	_CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS    = 1128
-	_CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS   = 1129
-	_CS_POSIX_V6_LPBIG_OFFBIG_LIBS      = 1130
-	_CS_POSIX_V6_LPBIG_OFFBIG_LINTFLAGS = 1131
-	_CS_POSIX_V6_WIDTH_RESTRICTED_ENVS  = 1
-	_CS_POSIX_V7_ILP32_OFF32_CFLAGS     = 1132
-	_CS_POSIX_V7_ILP32_OFF32_LDFLAGS    = 1133
-	_CS_POSIX_V7_ILP32_OFF32_LIBS       = 1134
-	_CS_POSIX_V7_ILP32_OFF32_LINTFLAGS  = 1135
-	_CS_POSIX_V7_ILP32_OFFBIG_CFLAGS    = 1136
-	_CS_POSIX_V7_ILP32_OFFBIG_LDFLAGS   = 1137
-	_CS_POSIX_V7_ILP32_OFFBIG_LIBS      = 1138
-	_CS_POSIX_V7_ILP32_OFFBIG_LINTFLAGS = 1139
-	_CS_POSIX_V7_LP64_OFF64_CFLAGS      = 1140
-	_CS_POSIX_V7_LP64_OFF64_LDFLAGS     = 1141
-	_CS_POSIX_V7_LP64_OFF64_LIBS        = 1142
-	_CS_POSIX_V7_LP64_OFF64_LINTFLAGS   = 1143
-	_CS_POSIX_V7_LPBIG_OFFBIG_CFLAGS    = 1144
-	_CS_POSIX_V7_LPBIG_OFFBIG_LDFLAGS   = 1145
-	_CS_POSIX_V7_LPBIG_OFFBIG_LIBS      = 1146
-	_CS_POSIX_V7_LPBIG_OFFBIG_LINTFLAGS = 1147
-	_CS_POSIX_V7_THREADS_CFLAGS         = 1150
-	_CS_POSIX_V7_THREADS_LDFLAGS        = 1151
-	_CS_POSIX_V7_WIDTH_RESTRICTED_ENVS  = 5
-	_CS_V6_ENV                          = 1148
-	_CS_V7_ENV                          = 1149
-	_IOFBF                              = 0
-	_IOLBF                              = 1
-	_IONBF                              = 2
-	_PC_2_SYMLINKS                      = 20
-	_PC_ALLOC_SIZE_MIN                  = 18
-	_PC_ASYNC_IO                        = 10
-	_PC_CHOWN_RESTRICTED                = 6
-	_PC_FILESIZEBITS                    = 13
-	_PC_LINK_MAX                        = 0
-	_PC_MAX_CANON                       = 1
-	_PC_MAX_INPUT                       = 2
-	_PC_NAME_MAX                        = 3
-	_PC_NO_TRUNC                        = 7
-	_PC_PATH_MAX                        = 4
-	_PC_PIPE_BUF                        = 5
-	_PC_PRIO_IO                         = 11
-	_PC_REC_INCR_XFER_SIZE              = 14
-	_PC_REC_MAX_XFER_SIZE               = 15
-	_PC_REC_MIN_XFER_SIZE               = 16
-	_PC_REC_XFER_ALIGN                  = 17
-	_PC_SOCK_MAXBUF                     = 12
-	_PC_SYMLINK_MAX                     = 19
-	_PC_SYNC_IO                         = 9
-	_PC_VDISABLE                        = 8
-	_POSIX2_C_BIND                      = 200809
-	_POSIX2_VERSION                     = 200809
-	_POSIX_ADVISORY_INFO                = 200809
-	_POSIX_ASYNCHRONOUS_IO              = 200809
-	_POSIX_BARRIERS                     = 200809
-	_POSIX_CHOWN_RESTRICTED             = 1
-	_POSIX_CLOCK_SELECTION              = 200809
-	_POSIX_CPUTIME                      = 200809
-	_POSIX_FSYNC                        = 200809
-	_POSIX_IPV6                         = 200809
-	_POSIX_JOB_CONTROL                  = 1
-	_POSIX_MAPPED_FILES                 = 200809
-	_POSIX_MEMLOCK                      = 200809
-	_POSIX_MEMLOCK_RANGE                = 200809
-	_POSIX_MEMORY_PROTECTION            = 200809
-	_POSIX_MESSAGE_PASSING              = 200809
-	_POSIX_MONOTONIC_CLOCK              = 200809
-	_POSIX_NO_TRUNC                     = 1
-	_POSIX_RAW_SOCKETS                  = 200809
-	_POSIX_READER_WRITER_LOCKS          = 200809
-	_POSIX_REALTIME_SIGNALS             = 200809
-	_POSIX_REGEXP                       = 1
-	_POSIX_SAVED_IDS                    = 1
-	_POSIX_SEMAPHORES                   = 200809
-	_POSIX_SHARED_MEMORY_OBJECTS        = 200809
-	_POSIX_SHELL                        = 1
-	_POSIX_SPAWN                        = 200809
-	_POSIX_SPIN_LOCKS                   = 200809
-	_POSIX_THREADS                      = 200809
-	_POSIX_THREAD_ATTR_STACKADDR        = 200809
-	_POSIX_THREAD_ATTR_STACKSIZE        = 200809
-	_POSIX_THREAD_CPUTIME               = 200809
-	_POSIX_THREAD_PRIORITY_SCHEDULING   = 200809
-	_POSIX_THREAD_PROCESS_SHARED        = 200809
-	_POSIX_THREAD_SAFE_FUNCTIONS        = 200809
-	_POSIX_TIMEOUTS                     = 200809
-	_POSIX_TIMERS                       = 200809
-	_POSIX_V6_LP64_OFF64                = 1
-	_POSIX_V7_LP64_OFF64                = 1
-	_POSIX_VDISABLE                     = 0
-	_POSIX_VERSION                      = 200809
-	_SC_2_CHAR_TERM                     = 95
-	_SC_2_C_BIND                        = 47
-	_SC_2_C_DEV                         = 48
-	_SC_2_FORT_DEV                      = 49
-	_SC_2_FORT_RUN                      = 50
-	_SC_2_LOCALEDEF                     = 52
-	_SC_2_PBS                           = 168
-	_SC_2_PBS_ACCOUNTING                = 169
-	_SC_2_PBS_CHECKPOINT                = 175
-	_SC_2_PBS_LOCATE                    = 170
-	_SC_2_PBS_MESSAGE                   = 171
-	_SC_2_PBS_TRACK                     = 172
-	_SC_2_SW_DEV                        = 51
-	_SC_2_UPE                           = 97
-	_SC_2_VERSION                       = 46
-	_SC_ADVISORY_INFO                   = 132
-	_SC_AIO_LISTIO_MAX                  = 23
-	_SC_AIO_MAX                         = 24
-	_SC_AIO_PRIO_DELTA_MAX              = 25
-	_SC_ARG_MAX                         = 0
-	_SC_ASYNCHRONOUS_IO                 = 12
-	_SC_ATEXIT_MAX                      = 87
-	_SC_AVPHYS_PAGES                    = 86
-	_SC_BARRIERS                        = 133
-	_SC_BC_BASE_MAX                     = 36
-	_SC_BC_DIM_MAX                      = 37
-	_SC_BC_SCALE_MAX                    = 38
-	_SC_BC_STRING_MAX                   = 39
-	_SC_CHILD_MAX                       = 1
-	_SC_CLK_TCK                         = 2
-	_SC_CLOCK_SELECTION                 = 137
-	_SC_COLL_WEIGHTS_MAX                = 40
-	_SC_CPUTIME                         = 138
-	_SC_DELAYTIMER_MAX                  = 26
-	_SC_EXPR_NEST_MAX                   = 42
-	_SC_FSYNC                           = 15
-	_SC_GETGR_R_SIZE_MAX                = 69
-	_SC_GETPW_R_SIZE_MAX                = 70
-	_SC_HOST_NAME_MAX                   = 180
-	_SC_IOV_MAX                         = 60
-	_SC_IPV6                            = 235
-	_SC_JOB_CONTROL                     = 7
-	_SC_LINE_MAX                        = 43
-	_SC_LOGIN_NAME_MAX                  = 71
-	_SC_MAPPED_FILES                    = 16
-	_SC_MEMLOCK                         = 17
-	_SC_MEMLOCK_RANGE                   = 18
-	_SC_MEMORY_PROTECTION               = 19
-	_SC_MESSAGE_PASSING                 = 20
-	_SC_MINSIGSTKSZ                     = 249
-	_SC_MONOTONIC_CLOCK                 = 149
-	_SC_MQ_OPEN_MAX                     = 27
-	_SC_MQ_PRIO_MAX                     = 28
-	_SC_NGROUPS_MAX                     = 3
-	_SC_NPROCESSORS_CONF                = 83
-	_SC_NPROCESSORS_ONLN                = 84
-	_SC_NZERO                           = 109
-	_SC_OPEN_MAX                        = 4
-	_SC_PAGESIZE                        = 30
-	_SC_PAGE_SIZE                       = 30
-	_SC_PASS_MAX                        = 88
-	_SC_PHYS_PAGES                      = 85
-	_SC_PRIORITIZED_IO                  = 13
-	_SC_PRIORITY_SCHEDULING             = 10
-	_SC_RAW_SOCKETS                     = 236
-	_SC_READER_WRITER_LOCKS             = 153
-	_SC_REALTIME_SIGNALS                = 9
-	_SC_REGEXP                          = 155
-	_SC_RE_DUP_MAX                      = 44
-	_SC_RTSIG_MAX                       = 31
-	_SC_SAVED_IDS                       = 8
-	_SC_SEMAPHORES                      = 21
-	_SC_SEM_NSEMS_MAX                   = 32
-	_SC_SEM_VALUE_MAX                   = 33
-	_SC_SHARED_MEMORY_OBJECTS           = 22
-	_SC_SHELL                           = 157
-	_SC_SIGQUEUE_MAX                    = 34
-	_SC_SIGSTKSZ                        = 250
-	_SC_SPAWN                           = 159
-	_SC_SPIN_LOCKS                      = 154
-	_SC_SPORADIC_SERVER                 = 160
-	_SC_SS_REPL_MAX                     = 241
-	_SC_STREAMS                         = 174
-	_SC_STREAM_MAX                      = 5
-	_SC_SYMLOOP_MAX                     = 173
-	_SC_SYNCHRONIZED_IO                 = 14
-	_SC_THREADS                         = 67
-	_SC_THREAD_ATTR_STACKADDR           = 77
-	_SC_THREAD_ATTR_STACKSIZE           = 78
-	_SC_THREAD_CPUTIME                  = 139
-	_SC_THREAD_DESTRUCTOR_ITERATIONS    = 73
-	_SC_THREAD_KEYS_MAX                 = 74
-	_SC_THREAD_PRIORITY_SCHEDULING      = 79
-	_SC_THREAD_PRIO_INHERIT             = 80
-	_SC_THREAD_PRIO_PROTECT             = 81
-	_SC_THREAD_PROCESS_SHARED           = 82
-	_SC_THREAD_ROBUST_PRIO_INHERIT      = 247
-	_SC_THREAD_ROBUST_PRIO_PROTECT      = 248
-	_SC_THREAD_SAFE_FUNCTIONS           = 68
-	_SC_THREAD_SPORADIC_SERVER          = 161
-	_SC_THREAD_STACK_MIN                = 75
-	_SC_THREAD_THREADS_MAX              = 76
-	_SC_TIMEOUTS                        = 164
-	_SC_TIMERS                          = 11
-	_SC_TIMER_MAX                       = 35
-	_SC_TRACE                           = 181
-	_SC_TRACE_EVENT_FILTER              = 182
-	_SC_TRACE_EVENT_NAME_MAX            = 242
-	_SC_TRACE_INHERIT                   = 183
-	_SC_TRACE_LOG                       = 184
-	_SC_TRACE_NAME_MAX                  = 243
-	_SC_TRACE_SYS_MAX                   = 244
-	_SC_TRACE_USER_EVENT_MAX            = 245
-	_SC_TTY_NAME_MAX                    = 72
-	_SC_TYPED_MEMORY_OBJECTS            = 165
-	_SC_TZNAME_MAX                      = 6
-	_SC_UIO_MAXIOV                      = 60
-	_SC_V6_ILP32_OFF32                  = 176
-	_SC_V6_ILP32_OFFBIG                 = 177
-	_SC_V6_LP64_OFF64                   = 178
-	_SC_V6_LPBIG_OFFBIG                 = 179
-	_SC_V7_ILP32_OFF32                  = 237
-	_SC_V7_ILP32_OFFBIG                 = 238
-	_SC_V7_LP64_OFF64                   = 239
-	_SC_V7_LPBIG_OFFBIG                 = 240
-	_SC_VERSION                         = 29
-	_SC_XBS5_ILP32_OFF32                = 125
-	_SC_XBS5_ILP32_OFFBIG               = 126
-	_SC_XBS5_LP64_OFF64                 = 127
-	_SC_XBS5_LPBIG_OFFBIG               = 128
-	_SC_XOPEN_CRYPT                     = 92
-	_SC_XOPEN_ENH_I18N                  = 93
-	_SC_XOPEN_LEGACY                    = 129
-	_SC_XOPEN_REALTIME                  = 130
-	_SC_XOPEN_REALTIME_THREADS          = 131
-	_SC_XOPEN_SHM                       = 94
-	_SC_XOPEN_STREAMS                   = 246
-	_SC_XOPEN_UNIX                      = 91
-	_SC_XOPEN_VERSION                   = 89
-	_SC_XOPEN_XCU_VERSION               = 90
-	_SC_XOPEN_XPG2                      = 98
-	_SC_XOPEN_XPG3                      = 99
-	_SC_XOPEN_XPG4                      = 100
-	_XOPEN_ENH_I18N                     = 1
-	_XOPEN_UNIX                         = 1
-	_XOPEN_VERSION                      = 700
-)
+const BUFSIZ = 1024
+const E2BIG = 7
+const EACCES = 13
+const EADDRINUSE = 98
+const EADDRNOTAVAIL = 99
+const EADV = 68
+const EAFNOSUPPORT = 97
+const EAGAIN = 11
+const EALREADY = 114
+const EBADE = 52
+const EBADF = 9
+const EBADFD = 77
+const EBADMSG = 74
+const EBADR = 53
+const EBADRQC = 56
+const EBADSLT = 57
+const EBFONT = 59
+const EBUSY = 16
+const ECANCELED = 125
+const ECHILD = 10
+const ECHRNG = 44
+const ECOMM = 70
+const ECONNABORTED = 103
+const ECONNREFUSED = 111
+const ECONNRESET = 104
+const EDEADLK = 35
+const EDEADLOCK = 35
+const EDESTADDRREQ = 89
+const EDOM = 33
+const EDOTDOT = 73
+const EDQUOT = 122
+const EEXIST = 17
+const EFAULT = 14
+const EFBIG = 27
+const EHOSTDOWN = 112
+const EHOSTUNREACH = 113
+const EHWPOISON = 133
+const EIDRM = 43
+const EILSEQ = 84
+const EINPROGRESS = 115
+const EINTR = 4
+const EINVAL = 22
+const EIO = 5
+const EISCONN = 106
+const EISDIR = 21
+const EISNAM = 120
+const EKEYEXPIRED = 127
+const EKEYREJECTED = 129
+const EKEYREVOKED = 128
+const EL2HLT = 51
+const EL2NSYNC = 45
+const EL3HLT = 46
+const EL3RST = 47
+const ELIBACC = 79
+const ELIBBAD = 80
+const ELIBEXEC = 83
+const ELIBMAX = 82
+const ELIBSCN = 81
+const ELNRNG = 48
+const ELOOP = 40
+const EMEDIUMTYPE = 124
+const EMFILE = 24
+const EMLINK = 31
+const EMSGSIZE = 90
+const EMULTIHOP = 72
+const ENAMETOOLONG = 36
+const ENAVAIL = 119
+const ENETDOWN = 100
+const ENETRESET = 102
+const ENETUNREACH = 101
+const ENFILE = 23
+const ENOANO = 55
+const ENOBUFS = 105
+const ENOCSI = 50
+const ENODATA = 61
+const ENODEV = 19
+const ENOENT = 2
+const ENOEXEC = 8
+const ENOKEY = 126
+const ENOLCK = 37
+const ENOLINK = 67
+const ENOMEDIUM = 123
+const ENOMEM = 12
+const ENOMSG = 42
+const ENONET = 64
+const ENOPKG = 65
+const ENOPROTOOPT = 92
+const ENOSPC = 28
+const ENOSR = 63
+const ENOSTR = 60
+const ENOSYS = 38
+const ENOTBLK = 15
+const ENOTCONN = 107
+const ENOTDIR = 20
+const ENOTEMPTY = 39
+const ENOTNAM = 118
+const ENOTRECOVERABLE = 131
+const ENOTSOCK = 88
+const ENOTSUP = 95
+const ENOTTY = 25
+const ENOTUNIQ = 76
+const ENXIO = 6
+const EOPNOTSUPP = 95
+const EOVERFLOW = 75
+const EOWNERDEAD = 130
+const EPERM = 1
+const EPFNOSUPPORT = 96
+const EPIPE = 32
+const EPROTO = 71
+const EPROTONOSUPPORT = 93
+const EPROTOTYPE = 91
+const ERANGE = 34
+const EREMCHG = 78
+const EREMOTE = 66
+const EREMOTEIO = 121
+const ERESTART = 85
+const ERFKILL = 132
+const EROFS = 30
+const ESHUTDOWN = 108
+const ESOCKTNOSUPPORT = 94
+const ESPIPE = 29
+const ESRCH = 3
+const ESRMNT = 69
+const ESTALE = 116
+const ESTRPIPE = 86
+const ETIME = 62
+const ETIMEDOUT = 110
+const ETOOMANYREFS = 109
+const ETXTBSY = 26
+const EUCLEAN = 117
+const EUNATCH = 49
+const EUSERS = 87
+const EWOULDBLOCK = 11
+const EXDEV = 18
+const EXFULL = 54
+const FILENAME_MAX = 4096
+const FOPEN_MAX = 1000
+const F_LOCK = 1
+const F_OK = 0
+const F_TEST = 3
+const F_TLOCK = 2
+const F_ULOCK = 0
+const L_ctermid = 20
+const L_tmpnam = 20
+const POSIX_CLOSE_RESTART = 0
+const P_tmpdir = "/tmp"
+const R_OK = 4
+const SEEK_DATA = 3
+const SEEK_HOLE = 4
+const STDERR_FILENO = 2
+const STDIN_FILENO = 0
+const STDOUT_FILENO = 1
+const TMP_MAX = 10000
+const W_OK = 2
+const X_OK = 1
+const _CS_GNU_LIBC_VERSION = 2
+const _CS_GNU_LIBPTHREAD_VERSION = 3
+const _CS_PATH = 0
+const _CS_POSIX_V5_WIDTH_RESTRICTED_ENVS = 4
+const _CS_POSIX_V6_ILP32_OFF32_CFLAGS = 1116
+const _CS_POSIX_V6_ILP32_OFF32_LDFLAGS = 1117
+const _CS_POSIX_V6_ILP32_OFF32_LIBS = 1118
+const _CS_POSIX_V6_ILP32_OFF32_LINTFLAGS = 1119
+const _CS_POSIX_V6_ILP32_OFFBIG_CFLAGS = 1120
+const _CS_POSIX_V6_ILP32_OFFBIG_LDFLAGS = 1121
+const _CS_POSIX_V6_ILP32_OFFBIG_LIBS = 1122
+const _CS_POSIX_V6_ILP32_OFFBIG_LINTFLAGS = 1123
+const _CS_POSIX_V6_LP64_OFF64_CFLAGS = 1124
+const _CS_POSIX_V6_LP64_OFF64_LDFLAGS = 1125
+const _CS_POSIX_V6_LP64_OFF64_LIBS = 1126
+const _CS_POSIX_V6_LP64_OFF64_LINTFLAGS = 1127
+const _CS_POSIX_V6_LPBIG_OFFBIG_CFLAGS = 1128
+const _CS_POSIX_V6_LPBIG_OFFBIG_LDFLAGS = 1129
+const _CS_POSIX_V6_LPBIG_OFFBIG_LIBS = 1130
+const _CS_POSIX_V6_LPBIG_OFFBIG_LINTFLAGS = 1131
+const _CS_POSIX_V6_WIDTH_RESTRICTED_ENVS = 1
+const _CS_POSIX_V7_ILP32_OFF32_CFLAGS = 1132
+const _CS_POSIX_V7_ILP32_OFF32_LDFLAGS = 1133
+const _CS_POSIX_V7_ILP32_OFF32_LIBS = 1134
+const _CS_POSIX_V7_ILP32_OFF32_LINTFLAGS = 1135
+const _CS_POSIX_V7_ILP32_OFFBIG_CFLAGS = 1136
+const _CS_POSIX_V7_ILP32_OFFBIG_LDFLAGS = 1137
+const _CS_POSIX_V7_ILP32_OFFBIG_LIBS = 1138
+const _CS_POSIX_V7_ILP32_OFFBIG_LINTFLAGS = 1139
+const _CS_POSIX_V7_LP64_OFF64_CFLAGS = 1140
+const _CS_POSIX_V7_LP64_OFF64_LDFLAGS = 1141
+const _CS_POSIX_V7_LP64_OFF64_LIBS = 1142
+const _CS_POSIX_V7_LP64_OFF64_LINTFLAGS = 1143
+const _CS_POSIX_V7_LPBIG_OFFBIG_CFLAGS = 1144
+const _CS_POSIX_V7_LPBIG_OFFBIG_LDFLAGS = 1145
+const _CS_POSIX_V7_LPBIG_OFFBIG_LIBS = 1146
+const _CS_POSIX_V7_LPBIG_OFFBIG_LINTFLAGS = 1147
+const _CS_POSIX_V7_THREADS_CFLAGS = 1150
+const _CS_POSIX_V7_THREADS_LDFLAGS = 1151
+const _CS_POSIX_V7_WIDTH_RESTRICTED_ENVS = 5
+const _CS_V6_ENV = 1148
+const _CS_V7_ENV = 1149
+const _IOFBF = 0
+const _IOLBF = 1
+const _IONBF = 2
+const _PC_2_SYMLINKS = 20
+const _PC_ALLOC_SIZE_MIN = 18
+const _PC_ASYNC_IO = 10
+const _PC_CHOWN_RESTRICTED = 6
+const _PC_FILESIZEBITS = 13
+const _PC_LINK_MAX = 0
+const _PC_MAX_CANON = 1
+const _PC_MAX_INPUT = 2
+const _PC_NAME_MAX = 3
+const _PC_NO_TRUNC = 7
+const _PC_PATH_MAX = 4
+const _PC_PIPE_BUF = 5
+const _PC_PRIO_IO = 11
+const _PC_REC_INCR_XFER_SIZE = 14
+const _PC_REC_MAX_XFER_SIZE = 15
+const _PC_REC_MIN_XFER_SIZE = 16
+const _PC_REC_XFER_ALIGN = 17
+const _PC_SOCK_MAXBUF = 12
+const _PC_SYMLINK_MAX = 19
+const _PC_SYNC_IO = 9
+const _PC_VDISABLE = 8
+const _POSIX2_C_BIND = 200809
+const _POSIX2_VERSION = 200809
+const _POSIX_ADVISORY_INFO = 200809
+const _POSIX_ASYNCHRONOUS_IO = 200809
+const _POSIX_BARRIERS = 200809
+const _POSIX_CHOWN_RESTRICTED = 1
+const _POSIX_CLOCK_SELECTION = 200809
+const _POSIX_CPUTIME = 200809
+const _POSIX_FSYNC = 200809
+const _POSIX_IPV6 = 200809
+const _POSIX_JOB_CONTROL = 1
+const _POSIX_MAPPED_FILES = 200809
+const _POSIX_MEMLOCK = 200809
+const _POSIX_MEMLOCK_RANGE = 200809
+const _POSIX_MEMORY_PROTECTION = 200809
+const _POSIX_MESSAGE_PASSING = 200809
+const _POSIX_MONOTONIC_CLOCK = 200809
+const _POSIX_NO_TRUNC = 1
+const _POSIX_RAW_SOCKETS = 200809
+const _POSIX_READER_WRITER_LOCKS = 200809
+const _POSIX_REALTIME_SIGNALS = 200809
+const _POSIX_REGEXP = 1
+const _POSIX_SAVED_IDS = 1
+const _POSIX_SEMAPHORES = 200809
+const _POSIX_SHARED_MEMORY_OBJECTS = 200809
+const _POSIX_SHELL = 1
+const _POSIX_SPAWN = 200809
+const _POSIX_SPIN_LOCKS = 200809
+const _POSIX_THREADS = 200809
+const _POSIX_THREAD_ATTR_STACKADDR = 200809
+const _POSIX_THREAD_ATTR_STACKSIZE = 200809
+const _POSIX_THREAD_CPUTIME = 200809
+const _POSIX_THREAD_PRIORITY_SCHEDULING = 200809
+const _POSIX_THREAD_PROCESS_SHARED = 200809
+const _POSIX_THREAD_SAFE_FUNCTIONS = 200809
+const _POSIX_TIMEOUTS = 200809
+const _POSIX_TIMERS = 200809
+const _POSIX_V6_LP64_OFF64 = 1
+const _POSIX_V7_LP64_OFF64 = 1
+const _POSIX_VDISABLE = 0
+const _POSIX_VERSION = 200809
+const _SC_2_CHAR_TERM = 95
+const _SC_2_C_BIND = 47
+const _SC_2_C_DEV = 48
+const _SC_2_FORT_DEV = 49
+const _SC_2_FORT_RUN = 50
+const _SC_2_LOCALEDEF = 52
+const _SC_2_PBS = 168
+const _SC_2_PBS_ACCOUNTING = 169
+const _SC_2_PBS_CHECKPOINT = 175
+const _SC_2_PBS_LOCATE = 170
+const _SC_2_PBS_MESSAGE = 171
+const _SC_2_PBS_TRACK = 172
+const _SC_2_SW_DEV = 51
+const _SC_2_UPE = 97
+const _SC_2_VERSION = 46
+const _SC_ADVISORY_INFO = 132
+const _SC_AIO_LISTIO_MAX = 23
+const _SC_AIO_MAX = 24
+const _SC_AIO_PRIO_DELTA_MAX = 25
+const _SC_ARG_MAX = 0
+const _SC_ASYNCHRONOUS_IO = 12
+const _SC_ATEXIT_MAX = 87
+const _SC_AVPHYS_PAGES = 86
+const _SC_BARRIERS = 133
+const _SC_BC_BASE_MAX = 36
+const _SC_BC_DIM_MAX = 37
+const _SC_BC_SCALE_MAX = 38
+const _SC_BC_STRING_MAX = 39
+const _SC_CHILD_MAX = 1
+const _SC_CLK_TCK = 2
+const _SC_CLOCK_SELECTION = 137
+const _SC_COLL_WEIGHTS_MAX = 40
+const _SC_CPUTIME = 138
+const _SC_DELAYTIMER_MAX = 26
+const _SC_EXPR_NEST_MAX = 42
+const _SC_FSYNC = 15
+const _SC_GETGR_R_SIZE_MAX = 69
+const _SC_GETPW_R_SIZE_MAX = 70
+const _SC_HOST_NAME_MAX = 180
+const _SC_IOV_MAX = 60
+const _SC_IPV6 = 235
+const _SC_JOB_CONTROL = 7
+const _SC_LINE_MAX = 43
+const _SC_LOGIN_NAME_MAX = 71
+const _SC_MAPPED_FILES = 16
+const _SC_MEMLOCK = 17
+const _SC_MEMLOCK_RANGE = 18
+const _SC_MEMORY_PROTECTION = 19
+const _SC_MESSAGE_PASSING = 20
+const _SC_MINSIGSTKSZ = 249
+const _SC_MONOTONIC_CLOCK = 149
+const _SC_MQ_OPEN_MAX = 27
+const _SC_MQ_PRIO_MAX = 28
+const _SC_NGROUPS_MAX = 3
+const _SC_NPROCESSORS_CONF = 83
+const _SC_NPROCESSORS_ONLN = 84
+const _SC_NZERO = 109
+const _SC_OPEN_MAX = 4
+const _SC_PAGESIZE = 30
+const _SC_PAGE_SIZE = 30
+const _SC_PASS_MAX = 88
+const _SC_PHYS_PAGES = 85
+const _SC_PRIORITIZED_IO = 13
+const _SC_PRIORITY_SCHEDULING = 10
+const _SC_RAW_SOCKETS = 236
+const _SC_READER_WRITER_LOCKS = 153
+const _SC_REALTIME_SIGNALS = 9
+const _SC_REGEXP = 155
+const _SC_RE_DUP_MAX = 44
+const _SC_RTSIG_MAX = 31
+const _SC_SAVED_IDS = 8
+const _SC_SEMAPHORES = 21
+const _SC_SEM_NSEMS_MAX = 32
+const _SC_SEM_VALUE_MAX = 33
+const _SC_SHARED_MEMORY_OBJECTS = 22
+const _SC_SHELL = 157
+const _SC_SIGQUEUE_MAX = 34
+const _SC_SIGSTKSZ = 250
+const _SC_SPAWN = 159
+const _SC_SPIN_LOCKS = 154
+const _SC_SPORADIC_SERVER = 160
+const _SC_SS_REPL_MAX = 241
+const _SC_STREAMS = 174
+const _SC_STREAM_MAX = 5
+const _SC_SYMLOOP_MAX = 173
+const _SC_SYNCHRONIZED_IO = 14
+const _SC_THREADS = 67
+const _SC_THREAD_ATTR_STACKADDR = 77
+const _SC_THREAD_ATTR_STACKSIZE = 78
+const _SC_THREAD_CPUTIME = 139
+const _SC_THREAD_DESTRUCTOR_ITERATIONS = 73
+const _SC_THREAD_KEYS_MAX = 74
+const _SC_THREAD_PRIORITY_SCHEDULING = 79
+const _SC_THREAD_PRIO_INHERIT = 80
+const _SC_THREAD_PRIO_PROTECT = 81
+const _SC_THREAD_PROCESS_SHARED = 82
+const _SC_THREAD_ROBUST_PRIO_INHERIT = 247
+const _SC_THREAD_ROBUST_PRIO_PROTECT = 248
+const _SC_THREAD_SAFE_FUNCTIONS = 68
+const _SC_THREAD_SPORADIC_SERVER = 161
+const _SC_THREAD_STACK_MIN = 75
+const _SC_THREAD_THREADS_MAX = 76
+const _SC_TIMEOUTS = 164
+const _SC_TIMERS = 11
+const _SC_TIMER_MAX = 35
+const _SC_TRACE = 181
+const _SC_TRACE_EVENT_FILTER = 182
+const _SC_TRACE_EVENT_NAME_MAX = 242
+const _SC_TRACE_INHERIT = 183
+const _SC_TRACE_LOG = 184
+const _SC_TRACE_NAME_MAX = 243
+const _SC_TRACE_SYS_MAX = 244
+const _SC_TRACE_USER_EVENT_MAX = 245
+const _SC_TTY_NAME_MAX = 72
+const _SC_TYPED_MEMORY_OBJECTS = 165
+const _SC_TZNAME_MAX = 6
+const _SC_UIO_MAXIOV = 60
+const _SC_V6_ILP32_OFF32 = 176
+const _SC_V6_ILP32_OFFBIG = 177
+const _SC_V6_LP64_OFF64 = 178
+const _SC_V6_LPBIG_OFFBIG = 179
+const _SC_V7_ILP32_OFF32 = 237
+const _SC_V7_ILP32_OFFBIG = 238
+const _SC_V7_LP64_OFF64 = 239
+const _SC_V7_LPBIG_OFFBIG = 240
+const _SC_VERSION = 29
+const _SC_XBS5_ILP32_OFF32 = 125
+const _SC_XBS5_ILP32_OFFBIG = 126
+const _SC_XBS5_LP64_OFF64 = 127
+const _SC_XBS5_LPBIG_OFFBIG = 128
+const _SC_XOPEN_CRYPT = 92
+const _SC_XOPEN_ENH_I18N = 93
+const _SC_XOPEN_LEGACY = 129
+const _SC_XOPEN_REALTIME = 130
+const _SC_XOPEN_REALTIME_THREADS = 131
+const _SC_XOPEN_SHM = 94
+const _SC_XOPEN_STREAMS = 246
+const _SC_XOPEN_UNIX = 91
+const _SC_XOPEN_VERSION = 89
+const _SC_XOPEN_XCU_VERSION = 90
+const _SC_XOPEN_XPG2 = 98
+const _SC_XOPEN_XPG3 = 99
+const _SC_XOPEN_XPG4 = 100
+const _XOPEN_ENH_I18N = 1
+const _XOPEN_UNIX = 1
+const _XOPEN_VERSION = 700
 
 type Tsize_t = uint64
 
@@ -3207,121 +3191,119 @@ func Xconfstr(tls *TLS, name int32, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	return Uint64FromInt32(Xsnprintf(tls, buf, len1, __ccgo_ts+15, VaList(bp+8, s)) + int32(1))
 }
 
-const (
-	ARG_MAX                             = 131072
-	BC_BASE_MAX                         = 99
-	BC_DIM_MAX                          = 2048
-	BC_SCALE_MAX                        = 99
-	BC_STRING_MAX                       = 1000
-	CHARCLASS_NAME_MAX                  = 14
-	CHAR_BIT                            = 8
-	CHAR_MAX                            = 255
-	CHAR_MIN                            = 0
-	COLL_WEIGHTS_MAX                    = 2
-	DELAYTIMER_MAX                      = 2147483647
-	EXPR_NEST_MAX                       = 32
-	FILESIZEBITS                        = 64
-	HOST_NAME_MAX                       = 255
-	INT_MAX                             = 2147483647
-	INT_MIN                             = -2147483648
-	IOV_MAX                             = 1024
-	LINE_MAX                            = 4096
-	LLONG_MAX                           = 9223372036854775807
-	LLONG_MIN                           = -9223372036854775808
-	LOGIN_NAME_MAX                      = 256
-	LONG_BIT                            = 64
-	LONG_MAX                            = 9223372036854775807
-	LONG_MIN                            = -9223372036854775808
-	MB_LEN_MAX                          = 4
-	MQ_PRIO_MAX                         = 32768
-	NAME_MAX                            = 255
-	NGROUPS_MAX                         = 32
-	NL_ARGMAX                           = 9
-	NL_LANGMAX                          = 32
-	NL_MSGMAX                           = 32767
-	NL_SETMAX                           = 255
-	NL_TEXTMAX                          = 2048
-	NZERO                               = 20
-	PAGESIZE                            = 4096
-	PAGE_SIZE                           = 4096
-	PATH_MAX                            = 4096
-	PIPE_BUF                            = 4096
-	PTHREAD_DESTRUCTOR_ITERATIONS       = 4
-	PTHREAD_KEYS_MAX                    = 128
-	PTHREAD_STACK_MIN                   = 2048
-	RE_DUP_MAX                          = 255
-	SCHAR_MAX                           = 127
-	SCHAR_MIN                           = -128
-	SEEK_CUR                            = 1
-	SEEK_END                            = 2
-	SEEK_SET                            = 0
-	SEM_NSEMS_MAX                       = 256
-	SEM_VALUE_MAX                       = 2147483647
-	SHRT_MAX                            = 32767
-	SHRT_MIN                            = -32768
-	SSIZE_MAX                           = 9223372036854775807
-	SYMLOOP_MAX                         = 40
-	TTY_NAME_MAX                        = 32
-	TZNAME_MAX                          = 6
-	UCHAR_MAX                           = 255
-	UINT_MAX                            = 4294967295
-	ULLONG_MAX                          = 18446744073709551615
-	ULONG_MAX                           = 18446744073709551615
-	USHRT_MAX                           = 65535
-	WORD_BIT                            = 32
-	_POSIX2_BC_BASE_MAX                 = 99
-	_POSIX2_BC_DIM_MAX                  = 2048
-	_POSIX2_BC_SCALE_MAX                = 99
-	_POSIX2_BC_STRING_MAX               = 1000
-	_POSIX2_CHARCLASS_NAME_MAX          = 14
-	_POSIX2_COLL_WEIGHTS_MAX            = 2
-	_POSIX2_EXPR_NEST_MAX               = 32
-	_POSIX2_LINE_MAX                    = 2048
-	_POSIX2_RE_DUP_MAX                  = 255
-	_POSIX_AIO_LISTIO_MAX               = 2
-	_POSIX_AIO_MAX                      = 1
-	_POSIX_ARG_MAX                      = 4096
-	_POSIX_CHILD_MAX                    = 25
-	_POSIX_CLOCKRES_MIN                 = 20000000
-	_POSIX_DELAYTIMER_MAX               = 32
-	_POSIX_HOST_NAME_MAX                = 255
-	_POSIX_LINK_MAX                     = 8
-	_POSIX_LOGIN_NAME_MAX               = 9
-	_POSIX_MAX_CANON                    = 255
-	_POSIX_MAX_INPUT                    = 255
-	_POSIX_MQ_OPEN_MAX                  = 8
-	_POSIX_MQ_PRIO_MAX                  = 32
-	_POSIX_NAME_MAX                     = 14
-	_POSIX_NGROUPS_MAX                  = 8
-	_POSIX_OPEN_MAX                     = 20
-	_POSIX_PATH_MAX                     = 256
-	_POSIX_PIPE_BUF                     = 512
-	_POSIX_RE_DUP_MAX                   = 255
-	_POSIX_RTSIG_MAX                    = 8
-	_POSIX_SEM_NSEMS_MAX                = 256
-	_POSIX_SEM_VALUE_MAX                = 32767
-	_POSIX_SIGQUEUE_MAX                 = 32
-	_POSIX_SSIZE_MAX                    = 32767
-	_POSIX_SS_REPL_MAX                  = 4
-	_POSIX_STREAM_MAX                   = 8
-	_POSIX_SYMLINK_MAX                  = 255
-	_POSIX_SYMLOOP_MAX                  = 8
-	_POSIX_THREAD_DESTRUCTOR_ITERATIONS = 4
-	_POSIX_THREAD_KEYS_MAX              = 128
-	_POSIX_THREAD_THREADS_MAX           = 64
-	_POSIX_TIMER_MAX                    = 32
-	_POSIX_TRACE_EVENT_NAME_MAX         = 30
-	_POSIX_TRACE_NAME_MAX               = 8
-	_POSIX_TRACE_SYS_MAX                = 8
-	_POSIX_TRACE_USER_EVENT_MAX         = 32
-	_POSIX_TTY_NAME_MAX                 = 9
-	_POSIX_TZNAME_MAX                   = 6
-	_XOPEN_IOV_MAX                      = 16
-	_XOPEN_NAME_MAX                     = 255
-	_XOPEN_PATH_MAX                     = 1024
-)
+const ARG_MAX = 131072
+const BC_BASE_MAX = 99
+const BC_DIM_MAX = 2048
+const BC_SCALE_MAX = 99
+const BC_STRING_MAX = 1000
+const CHARCLASS_NAME_MAX = 14
+const CHAR_BIT = 8
+const CHAR_MAX = 255
+const CHAR_MIN = 0
+const COLL_WEIGHTS_MAX = 2
+const DELAYTIMER_MAX = 2147483647
+const EXPR_NEST_MAX = 32
+const FILESIZEBITS = 64
+const HOST_NAME_MAX = 255
+const INT_MAX = 2147483647
+const INT_MIN = -2147483648
+const IOV_MAX = 1024
+const LINE_MAX = 4096
+const LLONG_MAX = 9223372036854775807
+const LLONG_MIN = -9223372036854775808
+const LOGIN_NAME_MAX = 256
+const LONG_BIT = 64
+const LONG_MAX = 9223372036854775807
+const LONG_MIN = -9223372036854775808
+const MB_LEN_MAX = 4
+const MQ_PRIO_MAX = 32768
+const NAME_MAX = 255
+const NGROUPS_MAX = 32
+const NL_ARGMAX = 9
+const NL_LANGMAX = 32
+const NL_MSGMAX = 32767
+const NL_SETMAX = 255
+const NL_TEXTMAX = 2048
+const NZERO = 20
+const PAGESIZE = 4096
+const PAGE_SIZE = 4096
+const PATH_MAX = 4096
+const PIPE_BUF = 4096
+const PTHREAD_DESTRUCTOR_ITERATIONS = 4
+const PTHREAD_KEYS_MAX = 128
+const PTHREAD_STACK_MIN = 2048
+const RE_DUP_MAX = 255
+const SCHAR_MAX = 127
+const SCHAR_MIN = -128
+const SEEK_CUR = 1
+const SEEK_END = 2
+const SEEK_SET = 0
+const SEM_NSEMS_MAX = 256
+const SEM_VALUE_MAX = 2147483647
+const SHRT_MAX = 32767
+const SHRT_MIN = -32768
+const SSIZE_MAX = 9223372036854775807
+const SYMLOOP_MAX = 40
+const TTY_NAME_MAX = 32
+const TZNAME_MAX = 6
+const UCHAR_MAX = 255
+const UINT_MAX = 4294967295
+const ULLONG_MAX = 18446744073709551615
+const ULONG_MAX = 18446744073709551615
+const USHRT_MAX = 65535
+const WORD_BIT = 32
+const _POSIX2_BC_BASE_MAX = 99
+const _POSIX2_BC_DIM_MAX = 2048
+const _POSIX2_BC_SCALE_MAX = 99
+const _POSIX2_BC_STRING_MAX = 1000
+const _POSIX2_CHARCLASS_NAME_MAX = 14
+const _POSIX2_COLL_WEIGHTS_MAX = 2
+const _POSIX2_EXPR_NEST_MAX = 32
+const _POSIX2_LINE_MAX = 2048
+const _POSIX2_RE_DUP_MAX = 255
+const _POSIX_AIO_LISTIO_MAX = 2
+const _POSIX_AIO_MAX = 1
+const _POSIX_ARG_MAX = 4096
+const _POSIX_CHILD_MAX = 25
+const _POSIX_CLOCKRES_MIN = 20000000
+const _POSIX_DELAYTIMER_MAX = 32
+const _POSIX_HOST_NAME_MAX = 255
+const _POSIX_LINK_MAX = 8
+const _POSIX_LOGIN_NAME_MAX = 9
+const _POSIX_MAX_CANON = 255
+const _POSIX_MAX_INPUT = 255
+const _POSIX_MQ_OPEN_MAX = 8
+const _POSIX_MQ_PRIO_MAX = 32
+const _POSIX_NAME_MAX = 14
+const _POSIX_NGROUPS_MAX = 8
+const _POSIX_OPEN_MAX = 20
+const _POSIX_PATH_MAX = 256
+const _POSIX_PIPE_BUF = 512
+const _POSIX_RE_DUP_MAX = 255
+const _POSIX_RTSIG_MAX = 8
+const _POSIX_SEM_NSEMS_MAX = 256
+const _POSIX_SEM_VALUE_MAX = 32767
+const _POSIX_SIGQUEUE_MAX = 32
+const _POSIX_SSIZE_MAX = 32767
+const _POSIX_SS_REPL_MAX = 4
+const _POSIX_STREAM_MAX = 8
+const _POSIX_SYMLINK_MAX = 255
+const _POSIX_SYMLOOP_MAX = 8
+const _POSIX_THREAD_DESTRUCTOR_ITERATIONS = 4
+const _POSIX_THREAD_KEYS_MAX = 128
+const _POSIX_THREAD_THREADS_MAX = 64
+const _POSIX_TIMER_MAX = 32
+const _POSIX_TRACE_EVENT_NAME_MAX = 30
+const _POSIX_TRACE_NAME_MAX = 8
+const _POSIX_TRACE_SYS_MAX = 8
+const _POSIX_TRACE_USER_EVENT_MAX = 32
+const _POSIX_TTY_NAME_MAX = 9
+const _POSIX_TZNAME_MAX = 6
+const _XOPEN_IOV_MAX = 16
+const _XOPEN_NAME_MAX = 255
+const _XOPEN_PATH_MAX = 1024
 
-func Xfpathconf(tls *TLS, fd, name int32) (r int64) {
+func Xfpathconf(tls *TLS, fd int32, name int32) (r int64) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v name=%v, (%v:)", tls, fd, name, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -3415,3452 +3397,3450 @@ func Xpathconf(tls *TLS, path uintptr, name int32) (r int64) {
 	return Xfpathconf(tls, -int32(1), name)
 }
 
-const (
-	AT_BASE                                = 7
-	AT_BASE_PLATFORM                       = 24
-	AT_CLKTCK                              = 17
-	AT_DCACHEBSIZE                         = 19
-	AT_EGID                                = 14
-	AT_ENTRY                               = 9
-	AT_EUID                                = 12
-	AT_EXECFD                              = 2
-	AT_EXECFN                              = 31
-	AT_FLAGS                               = 8
-	AT_FPUCW                               = 18
-	AT_GID                                 = 13
-	AT_HWCAP                               = 16
-	AT_HWCAP2                              = 26
-	AT_ICACHEBSIZE                         = 20
-	AT_IGNORE                              = 1
-	AT_IGNOREPPC                           = 22
-	AT_L1D_CACHEGEOMETRY                   = 43
-	AT_L1D_CACHESHAPE                      = 35
-	AT_L1D_CACHESIZE                       = 42
-	AT_L1I_CACHEGEOMETRY                   = 41
-	AT_L1I_CACHESHAPE                      = 34
-	AT_L1I_CACHESIZE                       = 40
-	AT_L2_CACHEGEOMETRY                    = 45
-	AT_L2_CACHESHAPE                       = 36
-	AT_L2_CACHESIZE                        = 44
-	AT_L3_CACHEGEOMETRY                    = 47
-	AT_L3_CACHESHAPE                       = 37
-	AT_L3_CACHESIZE                        = 46
-	AT_MINSIGSTKSZ                         = 51
-	AT_NOTELF                              = 10
-	AT_NULL                                = 0
-	AT_PAGESZ                              = 6
-	AT_PHDR                                = 3
-	AT_PHENT                               = 4
-	AT_PHNUM                               = 5
-	AT_PLATFORM                            = 15
-	AT_RANDOM                              = 25
-	AT_SECURE                              = 23
-	AT_SYSINFO                             = 32
-	AT_SYSINFO_EHDR                        = 33
-	AT_UCACHEBSIZE                         = 21
-	AT_UID                                 = 11
-	BUS_ADRALN                             = 1
-	BUS_ADRERR                             = 2
-	BUS_MCEERR_AO                          = 5
-	BUS_MCEERR_AR                          = 4
-	BUS_OBJERR                             = 3
-	CLD_CONTINUED                          = 6
-	CLD_DUMPED                             = 3
-	CLD_EXITED                             = 1
-	CLD_KILLED                             = 2
-	CLD_STOPPED                            = 5
-	CLD_TRAPPED                            = 4
-	DF_1_CONFALT                           = 8192
-	DF_1_DIRECT                            = 256
-	DF_1_DISPRELDNE                        = 32768
-	DF_1_DISPRELPND                        = 65536
-	DF_1_EDITED                            = 2097152
-	DF_1_ENDFILTEE                         = 16384
-	DF_1_GLOBAL                            = 2
-	DF_1_GLOBAUDIT                         = 16777216
-	DF_1_GROUP                             = 4
-	DF_1_IGNMULDEF                         = 262144
-	DF_1_INITFIRST                         = 32
-	DF_1_INTERPOSE                         = 1024
-	DF_1_LOADFLTR                          = 16
-	DF_1_NODEFLIB                          = 2048
-	DF_1_NODELETE                          = 8
-	DF_1_NODIRECT                          = 131072
-	DF_1_NODUMP                            = 4096
-	DF_1_NOHDR                             = 1048576
-	DF_1_NOKSYMS                           = 524288
-	DF_1_NOOPEN                            = 64
-	DF_1_NORELOC                           = 4194304
-	DF_1_NOW                               = 1
-	DF_1_ORIGIN                            = 128
-	DF_1_PIE                               = 134217728
-	DF_1_SINGLETON                         = 33554432
-	DF_1_STUB                              = 67108864
-	DF_1_SYMINTPOSE                        = 8388608
-	DF_1_TRANS                             = 512
-	DF_BIND_NOW                            = 8
-	DF_ORIGIN                              = 1
-	DF_P1_GROUPPERM                        = 2
-	DF_P1_LAZYLOAD                         = 1
-	DF_STATIC_TLS                          = 16
-	DF_SYMBOLIC                            = 2
-	DF_TEXTREL                             = 4
-	DTF_1_CONFEXP                          = 2
-	DTF_1_PARINIT                          = 1
-	DT_ADDRNUM                             = 11
-	DT_ADDRRNGHI                           = 1879047935
-	DT_ADDRRNGLO                           = 1879047680
-	DT_ALPHA_NUM                           = 1
-	DT_ALPHA_PLTRO                         = 1879048192
-	DT_AUDIT                               = 1879047932
-	DT_AUXILIARY                           = 2147483645
-	DT_BIND_NOW                            = 24
-	DT_CHECKSUM                            = 1879047672
-	DT_CONFIG                              = 1879047930
-	DT_DEBUG                               = 21
-	DT_DEPAUDIT                            = 1879047931
-	DT_ENCODING                            = 32
-	DT_EXTRANUM                            = 3
-	DT_FEATURE_1                           = 1879047676
-	DT_FILTER                              = 2147483647
-	DT_FINI                                = 13
-	DT_FINI_ARRAY                          = 26
-	DT_FINI_ARRAYSZ                        = 28
-	DT_FLAGS                               = 30
-	DT_FLAGS_1                             = 1879048187
-	DT_GNU_CONFLICT                        = 1879047928
-	DT_GNU_CONFLICTSZ                      = 1879047670
-	DT_GNU_HASH                            = 1879047925
-	DT_GNU_LIBLIST                         = 1879047929
-	DT_GNU_LIBLISTSZ                       = 1879047671
-	DT_GNU_PRELINKED                       = 1879047669
-	DT_HASH                                = 4
-	DT_HIOS                                = 1879044096
-	DT_HIPROC                              = 2147483647
-	DT_IA_64_NUM                           = 1
-	DT_IA_64_PLT_RESERVE                   = 1879048192
-	DT_INIT                                = 12
-	DT_INIT_ARRAY                          = 25
-	DT_INIT_ARRAYSZ                        = 27
-	DT_JMPREL                              = 23
-	DT_LOOS                                = 1610612749
-	DT_LOPROC                              = 1879048192
-	DT_MIPS_AUX_DYNAMIC                    = 1879048241
-	DT_MIPS_BASE_ADDRESS                   = 1879048198
-	DT_MIPS_COMPACT_SIZE                   = 1879048239
-	DT_MIPS_CONFLICT                       = 1879048200
-	DT_MIPS_CONFLICTNO                     = 1879048203
-	DT_MIPS_CXX_FLAGS                      = 1879048226
-	DT_MIPS_DELTA_CLASS                    = 1879048215
-	DT_MIPS_DELTA_CLASSSYM                 = 1879048224
-	DT_MIPS_DELTA_CLASSSYM_NO              = 1879048225
-	DT_MIPS_DELTA_CLASS_NO                 = 1879048216
-	DT_MIPS_DELTA_INSTANCE                 = 1879048217
-	DT_MIPS_DELTA_INSTANCE_NO              = 1879048218
-	DT_MIPS_DELTA_RELOC                    = 1879048219
-	DT_MIPS_DELTA_RELOC_NO                 = 1879048220
-	DT_MIPS_DELTA_SYM                      = 1879048221
-	DT_MIPS_DELTA_SYM_NO                   = 1879048222
-	DT_MIPS_DYNSTR_ALIGN                   = 1879048235
-	DT_MIPS_FLAGS                          = 1879048197
-	DT_MIPS_GOTSYM                         = 1879048211
-	DT_MIPS_GP_VALUE                       = 1879048240
-	DT_MIPS_HIDDEN_GOTIDX                  = 1879048231
-	DT_MIPS_HIPAGENO                       = 1879048212
-	DT_MIPS_ICHECKSUM                      = 1879048195
-	DT_MIPS_INTERFACE                      = 1879048234
-	DT_MIPS_INTERFACE_SIZE                 = 1879048236
-	DT_MIPS_IVERSION                       = 1879048196
-	DT_MIPS_LIBLIST                        = 1879048201
-	DT_MIPS_LIBLISTNO                      = 1879048208
-	DT_MIPS_LOCALPAGE_GOTIDX               = 1879048229
-	DT_MIPS_LOCAL_GOTIDX                   = 1879048230
-	DT_MIPS_LOCAL_GOTNO                    = 1879048202
-	DT_MIPS_MSYM                           = 1879048199
-	DT_MIPS_NUM                            = 54
-	DT_MIPS_OPTIONS                        = 1879048233
-	DT_MIPS_PERF_SUFFIX                    = 1879048238
-	DT_MIPS_PIXIE_INIT                     = 1879048227
-	DT_MIPS_PLTGOT                         = 1879048242
-	DT_MIPS_PROTECTED_GOTIDX               = 1879048232
-	DT_MIPS_RLD_MAP                        = 1879048214
-	DT_MIPS_RLD_MAP_REL                    = 1879048245
-	DT_MIPS_RLD_TEXT_RESOLVE_ADDR          = 1879048237
-	DT_MIPS_RLD_VERSION                    = 1879048193
-	DT_MIPS_RWPLT                          = 1879048244
-	DT_MIPS_SYMBOL_LIB                     = 1879048228
-	DT_MIPS_SYMTABNO                       = 1879048209
-	DT_MIPS_TIME_STAMP                     = 1879048194
-	DT_MIPS_UNREFEXTNO                     = 1879048210
-	DT_MOVEENT                             = 1879047674
-	DT_MOVESZ                              = 1879047675
-	DT_MOVETAB                             = 1879047934
-	DT_NEEDED                              = 1
-	DT_NIOS2_GP                            = 1879048194
-	DT_NULL                                = 0
-	DT_NUM                                 = 38
-	DT_PLTGOT                              = 3
-	DT_PLTPAD                              = 1879047933
-	DT_PLTPADSZ                            = 1879047673
-	DT_PLTREL                              = 20
-	DT_PLTRELSZ                            = 2
-	DT_POSFLAG_1                           = 1879047677
-	DT_PPC64_GLINK                         = 1879048192
-	DT_PPC64_NUM                           = 4
-	DT_PPC64_OPD                           = 1879048193
-	DT_PPC64_OPDSZ                         = 1879048194
-	DT_PPC64_OPT                           = 1879048195
-	DT_PPC_GOT                             = 1879048192
-	DT_PPC_NUM                             = 2
-	DT_PPC_OPT                             = 1879048193
-	DT_PREINIT_ARRAY                       = 32
-	DT_PREINIT_ARRAYSZ                     = 33
-	DT_PROCNUM                             = 54
-	DT_REL                                 = 17
-	DT_RELA                                = 7
-	DT_RELACOUNT                           = 1879048185
-	DT_RELAENT                             = 9
-	DT_RELASZ                              = 8
-	DT_RELCOUNT                            = 1879048186
-	DT_RELENT                              = 19
-	DT_RELR                                = 36
-	DT_RELRENT                             = 37
-	DT_RELRSZ                              = 35
-	DT_RELSZ                               = 18
-	DT_RPATH                               = 15
-	DT_RUNPATH                             = 29
-	DT_SONAME                              = 14
-	DT_SPARC_NUM                           = 2
-	DT_SPARC_REGISTER                      = 1879048193
-	DT_STRSZ                               = 10
-	DT_STRTAB                              = 5
-	DT_SYMBOLIC                            = 16
-	DT_SYMENT                              = 11
-	DT_SYMINENT                            = 1879047679
-	DT_SYMINFO                             = 1879047935
-	DT_SYMINSZ                             = 1879047678
-	DT_SYMTAB                              = 6
-	DT_SYMTAB_SHNDX                        = 34
-	DT_TEXTREL                             = 22
-	DT_TLSDESC_GOT                         = 1879047927
-	DT_TLSDESC_PLT                         = 1879047926
-	DT_VALNUM                              = 12
-	DT_VALRNGHI                            = 1879047679
-	DT_VALRNGLO                            = 1879047424
-	DT_VERDEF                              = 1879048188
-	DT_VERDEFNUM                           = 1879048189
-	DT_VERNEED                             = 1879048190
-	DT_VERNEEDNUM                          = 1879048191
-	DT_VERSIONTAGNUM                       = 16
-	DT_VERSYM                              = 1879048176
-	EFA_PARISC_1_0                         = 523
-	EFA_PARISC_1_1                         = 528
-	EFA_PARISC_2_0                         = 532
-	EF_ALPHA_32BIT                         = 1
-	EF_ALPHA_CANRELAX                      = 2
-	EF_ARM_ABI_FLOAT_HARD                  = 1024
-	EF_ARM_ABI_FLOAT_SOFT                  = 512
-	EF_ARM_ALIGN8                          = 64
-	EF_ARM_APCS_26                         = 8
-	EF_ARM_APCS_FLOAT                      = 16
-	EF_ARM_BE8                             = 8388608
-	EF_ARM_DYNSYMSUSESEGIDX                = 8
-	EF_ARM_EABIMASK                        = 4278190080
-	EF_ARM_EABI_UNKNOWN                    = 0
-	EF_ARM_EABI_VER1                       = 16777216
-	EF_ARM_EABI_VER2                       = 33554432
-	EF_ARM_EABI_VER3                       = 50331648
-	EF_ARM_EABI_VER4                       = 67108864
-	EF_ARM_EABI_VER5                       = 83886080
-	EF_ARM_HASENTRY                        = 2
-	EF_ARM_INTERWORK                       = 4
-	EF_ARM_LE8                             = 4194304
-	EF_ARM_MAPSYMSFIRST                    = 16
-	EF_ARM_MAVERICK_FLOAT                  = 2048
-	EF_ARM_NEW_ABI                         = 128
-	EF_ARM_OLD_ABI                         = 256
-	EF_ARM_PIC                             = 32
-	EF_ARM_RELEXEC                         = 1
-	EF_ARM_SOFT_FLOAT                      = 512
-	EF_ARM_SYMSARESORTED                   = 4
-	EF_ARM_VFP_FLOAT                       = 1024
-	EF_CPU32                               = 8454144
-	EF_IA_64_ABI64                         = 16
-	EF_IA_64_ARCH                          = 4278190080
-	EF_IA_64_MASKOS                        = 15
-	EF_LARCH_ABI_DOUBLE_FLOAT              = 3
-	EF_LARCH_ABI_MODIFIER_MASK             = 7
-	EF_LARCH_ABI_SINGLE_FLOAT              = 2
-	EF_LARCH_ABI_SOFT_FLOAT                = 1
-	EF_LARCH_OBJABI_V1                     = 64
-	EF_MIPS_64BIT_WHIRL                    = 16
-	EF_MIPS_ABI2                           = 32
-	EF_MIPS_ABI_ON32                       = 64
-	EF_MIPS_ARCH                           = 4026531840
-	EF_MIPS_ARCH_1                         = 0
-	EF_MIPS_ARCH_2                         = 268435456
-	EF_MIPS_ARCH_3                         = 536870912
-	EF_MIPS_ARCH_32                        = 1342177280
-	EF_MIPS_ARCH_32R2                      = 1879048192
-	EF_MIPS_ARCH_4                         = 805306368
-	EF_MIPS_ARCH_5                         = 1073741824
-	EF_MIPS_ARCH_64                        = 1610612736
-	EF_MIPS_ARCH_64R2                      = 2147483648
-	EF_MIPS_CPIC                           = 4
-	EF_MIPS_FP64                           = 512
-	EF_MIPS_NAN2008                        = 1024
-	EF_MIPS_NOREORDER                      = 1
-	EF_MIPS_PIC                            = 2
-	EF_MIPS_XGOT                           = 8
-	EF_PARISC_ARCH                         = 65535
-	EF_PARISC_EXT                          = 131072
-	EF_PARISC_LAZYSWAP                     = 4194304
-	EF_PARISC_LSB                          = 262144
-	EF_PARISC_NO_KABP                      = 1048576
-	EF_PARISC_TRAPNIL                      = 65536
-	EF_PARISC_WIDE                         = 524288
-	EF_PPC64_ABI                           = 3
-	EF_PPC_EMB                             = 2147483648
-	EF_PPC_RELOCATABLE                     = 65536
-	EF_PPC_RELOCATABLE_LIB                 = 32768
-	EF_SH1                                 = 1
-	EF_SH2                                 = 2
-	EF_SH2A                                = 13
-	EF_SH2A_NOFPU                          = 19
-	EF_SH2A_SH3E                           = 24
-	EF_SH2A_SH3_NOFPU                      = 22
-	EF_SH2A_SH4                            = 23
-	EF_SH2A_SH4_NOFPU                      = 21
-	EF_SH2E                                = 11
-	EF_SH3                                 = 3
-	EF_SH3E                                = 8
-	EF_SH3_DSP                             = 5
-	EF_SH3_NOMMU                           = 20
-	EF_SH4                                 = 9
-	EF_SH4A                                = 12
-	EF_SH4AL_DSP                           = 6
-	EF_SH4A_NOFPU                          = 17
-	EF_SH4_NOFPU                           = 16
-	EF_SH4_NOMMU_NOFPU                     = 18
-	EF_SH_DSP                              = 4
-	EF_SH_MACH_MASK                        = 31
-	EF_SH_UNKNOWN                          = 0
-	EF_SPARCV9_MM                          = 3
-	EF_SPARCV9_PSO                         = 1
-	EF_SPARCV9_RMO                         = 2
-	EF_SPARCV9_TSO                         = 0
-	EF_SPARC_32PLUS                        = 256
-	EF_SPARC_EXT_MASK                      = 16776960
-	EF_SPARC_HAL_R1                        = 1024
-	EF_SPARC_LEDATA                        = 8388608
-	EF_SPARC_SUN_US1                       = 512
-	EF_SPARC_SUN_US3                       = 2048
-	EI_ABIVERSION                          = 8
-	EI_CLASS                               = 4
-	EI_DATA                                = 5
-	EI_MAG0                                = 0
-	EI_MAG1                                = 1
-	EI_MAG2                                = 2
-	EI_MAG3                                = 3
-	EI_NIDENT                              = 16
-	EI_OSABI                               = 7
-	EI_PAD                                 = 9
-	EI_VERSION                             = 6
-	ELFCLASS32                             = 1
-	ELFCLASS64                             = 2
-	ELFCLASSNONE                           = 0
-	ELFCLASSNUM                            = 3
-	ELFCOMPRESS_HIOS                       = 1879048191
-	ELFCOMPRESS_HIPROC                     = 2147483647
-	ELFCOMPRESS_LOOS                       = 1610612736
-	ELFCOMPRESS_LOPROC                     = 1879048192
-	ELFCOMPRESS_ZLIB                       = 1
-	ELFCOMPRESS_ZSTD                       = 2
-	ELFDATA2LSB                            = 1
-	ELFDATA2MSB                            = 2
-	ELFDATANONE                            = 0
-	ELFDATANUM                             = 3
-	ELFMAG                                 = "\\177ELF"
-	ELFMAG0                                = 127
-	ELFMAG1                                = 69
-	ELFMAG2                                = 76
-	ELFMAG3                                = 70
-	ELFOSABI_AIX                           = 7
-	ELFOSABI_ARM                           = 97
-	ELFOSABI_FREEBSD                       = 9
-	ELFOSABI_GNU                           = 3
-	ELFOSABI_HPUX                          = 1
-	ELFOSABI_IRIX                          = 8
-	ELFOSABI_LINUX                         = 3
-	ELFOSABI_MODESTO                       = 11
-	ELFOSABI_NETBSD                        = 2
-	ELFOSABI_NONE                          = 0
-	ELFOSABI_OPENBSD                       = 12
-	ELFOSABI_SOLARIS                       = 6
-	ELFOSABI_STANDALONE                    = 255
-	ELFOSABI_SYSV                          = 0
-	ELFOSABI_TRU64                         = 10
-	ELF_NOTE_ABI                           = 1
-	ELF_NOTE_GNU                           = "GNU"
-	ELF_NOTE_OS_FREEBSD                    = 3
-	ELF_NOTE_OS_GNU                        = 1
-	ELF_NOTE_OS_LINUX                      = 0
-	ELF_NOTE_OS_SOLARIS2                   = 2
-	ELF_NOTE_PAGESIZE_HINT                 = 1
-	ELF_NOTE_SOLARIS                       = "SUNW Solaris"
-	EM_386                                 = 3
-	EM_56800EX                             = 200
-	EM_68HC05                              = 72
-	EM_68HC08                              = 71
-	EM_68HC11                              = 70
-	EM_68HC12                              = 53
-	EM_68HC16                              = 69
-	EM_68K                                 = 4
-	EM_78KOR                               = 199
-	EM_8051                                = 165
-	EM_860                                 = 7
-	EM_88K                                 = 5
-	EM_960                                 = 19
-	EM_AARCH64                             = 183
-	EM_ALPHA                               = 36902
-	EM_ALTERA_NIOS2                        = 113
-	EM_AMDGPU                              = 224
-	EM_ARC                                 = 45
-	EM_ARCA                                = 109
-	EM_ARC_A5                              = 93
-	EM_ARC_COMPACT                         = 93
-	EM_ARC_COMPACT2                        = 195
-	EM_ARM                                 = 40
-	EM_AVR                                 = 83
-	EM_AVR32                               = 185
-	EM_BA1                                 = 201
-	EM_BA2                                 = 202
-	EM_BLACKFIN                            = 106
-	EM_BPF                                 = 247
-	EM_C166                                = 116
-	EM_CDP                                 = 215
-	EM_CE                                  = 119
-	EM_CLOUDSHIELD                         = 192
-	EM_COGE                                = 216
-	EM_COLDFIRE                            = 52
-	EM_COOL                                = 217
-	EM_COREA_1ST                           = 193
-	EM_COREA_2ND                           = 194
-	EM_CR                                  = 103
-	EM_CR16                                = 177
-	EM_CRAYNV2                             = 172
-	EM_CRIS                                = 76
-	EM_CRX                                 = 114
-	EM_CSKY                                = 252
-	EM_CSR_KALIMBA                         = 219
-	EM_CUDA                                = 190
-	EM_CYPRESS_M8C                         = 161
-	EM_D10V                                = 85
-	EM_D30V                                = 86
-	EM_DSP24                               = 136
-	EM_DSPIC30F                            = 118
-	EM_DXP                                 = 112
-	EM_ECOG16                              = 176
-	EM_ECOG1X                              = 168
-	EM_ECOG2                               = 134
-	EM_EMX16                               = 212
-	EM_EMX8                                = 213
-	EM_ETPU                                = 178
-	EM_EXCESS                              = 111
-	EM_F2MC16                              = 104
-	EM_FAKE_ALPHA                          = 41
-	EM_FIREPATH                            = 78
-	EM_FR20                                = 37
-	EM_FR30                                = 84
-	EM_FT32                                = 222
-	EM_FX66                                = 66
-	EM_H8S                                 = 48
-	EM_H8_300                              = 46
-	EM_H8_300H                             = 47
-	EM_H8_500                              = 49
-	EM_HUANY                               = 81
-	EM_IA_64                               = 50
-	EM_IP2K                                = 101
-	EM_JAVELIN                             = 77
-	EM_K10M                                = 181
-	EM_KM32                                = 210
-	EM_KMX32                               = 211
-	EM_KVARC                               = 214
-	EM_L10M                                = 180
-	EM_LATTICEMICO32                       = 138
-	EM_LOONGARCH                           = 258
-	EM_M16C                                = 117
-	EM_M32                                 = 1
-	EM_M32C                                = 120
-	EM_M32R                                = 88
-	EM_MANIK                               = 171
-	EM_MAX                                 = 102
-	EM_MAXQ30                              = 169
-	EM_MCHP_PIC                            = 204
-	EM_MCST_ELBRUS                         = 175
-	EM_ME16                                = 59
-	EM_METAG                               = 174
-	EM_MICROBLAZE                          = 189
-	EM_MIPS                                = 8
-	EM_MIPS_RS3_LE                         = 10
-	EM_MIPS_X                              = 51
-	EM_MMA                                 = 54
-	EM_MMDSP_PLUS                          = 160
-	EM_MMIX                                = 80
-	EM_MN10200                             = 90
-	EM_MN10300                             = 89
-	EM_MOXIE                               = 223
-	EM_MSP430                              = 105
-	EM_NCPU                                = 56
-	EM_NDR1                                = 57
-	EM_NDS32                               = 167
-	EM_NONE                                = 0
-	EM_NORC                                = 218
-	EM_NS32K                               = 97
-	EM_NUM                                 = 259
-	EM_OPEN8                               = 196
-	EM_OPENRISC                            = 92
-	EM_OR1K                                = 92
-	EM_PARISC                              = 15
-	EM_PCP                                 = 55
-	EM_PDSP                                = 63
-	EM_PJ                                  = 91
-	EM_PPC                                 = 20
-	EM_PPC64                               = 21
-	EM_PRISM                               = 82
-	EM_QDSP6                               = 164
-	EM_R32C                                = 162
-	EM_RCE                                 = 39
-	EM_RH32                                = 38
-	EM_RISCV                               = 243
-	EM_RL78                                = 197
-	EM_RS08                                = 132
-	EM_RX                                  = 173
-	EM_S370                                = 9
-	EM_S390                                = 22
-	EM_SCORE7                              = 135
-	EM_SEP                                 = 108
-	EM_SE_C17                              = 139
-	EM_SE_C33                              = 107
-	EM_SH                                  = 42
-	EM_SHARC                               = 133
-	EM_SLE9X                               = 179
-	EM_SNP1K                               = 99
-	EM_SPARC                               = 2
-	EM_SPARC32PLUS                         = 18
-	EM_SPARCV9                             = 43
-	EM_ST100                               = 60
-	EM_ST19                                = 74
-	EM_ST200                               = 100
-	EM_ST7                                 = 68
-	EM_ST9PLUS                             = 67
-	EM_STARCORE                            = 58
-	EM_STM8                                = 186
-	EM_STXP7X                              = 166
-	EM_SVX                                 = 73
-	EM_TILE64                              = 187
-	EM_TILEGX                              = 191
-	EM_TILEPRO                             = 188
-	EM_TINYJ                               = 61
-	EM_TI_ARP32                            = 143
-	EM_TI_C2000                            = 141
-	EM_TI_C5500                            = 142
-	EM_TI_C6000                            = 140
-	EM_TI_PRU                              = 144
-	EM_TMM_GPP                             = 96
-	EM_TPC                                 = 98
-	EM_TRICORE                             = 44
-	EM_TRIMEDIA                            = 163
-	EM_TSK3000                             = 131
-	EM_UNICORE                             = 110
-	EM_V800                                = 36
-	EM_V850                                = 87
-	EM_VAX                                 = 75
-	EM_VIDEOCORE                           = 95
-	EM_VIDEOCORE3                          = 137
-	EM_VIDEOCORE5                          = 198
-	EM_VISIUM                              = 221
-	EM_VPP500                              = 17
-	EM_X86_64                              = 62
-	EM_XCORE                               = 203
-	EM_XGATE                               = 115
-	EM_XIMO16                              = 170
-	EM_XTENSA                              = 94
-	EM_Z80                                 = 220
-	EM_ZSP                                 = 79
-	ET_CORE                                = 4
-	ET_DYN                                 = 3
-	ET_EXEC                                = 2
-	ET_HIOS                                = 65279
-	ET_HIPROC                              = 65535
-	ET_LOOS                                = 65024
-	ET_LOPROC                              = 65280
-	ET_NONE                                = 0
-	ET_NUM                                 = 5
-	ET_REL                                 = 1
-	EV_CURRENT                             = 1
-	EV_NONE                                = 0
-	EV_NUM                                 = 2
-	EXIT_FAILURE                           = 1
-	EXIT_SUCCESS                           = 0
-	E_MIPS_ARCH_1                          = 0
-	E_MIPS_ARCH_2                          = 268435456
-	E_MIPS_ARCH_3                          = 536870912
-	E_MIPS_ARCH_32                         = 1342177280
-	E_MIPS_ARCH_4                          = 805306368
-	E_MIPS_ARCH_5                          = 1073741824
-	E_MIPS_ARCH_64                         = 1610612736
-	FD_SETSIZE                             = 1024
-	FPE_FLTDIV                             = 3
-	FPE_FLTINV                             = 7
-	FPE_FLTOVF                             = 4
-	FPE_FLTRES                             = 6
-	FPE_FLTSUB                             = 8
-	FPE_FLTUND                             = 5
-	FPE_INTDIV                             = 1
-	FPE_INTOVF                             = 2
-	GRP_COMDAT                             = 1
-	ILL_BADSTK                             = 8
-	ILL_COPROC                             = 7
-	ILL_ILLADR                             = 3
-	ILL_ILLOPC                             = 1
-	ILL_ILLOPN                             = 2
-	ILL_ILLTRP                             = 4
-	ILL_PRVOPC                             = 5
-	ILL_PRVREG                             = 6
-	IPC_64                                 = 0
-	ITIMER_PROF                            = 2
-	ITIMER_REAL                            = 0
-	ITIMER_VIRTUAL                         = 1
-	JT_ARG_MAX                             = -254
-	JT_AVPHYS_PAGES                        = -247
-	JT_DELAYTIMER_MAX                      = -245
-	JT_MINSIGSTKSZ                         = -244
-	JT_MQ_PRIO_MAX                         = -253
-	JT_NPROCESSORS_CONF                    = -250
-	JT_NPROCESSORS_ONLN                    = -249
-	JT_PAGE_SIZE                           = -252
-	JT_PHYS_PAGES                          = -248
-	JT_SEM_VALUE_MAX                       = -251
-	JT_SIGSTKSZ                            = -243
-	JT_ZERO                                = -246
-	LITUSE_ALPHA_ADDR                      = 0
-	LITUSE_ALPHA_BASE                      = 1
-	LITUSE_ALPHA_BYTOFF                    = 2
-	LITUSE_ALPHA_JSR                       = 3
-	LITUSE_ALPHA_TLS_GD                    = 4
-	LITUSE_ALPHA_TLS_LDM                   = 5
-	LL_DELAY_LOAD                          = 16
-	LL_DELTA                               = 32
-	LL_EXACT_MATCH                         = 1
-	LL_EXPORTS                             = 8
-	LL_IGNORE_INT_VER                      = 2
-	LL_NONE                                = 0
-	LL_REQUIRE_MINOR                       = 4
-	MB_CUR_MAX                             = 0
-	MINSIGSTKSZ                            = 2048
-	MIPS_AFL_ASE_DSP                       = 1
-	MIPS_AFL_ASE_DSPR2                     = 2
-	MIPS_AFL_ASE_EVA                       = 4
-	MIPS_AFL_ASE_MASK                      = 8191
-	MIPS_AFL_ASE_MCU                       = 8
-	MIPS_AFL_ASE_MDMX                      = 16
-	MIPS_AFL_ASE_MICROMIPS                 = 2048
-	MIPS_AFL_ASE_MIPS16                    = 1024
-	MIPS_AFL_ASE_MIPS3D                    = 32
-	MIPS_AFL_ASE_MSA                       = 512
-	MIPS_AFL_ASE_MT                        = 64
-	MIPS_AFL_ASE_SMARTMIPS                 = 128
-	MIPS_AFL_ASE_VIRT                      = 256
-	MIPS_AFL_ASE_XPA                       = 4096
-	MIPS_AFL_EXT_10000                     = 11
-	MIPS_AFL_EXT_3900                      = 10
-	MIPS_AFL_EXT_4010                      = 8
-	MIPS_AFL_EXT_4100                      = 9
-	MIPS_AFL_EXT_4111                      = 13
-	MIPS_AFL_EXT_4120                      = 14
-	MIPS_AFL_EXT_4650                      = 7
-	MIPS_AFL_EXT_5400                      = 15
-	MIPS_AFL_EXT_5500                      = 16
-	MIPS_AFL_EXT_5900                      = 6
-	MIPS_AFL_EXT_LOONGSON_2E               = 17
-	MIPS_AFL_EXT_LOONGSON_2F               = 18
-	MIPS_AFL_EXT_LOONGSON_3A               = 4
-	MIPS_AFL_EXT_OCTEON                    = 5
-	MIPS_AFL_EXT_OCTEON2                   = 2
-	MIPS_AFL_EXT_OCTEONP                   = 3
-	MIPS_AFL_EXT_SB1                       = 12
-	MIPS_AFL_EXT_XLR                       = 1
-	MIPS_AFL_FLAGS1_ODDSPREG               = 1
-	MIPS_AFL_REG_128                       = 3
-	MIPS_AFL_REG_32                        = 1
-	MIPS_AFL_REG_64                        = 2
-	MIPS_AFL_REG_NONE                      = 0
-	NT_386_IOPERM                          = 513
-	NT_386_TLS                             = 512
-	NT_ARC_V2                              = 1536
-	NT_ARM_HW_BREAK                        = 1026
-	NT_ARM_HW_WATCH                        = 1027
-	NT_ARM_PACA_KEYS                       = 1031
-	NT_ARM_PACG_KEYS                       = 1032
-	NT_ARM_PAC_ENABLED_KEYS                = 1034
-	NT_ARM_PAC_MASK                        = 1030
-	NT_ARM_SVE                             = 1029
-	NT_ARM_SYSTEM_CALL                     = 1028
-	NT_ARM_TAGGED_ADDR_CTRL                = 1033
-	NT_ARM_TLS                             = 1025
-	NT_ARM_VFP                             = 1024
-	NT_ASRS                                = 8
-	NT_AUXV                                = 6
-	NT_FILE                                = 1179208773
-	NT_FPREGSET                            = 2
-	NT_GNU_ABI_TAG                         = 1
-	NT_GNU_BUILD_ID                        = 3
-	NT_GNU_GOLD_VERSION                    = 4
-	NT_GNU_PROPERTY_TYPE_0                 = 5
-	NT_GWINDOWS                            = 7
-	NT_LOONGARCH_CPUCFG                    = 2560
-	NT_LOONGARCH_CSR                       = 2561
-	NT_LOONGARCH_LASX                      = 2563
-	NT_LOONGARCH_LBT                       = 2564
-	NT_LOONGARCH_LSX                       = 2562
-	NT_LWPSINFO                            = 17
-	NT_LWPSTATUS                           = 16
-	NT_METAG_CBUF                          = 1280
-	NT_METAG_RPIPE                         = 1281
-	NT_METAG_TLS                           = 1282
-	NT_MIPS_DSP                            = 2048
-	NT_MIPS_FP_MODE                        = 2049
-	NT_MIPS_MSA                            = 2050
-	NT_PLATFORM                            = 5
-	NT_PPC_DSCR                            = 261
-	NT_PPC_EBB                             = 262
-	NT_PPC_PMU                             = 263
-	NT_PPC_PPR                             = 260
-	NT_PPC_SPE                             = 257
-	NT_PPC_TAR                             = 259
-	NT_PPC_TM_CDSCR                        = 271
-	NT_PPC_TM_CFPR                         = 265
-	NT_PPC_TM_CGPR                         = 264
-	NT_PPC_TM_CPPR                         = 270
-	NT_PPC_TM_CTAR                         = 269
-	NT_PPC_TM_CVMX                         = 266
-	NT_PPC_TM_CVSX                         = 267
-	NT_PPC_TM_SPR                          = 268
-	NT_PPC_VMX                             = 256
-	NT_PPC_VSX                             = 258
-	NT_PRCRED                              = 14
-	NT_PRFPREG                             = 2
-	NT_PRFPXREG                            = 20
-	NT_PRPSINFO                            = 3
-	NT_PRSTATUS                            = 1
-	NT_PRXFPREG                            = 1189489535
-	NT_PRXREG                              = 4
-	NT_PSINFO                              = 13
-	NT_PSTATUS                             = 10
-	NT_RISCV_CSR                           = 2304
-	NT_RISCV_VECTOR                        = 2305
-	NT_S390_CTRS                           = 772
-	NT_S390_GS_BC                          = 780
-	NT_S390_GS_CB                          = 779
-	NT_S390_HIGH_GPRS                      = 768
-	NT_S390_LAST_BREAK                     = 774
-	NT_S390_PREFIX                         = 773
-	NT_S390_RI_CB                          = 781
-	NT_S390_SYSTEM_CALL                    = 775
-	NT_S390_TDB                            = 776
-	NT_S390_TIMER                          = 769
-	NT_S390_TODCMP                         = 770
-	NT_S390_TODPREG                        = 771
-	NT_S390_VXRS_HIGH                      = 778
-	NT_S390_VXRS_LOW                       = 777
-	NT_SIGINFO                             = 1397311305
-	NT_TASKSTRUCT                          = 4
-	NT_UTSNAME                             = 15
-	NT_VERSION                             = 1
-	NT_VMCOREDD                            = 1792
-	NT_X86_XSTATE                          = 514
-	ODK_EXCEPTIONS                         = 2
-	ODK_FILL                               = 5
-	ODK_HWAND                              = 7
-	ODK_HWOR                               = 8
-	ODK_HWPATCH                            = 4
-	ODK_NULL                               = 0
-	ODK_PAD                                = 3
-	ODK_REGINFO                            = 1
-	ODK_TAGS                               = 6
-	OEX_DISMISS                            = 524288
-	OEX_FPDBUG                             = 262144
-	OEX_FPU_DIV0                           = 8
-	OEX_FPU_INEX                           = 1
-	OEX_FPU_INVAL                          = 16
-	OEX_FPU_MAX                            = 7936
-	OEX_FPU_MIN                            = 31
-	OEX_FPU_OFLO                           = 4
-	OEX_FPU_UFLO                           = 2
-	OEX_PAGE0                              = 65536
-	OEX_PRECISEFP                          = 262144
-	OEX_SMM                                = 131072
-	OHWA0_R4KEOP_CHECKED                   = 1
-	OHWA1_R4KEOP_CLEAN                     = 2
-	OHW_R4KEOP                             = 1
-	OHW_R5KCVTL                            = 8
-	OHW_R5KEOP                             = 4
-	OHW_R8KPFETCH                          = 2
-	OPAD_POSTFIX                           = 2
-	OPAD_PREFIX                            = 1
-	OPAD_SYMBOL                            = 4
-	PF_ARM_ABS                             = 1073741824
-	PF_ARM_PI                              = 536870912
-	PF_ARM_SB                              = 268435456
-	PF_HP_CODE                             = 16777216
-	PF_HP_FAR_SHARED                       = 2097152
-	PF_HP_LAZYSWAP                         = 67108864
-	PF_HP_MODIFY                           = 33554432
-	PF_HP_NEAR_SHARED                      = 4194304
-	PF_HP_PAGE_SIZE                        = 1048576
-	PF_HP_SBP                              = 134217728
-	PF_IA_64_NORECOV                       = 2147483648
-	PF_MASKOS                              = 267386880
-	PF_MASKPROC                            = 4026531840
-	PF_MIPS_LOCAL                          = 268435456
-	PF_PARISC_SBP                          = 134217728
-	PF_R                                   = 4
-	PF_W                                   = 2
-	PF_X                                   = 1
-	PN_XNUM                                = 65535
-	POLL_ERR                               = 4
-	POLL_HUP                               = 6
-	POLL_IN                                = 1
-	POLL_MSG                               = 3
-	POLL_OUT                               = 2
-	POLL_PRI                               = 5
-	PPC64_OPT_LOCALENTRY                   = 4
-	PPC64_OPT_MULTI_TOC                    = 2
-	PPC64_OPT_TLS                          = 1
-	PPC_OPT_TLS                            = 1
-	PRIO_MAX                               = 20
-	PRIO_MIN                               = -20
-	PRIO_PGRP                              = 1
-	PRIO_PROCESS                           = 0
-	PRIO_USER                              = 2
-	PT_ARM_EXIDX                           = 1879048193
-	PT_DYNAMIC                             = 2
-	PT_GNU_EH_FRAME                        = 1685382480
-	PT_GNU_PROPERTY                        = 1685382483
-	PT_GNU_RELRO                           = 1685382482
-	PT_GNU_STACK                           = 1685382481
-	PT_HIOS                                = 1879048191
-	PT_HIPROC                              = 2147483647
-	PT_HISUNW                              = 1879048191
-	PT_HP_CORE_COMM                        = 1610612740
-	PT_HP_CORE_KERNEL                      = 1610612739
-	PT_HP_CORE_LOADABLE                    = 1610612742
-	PT_HP_CORE_MMF                         = 1610612745
-	PT_HP_CORE_NONE                        = 1610612737
-	PT_HP_CORE_PROC                        = 1610612741
-	PT_HP_CORE_SHM                         = 1610612744
-	PT_HP_CORE_STACK                       = 1610612743
-	PT_HP_CORE_VERSION                     = 1610612738
-	PT_HP_FASTBIND                         = 1610612753
-	PT_HP_HSL_ANNOT                        = 1610612755
-	PT_HP_OPT_ANNOT                        = 1610612754
-	PT_HP_PARALLEL                         = 1610612752
-	PT_HP_STACK                            = 1610612756
-	PT_HP_TLS                              = 1610612736
-	PT_IA_64_ARCHEXT                       = 1879048192
-	PT_IA_64_HP_HSL_ANOT                   = 1610612755
-	PT_IA_64_HP_OPT_ANOT                   = 1610612754
-	PT_IA_64_HP_STACK                      = 1610612756
-	PT_IA_64_UNWIND                        = 1879048193
-	PT_INTERP                              = 3
-	PT_LOAD                                = 1
-	PT_LOOS                                = 1610612736
-	PT_LOPROC                              = 1879048192
-	PT_LOSUNW                              = 1879048186
-	PT_MIPS_ABIFLAGS                       = 1879048195
-	PT_MIPS_OPTIONS                        = 1879048194
-	PT_MIPS_REGINFO                        = 1879048192
-	PT_MIPS_RTPROC                         = 1879048193
-	PT_NOTE                                = 4
-	PT_NULL                                = 0
-	PT_NUM                                 = 8
-	PT_PARISC_ARCHEXT                      = 1879048192
-	PT_PARISC_UNWIND                       = 1879048193
-	PT_PHDR                                = 6
-	PT_SHLIB                               = 5
-	PT_SUNWBSS                             = 1879048186
-	PT_SUNWSTACK                           = 1879048187
-	PT_TLS                                 = 7
-	RAND_MAX                               = 2147483647
-	RHF_CORD                               = 4096
-	RHF_DEFAULT_DELAY_LOAD                 = 512
-	RHF_DELTA_C_PLUS_PLUS                  = 64
-	RHF_GUARANTEE_INIT                     = 32
-	RHF_GUARANTEE_START_INIT               = 128
-	RHF_NONE                               = 0
-	RHF_NOTPOT                             = 2
-	RHF_NO_LIBRARY_REPLACEMENT             = 4
-	RHF_NO_MOVE                            = 8
-	RHF_NO_UNRES_UNDEF                     = 8192
-	RHF_PIXIE                              = 256
-	RHF_QUICKSTART                         = 1
-	RHF_REQUICKSTART                       = 1024
-	RHF_REQUICKSTARTED                     = 2048
-	RHF_RLD_ORDER_SAFE                     = 16384
-	RHF_SGI_ONLY                           = 16
-	RLIMIT_AS                              = 9
-	RLIMIT_CORE                            = 4
-	RLIMIT_CPU                             = 0
-	RLIMIT_DATA                            = 2
-	RLIMIT_FSIZE                           = 1
-	RLIMIT_LOCKS                           = 10
-	RLIMIT_MEMLOCK                         = 8
-	RLIMIT_MSGQUEUE                        = 12
-	RLIMIT_NICE                            = 13
-	RLIMIT_NLIMITS                         = 16
-	RLIMIT_NOFILE                          = 7
-	RLIMIT_NPROC                           = 6
-	RLIMIT_RSS                             = 5
-	RLIMIT_RTPRIO                          = 14
-	RLIMIT_RTTIME                          = 15
-	RLIMIT_SIGPENDING                      = 11
-	RLIMIT_STACK                           = 3
-	RLIM_INFINITY                          = 18446744073709551615
-	RLIM_NLIMITS                           = 16
-	RLIM_SAVED_CUR                         = 18446744073709551615
-	RLIM_SAVED_MAX                         = 18446744073709551615
-	RUSAGE_CHILDREN                        = -1
-	RUSAGE_SELF                            = 0
-	RUSAGE_THREAD                          = 1
-	R_386_16                               = 20
-	R_386_32                               = 1
-	R_386_32PLT                            = 11
-	R_386_8                                = 22
-	R_386_COPY                             = 5
-	R_386_GLOB_DAT                         = 6
-	R_386_GOT32                            = 3
-	R_386_GOT32X                           = 43
-	R_386_GOTOFF                           = 9
-	R_386_GOTPC                            = 10
-	R_386_IRELATIVE                        = 42
-	R_386_JMP_SLOT                         = 7
-	R_386_NONE                             = 0
-	R_386_NUM                              = 44
-	R_386_PC16                             = 21
-	R_386_PC32                             = 2
-	R_386_PC8                              = 23
-	R_386_PLT32                            = 4
-	R_386_RELATIVE                         = 8
-	R_386_SIZE32                           = 38
-	R_386_TLS_DESC                         = 41
-	R_386_TLS_DESC_CALL                    = 40
-	R_386_TLS_DTPMOD32                     = 35
-	R_386_TLS_DTPOFF32                     = 36
-	R_386_TLS_GD                           = 18
-	R_386_TLS_GD_32                        = 24
-	R_386_TLS_GD_CALL                      = 26
-	R_386_TLS_GD_POP                       = 27
-	R_386_TLS_GD_PUSH                      = 25
-	R_386_TLS_GOTDESC                      = 39
-	R_386_TLS_GOTIE                        = 16
-	R_386_TLS_IE                           = 15
-	R_386_TLS_IE_32                        = 33
-	R_386_TLS_LDM                          = 19
-	R_386_TLS_LDM_32                       = 28
-	R_386_TLS_LDM_CALL                     = 30
-	R_386_TLS_LDM_POP                      = 31
-	R_386_TLS_LDM_PUSH                     = 29
-	R_386_TLS_LDO_32                       = 32
-	R_386_TLS_LE                           = 17
-	R_386_TLS_LE_32                        = 34
-	R_386_TLS_TPOFF                        = 14
-	R_386_TLS_TPOFF32                      = 37
-	R_390_12                               = 2
-	R_390_16                               = 3
-	R_390_20                               = 57
-	R_390_32                               = 4
-	R_390_64                               = 22
-	R_390_8                                = 1
-	R_390_COPY                             = 9
-	R_390_GLOB_DAT                         = 10
-	R_390_GOT12                            = 6
-	R_390_GOT16                            = 15
-	R_390_GOT20                            = 58
-	R_390_GOT32                            = 7
-	R_390_GOT64                            = 24
-	R_390_GOTENT                           = 26
-	R_390_GOTOFF16                         = 27
-	R_390_GOTOFF32                         = 13
-	R_390_GOTOFF64                         = 28
-	R_390_GOTPC                            = 14
-	R_390_GOTPCDBL                         = 21
-	R_390_GOTPLT12                         = 29
-	R_390_GOTPLT16                         = 30
-	R_390_GOTPLT20                         = 59
-	R_390_GOTPLT32                         = 31
-	R_390_GOTPLT64                         = 32
-	R_390_GOTPLTENT                        = 33
-	R_390_JMP_SLOT                         = 11
-	R_390_NONE                             = 0
-	R_390_NUM                              = 61
-	R_390_PC16                             = 16
-	R_390_PC16DBL                          = 17
-	R_390_PC32                             = 5
-	R_390_PC32DBL                          = 19
-	R_390_PC64                             = 23
-	R_390_PLT16DBL                         = 18
-	R_390_PLT32                            = 8
-	R_390_PLT32DBL                         = 20
-	R_390_PLT64                            = 25
-	R_390_PLTOFF16                         = 34
-	R_390_PLTOFF32                         = 35
-	R_390_PLTOFF64                         = 36
-	R_390_RELATIVE                         = 12
-	R_390_TLS_DTPMOD                       = 54
-	R_390_TLS_DTPOFF                       = 55
-	R_390_TLS_GD32                         = 40
-	R_390_TLS_GD64                         = 41
-	R_390_TLS_GDCALL                       = 38
-	R_390_TLS_GOTIE12                      = 42
-	R_390_TLS_GOTIE20                      = 60
-	R_390_TLS_GOTIE32                      = 43
-	R_390_TLS_GOTIE64                      = 44
-	R_390_TLS_IE32                         = 47
-	R_390_TLS_IE64                         = 48
-	R_390_TLS_IEENT                        = 49
-	R_390_TLS_LDCALL                       = 39
-	R_390_TLS_LDM32                        = 45
-	R_390_TLS_LDM64                        = 46
-	R_390_TLS_LDO32                        = 52
-	R_390_TLS_LDO64                        = 53
-	R_390_TLS_LE32                         = 50
-	R_390_TLS_LE64                         = 51
-	R_390_TLS_LOAD                         = 37
-	R_390_TLS_TPOFF                        = 56
-	R_68K_16                               = 2
-	R_68K_32                               = 1
-	R_68K_8                                = 3
-	R_68K_COPY                             = 19
-	R_68K_GLOB_DAT                         = 20
-	R_68K_GOT16                            = 8
-	R_68K_GOT16O                           = 11
-	R_68K_GOT32                            = 7
-	R_68K_GOT32O                           = 10
-	R_68K_GOT8                             = 9
-	R_68K_GOT8O                            = 12
-	R_68K_JMP_SLOT                         = 21
-	R_68K_NONE                             = 0
-	R_68K_NUM                              = 43
-	R_68K_PC16                             = 5
-	R_68K_PC32                             = 4
-	R_68K_PC8                              = 6
-	R_68K_PLT16                            = 14
-	R_68K_PLT16O                           = 17
-	R_68K_PLT32                            = 13
-	R_68K_PLT32O                           = 16
-	R_68K_PLT8                             = 15
-	R_68K_PLT8O                            = 18
-	R_68K_RELATIVE                         = 22
-	R_68K_TLS_DTPMOD32                     = 40
-	R_68K_TLS_DTPREL32                     = 41
-	R_68K_TLS_GD16                         = 26
-	R_68K_TLS_GD32                         = 25
-	R_68K_TLS_GD8                          = 27
-	R_68K_TLS_IE16                         = 35
-	R_68K_TLS_IE32                         = 34
-	R_68K_TLS_IE8                          = 36
-	R_68K_TLS_LDM16                        = 29
-	R_68K_TLS_LDM32                        = 28
-	R_68K_TLS_LDM8                         = 30
-	R_68K_TLS_LDO16                        = 32
-	R_68K_TLS_LDO32                        = 31
-	R_68K_TLS_LDO8                         = 33
-	R_68K_TLS_LE16                         = 38
-	R_68K_TLS_LE32                         = 37
-	R_68K_TLS_LE8                          = 39
-	R_68K_TLS_TPREL32                      = 42
-	R_AARCH64_ABS16                        = 259
-	R_AARCH64_ABS32                        = 258
-	R_AARCH64_ABS64                        = 257
-	R_AARCH64_ADD_ABS_LO12_NC              = 277
-	R_AARCH64_ADR_GOT_PAGE                 = 311
-	R_AARCH64_ADR_PREL_LO21                = 274
-	R_AARCH64_ADR_PREL_PG_HI21             = 275
-	R_AARCH64_ADR_PREL_PG_HI21_NC          = 276
-	R_AARCH64_CALL26                       = 283
-	R_AARCH64_CONDBR19                     = 280
-	R_AARCH64_COPY                         = 1024
-	R_AARCH64_GLOB_DAT                     = 1025
-	R_AARCH64_GOTREL32                     = 308
-	R_AARCH64_GOTREL64                     = 307
-	R_AARCH64_GOT_LD_PREL19                = 309
-	R_AARCH64_JUMP26                       = 282
-	R_AARCH64_JUMP_SLOT                    = 1026
-	R_AARCH64_LD64_GOTOFF_LO15             = 310
-	R_AARCH64_LD64_GOTPAGE_LO15            = 313
-	R_AARCH64_LD64_GOT_LO12_NC             = 312
-	R_AARCH64_LDST128_ABS_LO12_NC          = 299
-	R_AARCH64_LDST16_ABS_LO12_NC           = 284
-	R_AARCH64_LDST32_ABS_LO12_NC           = 285
-	R_AARCH64_LDST64_ABS_LO12_NC           = 286
-	R_AARCH64_LDST8_ABS_LO12_NC            = 278
-	R_AARCH64_LD_PREL_LO19                 = 273
-	R_AARCH64_MOVW_GOTOFF_G0               = 300
-	R_AARCH64_MOVW_GOTOFF_G0_NC            = 301
-	R_AARCH64_MOVW_GOTOFF_G1               = 302
-	R_AARCH64_MOVW_GOTOFF_G1_NC            = 303
-	R_AARCH64_MOVW_GOTOFF_G2               = 304
-	R_AARCH64_MOVW_GOTOFF_G2_NC            = 305
-	R_AARCH64_MOVW_GOTOFF_G3               = 306
-	R_AARCH64_MOVW_PREL_G0                 = 287
-	R_AARCH64_MOVW_PREL_G0_NC              = 288
-	R_AARCH64_MOVW_PREL_G1                 = 289
-	R_AARCH64_MOVW_PREL_G1_NC              = 290
-	R_AARCH64_MOVW_PREL_G2                 = 291
-	R_AARCH64_MOVW_PREL_G2_NC              = 292
-	R_AARCH64_MOVW_PREL_G3                 = 293
-	R_AARCH64_MOVW_SABS_G0                 = 270
-	R_AARCH64_MOVW_SABS_G1                 = 271
-	R_AARCH64_MOVW_SABS_G2                 = 272
-	R_AARCH64_MOVW_UABS_G0                 = 263
-	R_AARCH64_MOVW_UABS_G0_NC              = 264
-	R_AARCH64_MOVW_UABS_G1                 = 265
-	R_AARCH64_MOVW_UABS_G1_NC              = 266
-	R_AARCH64_MOVW_UABS_G2                 = 267
-	R_AARCH64_MOVW_UABS_G2_NC              = 268
-	R_AARCH64_MOVW_UABS_G3                 = 269
-	R_AARCH64_NONE                         = 0
-	R_AARCH64_P32_ABS32                    = 1
-	R_AARCH64_P32_COPY                     = 180
-	R_AARCH64_P32_GLOB_DAT                 = 181
-	R_AARCH64_P32_IRELATIVE                = 188
-	R_AARCH64_P32_JUMP_SLOT                = 182
-	R_AARCH64_P32_RELATIVE                 = 183
-	R_AARCH64_P32_TLSDESC                  = 187
-	R_AARCH64_P32_TLS_DTPMOD               = 184
-	R_AARCH64_P32_TLS_DTPREL               = 185
-	R_AARCH64_P32_TLS_TPREL                = 186
-	R_AARCH64_PREL16                       = 262
-	R_AARCH64_PREL32                       = 261
-	R_AARCH64_PREL64                       = 260
-	R_AARCH64_RELATIVE                     = 1027
-	R_AARCH64_TLSDESC                      = 1031
-	R_AARCH64_TLSDESC_ADD                  = 568
-	R_AARCH64_TLSDESC_ADD_LO12             = 564
-	R_AARCH64_TLSDESC_ADR_PAGE21           = 562
-	R_AARCH64_TLSDESC_ADR_PREL21           = 561
-	R_AARCH64_TLSDESC_CALL                 = 569
-	R_AARCH64_TLSDESC_LD64_LO12            = 563
-	R_AARCH64_TLSDESC_LDR                  = 567
-	R_AARCH64_TLSDESC_LD_PREL19            = 560
-	R_AARCH64_TLSDESC_OFF_G0_NC            = 566
-	R_AARCH64_TLSDESC_OFF_G1               = 565
-	R_AARCH64_TLSGD_ADD_LO12_NC            = 514
-	R_AARCH64_TLSGD_ADR_PAGE21             = 513
-	R_AARCH64_TLSGD_ADR_PREL21             = 512
-	R_AARCH64_TLSGD_MOVW_G0_NC             = 516
-	R_AARCH64_TLSGD_MOVW_G1                = 515
-	R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21    = 541
-	R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC  = 542
-	R_AARCH64_TLSIE_LD_GOTTPREL_PREL19     = 543
-	R_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC    = 540
-	R_AARCH64_TLSIE_MOVW_GOTTPREL_G1       = 539
-	R_AARCH64_TLSLD_ADD_DTPREL_HI12        = 528
-	R_AARCH64_TLSLD_ADD_DTPREL_LO12        = 529
-	R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC     = 530
-	R_AARCH64_TLSLD_ADD_LO12_NC            = 519
-	R_AARCH64_TLSLD_ADR_PAGE21             = 518
-	R_AARCH64_TLSLD_ADR_PREL21             = 517
-	R_AARCH64_TLSLD_LDST128_DTPREL_LO12    = 572
-	R_AARCH64_TLSLD_LDST128_DTPREL_LO12_NC = 573
-	R_AARCH64_TLSLD_LDST16_DTPREL_LO12     = 533
-	R_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC  = 534
-	R_AARCH64_TLSLD_LDST32_DTPREL_LO12     = 535
-	R_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC  = 536
-	R_AARCH64_TLSLD_LDST64_DTPREL_LO12     = 537
-	R_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC  = 538
-	R_AARCH64_TLSLD_LDST8_DTPREL_LO12      = 531
-	R_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC   = 532
-	R_AARCH64_TLSLD_LD_PREL19              = 522
-	R_AARCH64_TLSLD_MOVW_DTPREL_G0         = 526
-	R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC      = 527
-	R_AARCH64_TLSLD_MOVW_DTPREL_G1         = 524
-	R_AARCH64_TLSLD_MOVW_DTPREL_G1_NC      = 525
-	R_AARCH64_TLSLD_MOVW_DTPREL_G2         = 523
-	R_AARCH64_TLSLD_MOVW_G0_NC             = 521
-	R_AARCH64_TLSLD_MOVW_G1                = 520
-	R_AARCH64_TLSLE_ADD_TPREL_HI12         = 549
-	R_AARCH64_TLSLE_ADD_TPREL_LO12         = 550
-	R_AARCH64_TLSLE_ADD_TPREL_LO12_NC      = 551
-	R_AARCH64_TLSLE_LDST128_TPREL_LO12     = 570
-	R_AARCH64_TLSLE_LDST128_TPREL_LO12_NC  = 571
-	R_AARCH64_TLSLE_LDST16_TPREL_LO12      = 554
-	R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC   = 555
-	R_AARCH64_TLSLE_LDST32_TPREL_LO12      = 556
-	R_AARCH64_TLSLE_LDST32_TPREL_LO12_NC   = 557
-	R_AARCH64_TLSLE_LDST64_TPREL_LO12      = 558
-	R_AARCH64_TLSLE_LDST64_TPREL_LO12_NC   = 559
-	R_AARCH64_TLSLE_LDST8_TPREL_LO12       = 552
-	R_AARCH64_TLSLE_LDST8_TPREL_LO12_NC    = 553
-	R_AARCH64_TLSLE_MOVW_TPREL_G0          = 547
-	R_AARCH64_TLSLE_MOVW_TPREL_G0_NC       = 548
-	R_AARCH64_TLSLE_MOVW_TPREL_G1          = 545
-	R_AARCH64_TLSLE_MOVW_TPREL_G1_NC       = 546
-	R_AARCH64_TLSLE_MOVW_TPREL_G2          = 544
-	R_AARCH64_TLS_DTPMOD                   = 1028
-	R_AARCH64_TLS_DTPMOD64                 = 1028
-	R_AARCH64_TLS_DTPREL                   = 1029
-	R_AARCH64_TLS_DTPREL64                 = 1029
-	R_AARCH64_TLS_TPREL                    = 1030
-	R_AARCH64_TLS_TPREL64                  = 1030
-	R_AARCH64_TSTBR14                      = 279
-	R_ALPHA_BRADDR                         = 7
-	R_ALPHA_COPY                           = 24
-	R_ALPHA_DTPMOD64                       = 31
-	R_ALPHA_DTPREL16                       = 36
-	R_ALPHA_DTPREL64                       = 33
-	R_ALPHA_DTPRELHI                       = 34
-	R_ALPHA_DTPRELLO                       = 35
-	R_ALPHA_GLOB_DAT                       = 25
-	R_ALPHA_GOTDTPREL                      = 32
-	R_ALPHA_GOTTPREL                       = 37
-	R_ALPHA_GPDISP                         = 6
-	R_ALPHA_GPREL16                        = 19
-	R_ALPHA_GPREL32                        = 3
-	R_ALPHA_GPRELHIGH                      = 17
-	R_ALPHA_GPRELLOW                       = 18
-	R_ALPHA_HINT                           = 8
-	R_ALPHA_JMP_SLOT                       = 26
-	R_ALPHA_LITERAL                        = 4
-	R_ALPHA_LITUSE                         = 5
-	R_ALPHA_NONE                           = 0
-	R_ALPHA_NUM                            = 46
-	R_ALPHA_REFLONG                        = 1
-	R_ALPHA_REFQUAD                        = 2
-	R_ALPHA_RELATIVE                       = 27
-	R_ALPHA_SREL16                         = 9
-	R_ALPHA_SREL32                         = 10
-	R_ALPHA_SREL64                         = 11
-	R_ALPHA_TLSGD                          = 29
-	R_ALPHA_TLS_GD_HI                      = 28
-	R_ALPHA_TLS_LDM                        = 30
-	R_ALPHA_TPREL16                        = 41
-	R_ALPHA_TPREL64                        = 38
-	R_ALPHA_TPRELHI                        = 39
-	R_ALPHA_TPRELLO                        = 40
-	R_ARM_ABS12                            = 6
-	R_ARM_ABS16                            = 5
-	R_ARM_ABS32                            = 2
-	R_ARM_ABS32_NOI                        = 55
-	R_ARM_ABS8                             = 8
-	R_ARM_ALU_PCREL_15_8                   = 33
-	R_ARM_ALU_PCREL_23_15                  = 34
-	R_ARM_ALU_PCREL_7_0                    = 32
-	R_ARM_ALU_PC_G0                        = 58
-	R_ARM_ALU_PC_G0_NC                     = 57
-	R_ARM_ALU_PC_G1                        = 60
-	R_ARM_ALU_PC_G1_NC                     = 59
-	R_ARM_ALU_PC_G2                        = 61
-	R_ARM_ALU_SBREL_19_12                  = 36
-	R_ARM_ALU_SBREL_27_20                  = 37
-	R_ARM_ALU_SB_G0                        = 71
-	R_ARM_ALU_SB_G0_NC                     = 70
-	R_ARM_ALU_SB_G1                        = 73
-	R_ARM_ALU_SB_G1_NC                     = 72
-	R_ARM_ALU_SB_G2                        = 74
-	R_ARM_AMP_VCALL9                       = 12
-	R_ARM_BASE_ABS                         = 31
-	R_ARM_CALL                             = 28
-	R_ARM_COPY                             = 20
-	R_ARM_GLOB_DAT                         = 21
-	R_ARM_GNU_VTENTRY                      = 100
-	R_ARM_GNU_VTINHERIT                    = 101
-	R_ARM_GOT32                            = 26
-	R_ARM_GOTOFF                           = 24
-	R_ARM_GOTOFF12                         = 98
-	R_ARM_GOTPC                            = 25
-	R_ARM_GOTRELAX                         = 99
-	R_ARM_GOT_ABS                          = 95
-	R_ARM_GOT_BREL12                       = 97
-	R_ARM_GOT_PREL                         = 96
-	R_ARM_IRELATIVE                        = 160
-	R_ARM_JUMP24                           = 29
-	R_ARM_JUMP_SLOT                        = 22
-	R_ARM_LDC_PC_G0                        = 67
-	R_ARM_LDC_PC_G1                        = 68
-	R_ARM_LDC_PC_G2                        = 69
-	R_ARM_LDC_SB_G0                        = 81
-	R_ARM_LDC_SB_G1                        = 82
-	R_ARM_LDC_SB_G2                        = 83
-	R_ARM_LDRS_PC_G0                       = 64
-	R_ARM_LDRS_PC_G1                       = 65
-	R_ARM_LDRS_PC_G2                       = 66
-	R_ARM_LDRS_SB_G0                       = 78
-	R_ARM_LDRS_SB_G1                       = 79
-	R_ARM_LDRS_SB_G2                       = 80
-	R_ARM_LDR_PC_G1                        = 62
-	R_ARM_LDR_PC_G2                        = 63
-	R_ARM_LDR_SBREL_11_0                   = 35
-	R_ARM_LDR_SB_G0                        = 75
-	R_ARM_LDR_SB_G1                        = 76
-	R_ARM_LDR_SB_G2                        = 77
-	R_ARM_ME_TOO                           = 128
-	R_ARM_MOVT_ABS                         = 44
-	R_ARM_MOVT_BREL                        = 85
-	R_ARM_MOVT_PREL                        = 46
-	R_ARM_MOVW_ABS_NC                      = 43
-	R_ARM_MOVW_BREL                        = 86
-	R_ARM_MOVW_BREL_NC                     = 84
-	R_ARM_MOVW_PREL_NC                     = 45
-	R_ARM_NONE                             = 0
-	R_ARM_NUM                              = 256
-	R_ARM_PC13                             = 4
-	R_ARM_PC24                             = 1
-	R_ARM_PLT32                            = 27
-	R_ARM_PLT32_ABS                        = 94
-	R_ARM_PREL31                           = 42
-	R_ARM_RABS22                           = 253
-	R_ARM_RBASE                            = 255
-	R_ARM_REL32                            = 3
-	R_ARM_REL32_NOI                        = 56
-	R_ARM_RELATIVE                         = 23
-	R_ARM_RPC24                            = 254
-	R_ARM_RREL32                           = 252
-	R_ARM_RSBREL32                         = 250
-	R_ARM_RXPC25                           = 249
-	R_ARM_SBREL31                          = 39
-	R_ARM_SBREL32                          = 9
-	R_ARM_TARGET1                          = 38
-	R_ARM_TARGET2                          = 41
-	R_ARM_THM_ABS5                         = 7
-	R_ARM_THM_ALU_PREL_11_0                = 53
-	R_ARM_THM_GOT_BREL12                   = 131
-	R_ARM_THM_JUMP19                       = 51
-	R_ARM_THM_JUMP24                       = 30
-	R_ARM_THM_JUMP6                        = 52
-	R_ARM_THM_MOVT_ABS                     = 48
-	R_ARM_THM_MOVT_BREL                    = 88
-	R_ARM_THM_MOVT_PREL                    = 50
-	R_ARM_THM_MOVW_ABS_NC                  = 47
-	R_ARM_THM_MOVW_BREL                    = 89
-	R_ARM_THM_MOVW_BREL_NC                 = 87
-	R_ARM_THM_MOVW_PREL_NC                 = 49
-	R_ARM_THM_PC11                         = 102
-	R_ARM_THM_PC12                         = 54
-	R_ARM_THM_PC22                         = 10
-	R_ARM_THM_PC8                          = 11
-	R_ARM_THM_PC9                          = 103
-	R_ARM_THM_RPC22                        = 251
-	R_ARM_THM_SWI8                         = 14
-	R_ARM_THM_TLS_CALL                     = 93
-	R_ARM_THM_TLS_DESCSEQ                  = 129
-	R_ARM_THM_TLS_DESCSEQ16                = 129
-	R_ARM_THM_TLS_DESCSEQ32                = 130
-	R_ARM_THM_XPC22                        = 16
-	R_ARM_TLS_CALL                         = 91
-	R_ARM_TLS_DESC                         = 13
-	R_ARM_TLS_DESCSEQ                      = 92
-	R_ARM_TLS_DTPMOD32                     = 17
-	R_ARM_TLS_DTPOFF32                     = 18
-	R_ARM_TLS_GD32                         = 104
-	R_ARM_TLS_GOTDESC                      = 90
-	R_ARM_TLS_IE12GP                       = 111
-	R_ARM_TLS_IE32                         = 107
-	R_ARM_TLS_LDM32                        = 105
-	R_ARM_TLS_LDO12                        = 109
-	R_ARM_TLS_LDO32                        = 106
-	R_ARM_TLS_LE12                         = 110
-	R_ARM_TLS_LE32                         = 108
-	R_ARM_TLS_TPOFF32                      = 19
-	R_ARM_V4BX                             = 40
-	R_ARM_XPC25                            = 15
-	R_BPF_MAP_FD                           = 1
-	R_BPF_NONE                             = 0
-	R_CKCORE_ADDR32                        = 1
-	R_CKCORE_ADDRGOT                       = 17
-	R_CKCORE_ADDRGOT_HI16                  = 36
-	R_CKCORE_ADDRGOT_LO16                  = 37
-	R_CKCORE_ADDRPLT                       = 18
-	R_CKCORE_ADDRPLT_HI16                  = 38
-	R_CKCORE_ADDRPLT_LO16                  = 39
-	R_CKCORE_ADDR_HI16                     = 24
-	R_CKCORE_ADDR_LO16                     = 25
-	R_CKCORE_COPY                          = 10
-	R_CKCORE_DOFFSET_IMM18                 = 44
-	R_CKCORE_DOFFSET_IMM18BY2              = 45
-	R_CKCORE_DOFFSET_IMM18BY4              = 46
-	R_CKCORE_DOFFSET_LO16                  = 42
-	R_CKCORE_GLOB_DAT                      = 11
-	R_CKCORE_GOT12                         = 30
-	R_CKCORE_GOT32                         = 15
-	R_CKCORE_GOTOFF                        = 13
-	R_CKCORE_GOTOFF_HI16                   = 28
-	R_CKCORE_GOTOFF_LO16                   = 29
-	R_CKCORE_GOTPC                         = 14
-	R_CKCORE_GOTPC_HI16                    = 26
-	R_CKCORE_GOTPC_LO16                    = 27
-	R_CKCORE_GOT_HI16                      = 31
-	R_CKCORE_GOT_IMM18BY4                  = 48
-	R_CKCORE_GOT_LO16                      = 32
-	R_CKCORE_JUMP_SLOT                     = 12
-	R_CKCORE_NONE                          = 0
-	R_CKCORE_PCREL32                       = 5
-	R_CKCORE_PCRELIMM11BY2                 = 3
-	R_CKCORE_PCRELIMM8BY4                  = 2
-	R_CKCORE_PCRELJSR_IMM11BY2             = 6
-	R_CKCORE_PCREL_IMM10BY2                = 22
-	R_CKCORE_PCREL_IMM10BY4                = 23
-	R_CKCORE_PCREL_IMM16BY2                = 20
-	R_CKCORE_PCREL_IMM16BY4                = 21
-	R_CKCORE_PCREL_IMM18BY2                = 43
-	R_CKCORE_PCREL_IMM26BY2                = 19
-	R_CKCORE_PCREL_IMM7BY4                 = 50
-	R_CKCORE_PCREL_JSR_IMM26BY2            = 40
-	R_CKCORE_PLT12                         = 33
-	R_CKCORE_PLT32                         = 16
-	R_CKCORE_PLT_HI16                      = 34
-	R_CKCORE_PLT_IMM18BY4                  = 49
-	R_CKCORE_PLT_LO16                      = 35
-	R_CKCORE_RELATIVE                      = 9
-	R_CKCORE_TLS_DTPMOD32                  = 56
-	R_CKCORE_TLS_DTPOFF32                  = 57
-	R_CKCORE_TLS_GD32                      = 53
-	R_CKCORE_TLS_IE32                      = 52
-	R_CKCORE_TLS_LDM32                     = 54
-	R_CKCORE_TLS_LDO32                     = 55
-	R_CKCORE_TLS_LE32                      = 51
-	R_CKCORE_TLS_TPOFF32                   = 58
-	R_CKCORE_TOFFSET_LO16                  = 41
-	R_CRIS_16                              = 2
-	R_CRIS_16_GOT                          = 13
-	R_CRIS_16_GOTPLT                       = 15
-	R_CRIS_16_PCREL                        = 5
-	R_CRIS_32                              = 3
-	R_CRIS_32_GOT                          = 14
-	R_CRIS_32_GOTPLT                       = 16
-	R_CRIS_32_GOTREL                       = 17
-	R_CRIS_32_PCREL                        = 6
-	R_CRIS_32_PLT_GOTREL                   = 18
-	R_CRIS_32_PLT_PCREL                    = 19
-	R_CRIS_8                               = 1
-	R_CRIS_8_PCREL                         = 4
-	R_CRIS_COPY                            = 9
-	R_CRIS_GLOB_DAT                        = 10
-	R_CRIS_GNU_VTENTRY                     = 8
-	R_CRIS_GNU_VTINHERIT                   = 7
-	R_CRIS_JUMP_SLOT                       = 11
-	R_CRIS_NONE                            = 0
-	R_CRIS_NUM                             = 20
-	R_CRIS_RELATIVE                        = 12
-	R_IA64_COPY                            = 132
-	R_IA64_DIR32LSB                        = 37
-	R_IA64_DIR32MSB                        = 36
-	R_IA64_DIR64LSB                        = 39
-	R_IA64_DIR64MSB                        = 38
-	R_IA64_DTPMOD64LSB                     = 167
-	R_IA64_DTPMOD64MSB                     = 166
-	R_IA64_DTPREL14                        = 177
-	R_IA64_DTPREL22                        = 178
-	R_IA64_DTPREL32LSB                     = 181
-	R_IA64_DTPREL32MSB                     = 180
-	R_IA64_DTPREL64I                       = 179
-	R_IA64_DTPREL64LSB                     = 183
-	R_IA64_DTPREL64MSB                     = 182
-	R_IA64_FPTR32LSB                       = 69
-	R_IA64_FPTR32MSB                       = 68
-	R_IA64_FPTR64I                         = 67
-	R_IA64_FPTR64LSB                       = 71
-	R_IA64_FPTR64MSB                       = 70
-	R_IA64_GPREL22                         = 42
-	R_IA64_GPREL32LSB                      = 45
-	R_IA64_GPREL32MSB                      = 44
-	R_IA64_GPREL64I                        = 43
-	R_IA64_GPREL64LSB                      = 47
-	R_IA64_GPREL64MSB                      = 46
-	R_IA64_IMM14                           = 33
-	R_IA64_IMM22                           = 34
-	R_IA64_IMM64                           = 35
-	R_IA64_IPLTLSB                         = 129
-	R_IA64_IPLTMSB                         = 128
-	R_IA64_LDXMOV                          = 135
-	R_IA64_LTOFF22                         = 50
-	R_IA64_LTOFF22X                        = 134
-	R_IA64_LTOFF64I                        = 51
-	R_IA64_LTOFF_DTPMOD22                  = 170
-	R_IA64_LTOFF_DTPREL22                  = 186
-	R_IA64_LTOFF_FPTR22                    = 82
-	R_IA64_LTOFF_FPTR32LSB                 = 85
-	R_IA64_LTOFF_FPTR32MSB                 = 84
-	R_IA64_LTOFF_FPTR64I                   = 83
-	R_IA64_LTOFF_FPTR64LSB                 = 87
-	R_IA64_LTOFF_FPTR64MSB                 = 86
-	R_IA64_LTOFF_TPREL22                   = 154
-	R_IA64_LTV32LSB                        = 117
-	R_IA64_LTV32MSB                        = 116
-	R_IA64_LTV64LSB                        = 119
-	R_IA64_LTV64MSB                        = 118
-	R_IA64_NONE                            = 0
-	R_IA64_PCREL21B                        = 73
-	R_IA64_PCREL21BI                       = 121
-	R_IA64_PCREL21F                        = 75
-	R_IA64_PCREL21M                        = 74
-	R_IA64_PCREL22                         = 122
-	R_IA64_PCREL32LSB                      = 77
-	R_IA64_PCREL32MSB                      = 76
-	R_IA64_PCREL60B                        = 72
-	R_IA64_PCREL64I                        = 123
-	R_IA64_PCREL64LSB                      = 79
-	R_IA64_PCREL64MSB                      = 78
-	R_IA64_PLTOFF22                        = 58
-	R_IA64_PLTOFF64I                       = 59
-	R_IA64_PLTOFF64LSB                     = 63
-	R_IA64_PLTOFF64MSB                     = 62
-	R_IA64_REL32LSB                        = 109
-	R_IA64_REL32MSB                        = 108
-	R_IA64_REL64LSB                        = 111
-	R_IA64_REL64MSB                        = 110
-	R_IA64_SECREL32LSB                     = 101
-	R_IA64_SECREL32MSB                     = 100
-	R_IA64_SECREL64LSB                     = 103
-	R_IA64_SECREL64MSB                     = 102
-	R_IA64_SEGREL32LSB                     = 93
-	R_IA64_SEGREL32MSB                     = 92
-	R_IA64_SEGREL64LSB                     = 95
-	R_IA64_SEGREL64MSB                     = 94
-	R_IA64_SUB                             = 133
-	R_IA64_TPREL14                         = 145
-	R_IA64_TPREL22                         = 146
-	R_IA64_TPREL64I                        = 147
-	R_IA64_TPREL64LSB                      = 151
-	R_IA64_TPREL64MSB                      = 150
-	R_LARCH_32                             = 1
-	R_LARCH_32_PCREL                       = 99
-	R_LARCH_64                             = 2
-	R_LARCH_ABS64_HI12                     = 70
-	R_LARCH_ABS64_LO20                     = 69
-	R_LARCH_ABS_HI20                       = 67
-	R_LARCH_ABS_LO12                       = 68
-	R_LARCH_ADD16                          = 48
-	R_LARCH_ADD24                          = 49
-	R_LARCH_ADD32                          = 50
-	R_LARCH_ADD64                          = 51
-	R_LARCH_ADD8                           = 47
-	R_LARCH_B16                            = 64
-	R_LARCH_B21                            = 65
-	R_LARCH_B26                            = 66
-	R_LARCH_COPY                           = 4
-	R_LARCH_GNU_VTENTRY                    = 58
-	R_LARCH_GNU_VTINHERIT                  = 57
-	R_LARCH_GOT64_HI12                     = 82
-	R_LARCH_GOT64_LO20                     = 81
-	R_LARCH_GOT64_PC_HI12                  = 78
-	R_LARCH_GOT64_PC_LO20                  = 77
-	R_LARCH_GOT_HI20                       = 79
-	R_LARCH_GOT_LO12                       = 80
-	R_LARCH_GOT_PC_HI20                    = 75
-	R_LARCH_GOT_PC_LO12                    = 76
-	R_LARCH_IRELATIVE                      = 12
-	R_LARCH_JUMP_SLOT                      = 5
-	R_LARCH_MARK_LA                        = 20
-	R_LARCH_MARK_PCREL                     = 21
-	R_LARCH_NONE                           = 0
-	R_LARCH_PCALA64_HI12                   = 74
-	R_LARCH_PCALA64_LO20                   = 73
-	R_LARCH_PCALA_HI20                     = 71
-	R_LARCH_PCALA_LO12                     = 72
-	R_LARCH_RELATIVE                       = 3
-	R_LARCH_RELAX                          = 100
-	R_LARCH_SOP_ADD                        = 35
-	R_LARCH_SOP_AND                        = 36
-	R_LARCH_SOP_ASSERT                     = 30
-	R_LARCH_SOP_IF_ELSE                    = 37
-	R_LARCH_SOP_NOT                        = 31
-	R_LARCH_SOP_POP_32_S_0_10_10_16_S2     = 45
-	R_LARCH_SOP_POP_32_S_0_5_10_16_S2      = 44
-	R_LARCH_SOP_POP_32_S_10_12             = 40
-	R_LARCH_SOP_POP_32_S_10_16             = 41
-	R_LARCH_SOP_POP_32_S_10_16_S2          = 42
-	R_LARCH_SOP_POP_32_S_10_5              = 38
-	R_LARCH_SOP_POP_32_S_5_20              = 43
-	R_LARCH_SOP_POP_32_U                   = 46
-	R_LARCH_SOP_POP_32_U_10_12             = 39
-	R_LARCH_SOP_PUSH_ABSOLUTE              = 23
-	R_LARCH_SOP_PUSH_DUP                   = 24
-	R_LARCH_SOP_PUSH_GPREL                 = 25
-	R_LARCH_SOP_PUSH_PCREL                 = 22
-	R_LARCH_SOP_PUSH_PLT_PCREL             = 29
-	R_LARCH_SOP_PUSH_TLS_GD                = 28
-	R_LARCH_SOP_PUSH_TLS_GOT               = 27
-	R_LARCH_SOP_PUSH_TLS_TPREL             = 26
-	R_LARCH_SOP_SL                         = 33
-	R_LARCH_SOP_SR                         = 34
-	R_LARCH_SOP_SUB                        = 32
-	R_LARCH_SUB16                          = 53
-	R_LARCH_SUB24                          = 54
-	R_LARCH_SUB32                          = 55
-	R_LARCH_SUB64                          = 56
-	R_LARCH_SUB8                           = 52
-	R_LARCH_TLS_DTPMOD32                   = 6
-	R_LARCH_TLS_DTPMOD64                   = 7
-	R_LARCH_TLS_DTPREL32                   = 8
-	R_LARCH_TLS_DTPREL64                   = 9
-	R_LARCH_TLS_GD_HI20                    = 98
-	R_LARCH_TLS_GD_PC_HI20                 = 97
-	R_LARCH_TLS_IE64_HI12                  = 94
-	R_LARCH_TLS_IE64_LO20                  = 93
-	R_LARCH_TLS_IE64_PC_HI12               = 90
-	R_LARCH_TLS_IE64_PC_LO20               = 89
-	R_LARCH_TLS_IE_HI20                    = 91
-	R_LARCH_TLS_IE_LO12                    = 92
-	R_LARCH_TLS_IE_PC_HI20                 = 87
-	R_LARCH_TLS_IE_PC_LO12                 = 88
-	R_LARCH_TLS_LD_HI20                    = 96
-	R_LARCH_TLS_LD_PC_HI20                 = 95
-	R_LARCH_TLS_LE64_HI12                  = 86
-	R_LARCH_TLS_LE64_LO20                  = 85
-	R_LARCH_TLS_LE_HI20                    = 83
-	R_LARCH_TLS_LE_LO12                    = 84
-	R_LARCH_TLS_TPREL32                    = 10
-	R_LARCH_TLS_TPREL64                    = 11
-	R_M32R_10_PCREL                        = 4
-	R_M32R_10_PCREL_RELA                   = 36
-	R_M32R_16                              = 1
-	R_M32R_16_RELA                         = 33
-	R_M32R_18_PCREL                        = 5
-	R_M32R_18_PCREL_RELA                   = 37
-	R_M32R_24                              = 3
-	R_M32R_24_RELA                         = 35
-	R_M32R_26_PCREL                        = 6
-	R_M32R_26_PCREL_RELA                   = 38
-	R_M32R_26_PLTREL                       = 49
-	R_M32R_32                              = 2
-	R_M32R_32_RELA                         = 34
-	R_M32R_COPY                            = 50
-	R_M32R_GLOB_DAT                        = 51
-	R_M32R_GNU_VTENTRY                     = 12
-	R_M32R_GNU_VTINHERIT                   = 11
-	R_M32R_GOT16_HI_SLO                    = 57
-	R_M32R_GOT16_HI_ULO                    = 56
-	R_M32R_GOT16_LO                        = 58
-	R_M32R_GOT24                           = 48
-	R_M32R_GOTOFF                          = 54
-	R_M32R_GOTOFF_HI_SLO                   = 63
-	R_M32R_GOTOFF_HI_ULO                   = 62
-	R_M32R_GOTOFF_LO                       = 64
-	R_M32R_GOTPC24                         = 55
-	R_M32R_GOTPC_HI_SLO                    = 60
-	R_M32R_GOTPC_HI_ULO                    = 59
-	R_M32R_GOTPC_LO                        = 61
-	R_M32R_HI16_SLO                        = 8
-	R_M32R_HI16_SLO_RELA                   = 40
-	R_M32R_HI16_ULO                        = 7
-	R_M32R_HI16_ULO_RELA                   = 39
-	R_M32R_JMP_SLOT                        = 52
-	R_M32R_LO16                            = 9
-	R_M32R_LO16_RELA                       = 41
-	R_M32R_NONE                            = 0
-	R_M32R_NUM                             = 256
-	R_M32R_REL32                           = 45
-	R_M32R_RELATIVE                        = 53
-	R_M32R_RELA_GNU_VTENTRY                = 44
-	R_M32R_RELA_GNU_VTINHERIT              = 43
-	R_M32R_SDA16                           = 10
-	R_M32R_SDA16_RELA                      = 42
-	R_MICROBLAZE_32                        = 1
-	R_MICROBLAZE_32_LO                     = 6
-	R_MICROBLAZE_32_PCREL                  = 2
-	R_MICROBLAZE_32_PCREL_LO               = 4
-	R_MICROBLAZE_32_SYM_OP_SYM             = 10
-	R_MICROBLAZE_64                        = 5
-	R_MICROBLAZE_64_NONE                   = 9
-	R_MICROBLAZE_64_PCREL                  = 3
-	R_MICROBLAZE_COPY                      = 21
-	R_MICROBLAZE_GLOB_DAT                  = 18
-	R_MICROBLAZE_GNU_VTENTRY               = 12
-	R_MICROBLAZE_GNU_VTINHERIT             = 11
-	R_MICROBLAZE_GOTOFF_32                 = 20
-	R_MICROBLAZE_GOTOFF_64                 = 19
-	R_MICROBLAZE_GOTPC_64                  = 13
-	R_MICROBLAZE_GOT_64                    = 14
-	R_MICROBLAZE_JUMP_SLOT                 = 17
-	R_MICROBLAZE_NONE                      = 0
-	R_MICROBLAZE_PLT_64                    = 15
-	R_MICROBLAZE_REL                       = 16
-	R_MICROBLAZE_SRO32                     = 7
-	R_MICROBLAZE_SRW32                     = 8
-	R_MICROBLAZE_TLS                       = 22
-	R_MICROBLAZE_TLSDTPMOD32               = 25
-	R_MICROBLAZE_TLSDTPREL32               = 26
-	R_MICROBLAZE_TLSDTPREL64               = 27
-	R_MICROBLAZE_TLSGD                     = 23
-	R_MICROBLAZE_TLSGOTTPREL32             = 28
-	R_MICROBLAZE_TLSLD                     = 24
-	R_MICROBLAZE_TLSTPREL32                = 29
-	R_MIPS_16                              = 1
-	R_MIPS_26                              = 4
-	R_MIPS_32                              = 2
-	R_MIPS_64                              = 18
-	R_MIPS_ADD_IMMEDIATE                   = 34
-	R_MIPS_CALL16                          = 11
-	R_MIPS_CALL_HI16                       = 30
-	R_MIPS_CALL_LO16                       = 31
-	R_MIPS_COPY                            = 126
-	R_MIPS_DELETE                          = 27
-	R_MIPS_GLOB_DAT                        = 51
-	R_MIPS_GOT16                           = 9
-	R_MIPS_GOT_DISP                        = 19
-	R_MIPS_GOT_HI16                        = 22
-	R_MIPS_GOT_LO16                        = 23
-	R_MIPS_GOT_OFST                        = 21
-	R_MIPS_GOT_PAGE                        = 20
-	R_MIPS_GPREL16                         = 7
-	R_MIPS_GPREL32                         = 12
-	R_MIPS_HI16                            = 5
-	R_MIPS_HIGHER                          = 28
-	R_MIPS_HIGHEST                         = 29
-	R_MIPS_INSERT_A                        = 25
-	R_MIPS_INSERT_B                        = 26
-	R_MIPS_JALR                            = 37
-	R_MIPS_JUMP_SLOT                       = 127
-	R_MIPS_LITERAL                         = 8
-	R_MIPS_LO16                            = 6
-	R_MIPS_NONE                            = 0
-	R_MIPS_NUM                             = 128
-	R_MIPS_PC16                            = 10
-	R_MIPS_PJUMP                           = 35
-	R_MIPS_REL16                           = 33
-	R_MIPS_REL32                           = 3
-	R_MIPS_RELGOT                          = 36
-	R_MIPS_SCN_DISP                        = 32
-	R_MIPS_SHIFT5                          = 16
-	R_MIPS_SHIFT6                          = 17
-	R_MIPS_SUB                             = 24
-	R_MIPS_TLS_DTPMOD32                    = 38
-	R_MIPS_TLS_DTPMOD64                    = 40
-	R_MIPS_TLS_DTPREL32                    = 39
-	R_MIPS_TLS_DTPREL64                    = 41
-	R_MIPS_TLS_DTPREL_HI16                 = 44
-	R_MIPS_TLS_DTPREL_LO16                 = 45
-	R_MIPS_TLS_GD                          = 42
-	R_MIPS_TLS_GOTTPREL                    = 46
-	R_MIPS_TLS_LDM                         = 43
-	R_MIPS_TLS_TPREL32                     = 47
-	R_MIPS_TLS_TPREL64                     = 48
-	R_MIPS_TLS_TPREL_HI16                  = 49
-	R_MIPS_TLS_TPREL_LO16                  = 50
-	R_MN10300_16                           = 2
-	R_MN10300_24                           = 9
-	R_MN10300_32                           = 1
-	R_MN10300_8                            = 3
-	R_MN10300_COPY                         = 20
-	R_MN10300_GLOB_DAT                     = 21
-	R_MN10300_GNU_VTENTRY                  = 8
-	R_MN10300_GNU_VTINHERIT                = 7
-	R_MN10300_GOT16                        = 19
-	R_MN10300_GOT24                        = 18
-	R_MN10300_GOT32                        = 17
-	R_MN10300_GOTOFF16                     = 14
-	R_MN10300_GOTOFF24                     = 13
-	R_MN10300_GOTOFF32                     = 12
-	R_MN10300_GOTPC16                      = 11
-	R_MN10300_GOTPC32                      = 10
-	R_MN10300_JMP_SLOT                     = 22
-	R_MN10300_NONE                         = 0
-	R_MN10300_NUM                          = 24
-	R_MN10300_PCREL16                      = 5
-	R_MN10300_PCREL32                      = 4
-	R_MN10300_PCREL8                       = 6
-	R_MN10300_PLT16                        = 16
-	R_MN10300_PLT32                        = 15
-	R_MN10300_RELATIVE                     = 23
-	R_NIOS2_ALIGN                          = 21
-	R_NIOS2_BFD_RELOC_16                   = 13
-	R_NIOS2_BFD_RELOC_32                   = 12
-	R_NIOS2_BFD_RELOC_8                    = 14
-	R_NIOS2_CACHE_OPX                      = 6
-	R_NIOS2_CALL16                         = 23
-	R_NIOS2_CALL26                         = 4
-	R_NIOS2_CALL26_NOAT                    = 41
-	R_NIOS2_CALLR                          = 20
-	R_NIOS2_CALL_HA                        = 45
-	R_NIOS2_CALL_LO                        = 44
-	R_NIOS2_CJMP                           = 19
-	R_NIOS2_COPY                           = 36
-	R_NIOS2_GLOB_DAT                       = 37
-	R_NIOS2_GNU_VTENTRY                    = 17
-	R_NIOS2_GNU_VTINHERIT                  = 16
-	R_NIOS2_GOT16                          = 22
-	R_NIOS2_GOTOFF                         = 40
-	R_NIOS2_GOTOFF_HA                      = 25
-	R_NIOS2_GOTOFF_LO                      = 24
-	R_NIOS2_GOT_HA                         = 43
-	R_NIOS2_GOT_LO                         = 42
-	R_NIOS2_GPREL                          = 15
-	R_NIOS2_HI16                           = 9
-	R_NIOS2_HIADJ16                        = 11
-	R_NIOS2_IMM5                           = 5
-	R_NIOS2_IMM6                           = 7
-	R_NIOS2_IMM8                           = 8
-	R_NIOS2_JUMP_SLOT                      = 38
-	R_NIOS2_LO16                           = 10
-	R_NIOS2_NONE                           = 0
-	R_NIOS2_PCREL16                        = 3
-	R_NIOS2_PCREL_HA                       = 27
-	R_NIOS2_PCREL_LO                       = 26
-	R_NIOS2_RELATIVE                       = 39
-	R_NIOS2_S16                            = 1
-	R_NIOS2_TLS_DTPMOD                     = 33
-	R_NIOS2_TLS_DTPREL                     = 34
-	R_NIOS2_TLS_GD16                       = 28
-	R_NIOS2_TLS_IE16                       = 31
-	R_NIOS2_TLS_LDM16                      = 29
-	R_NIOS2_TLS_LDO16                      = 30
-	R_NIOS2_TLS_LE16                       = 32
-	R_NIOS2_TLS_TPREL                      = 35
-	R_NIOS2_U16                            = 2
-	R_NIOS2_UJMP                           = 18
-	R_OR1K_16                              = 2
-	R_OR1K_16_PCREL                        = 10
-	R_OR1K_32                              = 1
-	R_OR1K_32_PCREL                        = 9
-	R_OR1K_8                               = 3
-	R_OR1K_8_PCREL                         = 11
-	R_OR1K_COPY                            = 18
-	R_OR1K_GLOB_DAT                        = 19
-	R_OR1K_GNU_VTENTRY                     = 7
-	R_OR1K_GNU_VTINHERIT                   = 8
-	R_OR1K_GOT16                           = 14
-	R_OR1K_GOTOFF_HI16                     = 16
-	R_OR1K_GOTOFF_LO16                     = 17
-	R_OR1K_GOTPC_HI16                      = 12
-	R_OR1K_GOTPC_LO16                      = 13
-	R_OR1K_HI_16_IN_INSN                   = 5
-	R_OR1K_INSN_REL_26                     = 6
-	R_OR1K_JMP_SLOT                        = 20
-	R_OR1K_LO_16_IN_INSN                   = 4
-	R_OR1K_NONE                            = 0
-	R_OR1K_PLT26                           = 15
-	R_OR1K_RELATIVE                        = 21
-	R_OR1K_TLS_DTPMOD                      = 34
-	R_OR1K_TLS_DTPOFF                      = 33
-	R_OR1K_TLS_GD_HI16                     = 22
-	R_OR1K_TLS_GD_LO16                     = 23
-	R_OR1K_TLS_IE_HI16                     = 28
-	R_OR1K_TLS_IE_LO16                     = 29
-	R_OR1K_TLS_LDM_HI16                    = 24
-	R_OR1K_TLS_LDM_LO16                    = 25
-	R_OR1K_TLS_LDO_HI16                    = 26
-	R_OR1K_TLS_LDO_LO16                    = 27
-	R_OR1K_TLS_LE_HI16                     = 30
-	R_OR1K_TLS_LE_LO16                     = 31
-	R_OR1K_TLS_TPOFF                       = 32
-	R_PARISC_COPY                          = 128
-	R_PARISC_DIR14DR                       = 84
-	R_PARISC_DIR14R                        = 6
-	R_PARISC_DIR14WR                       = 83
-	R_PARISC_DIR16DF                       = 87
-	R_PARISC_DIR16F                        = 85
-	R_PARISC_DIR16WF                       = 86
-	R_PARISC_DIR17F                        = 4
-	R_PARISC_DIR17R                        = 3
-	R_PARISC_DIR21L                        = 2
-	R_PARISC_DIR32                         = 1
-	R_PARISC_DIR64                         = 80
-	R_PARISC_DPREL14R                      = 22
-	R_PARISC_DPREL21L                      = 18
-	R_PARISC_EPLT                          = 130
-	R_PARISC_FPTR64                        = 64
-	R_PARISC_GNU_VTENTRY                   = 232
-	R_PARISC_GNU_VTINHERIT                 = 233
-	R_PARISC_GPREL14DR                     = 92
-	R_PARISC_GPREL14R                      = 30
-	R_PARISC_GPREL14WR                     = 91
-	R_PARISC_GPREL16DF                     = 95
-	R_PARISC_GPREL16F                      = 93
-	R_PARISC_GPREL16WF                     = 94
-	R_PARISC_GPREL21L                      = 26
-	R_PARISC_GPREL64                       = 88
-	R_PARISC_HIRESERVE                     = 255
-	R_PARISC_IPLT                          = 129
-	R_PARISC_LORESERVE                     = 128
-	R_PARISC_LTOFF14DR                     = 100
-	R_PARISC_LTOFF14R                      = 38
-	R_PARISC_LTOFF14WR                     = 99
-	R_PARISC_LTOFF16DF                     = 103
-	R_PARISC_LTOFF16F                      = 101
-	R_PARISC_LTOFF16WF                     = 102
-	R_PARISC_LTOFF21L                      = 34
-	R_PARISC_LTOFF64                       = 96
-	R_PARISC_LTOFF_FPTR14DR                = 124
-	R_PARISC_LTOFF_FPTR14R                 = 62
-	R_PARISC_LTOFF_FPTR14WR                = 123
-	R_PARISC_LTOFF_FPTR16DF                = 127
-	R_PARISC_LTOFF_FPTR16F                 = 125
-	R_PARISC_LTOFF_FPTR16WF                = 126
-	R_PARISC_LTOFF_FPTR21L                 = 58
-	R_PARISC_LTOFF_FPTR32                  = 57
-	R_PARISC_LTOFF_FPTR64                  = 120
-	R_PARISC_LTOFF_TP14DR                  = 228
-	R_PARISC_LTOFF_TP14F                   = 167
-	R_PARISC_LTOFF_TP14R                   = 166
-	R_PARISC_LTOFF_TP14WR                  = 227
-	R_PARISC_LTOFF_TP16DF                  = 231
-	R_PARISC_LTOFF_TP16F                   = 229
-	R_PARISC_LTOFF_TP16WF                  = 230
-	R_PARISC_LTOFF_TP21L                   = 162
-	R_PARISC_LTOFF_TP64                    = 224
-	R_PARISC_NONE                          = 0
-	R_PARISC_PCREL14DR                     = 76
-	R_PARISC_PCREL14R                      = 14
-	R_PARISC_PCREL14WR                     = 75
-	R_PARISC_PCREL16DF                     = 79
-	R_PARISC_PCREL16F                      = 77
-	R_PARISC_PCREL16WF                     = 78
-	R_PARISC_PCREL17F                      = 12
-	R_PARISC_PCREL17R                      = 11
-	R_PARISC_PCREL21L                      = 10
-	R_PARISC_PCREL22F                      = 74
-	R_PARISC_PCREL32                       = 9
-	R_PARISC_PCREL64                       = 72
-	R_PARISC_PLABEL14R                     = 70
-	R_PARISC_PLABEL21L                     = 66
-	R_PARISC_PLABEL32                      = 65
-	R_PARISC_PLTOFF14DR                    = 116
-	R_PARISC_PLTOFF14R                     = 54
-	R_PARISC_PLTOFF14WR                    = 115
-	R_PARISC_PLTOFF16DF                    = 119
-	R_PARISC_PLTOFF16F                     = 117
-	R_PARISC_PLTOFF16WF                    = 118
-	R_PARISC_PLTOFF21L                     = 50
-	R_PARISC_SECREL32                      = 41
-	R_PARISC_SECREL64                      = 104
-	R_PARISC_SEGBASE                       = 48
-	R_PARISC_SEGREL32                      = 49
-	R_PARISC_SEGREL64                      = 112
-	R_PARISC_TLS_DTPMOD32                  = 242
-	R_PARISC_TLS_DTPMOD64                  = 243
-	R_PARISC_TLS_DTPOFF32                  = 244
-	R_PARISC_TLS_DTPOFF64                  = 245
-	R_PARISC_TLS_GD14R                     = 235
-	R_PARISC_TLS_GD21L                     = 234
-	R_PARISC_TLS_GDCALL                    = 236
-	R_PARISC_TLS_IE14R                     = 166
-	R_PARISC_TLS_IE21L                     = 162
-	R_PARISC_TLS_LDM14R                    = 238
-	R_PARISC_TLS_LDM21L                    = 237
-	R_PARISC_TLS_LDMCALL                   = 239
-	R_PARISC_TLS_LDO14R                    = 241
-	R_PARISC_TLS_LDO21L                    = 240
-	R_PARISC_TLS_LE14R                     = 158
-	R_PARISC_TLS_LE21L                     = 154
-	R_PARISC_TLS_TPREL32                   = 153
-	R_PARISC_TLS_TPREL64                   = 216
-	R_PARISC_TPREL14DR                     = 220
-	R_PARISC_TPREL14R                      = 158
-	R_PARISC_TPREL14WR                     = 219
-	R_PARISC_TPREL16DF                     = 223
-	R_PARISC_TPREL16F                      = 221
-	R_PARISC_TPREL16WF                     = 222
-	R_PARISC_TPREL21L                      = 154
-	R_PARISC_TPREL32                       = 153
-	R_PARISC_TPREL64                       = 216
-	R_PPC64_ADDR14                         = 7
-	R_PPC64_ADDR14_BRNTAKEN                = 9
-	R_PPC64_ADDR14_BRTAKEN                 = 8
-	R_PPC64_ADDR16                         = 3
-	R_PPC64_ADDR16_DS                      = 56
-	R_PPC64_ADDR16_HA                      = 6
-	R_PPC64_ADDR16_HI                      = 5
-	R_PPC64_ADDR16_HIGH                    = 110
-	R_PPC64_ADDR16_HIGHA                   = 111
-	R_PPC64_ADDR16_HIGHER                  = 39
-	R_PPC64_ADDR16_HIGHERA                 = 40
-	R_PPC64_ADDR16_HIGHEST                 = 41
-	R_PPC64_ADDR16_HIGHESTA                = 42
-	R_PPC64_ADDR16_LO                      = 4
-	R_PPC64_ADDR16_LO_DS                   = 57
-	R_PPC64_ADDR24                         = 2
-	R_PPC64_ADDR30                         = 37
-	R_PPC64_ADDR32                         = 1
-	R_PPC64_ADDR64                         = 38
-	R_PPC64_COPY                           = 19
-	R_PPC64_DTPMOD64                       = 68
-	R_PPC64_DTPREL16                       = 74
-	R_PPC64_DTPREL16_DS                    = 101
-	R_PPC64_DTPREL16_HA                    = 77
-	R_PPC64_DTPREL16_HI                    = 76
-	R_PPC64_DTPREL16_HIGH                  = 114
-	R_PPC64_DTPREL16_HIGHA                 = 115
-	R_PPC64_DTPREL16_HIGHER                = 103
-	R_PPC64_DTPREL16_HIGHERA               = 104
-	R_PPC64_DTPREL16_HIGHEST               = 105
-	R_PPC64_DTPREL16_HIGHESTA              = 106
-	R_PPC64_DTPREL16_LO                    = 75
-	R_PPC64_DTPREL16_LO_DS                 = 102
-	R_PPC64_DTPREL64                       = 78
-	R_PPC64_GLOB_DAT                       = 20
-	R_PPC64_GOT16                          = 14
-	R_PPC64_GOT16_DS                       = 58
-	R_PPC64_GOT16_HA                       = 17
-	R_PPC64_GOT16_HI                       = 16
-	R_PPC64_GOT16_LO                       = 15
-	R_PPC64_GOT16_LO_DS                    = 59
-	R_PPC64_GOT_DTPREL16_DS                = 91
-	R_PPC64_GOT_DTPREL16_HA                = 94
-	R_PPC64_GOT_DTPREL16_HI                = 93
-	R_PPC64_GOT_DTPREL16_LO_DS             = 92
-	R_PPC64_GOT_TLSGD16                    = 79
-	R_PPC64_GOT_TLSGD16_HA                 = 82
-	R_PPC64_GOT_TLSGD16_HI                 = 81
-	R_PPC64_GOT_TLSGD16_LO                 = 80
-	R_PPC64_GOT_TLSLD16                    = 83
-	R_PPC64_GOT_TLSLD16_HA                 = 86
-	R_PPC64_GOT_TLSLD16_HI                 = 85
-	R_PPC64_GOT_TLSLD16_LO                 = 84
-	R_PPC64_GOT_TPREL16_DS                 = 87
-	R_PPC64_GOT_TPREL16_HA                 = 90
-	R_PPC64_GOT_TPREL16_HI                 = 89
-	R_PPC64_GOT_TPREL16_LO_DS              = 88
-	R_PPC64_IRELATIVE                      = 248
-	R_PPC64_JMP_IREL                       = 247
-	R_PPC64_JMP_SLOT                       = 21
-	R_PPC64_NONE                           = 0
-	R_PPC64_PLT16_HA                       = 31
-	R_PPC64_PLT16_HI                       = 30
-	R_PPC64_PLT16_LO                       = 29
-	R_PPC64_PLT16_LO_DS                    = 60
-	R_PPC64_PLT32                          = 27
-	R_PPC64_PLT64                          = 45
-	R_PPC64_PLTGOT16                       = 52
-	R_PPC64_PLTGOT16_DS                    = 65
-	R_PPC64_PLTGOT16_HA                    = 55
-	R_PPC64_PLTGOT16_HI                    = 54
-	R_PPC64_PLTGOT16_LO                    = 53
-	R_PPC64_PLTGOT16_LO_DS                 = 66
-	R_PPC64_PLTREL32                       = 28
-	R_PPC64_PLTREL64                       = 46
-	R_PPC64_REL14                          = 11
-	R_PPC64_REL14_BRNTAKEN                 = 13
-	R_PPC64_REL14_BRTAKEN                  = 12
-	R_PPC64_REL16                          = 249
-	R_PPC64_REL16_HA                       = 252
-	R_PPC64_REL16_HI                       = 251
-	R_PPC64_REL16_LO                       = 250
-	R_PPC64_REL24                          = 10
-	R_PPC64_REL32                          = 26
-	R_PPC64_REL64                          = 44
-	R_PPC64_RELATIVE                       = 22
-	R_PPC64_SECTOFF                        = 33
-	R_PPC64_SECTOFF_DS                     = 61
-	R_PPC64_SECTOFF_HA                     = 36
-	R_PPC64_SECTOFF_HI                     = 35
-	R_PPC64_SECTOFF_LO                     = 34
-	R_PPC64_SECTOFF_LO_DS                  = 62
-	R_PPC64_TLS                            = 67
-	R_PPC64_TLSGD                          = 107
-	R_PPC64_TLSLD                          = 108
-	R_PPC64_TOC                            = 51
-	R_PPC64_TOC16                          = 47
-	R_PPC64_TOC16_DS                       = 63
-	R_PPC64_TOC16_HA                       = 50
-	R_PPC64_TOC16_HI                       = 49
-	R_PPC64_TOC16_LO                       = 48
-	R_PPC64_TOC16_LO_DS                    = 64
-	R_PPC64_TOCSAVE                        = 109
-	R_PPC64_TPREL16                        = 69
-	R_PPC64_TPREL16_DS                     = 95
-	R_PPC64_TPREL16_HA                     = 72
-	R_PPC64_TPREL16_HI                     = 71
-	R_PPC64_TPREL16_HIGH                   = 112
-	R_PPC64_TPREL16_HIGHA                  = 113
-	R_PPC64_TPREL16_HIGHER                 = 97
-	R_PPC64_TPREL16_HIGHERA                = 98
-	R_PPC64_TPREL16_HIGHEST                = 99
-	R_PPC64_TPREL16_HIGHESTA               = 100
-	R_PPC64_TPREL16_LO                     = 70
-	R_PPC64_TPREL16_LO_DS                  = 96
-	R_PPC64_TPREL64                        = 73
-	R_PPC64_UADDR16                        = 25
-	R_PPC64_UADDR32                        = 24
-	R_PPC64_UADDR64                        = 43
-	R_PPC_ADDR14                           = 7
-	R_PPC_ADDR14_BRNTAKEN                  = 9
-	R_PPC_ADDR14_BRTAKEN                   = 8
-	R_PPC_ADDR16                           = 3
-	R_PPC_ADDR16_HA                        = 6
-	R_PPC_ADDR16_HI                        = 5
-	R_PPC_ADDR16_LO                        = 4
-	R_PPC_ADDR24                           = 2
-	R_PPC_ADDR32                           = 1
-	R_PPC_COPY                             = 19
-	R_PPC_DIAB_RELSDA_HA                   = 185
-	R_PPC_DIAB_RELSDA_HI                   = 184
-	R_PPC_DIAB_RELSDA_LO                   = 183
-	R_PPC_DIAB_SDA21_HA                    = 182
-	R_PPC_DIAB_SDA21_HI                    = 181
-	R_PPC_DIAB_SDA21_LO                    = 180
-	R_PPC_DTPMOD32                         = 68
-	R_PPC_DTPREL16                         = 74
-	R_PPC_DTPREL16_HA                      = 77
-	R_PPC_DTPREL16_HI                      = 76
-	R_PPC_DTPREL16_LO                      = 75
-	R_PPC_DTPREL32                         = 78
-	R_PPC_EMB_BIT_FLD                      = 115
-	R_PPC_EMB_MRKREF                       = 110
-	R_PPC_EMB_NADDR16                      = 102
-	R_PPC_EMB_NADDR16_HA                   = 105
-	R_PPC_EMB_NADDR16_HI                   = 104
-	R_PPC_EMB_NADDR16_LO                   = 103
-	R_PPC_EMB_NADDR32                      = 101
-	R_PPC_EMB_RELSDA                       = 116
-	R_PPC_EMB_RELSEC16                     = 111
-	R_PPC_EMB_RELST_HA                     = 114
-	R_PPC_EMB_RELST_HI                     = 113
-	R_PPC_EMB_RELST_LO                     = 112
-	R_PPC_EMB_SDA21                        = 109
-	R_PPC_EMB_SDA2I16                      = 107
-	R_PPC_EMB_SDA2REL                      = 108
-	R_PPC_EMB_SDAI16                       = 106
-	R_PPC_GLOB_DAT                         = 20
-	R_PPC_GOT16                            = 14
-	R_PPC_GOT16_HA                         = 17
-	R_PPC_GOT16_HI                         = 16
-	R_PPC_GOT16_LO                         = 15
-	R_PPC_GOT_DTPREL16                     = 91
-	R_PPC_GOT_DTPREL16_HA                  = 94
-	R_PPC_GOT_DTPREL16_HI                  = 93
-	R_PPC_GOT_DTPREL16_LO                  = 92
-	R_PPC_GOT_TLSGD16                      = 79
-	R_PPC_GOT_TLSGD16_HA                   = 82
-	R_PPC_GOT_TLSGD16_HI                   = 81
-	R_PPC_GOT_TLSGD16_LO                   = 80
-	R_PPC_GOT_TLSLD16                      = 83
-	R_PPC_GOT_TLSLD16_HA                   = 86
-	R_PPC_GOT_TLSLD16_HI                   = 85
-	R_PPC_GOT_TLSLD16_LO                   = 84
-	R_PPC_GOT_TPREL16                      = 87
-	R_PPC_GOT_TPREL16_HA                   = 90
-	R_PPC_GOT_TPREL16_HI                   = 89
-	R_PPC_GOT_TPREL16_LO                   = 88
-	R_PPC_IRELATIVE                        = 248
-	R_PPC_JMP_SLOT                         = 21
-	R_PPC_LOCAL24PC                        = 23
-	R_PPC_NONE                             = 0
-	R_PPC_PLT16_HA                         = 31
-	R_PPC_PLT16_HI                         = 30
-	R_PPC_PLT16_LO                         = 29
-	R_PPC_PLT32                            = 27
-	R_PPC_PLTREL24                         = 18
-	R_PPC_PLTREL32                         = 28
-	R_PPC_REL14                            = 11
-	R_PPC_REL14_BRNTAKEN                   = 13
-	R_PPC_REL14_BRTAKEN                    = 12
-	R_PPC_REL16                            = 249
-	R_PPC_REL16_HA                         = 252
-	R_PPC_REL16_HI                         = 251
-	R_PPC_REL16_LO                         = 250
-	R_PPC_REL24                            = 10
-	R_PPC_REL32                            = 26
-	R_PPC_RELATIVE                         = 22
-	R_PPC_SDAREL16                         = 32
-	R_PPC_SECTOFF                          = 33
-	R_PPC_SECTOFF_HA                       = 36
-	R_PPC_SECTOFF_HI                       = 35
-	R_PPC_SECTOFF_LO                       = 34
-	R_PPC_TLS                              = 67
-	R_PPC_TLSGD                            = 95
-	R_PPC_TLSLD                            = 96
-	R_PPC_TOC16                            = 255
-	R_PPC_TPREL16                          = 69
-	R_PPC_TPREL16_HA                       = 72
-	R_PPC_TPREL16_HI                       = 71
-	R_PPC_TPREL16_LO                       = 70
-	R_PPC_TPREL32                          = 73
-	R_PPC_UADDR16                          = 25
-	R_PPC_UADDR32                          = 24
-	R_RISCV_32                             = 1
-	R_RISCV_32_PCREL                       = 57
-	R_RISCV_64                             = 2
-	R_RISCV_ADD16                          = 34
-	R_RISCV_ADD32                          = 35
-	R_RISCV_ADD64                          = 36
-	R_RISCV_ADD8                           = 33
-	R_RISCV_ALIGN                          = 43
-	R_RISCV_BRANCH                         = 16
-	R_RISCV_CALL                           = 18
-	R_RISCV_CALL_PLT                       = 19
-	R_RISCV_COPY                           = 4
-	R_RISCV_GOT32_PCREL                    = 41
-	R_RISCV_GOT_HI20                       = 20
-	R_RISCV_HI20                           = 26
-	R_RISCV_IRELATIVE                      = 58
-	R_RISCV_JAL                            = 17
-	R_RISCV_JUMP_SLOT                      = 5
-	R_RISCV_LO12_I                         = 27
-	R_RISCV_LO12_S                         = 28
-	R_RISCV_NONE                           = 0
-	R_RISCV_PCREL_HI20                     = 23
-	R_RISCV_PCREL_LO12_I                   = 24
-	R_RISCV_PCREL_LO12_S                   = 25
-	R_RISCV_PLT32                          = 59
-	R_RISCV_RELATIVE                       = 3
-	R_RISCV_RELAX                          = 51
-	R_RISCV_RVC_BRANCH                     = 44
-	R_RISCV_RVC_JUMP                       = 45
-	R_RISCV_RVC_LUI                        = 46
-	R_RISCV_SET16                          = 55
-	R_RISCV_SET32                          = 56
-	R_RISCV_SET6                           = 53
-	R_RISCV_SET8                           = 54
-	R_RISCV_SET_ULEB128                    = 60
-	R_RISCV_SUB16                          = 38
-	R_RISCV_SUB32                          = 39
-	R_RISCV_SUB6                           = 52
-	R_RISCV_SUB64                          = 40
-	R_RISCV_SUB8                           = 37
-	R_RISCV_SUB_ULEB128                    = 61
-	R_RISCV_TLSDESC                        = 12
-	R_RISCV_TLSDESC_ADD_LO12               = 64
-	R_RISCV_TLSDESC_CALL                   = 65
-	R_RISCV_TLSDESC_HI20                   = 62
-	R_RISCV_TLSDESC_LOAD_LO12              = 63
-	R_RISCV_TLS_DTPMOD32                   = 6
-	R_RISCV_TLS_DTPMOD64                   = 7
-	R_RISCV_TLS_DTPREL32                   = 8
-	R_RISCV_TLS_DTPREL64                   = 9
-	R_RISCV_TLS_GD_HI20                    = 22
-	R_RISCV_TLS_GOT_HI20                   = 21
-	R_RISCV_TLS_TPREL32                    = 10
-	R_RISCV_TLS_TPREL64                    = 11
-	R_RISCV_TPREL_ADD                      = 32
-	R_RISCV_TPREL_HI20                     = 29
-	R_RISCV_TPREL_LO12_I                   = 30
-	R_RISCV_TPREL_LO12_S                   = 31
-	R_SH_ALIGN                             = 29
-	R_SH_CODE                              = 30
-	R_SH_COPY                              = 162
-	R_SH_COUNT                             = 28
-	R_SH_DATA                              = 31
-	R_SH_DIR32                             = 1
-	R_SH_DIR8BP                            = 7
-	R_SH_DIR8L                             = 9
-	R_SH_DIR8W                             = 8
-	R_SH_DIR8WPL                           = 5
-	R_SH_DIR8WPN                           = 3
-	R_SH_DIR8WPZ                           = 6
-	R_SH_FUNCDESC                          = 207
-	R_SH_FUNCDESC_VALUE                    = 208
-	R_SH_GLOB_DAT                          = 163
-	R_SH_GNU_VTENTRY                       = 35
-	R_SH_GNU_VTINHERIT                     = 34
-	R_SH_GOT20                             = 201
-	R_SH_GOT32                             = 160
-	R_SH_GOTFUNCDESC                       = 203
-	R_SH_GOTFUNCDEST20                     = 204
-	R_SH_GOTOFF                            = 166
-	R_SH_GOTOFF20                          = 202
-	R_SH_GOTOFFFUNCDESC                    = 205
-	R_SH_GOTOFFFUNCDEST20                  = 206
-	R_SH_GOTPC                             = 167
-	R_SH_IND12W                            = 4
-	R_SH_JMP_SLOT                          = 164
-	R_SH_LABEL                             = 32
-	R_SH_NONE                              = 0
-	R_SH_NUM                               = 256
-	R_SH_PLT32                             = 161
-	R_SH_REL32                             = 2
-	R_SH_RELATIVE                          = 165
-	R_SH_SWITCH16                          = 25
-	R_SH_SWITCH32                          = 26
-	R_SH_SWITCH8                           = 33
-	R_SH_TLS_DTPMOD32                      = 149
-	R_SH_TLS_DTPOFF32                      = 150
-	R_SH_TLS_GD_32                         = 144
-	R_SH_TLS_IE_32                         = 147
-	R_SH_TLS_LDO_32                        = 146
-	R_SH_TLS_LD_32                         = 145
-	R_SH_TLS_LE_32                         = 148
-	R_SH_TLS_TPOFF32                       = 151
-	R_SH_USES                              = 27
-	R_SPARC_10                             = 30
-	R_SPARC_11                             = 31
-	R_SPARC_13                             = 11
-	R_SPARC_16                             = 2
-	R_SPARC_22                             = 10
-	R_SPARC_32                             = 3
-	R_SPARC_5                              = 44
-	R_SPARC_6                              = 45
-	R_SPARC_64                             = 32
-	R_SPARC_7                              = 43
-	R_SPARC_8                              = 1
-	R_SPARC_COPY                           = 19
-	R_SPARC_DISP16                         = 5
-	R_SPARC_DISP32                         = 6
-	R_SPARC_DISP64                         = 46
-	R_SPARC_DISP8                          = 4
-	R_SPARC_GLOB_DAT                       = 20
-	R_SPARC_GLOB_JMP                       = 42
-	R_SPARC_GNU_VTENTRY                    = 251
-	R_SPARC_GNU_VTINHERIT                  = 250
-	R_SPARC_GOT10                          = 13
-	R_SPARC_GOT13                          = 14
-	R_SPARC_GOT22                          = 15
-	R_SPARC_GOTDATA_HIX22                  = 80
-	R_SPARC_GOTDATA_LOX10                  = 81
-	R_SPARC_GOTDATA_OP                     = 84
-	R_SPARC_GOTDATA_OP_HIX22               = 82
-	R_SPARC_GOTDATA_OP_LOX10               = 83
-	R_SPARC_H34                            = 85
-	R_SPARC_H44                            = 50
-	R_SPARC_HH22                           = 34
-	R_SPARC_HI22                           = 9
-	R_SPARC_HIPLT22                        = 25
-	R_SPARC_HIX22                          = 48
-	R_SPARC_HM10                           = 35
-	R_SPARC_JMP_SLOT                       = 21
-	R_SPARC_L44                            = 52
-	R_SPARC_LM22                           = 36
-	R_SPARC_LO10                           = 12
-	R_SPARC_LOPLT10                        = 26
-	R_SPARC_LOX10                          = 49
-	R_SPARC_M44                            = 51
-	R_SPARC_NONE                           = 0
-	R_SPARC_NUM                            = 253
-	R_SPARC_OLO10                          = 33
-	R_SPARC_PC10                           = 16
-	R_SPARC_PC22                           = 17
-	R_SPARC_PCPLT10                        = 29
-	R_SPARC_PCPLT22                        = 28
-	R_SPARC_PCPLT32                        = 27
-	R_SPARC_PC_HH22                        = 37
-	R_SPARC_PC_HM10                        = 38
-	R_SPARC_PC_LM22                        = 39
-	R_SPARC_PLT32                          = 24
-	R_SPARC_PLT64                          = 47
-	R_SPARC_REGISTER                       = 53
-	R_SPARC_RELATIVE                       = 22
-	R_SPARC_REV32                          = 252
-	R_SPARC_SIZE32                         = 86
-	R_SPARC_SIZE64                         = 87
-	R_SPARC_TLS_DTPMOD32                   = 74
-	R_SPARC_TLS_DTPMOD64                   = 75
-	R_SPARC_TLS_DTPOFF32                   = 76
-	R_SPARC_TLS_DTPOFF64                   = 77
-	R_SPARC_TLS_GD_ADD                     = 58
-	R_SPARC_TLS_GD_CALL                    = 59
-	R_SPARC_TLS_GD_HI22                    = 56
-	R_SPARC_TLS_GD_LO10                    = 57
-	R_SPARC_TLS_IE_ADD                     = 71
-	R_SPARC_TLS_IE_HI22                    = 67
-	R_SPARC_TLS_IE_LD                      = 69
-	R_SPARC_TLS_IE_LDX                     = 70
-	R_SPARC_TLS_IE_LO10                    = 68
-	R_SPARC_TLS_LDM_ADD                    = 62
-	R_SPARC_TLS_LDM_CALL                   = 63
-	R_SPARC_TLS_LDM_HI22                   = 60
-	R_SPARC_TLS_LDM_LO10                   = 61
-	R_SPARC_TLS_LDO_ADD                    = 66
-	R_SPARC_TLS_LDO_HIX22                  = 64
-	R_SPARC_TLS_LDO_LOX10                  = 65
-	R_SPARC_TLS_LE_HIX22                   = 72
-	R_SPARC_TLS_LE_LOX10                   = 73
-	R_SPARC_TLS_TPOFF32                    = 78
-	R_SPARC_TLS_TPOFF64                    = 79
-	R_SPARC_UA16                           = 55
-	R_SPARC_UA32                           = 23
-	R_SPARC_UA64                           = 54
-	R_SPARC_WDISP16                        = 40
-	R_SPARC_WDISP19                        = 41
-	R_SPARC_WDISP22                        = 8
-	R_SPARC_WDISP30                        = 7
-	R_SPARC_WPLT30                         = 18
-	R_X86_64_16                            = 12
-	R_X86_64_32                            = 10
-	R_X86_64_32S                           = 11
-	R_X86_64_64                            = 1
-	R_X86_64_8                             = 14
-	R_X86_64_COPY                          = 5
-	R_X86_64_DTPMOD64                      = 16
-	R_X86_64_DTPOFF32                      = 21
-	R_X86_64_DTPOFF64                      = 17
-	R_X86_64_GLOB_DAT                      = 6
-	R_X86_64_GOT32                         = 3
-	R_X86_64_GOT64                         = 27
-	R_X86_64_GOTOFF64                      = 25
-	R_X86_64_GOTPC32                       = 26
-	R_X86_64_GOTPC32_TLSDESC               = 34
-	R_X86_64_GOTPC64                       = 29
-	R_X86_64_GOTPCREL                      = 9
-	R_X86_64_GOTPCREL64                    = 28
-	R_X86_64_GOTPCRELX                     = 41
-	R_X86_64_GOTPLT64                      = 30
-	R_X86_64_GOTTPOFF                      = 22
-	R_X86_64_IRELATIVE                     = 37
-	R_X86_64_JUMP_SLOT                     = 7
-	R_X86_64_NONE                          = 0
-	R_X86_64_NUM                           = 43
-	R_X86_64_PC16                          = 13
-	R_X86_64_PC32                          = 2
-	R_X86_64_PC64                          = 24
-	R_X86_64_PC8                           = 15
-	R_X86_64_PLT32                         = 4
-	R_X86_64_PLTOFF64                      = 31
-	R_X86_64_RELATIVE                      = 8
-	R_X86_64_RELATIVE64                    = 38
-	R_X86_64_REX_GOTPCRELX                 = 42
-	R_X86_64_SIZE32                        = 32
-	R_X86_64_SIZE64                        = 33
-	R_X86_64_TLSDESC                       = 36
-	R_X86_64_TLSDESC_CALL                  = 35
-	R_X86_64_TLSGD                         = 19
-	R_X86_64_TLSLD                         = 20
-	R_X86_64_TPOFF32                       = 23
-	R_X86_64_TPOFF64                       = 18
-	SA_EXPOSE_TAGBITS                      = 2048
-	SA_NOCLDSTOP                           = 1
-	SA_NOCLDWAIT                           = 2
-	SA_NODEFER                             = 1073741824
-	SA_ONSTACK                             = 134217728
-	SA_RESETHAND                           = 2147483648
-	SA_RESTART                             = 268435456
-	SA_RESTORER                            = 67108864
-	SA_SIGINFO                             = 4
-	SA_UNSUPPORTED                         = 1024
-	SCM_TIMESTAMPING_OLD                   = 37
-	SCM_TIMESTAMPNS_OLD                    = 35
-	SCM_TIMESTAMP_OLD                      = 29
-	SEGV_ACCERR                            = 2
-	SEGV_BNDERR                            = 3
-	SEGV_MAPERR                            = 1
-	SEGV_MTEAERR                           = 8
-	SEGV_MTESERR                           = 9
-	SEGV_PKUERR                            = 4
-	SELFMAG                                = 4
-	SHF_ALLOC                              = 2
-	SHF_ALPHA_GPREL                        = 268435456
-	SHF_ARM_COMDEF                         = 2147483648
-	SHF_ARM_ENTRYSECT                      = 268435456
-	SHF_COMPRESSED                         = 2048
-	SHF_EXCLUDE                            = 2147483648
-	SHF_EXECINSTR                          = 4
-	SHF_GROUP                              = 512
-	SHF_IA_64_NORECOV                      = 536870912
-	SHF_IA_64_SHORT                        = 268435456
-	SHF_INFO_LINK                          = 64
-	SHF_LINK_ORDER                         = 128
-	SHF_MASKOS                             = 267386880
-	SHF_MASKPROC                           = 4026531840
-	SHF_MERGE                              = 16
-	SHF_MIPS_ADDR                          = 1073741824
-	SHF_MIPS_GPREL                         = 268435456
-	SHF_MIPS_LOCAL                         = 67108864
-	SHF_MIPS_MERGE                         = 536870912
-	SHF_MIPS_NAMES                         = 33554432
-	SHF_MIPS_NODUPE                        = 16777216
-	SHF_MIPS_NOSTRIP                       = 134217728
-	SHF_MIPS_STRINGS                       = 2147483648
-	SHF_ORDERED                            = 1073741824
-	SHF_OS_NONCONFORMING                   = 256
-	SHF_PARISC_HUGE                        = 1073741824
-	SHF_PARISC_SBP                         = 2147483648
-	SHF_PARISC_SHORT                       = 536870912
-	SHF_STRINGS                            = 32
-	SHF_TLS                                = 1024
-	SHF_WRITE                              = 1
-	SHN_ABS                                = 65521
-	SHN_AFTER                              = 65281
-	SHN_BEFORE                             = 65280
-	SHN_COMMON                             = 65522
-	SHN_HIOS                               = 65343
-	SHN_HIPROC                             = 65311
-	SHN_HIRESERVE                          = 65535
-	SHN_LOOS                               = 65312
-	SHN_LOPROC                             = 65280
-	SHN_LORESERVE                          = 65280
-	SHN_MIPS_ACOMMON                       = 65280
-	SHN_MIPS_DATA                          = 65282
-	SHN_MIPS_SCOMMON                       = 65283
-	SHN_MIPS_SUNDEFINED                    = 65284
-	SHN_MIPS_TEXT                          = 65281
-	SHN_PARISC_ANSI_COMMON                 = 65280
-	SHN_PARISC_HUGE_COMMON                 = 65281
-	SHN_UNDEF                              = 0
-	SHN_XINDEX                             = 65535
-	SHT_ALPHA_DEBUG                        = 1879048193
-	SHT_ALPHA_REGINFO                      = 1879048194
-	SHT_ARM_ATTRIBUTES                     = 1879048195
-	SHT_ARM_EXIDX                          = 1879048193
-	SHT_ARM_PREEMPTMAP                     = 1879048194
-	SHT_CHECKSUM                           = 1879048184
-	SHT_DYNAMIC                            = 6
-	SHT_DYNSYM                             = 11
-	SHT_FINI_ARRAY                         = 15
-	SHT_GNU_ATTRIBUTES                     = 1879048181
-	SHT_GNU_HASH                           = 1879048182
-	SHT_GNU_LIBLIST                        = 1879048183
-	SHT_GNU_verdef                         = 1879048189
-	SHT_GNU_verneed                        = 1879048190
-	SHT_GNU_versym                         = 1879048191
-	SHT_GROUP                              = 17
-	SHT_HASH                               = 5
-	SHT_HIOS                               = 1879048191
-	SHT_HIPROC                             = 2147483647
-	SHT_HISUNW                             = 1879048191
-	SHT_HIUSER                             = 2415919103
-	SHT_IA_64_EXT                          = 1879048192
-	SHT_IA_64_UNWIND                       = 1879048193
-	SHT_INIT_ARRAY                         = 14
-	SHT_LOOS                               = 1610612736
-	SHT_LOPROC                             = 1879048192
-	SHT_LOSUNW                             = 1879048186
-	SHT_LOUSER                             = 2147483648
-	SHT_MIPS_AUXSYM                        = 1879048214
-	SHT_MIPS_CONFLICT                      = 1879048194
-	SHT_MIPS_CONTENT                       = 1879048204
-	SHT_MIPS_DEBUG                         = 1879048197
-	SHT_MIPS_DELTACLASS                    = 1879048221
-	SHT_MIPS_DELTADECL                     = 1879048223
-	SHT_MIPS_DELTAINST                     = 1879048220
-	SHT_MIPS_DELTASYM                      = 1879048219
-	SHT_MIPS_DENSE                         = 1879048211
-	SHT_MIPS_DWARF                         = 1879048222
-	SHT_MIPS_EH_REGION                     = 1879048231
-	SHT_MIPS_EVENTS                        = 1879048225
-	SHT_MIPS_EXTSYM                        = 1879048210
-	SHT_MIPS_FDESC                         = 1879048209
-	SHT_MIPS_GPTAB                         = 1879048195
-	SHT_MIPS_IFACE                         = 1879048203
-	SHT_MIPS_LIBLIST                       = 1879048192
-	SHT_MIPS_LINE                          = 1879048217
-	SHT_MIPS_LOCSTR                        = 1879048216
-	SHT_MIPS_LOCSYM                        = 1879048213
-	SHT_MIPS_MSYM                          = 1879048193
-	SHT_MIPS_OPTIONS                       = 1879048205
-	SHT_MIPS_OPTSYM                        = 1879048215
-	SHT_MIPS_PACKAGE                       = 1879048199
-	SHT_MIPS_PACKSYM                       = 1879048200
-	SHT_MIPS_PDESC                         = 1879048212
-	SHT_MIPS_PDR_EXCEPTION                 = 1879048233
-	SHT_MIPS_PIXIE                         = 1879048227
-	SHT_MIPS_REGINFO                       = 1879048198
-	SHT_MIPS_RELD                          = 1879048201
-	SHT_MIPS_RFDESC                        = 1879048218
-	SHT_MIPS_SHDR                          = 1879048208
-	SHT_MIPS_SYMBOL_LIB                    = 1879048224
-	SHT_MIPS_TRANSLATE                     = 1879048226
-	SHT_MIPS_UCODE                         = 1879048196
-	SHT_MIPS_WHIRL                         = 1879048230
-	SHT_MIPS_XLATE                         = 1879048228
-	SHT_MIPS_XLATE_DEBUG                   = 1879048229
-	SHT_MIPS_XLATE_OLD                     = 1879048232
-	SHT_NOBITS                             = 8
-	SHT_NOTE                               = 7
-	SHT_NULL                               = 0
-	SHT_NUM                                = 20
-	SHT_PARISC_DOC                         = 1879048194
-	SHT_PARISC_EXT                         = 1879048192
-	SHT_PARISC_UNWIND                      = 1879048193
-	SHT_PREINIT_ARRAY                      = 16
-	SHT_PROGBITS                           = 1
-	SHT_REL                                = 9
-	SHT_RELA                               = 4
-	SHT_RELR                               = 19
-	SHT_SHLIB                              = 10
-	SHT_STRTAB                             = 3
-	SHT_SUNW_COMDAT                        = 1879048187
-	SHT_SUNW_move                          = 1879048186
-	SHT_SUNW_syminfo                       = 1879048188
-	SHT_SYMTAB                             = 2
-	SHT_SYMTAB_SHNDX                       = 18
-	SIGABRT                                = 6
-	SIGALRM                                = 14
-	SIGBUS                                 = 7
-	SIGCHLD                                = 17
-	SIGCONT                                = 18
-	SIGEV_NONE                             = 1
-	SIGEV_SIGNAL                           = 0
-	SIGEV_THREAD                           = 2
-	SIGEV_THREAD_ID                        = 4
-	SIGFPE                                 = 8
-	SIGHUP                                 = 1
-	SIGILL                                 = 4
-	SIGINT                                 = 2
-	SIGIO                                  = 29
-	SIGIOT                                 = 6
-	SIGKILL                                = 9
-	SIGPIPE                                = 13
-	SIGPOLL                                = 29
-	SIGPROF                                = 27
-	SIGPWR                                 = 30
-	SIGQUIT                                = 3
-	SIGRTMAX                               = 0
-	SIGRTMIN                               = 0
-	SIGSEGV                                = 11
-	SIGSTKFLT                              = 16
-	SIGSTKSZ                               = 8192
-	SIGSTOP                                = 19
-	SIGSYS                                 = 31
-	SIGTERM                                = 15
-	SIGTRAP                                = 5
-	SIGTSTP                                = 20
-	SIGTTIN                                = 21
-	SIGTTOU                                = 22
-	SIGUNUSED                              = 31
-	SIGURG                                 = 23
-	SIGUSR1                                = 10
-	SIGUSR2                                = 12
-	SIGVTALRM                              = 26
-	SIGWINCH                               = 28
-	SIGXCPU                                = 24
-	SIGXFSZ                                = 25
-	SIG_BLOCK                              = 0
-	SIG_SETMASK                            = 2
-	SIG_UNBLOCK                            = 1
-	SIOCGSTAMPNS_OLD                       = 35079
-	SIOCGSTAMP_OLD                         = 35078
-	SI_ASYNCIO                             = -4
-	SI_ASYNCNL                             = -60
-	SI_KERNEL                              = 128
-	SI_MESGQ                               = -3
-	SI_QUEUE                               = -1
-	SI_SIGIO                               = -5
-	SI_TIMER                               = -2
-	SI_TKILL                               = -6
-	SI_USER                                = 0
-	SO_RCVTIMEO_OLD                        = 20
-	SO_SNDTIMEO_OLD                        = 21
-	SO_TIMESTAMPING_OLD                    = 37
-	SO_TIMESTAMPNS_OLD                     = 35
-	SO_TIMESTAMP_OLD                       = 29
-	SS_AUTODISARM                          = 2147483648
-	SS_DISABLE                             = 2
-	SS_FLAG_BITS                           = 2147483648
-	SS_ONSTACK                             = 1
-	STB_GLOBAL                             = 1
-	STB_GNU_UNIQUE                         = 10
-	STB_HIOS                               = 12
-	STB_HIPROC                             = 15
-	STB_LOCAL                              = 0
-	STB_LOOS                               = 10
-	STB_LOPROC                             = 13
-	STB_MIPS_SPLIT_COMMON                  = 13
-	STB_NUM                                = 3
-	STB_WEAK                               = 2
-	STN_UNDEF                              = 0
-	STO_ALPHA_NOPV                         = 128
-	STO_ALPHA_STD_GPLOAD                   = 136
-	STO_MIPS_DEFAULT                       = 0
-	STO_MIPS_HIDDEN                        = 2
-	STO_MIPS_INTERNAL                      = 1
-	STO_MIPS_PLT                           = 8
-	STO_MIPS_PROTECTED                     = 3
-	STO_MIPS_SC_ALIGN_UNUSED               = 255
-	STO_PPC64_LOCAL_BIT                    = 5
-	STO_PPC64_LOCAL_MASK                   = 224
-	STT_ARM_16BIT                          = 15
-	STT_ARM_TFUNC                          = 13
-	STT_COMMON                             = 5
-	STT_FILE                               = 4
-	STT_FUNC                               = 2
-	STT_GNU_IFUNC                          = 10
-	STT_HIOS                               = 12
-	STT_HIPROC                             = 15
-	STT_HP_OPAQUE                          = 11
-	STT_HP_STUB                            = 12
-	STT_LOOS                               = 10
-	STT_LOPROC                             = 13
-	STT_NOTYPE                             = 0
-	STT_NUM                                = 7
-	STT_OBJECT                             = 1
-	STT_PARISC_MILLICODE                   = 13
-	STT_SECTION                            = 3
-	STT_SPARC_REGISTER                     = 13
-	STT_TLS                                = 6
-	STV_DEFAULT                            = 0
-	STV_HIDDEN                             = 2
-	STV_INTERNAL                           = 1
-	STV_PROTECTED                          = 3
-	SYMINFO_BT_LOWRESERVE                  = 65280
-	SYMINFO_BT_PARENT                      = 65534
-	SYMINFO_BT_SELF                        = 65535
-	SYMINFO_CURRENT                        = 1
-	SYMINFO_FLG_COPY                       = 4
-	SYMINFO_FLG_DIRECT                     = 1
-	SYMINFO_FLG_LAZYLOAD                   = 8
-	SYMINFO_FLG_PASSTHRU                   = 2
-	SYMINFO_NONE                           = 0
-	SYMINFO_NUM                            = 2
-	SYSCALL_MMAP2_UNIT                     = 4096
-	SYSCALL_RLIM_INFINITY                  = 18446744073709551615
-	SYS__sysctl                            = 156
-	SYS_accept                             = 43
-	SYS_accept4                            = 288
-	SYS_access                             = 21
-	SYS_acct                               = 163
-	SYS_add_key                            = 248
-	SYS_adjtimex                           = 159
-	SYS_afs_syscall                        = 183
-	SYS_alarm                              = 37
-	SYS_arch_prctl                         = 158
-	SYS_bind                               = 49
-	SYS_bpf                                = 321
-	SYS_brk                                = 12
-	SYS_cachestat                          = 451
-	SYS_capget                             = 125
-	SYS_capset                             = 126
-	SYS_chdir                              = 80
-	SYS_chmod                              = 90
-	SYS_chown                              = 92
-	SYS_chroot                             = 161
-	SYS_clock_adjtime                      = 305
-	SYS_clock_getres                       = 229
-	SYS_clock_gettime                      = 228
-	SYS_clock_nanosleep                    = 230
-	SYS_clock_settime                      = 227
-	SYS_clone                              = 56
-	SYS_clone3                             = 435
-	SYS_close                              = 3
-	SYS_close_range                        = 436
-	SYS_connect                            = 42
-	SYS_copy_file_range                    = 326
-	SYS_creat                              = 85
-	SYS_create_module                      = 174
-	SYS_delete_module                      = 176
-	SYS_dup                                = 32
-	SYS_dup2                               = 33
-	SYS_dup3                               = 292
-	SYS_epoll_create                       = 213
-	SYS_epoll_create1                      = 291
-	SYS_epoll_ctl                          = 233
-	SYS_epoll_ctl_old                      = 214
-	SYS_epoll_pwait                        = 281
-	SYS_epoll_pwait2                       = 441
-	SYS_epoll_wait                         = 232
-	SYS_epoll_wait_old                     = 215
-	SYS_eventfd                            = 284
-	SYS_eventfd2                           = 290
-	SYS_execve                             = 59
-	SYS_execveat                           = 322
-	SYS_exit                               = 60
-	SYS_exit_group                         = 231
-	SYS_faccessat                          = 269
-	SYS_faccessat2                         = 439
-	SYS_fadvise64                          = 221
-	SYS_fallocate                          = 285
-	SYS_fanotify_init                      = 300
-	SYS_fanotify_mark                      = 301
-	SYS_fchdir                             = 81
-	SYS_fchmod                             = 91
-	SYS_fchmodat                           = 268
-	SYS_fchmodat2                          = 452
-	SYS_fchown                             = 93
-	SYS_fchownat                           = 260
-	SYS_fcntl                              = 72
-	SYS_fdatasync                          = 75
-	SYS_fgetxattr                          = 193
-	SYS_finit_module                       = 313
-	SYS_flistxattr                         = 196
-	SYS_flock                              = 73
-	SYS_fork                               = 57
-	SYS_fremovexattr                       = 199
-	SYS_fsconfig                           = 431
-	SYS_fsetxattr                          = 190
-	SYS_fsmount                            = 432
-	SYS_fsopen                             = 430
-	SYS_fspick                             = 433
-	SYS_fstat                              = 5
-	SYS_fstatfs                            = 138
-	SYS_fsync                              = 74
-	SYS_ftruncate                          = 77
-	SYS_futex                              = 202
-	SYS_futex_waitv                        = 449
-	SYS_futimesat                          = 261
-	SYS_get_kernel_syms                    = 177
-	SYS_get_mempolicy                      = 239
-	SYS_get_robust_list                    = 274
-	SYS_get_thread_area                    = 211
-	SYS_getcpu                             = 309
-	SYS_getcwd                             = 79
-	SYS_getdents64                         = 217
-	SYS_getegid                            = 108
-	SYS_geteuid                            = 107
-	SYS_getgid                             = 104
-	SYS_getgroups                          = 115
-	SYS_getitimer                          = 36
-	SYS_getpeername                        = 52
-	SYS_getpgid                            = 121
-	SYS_getpgrp                            = 111
-	SYS_getpid                             = 39
-	SYS_getpmsg                            = 181
-	SYS_getppid                            = 110
-	SYS_getpriority                        = 140
-	SYS_getrandom                          = 318
-	SYS_getresgid                          = 120
-	SYS_getresuid                          = 118
-	SYS_getrlimit                          = 97
-	SYS_getrusage                          = 98
-	SYS_getsid                             = 124
-	SYS_getsockname                        = 51
-	SYS_getsockopt                         = 55
-	SYS_gettid                             = 186
-	SYS_gettimeofday                       = 96
-	SYS_getuid                             = 102
-	SYS_getxattr                           = 191
-	SYS_init_module                        = 175
-	SYS_inotify_add_watch                  = 254
-	SYS_inotify_init                       = 253
-	SYS_inotify_init1                      = 294
-	SYS_inotify_rm_watch                   = 255
-	SYS_io_cancel                          = 210
-	SYS_io_destroy                         = 207
-	SYS_io_getevents                       = 208
-	SYS_io_pgetevents                      = 333
-	SYS_io_setup                           = 206
-	SYS_io_submit                          = 209
-	SYS_io_uring_enter                     = 426
-	SYS_io_uring_register                  = 427
-	SYS_io_uring_setup                     = 425
-	SYS_ioctl                              = 16
-	SYS_ioperm                             = 173
-	SYS_iopl                               = 172
-	SYS_ioprio_get                         = 252
-	SYS_ioprio_set                         = 251
-	SYS_kcmp                               = 312
-	SYS_kexec_file_load                    = 320
-	SYS_kexec_load                         = 246
-	SYS_keyctl                             = 250
-	SYS_kill                               = 62
-	SYS_landlock_add_rule                  = 445
-	SYS_landlock_create_ruleset            = 444
-	SYS_landlock_restrict_self             = 446
-	SYS_lchown                             = 94
-	SYS_lgetxattr                          = 192
-	SYS_link                               = 86
-	SYS_linkat                             = 265
-	SYS_listen                             = 50
-	SYS_listxattr                          = 194
-	SYS_llistxattr                         = 195
-	SYS_lookup_dcookie                     = 212
-	SYS_lremovexattr                       = 198
-	SYS_lseek                              = 8
-	SYS_lsetxattr                          = 189
-	SYS_lstat                              = 6
-	SYS_madvise                            = 28
-	SYS_mbind                              = 237
-	SYS_membarrier                         = 324
-	SYS_memfd_create                       = 319
-	SYS_memfd_secret                       = 447
-	SYS_migrate_pages                      = 256
-	SYS_mincore                            = 27
-	SYS_mkdir                              = 83
-	SYS_mkdirat                            = 258
-	SYS_mknod                              = 133
-	SYS_mknodat                            = 259
-	SYS_mlock                              = 149
-	SYS_mlock2                             = 325
-	SYS_mlockall                           = 151
-	SYS_mmap                               = 9
-	SYS_modify_ldt                         = 154
-	SYS_mount                              = 165
-	SYS_mount_setattr                      = 442
-	SYS_move_mount                         = 429
-	SYS_move_pages                         = 279
-	SYS_mprotect                           = 10
-	SYS_mq_getsetattr                      = 245
-	SYS_mq_notify                          = 244
-	SYS_mq_open                            = 240
-	SYS_mq_timedreceive                    = 243
-	SYS_mq_timedsend                       = 242
-	SYS_mq_unlink                          = 241
-	SYS_mremap                             = 25
-	SYS_msgctl                             = 71
-	SYS_msgget                             = 68
-	SYS_msgrcv                             = 70
-	SYS_msgsnd                             = 69
-	SYS_msync                              = 26
-	SYS_munlock                            = 150
-	SYS_munlockall                         = 152
-	SYS_munmap                             = 11
-	SYS_name_to_handle_at                  = 303
-	SYS_nanosleep                          = 35
-	SYS_newfstatat                         = 262
-	SYS_nfsservctl                         = 180
-	SYS_open                               = 2
-	SYS_open_by_handle_at                  = 304
-	SYS_open_tree                          = 428
-	SYS_openat                             = 257
-	SYS_openat2                            = 437
-	SYS_pause                              = 34
-	SYS_perf_event_open                    = 298
-	SYS_personality                        = 135
-	SYS_pidfd_getfd                        = 438
-	SYS_pidfd_open                         = 434
-	SYS_pidfd_send_signal                  = 424
-	SYS_pipe                               = 22
-	SYS_pipe2                              = 293
-	SYS_pivot_root                         = 155
-	SYS_pkey_alloc                         = 330
-	SYS_pkey_free                          = 331
-	SYS_pkey_mprotect                      = 329
-	SYS_poll                               = 7
-	SYS_ppoll                              = 271
-	SYS_prctl                              = 157
-	SYS_pread64                            = 17
-	SYS_preadv                             = 295
-	SYS_preadv2                            = 327
-	SYS_prlimit64                          = 302
-	SYS_process_madvise                    = 440
-	SYS_process_mrelease                   = 448
-	SYS_process_vm_readv                   = 310
-	SYS_process_vm_writev                  = 311
-	SYS_pselect6                           = 270
-	SYS_ptrace                             = 101
-	SYS_putpmsg                            = 182
-	SYS_pwrite64                           = 18
-	SYS_pwritev                            = 296
-	SYS_pwritev2                           = 328
-	SYS_query_module                       = 178
-	SYS_quotactl                           = 179
-	SYS_read                               = 0
-	SYS_readahead                          = 187
-	SYS_readlink                           = 89
-	SYS_readlinkat                         = 267
-	SYS_readv                              = 19
-	SYS_reboot                             = 169
-	SYS_recvfrom                           = 45
-	SYS_recvmmsg                           = 299
-	SYS_recvmsg                            = 47
-	SYS_remap_file_pages                   = 216
-	SYS_removexattr                        = 197
-	SYS_rename                             = 82
-	SYS_renameat                           = 264
-	SYS_renameat2                          = 316
-	SYS_request_key                        = 249
-	SYS_restart_syscall                    = 219
-	SYS_rmdir                              = 84
-	SYS_rseq                               = 334
-	SYS_rt_sigaction                       = 13
-	SYS_rt_sigpending                      = 127
-	SYS_rt_sigprocmask                     = 14
-	SYS_rt_sigqueueinfo                    = 129
-	SYS_rt_sigreturn                       = 15
-	SYS_rt_sigsuspend                      = 130
-	SYS_rt_sigtimedwait                    = 128
-	SYS_rt_tgsigqueueinfo                  = 297
-	SYS_sched_get_priority_max             = 146
-	SYS_sched_get_priority_min             = 147
-	SYS_sched_getaffinity                  = 204
-	SYS_sched_getattr                      = 315
-	SYS_sched_getparam                     = 143
-	SYS_sched_getscheduler                 = 145
-	SYS_sched_rr_get_interval              = 148
-	SYS_sched_setaffinity                  = 203
-	SYS_sched_setattr                      = 314
-	SYS_sched_setparam                     = 142
-	SYS_sched_setscheduler                 = 144
-	SYS_sched_yield                        = 24
-	SYS_seccomp                            = 317
-	SYS_security                           = 185
-	SYS_select                             = 23
-	SYS_semctl                             = 66
-	SYS_semget                             = 64
-	SYS_semop                              = 65
-	SYS_semtimedop                         = 220
-	SYS_sendfile                           = 40
-	SYS_sendmmsg                           = 307
-	SYS_sendmsg                            = 46
-	SYS_sendto                             = 44
-	SYS_set_mempolicy                      = 238
-	SYS_set_mempolicy_home_node            = 450
-	SYS_set_robust_list                    = 273
-	SYS_set_thread_area                    = 205
-	SYS_set_tid_address                    = 218
-	SYS_setdomainname                      = 171
-	SYS_setfsgid                           = 123
-	SYS_setfsuid                           = 122
-	SYS_setgid                             = 106
-	SYS_setgroups                          = 116
-	SYS_sethostname                        = 170
-	SYS_setitimer                          = 38
-	SYS_setns                              = 308
-	SYS_setpgid                            = 109
-	SYS_setpriority                        = 141
-	SYS_setregid                           = 114
-	SYS_setresgid                          = 119
-	SYS_setresuid                          = 117
-	SYS_setreuid                           = 113
-	SYS_setrlimit                          = 160
-	SYS_setsid                             = 112
-	SYS_setsockopt                         = 54
-	SYS_settimeofday                       = 164
-	SYS_setuid                             = 105
-	SYS_setxattr                           = 188
-	SYS_shmat                              = 30
-	SYS_shmctl                             = 31
-	SYS_shmdt                              = 67
-	SYS_shmget                             = 29
-	SYS_shutdown                           = 48
-	SYS_sigaltstack                        = 131
-	SYS_signalfd                           = 282
-	SYS_signalfd4                          = 289
-	SYS_socket                             = 41
-	SYS_socketpair                         = 53
-	SYS_splice                             = 275
-	SYS_stat                               = 4
-	SYS_statfs                             = 137
-	SYS_statx                              = 332
-	SYS_swapoff                            = 168
-	SYS_swapon                             = 167
-	SYS_symlink                            = 88
-	SYS_symlinkat                          = 266
-	SYS_sync                               = 162
-	SYS_sync_file_range                    = 277
-	SYS_syncfs                             = 306
-	SYS_sysfs                              = 139
-	SYS_sysinfo                            = 99
-	SYS_syslog                             = 103
-	SYS_tee                                = 276
-	SYS_tgkill                             = 234
-	SYS_time                               = 201
-	SYS_timer_create                       = 222
-	SYS_timer_delete                       = 226
-	SYS_timer_getoverrun                   = 225
-	SYS_timer_gettime                      = 224
-	SYS_timer_settime                      = 223
-	SYS_timerfd_create                     = 283
-	SYS_timerfd_gettime                    = 287
-	SYS_timerfd_settime                    = 286
-	SYS_times                              = 100
-	SYS_tkill                              = 200
-	SYS_truncate                           = 76
-	SYS_tuxcall                            = 184
-	SYS_umask                              = 95
-	SYS_umount2                            = 166
-	SYS_uname                              = 63
-	SYS_unlink                             = 87
-	SYS_unlinkat                           = 263
-	SYS_unshare                            = 272
-	SYS_uselib                             = 134
-	SYS_userfaultfd                        = 323
-	SYS_ustat                              = 136
-	SYS_utime                              = 132
-	SYS_utimensat                          = 280
-	SYS_utimes                             = 235
-	SYS_vfork                              = 58
-	SYS_vhangup                            = 153
-	SYS_vmsplice                           = 278
-	SYS_vserver                            = 236
-	SYS_wait4                              = 61
-	SYS_waitid                             = 247
-	SYS_write                              = 1
-	SYS_writev                             = 20
-	TRAP_BRANCH                            = 3
-	TRAP_BRKPT                             = 1
-	TRAP_HWBKPT                            = 4
-	TRAP_TRACE                             = 2
-	TRAP_UNK                               = 5
-	VER                                    = -255
-	VER_DEF_CURRENT                        = 1
-	VER_DEF_NONE                           = 0
-	VER_DEF_NUM                            = 2
-	VER_FLG_BASE                           = 1
-	VER_FLG_WEAK                           = 2
-	VER_NDX_ELIMINATE                      = 65281
-	VER_NDX_GLOBAL                         = 1
-	VER_NDX_LOCAL                          = 0
-	VER_NDX_LORESERVE                      = 65280
-	VER_NEED_CURRENT                       = 1
-	VER_NEED_NONE                          = 0
-	VER_NEED_NUM                           = 2
-	WNOHANG                                = 1
-	WUNTRACED                              = 2
-	_NSIG                                  = 65
-	__NR__sysctl                           = 156
-	__NR_accept                            = 43
-	__NR_accept4                           = 288
-	__NR_access                            = 21
-	__NR_acct                              = 163
-	__NR_add_key                           = 248
-	__NR_adjtimex                          = 159
-	__NR_afs_syscall                       = 183
-	__NR_alarm                             = 37
-	__NR_arch_prctl                        = 158
-	__NR_bind                              = 49
-	__NR_bpf                               = 321
-	__NR_brk                               = 12
-	__NR_cachestat                         = 451
-	__NR_capget                            = 125
-	__NR_capset                            = 126
-	__NR_chdir                             = 80
-	__NR_chmod                             = 90
-	__NR_chown                             = 92
-	__NR_chroot                            = 161
-	__NR_clock_adjtime                     = 305
-	__NR_clock_getres                      = 229
-	__NR_clock_gettime                     = 228
-	__NR_clock_nanosleep                   = 230
-	__NR_clock_settime                     = 227
-	__NR_clone                             = 56
-	__NR_clone3                            = 435
-	__NR_close                             = 3
-	__NR_close_range                       = 436
-	__NR_connect                           = 42
-	__NR_copy_file_range                   = 326
-	__NR_creat                             = 85
-	__NR_create_module                     = 174
-	__NR_delete_module                     = 176
-	__NR_dup                               = 32
-	__NR_dup2                              = 33
-	__NR_dup3                              = 292
-	__NR_epoll_create                      = 213
-	__NR_epoll_create1                     = 291
-	__NR_epoll_ctl                         = 233
-	__NR_epoll_ctl_old                     = 214
-	__NR_epoll_pwait                       = 281
-	__NR_epoll_pwait2                      = 441
-	__NR_epoll_wait                        = 232
-	__NR_epoll_wait_old                    = 215
-	__NR_eventfd                           = 284
-	__NR_eventfd2                          = 290
-	__NR_execve                            = 59
-	__NR_execveat                          = 322
-	__NR_exit                              = 60
-	__NR_exit_group                        = 231
-	__NR_faccessat                         = 269
-	__NR_faccessat2                        = 439
-	__NR_fadvise64                         = 221
-	__NR_fallocate                         = 285
-	__NR_fanotify_init                     = 300
-	__NR_fanotify_mark                     = 301
-	__NR_fchdir                            = 81
-	__NR_fchmod                            = 91
-	__NR_fchmodat                          = 268
-	__NR_fchmodat2                         = 452
-	__NR_fchown                            = 93
-	__NR_fchownat                          = 260
-	__NR_fcntl                             = 72
-	__NR_fdatasync                         = 75
-	__NR_fgetxattr                         = 193
-	__NR_finit_module                      = 313
-	__NR_flistxattr                        = 196
-	__NR_flock                             = 73
-	__NR_fork                              = 57
-	__NR_fremovexattr                      = 199
-	__NR_fsconfig                          = 431
-	__NR_fsetxattr                         = 190
-	__NR_fsmount                           = 432
-	__NR_fsopen                            = 430
-	__NR_fspick                            = 433
-	__NR_fstat                             = 5
-	__NR_fstatfs                           = 138
-	__NR_fsync                             = 74
-	__NR_ftruncate                         = 77
-	__NR_futex                             = 202
-	__NR_futex_waitv                       = 449
-	__NR_futimesat                         = 261
-	__NR_get_kernel_syms                   = 177
-	__NR_get_mempolicy                     = 239
-	__NR_get_robust_list                   = 274
-	__NR_get_thread_area                   = 211
-	__NR_getcpu                            = 309
-	__NR_getcwd                            = 79
-	__NR_getdents                          = 78
-	__NR_getdents64                        = 217
-	__NR_getegid                           = 108
-	__NR_geteuid                           = 107
-	__NR_getgid                            = 104
-	__NR_getgroups                         = 115
-	__NR_getitimer                         = 36
-	__NR_getpeername                       = 52
-	__NR_getpgid                           = 121
-	__NR_getpgrp                           = 111
-	__NR_getpid                            = 39
-	__NR_getpmsg                           = 181
-	__NR_getppid                           = 110
-	__NR_getpriority                       = 140
-	__NR_getrandom                         = 318
-	__NR_getresgid                         = 120
-	__NR_getresuid                         = 118
-	__NR_getrlimit                         = 97
-	__NR_getrusage                         = 98
-	__NR_getsid                            = 124
-	__NR_getsockname                       = 51
-	__NR_getsockopt                        = 55
-	__NR_gettid                            = 186
-	__NR_gettimeofday                      = 96
-	__NR_getuid                            = 102
-	__NR_getxattr                          = 191
-	__NR_init_module                       = 175
-	__NR_inotify_add_watch                 = 254
-	__NR_inotify_init                      = 253
-	__NR_inotify_init1                     = 294
-	__NR_inotify_rm_watch                  = 255
-	__NR_io_cancel                         = 210
-	__NR_io_destroy                        = 207
-	__NR_io_getevents                      = 208
-	__NR_io_pgetevents                     = 333
-	__NR_io_setup                          = 206
-	__NR_io_submit                         = 209
-	__NR_io_uring_enter                    = 426
-	__NR_io_uring_register                 = 427
-	__NR_io_uring_setup                    = 425
-	__NR_ioctl                             = 16
-	__NR_ioperm                            = 173
-	__NR_iopl                              = 172
-	__NR_ioprio_get                        = 252
-	__NR_ioprio_set                        = 251
-	__NR_kcmp                              = 312
-	__NR_kexec_file_load                   = 320
-	__NR_kexec_load                        = 246
-	__NR_keyctl                            = 250
-	__NR_kill                              = 62
-	__NR_landlock_add_rule                 = 445
-	__NR_landlock_create_ruleset           = 444
-	__NR_landlock_restrict_self            = 446
-	__NR_lchown                            = 94
-	__NR_lgetxattr                         = 192
-	__NR_link                              = 86
-	__NR_linkat                            = 265
-	__NR_listen                            = 50
-	__NR_listxattr                         = 194
-	__NR_llistxattr                        = 195
-	__NR_lookup_dcookie                    = 212
-	__NR_lremovexattr                      = 198
-	__NR_lseek                             = 8
-	__NR_lsetxattr                         = 189
-	__NR_lstat                             = 6
-	__NR_madvise                           = 28
-	__NR_mbind                             = 237
-	__NR_membarrier                        = 324
-	__NR_memfd_create                      = 319
-	__NR_memfd_secret                      = 447
-	__NR_migrate_pages                     = 256
-	__NR_mincore                           = 27
-	__NR_mkdir                             = 83
-	__NR_mkdirat                           = 258
-	__NR_mknod                             = 133
-	__NR_mknodat                           = 259
-	__NR_mlock                             = 149
-	__NR_mlock2                            = 325
-	__NR_mlockall                          = 151
-	__NR_mmap                              = 9
-	__NR_modify_ldt                        = 154
-	__NR_mount                             = 165
-	__NR_mount_setattr                     = 442
-	__NR_move_mount                        = 429
-	__NR_move_pages                        = 279
-	__NR_mprotect                          = 10
-	__NR_mq_getsetattr                     = 245
-	__NR_mq_notify                         = 244
-	__NR_mq_open                           = 240
-	__NR_mq_timedreceive                   = 243
-	__NR_mq_timedsend                      = 242
-	__NR_mq_unlink                         = 241
-	__NR_mremap                            = 25
-	__NR_msgctl                            = 71
-	__NR_msgget                            = 68
-	__NR_msgrcv                            = 70
-	__NR_msgsnd                            = 69
-	__NR_msync                             = 26
-	__NR_munlock                           = 150
-	__NR_munlockall                        = 152
-	__NR_munmap                            = 11
-	__NR_name_to_handle_at                 = 303
-	__NR_nanosleep                         = 35
-	__NR_newfstatat                        = 262
-	__NR_nfsservctl                        = 180
-	__NR_open                              = 2
-	__NR_open_by_handle_at                 = 304
-	__NR_open_tree                         = 428
-	__NR_openat                            = 257
-	__NR_openat2                           = 437
-	__NR_pause                             = 34
-	__NR_perf_event_open                   = 298
-	__NR_personality                       = 135
-	__NR_pidfd_getfd                       = 438
-	__NR_pidfd_open                        = 434
-	__NR_pidfd_send_signal                 = 424
-	__NR_pipe                              = 22
-	__NR_pipe2                             = 293
-	__NR_pivot_root                        = 155
-	__NR_pkey_alloc                        = 330
-	__NR_pkey_free                         = 331
-	__NR_pkey_mprotect                     = 329
-	__NR_poll                              = 7
-	__NR_ppoll                             = 271
-	__NR_prctl                             = 157
-	__NR_pread64                           = 17
-	__NR_preadv                            = 295
-	__NR_preadv2                           = 327
-	__NR_prlimit64                         = 302
-	__NR_process_madvise                   = 440
-	__NR_process_mrelease                  = 448
-	__NR_process_vm_readv                  = 310
-	__NR_process_vm_writev                 = 311
-	__NR_pselect6                          = 270
-	__NR_ptrace                            = 101
-	__NR_putpmsg                           = 182
-	__NR_pwrite64                          = 18
-	__NR_pwritev                           = 296
-	__NR_pwritev2                          = 328
-	__NR_query_module                      = 178
-	__NR_quotactl                          = 179
-	__NR_read                              = 0
-	__NR_readahead                         = 187
-	__NR_readlink                          = 89
-	__NR_readlinkat                        = 267
-	__NR_readv                             = 19
-	__NR_reboot                            = 169
-	__NR_recvfrom                          = 45
-	__NR_recvmmsg                          = 299
-	__NR_recvmsg                           = 47
-	__NR_remap_file_pages                  = 216
-	__NR_removexattr                       = 197
-	__NR_rename                            = 82
-	__NR_renameat                          = 264
-	__NR_renameat2                         = 316
-	__NR_request_key                       = 249
-	__NR_restart_syscall                   = 219
-	__NR_rmdir                             = 84
-	__NR_rseq                              = 334
-	__NR_rt_sigaction                      = 13
-	__NR_rt_sigpending                     = 127
-	__NR_rt_sigprocmask                    = 14
-	__NR_rt_sigqueueinfo                   = 129
-	__NR_rt_sigreturn                      = 15
-	__NR_rt_sigsuspend                     = 130
-	__NR_rt_sigtimedwait                   = 128
-	__NR_rt_tgsigqueueinfo                 = 297
-	__NR_sched_get_priority_max            = 146
-	__NR_sched_get_priority_min            = 147
-	__NR_sched_getaffinity                 = 204
-	__NR_sched_getattr                     = 315
-	__NR_sched_getparam                    = 143
-	__NR_sched_getscheduler                = 145
-	__NR_sched_rr_get_interval             = 148
-	__NR_sched_setaffinity                 = 203
-	__NR_sched_setattr                     = 314
-	__NR_sched_setparam                    = 142
-	__NR_sched_setscheduler                = 144
-	__NR_sched_yield                       = 24
-	__NR_seccomp                           = 317
-	__NR_security                          = 185
-	__NR_select                            = 23
-	__NR_semctl                            = 66
-	__NR_semget                            = 64
-	__NR_semop                             = 65
-	__NR_semtimedop                        = 220
-	__NR_sendfile                          = 40
-	__NR_sendmmsg                          = 307
-	__NR_sendmsg                           = 46
-	__NR_sendto                            = 44
-	__NR_set_mempolicy                     = 238
-	__NR_set_mempolicy_home_node           = 450
-	__NR_set_robust_list                   = 273
-	__NR_set_thread_area                   = 205
-	__NR_set_tid_address                   = 218
-	__NR_setdomainname                     = 171
-	__NR_setfsgid                          = 123
-	__NR_setfsuid                          = 122
-	__NR_setgid                            = 106
-	__NR_setgroups                         = 116
-	__NR_sethostname                       = 170
-	__NR_setitimer                         = 38
-	__NR_setns                             = 308
-	__NR_setpgid                           = 109
-	__NR_setpriority                       = 141
-	__NR_setregid                          = 114
-	__NR_setresgid                         = 119
-	__NR_setresuid                         = 117
-	__NR_setreuid                          = 113
-	__NR_setrlimit                         = 160
-	__NR_setsid                            = 112
-	__NR_setsockopt                        = 54
-	__NR_settimeofday                      = 164
-	__NR_setuid                            = 105
-	__NR_setxattr                          = 188
-	__NR_shmat                             = 30
-	__NR_shmctl                            = 31
-	__NR_shmdt                             = 67
-	__NR_shmget                            = 29
-	__NR_shutdown                          = 48
-	__NR_sigaltstack                       = 131
-	__NR_signalfd                          = 282
-	__NR_signalfd4                         = 289
-	__NR_socket                            = 41
-	__NR_socketpair                        = 53
-	__NR_splice                            = 275
-	__NR_stat                              = 4
-	__NR_statfs                            = 137
-	__NR_statx                             = 332
-	__NR_swapoff                           = 168
-	__NR_swapon                            = 167
-	__NR_symlink                           = 88
-	__NR_symlinkat                         = 266
-	__NR_sync                              = 162
-	__NR_sync_file_range                   = 277
-	__NR_syncfs                            = 306
-	__NR_sysfs                             = 139
-	__NR_sysinfo                           = 99
-	__NR_syslog                            = 103
-	__NR_tee                               = 276
-	__NR_tgkill                            = 234
-	__NR_time                              = 201
-	__NR_timer_create                      = 222
-	__NR_timer_delete                      = 226
-	__NR_timer_getoverrun                  = 225
-	__NR_timer_gettime                     = 224
-	__NR_timer_settime                     = 223
-	__NR_timerfd_create                    = 283
-	__NR_timerfd_gettime                   = 287
-	__NR_timerfd_settime                   = 286
-	__NR_times                             = 100
-	__NR_tkill                             = 200
-	__NR_truncate                          = 76
-	__NR_tuxcall                           = 184
-	__NR_umask                             = 95
-	__NR_umount2                           = 166
-	__NR_uname                             = 63
-	__NR_unlink                            = 87
-	__NR_unlinkat                          = 263
-	__NR_unshare                           = 272
-	__NR_uselib                            = 134
-	__NR_userfaultfd                       = 323
-	__NR_ustat                             = 136
-	__NR_utime                             = 132
-	__NR_utimensat                         = 280
-	__NR_utimes                            = 235
-	__NR_vfork                             = 58
-	__NR_vhangup                           = 153
-	__NR_vmsplice                          = 278
-	__NR_vserver                           = 236
-	__NR_wait4                             = 61
-	__NR_waitid                            = 247
-	__NR_write                             = 1
-	__NR_writev                            = 20
-	__SC_accept                            = 5
-	__SC_accept4                           = 18
-	__SC_bind                              = 2
-	__SC_connect                           = 3
-	__SC_getpeername                       = 7
-	__SC_getsockname                       = 6
-	__SC_getsockopt                        = 15
-	__SC_listen                            = 4
-	__SC_recv                              = 10
-	__SC_recvfrom                          = 12
-	__SC_recvmmsg                          = 19
-	__SC_recvmsg                           = 17
-	__SC_send                              = 9
-	__SC_sendmmsg                          = 20
-	__SC_sendmsg                           = 16
-	__SC_sendto                            = 11
-	__SC_setsockopt                        = 14
-	__SC_shutdown                          = 13
-	__SC_socket                            = 1
-	__SC_socketpair                        = 8
-	libc                                   = 0
-)
+const AT_BASE = 7
+const AT_BASE_PLATFORM = 24
+const AT_CLKTCK = 17
+const AT_DCACHEBSIZE = 19
+const AT_EGID = 14
+const AT_ENTRY = 9
+const AT_EUID = 12
+const AT_EXECFD = 2
+const AT_EXECFN = 31
+const AT_FLAGS = 8
+const AT_FPUCW = 18
+const AT_GID = 13
+const AT_HWCAP = 16
+const AT_HWCAP2 = 26
+const AT_ICACHEBSIZE = 20
+const AT_IGNORE = 1
+const AT_IGNOREPPC = 22
+const AT_L1D_CACHEGEOMETRY = 43
+const AT_L1D_CACHESHAPE = 35
+const AT_L1D_CACHESIZE = 42
+const AT_L1I_CACHEGEOMETRY = 41
+const AT_L1I_CACHESHAPE = 34
+const AT_L1I_CACHESIZE = 40
+const AT_L2_CACHEGEOMETRY = 45
+const AT_L2_CACHESHAPE = 36
+const AT_L2_CACHESIZE = 44
+const AT_L3_CACHEGEOMETRY = 47
+const AT_L3_CACHESHAPE = 37
+const AT_L3_CACHESIZE = 46
+const AT_MINSIGSTKSZ = 51
+const AT_NOTELF = 10
+const AT_NULL = 0
+const AT_PAGESZ = 6
+const AT_PHDR = 3
+const AT_PHENT = 4
+const AT_PHNUM = 5
+const AT_PLATFORM = 15
+const AT_RANDOM = 25
+const AT_SECURE = 23
+const AT_SYSINFO = 32
+const AT_SYSINFO_EHDR = 33
+const AT_UCACHEBSIZE = 21
+const AT_UID = 11
+const BUS_ADRALN = 1
+const BUS_ADRERR = 2
+const BUS_MCEERR_AO = 5
+const BUS_MCEERR_AR = 4
+const BUS_OBJERR = 3
+const CLD_CONTINUED = 6
+const CLD_DUMPED = 3
+const CLD_EXITED = 1
+const CLD_KILLED = 2
+const CLD_STOPPED = 5
+const CLD_TRAPPED = 4
+const DF_1_CONFALT = 8192
+const DF_1_DIRECT = 256
+const DF_1_DISPRELDNE = 32768
+const DF_1_DISPRELPND = 65536
+const DF_1_EDITED = 2097152
+const DF_1_ENDFILTEE = 16384
+const DF_1_GLOBAL = 2
+const DF_1_GLOBAUDIT = 16777216
+const DF_1_GROUP = 4
+const DF_1_IGNMULDEF = 262144
+const DF_1_INITFIRST = 32
+const DF_1_INTERPOSE = 1024
+const DF_1_LOADFLTR = 16
+const DF_1_NODEFLIB = 2048
+const DF_1_NODELETE = 8
+const DF_1_NODIRECT = 131072
+const DF_1_NODUMP = 4096
+const DF_1_NOHDR = 1048576
+const DF_1_NOKSYMS = 524288
+const DF_1_NOOPEN = 64
+const DF_1_NORELOC = 4194304
+const DF_1_NOW = 1
+const DF_1_ORIGIN = 128
+const DF_1_PIE = 134217728
+const DF_1_SINGLETON = 33554432
+const DF_1_STUB = 67108864
+const DF_1_SYMINTPOSE = 8388608
+const DF_1_TRANS = 512
+const DF_BIND_NOW = 8
+const DF_ORIGIN = 1
+const DF_P1_GROUPPERM = 2
+const DF_P1_LAZYLOAD = 1
+const DF_STATIC_TLS = 16
+const DF_SYMBOLIC = 2
+const DF_TEXTREL = 4
+const DTF_1_CONFEXP = 2
+const DTF_1_PARINIT = 1
+const DT_ADDRNUM = 11
+const DT_ADDRRNGHI = 1879047935
+const DT_ADDRRNGLO = 1879047680
+const DT_ALPHA_NUM = 1
+const DT_ALPHA_PLTRO = 1879048192
+const DT_AUDIT = 1879047932
+const DT_AUXILIARY = 2147483645
+const DT_BIND_NOW = 24
+const DT_CHECKSUM = 1879047672
+const DT_CONFIG = 1879047930
+const DT_DEBUG = 21
+const DT_DEPAUDIT = 1879047931
+const DT_ENCODING = 32
+const DT_EXTRANUM = 3
+const DT_FEATURE_1 = 1879047676
+const DT_FILTER = 2147483647
+const DT_FINI = 13
+const DT_FINI_ARRAY = 26
+const DT_FINI_ARRAYSZ = 28
+const DT_FLAGS = 30
+const DT_FLAGS_1 = 1879048187
+const DT_GNU_CONFLICT = 1879047928
+const DT_GNU_CONFLICTSZ = 1879047670
+const DT_GNU_HASH = 1879047925
+const DT_GNU_LIBLIST = 1879047929
+const DT_GNU_LIBLISTSZ = 1879047671
+const DT_GNU_PRELINKED = 1879047669
+const DT_HASH = 4
+const DT_HIOS = 1879044096
+const DT_HIPROC = 2147483647
+const DT_IA_64_NUM = 1
+const DT_IA_64_PLT_RESERVE = 1879048192
+const DT_INIT = 12
+const DT_INIT_ARRAY = 25
+const DT_INIT_ARRAYSZ = 27
+const DT_JMPREL = 23
+const DT_LOOS = 1610612749
+const DT_LOPROC = 1879048192
+const DT_MIPS_AUX_DYNAMIC = 1879048241
+const DT_MIPS_BASE_ADDRESS = 1879048198
+const DT_MIPS_COMPACT_SIZE = 1879048239
+const DT_MIPS_CONFLICT = 1879048200
+const DT_MIPS_CONFLICTNO = 1879048203
+const DT_MIPS_CXX_FLAGS = 1879048226
+const DT_MIPS_DELTA_CLASS = 1879048215
+const DT_MIPS_DELTA_CLASSSYM = 1879048224
+const DT_MIPS_DELTA_CLASSSYM_NO = 1879048225
+const DT_MIPS_DELTA_CLASS_NO = 1879048216
+const DT_MIPS_DELTA_INSTANCE = 1879048217
+const DT_MIPS_DELTA_INSTANCE_NO = 1879048218
+const DT_MIPS_DELTA_RELOC = 1879048219
+const DT_MIPS_DELTA_RELOC_NO = 1879048220
+const DT_MIPS_DELTA_SYM = 1879048221
+const DT_MIPS_DELTA_SYM_NO = 1879048222
+const DT_MIPS_DYNSTR_ALIGN = 1879048235
+const DT_MIPS_FLAGS = 1879048197
+const DT_MIPS_GOTSYM = 1879048211
+const DT_MIPS_GP_VALUE = 1879048240
+const DT_MIPS_HIDDEN_GOTIDX = 1879048231
+const DT_MIPS_HIPAGENO = 1879048212
+const DT_MIPS_ICHECKSUM = 1879048195
+const DT_MIPS_INTERFACE = 1879048234
+const DT_MIPS_INTERFACE_SIZE = 1879048236
+const DT_MIPS_IVERSION = 1879048196
+const DT_MIPS_LIBLIST = 1879048201
+const DT_MIPS_LIBLISTNO = 1879048208
+const DT_MIPS_LOCALPAGE_GOTIDX = 1879048229
+const DT_MIPS_LOCAL_GOTIDX = 1879048230
+const DT_MIPS_LOCAL_GOTNO = 1879048202
+const DT_MIPS_MSYM = 1879048199
+const DT_MIPS_NUM = 54
+const DT_MIPS_OPTIONS = 1879048233
+const DT_MIPS_PERF_SUFFIX = 1879048238
+const DT_MIPS_PIXIE_INIT = 1879048227
+const DT_MIPS_PLTGOT = 1879048242
+const DT_MIPS_PROTECTED_GOTIDX = 1879048232
+const DT_MIPS_RLD_MAP = 1879048214
+const DT_MIPS_RLD_MAP_REL = 1879048245
+const DT_MIPS_RLD_TEXT_RESOLVE_ADDR = 1879048237
+const DT_MIPS_RLD_VERSION = 1879048193
+const DT_MIPS_RWPLT = 1879048244
+const DT_MIPS_SYMBOL_LIB = 1879048228
+const DT_MIPS_SYMTABNO = 1879048209
+const DT_MIPS_TIME_STAMP = 1879048194
+const DT_MIPS_UNREFEXTNO = 1879048210
+const DT_MOVEENT = 1879047674
+const DT_MOVESZ = 1879047675
+const DT_MOVETAB = 1879047934
+const DT_NEEDED = 1
+const DT_NIOS2_GP = 1879048194
+const DT_NULL = 0
+const DT_NUM = 38
+const DT_PLTGOT = 3
+const DT_PLTPAD = 1879047933
+const DT_PLTPADSZ = 1879047673
+const DT_PLTREL = 20
+const DT_PLTRELSZ = 2
+const DT_POSFLAG_1 = 1879047677
+const DT_PPC64_GLINK = 1879048192
+const DT_PPC64_NUM = 4
+const DT_PPC64_OPD = 1879048193
+const DT_PPC64_OPDSZ = 1879048194
+const DT_PPC64_OPT = 1879048195
+const DT_PPC_GOT = 1879048192
+const DT_PPC_NUM = 2
+const DT_PPC_OPT = 1879048193
+const DT_PREINIT_ARRAY = 32
+const DT_PREINIT_ARRAYSZ = 33
+const DT_PROCNUM = 54
+const DT_REL = 17
+const DT_RELA = 7
+const DT_RELACOUNT = 1879048185
+const DT_RELAENT = 9
+const DT_RELASZ = 8
+const DT_RELCOUNT = 1879048186
+const DT_RELENT = 19
+const DT_RELR = 36
+const DT_RELRENT = 37
+const DT_RELRSZ = 35
+const DT_RELSZ = 18
+const DT_RPATH = 15
+const DT_RUNPATH = 29
+const DT_SONAME = 14
+const DT_SPARC_NUM = 2
+const DT_SPARC_REGISTER = 1879048193
+const DT_STRSZ = 10
+const DT_STRTAB = 5
+const DT_SYMBOLIC = 16
+const DT_SYMENT = 11
+const DT_SYMINENT = 1879047679
+const DT_SYMINFO = 1879047935
+const DT_SYMINSZ = 1879047678
+const DT_SYMTAB = 6
+const DT_SYMTAB_SHNDX = 34
+const DT_TEXTREL = 22
+const DT_TLSDESC_GOT = 1879047927
+const DT_TLSDESC_PLT = 1879047926
+const DT_VALNUM = 12
+const DT_VALRNGHI = 1879047679
+const DT_VALRNGLO = 1879047424
+const DT_VERDEF = 1879048188
+const DT_VERDEFNUM = 1879048189
+const DT_VERNEED = 1879048190
+const DT_VERNEEDNUM = 1879048191
+const DT_VERSIONTAGNUM = 16
+const DT_VERSYM = 1879048176
+const EFA_PARISC_1_0 = 523
+const EFA_PARISC_1_1 = 528
+const EFA_PARISC_2_0 = 532
+const EF_ALPHA_32BIT = 1
+const EF_ALPHA_CANRELAX = 2
+const EF_ARM_ABI_FLOAT_HARD = 1024
+const EF_ARM_ABI_FLOAT_SOFT = 512
+const EF_ARM_ALIGN8 = 64
+const EF_ARM_APCS_26 = 8
+const EF_ARM_APCS_FLOAT = 16
+const EF_ARM_BE8 = 8388608
+const EF_ARM_DYNSYMSUSESEGIDX = 8
+const EF_ARM_EABIMASK = 4278190080
+const EF_ARM_EABI_UNKNOWN = 0
+const EF_ARM_EABI_VER1 = 16777216
+const EF_ARM_EABI_VER2 = 33554432
+const EF_ARM_EABI_VER3 = 50331648
+const EF_ARM_EABI_VER4 = 67108864
+const EF_ARM_EABI_VER5 = 83886080
+const EF_ARM_HASENTRY = 2
+const EF_ARM_INTERWORK = 4
+const EF_ARM_LE8 = 4194304
+const EF_ARM_MAPSYMSFIRST = 16
+const EF_ARM_MAVERICK_FLOAT = 2048
+const EF_ARM_NEW_ABI = 128
+const EF_ARM_OLD_ABI = 256
+const EF_ARM_PIC = 32
+const EF_ARM_RELEXEC = 1
+const EF_ARM_SOFT_FLOAT = 512
+const EF_ARM_SYMSARESORTED = 4
+const EF_ARM_VFP_FLOAT = 1024
+const EF_CPU32 = 8454144
+const EF_IA_64_ABI64 = 16
+const EF_IA_64_ARCH = 4278190080
+const EF_IA_64_MASKOS = 15
+const EF_LARCH_ABI_DOUBLE_FLOAT = 3
+const EF_LARCH_ABI_MODIFIER_MASK = 7
+const EF_LARCH_ABI_SINGLE_FLOAT = 2
+const EF_LARCH_ABI_SOFT_FLOAT = 1
+const EF_LARCH_OBJABI_V1 = 64
+const EF_MIPS_64BIT_WHIRL = 16
+const EF_MIPS_ABI2 = 32
+const EF_MIPS_ABI_ON32 = 64
+const EF_MIPS_ARCH = 4026531840
+const EF_MIPS_ARCH_1 = 0
+const EF_MIPS_ARCH_2 = 268435456
+const EF_MIPS_ARCH_3 = 536870912
+const EF_MIPS_ARCH_32 = 1342177280
+const EF_MIPS_ARCH_32R2 = 1879048192
+const EF_MIPS_ARCH_4 = 805306368
+const EF_MIPS_ARCH_5 = 1073741824
+const EF_MIPS_ARCH_64 = 1610612736
+const EF_MIPS_ARCH_64R2 = 2147483648
+const EF_MIPS_CPIC = 4
+const EF_MIPS_FP64 = 512
+const EF_MIPS_NAN2008 = 1024
+const EF_MIPS_NOREORDER = 1
+const EF_MIPS_PIC = 2
+const EF_MIPS_XGOT = 8
+const EF_PARISC_ARCH = 65535
+const EF_PARISC_EXT = 131072
+const EF_PARISC_LAZYSWAP = 4194304
+const EF_PARISC_LSB = 262144
+const EF_PARISC_NO_KABP = 1048576
+const EF_PARISC_TRAPNIL = 65536
+const EF_PARISC_WIDE = 524288
+const EF_PPC64_ABI = 3
+const EF_PPC_EMB = 2147483648
+const EF_PPC_RELOCATABLE = 65536
+const EF_PPC_RELOCATABLE_LIB = 32768
+const EF_SH1 = 1
+const EF_SH2 = 2
+const EF_SH2A = 13
+const EF_SH2A_NOFPU = 19
+const EF_SH2A_SH3E = 24
+const EF_SH2A_SH3_NOFPU = 22
+const EF_SH2A_SH4 = 23
+const EF_SH2A_SH4_NOFPU = 21
+const EF_SH2E = 11
+const EF_SH3 = 3
+const EF_SH3E = 8
+const EF_SH3_DSP = 5
+const EF_SH3_NOMMU = 20
+const EF_SH4 = 9
+const EF_SH4A = 12
+const EF_SH4AL_DSP = 6
+const EF_SH4A_NOFPU = 17
+const EF_SH4_NOFPU = 16
+const EF_SH4_NOMMU_NOFPU = 18
+const EF_SH_DSP = 4
+const EF_SH_MACH_MASK = 31
+const EF_SH_UNKNOWN = 0
+const EF_SPARCV9_MM = 3
+const EF_SPARCV9_PSO = 1
+const EF_SPARCV9_RMO = 2
+const EF_SPARCV9_TSO = 0
+const EF_SPARC_32PLUS = 256
+const EF_SPARC_EXT_MASK = 16776960
+const EF_SPARC_HAL_R1 = 1024
+const EF_SPARC_LEDATA = 8388608
+const EF_SPARC_SUN_US1 = 512
+const EF_SPARC_SUN_US3 = 2048
+const EI_ABIVERSION = 8
+const EI_CLASS = 4
+const EI_DATA = 5
+const EI_MAG0 = 0
+const EI_MAG1 = 1
+const EI_MAG2 = 2
+const EI_MAG3 = 3
+const EI_NIDENT = 16
+const EI_OSABI = 7
+const EI_PAD = 9
+const EI_VERSION = 6
+const ELFCLASS32 = 1
+const ELFCLASS64 = 2
+const ELFCLASSNONE = 0
+const ELFCLASSNUM = 3
+const ELFCOMPRESS_HIOS = 1879048191
+const ELFCOMPRESS_HIPROC = 2147483647
+const ELFCOMPRESS_LOOS = 1610612736
+const ELFCOMPRESS_LOPROC = 1879048192
+const ELFCOMPRESS_ZLIB = 1
+const ELFCOMPRESS_ZSTD = 2
+const ELFDATA2LSB = 1
+const ELFDATA2MSB = 2
+const ELFDATANONE = 0
+const ELFDATANUM = 3
+const ELFMAG = "\\177ELF"
+const ELFMAG0 = 127
+const ELFMAG1 = 69
+const ELFMAG2 = 76
+const ELFMAG3 = 70
+const ELFOSABI_AIX = 7
+const ELFOSABI_ARM = 97
+const ELFOSABI_FREEBSD = 9
+const ELFOSABI_GNU = 3
+const ELFOSABI_HPUX = 1
+const ELFOSABI_IRIX = 8
+const ELFOSABI_LINUX = 3
+const ELFOSABI_MODESTO = 11
+const ELFOSABI_NETBSD = 2
+const ELFOSABI_NONE = 0
+const ELFOSABI_OPENBSD = 12
+const ELFOSABI_SOLARIS = 6
+const ELFOSABI_STANDALONE = 255
+const ELFOSABI_SYSV = 0
+const ELFOSABI_TRU64 = 10
+const ELF_NOTE_ABI = 1
+const ELF_NOTE_GNU = "GNU"
+const ELF_NOTE_OS_FREEBSD = 3
+const ELF_NOTE_OS_GNU = 1
+const ELF_NOTE_OS_LINUX = 0
+const ELF_NOTE_OS_SOLARIS2 = 2
+const ELF_NOTE_PAGESIZE_HINT = 1
+const ELF_NOTE_SOLARIS = "SUNW Solaris"
+const EM_386 = 3
+const EM_56800EX = 200
+const EM_68HC05 = 72
+const EM_68HC08 = 71
+const EM_68HC11 = 70
+const EM_68HC12 = 53
+const EM_68HC16 = 69
+const EM_68K = 4
+const EM_78KOR = 199
+const EM_8051 = 165
+const EM_860 = 7
+const EM_88K = 5
+const EM_960 = 19
+const EM_AARCH64 = 183
+const EM_ALPHA = 36902
+const EM_ALTERA_NIOS2 = 113
+const EM_AMDGPU = 224
+const EM_ARC = 45
+const EM_ARCA = 109
+const EM_ARC_A5 = 93
+const EM_ARC_COMPACT = 93
+const EM_ARC_COMPACT2 = 195
+const EM_ARM = 40
+const EM_AVR = 83
+const EM_AVR32 = 185
+const EM_BA1 = 201
+const EM_BA2 = 202
+const EM_BLACKFIN = 106
+const EM_BPF = 247
+const EM_C166 = 116
+const EM_CDP = 215
+const EM_CE = 119
+const EM_CLOUDSHIELD = 192
+const EM_COGE = 216
+const EM_COLDFIRE = 52
+const EM_COOL = 217
+const EM_COREA_1ST = 193
+const EM_COREA_2ND = 194
+const EM_CR = 103
+const EM_CR16 = 177
+const EM_CRAYNV2 = 172
+const EM_CRIS = 76
+const EM_CRX = 114
+const EM_CSKY = 252
+const EM_CSR_KALIMBA = 219
+const EM_CUDA = 190
+const EM_CYPRESS_M8C = 161
+const EM_D10V = 85
+const EM_D30V = 86
+const EM_DSP24 = 136
+const EM_DSPIC30F = 118
+const EM_DXP = 112
+const EM_ECOG16 = 176
+const EM_ECOG1X = 168
+const EM_ECOG2 = 134
+const EM_EMX16 = 212
+const EM_EMX8 = 213
+const EM_ETPU = 178
+const EM_EXCESS = 111
+const EM_F2MC16 = 104
+const EM_FAKE_ALPHA = 41
+const EM_FIREPATH = 78
+const EM_FR20 = 37
+const EM_FR30 = 84
+const EM_FT32 = 222
+const EM_FX66 = 66
+const EM_H8S = 48
+const EM_H8_300 = 46
+const EM_H8_300H = 47
+const EM_H8_500 = 49
+const EM_HUANY = 81
+const EM_IA_64 = 50
+const EM_IP2K = 101
+const EM_JAVELIN = 77
+const EM_K10M = 181
+const EM_KM32 = 210
+const EM_KMX32 = 211
+const EM_KVARC = 214
+const EM_L10M = 180
+const EM_LATTICEMICO32 = 138
+const EM_LOONGARCH = 258
+const EM_M16C = 117
+const EM_M32 = 1
+const EM_M32C = 120
+const EM_M32R = 88
+const EM_MANIK = 171
+const EM_MAX = 102
+const EM_MAXQ30 = 169
+const EM_MCHP_PIC = 204
+const EM_MCST_ELBRUS = 175
+const EM_ME16 = 59
+const EM_METAG = 174
+const EM_MICROBLAZE = 189
+const EM_MIPS = 8
+const EM_MIPS_RS3_LE = 10
+const EM_MIPS_X = 51
+const EM_MMA = 54
+const EM_MMDSP_PLUS = 160
+const EM_MMIX = 80
+const EM_MN10200 = 90
+const EM_MN10300 = 89
+const EM_MOXIE = 223
+const EM_MSP430 = 105
+const EM_NCPU = 56
+const EM_NDR1 = 57
+const EM_NDS32 = 167
+const EM_NONE = 0
+const EM_NORC = 218
+const EM_NS32K = 97
+const EM_NUM = 259
+const EM_OPEN8 = 196
+const EM_OPENRISC = 92
+const EM_OR1K = 92
+const EM_PARISC = 15
+const EM_PCP = 55
+const EM_PDSP = 63
+const EM_PJ = 91
+const EM_PPC = 20
+const EM_PPC64 = 21
+const EM_PRISM = 82
+const EM_QDSP6 = 164
+const EM_R32C = 162
+const EM_RCE = 39
+const EM_RH32 = 38
+const EM_RISCV = 243
+const EM_RL78 = 197
+const EM_RS08 = 132
+const EM_RX = 173
+const EM_S370 = 9
+const EM_S390 = 22
+const EM_SCORE7 = 135
+const EM_SEP = 108
+const EM_SE_C17 = 139
+const EM_SE_C33 = 107
+const EM_SH = 42
+const EM_SHARC = 133
+const EM_SLE9X = 179
+const EM_SNP1K = 99
+const EM_SPARC = 2
+const EM_SPARC32PLUS = 18
+const EM_SPARCV9 = 43
+const EM_ST100 = 60
+const EM_ST19 = 74
+const EM_ST200 = 100
+const EM_ST7 = 68
+const EM_ST9PLUS = 67
+const EM_STARCORE = 58
+const EM_STM8 = 186
+const EM_STXP7X = 166
+const EM_SVX = 73
+const EM_TILE64 = 187
+const EM_TILEGX = 191
+const EM_TILEPRO = 188
+const EM_TINYJ = 61
+const EM_TI_ARP32 = 143
+const EM_TI_C2000 = 141
+const EM_TI_C5500 = 142
+const EM_TI_C6000 = 140
+const EM_TI_PRU = 144
+const EM_TMM_GPP = 96
+const EM_TPC = 98
+const EM_TRICORE = 44
+const EM_TRIMEDIA = 163
+const EM_TSK3000 = 131
+const EM_UNICORE = 110
+const EM_V800 = 36
+const EM_V850 = 87
+const EM_VAX = 75
+const EM_VIDEOCORE = 95
+const EM_VIDEOCORE3 = 137
+const EM_VIDEOCORE5 = 198
+const EM_VISIUM = 221
+const EM_VPP500 = 17
+const EM_X86_64 = 62
+const EM_XCORE = 203
+const EM_XGATE = 115
+const EM_XIMO16 = 170
+const EM_XTENSA = 94
+const EM_Z80 = 220
+const EM_ZSP = 79
+const ET_CORE = 4
+const ET_DYN = 3
+const ET_EXEC = 2
+const ET_HIOS = 65279
+const ET_HIPROC = 65535
+const ET_LOOS = 65024
+const ET_LOPROC = 65280
+const ET_NONE = 0
+const ET_NUM = 5
+const ET_REL = 1
+const EV_CURRENT = 1
+const EV_NONE = 0
+const EV_NUM = 2
+const EXIT_FAILURE = 1
+const EXIT_SUCCESS = 0
+const E_MIPS_ARCH_1 = 0
+const E_MIPS_ARCH_2 = 268435456
+const E_MIPS_ARCH_3 = 536870912
+const E_MIPS_ARCH_32 = 1342177280
+const E_MIPS_ARCH_4 = 805306368
+const E_MIPS_ARCH_5 = 1073741824
+const E_MIPS_ARCH_64 = 1610612736
+const FD_SETSIZE = 1024
+const FPE_FLTDIV = 3
+const FPE_FLTINV = 7
+const FPE_FLTOVF = 4
+const FPE_FLTRES = 6
+const FPE_FLTSUB = 8
+const FPE_FLTUND = 5
+const FPE_INTDIV = 1
+const FPE_INTOVF = 2
+const GRP_COMDAT = 1
+const ILL_BADSTK = 8
+const ILL_COPROC = 7
+const ILL_ILLADR = 3
+const ILL_ILLOPC = 1
+const ILL_ILLOPN = 2
+const ILL_ILLTRP = 4
+const ILL_PRVOPC = 5
+const ILL_PRVREG = 6
+const IPC_64 = 0
+const ITIMER_PROF = 2
+const ITIMER_REAL = 0
+const ITIMER_VIRTUAL = 1
+const JT_ARG_MAX = -254
+const JT_AVPHYS_PAGES = -247
+const JT_DELAYTIMER_MAX = -245
+const JT_MINSIGSTKSZ = -244
+const JT_MQ_PRIO_MAX = -253
+const JT_NPROCESSORS_CONF = -250
+const JT_NPROCESSORS_ONLN = -249
+const JT_PAGE_SIZE = -252
+const JT_PHYS_PAGES = -248
+const JT_SEM_VALUE_MAX = -251
+const JT_SIGSTKSZ = -243
+const JT_ZERO = -246
+const LITUSE_ALPHA_ADDR = 0
+const LITUSE_ALPHA_BASE = 1
+const LITUSE_ALPHA_BYTOFF = 2
+const LITUSE_ALPHA_JSR = 3
+const LITUSE_ALPHA_TLS_GD = 4
+const LITUSE_ALPHA_TLS_LDM = 5
+const LL_DELAY_LOAD = 16
+const LL_DELTA = 32
+const LL_EXACT_MATCH = 1
+const LL_EXPORTS = 8
+const LL_IGNORE_INT_VER = 2
+const LL_NONE = 0
+const LL_REQUIRE_MINOR = 4
+const MB_CUR_MAX = 0
+const MINSIGSTKSZ = 2048
+const MIPS_AFL_ASE_DSP = 1
+const MIPS_AFL_ASE_DSPR2 = 2
+const MIPS_AFL_ASE_EVA = 4
+const MIPS_AFL_ASE_MASK = 8191
+const MIPS_AFL_ASE_MCU = 8
+const MIPS_AFL_ASE_MDMX = 16
+const MIPS_AFL_ASE_MICROMIPS = 2048
+const MIPS_AFL_ASE_MIPS16 = 1024
+const MIPS_AFL_ASE_MIPS3D = 32
+const MIPS_AFL_ASE_MSA = 512
+const MIPS_AFL_ASE_MT = 64
+const MIPS_AFL_ASE_SMARTMIPS = 128
+const MIPS_AFL_ASE_VIRT = 256
+const MIPS_AFL_ASE_XPA = 4096
+const MIPS_AFL_EXT_10000 = 11
+const MIPS_AFL_EXT_3900 = 10
+const MIPS_AFL_EXT_4010 = 8
+const MIPS_AFL_EXT_4100 = 9
+const MIPS_AFL_EXT_4111 = 13
+const MIPS_AFL_EXT_4120 = 14
+const MIPS_AFL_EXT_4650 = 7
+const MIPS_AFL_EXT_5400 = 15
+const MIPS_AFL_EXT_5500 = 16
+const MIPS_AFL_EXT_5900 = 6
+const MIPS_AFL_EXT_LOONGSON_2E = 17
+const MIPS_AFL_EXT_LOONGSON_2F = 18
+const MIPS_AFL_EXT_LOONGSON_3A = 4
+const MIPS_AFL_EXT_OCTEON = 5
+const MIPS_AFL_EXT_OCTEON2 = 2
+const MIPS_AFL_EXT_OCTEONP = 3
+const MIPS_AFL_EXT_SB1 = 12
+const MIPS_AFL_EXT_XLR = 1
+const MIPS_AFL_FLAGS1_ODDSPREG = 1
+const MIPS_AFL_REG_128 = 3
+const MIPS_AFL_REG_32 = 1
+const MIPS_AFL_REG_64 = 2
+const MIPS_AFL_REG_NONE = 0
+const NT_386_IOPERM = 513
+const NT_386_TLS = 512
+const NT_ARC_V2 = 1536
+const NT_ARM_HW_BREAK = 1026
+const NT_ARM_HW_WATCH = 1027
+const NT_ARM_PACA_KEYS = 1031
+const NT_ARM_PACG_KEYS = 1032
+const NT_ARM_PAC_ENABLED_KEYS = 1034
+const NT_ARM_PAC_MASK = 1030
+const NT_ARM_SVE = 1029
+const NT_ARM_SYSTEM_CALL = 1028
+const NT_ARM_TAGGED_ADDR_CTRL = 1033
+const NT_ARM_TLS = 1025
+const NT_ARM_VFP = 1024
+const NT_ASRS = 8
+const NT_AUXV = 6
+const NT_FILE = 1179208773
+const NT_FPREGSET = 2
+const NT_GNU_ABI_TAG = 1
+const NT_GNU_BUILD_ID = 3
+const NT_GNU_GOLD_VERSION = 4
+const NT_GNU_PROPERTY_TYPE_0 = 5
+const NT_GWINDOWS = 7
+const NT_LOONGARCH_CPUCFG = 2560
+const NT_LOONGARCH_CSR = 2561
+const NT_LOONGARCH_LASX = 2563
+const NT_LOONGARCH_LBT = 2564
+const NT_LOONGARCH_LSX = 2562
+const NT_LWPSINFO = 17
+const NT_LWPSTATUS = 16
+const NT_METAG_CBUF = 1280
+const NT_METAG_RPIPE = 1281
+const NT_METAG_TLS = 1282
+const NT_MIPS_DSP = 2048
+const NT_MIPS_FP_MODE = 2049
+const NT_MIPS_MSA = 2050
+const NT_PLATFORM = 5
+const NT_PPC_DSCR = 261
+const NT_PPC_EBB = 262
+const NT_PPC_PMU = 263
+const NT_PPC_PPR = 260
+const NT_PPC_SPE = 257
+const NT_PPC_TAR = 259
+const NT_PPC_TM_CDSCR = 271
+const NT_PPC_TM_CFPR = 265
+const NT_PPC_TM_CGPR = 264
+const NT_PPC_TM_CPPR = 270
+const NT_PPC_TM_CTAR = 269
+const NT_PPC_TM_CVMX = 266
+const NT_PPC_TM_CVSX = 267
+const NT_PPC_TM_SPR = 268
+const NT_PPC_VMX = 256
+const NT_PPC_VSX = 258
+const NT_PRCRED = 14
+const NT_PRFPREG = 2
+const NT_PRFPXREG = 20
+const NT_PRPSINFO = 3
+const NT_PRSTATUS = 1
+const NT_PRXFPREG = 1189489535
+const NT_PRXREG = 4
+const NT_PSINFO = 13
+const NT_PSTATUS = 10
+const NT_RISCV_CSR = 2304
+const NT_RISCV_VECTOR = 2305
+const NT_S390_CTRS = 772
+const NT_S390_GS_BC = 780
+const NT_S390_GS_CB = 779
+const NT_S390_HIGH_GPRS = 768
+const NT_S390_LAST_BREAK = 774
+const NT_S390_PREFIX = 773
+const NT_S390_RI_CB = 781
+const NT_S390_SYSTEM_CALL = 775
+const NT_S390_TDB = 776
+const NT_S390_TIMER = 769
+const NT_S390_TODCMP = 770
+const NT_S390_TODPREG = 771
+const NT_S390_VXRS_HIGH = 778
+const NT_S390_VXRS_LOW = 777
+const NT_SIGINFO = 1397311305
+const NT_TASKSTRUCT = 4
+const NT_UTSNAME = 15
+const NT_VERSION = 1
+const NT_VMCOREDD = 1792
+const NT_X86_XSTATE = 514
+const ODK_EXCEPTIONS = 2
+const ODK_FILL = 5
+const ODK_HWAND = 7
+const ODK_HWOR = 8
+const ODK_HWPATCH = 4
+const ODK_NULL = 0
+const ODK_PAD = 3
+const ODK_REGINFO = 1
+const ODK_TAGS = 6
+const OEX_DISMISS = 524288
+const OEX_FPDBUG = 262144
+const OEX_FPU_DIV0 = 8
+const OEX_FPU_INEX = 1
+const OEX_FPU_INVAL = 16
+const OEX_FPU_MAX = 7936
+const OEX_FPU_MIN = 31
+const OEX_FPU_OFLO = 4
+const OEX_FPU_UFLO = 2
+const OEX_PAGE0 = 65536
+const OEX_PRECISEFP = 262144
+const OEX_SMM = 131072
+const OHWA0_R4KEOP_CHECKED = 1
+const OHWA1_R4KEOP_CLEAN = 2
+const OHW_R4KEOP = 1
+const OHW_R5KCVTL = 8
+const OHW_R5KEOP = 4
+const OHW_R8KPFETCH = 2
+const OPAD_POSTFIX = 2
+const OPAD_PREFIX = 1
+const OPAD_SYMBOL = 4
+const PF_ARM_ABS = 1073741824
+const PF_ARM_PI = 536870912
+const PF_ARM_SB = 268435456
+const PF_HP_CODE = 16777216
+const PF_HP_FAR_SHARED = 2097152
+const PF_HP_LAZYSWAP = 67108864
+const PF_HP_MODIFY = 33554432
+const PF_HP_NEAR_SHARED = 4194304
+const PF_HP_PAGE_SIZE = 1048576
+const PF_HP_SBP = 134217728
+const PF_IA_64_NORECOV = 2147483648
+const PF_MASKOS = 267386880
+const PF_MASKPROC = 4026531840
+const PF_MIPS_LOCAL = 268435456
+const PF_PARISC_SBP = 134217728
+const PF_R = 4
+const PF_W = 2
+const PF_X = 1
+const PN_XNUM = 65535
+const POLL_ERR = 4
+const POLL_HUP = 6
+const POLL_IN = 1
+const POLL_MSG = 3
+const POLL_OUT = 2
+const POLL_PRI = 5
+const PPC64_OPT_LOCALENTRY = 4
+const PPC64_OPT_MULTI_TOC = 2
+const PPC64_OPT_TLS = 1
+const PPC_OPT_TLS = 1
+const PRIO_MAX = 20
+const PRIO_MIN = -20
+const PRIO_PGRP = 1
+const PRIO_PROCESS = 0
+const PRIO_USER = 2
+const PT_ARM_EXIDX = 1879048193
+const PT_DYNAMIC = 2
+const PT_GNU_EH_FRAME = 1685382480
+const PT_GNU_PROPERTY = 1685382483
+const PT_GNU_RELRO = 1685382482
+const PT_GNU_STACK = 1685382481
+const PT_HIOS = 1879048191
+const PT_HIPROC = 2147483647
+const PT_HISUNW = 1879048191
+const PT_HP_CORE_COMM = 1610612740
+const PT_HP_CORE_KERNEL = 1610612739
+const PT_HP_CORE_LOADABLE = 1610612742
+const PT_HP_CORE_MMF = 1610612745
+const PT_HP_CORE_NONE = 1610612737
+const PT_HP_CORE_PROC = 1610612741
+const PT_HP_CORE_SHM = 1610612744
+const PT_HP_CORE_STACK = 1610612743
+const PT_HP_CORE_VERSION = 1610612738
+const PT_HP_FASTBIND = 1610612753
+const PT_HP_HSL_ANNOT = 1610612755
+const PT_HP_OPT_ANNOT = 1610612754
+const PT_HP_PARALLEL = 1610612752
+const PT_HP_STACK = 1610612756
+const PT_HP_TLS = 1610612736
+const PT_IA_64_ARCHEXT = 1879048192
+const PT_IA_64_HP_HSL_ANOT = 1610612755
+const PT_IA_64_HP_OPT_ANOT = 1610612754
+const PT_IA_64_HP_STACK = 1610612756
+const PT_IA_64_UNWIND = 1879048193
+const PT_INTERP = 3
+const PT_LOAD = 1
+const PT_LOOS = 1610612736
+const PT_LOPROC = 1879048192
+const PT_LOSUNW = 1879048186
+const PT_MIPS_ABIFLAGS = 1879048195
+const PT_MIPS_OPTIONS = 1879048194
+const PT_MIPS_REGINFO = 1879048192
+const PT_MIPS_RTPROC = 1879048193
+const PT_NOTE = 4
+const PT_NULL = 0
+const PT_NUM = 8
+const PT_PARISC_ARCHEXT = 1879048192
+const PT_PARISC_UNWIND = 1879048193
+const PT_PHDR = 6
+const PT_SHLIB = 5
+const PT_SUNWBSS = 1879048186
+const PT_SUNWSTACK = 1879048187
+const PT_TLS = 7
+const RAND_MAX = 2147483647
+const RHF_CORD = 4096
+const RHF_DEFAULT_DELAY_LOAD = 512
+const RHF_DELTA_C_PLUS_PLUS = 64
+const RHF_GUARANTEE_INIT = 32
+const RHF_GUARANTEE_START_INIT = 128
+const RHF_NONE = 0
+const RHF_NOTPOT = 2
+const RHF_NO_LIBRARY_REPLACEMENT = 4
+const RHF_NO_MOVE = 8
+const RHF_NO_UNRES_UNDEF = 8192
+const RHF_PIXIE = 256
+const RHF_QUICKSTART = 1
+const RHF_REQUICKSTART = 1024
+const RHF_REQUICKSTARTED = 2048
+const RHF_RLD_ORDER_SAFE = 16384
+const RHF_SGI_ONLY = 16
+const RLIMIT_AS = 9
+const RLIMIT_CORE = 4
+const RLIMIT_CPU = 0
+const RLIMIT_DATA = 2
+const RLIMIT_FSIZE = 1
+const RLIMIT_LOCKS = 10
+const RLIMIT_MEMLOCK = 8
+const RLIMIT_MSGQUEUE = 12
+const RLIMIT_NICE = 13
+const RLIMIT_NLIMITS = 16
+const RLIMIT_NOFILE = 7
+const RLIMIT_NPROC = 6
+const RLIMIT_RSS = 5
+const RLIMIT_RTPRIO = 14
+const RLIMIT_RTTIME = 15
+const RLIMIT_SIGPENDING = 11
+const RLIMIT_STACK = 3
+const RLIM_INFINITY = 18446744073709551615
+const RLIM_NLIMITS = 16
+const RLIM_SAVED_CUR = 18446744073709551615
+const RLIM_SAVED_MAX = 18446744073709551615
+const RUSAGE_CHILDREN = -1
+const RUSAGE_SELF = 0
+const RUSAGE_THREAD = 1
+const R_386_16 = 20
+const R_386_32 = 1
+const R_386_32PLT = 11
+const R_386_8 = 22
+const R_386_COPY = 5
+const R_386_GLOB_DAT = 6
+const R_386_GOT32 = 3
+const R_386_GOT32X = 43
+const R_386_GOTOFF = 9
+const R_386_GOTPC = 10
+const R_386_IRELATIVE = 42
+const R_386_JMP_SLOT = 7
+const R_386_NONE = 0
+const R_386_NUM = 44
+const R_386_PC16 = 21
+const R_386_PC32 = 2
+const R_386_PC8 = 23
+const R_386_PLT32 = 4
+const R_386_RELATIVE = 8
+const R_386_SIZE32 = 38
+const R_386_TLS_DESC = 41
+const R_386_TLS_DESC_CALL = 40
+const R_386_TLS_DTPMOD32 = 35
+const R_386_TLS_DTPOFF32 = 36
+const R_386_TLS_GD = 18
+const R_386_TLS_GD_32 = 24
+const R_386_TLS_GD_CALL = 26
+const R_386_TLS_GD_POP = 27
+const R_386_TLS_GD_PUSH = 25
+const R_386_TLS_GOTDESC = 39
+const R_386_TLS_GOTIE = 16
+const R_386_TLS_IE = 15
+const R_386_TLS_IE_32 = 33
+const R_386_TLS_LDM = 19
+const R_386_TLS_LDM_32 = 28
+const R_386_TLS_LDM_CALL = 30
+const R_386_TLS_LDM_POP = 31
+const R_386_TLS_LDM_PUSH = 29
+const R_386_TLS_LDO_32 = 32
+const R_386_TLS_LE = 17
+const R_386_TLS_LE_32 = 34
+const R_386_TLS_TPOFF = 14
+const R_386_TLS_TPOFF32 = 37
+const R_390_12 = 2
+const R_390_16 = 3
+const R_390_20 = 57
+const R_390_32 = 4
+const R_390_64 = 22
+const R_390_8 = 1
+const R_390_COPY = 9
+const R_390_GLOB_DAT = 10
+const R_390_GOT12 = 6
+const R_390_GOT16 = 15
+const R_390_GOT20 = 58
+const R_390_GOT32 = 7
+const R_390_GOT64 = 24
+const R_390_GOTENT = 26
+const R_390_GOTOFF16 = 27
+const R_390_GOTOFF32 = 13
+const R_390_GOTOFF64 = 28
+const R_390_GOTPC = 14
+const R_390_GOTPCDBL = 21
+const R_390_GOTPLT12 = 29
+const R_390_GOTPLT16 = 30
+const R_390_GOTPLT20 = 59
+const R_390_GOTPLT32 = 31
+const R_390_GOTPLT64 = 32
+const R_390_GOTPLTENT = 33
+const R_390_JMP_SLOT = 11
+const R_390_NONE = 0
+const R_390_NUM = 61
+const R_390_PC16 = 16
+const R_390_PC16DBL = 17
+const R_390_PC32 = 5
+const R_390_PC32DBL = 19
+const R_390_PC64 = 23
+const R_390_PLT16DBL = 18
+const R_390_PLT32 = 8
+const R_390_PLT32DBL = 20
+const R_390_PLT64 = 25
+const R_390_PLTOFF16 = 34
+const R_390_PLTOFF32 = 35
+const R_390_PLTOFF64 = 36
+const R_390_RELATIVE = 12
+const R_390_TLS_DTPMOD = 54
+const R_390_TLS_DTPOFF = 55
+const R_390_TLS_GD32 = 40
+const R_390_TLS_GD64 = 41
+const R_390_TLS_GDCALL = 38
+const R_390_TLS_GOTIE12 = 42
+const R_390_TLS_GOTIE20 = 60
+const R_390_TLS_GOTIE32 = 43
+const R_390_TLS_GOTIE64 = 44
+const R_390_TLS_IE32 = 47
+const R_390_TLS_IE64 = 48
+const R_390_TLS_IEENT = 49
+const R_390_TLS_LDCALL = 39
+const R_390_TLS_LDM32 = 45
+const R_390_TLS_LDM64 = 46
+const R_390_TLS_LDO32 = 52
+const R_390_TLS_LDO64 = 53
+const R_390_TLS_LE32 = 50
+const R_390_TLS_LE64 = 51
+const R_390_TLS_LOAD = 37
+const R_390_TLS_TPOFF = 56
+const R_68K_16 = 2
+const R_68K_32 = 1
+const R_68K_8 = 3
+const R_68K_COPY = 19
+const R_68K_GLOB_DAT = 20
+const R_68K_GOT16 = 8
+const R_68K_GOT16O = 11
+const R_68K_GOT32 = 7
+const R_68K_GOT32O = 10
+const R_68K_GOT8 = 9
+const R_68K_GOT8O = 12
+const R_68K_JMP_SLOT = 21
+const R_68K_NONE = 0
+const R_68K_NUM = 43
+const R_68K_PC16 = 5
+const R_68K_PC32 = 4
+const R_68K_PC8 = 6
+const R_68K_PLT16 = 14
+const R_68K_PLT16O = 17
+const R_68K_PLT32 = 13
+const R_68K_PLT32O = 16
+const R_68K_PLT8 = 15
+const R_68K_PLT8O = 18
+const R_68K_RELATIVE = 22
+const R_68K_TLS_DTPMOD32 = 40
+const R_68K_TLS_DTPREL32 = 41
+const R_68K_TLS_GD16 = 26
+const R_68K_TLS_GD32 = 25
+const R_68K_TLS_GD8 = 27
+const R_68K_TLS_IE16 = 35
+const R_68K_TLS_IE32 = 34
+const R_68K_TLS_IE8 = 36
+const R_68K_TLS_LDM16 = 29
+const R_68K_TLS_LDM32 = 28
+const R_68K_TLS_LDM8 = 30
+const R_68K_TLS_LDO16 = 32
+const R_68K_TLS_LDO32 = 31
+const R_68K_TLS_LDO8 = 33
+const R_68K_TLS_LE16 = 38
+const R_68K_TLS_LE32 = 37
+const R_68K_TLS_LE8 = 39
+const R_68K_TLS_TPREL32 = 42
+const R_AARCH64_ABS16 = 259
+const R_AARCH64_ABS32 = 258
+const R_AARCH64_ABS64 = 257
+const R_AARCH64_ADD_ABS_LO12_NC = 277
+const R_AARCH64_ADR_GOT_PAGE = 311
+const R_AARCH64_ADR_PREL_LO21 = 274
+const R_AARCH64_ADR_PREL_PG_HI21 = 275
+const R_AARCH64_ADR_PREL_PG_HI21_NC = 276
+const R_AARCH64_CALL26 = 283
+const R_AARCH64_CONDBR19 = 280
+const R_AARCH64_COPY = 1024
+const R_AARCH64_GLOB_DAT = 1025
+const R_AARCH64_GOTREL32 = 308
+const R_AARCH64_GOTREL64 = 307
+const R_AARCH64_GOT_LD_PREL19 = 309
+const R_AARCH64_JUMP26 = 282
+const R_AARCH64_JUMP_SLOT = 1026
+const R_AARCH64_LD64_GOTOFF_LO15 = 310
+const R_AARCH64_LD64_GOTPAGE_LO15 = 313
+const R_AARCH64_LD64_GOT_LO12_NC = 312
+const R_AARCH64_LDST128_ABS_LO12_NC = 299
+const R_AARCH64_LDST16_ABS_LO12_NC = 284
+const R_AARCH64_LDST32_ABS_LO12_NC = 285
+const R_AARCH64_LDST64_ABS_LO12_NC = 286
+const R_AARCH64_LDST8_ABS_LO12_NC = 278
+const R_AARCH64_LD_PREL_LO19 = 273
+const R_AARCH64_MOVW_GOTOFF_G0 = 300
+const R_AARCH64_MOVW_GOTOFF_G0_NC = 301
+const R_AARCH64_MOVW_GOTOFF_G1 = 302
+const R_AARCH64_MOVW_GOTOFF_G1_NC = 303
+const R_AARCH64_MOVW_GOTOFF_G2 = 304
+const R_AARCH64_MOVW_GOTOFF_G2_NC = 305
+const R_AARCH64_MOVW_GOTOFF_G3 = 306
+const R_AARCH64_MOVW_PREL_G0 = 287
+const R_AARCH64_MOVW_PREL_G0_NC = 288
+const R_AARCH64_MOVW_PREL_G1 = 289
+const R_AARCH64_MOVW_PREL_G1_NC = 290
+const R_AARCH64_MOVW_PREL_G2 = 291
+const R_AARCH64_MOVW_PREL_G2_NC = 292
+const R_AARCH64_MOVW_PREL_G3 = 293
+const R_AARCH64_MOVW_SABS_G0 = 270
+const R_AARCH64_MOVW_SABS_G1 = 271
+const R_AARCH64_MOVW_SABS_G2 = 272
+const R_AARCH64_MOVW_UABS_G0 = 263
+const R_AARCH64_MOVW_UABS_G0_NC = 264
+const R_AARCH64_MOVW_UABS_G1 = 265
+const R_AARCH64_MOVW_UABS_G1_NC = 266
+const R_AARCH64_MOVW_UABS_G2 = 267
+const R_AARCH64_MOVW_UABS_G2_NC = 268
+const R_AARCH64_MOVW_UABS_G3 = 269
+const R_AARCH64_NONE = 0
+const R_AARCH64_P32_ABS32 = 1
+const R_AARCH64_P32_COPY = 180
+const R_AARCH64_P32_GLOB_DAT = 181
+const R_AARCH64_P32_IRELATIVE = 188
+const R_AARCH64_P32_JUMP_SLOT = 182
+const R_AARCH64_P32_RELATIVE = 183
+const R_AARCH64_P32_TLSDESC = 187
+const R_AARCH64_P32_TLS_DTPMOD = 184
+const R_AARCH64_P32_TLS_DTPREL = 185
+const R_AARCH64_P32_TLS_TPREL = 186
+const R_AARCH64_PREL16 = 262
+const R_AARCH64_PREL32 = 261
+const R_AARCH64_PREL64 = 260
+const R_AARCH64_RELATIVE = 1027
+const R_AARCH64_TLSDESC = 1031
+const R_AARCH64_TLSDESC_ADD = 568
+const R_AARCH64_TLSDESC_ADD_LO12 = 564
+const R_AARCH64_TLSDESC_ADR_PAGE21 = 562
+const R_AARCH64_TLSDESC_ADR_PREL21 = 561
+const R_AARCH64_TLSDESC_CALL = 569
+const R_AARCH64_TLSDESC_LD64_LO12 = 563
+const R_AARCH64_TLSDESC_LDR = 567
+const R_AARCH64_TLSDESC_LD_PREL19 = 560
+const R_AARCH64_TLSDESC_OFF_G0_NC = 566
+const R_AARCH64_TLSDESC_OFF_G1 = 565
+const R_AARCH64_TLSGD_ADD_LO12_NC = 514
+const R_AARCH64_TLSGD_ADR_PAGE21 = 513
+const R_AARCH64_TLSGD_ADR_PREL21 = 512
+const R_AARCH64_TLSGD_MOVW_G0_NC = 516
+const R_AARCH64_TLSGD_MOVW_G1 = 515
+const R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21 = 541
+const R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC = 542
+const R_AARCH64_TLSIE_LD_GOTTPREL_PREL19 = 543
+const R_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC = 540
+const R_AARCH64_TLSIE_MOVW_GOTTPREL_G1 = 539
+const R_AARCH64_TLSLD_ADD_DTPREL_HI12 = 528
+const R_AARCH64_TLSLD_ADD_DTPREL_LO12 = 529
+const R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC = 530
+const R_AARCH64_TLSLD_ADD_LO12_NC = 519
+const R_AARCH64_TLSLD_ADR_PAGE21 = 518
+const R_AARCH64_TLSLD_ADR_PREL21 = 517
+const R_AARCH64_TLSLD_LDST128_DTPREL_LO12 = 572
+const R_AARCH64_TLSLD_LDST128_DTPREL_LO12_NC = 573
+const R_AARCH64_TLSLD_LDST16_DTPREL_LO12 = 533
+const R_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC = 534
+const R_AARCH64_TLSLD_LDST32_DTPREL_LO12 = 535
+const R_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC = 536
+const R_AARCH64_TLSLD_LDST64_DTPREL_LO12 = 537
+const R_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC = 538
+const R_AARCH64_TLSLD_LDST8_DTPREL_LO12 = 531
+const R_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC = 532
+const R_AARCH64_TLSLD_LD_PREL19 = 522
+const R_AARCH64_TLSLD_MOVW_DTPREL_G0 = 526
+const R_AARCH64_TLSLD_MOVW_DTPREL_G0_NC = 527
+const R_AARCH64_TLSLD_MOVW_DTPREL_G1 = 524
+const R_AARCH64_TLSLD_MOVW_DTPREL_G1_NC = 525
+const R_AARCH64_TLSLD_MOVW_DTPREL_G2 = 523
+const R_AARCH64_TLSLD_MOVW_G0_NC = 521
+const R_AARCH64_TLSLD_MOVW_G1 = 520
+const R_AARCH64_TLSLE_ADD_TPREL_HI12 = 549
+const R_AARCH64_TLSLE_ADD_TPREL_LO12 = 550
+const R_AARCH64_TLSLE_ADD_TPREL_LO12_NC = 551
+const R_AARCH64_TLSLE_LDST128_TPREL_LO12 = 570
+const R_AARCH64_TLSLE_LDST128_TPREL_LO12_NC = 571
+const R_AARCH64_TLSLE_LDST16_TPREL_LO12 = 554
+const R_AARCH64_TLSLE_LDST16_TPREL_LO12_NC = 555
+const R_AARCH64_TLSLE_LDST32_TPREL_LO12 = 556
+const R_AARCH64_TLSLE_LDST32_TPREL_LO12_NC = 557
+const R_AARCH64_TLSLE_LDST64_TPREL_LO12 = 558
+const R_AARCH64_TLSLE_LDST64_TPREL_LO12_NC = 559
+const R_AARCH64_TLSLE_LDST8_TPREL_LO12 = 552
+const R_AARCH64_TLSLE_LDST8_TPREL_LO12_NC = 553
+const R_AARCH64_TLSLE_MOVW_TPREL_G0 = 547
+const R_AARCH64_TLSLE_MOVW_TPREL_G0_NC = 548
+const R_AARCH64_TLSLE_MOVW_TPREL_G1 = 545
+const R_AARCH64_TLSLE_MOVW_TPREL_G1_NC = 546
+const R_AARCH64_TLSLE_MOVW_TPREL_G2 = 544
+const R_AARCH64_TLS_DTPMOD = 1028
+const R_AARCH64_TLS_DTPMOD64 = 1028
+const R_AARCH64_TLS_DTPREL = 1029
+const R_AARCH64_TLS_DTPREL64 = 1029
+const R_AARCH64_TLS_TPREL = 1030
+const R_AARCH64_TLS_TPREL64 = 1030
+const R_AARCH64_TSTBR14 = 279
+const R_ALPHA_BRADDR = 7
+const R_ALPHA_COPY = 24
+const R_ALPHA_DTPMOD64 = 31
+const R_ALPHA_DTPREL16 = 36
+const R_ALPHA_DTPREL64 = 33
+const R_ALPHA_DTPRELHI = 34
+const R_ALPHA_DTPRELLO = 35
+const R_ALPHA_GLOB_DAT = 25
+const R_ALPHA_GOTDTPREL = 32
+const R_ALPHA_GOTTPREL = 37
+const R_ALPHA_GPDISP = 6
+const R_ALPHA_GPREL16 = 19
+const R_ALPHA_GPREL32 = 3
+const R_ALPHA_GPRELHIGH = 17
+const R_ALPHA_GPRELLOW = 18
+const R_ALPHA_HINT = 8
+const R_ALPHA_JMP_SLOT = 26
+const R_ALPHA_LITERAL = 4
+const R_ALPHA_LITUSE = 5
+const R_ALPHA_NONE = 0
+const R_ALPHA_NUM = 46
+const R_ALPHA_REFLONG = 1
+const R_ALPHA_REFQUAD = 2
+const R_ALPHA_RELATIVE = 27
+const R_ALPHA_SREL16 = 9
+const R_ALPHA_SREL32 = 10
+const R_ALPHA_SREL64 = 11
+const R_ALPHA_TLSGD = 29
+const R_ALPHA_TLS_GD_HI = 28
+const R_ALPHA_TLS_LDM = 30
+const R_ALPHA_TPREL16 = 41
+const R_ALPHA_TPREL64 = 38
+const R_ALPHA_TPRELHI = 39
+const R_ALPHA_TPRELLO = 40
+const R_ARM_ABS12 = 6
+const R_ARM_ABS16 = 5
+const R_ARM_ABS32 = 2
+const R_ARM_ABS32_NOI = 55
+const R_ARM_ABS8 = 8
+const R_ARM_ALU_PCREL_15_8 = 33
+const R_ARM_ALU_PCREL_23_15 = 34
+const R_ARM_ALU_PCREL_7_0 = 32
+const R_ARM_ALU_PC_G0 = 58
+const R_ARM_ALU_PC_G0_NC = 57
+const R_ARM_ALU_PC_G1 = 60
+const R_ARM_ALU_PC_G1_NC = 59
+const R_ARM_ALU_PC_G2 = 61
+const R_ARM_ALU_SBREL_19_12 = 36
+const R_ARM_ALU_SBREL_27_20 = 37
+const R_ARM_ALU_SB_G0 = 71
+const R_ARM_ALU_SB_G0_NC = 70
+const R_ARM_ALU_SB_G1 = 73
+const R_ARM_ALU_SB_G1_NC = 72
+const R_ARM_ALU_SB_G2 = 74
+const R_ARM_AMP_VCALL9 = 12
+const R_ARM_BASE_ABS = 31
+const R_ARM_CALL = 28
+const R_ARM_COPY = 20
+const R_ARM_GLOB_DAT = 21
+const R_ARM_GNU_VTENTRY = 100
+const R_ARM_GNU_VTINHERIT = 101
+const R_ARM_GOT32 = 26
+const R_ARM_GOTOFF = 24
+const R_ARM_GOTOFF12 = 98
+const R_ARM_GOTPC = 25
+const R_ARM_GOTRELAX = 99
+const R_ARM_GOT_ABS = 95
+const R_ARM_GOT_BREL12 = 97
+const R_ARM_GOT_PREL = 96
+const R_ARM_IRELATIVE = 160
+const R_ARM_JUMP24 = 29
+const R_ARM_JUMP_SLOT = 22
+const R_ARM_LDC_PC_G0 = 67
+const R_ARM_LDC_PC_G1 = 68
+const R_ARM_LDC_PC_G2 = 69
+const R_ARM_LDC_SB_G0 = 81
+const R_ARM_LDC_SB_G1 = 82
+const R_ARM_LDC_SB_G2 = 83
+const R_ARM_LDRS_PC_G0 = 64
+const R_ARM_LDRS_PC_G1 = 65
+const R_ARM_LDRS_PC_G2 = 66
+const R_ARM_LDRS_SB_G0 = 78
+const R_ARM_LDRS_SB_G1 = 79
+const R_ARM_LDRS_SB_G2 = 80
+const R_ARM_LDR_PC_G1 = 62
+const R_ARM_LDR_PC_G2 = 63
+const R_ARM_LDR_SBREL_11_0 = 35
+const R_ARM_LDR_SB_G0 = 75
+const R_ARM_LDR_SB_G1 = 76
+const R_ARM_LDR_SB_G2 = 77
+const R_ARM_ME_TOO = 128
+const R_ARM_MOVT_ABS = 44
+const R_ARM_MOVT_BREL = 85
+const R_ARM_MOVT_PREL = 46
+const R_ARM_MOVW_ABS_NC = 43
+const R_ARM_MOVW_BREL = 86
+const R_ARM_MOVW_BREL_NC = 84
+const R_ARM_MOVW_PREL_NC = 45
+const R_ARM_NONE = 0
+const R_ARM_NUM = 256
+const R_ARM_PC13 = 4
+const R_ARM_PC24 = 1
+const R_ARM_PLT32 = 27
+const R_ARM_PLT32_ABS = 94
+const R_ARM_PREL31 = 42
+const R_ARM_RABS22 = 253
+const R_ARM_RBASE = 255
+const R_ARM_REL32 = 3
+const R_ARM_REL32_NOI = 56
+const R_ARM_RELATIVE = 23
+const R_ARM_RPC24 = 254
+const R_ARM_RREL32 = 252
+const R_ARM_RSBREL32 = 250
+const R_ARM_RXPC25 = 249
+const R_ARM_SBREL31 = 39
+const R_ARM_SBREL32 = 9
+const R_ARM_TARGET1 = 38
+const R_ARM_TARGET2 = 41
+const R_ARM_THM_ABS5 = 7
+const R_ARM_THM_ALU_PREL_11_0 = 53
+const R_ARM_THM_GOT_BREL12 = 131
+const R_ARM_THM_JUMP19 = 51
+const R_ARM_THM_JUMP24 = 30
+const R_ARM_THM_JUMP6 = 52
+const R_ARM_THM_MOVT_ABS = 48
+const R_ARM_THM_MOVT_BREL = 88
+const R_ARM_THM_MOVT_PREL = 50
+const R_ARM_THM_MOVW_ABS_NC = 47
+const R_ARM_THM_MOVW_BREL = 89
+const R_ARM_THM_MOVW_BREL_NC = 87
+const R_ARM_THM_MOVW_PREL_NC = 49
+const R_ARM_THM_PC11 = 102
+const R_ARM_THM_PC12 = 54
+const R_ARM_THM_PC22 = 10
+const R_ARM_THM_PC8 = 11
+const R_ARM_THM_PC9 = 103
+const R_ARM_THM_RPC22 = 251
+const R_ARM_THM_SWI8 = 14
+const R_ARM_THM_TLS_CALL = 93
+const R_ARM_THM_TLS_DESCSEQ = 129
+const R_ARM_THM_TLS_DESCSEQ16 = 129
+const R_ARM_THM_TLS_DESCSEQ32 = 130
+const R_ARM_THM_XPC22 = 16
+const R_ARM_TLS_CALL = 91
+const R_ARM_TLS_DESC = 13
+const R_ARM_TLS_DESCSEQ = 92
+const R_ARM_TLS_DTPMOD32 = 17
+const R_ARM_TLS_DTPOFF32 = 18
+const R_ARM_TLS_GD32 = 104
+const R_ARM_TLS_GOTDESC = 90
+const R_ARM_TLS_IE12GP = 111
+const R_ARM_TLS_IE32 = 107
+const R_ARM_TLS_LDM32 = 105
+const R_ARM_TLS_LDO12 = 109
+const R_ARM_TLS_LDO32 = 106
+const R_ARM_TLS_LE12 = 110
+const R_ARM_TLS_LE32 = 108
+const R_ARM_TLS_TPOFF32 = 19
+const R_ARM_V4BX = 40
+const R_ARM_XPC25 = 15
+const R_BPF_MAP_FD = 1
+const R_BPF_NONE = 0
+const R_CKCORE_ADDR32 = 1
+const R_CKCORE_ADDRGOT = 17
+const R_CKCORE_ADDRGOT_HI16 = 36
+const R_CKCORE_ADDRGOT_LO16 = 37
+const R_CKCORE_ADDRPLT = 18
+const R_CKCORE_ADDRPLT_HI16 = 38
+const R_CKCORE_ADDRPLT_LO16 = 39
+const R_CKCORE_ADDR_HI16 = 24
+const R_CKCORE_ADDR_LO16 = 25
+const R_CKCORE_COPY = 10
+const R_CKCORE_DOFFSET_IMM18 = 44
+const R_CKCORE_DOFFSET_IMM18BY2 = 45
+const R_CKCORE_DOFFSET_IMM18BY4 = 46
+const R_CKCORE_DOFFSET_LO16 = 42
+const R_CKCORE_GLOB_DAT = 11
+const R_CKCORE_GOT12 = 30
+const R_CKCORE_GOT32 = 15
+const R_CKCORE_GOTOFF = 13
+const R_CKCORE_GOTOFF_HI16 = 28
+const R_CKCORE_GOTOFF_LO16 = 29
+const R_CKCORE_GOTPC = 14
+const R_CKCORE_GOTPC_HI16 = 26
+const R_CKCORE_GOTPC_LO16 = 27
+const R_CKCORE_GOT_HI16 = 31
+const R_CKCORE_GOT_IMM18BY4 = 48
+const R_CKCORE_GOT_LO16 = 32
+const R_CKCORE_JUMP_SLOT = 12
+const R_CKCORE_NONE = 0
+const R_CKCORE_PCREL32 = 5
+const R_CKCORE_PCRELIMM11BY2 = 3
+const R_CKCORE_PCRELIMM8BY4 = 2
+const R_CKCORE_PCRELJSR_IMM11BY2 = 6
+const R_CKCORE_PCREL_IMM10BY2 = 22
+const R_CKCORE_PCREL_IMM10BY4 = 23
+const R_CKCORE_PCREL_IMM16BY2 = 20
+const R_CKCORE_PCREL_IMM16BY4 = 21
+const R_CKCORE_PCREL_IMM18BY2 = 43
+const R_CKCORE_PCREL_IMM26BY2 = 19
+const R_CKCORE_PCREL_IMM7BY4 = 50
+const R_CKCORE_PCREL_JSR_IMM26BY2 = 40
+const R_CKCORE_PLT12 = 33
+const R_CKCORE_PLT32 = 16
+const R_CKCORE_PLT_HI16 = 34
+const R_CKCORE_PLT_IMM18BY4 = 49
+const R_CKCORE_PLT_LO16 = 35
+const R_CKCORE_RELATIVE = 9
+const R_CKCORE_TLS_DTPMOD32 = 56
+const R_CKCORE_TLS_DTPOFF32 = 57
+const R_CKCORE_TLS_GD32 = 53
+const R_CKCORE_TLS_IE32 = 52
+const R_CKCORE_TLS_LDM32 = 54
+const R_CKCORE_TLS_LDO32 = 55
+const R_CKCORE_TLS_LE32 = 51
+const R_CKCORE_TLS_TPOFF32 = 58
+const R_CKCORE_TOFFSET_LO16 = 41
+const R_CRIS_16 = 2
+const R_CRIS_16_GOT = 13
+const R_CRIS_16_GOTPLT = 15
+const R_CRIS_16_PCREL = 5
+const R_CRIS_32 = 3
+const R_CRIS_32_GOT = 14
+const R_CRIS_32_GOTPLT = 16
+const R_CRIS_32_GOTREL = 17
+const R_CRIS_32_PCREL = 6
+const R_CRIS_32_PLT_GOTREL = 18
+const R_CRIS_32_PLT_PCREL = 19
+const R_CRIS_8 = 1
+const R_CRIS_8_PCREL = 4
+const R_CRIS_COPY = 9
+const R_CRIS_GLOB_DAT = 10
+const R_CRIS_GNU_VTENTRY = 8
+const R_CRIS_GNU_VTINHERIT = 7
+const R_CRIS_JUMP_SLOT = 11
+const R_CRIS_NONE = 0
+const R_CRIS_NUM = 20
+const R_CRIS_RELATIVE = 12
+const R_IA64_COPY = 132
+const R_IA64_DIR32LSB = 37
+const R_IA64_DIR32MSB = 36
+const R_IA64_DIR64LSB = 39
+const R_IA64_DIR64MSB = 38
+const R_IA64_DTPMOD64LSB = 167
+const R_IA64_DTPMOD64MSB = 166
+const R_IA64_DTPREL14 = 177
+const R_IA64_DTPREL22 = 178
+const R_IA64_DTPREL32LSB = 181
+const R_IA64_DTPREL32MSB = 180
+const R_IA64_DTPREL64I = 179
+const R_IA64_DTPREL64LSB = 183
+const R_IA64_DTPREL64MSB = 182
+const R_IA64_FPTR32LSB = 69
+const R_IA64_FPTR32MSB = 68
+const R_IA64_FPTR64I = 67
+const R_IA64_FPTR64LSB = 71
+const R_IA64_FPTR64MSB = 70
+const R_IA64_GPREL22 = 42
+const R_IA64_GPREL32LSB = 45
+const R_IA64_GPREL32MSB = 44
+const R_IA64_GPREL64I = 43
+const R_IA64_GPREL64LSB = 47
+const R_IA64_GPREL64MSB = 46
+const R_IA64_IMM14 = 33
+const R_IA64_IMM22 = 34
+const R_IA64_IMM64 = 35
+const R_IA64_IPLTLSB = 129
+const R_IA64_IPLTMSB = 128
+const R_IA64_LDXMOV = 135
+const R_IA64_LTOFF22 = 50
+const R_IA64_LTOFF22X = 134
+const R_IA64_LTOFF64I = 51
+const R_IA64_LTOFF_DTPMOD22 = 170
+const R_IA64_LTOFF_DTPREL22 = 186
+const R_IA64_LTOFF_FPTR22 = 82
+const R_IA64_LTOFF_FPTR32LSB = 85
+const R_IA64_LTOFF_FPTR32MSB = 84
+const R_IA64_LTOFF_FPTR64I = 83
+const R_IA64_LTOFF_FPTR64LSB = 87
+const R_IA64_LTOFF_FPTR64MSB = 86
+const R_IA64_LTOFF_TPREL22 = 154
+const R_IA64_LTV32LSB = 117
+const R_IA64_LTV32MSB = 116
+const R_IA64_LTV64LSB = 119
+const R_IA64_LTV64MSB = 118
+const R_IA64_NONE = 0
+const R_IA64_PCREL21B = 73
+const R_IA64_PCREL21BI = 121
+const R_IA64_PCREL21F = 75
+const R_IA64_PCREL21M = 74
+const R_IA64_PCREL22 = 122
+const R_IA64_PCREL32LSB = 77
+const R_IA64_PCREL32MSB = 76
+const R_IA64_PCREL60B = 72
+const R_IA64_PCREL64I = 123
+const R_IA64_PCREL64LSB = 79
+const R_IA64_PCREL64MSB = 78
+const R_IA64_PLTOFF22 = 58
+const R_IA64_PLTOFF64I = 59
+const R_IA64_PLTOFF64LSB = 63
+const R_IA64_PLTOFF64MSB = 62
+const R_IA64_REL32LSB = 109
+const R_IA64_REL32MSB = 108
+const R_IA64_REL64LSB = 111
+const R_IA64_REL64MSB = 110
+const R_IA64_SECREL32LSB = 101
+const R_IA64_SECREL32MSB = 100
+const R_IA64_SECREL64LSB = 103
+const R_IA64_SECREL64MSB = 102
+const R_IA64_SEGREL32LSB = 93
+const R_IA64_SEGREL32MSB = 92
+const R_IA64_SEGREL64LSB = 95
+const R_IA64_SEGREL64MSB = 94
+const R_IA64_SUB = 133
+const R_IA64_TPREL14 = 145
+const R_IA64_TPREL22 = 146
+const R_IA64_TPREL64I = 147
+const R_IA64_TPREL64LSB = 151
+const R_IA64_TPREL64MSB = 150
+const R_LARCH_32 = 1
+const R_LARCH_32_PCREL = 99
+const R_LARCH_64 = 2
+const R_LARCH_ABS64_HI12 = 70
+const R_LARCH_ABS64_LO20 = 69
+const R_LARCH_ABS_HI20 = 67
+const R_LARCH_ABS_LO12 = 68
+const R_LARCH_ADD16 = 48
+const R_LARCH_ADD24 = 49
+const R_LARCH_ADD32 = 50
+const R_LARCH_ADD64 = 51
+const R_LARCH_ADD8 = 47
+const R_LARCH_B16 = 64
+const R_LARCH_B21 = 65
+const R_LARCH_B26 = 66
+const R_LARCH_COPY = 4
+const R_LARCH_GNU_VTENTRY = 58
+const R_LARCH_GNU_VTINHERIT = 57
+const R_LARCH_GOT64_HI12 = 82
+const R_LARCH_GOT64_LO20 = 81
+const R_LARCH_GOT64_PC_HI12 = 78
+const R_LARCH_GOT64_PC_LO20 = 77
+const R_LARCH_GOT_HI20 = 79
+const R_LARCH_GOT_LO12 = 80
+const R_LARCH_GOT_PC_HI20 = 75
+const R_LARCH_GOT_PC_LO12 = 76
+const R_LARCH_IRELATIVE = 12
+const R_LARCH_JUMP_SLOT = 5
+const R_LARCH_MARK_LA = 20
+const R_LARCH_MARK_PCREL = 21
+const R_LARCH_NONE = 0
+const R_LARCH_PCALA64_HI12 = 74
+const R_LARCH_PCALA64_LO20 = 73
+const R_LARCH_PCALA_HI20 = 71
+const R_LARCH_PCALA_LO12 = 72
+const R_LARCH_RELATIVE = 3
+const R_LARCH_RELAX = 100
+const R_LARCH_SOP_ADD = 35
+const R_LARCH_SOP_AND = 36
+const R_LARCH_SOP_ASSERT = 30
+const R_LARCH_SOP_IF_ELSE = 37
+const R_LARCH_SOP_NOT = 31
+const R_LARCH_SOP_POP_32_S_0_10_10_16_S2 = 45
+const R_LARCH_SOP_POP_32_S_0_5_10_16_S2 = 44
+const R_LARCH_SOP_POP_32_S_10_12 = 40
+const R_LARCH_SOP_POP_32_S_10_16 = 41
+const R_LARCH_SOP_POP_32_S_10_16_S2 = 42
+const R_LARCH_SOP_POP_32_S_10_5 = 38
+const R_LARCH_SOP_POP_32_S_5_20 = 43
+const R_LARCH_SOP_POP_32_U = 46
+const R_LARCH_SOP_POP_32_U_10_12 = 39
+const R_LARCH_SOP_PUSH_ABSOLUTE = 23
+const R_LARCH_SOP_PUSH_DUP = 24
+const R_LARCH_SOP_PUSH_GPREL = 25
+const R_LARCH_SOP_PUSH_PCREL = 22
+const R_LARCH_SOP_PUSH_PLT_PCREL = 29
+const R_LARCH_SOP_PUSH_TLS_GD = 28
+const R_LARCH_SOP_PUSH_TLS_GOT = 27
+const R_LARCH_SOP_PUSH_TLS_TPREL = 26
+const R_LARCH_SOP_SL = 33
+const R_LARCH_SOP_SR = 34
+const R_LARCH_SOP_SUB = 32
+const R_LARCH_SUB16 = 53
+const R_LARCH_SUB24 = 54
+const R_LARCH_SUB32 = 55
+const R_LARCH_SUB64 = 56
+const R_LARCH_SUB8 = 52
+const R_LARCH_TLS_DTPMOD32 = 6
+const R_LARCH_TLS_DTPMOD64 = 7
+const R_LARCH_TLS_DTPREL32 = 8
+const R_LARCH_TLS_DTPREL64 = 9
+const R_LARCH_TLS_GD_HI20 = 98
+const R_LARCH_TLS_GD_PC_HI20 = 97
+const R_LARCH_TLS_IE64_HI12 = 94
+const R_LARCH_TLS_IE64_LO20 = 93
+const R_LARCH_TLS_IE64_PC_HI12 = 90
+const R_LARCH_TLS_IE64_PC_LO20 = 89
+const R_LARCH_TLS_IE_HI20 = 91
+const R_LARCH_TLS_IE_LO12 = 92
+const R_LARCH_TLS_IE_PC_HI20 = 87
+const R_LARCH_TLS_IE_PC_LO12 = 88
+const R_LARCH_TLS_LD_HI20 = 96
+const R_LARCH_TLS_LD_PC_HI20 = 95
+const R_LARCH_TLS_LE64_HI12 = 86
+const R_LARCH_TLS_LE64_LO20 = 85
+const R_LARCH_TLS_LE_HI20 = 83
+const R_LARCH_TLS_LE_LO12 = 84
+const R_LARCH_TLS_TPREL32 = 10
+const R_LARCH_TLS_TPREL64 = 11
+const R_M32R_10_PCREL = 4
+const R_M32R_10_PCREL_RELA = 36
+const R_M32R_16 = 1
+const R_M32R_16_RELA = 33
+const R_M32R_18_PCREL = 5
+const R_M32R_18_PCREL_RELA = 37
+const R_M32R_24 = 3
+const R_M32R_24_RELA = 35
+const R_M32R_26_PCREL = 6
+const R_M32R_26_PCREL_RELA = 38
+const R_M32R_26_PLTREL = 49
+const R_M32R_32 = 2
+const R_M32R_32_RELA = 34
+const R_M32R_COPY = 50
+const R_M32R_GLOB_DAT = 51
+const R_M32R_GNU_VTENTRY = 12
+const R_M32R_GNU_VTINHERIT = 11
+const R_M32R_GOT16_HI_SLO = 57
+const R_M32R_GOT16_HI_ULO = 56
+const R_M32R_GOT16_LO = 58
+const R_M32R_GOT24 = 48
+const R_M32R_GOTOFF = 54
+const R_M32R_GOTOFF_HI_SLO = 63
+const R_M32R_GOTOFF_HI_ULO = 62
+const R_M32R_GOTOFF_LO = 64
+const R_M32R_GOTPC24 = 55
+const R_M32R_GOTPC_HI_SLO = 60
+const R_M32R_GOTPC_HI_ULO = 59
+const R_M32R_GOTPC_LO = 61
+const R_M32R_HI16_SLO = 8
+const R_M32R_HI16_SLO_RELA = 40
+const R_M32R_HI16_ULO = 7
+const R_M32R_HI16_ULO_RELA = 39
+const R_M32R_JMP_SLOT = 52
+const R_M32R_LO16 = 9
+const R_M32R_LO16_RELA = 41
+const R_M32R_NONE = 0
+const R_M32R_NUM = 256
+const R_M32R_REL32 = 45
+const R_M32R_RELATIVE = 53
+const R_M32R_RELA_GNU_VTENTRY = 44
+const R_M32R_RELA_GNU_VTINHERIT = 43
+const R_M32R_SDA16 = 10
+const R_M32R_SDA16_RELA = 42
+const R_MICROBLAZE_32 = 1
+const R_MICROBLAZE_32_LO = 6
+const R_MICROBLAZE_32_PCREL = 2
+const R_MICROBLAZE_32_PCREL_LO = 4
+const R_MICROBLAZE_32_SYM_OP_SYM = 10
+const R_MICROBLAZE_64 = 5
+const R_MICROBLAZE_64_NONE = 9
+const R_MICROBLAZE_64_PCREL = 3
+const R_MICROBLAZE_COPY = 21
+const R_MICROBLAZE_GLOB_DAT = 18
+const R_MICROBLAZE_GNU_VTENTRY = 12
+const R_MICROBLAZE_GNU_VTINHERIT = 11
+const R_MICROBLAZE_GOTOFF_32 = 20
+const R_MICROBLAZE_GOTOFF_64 = 19
+const R_MICROBLAZE_GOTPC_64 = 13
+const R_MICROBLAZE_GOT_64 = 14
+const R_MICROBLAZE_JUMP_SLOT = 17
+const R_MICROBLAZE_NONE = 0
+const R_MICROBLAZE_PLT_64 = 15
+const R_MICROBLAZE_REL = 16
+const R_MICROBLAZE_SRO32 = 7
+const R_MICROBLAZE_SRW32 = 8
+const R_MICROBLAZE_TLS = 22
+const R_MICROBLAZE_TLSDTPMOD32 = 25
+const R_MICROBLAZE_TLSDTPREL32 = 26
+const R_MICROBLAZE_TLSDTPREL64 = 27
+const R_MICROBLAZE_TLSGD = 23
+const R_MICROBLAZE_TLSGOTTPREL32 = 28
+const R_MICROBLAZE_TLSLD = 24
+const R_MICROBLAZE_TLSTPREL32 = 29
+const R_MIPS_16 = 1
+const R_MIPS_26 = 4
+const R_MIPS_32 = 2
+const R_MIPS_64 = 18
+const R_MIPS_ADD_IMMEDIATE = 34
+const R_MIPS_CALL16 = 11
+const R_MIPS_CALL_HI16 = 30
+const R_MIPS_CALL_LO16 = 31
+const R_MIPS_COPY = 126
+const R_MIPS_DELETE = 27
+const R_MIPS_GLOB_DAT = 51
+const R_MIPS_GOT16 = 9
+const R_MIPS_GOT_DISP = 19
+const R_MIPS_GOT_HI16 = 22
+const R_MIPS_GOT_LO16 = 23
+const R_MIPS_GOT_OFST = 21
+const R_MIPS_GOT_PAGE = 20
+const R_MIPS_GPREL16 = 7
+const R_MIPS_GPREL32 = 12
+const R_MIPS_HI16 = 5
+const R_MIPS_HIGHER = 28
+const R_MIPS_HIGHEST = 29
+const R_MIPS_INSERT_A = 25
+const R_MIPS_INSERT_B = 26
+const R_MIPS_JALR = 37
+const R_MIPS_JUMP_SLOT = 127
+const R_MIPS_LITERAL = 8
+const R_MIPS_LO16 = 6
+const R_MIPS_NONE = 0
+const R_MIPS_NUM = 128
+const R_MIPS_PC16 = 10
+const R_MIPS_PJUMP = 35
+const R_MIPS_REL16 = 33
+const R_MIPS_REL32 = 3
+const R_MIPS_RELGOT = 36
+const R_MIPS_SCN_DISP = 32
+const R_MIPS_SHIFT5 = 16
+const R_MIPS_SHIFT6 = 17
+const R_MIPS_SUB = 24
+const R_MIPS_TLS_DTPMOD32 = 38
+const R_MIPS_TLS_DTPMOD64 = 40
+const R_MIPS_TLS_DTPREL32 = 39
+const R_MIPS_TLS_DTPREL64 = 41
+const R_MIPS_TLS_DTPREL_HI16 = 44
+const R_MIPS_TLS_DTPREL_LO16 = 45
+const R_MIPS_TLS_GD = 42
+const R_MIPS_TLS_GOTTPREL = 46
+const R_MIPS_TLS_LDM = 43
+const R_MIPS_TLS_TPREL32 = 47
+const R_MIPS_TLS_TPREL64 = 48
+const R_MIPS_TLS_TPREL_HI16 = 49
+const R_MIPS_TLS_TPREL_LO16 = 50
+const R_MN10300_16 = 2
+const R_MN10300_24 = 9
+const R_MN10300_32 = 1
+const R_MN10300_8 = 3
+const R_MN10300_COPY = 20
+const R_MN10300_GLOB_DAT = 21
+const R_MN10300_GNU_VTENTRY = 8
+const R_MN10300_GNU_VTINHERIT = 7
+const R_MN10300_GOT16 = 19
+const R_MN10300_GOT24 = 18
+const R_MN10300_GOT32 = 17
+const R_MN10300_GOTOFF16 = 14
+const R_MN10300_GOTOFF24 = 13
+const R_MN10300_GOTOFF32 = 12
+const R_MN10300_GOTPC16 = 11
+const R_MN10300_GOTPC32 = 10
+const R_MN10300_JMP_SLOT = 22
+const R_MN10300_NONE = 0
+const R_MN10300_NUM = 24
+const R_MN10300_PCREL16 = 5
+const R_MN10300_PCREL32 = 4
+const R_MN10300_PCREL8 = 6
+const R_MN10300_PLT16 = 16
+const R_MN10300_PLT32 = 15
+const R_MN10300_RELATIVE = 23
+const R_NIOS2_ALIGN = 21
+const R_NIOS2_BFD_RELOC_16 = 13
+const R_NIOS2_BFD_RELOC_32 = 12
+const R_NIOS2_BFD_RELOC_8 = 14
+const R_NIOS2_CACHE_OPX = 6
+const R_NIOS2_CALL16 = 23
+const R_NIOS2_CALL26 = 4
+const R_NIOS2_CALL26_NOAT = 41
+const R_NIOS2_CALLR = 20
+const R_NIOS2_CALL_HA = 45
+const R_NIOS2_CALL_LO = 44
+const R_NIOS2_CJMP = 19
+const R_NIOS2_COPY = 36
+const R_NIOS2_GLOB_DAT = 37
+const R_NIOS2_GNU_VTENTRY = 17
+const R_NIOS2_GNU_VTINHERIT = 16
+const R_NIOS2_GOT16 = 22
+const R_NIOS2_GOTOFF = 40
+const R_NIOS2_GOTOFF_HA = 25
+const R_NIOS2_GOTOFF_LO = 24
+const R_NIOS2_GOT_HA = 43
+const R_NIOS2_GOT_LO = 42
+const R_NIOS2_GPREL = 15
+const R_NIOS2_HI16 = 9
+const R_NIOS2_HIADJ16 = 11
+const R_NIOS2_IMM5 = 5
+const R_NIOS2_IMM6 = 7
+const R_NIOS2_IMM8 = 8
+const R_NIOS2_JUMP_SLOT = 38
+const R_NIOS2_LO16 = 10
+const R_NIOS2_NONE = 0
+const R_NIOS2_PCREL16 = 3
+const R_NIOS2_PCREL_HA = 27
+const R_NIOS2_PCREL_LO = 26
+const R_NIOS2_RELATIVE = 39
+const R_NIOS2_S16 = 1
+const R_NIOS2_TLS_DTPMOD = 33
+const R_NIOS2_TLS_DTPREL = 34
+const R_NIOS2_TLS_GD16 = 28
+const R_NIOS2_TLS_IE16 = 31
+const R_NIOS2_TLS_LDM16 = 29
+const R_NIOS2_TLS_LDO16 = 30
+const R_NIOS2_TLS_LE16 = 32
+const R_NIOS2_TLS_TPREL = 35
+const R_NIOS2_U16 = 2
+const R_NIOS2_UJMP = 18
+const R_OR1K_16 = 2
+const R_OR1K_16_PCREL = 10
+const R_OR1K_32 = 1
+const R_OR1K_32_PCREL = 9
+const R_OR1K_8 = 3
+const R_OR1K_8_PCREL = 11
+const R_OR1K_COPY = 18
+const R_OR1K_GLOB_DAT = 19
+const R_OR1K_GNU_VTENTRY = 7
+const R_OR1K_GNU_VTINHERIT = 8
+const R_OR1K_GOT16 = 14
+const R_OR1K_GOTOFF_HI16 = 16
+const R_OR1K_GOTOFF_LO16 = 17
+const R_OR1K_GOTPC_HI16 = 12
+const R_OR1K_GOTPC_LO16 = 13
+const R_OR1K_HI_16_IN_INSN = 5
+const R_OR1K_INSN_REL_26 = 6
+const R_OR1K_JMP_SLOT = 20
+const R_OR1K_LO_16_IN_INSN = 4
+const R_OR1K_NONE = 0
+const R_OR1K_PLT26 = 15
+const R_OR1K_RELATIVE = 21
+const R_OR1K_TLS_DTPMOD = 34
+const R_OR1K_TLS_DTPOFF = 33
+const R_OR1K_TLS_GD_HI16 = 22
+const R_OR1K_TLS_GD_LO16 = 23
+const R_OR1K_TLS_IE_HI16 = 28
+const R_OR1K_TLS_IE_LO16 = 29
+const R_OR1K_TLS_LDM_HI16 = 24
+const R_OR1K_TLS_LDM_LO16 = 25
+const R_OR1K_TLS_LDO_HI16 = 26
+const R_OR1K_TLS_LDO_LO16 = 27
+const R_OR1K_TLS_LE_HI16 = 30
+const R_OR1K_TLS_LE_LO16 = 31
+const R_OR1K_TLS_TPOFF = 32
+const R_PARISC_COPY = 128
+const R_PARISC_DIR14DR = 84
+const R_PARISC_DIR14R = 6
+const R_PARISC_DIR14WR = 83
+const R_PARISC_DIR16DF = 87
+const R_PARISC_DIR16F = 85
+const R_PARISC_DIR16WF = 86
+const R_PARISC_DIR17F = 4
+const R_PARISC_DIR17R = 3
+const R_PARISC_DIR21L = 2
+const R_PARISC_DIR32 = 1
+const R_PARISC_DIR64 = 80
+const R_PARISC_DPREL14R = 22
+const R_PARISC_DPREL21L = 18
+const R_PARISC_EPLT = 130
+const R_PARISC_FPTR64 = 64
+const R_PARISC_GNU_VTENTRY = 232
+const R_PARISC_GNU_VTINHERIT = 233
+const R_PARISC_GPREL14DR = 92
+const R_PARISC_GPREL14R = 30
+const R_PARISC_GPREL14WR = 91
+const R_PARISC_GPREL16DF = 95
+const R_PARISC_GPREL16F = 93
+const R_PARISC_GPREL16WF = 94
+const R_PARISC_GPREL21L = 26
+const R_PARISC_GPREL64 = 88
+const R_PARISC_HIRESERVE = 255
+const R_PARISC_IPLT = 129
+const R_PARISC_LORESERVE = 128
+const R_PARISC_LTOFF14DR = 100
+const R_PARISC_LTOFF14R = 38
+const R_PARISC_LTOFF14WR = 99
+const R_PARISC_LTOFF16DF = 103
+const R_PARISC_LTOFF16F = 101
+const R_PARISC_LTOFF16WF = 102
+const R_PARISC_LTOFF21L = 34
+const R_PARISC_LTOFF64 = 96
+const R_PARISC_LTOFF_FPTR14DR = 124
+const R_PARISC_LTOFF_FPTR14R = 62
+const R_PARISC_LTOFF_FPTR14WR = 123
+const R_PARISC_LTOFF_FPTR16DF = 127
+const R_PARISC_LTOFF_FPTR16F = 125
+const R_PARISC_LTOFF_FPTR16WF = 126
+const R_PARISC_LTOFF_FPTR21L = 58
+const R_PARISC_LTOFF_FPTR32 = 57
+const R_PARISC_LTOFF_FPTR64 = 120
+const R_PARISC_LTOFF_TP14DR = 228
+const R_PARISC_LTOFF_TP14F = 167
+const R_PARISC_LTOFF_TP14R = 166
+const R_PARISC_LTOFF_TP14WR = 227
+const R_PARISC_LTOFF_TP16DF = 231
+const R_PARISC_LTOFF_TP16F = 229
+const R_PARISC_LTOFF_TP16WF = 230
+const R_PARISC_LTOFF_TP21L = 162
+const R_PARISC_LTOFF_TP64 = 224
+const R_PARISC_NONE = 0
+const R_PARISC_PCREL14DR = 76
+const R_PARISC_PCREL14R = 14
+const R_PARISC_PCREL14WR = 75
+const R_PARISC_PCREL16DF = 79
+const R_PARISC_PCREL16F = 77
+const R_PARISC_PCREL16WF = 78
+const R_PARISC_PCREL17F = 12
+const R_PARISC_PCREL17R = 11
+const R_PARISC_PCREL21L = 10
+const R_PARISC_PCREL22F = 74
+const R_PARISC_PCREL32 = 9
+const R_PARISC_PCREL64 = 72
+const R_PARISC_PLABEL14R = 70
+const R_PARISC_PLABEL21L = 66
+const R_PARISC_PLABEL32 = 65
+const R_PARISC_PLTOFF14DR = 116
+const R_PARISC_PLTOFF14R = 54
+const R_PARISC_PLTOFF14WR = 115
+const R_PARISC_PLTOFF16DF = 119
+const R_PARISC_PLTOFF16F = 117
+const R_PARISC_PLTOFF16WF = 118
+const R_PARISC_PLTOFF21L = 50
+const R_PARISC_SECREL32 = 41
+const R_PARISC_SECREL64 = 104
+const R_PARISC_SEGBASE = 48
+const R_PARISC_SEGREL32 = 49
+const R_PARISC_SEGREL64 = 112
+const R_PARISC_TLS_DTPMOD32 = 242
+const R_PARISC_TLS_DTPMOD64 = 243
+const R_PARISC_TLS_DTPOFF32 = 244
+const R_PARISC_TLS_DTPOFF64 = 245
+const R_PARISC_TLS_GD14R = 235
+const R_PARISC_TLS_GD21L = 234
+const R_PARISC_TLS_GDCALL = 236
+const R_PARISC_TLS_IE14R = 166
+const R_PARISC_TLS_IE21L = 162
+const R_PARISC_TLS_LDM14R = 238
+const R_PARISC_TLS_LDM21L = 237
+const R_PARISC_TLS_LDMCALL = 239
+const R_PARISC_TLS_LDO14R = 241
+const R_PARISC_TLS_LDO21L = 240
+const R_PARISC_TLS_LE14R = 158
+const R_PARISC_TLS_LE21L = 154
+const R_PARISC_TLS_TPREL32 = 153
+const R_PARISC_TLS_TPREL64 = 216
+const R_PARISC_TPREL14DR = 220
+const R_PARISC_TPREL14R = 158
+const R_PARISC_TPREL14WR = 219
+const R_PARISC_TPREL16DF = 223
+const R_PARISC_TPREL16F = 221
+const R_PARISC_TPREL16WF = 222
+const R_PARISC_TPREL21L = 154
+const R_PARISC_TPREL32 = 153
+const R_PARISC_TPREL64 = 216
+const R_PPC64_ADDR14 = 7
+const R_PPC64_ADDR14_BRNTAKEN = 9
+const R_PPC64_ADDR14_BRTAKEN = 8
+const R_PPC64_ADDR16 = 3
+const R_PPC64_ADDR16_DS = 56
+const R_PPC64_ADDR16_HA = 6
+const R_PPC64_ADDR16_HI = 5
+const R_PPC64_ADDR16_HIGH = 110
+const R_PPC64_ADDR16_HIGHA = 111
+const R_PPC64_ADDR16_HIGHER = 39
+const R_PPC64_ADDR16_HIGHERA = 40
+const R_PPC64_ADDR16_HIGHEST = 41
+const R_PPC64_ADDR16_HIGHESTA = 42
+const R_PPC64_ADDR16_LO = 4
+const R_PPC64_ADDR16_LO_DS = 57
+const R_PPC64_ADDR24 = 2
+const R_PPC64_ADDR30 = 37
+const R_PPC64_ADDR32 = 1
+const R_PPC64_ADDR64 = 38
+const R_PPC64_COPY = 19
+const R_PPC64_DTPMOD64 = 68
+const R_PPC64_DTPREL16 = 74
+const R_PPC64_DTPREL16_DS = 101
+const R_PPC64_DTPREL16_HA = 77
+const R_PPC64_DTPREL16_HI = 76
+const R_PPC64_DTPREL16_HIGH = 114
+const R_PPC64_DTPREL16_HIGHA = 115
+const R_PPC64_DTPREL16_HIGHER = 103
+const R_PPC64_DTPREL16_HIGHERA = 104
+const R_PPC64_DTPREL16_HIGHEST = 105
+const R_PPC64_DTPREL16_HIGHESTA = 106
+const R_PPC64_DTPREL16_LO = 75
+const R_PPC64_DTPREL16_LO_DS = 102
+const R_PPC64_DTPREL64 = 78
+const R_PPC64_GLOB_DAT = 20
+const R_PPC64_GOT16 = 14
+const R_PPC64_GOT16_DS = 58
+const R_PPC64_GOT16_HA = 17
+const R_PPC64_GOT16_HI = 16
+const R_PPC64_GOT16_LO = 15
+const R_PPC64_GOT16_LO_DS = 59
+const R_PPC64_GOT_DTPREL16_DS = 91
+const R_PPC64_GOT_DTPREL16_HA = 94
+const R_PPC64_GOT_DTPREL16_HI = 93
+const R_PPC64_GOT_DTPREL16_LO_DS = 92
+const R_PPC64_GOT_TLSGD16 = 79
+const R_PPC64_GOT_TLSGD16_HA = 82
+const R_PPC64_GOT_TLSGD16_HI = 81
+const R_PPC64_GOT_TLSGD16_LO = 80
+const R_PPC64_GOT_TLSLD16 = 83
+const R_PPC64_GOT_TLSLD16_HA = 86
+const R_PPC64_GOT_TLSLD16_HI = 85
+const R_PPC64_GOT_TLSLD16_LO = 84
+const R_PPC64_GOT_TPREL16_DS = 87
+const R_PPC64_GOT_TPREL16_HA = 90
+const R_PPC64_GOT_TPREL16_HI = 89
+const R_PPC64_GOT_TPREL16_LO_DS = 88
+const R_PPC64_IRELATIVE = 248
+const R_PPC64_JMP_IREL = 247
+const R_PPC64_JMP_SLOT = 21
+const R_PPC64_NONE = 0
+const R_PPC64_PLT16_HA = 31
+const R_PPC64_PLT16_HI = 30
+const R_PPC64_PLT16_LO = 29
+const R_PPC64_PLT16_LO_DS = 60
+const R_PPC64_PLT32 = 27
+const R_PPC64_PLT64 = 45
+const R_PPC64_PLTGOT16 = 52
+const R_PPC64_PLTGOT16_DS = 65
+const R_PPC64_PLTGOT16_HA = 55
+const R_PPC64_PLTGOT16_HI = 54
+const R_PPC64_PLTGOT16_LO = 53
+const R_PPC64_PLTGOT16_LO_DS = 66
+const R_PPC64_PLTREL32 = 28
+const R_PPC64_PLTREL64 = 46
+const R_PPC64_REL14 = 11
+const R_PPC64_REL14_BRNTAKEN = 13
+const R_PPC64_REL14_BRTAKEN = 12
+const R_PPC64_REL16 = 249
+const R_PPC64_REL16_HA = 252
+const R_PPC64_REL16_HI = 251
+const R_PPC64_REL16_LO = 250
+const R_PPC64_REL24 = 10
+const R_PPC64_REL32 = 26
+const R_PPC64_REL64 = 44
+const R_PPC64_RELATIVE = 22
+const R_PPC64_SECTOFF = 33
+const R_PPC64_SECTOFF_DS = 61
+const R_PPC64_SECTOFF_HA = 36
+const R_PPC64_SECTOFF_HI = 35
+const R_PPC64_SECTOFF_LO = 34
+const R_PPC64_SECTOFF_LO_DS = 62
+const R_PPC64_TLS = 67
+const R_PPC64_TLSGD = 107
+const R_PPC64_TLSLD = 108
+const R_PPC64_TOC = 51
+const R_PPC64_TOC16 = 47
+const R_PPC64_TOC16_DS = 63
+const R_PPC64_TOC16_HA = 50
+const R_PPC64_TOC16_HI = 49
+const R_PPC64_TOC16_LO = 48
+const R_PPC64_TOC16_LO_DS = 64
+const R_PPC64_TOCSAVE = 109
+const R_PPC64_TPREL16 = 69
+const R_PPC64_TPREL16_DS = 95
+const R_PPC64_TPREL16_HA = 72
+const R_PPC64_TPREL16_HI = 71
+const R_PPC64_TPREL16_HIGH = 112
+const R_PPC64_TPREL16_HIGHA = 113
+const R_PPC64_TPREL16_HIGHER = 97
+const R_PPC64_TPREL16_HIGHERA = 98
+const R_PPC64_TPREL16_HIGHEST = 99
+const R_PPC64_TPREL16_HIGHESTA = 100
+const R_PPC64_TPREL16_LO = 70
+const R_PPC64_TPREL16_LO_DS = 96
+const R_PPC64_TPREL64 = 73
+const R_PPC64_UADDR16 = 25
+const R_PPC64_UADDR32 = 24
+const R_PPC64_UADDR64 = 43
+const R_PPC_ADDR14 = 7
+const R_PPC_ADDR14_BRNTAKEN = 9
+const R_PPC_ADDR14_BRTAKEN = 8
+const R_PPC_ADDR16 = 3
+const R_PPC_ADDR16_HA = 6
+const R_PPC_ADDR16_HI = 5
+const R_PPC_ADDR16_LO = 4
+const R_PPC_ADDR24 = 2
+const R_PPC_ADDR32 = 1
+const R_PPC_COPY = 19
+const R_PPC_DIAB_RELSDA_HA = 185
+const R_PPC_DIAB_RELSDA_HI = 184
+const R_PPC_DIAB_RELSDA_LO = 183
+const R_PPC_DIAB_SDA21_HA = 182
+const R_PPC_DIAB_SDA21_HI = 181
+const R_PPC_DIAB_SDA21_LO = 180
+const R_PPC_DTPMOD32 = 68
+const R_PPC_DTPREL16 = 74
+const R_PPC_DTPREL16_HA = 77
+const R_PPC_DTPREL16_HI = 76
+const R_PPC_DTPREL16_LO = 75
+const R_PPC_DTPREL32 = 78
+const R_PPC_EMB_BIT_FLD = 115
+const R_PPC_EMB_MRKREF = 110
+const R_PPC_EMB_NADDR16 = 102
+const R_PPC_EMB_NADDR16_HA = 105
+const R_PPC_EMB_NADDR16_HI = 104
+const R_PPC_EMB_NADDR16_LO = 103
+const R_PPC_EMB_NADDR32 = 101
+const R_PPC_EMB_RELSDA = 116
+const R_PPC_EMB_RELSEC16 = 111
+const R_PPC_EMB_RELST_HA = 114
+const R_PPC_EMB_RELST_HI = 113
+const R_PPC_EMB_RELST_LO = 112
+const R_PPC_EMB_SDA21 = 109
+const R_PPC_EMB_SDA2I16 = 107
+const R_PPC_EMB_SDA2REL = 108
+const R_PPC_EMB_SDAI16 = 106
+const R_PPC_GLOB_DAT = 20
+const R_PPC_GOT16 = 14
+const R_PPC_GOT16_HA = 17
+const R_PPC_GOT16_HI = 16
+const R_PPC_GOT16_LO = 15
+const R_PPC_GOT_DTPREL16 = 91
+const R_PPC_GOT_DTPREL16_HA = 94
+const R_PPC_GOT_DTPREL16_HI = 93
+const R_PPC_GOT_DTPREL16_LO = 92
+const R_PPC_GOT_TLSGD16 = 79
+const R_PPC_GOT_TLSGD16_HA = 82
+const R_PPC_GOT_TLSGD16_HI = 81
+const R_PPC_GOT_TLSGD16_LO = 80
+const R_PPC_GOT_TLSLD16 = 83
+const R_PPC_GOT_TLSLD16_HA = 86
+const R_PPC_GOT_TLSLD16_HI = 85
+const R_PPC_GOT_TLSLD16_LO = 84
+const R_PPC_GOT_TPREL16 = 87
+const R_PPC_GOT_TPREL16_HA = 90
+const R_PPC_GOT_TPREL16_HI = 89
+const R_PPC_GOT_TPREL16_LO = 88
+const R_PPC_IRELATIVE = 248
+const R_PPC_JMP_SLOT = 21
+const R_PPC_LOCAL24PC = 23
+const R_PPC_NONE = 0
+const R_PPC_PLT16_HA = 31
+const R_PPC_PLT16_HI = 30
+const R_PPC_PLT16_LO = 29
+const R_PPC_PLT32 = 27
+const R_PPC_PLTREL24 = 18
+const R_PPC_PLTREL32 = 28
+const R_PPC_REL14 = 11
+const R_PPC_REL14_BRNTAKEN = 13
+const R_PPC_REL14_BRTAKEN = 12
+const R_PPC_REL16 = 249
+const R_PPC_REL16_HA = 252
+const R_PPC_REL16_HI = 251
+const R_PPC_REL16_LO = 250
+const R_PPC_REL24 = 10
+const R_PPC_REL32 = 26
+const R_PPC_RELATIVE = 22
+const R_PPC_SDAREL16 = 32
+const R_PPC_SECTOFF = 33
+const R_PPC_SECTOFF_HA = 36
+const R_PPC_SECTOFF_HI = 35
+const R_PPC_SECTOFF_LO = 34
+const R_PPC_TLS = 67
+const R_PPC_TLSGD = 95
+const R_PPC_TLSLD = 96
+const R_PPC_TOC16 = 255
+const R_PPC_TPREL16 = 69
+const R_PPC_TPREL16_HA = 72
+const R_PPC_TPREL16_HI = 71
+const R_PPC_TPREL16_LO = 70
+const R_PPC_TPREL32 = 73
+const R_PPC_UADDR16 = 25
+const R_PPC_UADDR32 = 24
+const R_RISCV_32 = 1
+const R_RISCV_32_PCREL = 57
+const R_RISCV_64 = 2
+const R_RISCV_ADD16 = 34
+const R_RISCV_ADD32 = 35
+const R_RISCV_ADD64 = 36
+const R_RISCV_ADD8 = 33
+const R_RISCV_ALIGN = 43
+const R_RISCV_BRANCH = 16
+const R_RISCV_CALL = 18
+const R_RISCV_CALL_PLT = 19
+const R_RISCV_COPY = 4
+const R_RISCV_GOT32_PCREL = 41
+const R_RISCV_GOT_HI20 = 20
+const R_RISCV_HI20 = 26
+const R_RISCV_IRELATIVE = 58
+const R_RISCV_JAL = 17
+const R_RISCV_JUMP_SLOT = 5
+const R_RISCV_LO12_I = 27
+const R_RISCV_LO12_S = 28
+const R_RISCV_NONE = 0
+const R_RISCV_PCREL_HI20 = 23
+const R_RISCV_PCREL_LO12_I = 24
+const R_RISCV_PCREL_LO12_S = 25
+const R_RISCV_PLT32 = 59
+const R_RISCV_RELATIVE = 3
+const R_RISCV_RELAX = 51
+const R_RISCV_RVC_BRANCH = 44
+const R_RISCV_RVC_JUMP = 45
+const R_RISCV_RVC_LUI = 46
+const R_RISCV_SET16 = 55
+const R_RISCV_SET32 = 56
+const R_RISCV_SET6 = 53
+const R_RISCV_SET8 = 54
+const R_RISCV_SET_ULEB128 = 60
+const R_RISCV_SUB16 = 38
+const R_RISCV_SUB32 = 39
+const R_RISCV_SUB6 = 52
+const R_RISCV_SUB64 = 40
+const R_RISCV_SUB8 = 37
+const R_RISCV_SUB_ULEB128 = 61
+const R_RISCV_TLSDESC = 12
+const R_RISCV_TLSDESC_ADD_LO12 = 64
+const R_RISCV_TLSDESC_CALL = 65
+const R_RISCV_TLSDESC_HI20 = 62
+const R_RISCV_TLSDESC_LOAD_LO12 = 63
+const R_RISCV_TLS_DTPMOD32 = 6
+const R_RISCV_TLS_DTPMOD64 = 7
+const R_RISCV_TLS_DTPREL32 = 8
+const R_RISCV_TLS_DTPREL64 = 9
+const R_RISCV_TLS_GD_HI20 = 22
+const R_RISCV_TLS_GOT_HI20 = 21
+const R_RISCV_TLS_TPREL32 = 10
+const R_RISCV_TLS_TPREL64 = 11
+const R_RISCV_TPREL_ADD = 32
+const R_RISCV_TPREL_HI20 = 29
+const R_RISCV_TPREL_LO12_I = 30
+const R_RISCV_TPREL_LO12_S = 31
+const R_SH_ALIGN = 29
+const R_SH_CODE = 30
+const R_SH_COPY = 162
+const R_SH_COUNT = 28
+const R_SH_DATA = 31
+const R_SH_DIR32 = 1
+const R_SH_DIR8BP = 7
+const R_SH_DIR8L = 9
+const R_SH_DIR8W = 8
+const R_SH_DIR8WPL = 5
+const R_SH_DIR8WPN = 3
+const R_SH_DIR8WPZ = 6
+const R_SH_FUNCDESC = 207
+const R_SH_FUNCDESC_VALUE = 208
+const R_SH_GLOB_DAT = 163
+const R_SH_GNU_VTENTRY = 35
+const R_SH_GNU_VTINHERIT = 34
+const R_SH_GOT20 = 201
+const R_SH_GOT32 = 160
+const R_SH_GOTFUNCDESC = 203
+const R_SH_GOTFUNCDEST20 = 204
+const R_SH_GOTOFF = 166
+const R_SH_GOTOFF20 = 202
+const R_SH_GOTOFFFUNCDESC = 205
+const R_SH_GOTOFFFUNCDEST20 = 206
+const R_SH_GOTPC = 167
+const R_SH_IND12W = 4
+const R_SH_JMP_SLOT = 164
+const R_SH_LABEL = 32
+const R_SH_NONE = 0
+const R_SH_NUM = 256
+const R_SH_PLT32 = 161
+const R_SH_REL32 = 2
+const R_SH_RELATIVE = 165
+const R_SH_SWITCH16 = 25
+const R_SH_SWITCH32 = 26
+const R_SH_SWITCH8 = 33
+const R_SH_TLS_DTPMOD32 = 149
+const R_SH_TLS_DTPOFF32 = 150
+const R_SH_TLS_GD_32 = 144
+const R_SH_TLS_IE_32 = 147
+const R_SH_TLS_LDO_32 = 146
+const R_SH_TLS_LD_32 = 145
+const R_SH_TLS_LE_32 = 148
+const R_SH_TLS_TPOFF32 = 151
+const R_SH_USES = 27
+const R_SPARC_10 = 30
+const R_SPARC_11 = 31
+const R_SPARC_13 = 11
+const R_SPARC_16 = 2
+const R_SPARC_22 = 10
+const R_SPARC_32 = 3
+const R_SPARC_5 = 44
+const R_SPARC_6 = 45
+const R_SPARC_64 = 32
+const R_SPARC_7 = 43
+const R_SPARC_8 = 1
+const R_SPARC_COPY = 19
+const R_SPARC_DISP16 = 5
+const R_SPARC_DISP32 = 6
+const R_SPARC_DISP64 = 46
+const R_SPARC_DISP8 = 4
+const R_SPARC_GLOB_DAT = 20
+const R_SPARC_GLOB_JMP = 42
+const R_SPARC_GNU_VTENTRY = 251
+const R_SPARC_GNU_VTINHERIT = 250
+const R_SPARC_GOT10 = 13
+const R_SPARC_GOT13 = 14
+const R_SPARC_GOT22 = 15
+const R_SPARC_GOTDATA_HIX22 = 80
+const R_SPARC_GOTDATA_LOX10 = 81
+const R_SPARC_GOTDATA_OP = 84
+const R_SPARC_GOTDATA_OP_HIX22 = 82
+const R_SPARC_GOTDATA_OP_LOX10 = 83
+const R_SPARC_H34 = 85
+const R_SPARC_H44 = 50
+const R_SPARC_HH22 = 34
+const R_SPARC_HI22 = 9
+const R_SPARC_HIPLT22 = 25
+const R_SPARC_HIX22 = 48
+const R_SPARC_HM10 = 35
+const R_SPARC_JMP_SLOT = 21
+const R_SPARC_L44 = 52
+const R_SPARC_LM22 = 36
+const R_SPARC_LO10 = 12
+const R_SPARC_LOPLT10 = 26
+const R_SPARC_LOX10 = 49
+const R_SPARC_M44 = 51
+const R_SPARC_NONE = 0
+const R_SPARC_NUM = 253
+const R_SPARC_OLO10 = 33
+const R_SPARC_PC10 = 16
+const R_SPARC_PC22 = 17
+const R_SPARC_PCPLT10 = 29
+const R_SPARC_PCPLT22 = 28
+const R_SPARC_PCPLT32 = 27
+const R_SPARC_PC_HH22 = 37
+const R_SPARC_PC_HM10 = 38
+const R_SPARC_PC_LM22 = 39
+const R_SPARC_PLT32 = 24
+const R_SPARC_PLT64 = 47
+const R_SPARC_REGISTER = 53
+const R_SPARC_RELATIVE = 22
+const R_SPARC_REV32 = 252
+const R_SPARC_SIZE32 = 86
+const R_SPARC_SIZE64 = 87
+const R_SPARC_TLS_DTPMOD32 = 74
+const R_SPARC_TLS_DTPMOD64 = 75
+const R_SPARC_TLS_DTPOFF32 = 76
+const R_SPARC_TLS_DTPOFF64 = 77
+const R_SPARC_TLS_GD_ADD = 58
+const R_SPARC_TLS_GD_CALL = 59
+const R_SPARC_TLS_GD_HI22 = 56
+const R_SPARC_TLS_GD_LO10 = 57
+const R_SPARC_TLS_IE_ADD = 71
+const R_SPARC_TLS_IE_HI22 = 67
+const R_SPARC_TLS_IE_LD = 69
+const R_SPARC_TLS_IE_LDX = 70
+const R_SPARC_TLS_IE_LO10 = 68
+const R_SPARC_TLS_LDM_ADD = 62
+const R_SPARC_TLS_LDM_CALL = 63
+const R_SPARC_TLS_LDM_HI22 = 60
+const R_SPARC_TLS_LDM_LO10 = 61
+const R_SPARC_TLS_LDO_ADD = 66
+const R_SPARC_TLS_LDO_HIX22 = 64
+const R_SPARC_TLS_LDO_LOX10 = 65
+const R_SPARC_TLS_LE_HIX22 = 72
+const R_SPARC_TLS_LE_LOX10 = 73
+const R_SPARC_TLS_TPOFF32 = 78
+const R_SPARC_TLS_TPOFF64 = 79
+const R_SPARC_UA16 = 55
+const R_SPARC_UA32 = 23
+const R_SPARC_UA64 = 54
+const R_SPARC_WDISP16 = 40
+const R_SPARC_WDISP19 = 41
+const R_SPARC_WDISP22 = 8
+const R_SPARC_WDISP30 = 7
+const R_SPARC_WPLT30 = 18
+const R_X86_64_16 = 12
+const R_X86_64_32 = 10
+const R_X86_64_32S = 11
+const R_X86_64_64 = 1
+const R_X86_64_8 = 14
+const R_X86_64_COPY = 5
+const R_X86_64_DTPMOD64 = 16
+const R_X86_64_DTPOFF32 = 21
+const R_X86_64_DTPOFF64 = 17
+const R_X86_64_GLOB_DAT = 6
+const R_X86_64_GOT32 = 3
+const R_X86_64_GOT64 = 27
+const R_X86_64_GOTOFF64 = 25
+const R_X86_64_GOTPC32 = 26
+const R_X86_64_GOTPC32_TLSDESC = 34
+const R_X86_64_GOTPC64 = 29
+const R_X86_64_GOTPCREL = 9
+const R_X86_64_GOTPCREL64 = 28
+const R_X86_64_GOTPCRELX = 41
+const R_X86_64_GOTPLT64 = 30
+const R_X86_64_GOTTPOFF = 22
+const R_X86_64_IRELATIVE = 37
+const R_X86_64_JUMP_SLOT = 7
+const R_X86_64_NONE = 0
+const R_X86_64_NUM = 43
+const R_X86_64_PC16 = 13
+const R_X86_64_PC32 = 2
+const R_X86_64_PC64 = 24
+const R_X86_64_PC8 = 15
+const R_X86_64_PLT32 = 4
+const R_X86_64_PLTOFF64 = 31
+const R_X86_64_RELATIVE = 8
+const R_X86_64_RELATIVE64 = 38
+const R_X86_64_REX_GOTPCRELX = 42
+const R_X86_64_SIZE32 = 32
+const R_X86_64_SIZE64 = 33
+const R_X86_64_TLSDESC = 36
+const R_X86_64_TLSDESC_CALL = 35
+const R_X86_64_TLSGD = 19
+const R_X86_64_TLSLD = 20
+const R_X86_64_TPOFF32 = 23
+const R_X86_64_TPOFF64 = 18
+const SA_EXPOSE_TAGBITS = 2048
+const SA_NOCLDSTOP = 1
+const SA_NOCLDWAIT = 2
+const SA_NODEFER = 1073741824
+const SA_ONSTACK = 134217728
+const SA_RESETHAND = 2147483648
+const SA_RESTART = 268435456
+const SA_RESTORER = 67108864
+const SA_SIGINFO = 4
+const SA_UNSUPPORTED = 1024
+const SCM_TIMESTAMPING_OLD = 37
+const SCM_TIMESTAMPNS_OLD = 35
+const SCM_TIMESTAMP_OLD = 29
+const SEGV_ACCERR = 2
+const SEGV_BNDERR = 3
+const SEGV_MAPERR = 1
+const SEGV_MTEAERR = 8
+const SEGV_MTESERR = 9
+const SEGV_PKUERR = 4
+const SELFMAG = 4
+const SHF_ALLOC = 2
+const SHF_ALPHA_GPREL = 268435456
+const SHF_ARM_COMDEF = 2147483648
+const SHF_ARM_ENTRYSECT = 268435456
+const SHF_COMPRESSED = 2048
+const SHF_EXCLUDE = 2147483648
+const SHF_EXECINSTR = 4
+const SHF_GROUP = 512
+const SHF_IA_64_NORECOV = 536870912
+const SHF_IA_64_SHORT = 268435456
+const SHF_INFO_LINK = 64
+const SHF_LINK_ORDER = 128
+const SHF_MASKOS = 267386880
+const SHF_MASKPROC = 4026531840
+const SHF_MERGE = 16
+const SHF_MIPS_ADDR = 1073741824
+const SHF_MIPS_GPREL = 268435456
+const SHF_MIPS_LOCAL = 67108864
+const SHF_MIPS_MERGE = 536870912
+const SHF_MIPS_NAMES = 33554432
+const SHF_MIPS_NODUPE = 16777216
+const SHF_MIPS_NOSTRIP = 134217728
+const SHF_MIPS_STRINGS = 2147483648
+const SHF_ORDERED = 1073741824
+const SHF_OS_NONCONFORMING = 256
+const SHF_PARISC_HUGE = 1073741824
+const SHF_PARISC_SBP = 2147483648
+const SHF_PARISC_SHORT = 536870912
+const SHF_STRINGS = 32
+const SHF_TLS = 1024
+const SHF_WRITE = 1
+const SHN_ABS = 65521
+const SHN_AFTER = 65281
+const SHN_BEFORE = 65280
+const SHN_COMMON = 65522
+const SHN_HIOS = 65343
+const SHN_HIPROC = 65311
+const SHN_HIRESERVE = 65535
+const SHN_LOOS = 65312
+const SHN_LOPROC = 65280
+const SHN_LORESERVE = 65280
+const SHN_MIPS_ACOMMON = 65280
+const SHN_MIPS_DATA = 65282
+const SHN_MIPS_SCOMMON = 65283
+const SHN_MIPS_SUNDEFINED = 65284
+const SHN_MIPS_TEXT = 65281
+const SHN_PARISC_ANSI_COMMON = 65280
+const SHN_PARISC_HUGE_COMMON = 65281
+const SHN_UNDEF = 0
+const SHN_XINDEX = 65535
+const SHT_ALPHA_DEBUG = 1879048193
+const SHT_ALPHA_REGINFO = 1879048194
+const SHT_ARM_ATTRIBUTES = 1879048195
+const SHT_ARM_EXIDX = 1879048193
+const SHT_ARM_PREEMPTMAP = 1879048194
+const SHT_CHECKSUM = 1879048184
+const SHT_DYNAMIC = 6
+const SHT_DYNSYM = 11
+const SHT_FINI_ARRAY = 15
+const SHT_GNU_ATTRIBUTES = 1879048181
+const SHT_GNU_HASH = 1879048182
+const SHT_GNU_LIBLIST = 1879048183
+const SHT_GNU_verdef = 1879048189
+const SHT_GNU_verneed = 1879048190
+const SHT_GNU_versym = 1879048191
+const SHT_GROUP = 17
+const SHT_HASH = 5
+const SHT_HIOS = 1879048191
+const SHT_HIPROC = 2147483647
+const SHT_HISUNW = 1879048191
+const SHT_HIUSER = 2415919103
+const SHT_IA_64_EXT = 1879048192
+const SHT_IA_64_UNWIND = 1879048193
+const SHT_INIT_ARRAY = 14
+const SHT_LOOS = 1610612736
+const SHT_LOPROC = 1879048192
+const SHT_LOSUNW = 1879048186
+const SHT_LOUSER = 2147483648
+const SHT_MIPS_AUXSYM = 1879048214
+const SHT_MIPS_CONFLICT = 1879048194
+const SHT_MIPS_CONTENT = 1879048204
+const SHT_MIPS_DEBUG = 1879048197
+const SHT_MIPS_DELTACLASS = 1879048221
+const SHT_MIPS_DELTADECL = 1879048223
+const SHT_MIPS_DELTAINST = 1879048220
+const SHT_MIPS_DELTASYM = 1879048219
+const SHT_MIPS_DENSE = 1879048211
+const SHT_MIPS_DWARF = 1879048222
+const SHT_MIPS_EH_REGION = 1879048231
+const SHT_MIPS_EVENTS = 1879048225
+const SHT_MIPS_EXTSYM = 1879048210
+const SHT_MIPS_FDESC = 1879048209
+const SHT_MIPS_GPTAB = 1879048195
+const SHT_MIPS_IFACE = 1879048203
+const SHT_MIPS_LIBLIST = 1879048192
+const SHT_MIPS_LINE = 1879048217
+const SHT_MIPS_LOCSTR = 1879048216
+const SHT_MIPS_LOCSYM = 1879048213
+const SHT_MIPS_MSYM = 1879048193
+const SHT_MIPS_OPTIONS = 1879048205
+const SHT_MIPS_OPTSYM = 1879048215
+const SHT_MIPS_PACKAGE = 1879048199
+const SHT_MIPS_PACKSYM = 1879048200
+const SHT_MIPS_PDESC = 1879048212
+const SHT_MIPS_PDR_EXCEPTION = 1879048233
+const SHT_MIPS_PIXIE = 1879048227
+const SHT_MIPS_REGINFO = 1879048198
+const SHT_MIPS_RELD = 1879048201
+const SHT_MIPS_RFDESC = 1879048218
+const SHT_MIPS_SHDR = 1879048208
+const SHT_MIPS_SYMBOL_LIB = 1879048224
+const SHT_MIPS_TRANSLATE = 1879048226
+const SHT_MIPS_UCODE = 1879048196
+const SHT_MIPS_WHIRL = 1879048230
+const SHT_MIPS_XLATE = 1879048228
+const SHT_MIPS_XLATE_DEBUG = 1879048229
+const SHT_MIPS_XLATE_OLD = 1879048232
+const SHT_NOBITS = 8
+const SHT_NOTE = 7
+const SHT_NULL = 0
+const SHT_NUM = 20
+const SHT_PARISC_DOC = 1879048194
+const SHT_PARISC_EXT = 1879048192
+const SHT_PARISC_UNWIND = 1879048193
+const SHT_PREINIT_ARRAY = 16
+const SHT_PROGBITS = 1
+const SHT_REL = 9
+const SHT_RELA = 4
+const SHT_RELR = 19
+const SHT_SHLIB = 10
+const SHT_STRTAB = 3
+const SHT_SUNW_COMDAT = 1879048187
+const SHT_SUNW_move = 1879048186
+const SHT_SUNW_syminfo = 1879048188
+const SHT_SYMTAB = 2
+const SHT_SYMTAB_SHNDX = 18
+const SIGABRT = 6
+const SIGALRM = 14
+const SIGBUS = 7
+const SIGCHLD = 17
+const SIGCONT = 18
+const SIGEV_NONE = 1
+const SIGEV_SIGNAL = 0
+const SIGEV_THREAD = 2
+const SIGEV_THREAD_ID = 4
+const SIGFPE = 8
+const SIGHUP = 1
+const SIGILL = 4
+const SIGINT = 2
+const SIGIO = 29
+const SIGIOT = 6
+const SIGKILL = 9
+const SIGPIPE = 13
+const SIGPOLL = 29
+const SIGPROF = 27
+const SIGPWR = 30
+const SIGQUIT = 3
+const SIGRTMAX = 0
+const SIGRTMIN = 0
+const SIGSEGV = 11
+const SIGSTKFLT = 16
+const SIGSTKSZ = 8192
+const SIGSTOP = 19
+const SIGSYS = 31
+const SIGTERM = 15
+const SIGTRAP = 5
+const SIGTSTP = 20
+const SIGTTIN = 21
+const SIGTTOU = 22
+const SIGUNUSED = 31
+const SIGURG = 23
+const SIGUSR1 = 10
+const SIGUSR2 = 12
+const SIGVTALRM = 26
+const SIGWINCH = 28
+const SIGXCPU = 24
+const SIGXFSZ = 25
+const SIG_BLOCK = 0
+const SIG_SETMASK = 2
+const SIG_UNBLOCK = 1
+const SIOCGSTAMPNS_OLD = 35079
+const SIOCGSTAMP_OLD = 35078
+const SI_ASYNCIO = -4
+const SI_ASYNCNL = -60
+const SI_KERNEL = 128
+const SI_MESGQ = -3
+const SI_QUEUE = -1
+const SI_SIGIO = -5
+const SI_TIMER = -2
+const SI_TKILL = -6
+const SI_USER = 0
+const SO_RCVTIMEO_OLD = 20
+const SO_SNDTIMEO_OLD = 21
+const SO_TIMESTAMPING_OLD = 37
+const SO_TIMESTAMPNS_OLD = 35
+const SO_TIMESTAMP_OLD = 29
+const SS_AUTODISARM = 2147483648
+const SS_DISABLE = 2
+const SS_FLAG_BITS = 2147483648
+const SS_ONSTACK = 1
+const STB_GLOBAL = 1
+const STB_GNU_UNIQUE = 10
+const STB_HIOS = 12
+const STB_HIPROC = 15
+const STB_LOCAL = 0
+const STB_LOOS = 10
+const STB_LOPROC = 13
+const STB_MIPS_SPLIT_COMMON = 13
+const STB_NUM = 3
+const STB_WEAK = 2
+const STN_UNDEF = 0
+const STO_ALPHA_NOPV = 128
+const STO_ALPHA_STD_GPLOAD = 136
+const STO_MIPS_DEFAULT = 0
+const STO_MIPS_HIDDEN = 2
+const STO_MIPS_INTERNAL = 1
+const STO_MIPS_PLT = 8
+const STO_MIPS_PROTECTED = 3
+const STO_MIPS_SC_ALIGN_UNUSED = 255
+const STO_PPC64_LOCAL_BIT = 5
+const STO_PPC64_LOCAL_MASK = 224
+const STT_ARM_16BIT = 15
+const STT_ARM_TFUNC = 13
+const STT_COMMON = 5
+const STT_FILE = 4
+const STT_FUNC = 2
+const STT_GNU_IFUNC = 10
+const STT_HIOS = 12
+const STT_HIPROC = 15
+const STT_HP_OPAQUE = 11
+const STT_HP_STUB = 12
+const STT_LOOS = 10
+const STT_LOPROC = 13
+const STT_NOTYPE = 0
+const STT_NUM = 7
+const STT_OBJECT = 1
+const STT_PARISC_MILLICODE = 13
+const STT_SECTION = 3
+const STT_SPARC_REGISTER = 13
+const STT_TLS = 6
+const STV_DEFAULT = 0
+const STV_HIDDEN = 2
+const STV_INTERNAL = 1
+const STV_PROTECTED = 3
+const SYMINFO_BT_LOWRESERVE = 65280
+const SYMINFO_BT_PARENT = 65534
+const SYMINFO_BT_SELF = 65535
+const SYMINFO_CURRENT = 1
+const SYMINFO_FLG_COPY = 4
+const SYMINFO_FLG_DIRECT = 1
+const SYMINFO_FLG_LAZYLOAD = 8
+const SYMINFO_FLG_PASSTHRU = 2
+const SYMINFO_NONE = 0
+const SYMINFO_NUM = 2
+const SYSCALL_MMAP2_UNIT = 4096
+const SYSCALL_RLIM_INFINITY = 18446744073709551615
+const SYS__sysctl = 156
+const SYS_accept = 43
+const SYS_accept4 = 288
+const SYS_access = 21
+const SYS_acct = 163
+const SYS_add_key = 248
+const SYS_adjtimex = 159
+const SYS_afs_syscall = 183
+const SYS_alarm = 37
+const SYS_arch_prctl = 158
+const SYS_bind = 49
+const SYS_bpf = 321
+const SYS_brk = 12
+const SYS_cachestat = 451
+const SYS_capget = 125
+const SYS_capset = 126
+const SYS_chdir = 80
+const SYS_chmod = 90
+const SYS_chown = 92
+const SYS_chroot = 161
+const SYS_clock_adjtime = 305
+const SYS_clock_getres = 229
+const SYS_clock_gettime = 228
+const SYS_clock_nanosleep = 230
+const SYS_clock_settime = 227
+const SYS_clone = 56
+const SYS_clone3 = 435
+const SYS_close = 3
+const SYS_close_range = 436
+const SYS_connect = 42
+const SYS_copy_file_range = 326
+const SYS_creat = 85
+const SYS_create_module = 174
+const SYS_delete_module = 176
+const SYS_dup = 32
+const SYS_dup2 = 33
+const SYS_dup3 = 292
+const SYS_epoll_create = 213
+const SYS_epoll_create1 = 291
+const SYS_epoll_ctl = 233
+const SYS_epoll_ctl_old = 214
+const SYS_epoll_pwait = 281
+const SYS_epoll_pwait2 = 441
+const SYS_epoll_wait = 232
+const SYS_epoll_wait_old = 215
+const SYS_eventfd = 284
+const SYS_eventfd2 = 290
+const SYS_execve = 59
+const SYS_execveat = 322
+const SYS_exit = 60
+const SYS_exit_group = 231
+const SYS_faccessat = 269
+const SYS_faccessat2 = 439
+const SYS_fadvise64 = 221
+const SYS_fallocate = 285
+const SYS_fanotify_init = 300
+const SYS_fanotify_mark = 301
+const SYS_fchdir = 81
+const SYS_fchmod = 91
+const SYS_fchmodat = 268
+const SYS_fchmodat2 = 452
+const SYS_fchown = 93
+const SYS_fchownat = 260
+const SYS_fcntl = 72
+const SYS_fdatasync = 75
+const SYS_fgetxattr = 193
+const SYS_finit_module = 313
+const SYS_flistxattr = 196
+const SYS_flock = 73
+const SYS_fork = 57
+const SYS_fremovexattr = 199
+const SYS_fsconfig = 431
+const SYS_fsetxattr = 190
+const SYS_fsmount = 432
+const SYS_fsopen = 430
+const SYS_fspick = 433
+const SYS_fstat = 5
+const SYS_fstatfs = 138
+const SYS_fsync = 74
+const SYS_ftruncate = 77
+const SYS_futex = 202
+const SYS_futex_waitv = 449
+const SYS_futimesat = 261
+const SYS_get_kernel_syms = 177
+const SYS_get_mempolicy = 239
+const SYS_get_robust_list = 274
+const SYS_get_thread_area = 211
+const SYS_getcpu = 309
+const SYS_getcwd = 79
+const SYS_getdents64 = 217
+const SYS_getegid = 108
+const SYS_geteuid = 107
+const SYS_getgid = 104
+const SYS_getgroups = 115
+const SYS_getitimer = 36
+const SYS_getpeername = 52
+const SYS_getpgid = 121
+const SYS_getpgrp = 111
+const SYS_getpid = 39
+const SYS_getpmsg = 181
+const SYS_getppid = 110
+const SYS_getpriority = 140
+const SYS_getrandom = 318
+const SYS_getresgid = 120
+const SYS_getresuid = 118
+const SYS_getrlimit = 97
+const SYS_getrusage = 98
+const SYS_getsid = 124
+const SYS_getsockname = 51
+const SYS_getsockopt = 55
+const SYS_gettid = 186
+const SYS_gettimeofday = 96
+const SYS_getuid = 102
+const SYS_getxattr = 191
+const SYS_init_module = 175
+const SYS_inotify_add_watch = 254
+const SYS_inotify_init = 253
+const SYS_inotify_init1 = 294
+const SYS_inotify_rm_watch = 255
+const SYS_io_cancel = 210
+const SYS_io_destroy = 207
+const SYS_io_getevents = 208
+const SYS_io_pgetevents = 333
+const SYS_io_setup = 206
+const SYS_io_submit = 209
+const SYS_io_uring_enter = 426
+const SYS_io_uring_register = 427
+const SYS_io_uring_setup = 425
+const SYS_ioctl = 16
+const SYS_ioperm = 173
+const SYS_iopl = 172
+const SYS_ioprio_get = 252
+const SYS_ioprio_set = 251
+const SYS_kcmp = 312
+const SYS_kexec_file_load = 320
+const SYS_kexec_load = 246
+const SYS_keyctl = 250
+const SYS_kill = 62
+const SYS_landlock_add_rule = 445
+const SYS_landlock_create_ruleset = 444
+const SYS_landlock_restrict_self = 446
+const SYS_lchown = 94
+const SYS_lgetxattr = 192
+const SYS_link = 86
+const SYS_linkat = 265
+const SYS_listen = 50
+const SYS_listxattr = 194
+const SYS_llistxattr = 195
+const SYS_lookup_dcookie = 212
+const SYS_lremovexattr = 198
+const SYS_lseek = 8
+const SYS_lsetxattr = 189
+const SYS_lstat = 6
+const SYS_madvise = 28
+const SYS_mbind = 237
+const SYS_membarrier = 324
+const SYS_memfd_create = 319
+const SYS_memfd_secret = 447
+const SYS_migrate_pages = 256
+const SYS_mincore = 27
+const SYS_mkdir = 83
+const SYS_mkdirat = 258
+const SYS_mknod = 133
+const SYS_mknodat = 259
+const SYS_mlock = 149
+const SYS_mlock2 = 325
+const SYS_mlockall = 151
+const SYS_mmap = 9
+const SYS_modify_ldt = 154
+const SYS_mount = 165
+const SYS_mount_setattr = 442
+const SYS_move_mount = 429
+const SYS_move_pages = 279
+const SYS_mprotect = 10
+const SYS_mq_getsetattr = 245
+const SYS_mq_notify = 244
+const SYS_mq_open = 240
+const SYS_mq_timedreceive = 243
+const SYS_mq_timedsend = 242
+const SYS_mq_unlink = 241
+const SYS_mremap = 25
+const SYS_msgctl = 71
+const SYS_msgget = 68
+const SYS_msgrcv = 70
+const SYS_msgsnd = 69
+const SYS_msync = 26
+const SYS_munlock = 150
+const SYS_munlockall = 152
+const SYS_munmap = 11
+const SYS_name_to_handle_at = 303
+const SYS_nanosleep = 35
+const SYS_newfstatat = 262
+const SYS_nfsservctl = 180
+const SYS_open = 2
+const SYS_open_by_handle_at = 304
+const SYS_open_tree = 428
+const SYS_openat = 257
+const SYS_openat2 = 437
+const SYS_pause = 34
+const SYS_perf_event_open = 298
+const SYS_personality = 135
+const SYS_pidfd_getfd = 438
+const SYS_pidfd_open = 434
+const SYS_pidfd_send_signal = 424
+const SYS_pipe = 22
+const SYS_pipe2 = 293
+const SYS_pivot_root = 155
+const SYS_pkey_alloc = 330
+const SYS_pkey_free = 331
+const SYS_pkey_mprotect = 329
+const SYS_poll = 7
+const SYS_ppoll = 271
+const SYS_prctl = 157
+const SYS_pread64 = 17
+const SYS_preadv = 295
+const SYS_preadv2 = 327
+const SYS_prlimit64 = 302
+const SYS_process_madvise = 440
+const SYS_process_mrelease = 448
+const SYS_process_vm_readv = 310
+const SYS_process_vm_writev = 311
+const SYS_pselect6 = 270
+const SYS_ptrace = 101
+const SYS_putpmsg = 182
+const SYS_pwrite64 = 18
+const SYS_pwritev = 296
+const SYS_pwritev2 = 328
+const SYS_query_module = 178
+const SYS_quotactl = 179
+const SYS_read = 0
+const SYS_readahead = 187
+const SYS_readlink = 89
+const SYS_readlinkat = 267
+const SYS_readv = 19
+const SYS_reboot = 169
+const SYS_recvfrom = 45
+const SYS_recvmmsg = 299
+const SYS_recvmsg = 47
+const SYS_remap_file_pages = 216
+const SYS_removexattr = 197
+const SYS_rename = 82
+const SYS_renameat = 264
+const SYS_renameat2 = 316
+const SYS_request_key = 249
+const SYS_restart_syscall = 219
+const SYS_rmdir = 84
+const SYS_rseq = 334
+const SYS_rt_sigaction = 13
+const SYS_rt_sigpending = 127
+const SYS_rt_sigprocmask = 14
+const SYS_rt_sigqueueinfo = 129
+const SYS_rt_sigreturn = 15
+const SYS_rt_sigsuspend = 130
+const SYS_rt_sigtimedwait = 128
+const SYS_rt_tgsigqueueinfo = 297
+const SYS_sched_get_priority_max = 146
+const SYS_sched_get_priority_min = 147
+const SYS_sched_getaffinity = 204
+const SYS_sched_getattr = 315
+const SYS_sched_getparam = 143
+const SYS_sched_getscheduler = 145
+const SYS_sched_rr_get_interval = 148
+const SYS_sched_setaffinity = 203
+const SYS_sched_setattr = 314
+const SYS_sched_setparam = 142
+const SYS_sched_setscheduler = 144
+const SYS_sched_yield = 24
+const SYS_seccomp = 317
+const SYS_security = 185
+const SYS_select = 23
+const SYS_semctl = 66
+const SYS_semget = 64
+const SYS_semop = 65
+const SYS_semtimedop = 220
+const SYS_sendfile = 40
+const SYS_sendmmsg = 307
+const SYS_sendmsg = 46
+const SYS_sendto = 44
+const SYS_set_mempolicy = 238
+const SYS_set_mempolicy_home_node = 450
+const SYS_set_robust_list = 273
+const SYS_set_thread_area = 205
+const SYS_set_tid_address = 218
+const SYS_setdomainname = 171
+const SYS_setfsgid = 123
+const SYS_setfsuid = 122
+const SYS_setgid = 106
+const SYS_setgroups = 116
+const SYS_sethostname = 170
+const SYS_setitimer = 38
+const SYS_setns = 308
+const SYS_setpgid = 109
+const SYS_setpriority = 141
+const SYS_setregid = 114
+const SYS_setresgid = 119
+const SYS_setresuid = 117
+const SYS_setreuid = 113
+const SYS_setrlimit = 160
+const SYS_setsid = 112
+const SYS_setsockopt = 54
+const SYS_settimeofday = 164
+const SYS_setuid = 105
+const SYS_setxattr = 188
+const SYS_shmat = 30
+const SYS_shmctl = 31
+const SYS_shmdt = 67
+const SYS_shmget = 29
+const SYS_shutdown = 48
+const SYS_sigaltstack = 131
+const SYS_signalfd = 282
+const SYS_signalfd4 = 289
+const SYS_socket = 41
+const SYS_socketpair = 53
+const SYS_splice = 275
+const SYS_stat = 4
+const SYS_statfs = 137
+const SYS_statx = 332
+const SYS_swapoff = 168
+const SYS_swapon = 167
+const SYS_symlink = 88
+const SYS_symlinkat = 266
+const SYS_sync = 162
+const SYS_sync_file_range = 277
+const SYS_syncfs = 306
+const SYS_sysfs = 139
+const SYS_sysinfo = 99
+const SYS_syslog = 103
+const SYS_tee = 276
+const SYS_tgkill = 234
+const SYS_time = 201
+const SYS_timer_create = 222
+const SYS_timer_delete = 226
+const SYS_timer_getoverrun = 225
+const SYS_timer_gettime = 224
+const SYS_timer_settime = 223
+const SYS_timerfd_create = 283
+const SYS_timerfd_gettime = 287
+const SYS_timerfd_settime = 286
+const SYS_times = 100
+const SYS_tkill = 200
+const SYS_truncate = 76
+const SYS_tuxcall = 184
+const SYS_umask = 95
+const SYS_umount2 = 166
+const SYS_uname = 63
+const SYS_unlink = 87
+const SYS_unlinkat = 263
+const SYS_unshare = 272
+const SYS_uselib = 134
+const SYS_userfaultfd = 323
+const SYS_ustat = 136
+const SYS_utime = 132
+const SYS_utimensat = 280
+const SYS_utimes = 235
+const SYS_vfork = 58
+const SYS_vhangup = 153
+const SYS_vmsplice = 278
+const SYS_vserver = 236
+const SYS_wait4 = 61
+const SYS_waitid = 247
+const SYS_write = 1
+const SYS_writev = 20
+const TRAP_BRANCH = 3
+const TRAP_BRKPT = 1
+const TRAP_HWBKPT = 4
+const TRAP_TRACE = 2
+const TRAP_UNK = 5
+const VER = -255
+const VER_DEF_CURRENT = 1
+const VER_DEF_NONE = 0
+const VER_DEF_NUM = 2
+const VER_FLG_BASE = 1
+const VER_FLG_WEAK = 2
+const VER_NDX_ELIMINATE = 65281
+const VER_NDX_GLOBAL = 1
+const VER_NDX_LOCAL = 0
+const VER_NDX_LORESERVE = 65280
+const VER_NEED_CURRENT = 1
+const VER_NEED_NONE = 0
+const VER_NEED_NUM = 2
+const WNOHANG = 1
+const WUNTRACED = 2
+const _NSIG = 65
+const __NR__sysctl = 156
+const __NR_accept = 43
+const __NR_accept4 = 288
+const __NR_access = 21
+const __NR_acct = 163
+const __NR_add_key = 248
+const __NR_adjtimex = 159
+const __NR_afs_syscall = 183
+const __NR_alarm = 37
+const __NR_arch_prctl = 158
+const __NR_bind = 49
+const __NR_bpf = 321
+const __NR_brk = 12
+const __NR_cachestat = 451
+const __NR_capget = 125
+const __NR_capset = 126
+const __NR_chdir = 80
+const __NR_chmod = 90
+const __NR_chown = 92
+const __NR_chroot = 161
+const __NR_clock_adjtime = 305
+const __NR_clock_getres = 229
+const __NR_clock_gettime = 228
+const __NR_clock_nanosleep = 230
+const __NR_clock_settime = 227
+const __NR_clone = 56
+const __NR_clone3 = 435
+const __NR_close = 3
+const __NR_close_range = 436
+const __NR_connect = 42
+const __NR_copy_file_range = 326
+const __NR_creat = 85
+const __NR_create_module = 174
+const __NR_delete_module = 176
+const __NR_dup = 32
+const __NR_dup2 = 33
+const __NR_dup3 = 292
+const __NR_epoll_create = 213
+const __NR_epoll_create1 = 291
+const __NR_epoll_ctl = 233
+const __NR_epoll_ctl_old = 214
+const __NR_epoll_pwait = 281
+const __NR_epoll_pwait2 = 441
+const __NR_epoll_wait = 232
+const __NR_epoll_wait_old = 215
+const __NR_eventfd = 284
+const __NR_eventfd2 = 290
+const __NR_execve = 59
+const __NR_execveat = 322
+const __NR_exit = 60
+const __NR_exit_group = 231
+const __NR_faccessat = 269
+const __NR_faccessat2 = 439
+const __NR_fadvise64 = 221
+const __NR_fallocate = 285
+const __NR_fanotify_init = 300
+const __NR_fanotify_mark = 301
+const __NR_fchdir = 81
+const __NR_fchmod = 91
+const __NR_fchmodat = 268
+const __NR_fchmodat2 = 452
+const __NR_fchown = 93
+const __NR_fchownat = 260
+const __NR_fcntl = 72
+const __NR_fdatasync = 75
+const __NR_fgetxattr = 193
+const __NR_finit_module = 313
+const __NR_flistxattr = 196
+const __NR_flock = 73
+const __NR_fork = 57
+const __NR_fremovexattr = 199
+const __NR_fsconfig = 431
+const __NR_fsetxattr = 190
+const __NR_fsmount = 432
+const __NR_fsopen = 430
+const __NR_fspick = 433
+const __NR_fstat = 5
+const __NR_fstatfs = 138
+const __NR_fsync = 74
+const __NR_ftruncate = 77
+const __NR_futex = 202
+const __NR_futex_waitv = 449
+const __NR_futimesat = 261
+const __NR_get_kernel_syms = 177
+const __NR_get_mempolicy = 239
+const __NR_get_robust_list = 274
+const __NR_get_thread_area = 211
+const __NR_getcpu = 309
+const __NR_getcwd = 79
+const __NR_getdents = 78
+const __NR_getdents64 = 217
+const __NR_getegid = 108
+const __NR_geteuid = 107
+const __NR_getgid = 104
+const __NR_getgroups = 115
+const __NR_getitimer = 36
+const __NR_getpeername = 52
+const __NR_getpgid = 121
+const __NR_getpgrp = 111
+const __NR_getpid = 39
+const __NR_getpmsg = 181
+const __NR_getppid = 110
+const __NR_getpriority = 140
+const __NR_getrandom = 318
+const __NR_getresgid = 120
+const __NR_getresuid = 118
+const __NR_getrlimit = 97
+const __NR_getrusage = 98
+const __NR_getsid = 124
+const __NR_getsockname = 51
+const __NR_getsockopt = 55
+const __NR_gettid = 186
+const __NR_gettimeofday = 96
+const __NR_getuid = 102
+const __NR_getxattr = 191
+const __NR_init_module = 175
+const __NR_inotify_add_watch = 254
+const __NR_inotify_init = 253
+const __NR_inotify_init1 = 294
+const __NR_inotify_rm_watch = 255
+const __NR_io_cancel = 210
+const __NR_io_destroy = 207
+const __NR_io_getevents = 208
+const __NR_io_pgetevents = 333
+const __NR_io_setup = 206
+const __NR_io_submit = 209
+const __NR_io_uring_enter = 426
+const __NR_io_uring_register = 427
+const __NR_io_uring_setup = 425
+const __NR_ioctl = 16
+const __NR_ioperm = 173
+const __NR_iopl = 172
+const __NR_ioprio_get = 252
+const __NR_ioprio_set = 251
+const __NR_kcmp = 312
+const __NR_kexec_file_load = 320
+const __NR_kexec_load = 246
+const __NR_keyctl = 250
+const __NR_kill = 62
+const __NR_landlock_add_rule = 445
+const __NR_landlock_create_ruleset = 444
+const __NR_landlock_restrict_self = 446
+const __NR_lchown = 94
+const __NR_lgetxattr = 192
+const __NR_link = 86
+const __NR_linkat = 265
+const __NR_listen = 50
+const __NR_listxattr = 194
+const __NR_llistxattr = 195
+const __NR_lookup_dcookie = 212
+const __NR_lremovexattr = 198
+const __NR_lseek = 8
+const __NR_lsetxattr = 189
+const __NR_lstat = 6
+const __NR_madvise = 28
+const __NR_mbind = 237
+const __NR_membarrier = 324
+const __NR_memfd_create = 319
+const __NR_memfd_secret = 447
+const __NR_migrate_pages = 256
+const __NR_mincore = 27
+const __NR_mkdir = 83
+const __NR_mkdirat = 258
+const __NR_mknod = 133
+const __NR_mknodat = 259
+const __NR_mlock = 149
+const __NR_mlock2 = 325
+const __NR_mlockall = 151
+const __NR_mmap = 9
+const __NR_modify_ldt = 154
+const __NR_mount = 165
+const __NR_mount_setattr = 442
+const __NR_move_mount = 429
+const __NR_move_pages = 279
+const __NR_mprotect = 10
+const __NR_mq_getsetattr = 245
+const __NR_mq_notify = 244
+const __NR_mq_open = 240
+const __NR_mq_timedreceive = 243
+const __NR_mq_timedsend = 242
+const __NR_mq_unlink = 241
+const __NR_mremap = 25
+const __NR_msgctl = 71
+const __NR_msgget = 68
+const __NR_msgrcv = 70
+const __NR_msgsnd = 69
+const __NR_msync = 26
+const __NR_munlock = 150
+const __NR_munlockall = 152
+const __NR_munmap = 11
+const __NR_name_to_handle_at = 303
+const __NR_nanosleep = 35
+const __NR_newfstatat = 262
+const __NR_nfsservctl = 180
+const __NR_open = 2
+const __NR_open_by_handle_at = 304
+const __NR_open_tree = 428
+const __NR_openat = 257
+const __NR_openat2 = 437
+const __NR_pause = 34
+const __NR_perf_event_open = 298
+const __NR_personality = 135
+const __NR_pidfd_getfd = 438
+const __NR_pidfd_open = 434
+const __NR_pidfd_send_signal = 424
+const __NR_pipe = 22
+const __NR_pipe2 = 293
+const __NR_pivot_root = 155
+const __NR_pkey_alloc = 330
+const __NR_pkey_free = 331
+const __NR_pkey_mprotect = 329
+const __NR_poll = 7
+const __NR_ppoll = 271
+const __NR_prctl = 157
+const __NR_pread64 = 17
+const __NR_preadv = 295
+const __NR_preadv2 = 327
+const __NR_prlimit64 = 302
+const __NR_process_madvise = 440
+const __NR_process_mrelease = 448
+const __NR_process_vm_readv = 310
+const __NR_process_vm_writev = 311
+const __NR_pselect6 = 270
+const __NR_ptrace = 101
+const __NR_putpmsg = 182
+const __NR_pwrite64 = 18
+const __NR_pwritev = 296
+const __NR_pwritev2 = 328
+const __NR_query_module = 178
+const __NR_quotactl = 179
+const __NR_read = 0
+const __NR_readahead = 187
+const __NR_readlink = 89
+const __NR_readlinkat = 267
+const __NR_readv = 19
+const __NR_reboot = 169
+const __NR_recvfrom = 45
+const __NR_recvmmsg = 299
+const __NR_recvmsg = 47
+const __NR_remap_file_pages = 216
+const __NR_removexattr = 197
+const __NR_rename = 82
+const __NR_renameat = 264
+const __NR_renameat2 = 316
+const __NR_request_key = 249
+const __NR_restart_syscall = 219
+const __NR_rmdir = 84
+const __NR_rseq = 334
+const __NR_rt_sigaction = 13
+const __NR_rt_sigpending = 127
+const __NR_rt_sigprocmask = 14
+const __NR_rt_sigqueueinfo = 129
+const __NR_rt_sigreturn = 15
+const __NR_rt_sigsuspend = 130
+const __NR_rt_sigtimedwait = 128
+const __NR_rt_tgsigqueueinfo = 297
+const __NR_sched_get_priority_max = 146
+const __NR_sched_get_priority_min = 147
+const __NR_sched_getaffinity = 204
+const __NR_sched_getattr = 315
+const __NR_sched_getparam = 143
+const __NR_sched_getscheduler = 145
+const __NR_sched_rr_get_interval = 148
+const __NR_sched_setaffinity = 203
+const __NR_sched_setattr = 314
+const __NR_sched_setparam = 142
+const __NR_sched_setscheduler = 144
+const __NR_sched_yield = 24
+const __NR_seccomp = 317
+const __NR_security = 185
+const __NR_select = 23
+const __NR_semctl = 66
+const __NR_semget = 64
+const __NR_semop = 65
+const __NR_semtimedop = 220
+const __NR_sendfile = 40
+const __NR_sendmmsg = 307
+const __NR_sendmsg = 46
+const __NR_sendto = 44
+const __NR_set_mempolicy = 238
+const __NR_set_mempolicy_home_node = 450
+const __NR_set_robust_list = 273
+const __NR_set_thread_area = 205
+const __NR_set_tid_address = 218
+const __NR_setdomainname = 171
+const __NR_setfsgid = 123
+const __NR_setfsuid = 122
+const __NR_setgid = 106
+const __NR_setgroups = 116
+const __NR_sethostname = 170
+const __NR_setitimer = 38
+const __NR_setns = 308
+const __NR_setpgid = 109
+const __NR_setpriority = 141
+const __NR_setregid = 114
+const __NR_setresgid = 119
+const __NR_setresuid = 117
+const __NR_setreuid = 113
+const __NR_setrlimit = 160
+const __NR_setsid = 112
+const __NR_setsockopt = 54
+const __NR_settimeofday = 164
+const __NR_setuid = 105
+const __NR_setxattr = 188
+const __NR_shmat = 30
+const __NR_shmctl = 31
+const __NR_shmdt = 67
+const __NR_shmget = 29
+const __NR_shutdown = 48
+const __NR_sigaltstack = 131
+const __NR_signalfd = 282
+const __NR_signalfd4 = 289
+const __NR_socket = 41
+const __NR_socketpair = 53
+const __NR_splice = 275
+const __NR_stat = 4
+const __NR_statfs = 137
+const __NR_statx = 332
+const __NR_swapoff = 168
+const __NR_swapon = 167
+const __NR_symlink = 88
+const __NR_symlinkat = 266
+const __NR_sync = 162
+const __NR_sync_file_range = 277
+const __NR_syncfs = 306
+const __NR_sysfs = 139
+const __NR_sysinfo = 99
+const __NR_syslog = 103
+const __NR_tee = 276
+const __NR_tgkill = 234
+const __NR_time = 201
+const __NR_timer_create = 222
+const __NR_timer_delete = 226
+const __NR_timer_getoverrun = 225
+const __NR_timer_gettime = 224
+const __NR_timer_settime = 223
+const __NR_timerfd_create = 283
+const __NR_timerfd_gettime = 287
+const __NR_timerfd_settime = 286
+const __NR_times = 100
+const __NR_tkill = 200
+const __NR_truncate = 76
+const __NR_tuxcall = 184
+const __NR_umask = 95
+const __NR_umount2 = 166
+const __NR_uname = 63
+const __NR_unlink = 87
+const __NR_unlinkat = 263
+const __NR_unshare = 272
+const __NR_uselib = 134
+const __NR_userfaultfd = 323
+const __NR_ustat = 136
+const __NR_utime = 132
+const __NR_utimensat = 280
+const __NR_utimes = 235
+const __NR_vfork = 58
+const __NR_vhangup = 153
+const __NR_vmsplice = 278
+const __NR_vserver = 236
+const __NR_wait4 = 61
+const __NR_waitid = 247
+const __NR_write = 1
+const __NR_writev = 20
+const __SC_accept = 5
+const __SC_accept4 = 18
+const __SC_bind = 2
+const __SC_connect = 3
+const __SC_getpeername = 7
+const __SC_getsockname = 6
+const __SC_getsockopt = 15
+const __SC_listen = 4
+const __SC_recv = 10
+const __SC_recvfrom = 12
+const __SC_recvmmsg = 19
+const __SC_recvmsg = 17
+const __SC_send = 9
+const __SC_sendmmsg = 20
+const __SC_sendmsg = 16
+const __SC_sendto = 11
+const __SC_setsockopt = 14
+const __SC_shutdown = 13
+const __SC_socket = 1
+const __SC_socketpair = 8
+const libc = 0
 
 type Ttime_t = int64
 
@@ -7405,17 +7385,15 @@ type TElf_MIPS_ABIFlags_v0 = struct {
 	Fflags2    TElf32_Word
 }
 
-const (
-	_Val_GNU_MIPS_ABI_FP_ANY    = 0
-	_Val_GNU_MIPS_ABI_FP_DOUBLE = 1
-	_Val_GNU_MIPS_ABI_FP_SINGLE = 2
-	_Val_GNU_MIPS_ABI_FP_SOFT   = 3
-	_Val_GNU_MIPS_ABI_FP_OLD_64 = 4
-	_Val_GNU_MIPS_ABI_FP_XX     = 5
-	_Val_GNU_MIPS_ABI_FP_64     = 6
-	_Val_GNU_MIPS_ABI_FP_64A    = 7
-	_Val_GNU_MIPS_ABI_FP_MAX    = 7
-)
+const _Val_GNU_MIPS_ABI_FP_ANY = 0
+const _Val_GNU_MIPS_ABI_FP_DOUBLE = 1
+const _Val_GNU_MIPS_ABI_FP_SINGLE = 2
+const _Val_GNU_MIPS_ABI_FP_SOFT = 3
+const _Val_GNU_MIPS_ABI_FP_OLD_64 = 4
+const _Val_GNU_MIPS_ABI_FP_XX = 5
+const _Val_GNU_MIPS_ABI_FP_64 = 6
+const _Val_GNU_MIPS_ABI_FP_64A = 7
+const _Val_GNU_MIPS_ABI_FP_MAX = 7
 
 type Tsyscall_arg_t = int64
 
@@ -7730,7 +7708,7 @@ type Tcrypt_data = struct {
 	F__buf       [256]int8
 }
 
-func Xcrypt(tls *TLS, key, salt uintptr) (r uintptr) {
+func Xcrypt(tls *TLS, key uintptr, salt uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v salt=%v, (%v:)", tls, key, salt, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -7888,7 +7866,7 @@ var _BF_atoi64 = [96]uint8{
 	95: uint8(64),
 }
 
-func _BF_decode(tls *TLS, dst, src uintptr, size int32) (r int32) {
+func _BF_decode(tls *TLS, dst uintptr, src uintptr, size int32) (r int32) {
 	var c1, c2, c3, c4, tmp uint32
 	var dptr, end, sptr, v1 uintptr
 	_, _, _, _, _, _, _, _, _ = c1, c2, c3, c4, dptr, end, sptr, tmp, v1
@@ -7963,7 +7941,7 @@ func _BF_decode(tls *TLS, dst, src uintptr, size int32) (r int32) {
 	return 0
 }
 
-func _BF_encode(tls *TLS, dst, src uintptr, size int32) {
+func _BF_encode(tls *TLS, dst uintptr, src uintptr, size int32) {
 	var c1, c2 uint32
 	var dptr, end, sptr, v1 uintptr
 	_, _, _, _, _, _ = c1, c2, dptr, end, sptr, v1
@@ -8036,7 +8014,7 @@ func _BF_swap(tls *TLS, x uintptr, count int32) {
 	}
 }
 
-func _BF_encrypt(tls *TLS, ctx uintptr, L, R TBF_word, start, end uintptr) (r TBF_word) {
+func _BF_encrypt(tls *TLS, ctx uintptr, L TBF_word, R TBF_word, start uintptr, end uintptr) (r TBF_word) {
 	var i int32
 	var ptr, v2 uintptr
 	var tmp1, tmp2, tmp3, tmp4 TBF_word
@@ -8095,7 +8073,7 @@ func _BF_encrypt(tls *TLS, ctx uintptr, L, R TBF_word, start, end uintptr) (r TB
 	return L
 }
 
-func _BF_set_key(tls *TLS, key, expanded, initial uintptr, flags uint8) {
+func _BF_set_key(tls *TLS, key uintptr, expanded uintptr, initial uintptr, flags uint8) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var bug, i, j uint32
@@ -8223,7 +8201,7 @@ var _flags_by_subtype = [26]uint8{
 	24: uint8(4),
 }
 
-func _BF_crypt(tls *TLS, key, setting, output uintptr, min TBF_word) (r uintptr) {
+func _BF_crypt(tls *TLS, key uintptr, setting uintptr, output uintptr, min TBF_word) (r uintptr) {
 	bp := tls.Alloc(4272)
 	defer tls.Free(4272)
 	var L, L1, R, count, tmp1, tmp2, tmp3, tmp4, v1 TBF_word
@@ -8372,7 +8350,7 @@ func _BF_crypt(tls *TLS, key, setting, output uintptr, min TBF_word) (r uintptr)
 //	 * The performance cost of this quick self-test is around 0.6% at the "$2a$08"
 //	 * setting.
 //	 */
-func X__crypt_blowfish(tls *TLS, key, setting, output uintptr) (r uintptr) {
+func X__crypt_blowfish(tls *TLS, key uintptr, setting uintptr, output uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v setting=%v output=%v, (%v:)", tls, key, setting, output, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -8953,7 +8931,6 @@ var _psbox = [8][64]Tuint32_t{
 		63: uint32(0x08020800),
 	},
 }
-
 var _ip_maskl = [16][16]Tuint32_t{
 	0: {
 		1:  uint32(0x00010000),
@@ -9180,7 +9157,6 @@ var _ip_maskl = [16][16]Tuint32_t{
 		15: uint32(0x00008080),
 	},
 }
-
 var _ip_maskr = [16][16]Tuint32_t{
 	0: {
 		2:  uint32(0x00010000),
@@ -9407,7 +9383,6 @@ var _ip_maskr = [16][16]Tuint32_t{
 		15: uint32(0x00008080),
 	},
 }
-
 var _fp_maskl = [8][16]Tuint32_t{
 	0: {
 		1:  uint32(0x40000000),
@@ -9546,7 +9521,6 @@ var _fp_maskl = [8][16]Tuint32_t{
 		15: uint32(0x02020202),
 	},
 }
-
 var _fp_maskr = [8][16]Tuint32_t{
 	0: {
 		1:  uint32(0x40000000),
@@ -9685,7 +9659,6 @@ var _fp_maskr = [8][16]Tuint32_t{
 		15: uint32(0x02020202),
 	},
 }
-
 var _key_perm_maskl = [8][16]Tuint32_t{
 	0: {
 		2:  uint32(0x00000010),
@@ -9820,7 +9793,6 @@ var _key_perm_maskl = [8][16]Tuint32_t{
 		15: uint32(0x08080808),
 	},
 }
-
 var _key_perm_maskr = [12][16]Tuint32_t{
 	0: {
 		1:  uint32(0x00000001),
@@ -9991,7 +9963,6 @@ var _key_perm_maskr = [12][16]Tuint32_t{
 		15: uint32(0x08080800),
 	},
 }
-
 var _comp_maskl0 = [4][8]Tuint32_t{
 	0: {
 		1: uint32(0x00020000),
@@ -10028,7 +9999,6 @@ var _comp_maskl0 = [4][8]Tuint32_t{
 		7: uint32(0x00100800),
 	},
 }
-
 var _comp_maskr0 = [4][8]Tuint32_t{
 	0: {
 		1: uint32(0x00200000),
@@ -10065,7 +10035,6 @@ var _comp_maskr0 = [4][8]Tuint32_t{
 		7: uint32(0x00408008),
 	},
 }
-
 var _comp_maskl1 = [4][16]Tuint32_t{
 	0: {
 		1:  uint32(0x00000010),
@@ -10134,7 +10103,6 @@ var _comp_maskl1 = [4][16]Tuint32_t{
 		15: uint32(0x00010088),
 	},
 }
-
 var _comp_maskr1 = [4][16]Tuint32_t{
 	0: {
 		2:  uint32(0x00000080),
@@ -10270,7 +10238,7 @@ func _setup_salt(tls *TLS, salt Tuint32_t) (r Tuint32_t) {
 	return saltbits
 }
 
-func X__des_setkey(tls *TLS, key, ekey uintptr) {
+func X__des_setkey(tls *TLS, key uintptr, ekey uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v ekey=%v, (%v:)", tls, key, ekey, origin(2))
 	}
@@ -10348,7 +10316,7 @@ func X__des_setkey(tls *TLS, key, ekey uintptr) {
 //	/*
 //	 * l_in, r_in, l_out, and r_out are in pseudo-"big-endian" format.
 //	 */
-func X__do_des(tls *TLS, l_in, r_in Tuint32_t, l_out, r_out uintptr, count, saltbits Tuint32_t, ekey uintptr) {
+func X__do_des(tls *TLS, l_in Tuint32_t, r_in Tuint32_t, l_out uintptr, r_out uintptr, count Tuint32_t, saltbits Tuint32_t, ekey uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v l_in=%v r_in=%v l_out=%v r_out=%v count=%v saltbits=%v ekey=%v, (%v:)", tls, l_in, r_in, l_out, r_out, count, saltbits, ekey, origin(2))
 	}
@@ -10452,7 +10420,7 @@ func X__do_des(tls *TLS, l_in, r_in Tuint32_t, l_out, r_out uintptr, count, salt
 	**(**Tuint32_t)(__ccgo_up(r_out)) = ro
 }
 
-func _des_cipher(tls *TLS, in, out uintptr, count, saltbits Tuint32_t, ekey uintptr) {
+func _des_cipher(tls *TLS, in uintptr, out uintptr, count Tuint32_t, saltbits Tuint32_t, ekey uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rawl, rawr Tuint32_t
@@ -10472,7 +10440,7 @@ func _des_cipher(tls *TLS, in, out uintptr, count, saltbits Tuint32_t, ekey uint
 	**(**uint8)(__ccgo_up(out + 7)) = uint8(**(**Tuint32_t)(__ccgo_up(bp + 4)))
 }
 
-func __crypt_extended_r_uut(tls *TLS, _key, _setting, output uintptr) (r uintptr) {
+func __crypt_extended_r_uut(tls *TLS, _key uintptr, _setting uintptr, output uintptr) (r uintptr) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var count, l, salt, value, value1 Tuint32_t
@@ -10624,7 +10592,7 @@ func __crypt_extended_r_uut(tls *TLS, _key, _setting, output uintptr) (r uintptr
 	return output
 }
 
-func X__crypt_des(tls *TLS, key, setting, output uintptr) (r uintptr) {
+func X__crypt_des(tls *TLS, key uintptr, setting uintptr, output uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v setting=%v output=%v, (%v:)", tls, key, setting, output, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -10664,10 +10632,8 @@ func X__crypt_des(tls *TLS, key, setting, output uintptr) (r uintptr) {
 	return v1
 }
 
-const (
-	KEY_MAX  = 30000
-	SALT_MAX = 8
-)
+const KEY_MAX = 30000
+const SALT_MAX = 8
 
 /* public domain md5 implementation based on rfc1321 and libtomcrypt */
 
@@ -10748,7 +10714,7 @@ var _tab = [64]Tuint32_t{
 	63: uint32(0xeb86d391),
 }
 
-func _processblock(tls *TLS, s, buf uintptr) {
+func _processblock(tls *TLS, s uintptr, buf uintptr) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var a, b, c, d, i Tuint32_t
@@ -10868,7 +10834,7 @@ func _md5_init(tls *TLS, s uintptr) {
 	**(**Tuint32_t)(__ccgo_up(s + 8 + 3*4)) = uint32(0x10325476)
 }
 
-func _md5_sum(tls *TLS, s, md uintptr) {
+func _md5_sum(tls *TLS, s uintptr, md uintptr) {
 	var i int32
 	_ = i
 	_pad(tls, s)
@@ -10888,7 +10854,7 @@ func _md5_sum(tls *TLS, s, md uintptr) {
 	}
 }
 
-func _md5_update(tls *TLS, s, m uintptr, len1 uint64) {
+func _md5_update(tls *TLS, s uintptr, m uintptr, len1 uint64) {
 	var p uintptr
 	var r uint32
 	_, _ = p, r
@@ -10967,7 +10933,7 @@ func _to64(tls *TLS, s uintptr, u uint32, n int32) (r uintptr) {
 	return s
 }
 
-func _md5crypt(tls *TLS, key, setting, output uintptr) (r uintptr) {
+func _md5crypt(tls *TLS, key uintptr, setting uintptr, output uintptr) (r uintptr) {
 	bp := tls.Alloc(112)
 	defer tls.Free(112)
 	var i, klen, slen uint32
@@ -11113,7 +11079,7 @@ var _perm = [5][3]uint8{
 	},
 }
 
-func X__crypt_md5(tls *TLS, key, setting, output uintptr) (r uintptr) {
+func X__crypt_md5(tls *TLS, key uintptr, setting uintptr, output uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v setting=%v output=%v, (%v:)", tls, key, setting, output, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -11138,7 +11104,7 @@ var _testsetting = [13]int8{'$', '1', '$', 'a', 'b', 'c', 'd', '0', '1', '2', '3
 
 var _testhash = [35]int8{'$', '1', '$', 'a', 'b', 'c', 'd', '0', '1', '2', '3', '$', '9', 'Q', 'c', 'g', '8', 'D', 'y', 'v', 'i', 'e', 'k', 'V', '3', 't', 'D', 'G', 'M', 'Z', 'y', 'n', 'J', '1'}
 
-func X__crypt_r(tls *TLS, key, salt, data uintptr) (r uintptr) {
+func X__crypt_r(tls *TLS, key uintptr, salt uintptr, data uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v salt=%v data=%v, (%v:)", tls, key, salt, data, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -11167,7 +11133,7 @@ func X__crypt_r(tls *TLS, key, salt, data uintptr) (r uintptr) {
 	return X__crypt_des(tls, key, salt, output)
 }
 
-func Xcrypt_r(tls *TLS, key, salt, data uintptr) (r uintptr) {
+func Xcrypt_r(tls *TLS, key uintptr, salt uintptr, data uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v salt=%v data=%v, (%v:)", tls, key, salt, data, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -11175,13 +11141,11 @@ func Xcrypt_r(tls *TLS, key, salt, data uintptr) (r uintptr) {
 	return X__crypt_r(tls, key, salt, data)
 }
 
-const (
-	KEY_MAX1       = 256
-	ROUNDS_DEFAULT = 5000
-	ROUNDS_MAX     = 9999999
-	ROUNDS_MIN     = 1000
-	SALT_MAX1      = 16
-)
+const KEY_MAX1 = 256
+const ROUNDS_DEFAULT = 5000
+const ROUNDS_MAX = 9999999
+const ROUNDS_MIN = 1000
+const SALT_MAX1 = 16
 
 /* public domain sha256 implementation based on fips180-3 */
 
@@ -11262,7 +11226,7 @@ var _K = [64]Tuint32_t{
 	63: uint32(0xc67178f2),
 }
 
-func _processblock1(tls *TLS, s, buf uintptr) {
+func _processblock1(tls *TLS, s uintptr, buf uintptr) {
 	bp := tls.Alloc(256)
 	defer tls.Free(256)
 	var a, b, c, d, e, f, g, h, t1, t2 Tuint32_t
@@ -11368,7 +11332,7 @@ func _sha256_init(tls *TLS, s uintptr) {
 	**(**Tuint32_t)(__ccgo_up(s + 8 + 7*4)) = uint32(0x5be0cd19)
 }
 
-func _sha256_sum(tls *TLS, s, md uintptr) {
+func _sha256_sum(tls *TLS, s uintptr, md uintptr) {
 	var i int32
 	_ = i
 	_pad1(tls, s)
@@ -11388,7 +11352,7 @@ func _sha256_sum(tls *TLS, s, md uintptr) {
 	}
 }
 
-func _sha256_update(tls *TLS, s, m uintptr, len1 uint64) {
+func _sha256_update(tls *TLS, s uintptr, m uintptr, len1 uint64) {
 	var p uintptr
 	var r uint32
 	_, _ = p, r
@@ -11463,7 +11427,7 @@ func _hashmd(tls *TLS, s uintptr, n uint32, md uintptr) {
 	_sha256_update(tls, s, md, uint64(i))
 }
 
-func _sha256crypt(tls *TLS, key, setting, output uintptr) (r1 uintptr) {
+func _sha256crypt(tls *TLS, key uintptr, setting uintptr, output uintptr) (r1 uintptr) {
 	bp := tls.Alloc(272)
 	defer tls.Free(272)
 	var i, klen, r, slen uint32
@@ -11692,7 +11656,7 @@ var _perm1 = [10][3]uint8{
 	},
 }
 
-func X__crypt_sha256(tls *TLS, key, setting, output uintptr) (r uintptr) {
+func X__crypt_sha256(tls *TLS, key uintptr, setting uintptr, output uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v setting=%v output=%v, (%v:)", tls, key, setting, output, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -11813,7 +11777,7 @@ var _K1 = [80]Tuint64_t{
 	79: uint64(0x6c44198c4a475817),
 }
 
-func _processblock2(tls *TLS, s, buf uintptr) {
+func _processblock2(tls *TLS, s uintptr, buf uintptr) {
 	bp := tls.Alloc(640)
 	defer tls.Free(640)
 	var a, b, c, d, e, f, g, h, t1, t2 Tuint64_t
@@ -11923,7 +11887,7 @@ func _sha512_init(tls *TLS, s uintptr) {
 	**(**Tuint64_t)(__ccgo_up(s + 8 + 7*8)) = uint64(0x5be0cd19137e2179)
 }
 
-func _sha512_sum(tls *TLS, s, md uintptr) {
+func _sha512_sum(tls *TLS, s uintptr, md uintptr) {
 	var i int32
 	_ = i
 	_pad2(tls, s)
@@ -11947,7 +11911,7 @@ func _sha512_sum(tls *TLS, s, md uintptr) {
 	}
 }
 
-func _sha512_update(tls *TLS, s, m uintptr, len1 uint64) {
+func _sha512_update(tls *TLS, s uintptr, m uintptr, len1 uint64) {
 	var p uintptr
 	var r uint32
 	_, _ = p, r
@@ -12022,7 +11986,7 @@ func _hashmd1(tls *TLS, s uintptr, n uint32, md uintptr) {
 	_sha512_update(tls, s, md, uint64(i))
 }
 
-func _sha512crypt(tls *TLS, key, setting, output uintptr) (r1 uintptr) {
+func _sha512crypt(tls *TLS, key uintptr, setting uintptr, output uintptr) (r1 uintptr) {
 	bp := tls.Alloc(464)
 	defer tls.Free(464)
 	var i, klen, r, slen uint32
@@ -12316,7 +12280,7 @@ var _perm2 = [21][3]uint8{
 	},
 }
 
-func X__crypt_sha512(tls *TLS, key, setting, output uintptr) (r uintptr) {
+func X__crypt_sha512(tls *TLS, key uintptr, setting uintptr, output uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v setting=%v output=%v, (%v:)", tls, key, setting, output, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -12599,151 +12563,149 @@ func X__ctype_b_loc(tls *TLS) (r uintptr) {
 	return uintptr(unsafe.Pointer(&_ptable))
 }
 
-const (
-	CLOCKS_PER_SEC                = 1000000
-	CLOCK_BOOTTIME                = 7
-	CLOCK_BOOTTIME_ALARM          = 9
-	CLOCK_MONOTONIC               = 1
-	CLOCK_MONOTONIC_COARSE        = 6
-	CLOCK_MONOTONIC_RAW           = 4
-	CLOCK_PROCESS_CPUTIME_ID      = 2
-	CLOCK_REALTIME                = 0
-	CLOCK_REALTIME_ALARM          = 8
-	CLOCK_REALTIME_COARSE         = 5
-	CLOCK_SGI_CYCLE               = 10
-	CLOCK_TAI                     = 11
-	CLOCK_THREAD_CPUTIME_ID       = 3
-	C_LOCALE                      = 0
-	DEFAULT_GUARD_MAX             = 1048576
-	DEFAULT_GUARD_SIZE            = 8192
-	DEFAULT_STACK_MAX             = 8388608
-	DEFAULT_STACK_SIZE            = 131072
-	DTP_OFFSET                    = 0
-	FUTEX_CLOCK_REALTIME          = 256
-	FUTEX_CMP_REQUEUE             = 4
-	FUTEX_FD                      = 2
-	FUTEX_LOCK_PI                 = 6
-	FUTEX_PRIVATE                 = 128
-	FUTEX_REQUEUE                 = 3
-	FUTEX_TRYLOCK_PI              = 8
-	FUTEX_UNLOCK_PI               = 7
-	FUTEX_WAIT                    = 0
-	FUTEX_WAIT_BITSET             = 9
-	FUTEX_WAKE                    = 1
-	FUTEX_WAKE_OP                 = 5
-	LC_ALL                        = 6
-	LC_ALL_MASK                   = 2147483647
-	LC_COLLATE                    = 3
-	LC_COLLATE_MASK               = 8
-	LC_CTYPE                      = 0
-	LC_CTYPE_MASK                 = 1
-	LC_GLOBAL_LOCALE              = -1
-	LC_MESSAGES                   = 5
-	LC_MESSAGES_MASK              = 32
-	LC_MONETARY                   = 4
-	LC_MONETARY_MASK              = 16
-	LC_NUMERIC                    = 1
-	LC_NUMERIC_MASK               = 2
-	LC_TIME                       = 2
-	LC_TIME_MASK                  = 4
-	LOCALE_NAME_MAX               = 23
-	MAP_32BIT                     = 64
-	MAP_ANON                      = 32
-	MAP_ANONYMOUS                 = 32
-	MAP_DENYWRITE                 = 2048
-	MAP_EXECUTABLE                = 4096
-	MAP_FAILED                    = -1
-	MAP_FILE                      = 0
-	MAP_FIXED                     = 16
-	MAP_FIXED_NOREPLACE           = 1048576
-	MAP_GROWSDOWN                 = 256
-	MAP_HUGETLB                   = 262144
-	MAP_HUGE_16GB                 = 2281701376
-	MAP_HUGE_16KB                 = 939524096
-	MAP_HUGE_16MB                 = 1610612736
-	MAP_HUGE_1GB                  = 2013265920
-	MAP_HUGE_1MB                  = 1342177280
-	MAP_HUGE_256MB                = 1879048192
-	MAP_HUGE_2GB                  = 2080374784
-	MAP_HUGE_2MB                  = 1409286144
-	MAP_HUGE_32MB                 = 1677721600
-	MAP_HUGE_512KB                = 1275068416
-	MAP_HUGE_512MB                = 1946157056
-	MAP_HUGE_64KB                 = 1073741824
-	MAP_HUGE_8MB                  = 1543503872
-	MAP_HUGE_MASK                 = 63
-	MAP_HUGE_SHIFT                = 26
-	MAP_LOCKED                    = 8192
-	MAP_NONBLOCK                  = 65536
-	MAP_NORESERVE                 = 16384
-	MAP_POPULATE                  = 32768
-	MAP_PRIVATE                   = 2
-	MAP_SHARED                    = 1
-	MAP_SHARED_VALIDATE           = 3
-	MAP_STACK                     = 131072
-	MAP_SYNC                      = 524288
-	MAP_TYPE                      = 15
-	MCL_CURRENT                   = 1
-	MCL_FUTURE                    = 2
-	MCL_ONFAULT                   = 4
-	MS_ASYNC                      = 1
-	MS_INVALIDATE                 = 2
-	MS_SYNC                       = 4
-	POSIX_MADV_DONTNEED           = 4
-	POSIX_MADV_NORMAL             = 0
-	POSIX_MADV_RANDOM             = 1
-	POSIX_MADV_SEQUENTIAL         = 2
-	POSIX_MADV_WILLNEED           = 3
-	PROT_EXEC                     = 4
-	PROT_GROWSDOWN                = 16777216
-	PROT_GROWSUP                  = 33554432
-	PROT_NONE                     = 0
-	PROT_READ                     = 1
-	PROT_WRITE                    = 2
-	PTHREAD_BARRIER_SERIAL_THREAD = -1
-	PTHREAD_CANCELED              = -1
-	PTHREAD_CANCEL_ASYNCHRONOUS   = 1
-	PTHREAD_CANCEL_DEFERRED       = 0
-	PTHREAD_CANCEL_DISABLE        = 1
-	PTHREAD_CANCEL_ENABLE         = 0
-	PTHREAD_CANCEL_MASKED         = 2
-	PTHREAD_CREATE_DETACHED       = 1
-	PTHREAD_CREATE_JOINABLE       = 0
-	PTHREAD_EXPLICIT_SCHED        = 1
-	PTHREAD_INHERIT_SCHED         = 0
-	PTHREAD_MUTEX_DEFAULT         = 0
-	PTHREAD_MUTEX_ERRORCHECK      = 2
-	PTHREAD_MUTEX_NORMAL          = 0
-	PTHREAD_MUTEX_RECURSIVE       = 1
-	PTHREAD_MUTEX_ROBUST          = 1
-	PTHREAD_MUTEX_STALLED         = 0
-	PTHREAD_ONCE_INIT             = 0
-	PTHREAD_PRIO_INHERIT          = 1
-	PTHREAD_PRIO_NONE             = 0
-	PTHREAD_PRIO_PROTECT          = 2
-	PTHREAD_PROCESS_PRIVATE       = 0
-	PTHREAD_PROCESS_SHARED        = 1
-	PTHREAD_SCOPE_PROCESS         = 1
-	PTHREAD_SCOPE_SYSTEM          = 0
-	SCHED_BATCH                   = 3
-	SCHED_DEADLINE                = 6
-	SCHED_FIFO                    = 1
-	SCHED_IDLE                    = 5
-	SCHED_OTHER                   = 0
-	SCHED_RESET_ON_FORK           = 1073741824
-	SCHED_RR                      = 2
-	SIGCANCEL                     = 33
-	SIGSYNCCALL                   = 34
-	SIGTIMER                      = 32
-	TIMER_ABSTIME                 = 1
-	TIME_UTC                      = 1
-	TP_OFFSET                     = 0
-	UTF8_LOCALE                   = 0
-	__CCGO_SIZEOF_GO_MUTEX        = 8
-	__SU                          = 0
-	pthread                       = 0
-	tls_mod_off_t                 = 0
-)
+const CLOCKS_PER_SEC = 1000000
+const CLOCK_BOOTTIME = 7
+const CLOCK_BOOTTIME_ALARM = 9
+const CLOCK_MONOTONIC = 1
+const CLOCK_MONOTONIC_COARSE = 6
+const CLOCK_MONOTONIC_RAW = 4
+const CLOCK_PROCESS_CPUTIME_ID = 2
+const CLOCK_REALTIME = 0
+const CLOCK_REALTIME_ALARM = 8
+const CLOCK_REALTIME_COARSE = 5
+const CLOCK_SGI_CYCLE = 10
+const CLOCK_TAI = 11
+const CLOCK_THREAD_CPUTIME_ID = 3
+const C_LOCALE = 0
+const DEFAULT_GUARD_MAX = 1048576
+const DEFAULT_GUARD_SIZE = 8192
+const DEFAULT_STACK_MAX = 8388608
+const DEFAULT_STACK_SIZE = 131072
+const DTP_OFFSET = 0
+const FUTEX_CLOCK_REALTIME = 256
+const FUTEX_CMP_REQUEUE = 4
+const FUTEX_FD = 2
+const FUTEX_LOCK_PI = 6
+const FUTEX_PRIVATE = 128
+const FUTEX_REQUEUE = 3
+const FUTEX_TRYLOCK_PI = 8
+const FUTEX_UNLOCK_PI = 7
+const FUTEX_WAIT = 0
+const FUTEX_WAIT_BITSET = 9
+const FUTEX_WAKE = 1
+const FUTEX_WAKE_OP = 5
+const LC_ALL = 6
+const LC_ALL_MASK = 2147483647
+const LC_COLLATE = 3
+const LC_COLLATE_MASK = 8
+const LC_CTYPE = 0
+const LC_CTYPE_MASK = 1
+const LC_GLOBAL_LOCALE = -1
+const LC_MESSAGES = 5
+const LC_MESSAGES_MASK = 32
+const LC_MONETARY = 4
+const LC_MONETARY_MASK = 16
+const LC_NUMERIC = 1
+const LC_NUMERIC_MASK = 2
+const LC_TIME = 2
+const LC_TIME_MASK = 4
+const LOCALE_NAME_MAX = 23
+const MAP_32BIT = 64
+const MAP_ANON = 32
+const MAP_ANONYMOUS = 32
+const MAP_DENYWRITE = 2048
+const MAP_EXECUTABLE = 4096
+const MAP_FAILED = -1
+const MAP_FILE = 0
+const MAP_FIXED = 16
+const MAP_FIXED_NOREPLACE = 1048576
+const MAP_GROWSDOWN = 256
+const MAP_HUGETLB = 262144
+const MAP_HUGE_16GB = 2281701376
+const MAP_HUGE_16KB = 939524096
+const MAP_HUGE_16MB = 1610612736
+const MAP_HUGE_1GB = 2013265920
+const MAP_HUGE_1MB = 1342177280
+const MAP_HUGE_256MB = 1879048192
+const MAP_HUGE_2GB = 2080374784
+const MAP_HUGE_2MB = 1409286144
+const MAP_HUGE_32MB = 1677721600
+const MAP_HUGE_512KB = 1275068416
+const MAP_HUGE_512MB = 1946157056
+const MAP_HUGE_64KB = 1073741824
+const MAP_HUGE_8MB = 1543503872
+const MAP_HUGE_MASK = 63
+const MAP_HUGE_SHIFT = 26
+const MAP_LOCKED = 8192
+const MAP_NONBLOCK = 65536
+const MAP_NORESERVE = 16384
+const MAP_POPULATE = 32768
+const MAP_PRIVATE = 2
+const MAP_SHARED = 1
+const MAP_SHARED_VALIDATE = 3
+const MAP_STACK = 131072
+const MAP_SYNC = 524288
+const MAP_TYPE = 15
+const MCL_CURRENT = 1
+const MCL_FUTURE = 2
+const MCL_ONFAULT = 4
+const MS_ASYNC = 1
+const MS_INVALIDATE = 2
+const MS_SYNC = 4
+const POSIX_MADV_DONTNEED = 4
+const POSIX_MADV_NORMAL = 0
+const POSIX_MADV_RANDOM = 1
+const POSIX_MADV_SEQUENTIAL = 2
+const POSIX_MADV_WILLNEED = 3
+const PROT_EXEC = 4
+const PROT_GROWSDOWN = 16777216
+const PROT_GROWSUP = 33554432
+const PROT_NONE = 0
+const PROT_READ = 1
+const PROT_WRITE = 2
+const PTHREAD_BARRIER_SERIAL_THREAD = -1
+const PTHREAD_CANCELED = -1
+const PTHREAD_CANCEL_ASYNCHRONOUS = 1
+const PTHREAD_CANCEL_DEFERRED = 0
+const PTHREAD_CANCEL_DISABLE = 1
+const PTHREAD_CANCEL_ENABLE = 0
+const PTHREAD_CANCEL_MASKED = 2
+const PTHREAD_CREATE_DETACHED = 1
+const PTHREAD_CREATE_JOINABLE = 0
+const PTHREAD_EXPLICIT_SCHED = 1
+const PTHREAD_INHERIT_SCHED = 0
+const PTHREAD_MUTEX_DEFAULT = 0
+const PTHREAD_MUTEX_ERRORCHECK = 2
+const PTHREAD_MUTEX_NORMAL = 0
+const PTHREAD_MUTEX_RECURSIVE = 1
+const PTHREAD_MUTEX_ROBUST = 1
+const PTHREAD_MUTEX_STALLED = 0
+const PTHREAD_ONCE_INIT = 0
+const PTHREAD_PRIO_INHERIT = 1
+const PTHREAD_PRIO_NONE = 0
+const PTHREAD_PRIO_PROTECT = 2
+const PTHREAD_PROCESS_PRIVATE = 0
+const PTHREAD_PROCESS_SHARED = 1
+const PTHREAD_SCOPE_PROCESS = 1
+const PTHREAD_SCOPE_SYSTEM = 0
+const SCHED_BATCH = 3
+const SCHED_DEADLINE = 6
+const SCHED_FIFO = 1
+const SCHED_IDLE = 5
+const SCHED_OTHER = 0
+const SCHED_RESET_ON_FORK = 1073741824
+const SCHED_RR = 2
+const SIGCANCEL = 33
+const SIGSYNCCALL = 34
+const SIGTIMER = 32
+const TIMER_ABSTIME = 1
+const TIME_UTC = 1
+const TP_OFFSET = 0
+const UTF8_LOCALE = 0
+const __CCGO_SIZEOF_GO_MUTEX = 8
+const __SU = 0
+const pthread = 0
+const tls_mod_off_t = 0
 
 type Tlconv = struct {
 	Fdecimal_point      uintptr
@@ -12910,12 +12872,10 @@ type t__ptcb = struct {
 
 type Tmode_t = uint32
 
-const (
-	_DT_EXITED   = 0
-	_DT_EXITING  = 1
-	_DT_JOINABLE = 2
-	_DT_DETACHED = 3
-)
+const _DT_EXITED = 0
+const _DT_EXITING = 1
+const _DT_JOINABLE = 2
+const _DT_DETACHED = 3
 
 func X__ctype_get_mb_cur_max(tls *TLS) (r Tsize_t) {
 	if __ccgo_strace {
@@ -16430,20 +16390,18 @@ func Xiswcntrl_l(tls *TLS, c Twint_t, l Tlocale_t) (r int32) {
 	return X__iswcntrl_l(tls, c, l)
 }
 
-const (
-	WCTYPE_ALNUM  = 1
-	WCTYPE_ALPHA  = 2
-	WCTYPE_BLANK  = 3
-	WCTYPE_CNTRL  = 4
-	WCTYPE_DIGIT  = 5
-	WCTYPE_GRAPH  = 6
-	WCTYPE_LOWER  = 7
-	WCTYPE_PRINT  = 8
-	WCTYPE_PUNCT  = 9
-	WCTYPE_SPACE  = 10
-	WCTYPE_UPPER  = 11
-	WCTYPE_XDIGIT = 12
-)
+const WCTYPE_ALNUM = 1
+const WCTYPE_ALPHA = 2
+const WCTYPE_BLANK = 3
+const WCTYPE_CNTRL = 4
+const WCTYPE_DIGIT = 5
+const WCTYPE_GRAPH = 6
+const WCTYPE_LOWER = 7
+const WCTYPE_PRINT = 8
+const WCTYPE_PUNCT = 9
+const WCTYPE_SPACE = 10
+const WCTYPE_UPPER = 11
+const WCTYPE_XDIGIT = 12
 
 func Xiswctype(tls *TLS, wc Twint_t, type1 Twctype_t) (r int32) {
 	if __ccgo_strace {
@@ -20169,7 +20127,6 @@ var _tab1 = [2666]uint8{
 	2601: uint8(86),
 	2602: uint8(14),
 }
-
 var _rules = [240]int32{
 	1:   int32(0x2001),
 	2:   -int32(0x2000),
@@ -20389,7 +20346,6 @@ var _rules = [240]int32{
 	238: int32(0x2201),
 	239: -int32(0x2200),
 }
-
 var _rulebases = [512]uint8{
 	1:   uint8(6),
 	2:   uint8(39),
@@ -20415,7 +20371,6 @@ var _rulebases = [512]uint8{
 	366: uint8(234),
 	489: uint8(237),
 }
-
 var _exceptions = [200][2]uint8{
 	0: {
 		0: uint8(48),
@@ -23533,7 +23488,7 @@ type Tdirent = struct {
 	Fd_name   [256]int8
 }
 
-func Xalphasort(tls *TLS, a, b uintptr) (r int32) {
+func Xalphasort(tls *TLS, a uintptr, b uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v a=%v b=%v, (%v:)", tls, a, b, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -23572,93 +23527,91 @@ func Xdirfd(tls *TLS, d uintptr) (r int32) {
 	return (*TDIR)(unsafe.Pointer(d)).Ffd
 }
 
-const (
-	AT_EACCESS            = 512
-	AT_FDCWD              = -100
-	AT_REMOVEDIR          = 512
-	AT_SYMLINK_FOLLOW     = 1024
-	AT_SYMLINK_NOFOLLOW   = 256
-	FD_CLOEXEC            = 1
-	F_DUPFD               = 0
-	F_DUPFD_CLOEXEC       = 1030
-	F_GETFD               = 1
-	F_GETFL               = 3
-	F_GETLK               = 5
-	F_GETOWN              = 9
-	F_GETOWNER_UIDS       = 17
-	F_GETOWN_EX           = 16
-	F_GETSIG              = 11
-	F_OFD_GETLK           = 36
-	F_OFD_SETLK           = 37
-	F_OFD_SETLKW          = 38
-	F_RDLCK               = 0
-	F_SETFD               = 2
-	F_SETFL               = 4
-	F_SETLK               = 6
-	F_SETLKW              = 7
-	F_SETOWN              = 8
-	F_SETOWN_EX           = 15
-	F_SETSIG              = 10
-	F_UNLCK               = 2
-	F_WRLCK               = 1
-	O_ACCMODE             = 2097155
-	O_APPEND              = 1024
-	O_ASYNC               = 8192
-	O_CLOEXEC             = 524288
-	O_CREAT               = 64
-	O_DIRECT              = 16384
-	O_DIRECTORY           = 65536
-	O_DSYNC               = 4096
-	O_EXCL                = 128
-	O_EXEC                = 2097152
-	O_LARGEFILE           = 32768
-	O_NDELAY              = 2048
-	O_NOATIME             = 262144
-	O_NOCTTY              = 256
-	O_NOFOLLOW            = 131072
-	O_NONBLOCK            = 2048
-	O_PATH                = 2097152
-	O_RDONLY              = 0
-	O_RDWR                = 2
-	O_RSYNC               = 1052672
-	O_SEARCH              = 2097152
-	O_SYNC                = 1052672
-	O_TMPFILE             = 4259840
-	O_TRUNC               = 512
-	O_TTY_INIT            = 0
-	O_WRONLY              = 1
-	POSIX_FADV_DONTNEED   = 4
-	POSIX_FADV_NOREUSE    = 5
-	POSIX_FADV_NORMAL     = 0
-	POSIX_FADV_RANDOM     = 1
-	POSIX_FADV_SEQUENTIAL = 2
-	POSIX_FADV_WILLNEED   = 3
-	S_IFBLK               = 24576
-	S_IFCHR               = 8192
-	S_IFDIR               = 16384
-	S_IFIFO               = 4096
-	S_IFLNK               = 40960
-	S_IFMT                = 61440
-	S_IFREG               = 32768
-	S_IFSOCK              = 49152
-	S_IRGRP               = 32
-	S_IROTH               = 4
-	S_IRUSR               = 256
-	S_IRWXG               = 56
-	S_IRWXO               = 7
-	S_IRWXU               = 448
-	S_ISGID               = 1024
-	S_ISUID               = 2048
-	S_ISVTX               = 512
-	S_IWGRP               = 16
-	S_IWOTH               = 2
-	S_IWUSR               = 128
-	S_IXGRP               = 8
-	S_IXOTH               = 1
-	S_IXUSR               = 64
-	UTIME_NOW             = 1073741823
-	UTIME_OMIT            = 1073741822
-)
+const AT_EACCESS = 512
+const AT_FDCWD = -100
+const AT_REMOVEDIR = 512
+const AT_SYMLINK_FOLLOW = 1024
+const AT_SYMLINK_NOFOLLOW = 256
+const FD_CLOEXEC = 1
+const F_DUPFD = 0
+const F_DUPFD_CLOEXEC = 1030
+const F_GETFD = 1
+const F_GETFL = 3
+const F_GETLK = 5
+const F_GETOWN = 9
+const F_GETOWNER_UIDS = 17
+const F_GETOWN_EX = 16
+const F_GETSIG = 11
+const F_OFD_GETLK = 36
+const F_OFD_SETLK = 37
+const F_OFD_SETLKW = 38
+const F_RDLCK = 0
+const F_SETFD = 2
+const F_SETFL = 4
+const F_SETLK = 6
+const F_SETLKW = 7
+const F_SETOWN = 8
+const F_SETOWN_EX = 15
+const F_SETSIG = 10
+const F_UNLCK = 2
+const F_WRLCK = 1
+const O_ACCMODE = 2097155
+const O_APPEND = 1024
+const O_ASYNC = 8192
+const O_CLOEXEC = 524288
+const O_CREAT = 64
+const O_DIRECT = 16384
+const O_DIRECTORY = 65536
+const O_DSYNC = 4096
+const O_EXCL = 128
+const O_EXEC = 2097152
+const O_LARGEFILE = 32768
+const O_NDELAY = 2048
+const O_NOATIME = 262144
+const O_NOCTTY = 256
+const O_NOFOLLOW = 131072
+const O_NONBLOCK = 2048
+const O_PATH = 2097152
+const O_RDONLY = 0
+const O_RDWR = 2
+const O_RSYNC = 1052672
+const O_SEARCH = 2097152
+const O_SYNC = 1052672
+const O_TMPFILE = 4259840
+const O_TRUNC = 512
+const O_TTY_INIT = 0
+const O_WRONLY = 1
+const POSIX_FADV_DONTNEED = 4
+const POSIX_FADV_NOREUSE = 5
+const POSIX_FADV_NORMAL = 0
+const POSIX_FADV_RANDOM = 1
+const POSIX_FADV_SEQUENTIAL = 2
+const POSIX_FADV_WILLNEED = 3
+const S_IFBLK = 24576
+const S_IFCHR = 8192
+const S_IFDIR = 16384
+const S_IFIFO = 4096
+const S_IFLNK = 40960
+const S_IFMT = 61440
+const S_IFREG = 32768
+const S_IFSOCK = 49152
+const S_IRGRP = 32
+const S_IROTH = 4
+const S_IRUSR = 256
+const S_IRWXG = 56
+const S_IRWXO = 7
+const S_IRWXU = 448
+const S_ISGID = 1024
+const S_ISUID = 2048
+const S_ISVTX = 512
+const S_IWGRP = 16
+const S_IWOTH = 2
+const S_IWUSR = 128
+const S_IXGRP = 8
+const S_IXOTH = 1
+const S_IXUSR = 64
+const UTIME_NOW = 1073741823
+const UTIME_OMIT = 1073741822
 
 type Tflock = struct {
 	Fl_type   int16
@@ -23725,75 +23678,73 @@ func Xfdopendir(tls *TLS, fd int32) (r uintptr) {
 	return dir
 }
 
-const (
-	AT_EMPTY_PATH               = 4096
-	AT_NO_AUTOMOUNT             = 2048
-	AT_RECURSIVE                = 32768
-	AT_STATX_DONT_SYNC          = 16384
-	AT_STATX_FORCE_SYNC         = 8192
-	AT_STATX_SYNC_AS_STAT       = 0
-	AT_STATX_SYNC_TYPE          = 24576
-	DN_ACCESS                   = 1
-	DN_ATTRIB                   = 32
-	DN_CREATE                   = 4
-	DN_DELETE                   = 8
-	DN_MODIFY                   = 2
-	DN_MULTISHOT                = 2147483648
-	DN_RENAME                   = 16
-	DT_BLK                      = 6
-	DT_CHR                      = 2
-	DT_DIR                      = 4
-	DT_FIFO                     = 1
-	DT_LNK                      = 10
-	DT_REG                      = 8
-	DT_SOCK                     = 12
-	DT_UNKNOWN                  = 0
-	DT_WHT                      = 14
-	FALLOC_FL_KEEP_SIZE         = 1
-	FALLOC_FL_PUNCH_HOLE        = 2
-	FAPPEND                     = 1024
-	FASYNC                      = 8192
-	FFSYNC                      = 1052672
-	FNDELAY                     = 2048
-	FNONBLOCK                   = 2048
-	F_ADD_SEALS                 = 1033
-	F_CANCELLK                  = 1029
-	F_GETLEASE                  = 1025
-	F_GETPIPE_SZ                = 1032
-	F_GET_FILE_RW_HINT          = 1037
-	F_GET_RW_HINT               = 1035
-	F_GET_SEALS                 = 1034
-	F_NOTIFY                    = 1026
-	F_OWNER_GID                 = 2
-	F_OWNER_PGRP                = 2
-	F_OWNER_PID                 = 1
-	F_OWNER_TID                 = 0
-	F_SEAL_FUTURE_WRITE         = 16
-	F_SEAL_GROW                 = 4
-	F_SEAL_SEAL                 = 1
-	F_SEAL_SHRINK               = 2
-	F_SEAL_WRITE                = 8
-	F_SETLEASE                  = 1024
-	F_SETPIPE_SZ                = 1031
-	F_SET_FILE_RW_HINT          = 1038
-	F_SET_RW_HINT               = 1036
-	MAX_HANDLE_SZ               = 128
-	RWF_WRITE_LIFE_NOT_SET      = 0
-	RWH_WRITE_LIFE_EXTREME      = 5
-	RWH_WRITE_LIFE_LONG         = 4
-	RWH_WRITE_LIFE_MEDIUM       = 3
-	RWH_WRITE_LIFE_NONE         = 1
-	RWH_WRITE_LIFE_SHORT        = 2
-	SPLICE_F_GIFT               = 8
-	SPLICE_F_MORE               = 4
-	SPLICE_F_MOVE               = 1
-	SPLICE_F_NONBLOCK           = 2
-	SYNC_FILE_RANGE_WAIT_AFTER  = 4
-	SYNC_FILE_RANGE_WAIT_BEFORE = 1
-	SYNC_FILE_RANGE_WRITE       = 2
-	alloca                      = 0
-	loff_t                      = 0
-)
+const AT_EMPTY_PATH = 4096
+const AT_NO_AUTOMOUNT = 2048
+const AT_RECURSIVE = 32768
+const AT_STATX_DONT_SYNC = 16384
+const AT_STATX_FORCE_SYNC = 8192
+const AT_STATX_SYNC_AS_STAT = 0
+const AT_STATX_SYNC_TYPE = 24576
+const DN_ACCESS = 1
+const DN_ATTRIB = 32
+const DN_CREATE = 4
+const DN_DELETE = 8
+const DN_MODIFY = 2
+const DN_MULTISHOT = 2147483648
+const DN_RENAME = 16
+const DT_BLK = 6
+const DT_CHR = 2
+const DT_DIR = 4
+const DT_FIFO = 1
+const DT_LNK = 10
+const DT_REG = 8
+const DT_SOCK = 12
+const DT_UNKNOWN = 0
+const DT_WHT = 14
+const FALLOC_FL_KEEP_SIZE = 1
+const FALLOC_FL_PUNCH_HOLE = 2
+const FAPPEND = 1024
+const FASYNC = 8192
+const FFSYNC = 1052672
+const FNDELAY = 2048
+const FNONBLOCK = 2048
+const F_ADD_SEALS = 1033
+const F_CANCELLK = 1029
+const F_GETLEASE = 1025
+const F_GETPIPE_SZ = 1032
+const F_GET_FILE_RW_HINT = 1037
+const F_GET_RW_HINT = 1035
+const F_GET_SEALS = 1034
+const F_NOTIFY = 1026
+const F_OWNER_GID = 2
+const F_OWNER_PGRP = 2
+const F_OWNER_PID = 1
+const F_OWNER_TID = 0
+const F_SEAL_FUTURE_WRITE = 16
+const F_SEAL_GROW = 4
+const F_SEAL_SEAL = 1
+const F_SEAL_SHRINK = 2
+const F_SEAL_WRITE = 8
+const F_SETLEASE = 1024
+const F_SETPIPE_SZ = 1031
+const F_SET_FILE_RW_HINT = 1038
+const F_SET_RW_HINT = 1036
+const MAX_HANDLE_SZ = 128
+const RWF_WRITE_LIFE_NOT_SET = 0
+const RWH_WRITE_LIFE_EXTREME = 5
+const RWH_WRITE_LIFE_LONG = 4
+const RWH_WRITE_LIFE_MEDIUM = 3
+const RWH_WRITE_LIFE_NONE = 1
+const RWH_WRITE_LIFE_SHORT = 2
+const SPLICE_F_GIFT = 8
+const SPLICE_F_MORE = 4
+const SPLICE_F_MOVE = 1
+const SPLICE_F_NONBLOCK = 2
+const SYNC_FILE_RANGE_WAIT_AFTER = 4
+const SYNC_FILE_RANGE_WAIT_BEFORE = 1
+const SYNC_FILE_RANGE_WRITE = 2
+const alloca = 0
+const loff_t = 0
 
 type Tiovec = struct {
 	Fiov_base uintptr
@@ -23862,7 +23813,7 @@ func Xreaddir(tls *TLS, dir uintptr) (r uintptr) {
 	return de
 }
 
-func Xreaddir_r(tls *TLS, dir, buf, result uintptr) (r int32) {
+func Xreaddir_r(tls *TLS, dir uintptr, buf uintptr, result uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v dir=%v buf=%v result=%v, (%v:)", tls, dir, buf, result, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -23910,7 +23861,7 @@ type t__ccgo_fp__Xscandir_2 = func(*TLS, uintptr) int32
 
 type t__ccgo_fp__Xscandir_3 = func(*TLS, uintptr, uintptr) int32
 
-func Xscandir(tls *TLS, path, res, __ccgo_fp_sel, __ccgo_fp_cmp uintptr) (r int32) {
+func Xscandir(tls *TLS, path uintptr, res uintptr, __ccgo_fp_sel uintptr, __ccgo_fp_cmp uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v res=%v __ccgo_fp_sel=%v __ccgo_fp_cmp=%v, (%v:)", tls, path, res, __ccgo_fp_sel, __ccgo_fp_cmp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -24001,7 +23952,7 @@ func Xtelldir(tls *TLS, dir uintptr) (r int64) {
 	return (*TDIR)(unsafe.Pointer(dir)).Ftell
 }
 
-func Xversionsort(tls *TLS, a, b uintptr) (r int32) {
+func Xversionsort(tls *TLS, a uintptr, b uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v a=%v b=%v, (%v:)", tls, a, b, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -24071,13 +24022,11 @@ func X__stack_chk_fail_local(tls *TLS) {
 	X__stack_chk_fail(tls)
 }
 
-const (
-	L_INCR = 1
-	L_SET  = 0
-	L_XTND = 2
-)
+const L_INCR = 1
+const L_SET = 0
+const L_XTND = 2
 
-func _dummy(tls *TLS, old, new1 uintptr) {
+func _dummy(tls *TLS, old uintptr, new1 uintptr) {
 }
 
 func Xclearenv(tls *TLS) (r int32) {
@@ -24126,7 +24075,7 @@ func Xgetenv(tls *TLS, name uintptr) (r uintptr) {
 	return uintptr(0)
 }
 
-func _dummy1(tls *TLS, old, new1 uintptr) {
+func _dummy1(tls *TLS, old uintptr, new1 uintptr) {
 }
 
 func X__putenv(tls *TLS, s uintptr, l Tsize_t, r uintptr) (r1 int32) {
@@ -24204,10 +24153,8 @@ func Xputenv(tls *TLS, s uintptr) (r int32) {
 	return X__putenv(tls, s, l, uintptr(0))
 }
 
-const (
-	L_cuserid = 20
-	NL_NMAX   = 16
-)
+const L_cuserid = 20
+const NL_NMAX = 16
 
 type Tcookie_io_functions_t = struct {
 	Fread   uintptr
@@ -24233,7 +24180,7 @@ func Xsecure_getenv(tls *TLS, name uintptr) (r uintptr) {
 	return v1
 }
 
-func X__env_rm_add(tls *TLS, old, new1 uintptr) {
+func X__env_rm_add(tls *TLS, old uintptr, new1 uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v old=%v new1=%v, (%v:)", tls, old, new1, origin(2))
 	}
@@ -24278,7 +24225,7 @@ var _env_alloced uintptr
 
 var _env_alloced_n Tsize_t
 
-func Xsetenv(tls *TLS, var1, value uintptr, overwrite int32) (r int32) {
+func Xsetenv(tls *TLS, var1 uintptr, value uintptr, overwrite int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v var1=%v value=%v overwrite=%v, (%v:)", tls, var1, value, overwrite, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -24309,7 +24256,7 @@ func Xsetenv(tls *TLS, var1, value uintptr, overwrite int32) (r int32) {
 	return X__putenv(tls, s, l1, s)
 }
 
-func _dummy2(tls *TLS, old, new1 uintptr) {
+func _dummy2(tls *TLS, old uintptr, new1 uintptr) {
 }
 
 func Xunsetenv(tls *TLS, name uintptr) (r int32) {
@@ -24690,7 +24637,7 @@ func X_Exit(tls *TLS, ec int32) {
 	}
 }
 
-func X__assert_fail(tls *TLS, expr, file uintptr, line int32, func1 uintptr) {
+func X__assert_fail(tls *TLS, expr uintptr, file uintptr, line int32, func1 uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v expr=%v file=%v line=%v func1=%v, (%v:)", tls, expr, file, line, func1, origin(2))
 	}
@@ -24702,11 +24649,9 @@ func X__assert_fail(tls *TLS, expr, file uintptr, line int32, func1 uintptr) {
 
 const COUNT = 32
 
-var (
-	_funcs [32]uintptr
-	_count int32
-	_lock  [1]int32
-)
+var _funcs [32]uintptr
+var _count int32
+var _lock [1]int32
 
 func X__funcs_on_quick_exit(tls *TLS) {
 	if __ccgo_strace {
@@ -24769,7 +24714,7 @@ func Xcreat(tls *TLS, filename uintptr, mode Tmode_t) (r int32) {
 	return Xopen(tls, filename, Int32FromInt32(O_CREAT)|Int32FromInt32(O_WRONLY)|Int32FromInt32(O_TRUNC), VaList(bp+8, mode))
 }
 
-func Xfcntl(tls *TLS, fd, cmd int32, va uintptr) (r int32) {
+func Xfcntl(tls *TLS, fd int32, cmd int32, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v cmd=%v va=%v, (%v:)", tls, fd, cmd, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -24880,7 +24825,7 @@ func Xopenat(tls *TLS, fd int32, filename uintptr, flags int32, va uintptr) (r i
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_openat), int64(fd), int64(filename), int64(flags|Int32FromInt32(O_LARGEFILE)), Int64FromUint32(mode), 0, 0))))
 }
 
-func Xposix_fadvise(tls *TLS, fd int32, base, len1 Toff_t, advice int32) (r int32) {
+func Xposix_fadvise(tls *TLS, fd int32, base Toff_t, len1 Toff_t, advice int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v base=%v len1=%v advice=%v, (%v:)", tls, fd, base, len1, advice, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -24888,7 +24833,7 @@ func Xposix_fadvise(tls *TLS, fd int32, base, len1 Toff_t, advice int32) (r int3
 	return int32(-X__syscall4(tls, int64(SYS_fadvise64), int64(fd), base, len1, int64(advice)))
 }
 
-func Xposix_fallocate(tls *TLS, fd int32, base, len1 Toff_t) (r int32) {
+func Xposix_fallocate(tls *TLS, fd int32, base Toff_t, len1 Toff_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v base=%v len1=%v, (%v:)", tls, fd, base, len1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -24896,19 +24841,17 @@ func Xposix_fallocate(tls *TLS, fd int32, base, len1 Toff_t) (r int32) {
 	return int32(-X__syscall4(tls, int64(SYS_fallocate), int64(fd), int64(Int32FromInt32(0)), base, len1))
 }
 
-const (
-	FE_ALL_EXCEPT = 63
-	FE_DIVBYZERO  = 4
-	FE_DOWNWARD   = 1024
-	FE_INEXACT    = 32
-	FE_INVALID    = 1
-	FE_OVERFLOW   = 8
-	FE_TONEAREST  = 0
-	FE_TOWARDZERO = 3072
-	FE_UNDERFLOW  = 16
-	FE_UPWARD     = 2048
-	__FE_DENORM   = 2
-)
+const FE_ALL_EXCEPT = 63
+const FE_DIVBYZERO = 4
+const FE_DOWNWARD = 1024
+const FE_INEXACT = 32
+const FE_INVALID = 1
+const FE_OVERFLOW = 8
+const FE_TONEAREST = 0
+const FE_TOWARDZERO = 3072
+const FE_UNDERFLOW = 16
+const FE_UPWARD = 2048
+const __FE_DENORM = 2
 
 type Tfexcept_t = uint16
 
@@ -24987,40 +24930,36 @@ func Xfesetenv(tls *TLS, envp uintptr) (r int32) {
 	return 0
 }
 
-const (
-	WCONTINUED  = 8
-	WEXITED     = 4
-	WNOWAIT     = 16777216
-	WSTOPPED    = 2
-	__WALL      = 1073741824
-	__WCLONE    = 2147483648
-	__WNOTHREAD = 536870912
-)
+const WCONTINUED = 8
+const WEXITED = 4
+const WNOWAIT = 16777216
+const WSTOPPED = 2
+const __WALL = 1073741824
+const __WCLONE = 2147483648
+const __WNOTHREAD = 536870912
 
 type Tidtype_t = int32
 
-const (
-	_P_ALL        = 0
-	_P_PID        = 1
-	_P_PGID       = 2
-	_P_PIDFD      = 3
-	F_APP         = 128
-	F_EOF         = 16
-	F_ERR         = 32
-	F_NORD        = 4
-	F_NOWR        = 8
-	F_PERM        = 1
-	F_SVB         = 64
-	KMAX          = 128
-	LDBL_EPSILON1 = 2.22044604925031308085e-16
-	LDBL_MAX1     = 1.79769313486231570815e+308
-	LDBL_MIN1     = 2.22507385850720138309e-308
-	LD_B1B_DIG    = 2
-	LD_B1B_MAX    = 254740991
-	MASK          = 127
-	MAYBE_WAITERS = 1073741824
-	UNGET         = 8
-)
+const _P_ALL = 0
+const _P_PID = 1
+const _P_PGID = 2
+const _P_PIDFD = 3
+const F_APP = 128
+const F_EOF = 16
+const F_ERR = 32
+const F_NORD = 4
+const F_NOWR = 8
+const F_PERM = 1
+const F_SVB = 64
+const KMAX = 128
+const LDBL_EPSILON1 = 2.22044604925031308085e-16
+const LDBL_MAX1 = 1.79769313486231570815e+308
+const LDBL_MIN1 = 2.22507385850720138309e-308
+const LD_B1B_DIG = 2
+const LD_B1B_MAX = 254740991
+const MASK = 127
+const MAYBE_WAITERS = 1073741824
+const UNGET = 8
 
 type TFILE = struct {
 	Fflags        uint32
@@ -25162,7 +25101,7 @@ func _scanexp(tls *TLS, f uintptr, pok int32) (r int64) {
 	return v19
 }
 
-func _decfloat(tls *TLS, f uintptr, c, bits, emin, sign, pok int32) (r float64) {
+func _decfloat(tls *TLS, f uintptr, c int32, bits int32, emin int32, sign int32, pok int32) (r float64) {
 	bp := tls.Alloc(512)
 	defer tls.Free(512)
 	var a, bitlim, denormal, e2, emax, gotdig, gotrad, i, j, k, lnz, p10, rp, rpm9, sh, z, v2, v6 int32
@@ -25590,7 +25529,7 @@ var _p10s = [8]int32{
 	7: int32(100000000),
 }
 
-func _hexfloat(tls *TLS, f uintptr, bits, emin, sign, pok int32) (r float64) {
+func _hexfloat(tls *TLS, f uintptr, bits int32, emin int32, sign int32, pok int32) (r float64) {
 	var bias, scale, y float64
 	var c, d, gotdig, gotrad, gottail, v1 int32
 	var dc, e2, rp int64
@@ -25799,7 +25738,7 @@ func _hexfloat(tls *TLS, f uintptr, bits, emin, sign, pok int32) (r float64) {
 	return Xscalbnl(tls, y, int32(e2))
 }
 
-func X__floatscan(tls *TLS, f uintptr, prec, pok int32) (r float64) {
+func X__floatscan(tls *TLS, f uintptr, prec int32, pok int32) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v prec=%v pok=%v, (%v:)", tls, f, prec, pok, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -26678,24 +26617,20 @@ type Tr_debug = struct {
 	Fr_ldbase  TElf64_Addr
 }
 
-const (
-	_RT_CONSISTENT = 0
-	_RT_ADD        = 1
-	_RT_DELETE     = 2
-	VERSION        = "1.2.5"
-)
+const _RT_CONSISTENT = 0
+const _RT_ADD = 1
+const _RT_DELETE = 2
+const VERSION = "1.2.5"
 
-const (
-	IPC_CREAT      = 512
-	IPC_EXCL       = 1024
-	IPC_INFO       = 3
-	IPC_NOWAIT     = 2048
-	IPC_RMID       = 0
-	IPC_SET        = 1
-	IPC_STAT       = 2
-	__ipc_perm_key = 0
-	__ipc_perm_seq = 0
-)
+const IPC_CREAT = 512
+const IPC_EXCL = 1024
+const IPC_INFO = 3
+const IPC_NOWAIT = 2048
+const IPC_RMID = 0
+const IPC_SET = 1
+const IPC_STAT = 2
+const __ipc_perm_key = 0
+const __ipc_perm_seq = 0
 
 type Tkey_t = int32
 
@@ -26725,27 +26660,25 @@ func Xftok(tls *TLS, path uintptr, id int32) (r Tkey_t) {
 	return Int32FromUint64((**(**Tstat)(__ccgo_up(bp))).Fst_ino&Uint64FromInt32(0xffff) | (**(**Tstat)(__ccgo_up(bp))).Fst_dev&Uint64FromInt32(0xff)<<Int32FromInt32(16) | uint64(Uint32FromInt32(id)&Uint32FromUint32(0xff)<<Int32FromInt32(24)))
 }
 
-const (
-	IPCOP_msgctl     = 14
-	IPCOP_msgget     = 13
-	IPCOP_msgrcv     = 12
-	IPCOP_msgsnd     = 11
-	IPCOP_semctl     = 3
-	IPCOP_semget     = 2
-	IPCOP_semop      = 1
-	IPCOP_semtimedop = 4
-	IPCOP_shmat      = 21
-	IPCOP_shmctl     = 24
-	IPCOP_shmdt      = 22
-	IPCOP_shmget     = 23
-	IPC_TIME64       = 0
-	MSG_EXCEPT       = 8192
-	MSG_INFO         = 12
-	MSG_NOERROR      = 4096
-	MSG_STAT         = 11
-	MSG_STAT_ANY     = 13
-	__msg_cbytes     = 0
-)
+const IPCOP_msgctl = 14
+const IPCOP_msgget = 13
+const IPCOP_msgrcv = 12
+const IPCOP_msgsnd = 11
+const IPCOP_semctl = 3
+const IPCOP_semget = 2
+const IPCOP_semop = 1
+const IPCOP_semtimedop = 4
+const IPCOP_shmat = 21
+const IPCOP_shmctl = 24
+const IPCOP_shmdt = 22
+const IPCOP_shmget = 23
+const IPC_TIME64 = 0
+const MSG_EXCEPT = 8192
+const MSG_INFO = 12
+const MSG_NOERROR = 4096
+const MSG_STAT = 11
+const MSG_STAT_ANY = 13
+const __msg_cbytes = 0
 
 type Tmsgqnum_t = uint64
 
@@ -26775,7 +26708,7 @@ type Tmsginfo = struct {
 	Fmsgseg  uint16
 }
 
-func Xmsgctl(tls *TLS, q, cmd int32, buf uintptr) (r1 int32) {
+func Xmsgctl(tls *TLS, q int32, cmd int32, buf uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v q=%v cmd=%v buf=%v, (%v:)", tls, q, cmd, buf, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -26810,20 +26743,18 @@ func Xmsgsnd(tls *TLS, q int32, m uintptr, len1 Tsize_t, flag int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_msgsnd), int64(q), int64(m), Int64FromUint64(len1), int64(flag), 0, 0))))
 }
 
-const (
-	GETALL               = 13
-	GETNCNT              = 14
-	GETPID               = 11
-	GETVAL               = 12
-	GETZCNT              = 15
-	SEM_INFO             = 19
-	SEM_STAT             = 18
-	SEM_STAT_ANY         = 20
-	SEM_UNDO             = 4096
-	SETALL               = 17
-	SETVAL               = 16
-	_SEM_SEMUN_UNDEFINED = 1
-)
+const GETALL = 13
+const GETNCNT = 14
+const GETPID = 11
+const GETVAL = 12
+const GETZCNT = 15
+const SEM_INFO = 19
+const SEM_STAT = 18
+const SEM_STAT_ANY = 20
+const SEM_UNDO = 4096
+const SETALL = 17
+const SETVAL = 16
+const _SEM_SEMUN_UNDEFINED = 1
 
 type Tsemid_ds = struct {
 	Fsem_perm        Tipc_perm
@@ -26863,7 +26794,7 @@ type Tsemun = struct {
 	F__ccgo_pad3 [4]byte
 }
 
-func Xsemctl(tls *TLS, id, num, cmd int32, va uintptr) (r1 int32) {
+func Xsemctl(tls *TLS, id int32, num int32, cmd int32, va uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v id=%v num=%v cmd=%v va=%v, (%v:)", tls, id, num, cmd, va, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -26902,7 +26833,7 @@ func Xsemctl(tls *TLS, id, num, cmd int32, va uintptr) (r1 int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func Xsemget(tls *TLS, key Tkey_t, n, fl int32) (r int32) {
+func Xsemget(tls *TLS, key Tkey_t, n int32, fl int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v n=%v fl=%v, (%v:)", tls, key, n, fl, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -26925,11 +26856,9 @@ func Xsemop(tls *TLS, id int32, buf uintptr, n Tsize_t) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_semop), int64(id), int64(buf), Int64FromUint64(n)))))
 }
 
-const (
-	NO_TIME32 = 0
-	__key     = 0
-	__seq     = 0
-)
+const NO_TIME32 = 0
+const __key = 0
+const __seq = 0
 
 type Tipc_perm1 = struct {
 	Fkey    Tkey_t
@@ -26963,38 +26892,36 @@ func Xsemtimedop(tls *TLS, id int32, buf uintptr, n Tsize_t, ts uintptr) (r int3
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_semtimedop), int64(id), int64(buf), Int64FromUint64(n), int64(ts)))))
 }
 
-const (
-	SHMLBA         = 4096
-	SHM_DEST       = 512
-	SHM_EXEC       = 32768
-	SHM_HUGETLB    = 2048
-	SHM_HUGE_16GB  = 2281701376
-	SHM_HUGE_16MB  = 1610612736
-	SHM_HUGE_1GB   = 2013265920
-	SHM_HUGE_1MB   = 1342177280
-	SHM_HUGE_256MB = 1879048192
-	SHM_HUGE_2GB   = 2080374784
-	SHM_HUGE_2MB   = 1409286144
-	SHM_HUGE_32MB  = 1677721600
-	SHM_HUGE_512KB = 1275068416
-	SHM_HUGE_512MB = 1946157056
-	SHM_HUGE_64KB  = 1073741824
-	SHM_HUGE_8MB   = 1543503872
-	SHM_HUGE_MASK  = 63
-	SHM_HUGE_SHIFT = 26
-	SHM_INFO       = 14
-	SHM_LOCK       = 11
-	SHM_LOCKED     = 1024
-	SHM_NORESERVE  = 4096
-	SHM_R          = 256
-	SHM_RDONLY     = 4096
-	SHM_REMAP      = 16384
-	SHM_RND        = 8192
-	SHM_STAT       = 13
-	SHM_STAT_ANY   = 15
-	SHM_UNLOCK     = 12
-	SHM_W          = 128
-)
+const SHMLBA = 4096
+const SHM_DEST = 512
+const SHM_EXEC = 32768
+const SHM_HUGETLB = 2048
+const SHM_HUGE_16GB = 2281701376
+const SHM_HUGE_16MB = 1610612736
+const SHM_HUGE_1GB = 2013265920
+const SHM_HUGE_1MB = 1342177280
+const SHM_HUGE_256MB = 1879048192
+const SHM_HUGE_2GB = 2080374784
+const SHM_HUGE_2MB = 1409286144
+const SHM_HUGE_32MB = 1677721600
+const SHM_HUGE_512KB = 1275068416
+const SHM_HUGE_512MB = 1946157056
+const SHM_HUGE_64KB = 1073741824
+const SHM_HUGE_8MB = 1543503872
+const SHM_HUGE_MASK = 63
+const SHM_HUGE_SHIFT = 26
+const SHM_INFO = 14
+const SHM_LOCK = 11
+const SHM_LOCKED = 1024
+const SHM_NORESERVE = 4096
+const SHM_R = 256
+const SHM_RDONLY = 4096
+const SHM_REMAP = 16384
+const SHM_RND = 8192
+const SHM_STAT = 13
+const SHM_STAT_ANY = 15
+const SHM_UNLOCK = 12
+const SHM_W = 128
 
 type Tshmid_ds = struct {
 	Fshm_perm   Tipc_perm
@@ -27037,7 +26964,7 @@ func Xshmat(tls *TLS, id int32, addr uintptr, flag int32) (r uintptr) {
 	return uintptr(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_shmat), int64(id), int64(addr), int64(flag)))))
 }
 
-func Xshmctl(tls *TLS, id, cmd int32, buf uintptr) (r1 int32) {
+func Xshmctl(tls *TLS, id int32, cmd int32, buf uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v id=%v cmd=%v buf=%v, (%v:)", tls, id, cmd, buf, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -27152,7 +27079,7 @@ func Xverrx(tls *TLS, status int32, fmt uintptr, ap Tva_list) {
 	_exit(tls, status)
 }
 
-func Xwarn(tls *TLS, fmt, va uintptr) {
+func Xwarn(tls *TLS, fmt uintptr, va uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 	}
@@ -27163,7 +27090,7 @@ func Xwarn(tls *TLS, fmt, va uintptr) {
 	_ = ap
 }
 
-func Xwarnx(tls *TLS, fmt, va uintptr) {
+func Xwarnx(tls *TLS, fmt uintptr, va uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 	}
@@ -27174,7 +27101,7 @@ func Xwarnx(tls *TLS, fmt, va uintptr) {
 	_ = ap
 }
 
-func Xerr(tls *TLS, status int32, fmt, va uintptr) {
+func Xerr(tls *TLS, status int32, fmt uintptr, va uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v status=%v fmt=%v va=%v, (%v:)", tls, status, fmt, va, origin(2))
 	}
@@ -27185,7 +27112,7 @@ func Xerr(tls *TLS, status int32, fmt, va uintptr) {
 	_ = ap
 }
 
-func Xerrx(tls *TLS, status int32, fmt, va uintptr) {
+func Xerrx(tls *TLS, status int32, fmt uintptr, va uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v status=%v fmt=%v va=%v, (%v:)", tls, status, fmt, va, origin(2))
 	}
@@ -27212,19 +27139,17 @@ func Xeaccess(tls *TLS, filename uintptr, amode int32) (r int32) {
 	return Xeuidaccess(tls, filename, amode)
 }
 
-const (
-	FTW_CHDIR = 4
-	FTW_D     = 2
-	FTW_DEPTH = 8
-	FTW_DNR   = 3
-	FTW_DP    = 6
-	FTW_F     = 1
-	FTW_MOUNT = 2
-	FTW_NS    = 4
-	FTW_PHYS  = 1
-	FTW_SL    = 5
-	FTW_SLN   = 7
-)
+const FTW_CHDIR = 4
+const FTW_D = 2
+const FTW_DEPTH = 8
+const FTW_DNR = 3
+const FTW_DP = 6
+const FTW_F = 1
+const FTW_MOUNT = 2
+const FTW_NS = 4
+const FTW_PHYS = 1
+const FTW_SL = 5
+const FTW_SLN = 7
 
 type TFTW = struct {
 	Fbase  int32
@@ -27233,7 +27158,7 @@ type TFTW = struct {
 
 type t__ccgo_fp__Xftw_1 = func(*TLS, uintptr, uintptr, int32) int32
 
-func Xftw(tls *TLS, path, __ccgo_fp_fn uintptr, fd_limit int32) (r int32) {
+func Xftw(tls *TLS, path uintptr, __ccgo_fp_fn uintptr, fd_limit int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v __ccgo_fp_fn=%v fd_limit=%v, (%v:)", tls, path, __ccgo_fp_fn, fd_limit, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -27244,25 +27169,23 @@ func Xftw(tls *TLS, path, __ccgo_fp_fn uintptr, fd_limit int32) (r int32) {
 	return Xnftw(tls, path, __ccgo_fp_fn, fd_limit, int32(FTW_PHYS))
 }
 
-const (
-	STATX_ALL         = 4095
-	STATX_ATIME       = 32
-	STATX_BASIC_STATS = 2047
-	STATX_BLOCKS      = 1024
-	STATX_BTIME       = 2048
-	STATX_CTIME       = 128
-	STATX_GID         = 16
-	STATX_INO         = 256
-	STATX_MODE        = 2
-	STATX_MTIME       = 64
-	STATX_NLINK       = 4
-	STATX_SIZE        = 512
-	STATX_TYPE        = 1
-	STATX_UID         = 8
-	S_IEXEC           = 64
-	S_IREAD           = 256
-	S_IWRITE          = 128
-)
+const STATX_ALL = 4095
+const STATX_ATIME = 32
+const STATX_BASIC_STATS = 2047
+const STATX_BLOCKS = 1024
+const STATX_BTIME = 2048
+const STATX_CTIME = 128
+const STATX_GID = 16
+const STATX_INO = 256
+const STATX_MODE = 2
+const STATX_MTIME = 64
+const STATX_NLINK = 4
+const STATX_SIZE = 512
+const STATX_TYPE = 1
+const STATX_UID = 8
+const S_IEXEC = 64
+const S_IREAD = 256
+const S_IWRITE = 128
 
 type Tstatx_timestamp = struct {
 	Ftv_sec  Tint64_t
@@ -27382,147 +27305,145 @@ func Xgetpagesize(tls *TLS) (r int32) {
 	return int32(PAGESIZE)
 }
 
-const (
-	B0        = 0
-	B1000000  = 4104
-	B110      = 3
-	B115200   = 4098
-	B1152000  = 4105
-	B1200     = 9
-	B134      = 4
-	B150      = 5
-	B1500000  = 4106
-	B1800     = 10
-	B19200    = 14
-	B200      = 6
-	B2000000  = 4107
-	B230400   = 4099
-	B2400     = 11
-	B2500000  = 4108
-	B300      = 7
-	B3000000  = 4109
-	B3500000  = 4110
-	B38400    = 15
-	B4000000  = 4111
-	B460800   = 4100
-	B4800     = 12
-	B50       = 1
-	B500000   = 4101
-	B57600    = 4097
-	B576000   = 4102
-	B600      = 8
-	B75       = 2
-	B921600   = 4103
-	B9600     = 13
-	BRKINT    = 2
-	BS0       = 0
-	BS1       = 8192
-	BSDLY     = 8192
-	CBAUD     = 4111
-	CBAUDEX   = 4096
-	CIBAUD    = 269418496
-	CLOCAL    = 2048
-	CMSPAR    = 1073741824
-	CR0       = 0
-	CR1       = 512
-	CR2       = 1024
-	CR3       = 1536
-	CRDLY     = 1536
-	CREAD     = 128
-	CRTSCTS   = 2147483648
-	CS5       = 0
-	CS6       = 16
-	CS7       = 32
-	CS8       = 48
-	CSIZE     = 48
-	CSTOPB    = 64
-	ECHO      = 8
-	ECHOCTL   = 512
-	ECHOE     = 16
-	ECHOK     = 32
-	ECHOKE    = 2048
-	ECHONL    = 64
-	ECHOPRT   = 1024
-	EXTA      = 14
-	EXTB      = 15
-	EXTPROC   = 65536
-	FF0       = 0
-	FF1       = 32768
-	FFDLY     = 32768
-	FLUSHO    = 4096
-	HUPCL     = 1024
-	ICANON    = 2
-	ICRNL     = 256
-	IEXTEN    = 32768
-	IGNBRK    = 1
-	IGNCR     = 128
-	IGNPAR    = 4
-	IMAXBEL   = 8192
-	INLCR     = 64
-	INPCK     = 16
-	ISIG      = 1
-	ISTRIP    = 32
-	IUCLC     = 512
-	IUTF8     = 16384
-	IXANY     = 2048
-	IXOFF     = 4096
-	IXON      = 1024
-	NCCS      = 32
-	NL0       = 0
-	NL1       = 256
-	NLDLY     = 256
-	NOFLSH    = 128
-	OCRNL     = 8
-	OFDEL     = 128
-	OFILL     = 64
-	OLCUC     = 2
-	ONLCR     = 4
-	ONLRET    = 32
-	ONOCR     = 16
-	OPOST     = 1
-	PARENB    = 256
-	PARMRK    = 8
-	PARODD    = 512
-	PENDIN    = 16384
-	TAB0      = 0
-	TAB1      = 2048
-	TAB2      = 4096
-	TAB3      = 6144
-	TABDLY    = 6144
-	TCIFLUSH  = 0
-	TCIOFF    = 2
-	TCIOFLUSH = 2
-	TCION     = 3
-	TCOFLUSH  = 1
-	TCOOFF    = 0
-	TCOON     = 1
-	TCSADRAIN = 1
-	TCSAFLUSH = 2
-	TCSANOW   = 0
-	TOSTOP    = 256
-	VDISCARD  = 13
-	VEOF      = 4
-	VEOL      = 11
-	VEOL2     = 16
-	VERASE    = 2
-	VINTR     = 0
-	VKILL     = 3
-	VLNEXT    = 15
-	VMIN      = 6
-	VQUIT     = 1
-	VREPRINT  = 12
-	VSTART    = 8
-	VSTOP     = 9
-	VSUSP     = 10
-	VSWTC     = 7
-	VT0       = 0
-	VT1       = 16384
-	VTDLY     = 16384
-	VTIME     = 5
-	VWERASE   = 14
-	XCASE     = 4
-	XTABS     = 6144
-)
+const B0 = 0
+const B1000000 = 4104
+const B110 = 3
+const B115200 = 4098
+const B1152000 = 4105
+const B1200 = 9
+const B134 = 4
+const B150 = 5
+const B1500000 = 4106
+const B1800 = 10
+const B19200 = 14
+const B200 = 6
+const B2000000 = 4107
+const B230400 = 4099
+const B2400 = 11
+const B2500000 = 4108
+const B300 = 7
+const B3000000 = 4109
+const B3500000 = 4110
+const B38400 = 15
+const B4000000 = 4111
+const B460800 = 4100
+const B4800 = 12
+const B50 = 1
+const B500000 = 4101
+const B57600 = 4097
+const B576000 = 4102
+const B600 = 8
+const B75 = 2
+const B921600 = 4103
+const B9600 = 13
+const BRKINT = 2
+const BS0 = 0
+const BS1 = 8192
+const BSDLY = 8192
+const CBAUD = 4111
+const CBAUDEX = 4096
+const CIBAUD = 269418496
+const CLOCAL = 2048
+const CMSPAR = 1073741824
+const CR0 = 0
+const CR1 = 512
+const CR2 = 1024
+const CR3 = 1536
+const CRDLY = 1536
+const CREAD = 128
+const CRTSCTS = 2147483648
+const CS5 = 0
+const CS6 = 16
+const CS7 = 32
+const CS8 = 48
+const CSIZE = 48
+const CSTOPB = 64
+const ECHO = 8
+const ECHOCTL = 512
+const ECHOE = 16
+const ECHOK = 32
+const ECHOKE = 2048
+const ECHONL = 64
+const ECHOPRT = 1024
+const EXTA = 14
+const EXTB = 15
+const EXTPROC = 65536
+const FF0 = 0
+const FF1 = 32768
+const FFDLY = 32768
+const FLUSHO = 4096
+const HUPCL = 1024
+const ICANON = 2
+const ICRNL = 256
+const IEXTEN = 32768
+const IGNBRK = 1
+const IGNCR = 128
+const IGNPAR = 4
+const IMAXBEL = 8192
+const INLCR = 64
+const INPCK = 16
+const ISIG = 1
+const ISTRIP = 32
+const IUCLC = 512
+const IUTF8 = 16384
+const IXANY = 2048
+const IXOFF = 4096
+const IXON = 1024
+const NCCS = 32
+const NL0 = 0
+const NL1 = 256
+const NLDLY = 256
+const NOFLSH = 128
+const OCRNL = 8
+const OFDEL = 128
+const OFILL = 64
+const OLCUC = 2
+const ONLCR = 4
+const ONLRET = 32
+const ONOCR = 16
+const OPOST = 1
+const PARENB = 256
+const PARMRK = 8
+const PARODD = 512
+const PENDIN = 16384
+const TAB0 = 0
+const TAB1 = 2048
+const TAB2 = 4096
+const TAB3 = 6144
+const TABDLY = 6144
+const TCIFLUSH = 0
+const TCIOFF = 2
+const TCIOFLUSH = 2
+const TCION = 3
+const TCOFLUSH = 1
+const TCOOFF = 0
+const TCOON = 1
+const TCSADRAIN = 1
+const TCSAFLUSH = 2
+const TCSANOW = 0
+const TOSTOP = 256
+const VDISCARD = 13
+const VEOF = 4
+const VEOL = 11
+const VEOL2 = 16
+const VERASE = 2
+const VINTR = 0
+const VKILL = 3
+const VLNEXT = 15
+const VMIN = 6
+const VQUIT = 1
+const VREPRINT = 12
+const VSTART = 8
+const VSTOP = 9
+const VSUSP = 10
+const VSWTC = 7
+const VT0 = 0
+const VT1 = 16384
+const VTDLY = 16384
+const VTIME = 5
+const VWERASE = 14
+const XCASE = 4
+const XTABS = 6144
 
 type Twinsize = struct {
 	Fws_row    uint16
@@ -27597,11 +27518,9 @@ var _password [128]int8
 
 var _defshells = [18]int8{'/', 'b', 'i', 'n', '/', 's', 'h', 10, '/', 'b', 'i', 'n', '/', 'c', 's', 'h', 10}
 
-var (
-	_line     uintptr
-	_linesize Tsize_t
-	_f        uintptr
-)
+var _line uintptr
+var _linesize Tsize_t
+var _f uintptr
 
 func Xendusershell(tls *TLS) {
 	if __ccgo_strace {
@@ -27648,72 +27567,70 @@ func Xgetusershell(tls *TLS) (r uintptr) {
 	return _line
 }
 
-const (
-	ANYMARK     = 1
-	FLUSHBAND   = 4
-	FLUSHR      = 1
-	FLUSHRW     = 3
-	FLUSHW      = 2
-	FMNAMESZ    = 8
-	I_ATMARK    = 21279
-	I_CANPUT    = 21282
-	I_CKBAND    = 21277
-	I_FDINSERT  = 21264
-	I_FIND      = 21259
-	I_FLUSH     = 21253
-	I_FLUSHBAND = 21276
-	I_GETBAND   = 21278
-	I_GETCLTIME = 21281
-	I_GETSIG    = 21258
-	I_GRDOPT    = 21255
-	I_GWROPT    = 21268
-	I_LINK      = 21260
-	I_LIST      = 21269
-	I_LOOK      = 21252
-	I_NREAD     = 21249
-	I_PEEK      = 21263
-	I_PLINK     = 21270
-	I_POP       = 21251
-	I_PUNLINK   = 21271
-	I_PUSH      = 21250
-	I_RECVFD    = 21262
-	I_SENDFD    = 21265
-	I_SETCLTIME = 21280
-	I_SETSIG    = 21257
-	I_SRDOPT    = 21254
-	I_STR       = 21256
-	I_SWROPT    = 21267
-	I_UNLINK    = 21261
-	LASTMARK    = 2
-	MORECTL     = 1
-	MOREDATA    = 2
-	MSG_ANY     = 2
-	MSG_BAND    = 4
-	MSG_HIPRI   = 1
-	MUXID_ALL   = -1
-	RMSGD       = 1
-	RMSGN       = 2
-	RNORM       = 0
-	RPROTDAT    = 4
-	RPROTDIS    = 8
-	RPROTMASK   = 28
-	RPROTNORM   = 16
-	RS_HIPRI    = 1
-	SNDPIPE     = 2
-	SNDZERO     = 1
-	S_BANDURG   = 512
-	S_ERROR     = 16
-	S_HANGUP    = 32
-	S_HIPRI     = 2
-	S_INPUT     = 1
-	S_MSG       = 8
-	S_OUTPUT    = 4
-	S_RDBAND    = 128
-	S_RDNORM    = 64
-	S_WRBAND    = 256
-	S_WRNORM    = 4
-	__SID       = 21248
-)
+const ANYMARK = 1
+const FLUSHBAND = 4
+const FLUSHR = 1
+const FLUSHRW = 3
+const FLUSHW = 2
+const FMNAMESZ = 8
+const I_ATMARK = 21279
+const I_CANPUT = 21282
+const I_CKBAND = 21277
+const I_FDINSERT = 21264
+const I_FIND = 21259
+const I_FLUSH = 21253
+const I_FLUSHBAND = 21276
+const I_GETBAND = 21278
+const I_GETCLTIME = 21281
+const I_GETSIG = 21258
+const I_GRDOPT = 21255
+const I_GWROPT = 21268
+const I_LINK = 21260
+const I_LIST = 21269
+const I_LOOK = 21252
+const I_NREAD = 21249
+const I_PEEK = 21263
+const I_PLINK = 21270
+const I_POP = 21251
+const I_PUNLINK = 21271
+const I_PUSH = 21250
+const I_RECVFD = 21262
+const I_SENDFD = 21265
+const I_SETCLTIME = 21280
+const I_SETSIG = 21257
+const I_SRDOPT = 21254
+const I_STR = 21256
+const I_SWROPT = 21267
+const I_UNLINK = 21261
+const LASTMARK = 2
+const MORECTL = 1
+const MOREDATA = 2
+const MSG_ANY = 2
+const MSG_BAND = 4
+const MSG_HIPRI = 1
+const MUXID_ALL = -1
+const RMSGD = 1
+const RMSGN = 2
+const RNORM = 0
+const RPROTDAT = 4
+const RPROTDIS = 8
+const RPROTMASK = 28
+const RPROTNORM = 16
+const RS_HIPRI = 1
+const SNDPIPE = 2
+const SNDZERO = 1
+const S_BANDURG = 512
+const S_ERROR = 16
+const S_HANGUP = 32
+const S_HIPRI = 2
+const S_INPUT = 1
+const S_MSG = 8
+const S_OUTPUT = 4
+const S_RDBAND = 128
+const S_RDNORM = 64
+const S_WRBAND = 256
+const S_WRNORM = 4
+const __SID = 21248
 
 type Tbandinfo = struct {
 	Fbi_pri  uint8
@@ -27778,7 +27695,7 @@ func Xisastream(tls *TLS, fd int32) (r int32) {
 	return v1
 }
 
-func Xlutimes(tls *TLS, filename, tv uintptr) (r int32) {
+func Xlutimes(tls *TLS, filename uintptr, tv uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v filename=%v tv=%v, (%v:)", tls, filename, tv, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -27802,10 +27719,8 @@ func Xlutimes(tls *TLS, filename, tv uintptr) (r int32) {
 	return Xutimensat(tls, -int32(100), filename, v1, int32(AT_SYMLINK_NOFOLLOW))
 }
 
-const (
-	UL_GETFSIZE = 1
-	UL_SETFSIZE = 2
-)
+const UL_GETFSIZE = 1
+const UL_SETFSIZE = 2
 
 func Xulimit(tls *TLS, cmd int32, va uintptr) (r int64) {
 	if __ccgo_strace {
@@ -27831,19 +27746,17 @@ func Xulimit(tls *TLS, cmd int32, va uintptr) (r int64) {
 	return Int64FromUint64((**(**Trlimit)(__ccgo_up(bp))).Frlim_cur / uint64(512))
 }
 
-const (
-	BOOT_TIME     = 2
-	DEAD_PROCESS  = 8
-	EMPTY         = 0
-	INIT_PROCESS  = 5
-	LOGIN_PROCESS = 6
-	NEW_TIME      = 3
-	OLD_TIME      = 4
-	RUN_LVL       = 1
-	USER_PROCESS  = 7
-	e_exit        = 0
-	e_termination = 0
-)
+const BOOT_TIME = 2
+const DEAD_PROCESS = 8
+const EMPTY = 0
+const INIT_PROCESS = 5
+const LOGIN_PROCESS = 6
+const NEW_TIME = 3
+const OLD_TIME = 4
+const RUN_LVL = 1
+const USER_PROCESS = 7
+const e_exit = 0
+const e_termination = 0
 
 type Tutmpx = struct {
 	Fut_type   int16
@@ -27908,7 +27821,7 @@ func Xpututxline(tls *TLS, ut uintptr) (r uintptr) {
 	return UintptrFromInt32(0)
 }
 
-func Xupdwtmpx(tls *TLS, f, u uintptr) {
+func Xupdwtmpx(tls *TLS, f uintptr, u uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v u=%v, (%v:)", tls, f, u, origin(2))
 	}
@@ -27965,64 +27878,62 @@ func Xsetutent(tls *TLS) {
 	Xsetutxent(tls)
 }
 
-func Xupdwtmp(tls *TLS, f, u uintptr) {
+func Xupdwtmp(tls *TLS, f uintptr, u uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v u=%v, (%v:)", tls, f, u, origin(2))
 	}
 	Xupdwtmpx(tls, f, u)
 }
 
-const (
-	ADJ_ESTERROR          = 8
-	ADJ_FREQUENCY         = 2
-	ADJ_MAXERROR          = 4
-	ADJ_MICRO             = 4096
-	ADJ_NANO              = 8192
-	ADJ_OFFSET            = 1
-	ADJ_OFFSET_SINGLESHOT = 32769
-	ADJ_OFFSET_SS_READ    = 40961
-	ADJ_SETOFFSET         = 256
-	ADJ_STATUS            = 16
-	ADJ_TAI               = 128
-	ADJ_TICK              = 16384
-	ADJ_TIMECONST         = 32
-	MAXTC                 = 6
-	MOD_CLKA              = 32769
-	MOD_CLKB              = 16384
-	MOD_ESTERROR          = 8
-	MOD_FREQUENCY         = 2
-	MOD_MAXERROR          = 4
-	MOD_MICRO             = 4096
-	MOD_NANO              = 8192
-	MOD_OFFSET            = 1
-	MOD_STATUS            = 16
-	MOD_TAI               = 128
-	MOD_TIMECONST         = 32
-	STA_CLK               = 32768
-	STA_CLOCKERR          = 4096
-	STA_DEL               = 32
-	STA_FLL               = 8
-	STA_FREQHOLD          = 128
-	STA_INS               = 16
-	STA_MODE              = 16384
-	STA_NANO              = 8192
-	STA_PLL               = 1
-	STA_PPSERROR          = 2048
-	STA_PPSFREQ           = 2
-	STA_PPSJITTER         = 512
-	STA_PPSSIGNAL         = 256
-	STA_PPSTIME           = 4
-	STA_PPSWANDER         = 1024
-	STA_RONLY             = 65280
-	STA_UNSYNC            = 64
-	TIME_BAD              = 5
-	TIME_DEL              = 2
-	TIME_ERROR            = 5
-	TIME_INS              = 1
-	TIME_OK               = 0
-	TIME_OOP              = 3
-	TIME_WAIT             = 4
-)
+const ADJ_ESTERROR = 8
+const ADJ_FREQUENCY = 2
+const ADJ_MAXERROR = 4
+const ADJ_MICRO = 4096
+const ADJ_NANO = 8192
+const ADJ_OFFSET = 1
+const ADJ_OFFSET_SINGLESHOT = 32769
+const ADJ_OFFSET_SS_READ = 40961
+const ADJ_SETOFFSET = 256
+const ADJ_STATUS = 16
+const ADJ_TAI = 128
+const ADJ_TICK = 16384
+const ADJ_TIMECONST = 32
+const MAXTC = 6
+const MOD_CLKA = 32769
+const MOD_CLKB = 16384
+const MOD_ESTERROR = 8
+const MOD_FREQUENCY = 2
+const MOD_MAXERROR = 4
+const MOD_MICRO = 4096
+const MOD_NANO = 8192
+const MOD_OFFSET = 1
+const MOD_STATUS = 16
+const MOD_TAI = 128
+const MOD_TIMECONST = 32
+const STA_CLK = 32768
+const STA_CLOCKERR = 4096
+const STA_DEL = 32
+const STA_FLL = 8
+const STA_FREQHOLD = 128
+const STA_INS = 16
+const STA_MODE = 16384
+const STA_NANO = 8192
+const STA_PLL = 1
+const STA_PPSERROR = 2048
+const STA_PPSFREQ = 2
+const STA_PPSJITTER = 512
+const STA_PPSSIGNAL = 256
+const STA_PPSTIME = 4
+const STA_PPSWANDER = 1024
+const STA_RONLY = 65280
+const STA_UNSYNC = 64
+const TIME_BAD = 5
+const TIME_DEL = 2
+const TIME_ERROR = 5
+const TIME_INS = 1
+const TIME_OK = 0
+const TIME_OOP = 3
+const TIME_WAIT = 4
 
 type Tntptimeval = struct {
 	Ftime     Ttimeval
@@ -28054,7 +27965,7 @@ type Ttimex = struct {
 	F__padding [11]int32
 }
 
-func Xadjtime(tls *TLS, in, out uintptr) (r int32) {
+func Xadjtime(tls *TLS, in uintptr, out uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v in=%v out=%v, (%v:)", tls, in, out, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28112,7 +28023,7 @@ func Xbrk(tls *TLS, end uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(-Int32FromInt32(ENOMEM))))
 }
 
-func Xcapset(tls *TLS, a, b uintptr) (r int32) {
+func Xcapset(tls *TLS, a uintptr, b uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v a=%v b=%v, (%v:)", tls, a, b, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28120,7 +28031,7 @@ func Xcapset(tls *TLS, a, b uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_capset), int64(a), int64(b)))))
 }
 
-func Xcapget(tls *TLS, a, b uintptr) (r int32) {
+func Xcapget(tls *TLS, a uintptr, b uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v a=%v b=%v, (%v:)", tls, a, b, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28268,29 +28179,27 @@ func Xcopy_file_range(tls *TLS, fd_in int32, off_in uintptr, fd_out int32, off_o
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall6(tls, int64(SYS_copy_file_range), int64(fd_in), int64(off_in), int64(fd_out), int64(off_out), Int64FromUint64(len1), Int64FromUint32(flags))))
 }
 
-const (
-	EPOLLERR       = 8
-	EPOLLET        = 2147483648
-	EPOLLEXCLUSIVE = 268435456
-	EPOLLHUP       = 16
-	EPOLLIN        = 1
-	EPOLLMSG       = 1024
-	EPOLLNVAL      = 32
-	EPOLLONESHOT   = 1073741824
-	EPOLLOUT       = 4
-	EPOLLPRI       = 2
-	EPOLLRDBAND    = 128
-	EPOLLRDHUP     = 8192
-	EPOLLRDNORM    = 64
-	EPOLLWAKEUP    = 536870912
-	EPOLLWRBAND    = 512
-	EPOLLWRNORM    = 256
-	EPOLL_CLOEXEC  = 524288
-	EPOLL_CTL_ADD  = 1
-	EPOLL_CTL_DEL  = 2
-	EPOLL_CTL_MOD  = 3
-	EPOLL_NONBLOCK = 2048
-)
+const EPOLLERR = 8
+const EPOLLET = 2147483648
+const EPOLLEXCLUSIVE = 268435456
+const EPOLLHUP = 16
+const EPOLLIN = 1
+const EPOLLMSG = 1024
+const EPOLLNVAL = 32
+const EPOLLONESHOT = 1073741824
+const EPOLLOUT = 4
+const EPOLLPRI = 2
+const EPOLLRDBAND = 128
+const EPOLLRDHUP = 8192
+const EPOLLRDNORM = 64
+const EPOLLWAKEUP = 536870912
+const EPOLLWRBAND = 512
+const EPOLLWRNORM = 256
+const EPOLL_CLOEXEC = 524288
+const EPOLL_CTL_ADD = 1
+const EPOLL_CTL_DEL = 2
+const EPOLL_CTL_MOD = 3
+const EPOLL_NONBLOCK = 2048
 
 type Tfsblkcnt_t = uint64
 
@@ -28339,7 +28248,7 @@ func Xepoll_create1(tls *TLS, flags int32) (r1 int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func Xepoll_ctl(tls *TLS, fd, op, fd2 int32, ev uintptr) (r int32) {
+func Xepoll_ctl(tls *TLS, fd int32, op int32, fd2 int32, ev uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v op=%v fd2=%v ev=%v, (%v:)", tls, fd, op, fd2, ev, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28347,7 +28256,7 @@ func Xepoll_ctl(tls *TLS, fd, op, fd2 int32, ev uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_epoll_ctl), int64(fd), int64(op), int64(fd2), int64(ev)))))
 }
 
-func Xepoll_pwait(tls *TLS, fd int32, ev uintptr, cnt, to int32, sigs uintptr) (r1 int32) {
+func Xepoll_pwait(tls *TLS, fd int32, ev uintptr, cnt int32, to int32, sigs uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v ev=%v cnt=%v to=%v sigs=%v, (%v:)", tls, fd, ev, cnt, to, sigs, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -28361,7 +28270,7 @@ func Xepoll_pwait(tls *TLS, fd int32, ev uintptr, cnt, to int32, sigs uintptr) (
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func Xepoll_wait(tls *TLS, fd int32, ev uintptr, cnt, to int32) (r int32) {
+func Xepoll_wait(tls *TLS, fd int32, ev uintptr, cnt int32, to int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v ev=%v cnt=%v to=%v, (%v:)", tls, fd, ev, cnt, to, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28369,11 +28278,9 @@ func Xepoll_wait(tls *TLS, fd int32, ev uintptr, cnt, to int32) (r int32) {
 	return Xepoll_pwait(tls, fd, ev, cnt, to, uintptr(0))
 }
 
-const (
-	EFD_CLOEXEC   = 524288
-	EFD_NONBLOCK  = 2048
-	EFD_SEMAPHORE = 1
-)
+const EFD_CLOEXEC = 524288
+const EFD_NONBLOCK = 2048
+const EFD_SEMAPHORE = 1
 
 type Teventfd_t = uint64
 
@@ -28424,7 +28331,7 @@ func Xeventfd_write(tls *TLS, fd int32, _value Teventfd_t) (r int32) {
 	return v1
 }
 
-func Xfallocate(tls *TLS, fd, mode int32, base, len1 Toff_t) (r int32) {
+func Xfallocate(tls *TLS, fd int32, mode int32, base Toff_t, len1 Toff_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v mode=%v base=%v len1=%v, (%v:)", tls, fd, mode, base, len1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28432,81 +28339,79 @@ func Xfallocate(tls *TLS, fd, mode int32, base, len1 Toff_t) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_fallocate), int64(fd), int64(mode), base, len1))))
 }
 
-const (
-	FANOTIFY_METADATA_VERSION     = 3
-	FAN_ACCESS                    = 1
-	FAN_ACCESS_PERM               = 131072
-	FAN_ALLOW                     = 1
-	FAN_ALL_CLASS_BITS            = 12
-	FAN_ALL_EVENTS                = 59
-	FAN_ALL_INIT_FLAGS            = 63
-	FAN_ALL_MARK_FLAGS            = 255
-	FAN_ALL_OUTGOING_EVENTS       = 213051
-	FAN_ALL_PERM_EVENTS           = 196608
-	FAN_ATTRIB                    = 4
-	FAN_AUDIT                     = 16
-	FAN_CLASS_CONTENT             = 4
-	FAN_CLASS_NOTIF               = 0
-	FAN_CLASS_PRE_CONTENT         = 8
-	FAN_CLOEXEC                   = 1
-	FAN_CLOSE                     = 24
-	FAN_CLOSE_NOWRITE             = 16
-	FAN_CLOSE_WRITE               = 8
-	FAN_CREATE                    = 256
-	FAN_DELETE                    = 512
-	FAN_DELETE_SELF               = 1024
-	FAN_DENY                      = 2
-	FAN_DIR_MODIFY                = 524288
-	FAN_ENABLE_AUDIT              = 64
-	FAN_EVENT_INFO_TYPE_DFID      = 3
-	FAN_EVENT_INFO_TYPE_DFID_NAME = 2
-	FAN_EVENT_INFO_TYPE_FID       = 1
-	FAN_EVENT_METADATA_LEN        = 0
-	FAN_EVENT_ON_CHILD            = 134217728
-	FAN_MARK_ADD                  = 1
-	FAN_MARK_DONT_FOLLOW          = 4
-	FAN_MARK_FILESYSTEM           = 256
-	FAN_MARK_FLUSH                = 128
-	FAN_MARK_IGNORED_MASK         = 32
-	FAN_MARK_IGNORED_SURV_MODIFY  = 64
-	FAN_MARK_INODE                = 0
-	FAN_MARK_MOUNT                = 16
-	FAN_MARK_ONLYDIR              = 8
-	FAN_MARK_REMOVE               = 2
-	FAN_MARK_TYPE_MASK            = 272
-	FAN_MODIFY                    = 2
-	FAN_MOVE                      = 192
-	FAN_MOVED_FROM                = 64
-	FAN_MOVED_TO                  = 128
-	FAN_MOVE_SELF                 = 2048
-	FAN_NOFD                      = -1
-	FAN_NONBLOCK                  = 2
-	FAN_ONDIR                     = 1073741824
-	FAN_OPEN                      = 32
-	FAN_OPEN_EXEC                 = 4096
-	FAN_OPEN_EXEC_PERM            = 262144
-	FAN_OPEN_PERM                 = 65536
-	FAN_Q_OVERFLOW                = 16384
-	FAN_REPORT_DFID_NAME          = 3072
-	FAN_REPORT_DIR_FID            = 1024
-	FAN_REPORT_FID                = 512
-	FAN_REPORT_NAME               = 2048
-	FAN_REPORT_TID                = 256
-	FAN_UNLIMITED_MARKS           = 32
-	FAN_UNLIMITED_QUEUE           = 16
-	ST_APPEND                     = 256
-	ST_IMMUTABLE                  = 512
-	ST_MANDLOCK                   = 64
-	ST_NOATIME                    = 1024
-	ST_NODEV                      = 4
-	ST_NODIRATIME                 = 2048
-	ST_NOEXEC                     = 8
-	ST_NOSUID                     = 2
-	ST_RDONLY                     = 1
-	ST_RELATIME                   = 4096
-	ST_SYNCHRONOUS                = 16
-	ST_WRITE                      = 128
-)
+const FANOTIFY_METADATA_VERSION = 3
+const FAN_ACCESS = 1
+const FAN_ACCESS_PERM = 131072
+const FAN_ALLOW = 1
+const FAN_ALL_CLASS_BITS = 12
+const FAN_ALL_EVENTS = 59
+const FAN_ALL_INIT_FLAGS = 63
+const FAN_ALL_MARK_FLAGS = 255
+const FAN_ALL_OUTGOING_EVENTS = 213051
+const FAN_ALL_PERM_EVENTS = 196608
+const FAN_ATTRIB = 4
+const FAN_AUDIT = 16
+const FAN_CLASS_CONTENT = 4
+const FAN_CLASS_NOTIF = 0
+const FAN_CLASS_PRE_CONTENT = 8
+const FAN_CLOEXEC = 1
+const FAN_CLOSE = 24
+const FAN_CLOSE_NOWRITE = 16
+const FAN_CLOSE_WRITE = 8
+const FAN_CREATE = 256
+const FAN_DELETE = 512
+const FAN_DELETE_SELF = 1024
+const FAN_DENY = 2
+const FAN_DIR_MODIFY = 524288
+const FAN_ENABLE_AUDIT = 64
+const FAN_EVENT_INFO_TYPE_DFID = 3
+const FAN_EVENT_INFO_TYPE_DFID_NAME = 2
+const FAN_EVENT_INFO_TYPE_FID = 1
+const FAN_EVENT_METADATA_LEN = 0
+const FAN_EVENT_ON_CHILD = 134217728
+const FAN_MARK_ADD = 1
+const FAN_MARK_DONT_FOLLOW = 4
+const FAN_MARK_FILESYSTEM = 256
+const FAN_MARK_FLUSH = 128
+const FAN_MARK_IGNORED_MASK = 32
+const FAN_MARK_IGNORED_SURV_MODIFY = 64
+const FAN_MARK_INODE = 0
+const FAN_MARK_MOUNT = 16
+const FAN_MARK_ONLYDIR = 8
+const FAN_MARK_REMOVE = 2
+const FAN_MARK_TYPE_MASK = 272
+const FAN_MODIFY = 2
+const FAN_MOVE = 192
+const FAN_MOVED_FROM = 64
+const FAN_MOVED_TO = 128
+const FAN_MOVE_SELF = 2048
+const FAN_NOFD = -1
+const FAN_NONBLOCK = 2
+const FAN_ONDIR = 1073741824
+const FAN_OPEN = 32
+const FAN_OPEN_EXEC = 4096
+const FAN_OPEN_EXEC_PERM = 262144
+const FAN_OPEN_PERM = 65536
+const FAN_Q_OVERFLOW = 16384
+const FAN_REPORT_DFID_NAME = 3072
+const FAN_REPORT_DIR_FID = 1024
+const FAN_REPORT_FID = 512
+const FAN_REPORT_NAME = 2048
+const FAN_REPORT_TID = 256
+const FAN_UNLIMITED_MARKS = 32
+const FAN_UNLIMITED_QUEUE = 16
+const ST_APPEND = 256
+const ST_IMMUTABLE = 512
+const ST_MANDLOCK = 64
+const ST_NOATIME = 1024
+const ST_NODEV = 4
+const ST_NODIRATIME = 2048
+const ST_NOEXEC = 8
+const ST_NOSUID = 2
+const ST_RDONLY = 1
+const ST_RELATIME = 4096
+const ST_SYNCHRONOUS = 16
+const ST_WRITE = 128
 
 type Tstatvfs = struct {
 	Ff_bsize    uint64
@@ -28571,7 +28476,7 @@ type Tfanotify_response = struct {
 	Fresponse uint32
 }
 
-func Xfanotify_init(tls *TLS, flags, event_f_flags uint32) (r int32) {
+func Xfanotify_init(tls *TLS, flags uint32, event_f_flags uint32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v flags=%v event_f_flags=%v, (%v:)", tls, flags, event_f_flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28587,14 +28492,12 @@ func Xfanotify_mark(tls *TLS, fanotify_fd int32, flags uint32, mask uint64, dfd 
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall5(tls, int64(SYS_fanotify_mark), int64(fanotify_fd), Int64FromUint32(flags), Int64FromUint64(mask), int64(dfd), int64(pathname)))))
 }
 
-const (
-	LOCK_EX = 2
-	LOCK_NB = 4
-	LOCK_SH = 1
-	LOCK_UN = 8
-)
+const LOCK_EX = 2
+const LOCK_NB = 4
+const LOCK_SH = 1
+const LOCK_UN = 8
 
-func Xflock(tls *TLS, fd, op int32) (r int32) {
+func Xflock(tls *TLS, fd int32, op int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v op=%v, (%v:)", tls, fd, op, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28613,11 +28516,9 @@ func Xgetdents(tls *TLS, fd int32, buf uintptr, len1 Tsize_t) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_getdents64), int64(fd), int64(buf), Int64FromUint64(len1)))))
 }
 
-const (
-	GRND_INSECURE = 4
-	GRND_NONBLOCK = 1
-	GRND_RANDOM   = 2
-)
+const GRND_INSECURE = 4
+const GRND_NONBLOCK = 1
+const GRND_RANDOM = 2
 
 func Xgetrandom(tls *TLS, buf uintptr, buflen Tsize_t, flags uint32) (r Tssize_t) {
 	if __ccgo_strace {
@@ -28627,35 +28528,33 @@ func Xgetrandom(tls *TLS, buf uintptr, buflen Tsize_t, flags uint32) (r Tssize_t
 	return X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_getrandom), int64(buf), Int64FromUint64(buflen), Int64FromUint32(flags), 0, 0, 0)))
 }
 
-const (
-	IN_ACCESS        = 1
-	IN_ALL_EVENTS    = 4095
-	IN_ATTRIB        = 4
-	IN_CLOEXEC       = 524288
-	IN_CLOSE         = 24
-	IN_CLOSE_NOWRITE = 16
-	IN_CLOSE_WRITE   = 8
-	IN_CREATE        = 256
-	IN_DELETE        = 512
-	IN_DELETE_SELF   = 1024
-	IN_DONT_FOLLOW   = 33554432
-	IN_EXCL_UNLINK   = 67108864
-	IN_IGNORED       = 32768
-	IN_ISDIR         = 1073741824
-	IN_MASK_ADD      = 536870912
-	IN_MASK_CREATE   = 268435456
-	IN_MODIFY        = 2
-	IN_MOVE          = 192
-	IN_MOVED_FROM    = 64
-	IN_MOVED_TO      = 128
-	IN_MOVE_SELF     = 2048
-	IN_NONBLOCK      = 2048
-	IN_ONESHOT       = 2147483648
-	IN_ONLYDIR       = 16777216
-	IN_OPEN          = 32
-	IN_Q_OVERFLOW    = 16384
-	IN_UNMOUNT       = 8192
-)
+const IN_ACCESS = 1
+const IN_ALL_EVENTS = 4095
+const IN_ATTRIB = 4
+const IN_CLOEXEC = 524288
+const IN_CLOSE = 24
+const IN_CLOSE_NOWRITE = 16
+const IN_CLOSE_WRITE = 8
+const IN_CREATE = 256
+const IN_DELETE = 512
+const IN_DELETE_SELF = 1024
+const IN_DONT_FOLLOW = 33554432
+const IN_EXCL_UNLINK = 67108864
+const IN_IGNORED = 32768
+const IN_ISDIR = 1073741824
+const IN_MASK_ADD = 536870912
+const IN_MASK_CREATE = 268435456
+const IN_MODIFY = 2
+const IN_MOVE = 192
+const IN_MOVED_FROM = 64
+const IN_MOVED_TO = 128
+const IN_MOVE_SELF = 2048
+const IN_NONBLOCK = 2048
+const IN_ONESHOT = 2147483648
+const IN_ONLYDIR = 16777216
+const IN_OPEN = 32
+const IN_Q_OVERFLOW = 16384
+const IN_UNMOUNT = 8192
 
 type Tinotify_event = struct {
 	Fwd     int32
@@ -28694,7 +28593,7 @@ func Xinotify_add_watch(tls *TLS, fd int32, pathname uintptr, mask Tuint32_t) (r
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_inotify_add_watch), int64(fd), int64(pathname), Int64FromUint32(mask)))))
 }
 
-func Xinotify_rm_watch(tls *TLS, fd, wd int32) (r int32) {
+func Xinotify_rm_watch(tls *TLS, fd int32, wd int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v wd=%v, (%v:)", tls, fd, wd, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28702,7 +28601,7 @@ func Xinotify_rm_watch(tls *TLS, fd, wd int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_inotify_rm_watch), int64(fd), int64(wd)))))
 }
 
-func Xioperm(tls *TLS, from, num uint64, turn_on int32) (r int32) {
+func Xioperm(tls *TLS, from uint64, num uint64, turn_on int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v from=%v num=%v turn_on=%v, (%v:)", tls, from, num, turn_on, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -28726,37 +28625,35 @@ func Xklogctl(tls *TLS, type1 int32, buf uintptr, len1 int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_syslog), int64(type1), int64(buf), int64(len1)))))
 }
 
-const (
-	MADV_COLD         = 20
-	MADV_DODUMP       = 17
-	MADV_DOFORK       = 11
-	MADV_DONTDUMP     = 16
-	MADV_DONTFORK     = 10
-	MADV_DONTNEED     = 4
-	MADV_FREE         = 8
-	MADV_HUGEPAGE     = 14
-	MADV_HWPOISON     = 100
-	MADV_KEEPONFORK   = 19
-	MADV_MERGEABLE    = 12
-	MADV_NOHUGEPAGE   = 15
-	MADV_NORMAL       = 0
-	MADV_PAGEOUT      = 21
-	MADV_RANDOM       = 1
-	MADV_REMOVE       = 9
-	MADV_SEQUENTIAL   = 2
-	MADV_SOFT_OFFLINE = 101
-	MADV_UNMERGEABLE  = 13
-	MADV_WILLNEED     = 3
-	MADV_WIPEONFORK   = 18
-	MFD_ALLOW_SEALING = 2
-	MFD_CLOEXEC       = 1
-	MFD_HUGETLB       = 4
-	MLOCK_ONFAULT     = 1
-	MREMAP_DONTUNMAP  = 4
-	MREMAP_FIXED      = 2
-	MREMAP_MAYMOVE    = 1
-	_GNU_SOURCE       = 1
-)
+const MADV_COLD = 20
+const MADV_DODUMP = 17
+const MADV_DOFORK = 11
+const MADV_DONTDUMP = 16
+const MADV_DONTFORK = 10
+const MADV_DONTNEED = 4
+const MADV_FREE = 8
+const MADV_HUGEPAGE = 14
+const MADV_HWPOISON = 100
+const MADV_KEEPONFORK = 19
+const MADV_MERGEABLE = 12
+const MADV_NOHUGEPAGE = 15
+const MADV_NORMAL = 0
+const MADV_PAGEOUT = 21
+const MADV_RANDOM = 1
+const MADV_REMOVE = 9
+const MADV_SEQUENTIAL = 2
+const MADV_SOFT_OFFLINE = 101
+const MADV_UNMERGEABLE = 13
+const MADV_WILLNEED = 3
+const MADV_WIPEONFORK = 18
+const MFD_ALLOW_SEALING = 2
+const MFD_CLOEXEC = 1
+const MFD_HUGETLB = 4
+const MLOCK_ONFAULT = 1
+const MREMAP_DONTUNMAP = 4
+const MREMAP_FIXED = 2
+const MREMAP_MAYMOVE = 1
+const _GNU_SOURCE = 1
 
 func Xmemfd_create(tls *TLS, name uintptr, flags uint32) (r int32) {
 	if __ccgo_strace {
@@ -28793,250 +28690,248 @@ func Xdelete_module(tls *TLS, a uintptr, b uint32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_delete_module), int64(a), Int64FromUint32(b)))))
 }
 
-const (
-	BLKBSZGET          = 2147488368
-	BLKBSZSET          = 1073746545
-	BLKFLSBUF          = 4705
-	BLKFRAGET          = 4709
-	BLKFRASET          = 4708
-	BLKGETSIZE         = 4704
-	BLKGETSIZE64       = 2147488370
-	BLKRAGET           = 4707
-	BLKRASET           = 4706
-	BLKROGET           = 4702
-	BLKROSET           = 4701
-	BLKRRPART          = 4703
-	BLKSECTGET         = 4711
-	BLKSECTSET         = 4710
-	BLKSSZGET          = 4712
-	FIOASYNC           = 21586
-	FIOCLEX            = 21585
-	FIOGETOWN          = 35075
-	FIONBIO            = 21537
-	FIONCLEX           = 21584
-	FIONREAD           = 21531
-	FIOQSIZE           = 21600
-	FIOSETOWN          = 35073
-	MNT_DETACH         = 2
-	MNT_EXPIRE         = 4
-	MNT_FORCE          = 1
-	MS_ACTIVE          = 1073741824
-	MS_BIND            = 4096
-	MS_BORN            = 536870912
-	MS_DIRSYNC         = 128
-	MS_I_VERSION       = 8388608
-	MS_KERNMOUNT       = 4194304
-	MS_LAZYTIME        = 33554432
-	MS_MANDLOCK        = 64
-	MS_MGC_MSK         = 4294901760
-	MS_MGC_VAL         = 3236757504
-	MS_MOVE            = 8192
-	MS_NOATIME         = 1024
-	MS_NODEV           = 4
-	MS_NODIRATIME      = 2048
-	MS_NOEXEC          = 8
-	MS_NOREMOTELOCK    = 134217728
-	MS_NOSEC           = 268435456
-	MS_NOSUID          = 2
-	MS_NOSYMFOLLOW     = 256
-	MS_NOUSER          = 2147483648
-	MS_POSIXACL        = 65536
-	MS_PRIVATE         = 262144
-	MS_RDONLY          = 1
-	MS_REC             = 16384
-	MS_RELATIME        = 2097152
-	MS_REMOUNT         = 32
-	MS_RMT_MASK        = 41943121
-	MS_SHARED          = 1048576
-	MS_SILENT          = 32768
-	MS_SLAVE           = 524288
-	MS_STRICTATIME     = 16777216
-	MS_SYNCHRONOUS     = 16
-	MS_UNBINDABLE      = 131072
-	N_6PACK            = 7
-	N_AX25             = 5
-	N_CAIF             = 20
-	N_GIGASET_M101     = 16
-	N_GSM0710          = 21
-	N_HCI              = 15
-	N_HDLC             = 13
-	N_IRDA             = 11
-	N_MASC             = 8
-	N_MOUSE            = 2
-	N_NCI              = 25
-	N_NULL             = 27
-	N_PPP              = 3
-	N_PPS              = 18
-	N_PROFIBUS_FDL     = 10
-	N_R3964            = 9
-	N_SLCAN            = 17
-	N_SLIP             = 1
-	N_SMSBLOCK         = 12
-	N_SPEAKUP          = 26
-	N_STRIP            = 4
-	N_SYNC_PPP         = 14
-	N_TI_WL            = 22
-	N_TRACEROUTER      = 24
-	N_TRACESINK        = 23
-	N_TTY              = 0
-	N_V253             = 19
-	N_X25              = 6
-	SIOCADDDLCI        = 35200
-	SIOCADDMULTI       = 35121
-	SIOCADDRT          = 35083
-	SIOCATMARK         = 35077
-	SIOCDARP           = 35155
-	SIOCDELDLCI        = 35201
-	SIOCDELMULTI       = 35122
-	SIOCDELRT          = 35084
-	SIOCDEVPRIVATE     = 35312
-	SIOCDIFADDR        = 35126
-	SIOCDRARP          = 35168
-	SIOCGARP           = 35156
-	SIOCGIFADDR        = 35093
-	SIOCGIFBR          = 35136
-	SIOCGIFBRDADDR     = 35097
-	SIOCGIFCONF        = 35090
-	SIOCGIFCOUNT       = 35128
-	SIOCGIFDSTADDR     = 35095
-	SIOCGIFENCAP       = 35109
-	SIOCGIFFLAGS       = 35091
-	SIOCGIFHWADDR      = 35111
-	SIOCGIFINDEX       = 35123
-	SIOCGIFMAP         = 35184
-	SIOCGIFMEM         = 35103
-	SIOCGIFMETRIC      = 35101
-	SIOCGIFMTU         = 35105
-	SIOCGIFNAME        = 35088
-	SIOCGIFNETMASK     = 35099
-	SIOCGIFPFLAGS      = 35125
-	SIOCGIFSLAVE       = 35113
-	SIOCGIFTXQLEN      = 35138
-	SIOCGPGRP          = 35076
-	SIOCGRARP          = 35169
-	SIOCGSTAMP         = 35078
-	SIOCGSTAMPNS       = 35079
-	SIOCPROTOPRIVATE   = 35296
-	SIOCRTMSG          = 35085
-	SIOCSARP           = 35157
-	SIOCSIFADDR        = 35094
-	SIOCSIFBR          = 35137
-	SIOCSIFBRDADDR     = 35098
-	SIOCSIFDSTADDR     = 35096
-	SIOCSIFENCAP       = 35110
-	SIOCSIFFLAGS       = 35092
-	SIOCSIFHWADDR      = 35108
-	SIOCSIFHWBROADCAST = 35127
-	SIOCSIFLINK        = 35089
-	SIOCSIFMAP         = 35185
-	SIOCSIFMEM         = 35104
-	SIOCSIFMETRIC      = 35102
-	SIOCSIFMTU         = 35106
-	SIOCSIFNAME        = 35107
-	SIOCSIFNETMASK     = 35100
-	SIOCSIFPFLAGS      = 35124
-	SIOCSIFSLAVE       = 35120
-	SIOCSIFTXQLEN      = 35139
-	SIOCSPGRP          = 35074
-	SIOCSRARP          = 35170
-	SIOGIFINDEX        = 35123
-	TCFLSH             = 21515
-	TCGETA             = 21509
-	TCGETS             = 21505
-	TCGETX             = 21554
-	TCSBRK             = 21513
-	TCSBRKP            = 21541
-	TCSETA             = 21510
-	TCSETAF            = 21512
-	TCSETAW            = 21511
-	TCSETS             = 21506
-	TCSETSF            = 21508
-	TCSETSW            = 21507
-	TCSETX             = 21555
-	TCSETXF            = 21556
-	TCSETXW            = 21557
-	TCXONC             = 21514
-	TIOCCBRK           = 21544
-	TIOCCONS           = 21533
-	TIOCEXCL           = 21516
-	TIOCGDEV           = 2147767346
-	TIOCGETD           = 21540
-	TIOCGEXCL          = 2147767360
-	TIOCGICOUNT        = 21597
-	TIOCGISO7816       = 2150126658
-	TIOCGLCKTRMIOS     = 21590
-	TIOCGPGRP          = 21519
-	TIOCGPKT           = 2147767352
-	TIOCGPTLCK         = 2147767353
-	TIOCGPTN           = 2147767344
-	TIOCGPTPEER        = 21569
-	TIOCGRS485         = 21550
-	TIOCGSERIAL        = 21534
-	TIOCGSID           = 21545
-	TIOCGSOFTCAR       = 21529
-	TIOCGWINSZ         = 21523
-	TIOCINQ            = 21531
-	TIOCLINUX          = 21532
-	TIOCMBIC           = 21527
-	TIOCMBIS           = 21526
-	TIOCMGET           = 21525
-	TIOCMIWAIT         = 21596
-	TIOCMSET           = 21528
-	TIOCM_CAR          = 64
-	TIOCM_CD           = 64
-	TIOCM_CTS          = 32
-	TIOCM_DSR          = 256
-	TIOCM_DTR          = 2
-	TIOCM_LE           = 1
-	TIOCM_LOOP         = 32768
-	TIOCM_OUT1         = 8192
-	TIOCM_OUT2         = 16384
-	TIOCM_RI           = 128
-	TIOCM_RNG          = 128
-	TIOCM_RTS          = 4
-	TIOCM_SR           = 16
-	TIOCM_ST           = 8
-	TIOCNOTTY          = 21538
-	TIOCNXCL           = 21517
-	TIOCOUTQ           = 21521
-	TIOCPKT            = 21536
-	TIOCPKT_DATA       = 0
-	TIOCPKT_DOSTOP     = 32
-	TIOCPKT_FLUSHREAD  = 1
-	TIOCPKT_FLUSHWRITE = 2
-	TIOCPKT_IOCTL      = 64
-	TIOCPKT_NOSTOP     = 16
-	TIOCPKT_START      = 8
-	TIOCPKT_STOP       = 4
-	TIOCSBRK           = 21543
-	TIOCSCTTY          = 21518
-	TIOCSERCONFIG      = 21587
-	TIOCSERGETLSR      = 21593
-	TIOCSERGETMULTI    = 21594
-	TIOCSERGSTRUCT     = 21592
-	TIOCSERGWILD       = 21588
-	TIOCSERSETMULTI    = 21595
-	TIOCSERSWILD       = 21589
-	TIOCSER_TEMT       = 1
-	TIOCSETD           = 21539
-	TIOCSIG            = 1074025526
-	TIOCSISO7816       = 3223868483
-	TIOCSLCKTRMIOS     = 21591
-	TIOCSPGRP          = 21520
-	TIOCSPTLCK         = 1074025521
-	TIOCSRS485         = 21551
-	TIOCSSERIAL        = 21535
-	TIOCSSOFTCAR       = 21530
-	TIOCSTI            = 21522
-	TIOCSWINSZ         = 21524
-	TIOCVHANGUP        = 21559
-	UMOUNT_NOFOLLOW    = 8
-	_IOC_NONE          = 0
-	_IOC_READ          = 2
-	_IOC_WRITE         = 1
-)
+const BLKBSZGET = 2147488368
+const BLKBSZSET = 1073746545
+const BLKFLSBUF = 4705
+const BLKFRAGET = 4709
+const BLKFRASET = 4708
+const BLKGETSIZE = 4704
+const BLKGETSIZE64 = 2147488370
+const BLKRAGET = 4707
+const BLKRASET = 4706
+const BLKROGET = 4702
+const BLKROSET = 4701
+const BLKRRPART = 4703
+const BLKSECTGET = 4711
+const BLKSECTSET = 4710
+const BLKSSZGET = 4712
+const FIOASYNC = 21586
+const FIOCLEX = 21585
+const FIOGETOWN = 35075
+const FIONBIO = 21537
+const FIONCLEX = 21584
+const FIONREAD = 21531
+const FIOQSIZE = 21600
+const FIOSETOWN = 35073
+const MNT_DETACH = 2
+const MNT_EXPIRE = 4
+const MNT_FORCE = 1
+const MS_ACTIVE = 1073741824
+const MS_BIND = 4096
+const MS_BORN = 536870912
+const MS_DIRSYNC = 128
+const MS_I_VERSION = 8388608
+const MS_KERNMOUNT = 4194304
+const MS_LAZYTIME = 33554432
+const MS_MANDLOCK = 64
+const MS_MGC_MSK = 4294901760
+const MS_MGC_VAL = 3236757504
+const MS_MOVE = 8192
+const MS_NOATIME = 1024
+const MS_NODEV = 4
+const MS_NODIRATIME = 2048
+const MS_NOEXEC = 8
+const MS_NOREMOTELOCK = 134217728
+const MS_NOSEC = 268435456
+const MS_NOSUID = 2
+const MS_NOSYMFOLLOW = 256
+const MS_NOUSER = 2147483648
+const MS_POSIXACL = 65536
+const MS_PRIVATE = 262144
+const MS_RDONLY = 1
+const MS_REC = 16384
+const MS_RELATIME = 2097152
+const MS_REMOUNT = 32
+const MS_RMT_MASK = 41943121
+const MS_SHARED = 1048576
+const MS_SILENT = 32768
+const MS_SLAVE = 524288
+const MS_STRICTATIME = 16777216
+const MS_SYNCHRONOUS = 16
+const MS_UNBINDABLE = 131072
+const N_6PACK = 7
+const N_AX25 = 5
+const N_CAIF = 20
+const N_GIGASET_M101 = 16
+const N_GSM0710 = 21
+const N_HCI = 15
+const N_HDLC = 13
+const N_IRDA = 11
+const N_MASC = 8
+const N_MOUSE = 2
+const N_NCI = 25
+const N_NULL = 27
+const N_PPP = 3
+const N_PPS = 18
+const N_PROFIBUS_FDL = 10
+const N_R3964 = 9
+const N_SLCAN = 17
+const N_SLIP = 1
+const N_SMSBLOCK = 12
+const N_SPEAKUP = 26
+const N_STRIP = 4
+const N_SYNC_PPP = 14
+const N_TI_WL = 22
+const N_TRACEROUTER = 24
+const N_TRACESINK = 23
+const N_TTY = 0
+const N_V253 = 19
+const N_X25 = 6
+const SIOCADDDLCI = 35200
+const SIOCADDMULTI = 35121
+const SIOCADDRT = 35083
+const SIOCATMARK = 35077
+const SIOCDARP = 35155
+const SIOCDELDLCI = 35201
+const SIOCDELMULTI = 35122
+const SIOCDELRT = 35084
+const SIOCDEVPRIVATE = 35312
+const SIOCDIFADDR = 35126
+const SIOCDRARP = 35168
+const SIOCGARP = 35156
+const SIOCGIFADDR = 35093
+const SIOCGIFBR = 35136
+const SIOCGIFBRDADDR = 35097
+const SIOCGIFCONF = 35090
+const SIOCGIFCOUNT = 35128
+const SIOCGIFDSTADDR = 35095
+const SIOCGIFENCAP = 35109
+const SIOCGIFFLAGS = 35091
+const SIOCGIFHWADDR = 35111
+const SIOCGIFINDEX = 35123
+const SIOCGIFMAP = 35184
+const SIOCGIFMEM = 35103
+const SIOCGIFMETRIC = 35101
+const SIOCGIFMTU = 35105
+const SIOCGIFNAME = 35088
+const SIOCGIFNETMASK = 35099
+const SIOCGIFPFLAGS = 35125
+const SIOCGIFSLAVE = 35113
+const SIOCGIFTXQLEN = 35138
+const SIOCGPGRP = 35076
+const SIOCGRARP = 35169
+const SIOCGSTAMP = 35078
+const SIOCGSTAMPNS = 35079
+const SIOCPROTOPRIVATE = 35296
+const SIOCRTMSG = 35085
+const SIOCSARP = 35157
+const SIOCSIFADDR = 35094
+const SIOCSIFBR = 35137
+const SIOCSIFBRDADDR = 35098
+const SIOCSIFDSTADDR = 35096
+const SIOCSIFENCAP = 35110
+const SIOCSIFFLAGS = 35092
+const SIOCSIFHWADDR = 35108
+const SIOCSIFHWBROADCAST = 35127
+const SIOCSIFLINK = 35089
+const SIOCSIFMAP = 35185
+const SIOCSIFMEM = 35104
+const SIOCSIFMETRIC = 35102
+const SIOCSIFMTU = 35106
+const SIOCSIFNAME = 35107
+const SIOCSIFNETMASK = 35100
+const SIOCSIFPFLAGS = 35124
+const SIOCSIFSLAVE = 35120
+const SIOCSIFTXQLEN = 35139
+const SIOCSPGRP = 35074
+const SIOCSRARP = 35170
+const SIOGIFINDEX = 35123
+const TCFLSH = 21515
+const TCGETA = 21509
+const TCGETS = 21505
+const TCGETX = 21554
+const TCSBRK = 21513
+const TCSBRKP = 21541
+const TCSETA = 21510
+const TCSETAF = 21512
+const TCSETAW = 21511
+const TCSETS = 21506
+const TCSETSF = 21508
+const TCSETSW = 21507
+const TCSETX = 21555
+const TCSETXF = 21556
+const TCSETXW = 21557
+const TCXONC = 21514
+const TIOCCBRK = 21544
+const TIOCCONS = 21533
+const TIOCEXCL = 21516
+const TIOCGDEV = 2147767346
+const TIOCGETD = 21540
+const TIOCGEXCL = 2147767360
+const TIOCGICOUNT = 21597
+const TIOCGISO7816 = 2150126658
+const TIOCGLCKTRMIOS = 21590
+const TIOCGPGRP = 21519
+const TIOCGPKT = 2147767352
+const TIOCGPTLCK = 2147767353
+const TIOCGPTN = 2147767344
+const TIOCGPTPEER = 21569
+const TIOCGRS485 = 21550
+const TIOCGSERIAL = 21534
+const TIOCGSID = 21545
+const TIOCGSOFTCAR = 21529
+const TIOCGWINSZ = 21523
+const TIOCINQ = 21531
+const TIOCLINUX = 21532
+const TIOCMBIC = 21527
+const TIOCMBIS = 21526
+const TIOCMGET = 21525
+const TIOCMIWAIT = 21596
+const TIOCMSET = 21528
+const TIOCM_CAR = 64
+const TIOCM_CD = 64
+const TIOCM_CTS = 32
+const TIOCM_DSR = 256
+const TIOCM_DTR = 2
+const TIOCM_LE = 1
+const TIOCM_LOOP = 32768
+const TIOCM_OUT1 = 8192
+const TIOCM_OUT2 = 16384
+const TIOCM_RI = 128
+const TIOCM_RNG = 128
+const TIOCM_RTS = 4
+const TIOCM_SR = 16
+const TIOCM_ST = 8
+const TIOCNOTTY = 21538
+const TIOCNXCL = 21517
+const TIOCOUTQ = 21521
+const TIOCPKT = 21536
+const TIOCPKT_DATA = 0
+const TIOCPKT_DOSTOP = 32
+const TIOCPKT_FLUSHREAD = 1
+const TIOCPKT_FLUSHWRITE = 2
+const TIOCPKT_IOCTL = 64
+const TIOCPKT_NOSTOP = 16
+const TIOCPKT_START = 8
+const TIOCPKT_STOP = 4
+const TIOCSBRK = 21543
+const TIOCSCTTY = 21518
+const TIOCSERCONFIG = 21587
+const TIOCSERGETLSR = 21593
+const TIOCSERGETMULTI = 21594
+const TIOCSERGSTRUCT = 21592
+const TIOCSERGWILD = 21588
+const TIOCSERSETMULTI = 21595
+const TIOCSERSWILD = 21589
+const TIOCSER_TEMT = 1
+const TIOCSETD = 21539
+const TIOCSIG = 1074025526
+const TIOCSISO7816 = 3223868483
+const TIOCSLCKTRMIOS = 21591
+const TIOCSPGRP = 21520
+const TIOCSPTLCK = 1074025521
+const TIOCSRS485 = 21551
+const TIOCSSERIAL = 21535
+const TIOCSSOFTCAR = 21530
+const TIOCSTI = 21522
+const TIOCSWINSZ = 21524
+const TIOCVHANGUP = 21559
+const UMOUNT_NOFOLLOW = 8
+const _IOC_NONE = 0
+const _IOC_READ = 2
+const _IOC_WRITE = 1
 
-func Xmount(tls *TLS, special, dir, fstype uintptr, flags uint64, data uintptr) (r int32) {
+func Xmount(tls *TLS, special uintptr, dir uintptr, fstype uintptr, flags uint64, data uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v special=%v dir=%v fstype=%v flags=%v data=%v, (%v:)", tls, special, dir, fstype, flags, data, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29060,7 +28955,7 @@ func Xumount2(tls *TLS, special uintptr, flags int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_umount2), int64(special), int64(flags)))))
 }
 
-func Xname_to_handle_at(tls *TLS, dirfd int32, pathname, handle, mount_id uintptr, flags int32) (r int32) {
+func Xname_to_handle_at(tls *TLS, dirfd int32, pathname uintptr, handle uintptr, mount_id uintptr, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v dirfd=%v pathname=%v handle=%v mount_id=%v flags=%v, (%v:)", tls, dirfd, pathname, handle, mount_id, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29076,42 +28971,40 @@ func Xopen_by_handle_at(tls *TLS, mount_fd int32, handle uintptr, flags int32) (
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_open_by_handle_at), int64(mount_fd), int64(handle), int64(flags)))))
 }
 
-const (
-	ADDR_COMPAT_LAYOUT = 2097152
-	ADDR_LIMIT_32BIT   = 8388608
-	ADDR_LIMIT_3GB     = 134217728
-	ADDR_NO_RANDOMIZE  = 262144
-	FDPIC_FUNCPTRS     = 524288
-	MMAP_PAGE_ZERO     = 1048576
-	PER_BSD            = 6
-	PER_HPUX           = 16
-	PER_IRIX32         = 67108873
-	PER_IRIX64         = 67108875
-	PER_IRIXN32        = 67108874
-	PER_ISCR4          = 67108869
-	PER_LINUX          = 0
-	PER_LINUX32        = 8
-	PER_LINUX32_3GB    = 134217736
-	PER_LINUX_32BIT    = 8388608
-	PER_LINUX_FDPIC    = 524288
-	PER_MASK           = 255
-	PER_OSF4           = 15
-	PER_OSR5           = 100663299
-	PER_RISCOS         = 12
-	PER_SCOSVR3        = 117440515
-	PER_SOLARIS        = 67108877
-	PER_SUNOS          = 67108870
-	PER_SVR3           = 83886082
-	PER_SVR4           = 68157441
-	PER_UW7            = 68157454
-	PER_WYSEV386       = 83886084
-	PER_XENIX          = 83886087
-	READ_IMPLIES_EXEC  = 4194304
-	SHORT_INODE        = 16777216
-	STICKY_TIMEOUTS    = 67108864
-	UNAME26            = 131072
-	WHOLE_SECONDS      = 33554432
-)
+const ADDR_COMPAT_LAYOUT = 2097152
+const ADDR_LIMIT_32BIT = 8388608
+const ADDR_LIMIT_3GB = 134217728
+const ADDR_NO_RANDOMIZE = 262144
+const FDPIC_FUNCPTRS = 524288
+const MMAP_PAGE_ZERO = 1048576
+const PER_BSD = 6
+const PER_HPUX = 16
+const PER_IRIX32 = 67108873
+const PER_IRIX64 = 67108875
+const PER_IRIXN32 = 67108874
+const PER_ISCR4 = 67108869
+const PER_LINUX = 0
+const PER_LINUX32 = 8
+const PER_LINUX32_3GB = 134217736
+const PER_LINUX_32BIT = 8388608
+const PER_LINUX_FDPIC = 524288
+const PER_MASK = 255
+const PER_OSF4 = 15
+const PER_OSR5 = 100663299
+const PER_RISCOS = 12
+const PER_SCOSVR3 = 117440515
+const PER_SOLARIS = 67108877
+const PER_SUNOS = 67108870
+const PER_SVR3 = 83886082
+const PER_SVR4 = 68157441
+const PER_UW7 = 68157454
+const PER_WYSEV386 = 83886084
+const PER_XENIX = 83886087
+const READ_IMPLIES_EXEC = 4194304
+const SHORT_INODE = 16777216
+const STICKY_TIMEOUTS = 67108864
+const UNAME26 = 131072
+const WHOLE_SECONDS = 33554432
 
 func Xpersonality(tls *TLS, persona uint64) (r int32) {
 	if __ccgo_strace {
@@ -29121,7 +29014,7 @@ func Xpersonality(tls *TLS, persona uint64) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall1(tls, int64(SYS_personality), Int64FromUint64(persona)))))
 }
 
-func Xpivot_root(tls *TLS, new1, old uintptr) (r int32) {
+func Xpivot_root(tls *TLS, new1 uintptr, old uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v new1=%v old=%v, (%v:)", tls, new1, old, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29129,142 +29022,140 @@ func Xpivot_root(tls *TLS, new1, old uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_pivot_root), int64(new1), int64(old)))))
 }
 
-const (
-	PR_CAPBSET_DROP               = 24
-	PR_CAPBSET_READ               = 23
-	PR_CAP_AMBIENT                = 47
-	PR_CAP_AMBIENT_CLEAR_ALL      = 4
-	PR_CAP_AMBIENT_IS_SET         = 1
-	PR_CAP_AMBIENT_LOWER          = 3
-	PR_CAP_AMBIENT_RAISE          = 2
-	PR_ENDIAN_BIG                 = 0
-	PR_ENDIAN_LITTLE              = 1
-	PR_ENDIAN_PPC_LITTLE          = 2
-	PR_FPEMU_NOPRINT              = 1
-	PR_FPEMU_SIGFPE               = 2
-	PR_FP_EXC_ASYNC               = 2
-	PR_FP_EXC_DISABLED            = 0
-	PR_FP_EXC_DIV                 = 65536
-	PR_FP_EXC_INV                 = 1048576
-	PR_FP_EXC_NONRECOV            = 1
-	PR_FP_EXC_OVF                 = 131072
-	PR_FP_EXC_PRECISE             = 3
-	PR_FP_EXC_RES                 = 524288
-	PR_FP_EXC_SW_ENABLE           = 128
-	PR_FP_EXC_UND                 = 262144
-	PR_FP_MODE_FR                 = 1
-	PR_FP_MODE_FRE                = 2
-	PR_GET_CHILD_SUBREAPER        = 37
-	PR_GET_DUMPABLE               = 3
-	PR_GET_ENDIAN                 = 19
-	PR_GET_FPEMU                  = 9
-	PR_GET_FPEXC                  = 11
-	PR_GET_FP_MODE                = 46
-	PR_GET_IO_FLUSHER             = 58
-	PR_GET_KEEPCAPS               = 7
-	PR_GET_NAME                   = 16
-	PR_GET_NO_NEW_PRIVS           = 39
-	PR_GET_PDEATHSIG              = 2
-	PR_GET_SECCOMP                = 21
-	PR_GET_SECUREBITS             = 27
-	PR_GET_SPECULATION_CTRL       = 52
-	PR_GET_TAGGED_ADDR_CTRL       = 56
-	PR_GET_THP_DISABLE            = 42
-	PR_GET_TID_ADDRESS            = 40
-	PR_GET_TIMERSLACK             = 30
-	PR_GET_TIMING                 = 13
-	PR_GET_TSC                    = 25
-	PR_GET_UNALIGN                = 5
-	PR_MCE_KILL                   = 33
-	PR_MCE_KILL_CLEAR             = 0
-	PR_MCE_KILL_DEFAULT           = 2
-	PR_MCE_KILL_EARLY             = 1
-	PR_MCE_KILL_GET               = 34
-	PR_MCE_KILL_LATE              = 0
-	PR_MCE_KILL_SET               = 1
-	PR_MPX_DISABLE_MANAGEMENT     = 44
-	PR_MPX_ENABLE_MANAGEMENT      = 43
-	PR_MTE_TAG_MASK               = 524280
-	PR_MTE_TAG_SHIFT              = 3
-	PR_MTE_TCF_ASYNC              = 4
-	PR_MTE_TCF_MASK               = 6
-	PR_MTE_TCF_NONE               = 0
-	PR_MTE_TCF_SHIFT              = 1
-	PR_MTE_TCF_SYNC               = 2
-	PR_PAC_APDAKEY                = 4
-	PR_PAC_APDBKEY                = 8
-	PR_PAC_APGAKEY                = 16
-	PR_PAC_APIAKEY                = 1
-	PR_PAC_APIBKEY                = 2
-	PR_PAC_GET_ENABLED_KEYS       = 61
-	PR_PAC_RESET_KEYS             = 54
-	PR_PAC_SET_ENABLED_KEYS       = 60
-	PR_SET_CHILD_SUBREAPER        = 36
-	PR_SET_DUMPABLE               = 4
-	PR_SET_ENDIAN                 = 20
-	PR_SET_FPEMU                  = 10
-	PR_SET_FPEXC                  = 12
-	PR_SET_FP_MODE                = 45
-	PR_SET_IO_FLUSHER             = 57
-	PR_SET_KEEPCAPS               = 8
-	PR_SET_MM                     = 35
-	PR_SET_MM_ARG_END             = 9
-	PR_SET_MM_ARG_START           = 8
-	PR_SET_MM_AUXV                = 12
-	PR_SET_MM_BRK                 = 7
-	PR_SET_MM_END_CODE            = 2
-	PR_SET_MM_END_DATA            = 4
-	PR_SET_MM_ENV_END             = 11
-	PR_SET_MM_ENV_START           = 10
-	PR_SET_MM_EXE_FILE            = 13
-	PR_SET_MM_MAP                 = 14
-	PR_SET_MM_MAP_SIZE            = 15
-	PR_SET_MM_START_BRK           = 6
-	PR_SET_MM_START_CODE          = 1
-	PR_SET_MM_START_DATA          = 3
-	PR_SET_MM_START_STACK         = 5
-	PR_SET_NAME                   = 15
-	PR_SET_NO_NEW_PRIVS           = 38
-	PR_SET_PDEATHSIG              = 1
-	PR_SET_PTRACER                = 1499557217
-	PR_SET_PTRACER_ANY            = 18446744073709551615
-	PR_SET_SECCOMP                = 22
-	PR_SET_SECUREBITS             = 28
-	PR_SET_SPECULATION_CTRL       = 53
-	PR_SET_SYSCALL_USER_DISPATCH  = 59
-	PR_SET_TAGGED_ADDR_CTRL       = 55
-	PR_SET_THP_DISABLE            = 41
-	PR_SET_TIMERSLACK             = 29
-	PR_SET_TIMING                 = 14
-	PR_SET_TSC                    = 26
-	PR_SET_UNALIGN                = 6
-	PR_SPEC_DISABLE               = 4
-	PR_SPEC_DISABLE_NOEXEC        = 16
-	PR_SPEC_ENABLE                = 2
-	PR_SPEC_FORCE_DISABLE         = 8
-	PR_SPEC_INDIRECT_BRANCH       = 1
-	PR_SPEC_NOT_AFFECTED          = 0
-	PR_SPEC_PRCTL                 = 1
-	PR_SPEC_STORE_BYPASS          = 0
-	PR_SVE_GET_VL                 = 51
-	PR_SVE_SET_VL                 = 50
-	PR_SVE_SET_VL_ONEXEC          = 262144
-	PR_SVE_VL_INHERIT             = 131072
-	PR_SVE_VL_LEN_MASK            = 65535
-	PR_SYS_DISPATCH_OFF           = 0
-	PR_SYS_DISPATCH_ON            = 1
-	PR_TAGGED_ADDR_ENABLE         = 1
-	PR_TASK_PERF_EVENTS_DISABLE   = 31
-	PR_TASK_PERF_EVENTS_ENABLE    = 32
-	PR_TIMING_STATISTICAL         = 0
-	PR_TIMING_TIMESTAMP           = 1
-	PR_TSC_ENABLE                 = 1
-	PR_TSC_SIGSEGV                = 2
-	PR_UNALIGN_NOPRINT            = 1
-	PR_UNALIGN_SIGBUS             = 2
-	SYSCALL_DISPATCH_FILTER_ALLOW = 0
-	SYSCALL_DISPATCH_FILTER_BLOCK = 1
-)
+const PR_CAPBSET_DROP = 24
+const PR_CAPBSET_READ = 23
+const PR_CAP_AMBIENT = 47
+const PR_CAP_AMBIENT_CLEAR_ALL = 4
+const PR_CAP_AMBIENT_IS_SET = 1
+const PR_CAP_AMBIENT_LOWER = 3
+const PR_CAP_AMBIENT_RAISE = 2
+const PR_ENDIAN_BIG = 0
+const PR_ENDIAN_LITTLE = 1
+const PR_ENDIAN_PPC_LITTLE = 2
+const PR_FPEMU_NOPRINT = 1
+const PR_FPEMU_SIGFPE = 2
+const PR_FP_EXC_ASYNC = 2
+const PR_FP_EXC_DISABLED = 0
+const PR_FP_EXC_DIV = 65536
+const PR_FP_EXC_INV = 1048576
+const PR_FP_EXC_NONRECOV = 1
+const PR_FP_EXC_OVF = 131072
+const PR_FP_EXC_PRECISE = 3
+const PR_FP_EXC_RES = 524288
+const PR_FP_EXC_SW_ENABLE = 128
+const PR_FP_EXC_UND = 262144
+const PR_FP_MODE_FR = 1
+const PR_FP_MODE_FRE = 2
+const PR_GET_CHILD_SUBREAPER = 37
+const PR_GET_DUMPABLE = 3
+const PR_GET_ENDIAN = 19
+const PR_GET_FPEMU = 9
+const PR_GET_FPEXC = 11
+const PR_GET_FP_MODE = 46
+const PR_GET_IO_FLUSHER = 58
+const PR_GET_KEEPCAPS = 7
+const PR_GET_NAME = 16
+const PR_GET_NO_NEW_PRIVS = 39
+const PR_GET_PDEATHSIG = 2
+const PR_GET_SECCOMP = 21
+const PR_GET_SECUREBITS = 27
+const PR_GET_SPECULATION_CTRL = 52
+const PR_GET_TAGGED_ADDR_CTRL = 56
+const PR_GET_THP_DISABLE = 42
+const PR_GET_TID_ADDRESS = 40
+const PR_GET_TIMERSLACK = 30
+const PR_GET_TIMING = 13
+const PR_GET_TSC = 25
+const PR_GET_UNALIGN = 5
+const PR_MCE_KILL = 33
+const PR_MCE_KILL_CLEAR = 0
+const PR_MCE_KILL_DEFAULT = 2
+const PR_MCE_KILL_EARLY = 1
+const PR_MCE_KILL_GET = 34
+const PR_MCE_KILL_LATE = 0
+const PR_MCE_KILL_SET = 1
+const PR_MPX_DISABLE_MANAGEMENT = 44
+const PR_MPX_ENABLE_MANAGEMENT = 43
+const PR_MTE_TAG_MASK = 524280
+const PR_MTE_TAG_SHIFT = 3
+const PR_MTE_TCF_ASYNC = 4
+const PR_MTE_TCF_MASK = 6
+const PR_MTE_TCF_NONE = 0
+const PR_MTE_TCF_SHIFT = 1
+const PR_MTE_TCF_SYNC = 2
+const PR_PAC_APDAKEY = 4
+const PR_PAC_APDBKEY = 8
+const PR_PAC_APGAKEY = 16
+const PR_PAC_APIAKEY = 1
+const PR_PAC_APIBKEY = 2
+const PR_PAC_GET_ENABLED_KEYS = 61
+const PR_PAC_RESET_KEYS = 54
+const PR_PAC_SET_ENABLED_KEYS = 60
+const PR_SET_CHILD_SUBREAPER = 36
+const PR_SET_DUMPABLE = 4
+const PR_SET_ENDIAN = 20
+const PR_SET_FPEMU = 10
+const PR_SET_FPEXC = 12
+const PR_SET_FP_MODE = 45
+const PR_SET_IO_FLUSHER = 57
+const PR_SET_KEEPCAPS = 8
+const PR_SET_MM = 35
+const PR_SET_MM_ARG_END = 9
+const PR_SET_MM_ARG_START = 8
+const PR_SET_MM_AUXV = 12
+const PR_SET_MM_BRK = 7
+const PR_SET_MM_END_CODE = 2
+const PR_SET_MM_END_DATA = 4
+const PR_SET_MM_ENV_END = 11
+const PR_SET_MM_ENV_START = 10
+const PR_SET_MM_EXE_FILE = 13
+const PR_SET_MM_MAP = 14
+const PR_SET_MM_MAP_SIZE = 15
+const PR_SET_MM_START_BRK = 6
+const PR_SET_MM_START_CODE = 1
+const PR_SET_MM_START_DATA = 3
+const PR_SET_MM_START_STACK = 5
+const PR_SET_NAME = 15
+const PR_SET_NO_NEW_PRIVS = 38
+const PR_SET_PDEATHSIG = 1
+const PR_SET_PTRACER = 1499557217
+const PR_SET_PTRACER_ANY = 18446744073709551615
+const PR_SET_SECCOMP = 22
+const PR_SET_SECUREBITS = 28
+const PR_SET_SPECULATION_CTRL = 53
+const PR_SET_SYSCALL_USER_DISPATCH = 59
+const PR_SET_TAGGED_ADDR_CTRL = 55
+const PR_SET_THP_DISABLE = 41
+const PR_SET_TIMERSLACK = 29
+const PR_SET_TIMING = 14
+const PR_SET_TSC = 26
+const PR_SET_UNALIGN = 6
+const PR_SPEC_DISABLE = 4
+const PR_SPEC_DISABLE_NOEXEC = 16
+const PR_SPEC_ENABLE = 2
+const PR_SPEC_FORCE_DISABLE = 8
+const PR_SPEC_INDIRECT_BRANCH = 1
+const PR_SPEC_NOT_AFFECTED = 0
+const PR_SPEC_PRCTL = 1
+const PR_SPEC_STORE_BYPASS = 0
+const PR_SVE_GET_VL = 51
+const PR_SVE_SET_VL = 50
+const PR_SVE_SET_VL_ONEXEC = 262144
+const PR_SVE_VL_INHERIT = 131072
+const PR_SVE_VL_LEN_MASK = 65535
+const PR_SYS_DISPATCH_OFF = 0
+const PR_SYS_DISPATCH_ON = 1
+const PR_TAGGED_ADDR_ENABLE = 1
+const PR_TASK_PERF_EVENTS_DISABLE = 31
+const PR_TASK_PERF_EVENTS_ENABLE = 32
+const PR_TIMING_STATISTICAL = 0
+const PR_TIMING_TIMESTAMP = 1
+const PR_TSC_ENABLE = 1
+const PR_TSC_SIGSEGV = 2
+const PR_UNALIGN_NOPRINT = 1
+const PR_UNALIGN_SIGBUS = 2
+const SYSCALL_DISPATCH_FILTER_ALLOW = 0
+const SYSCALL_DISPATCH_FILTER_BLOCK = 1
 
 type Tprctl_mm_map = struct {
 	Fstart_code  Tuint64_t
@@ -29308,14 +29199,12 @@ func Xprctl(tls *TLS, op int32, va uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall5(tls, int64(SYS_prctl), int64(op), Int64FromUint64(x[0]), Int64FromUint64(x[int32(1)]), Int64FromUint64(x[int32(2)]), Int64FromUint64(x[int32(3)])))))
 }
 
-const (
-	RWF_APPEND = 16
-	RWF_DSYNC  = 2
-	RWF_HIPRI  = 1
-	RWF_NOWAIT = 8
-	RWF_SYNC   = 4
-	UIO_MAXIOV = 1024
-)
+const RWF_APPEND = 16
+const RWF_DSYNC = 2
+const RWF_HIPRI = 1
+const RWF_NOWAIT = 8
+const RWF_SYNC = 4
+const UIO_MAXIOV = 1024
 
 func Xpreadv2(tls *TLS, fd int32, iov uintptr, count int32, ofs Toff_t, flags int32) (r Tssize_t) {
 	if __ccgo_strace {
@@ -29331,7 +29220,7 @@ func Xpreadv2(tls *TLS, fd int32, iov uintptr, count int32, ofs Toff_t, flags in
 	return X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_preadv2), int64(fd), int64(iov), int64(count), ofs, ofs>>Int32FromInt32(32), int64(flags))))
 }
 
-func Xprlimit(tls *TLS, pid Tpid_t, resource int32, new_limit, old_limit uintptr) (r1 int32) {
+func Xprlimit(tls *TLS, pid Tpid_t, resource int32, new_limit uintptr, old_limit uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v pid=%v resource=%v new_limit=%v old_limit=%v, (%v:)", tls, pid, resource, new_limit, old_limit, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -29363,7 +29252,7 @@ func Xprlimit(tls *TLS, pid Tpid_t, resource int32, new_limit, old_limit uintptr
 	return r
 }
 
-func Xprocess_vm_writev(tls *TLS, pid Tpid_t, lvec uintptr, liovcnt uint64, rvec uintptr, riovcnt, flags uint64) (r Tssize_t) {
+func Xprocess_vm_writev(tls *TLS, pid Tpid_t, lvec uintptr, liovcnt uint64, rvec uintptr, riovcnt uint64, flags uint64) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v pid=%v lvec=%v liovcnt=%v rvec=%v riovcnt=%v flags=%v, (%v:)", tls, pid, lvec, liovcnt, rvec, riovcnt, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29371,7 +29260,7 @@ func Xprocess_vm_writev(tls *TLS, pid Tpid_t, lvec uintptr, liovcnt uint64, rvec
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall6(tls, int64(SYS_process_vm_writev), int64(pid), int64(lvec), Int64FromUint64(liovcnt), int64(rvec), Int64FromUint64(riovcnt), Int64FromUint64(flags))))
 }
 
-func Xprocess_vm_readv(tls *TLS, pid Tpid_t, lvec uintptr, liovcnt uint64, rvec uintptr, riovcnt, flags uint64) (r Tssize_t) {
+func Xprocess_vm_readv(tls *TLS, pid Tpid_t, lvec uintptr, liovcnt uint64, rvec uintptr, riovcnt uint64, flags uint64) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v pid=%v lvec=%v liovcnt=%v rvec=%v riovcnt=%v flags=%v, (%v:)", tls, pid, lvec, liovcnt, rvec, riovcnt, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29379,102 +29268,100 @@ func Xprocess_vm_readv(tls *TLS, pid Tpid_t, lvec uintptr, liovcnt uint64, rvec 
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall6(tls, int64(SYS_process_vm_readv), int64(pid), int64(lvec), Int64FromUint64(liovcnt), int64(rvec), Int64FromUint64(riovcnt), Int64FromUint64(flags))))
 }
 
-const (
-	PTRACE_ARCH_PRCTL             = 30
-	PTRACE_ATTACH                 = 16
-	PTRACE_CONT                   = 7
-	PTRACE_DETACH                 = 17
-	PTRACE_EVENT_CLONE            = 3
-	PTRACE_EVENT_EXEC             = 4
-	PTRACE_EVENT_EXIT             = 6
-	PTRACE_EVENT_FORK             = 1
-	PTRACE_EVENT_SECCOMP          = 7
-	PTRACE_EVENT_STOP             = 128
-	PTRACE_EVENT_VFORK            = 2
-	PTRACE_EVENT_VFORK_DONE       = 5
-	PTRACE_GETEVENTMSG            = 16897
-	PTRACE_GETFPREGS              = 14
-	PTRACE_GETFPXREGS             = 18
-	PTRACE_GETREGS                = 12
-	PTRACE_GETREGSET              = 16900
-	PTRACE_GETSIGINFO             = 16898
-	PTRACE_GETSIGMASK             = 16906
-	PTRACE_GET_RSEQ_CONFIGURATION = 16911
-	PTRACE_GET_SYSCALL_INFO       = 16910
-	PTRACE_GET_THREAD_AREA        = 25
-	PTRACE_INTERRUPT              = 16903
-	PTRACE_KILL                   = 8
-	PTRACE_LISTEN                 = 16904
-	PTRACE_O_EXITKILL             = 1048576
-	PTRACE_O_MASK                 = 3145983
-	PTRACE_O_SUSPEND_SECCOMP      = 2097152
-	PTRACE_O_TRACECLONE           = 8
-	PTRACE_O_TRACEEXEC            = 16
-	PTRACE_O_TRACEEXIT            = 64
-	PTRACE_O_TRACEFORK            = 2
-	PTRACE_O_TRACESECCOMP         = 128
-	PTRACE_O_TRACESYSGOOD         = 1
-	PTRACE_O_TRACEVFORK           = 4
-	PTRACE_O_TRACEVFORKDONE       = 32
-	PTRACE_PEEKDATA               = 2
-	PTRACE_PEEKSIGINFO            = 16905
-	PTRACE_PEEKSIGINFO_SHARED     = 1
-	PTRACE_PEEKTEXT               = 1
-	PTRACE_PEEKUSER               = 3
-	PTRACE_POKEDATA               = 5
-	PTRACE_POKETEXT               = 4
-	PTRACE_POKEUSER               = 6
-	PTRACE_SECCOMP_GET_FILTER     = 16908
-	PTRACE_SECCOMP_GET_METADATA   = 16909
-	PTRACE_SEIZE                  = 16902
-	PTRACE_SETFPREGS              = 15
-	PTRACE_SETFPXREGS             = 19
-	PTRACE_SETOPTIONS             = 16896
-	PTRACE_SETREGS                = 13
-	PTRACE_SETREGSET              = 16901
-	PTRACE_SETSIGINFO             = 16899
-	PTRACE_SETSIGMASK             = 16907
-	PTRACE_SET_THREAD_AREA        = 26
-	PTRACE_SINGLEBLOCK            = 33
-	PTRACE_SINGLESTEP             = 9
-	PTRACE_SYSCALL                = 24
-	PTRACE_SYSCALL_INFO_ENTRY     = 1
-	PTRACE_SYSCALL_INFO_EXIT      = 2
-	PTRACE_SYSCALL_INFO_NONE      = 0
-	PTRACE_SYSCALL_INFO_SECCOMP   = 3
-	PTRACE_SYSEMU                 = 31
-	PTRACE_SYSEMU_SINGLESTEP      = 32
-	PTRACE_TRACEME                = 0
-	PT_ARCH_PRCTL                 = 30
-	PT_ATTACH                     = 16
-	PT_CONTINUE                   = 7
-	PT_DETACH                     = 17
-	PT_GETEVENTMSG                = 16897
-	PT_GETFPREGS                  = 14
-	PT_GETFPXREGS                 = 18
-	PT_GETREGS                    = 12
-	PT_GETSIGINFO                 = 16898
-	PT_GET_THREAD_AREA            = 25
-	PT_KILL                       = 8
-	PT_READ_D                     = 2
-	PT_READ_I                     = 1
-	PT_READ_U                     = 3
-	PT_SETFPREGS                  = 15
-	PT_SETFPXREGS                 = 19
-	PT_SETOPTIONS                 = 16896
-	PT_SETREGS                    = 13
-	PT_SETSIGINFO                 = 16899
-	PT_SET_THREAD_AREA            = 26
-	PT_STEP                       = 9
-	PT_STEPBLOCK                  = 33
-	PT_SYSCALL                    = 24
-	PT_SYSEMU                     = 31
-	PT_SYSEMU_SINGLESTEP          = 32
-	PT_TRACE_ME                   = 0
-	PT_WRITE_D                    = 5
-	PT_WRITE_I                    = 4
-	PT_WRITE_U                    = 6
-)
+const PTRACE_ARCH_PRCTL = 30
+const PTRACE_ATTACH = 16
+const PTRACE_CONT = 7
+const PTRACE_DETACH = 17
+const PTRACE_EVENT_CLONE = 3
+const PTRACE_EVENT_EXEC = 4
+const PTRACE_EVENT_EXIT = 6
+const PTRACE_EVENT_FORK = 1
+const PTRACE_EVENT_SECCOMP = 7
+const PTRACE_EVENT_STOP = 128
+const PTRACE_EVENT_VFORK = 2
+const PTRACE_EVENT_VFORK_DONE = 5
+const PTRACE_GETEVENTMSG = 16897
+const PTRACE_GETFPREGS = 14
+const PTRACE_GETFPXREGS = 18
+const PTRACE_GETREGS = 12
+const PTRACE_GETREGSET = 16900
+const PTRACE_GETSIGINFO = 16898
+const PTRACE_GETSIGMASK = 16906
+const PTRACE_GET_RSEQ_CONFIGURATION = 16911
+const PTRACE_GET_SYSCALL_INFO = 16910
+const PTRACE_GET_THREAD_AREA = 25
+const PTRACE_INTERRUPT = 16903
+const PTRACE_KILL = 8
+const PTRACE_LISTEN = 16904
+const PTRACE_O_EXITKILL = 1048576
+const PTRACE_O_MASK = 3145983
+const PTRACE_O_SUSPEND_SECCOMP = 2097152
+const PTRACE_O_TRACECLONE = 8
+const PTRACE_O_TRACEEXEC = 16
+const PTRACE_O_TRACEEXIT = 64
+const PTRACE_O_TRACEFORK = 2
+const PTRACE_O_TRACESECCOMP = 128
+const PTRACE_O_TRACESYSGOOD = 1
+const PTRACE_O_TRACEVFORK = 4
+const PTRACE_O_TRACEVFORKDONE = 32
+const PTRACE_PEEKDATA = 2
+const PTRACE_PEEKSIGINFO = 16905
+const PTRACE_PEEKSIGINFO_SHARED = 1
+const PTRACE_PEEKTEXT = 1
+const PTRACE_PEEKUSER = 3
+const PTRACE_POKEDATA = 5
+const PTRACE_POKETEXT = 4
+const PTRACE_POKEUSER = 6
+const PTRACE_SECCOMP_GET_FILTER = 16908
+const PTRACE_SECCOMP_GET_METADATA = 16909
+const PTRACE_SEIZE = 16902
+const PTRACE_SETFPREGS = 15
+const PTRACE_SETFPXREGS = 19
+const PTRACE_SETOPTIONS = 16896
+const PTRACE_SETREGS = 13
+const PTRACE_SETREGSET = 16901
+const PTRACE_SETSIGINFO = 16899
+const PTRACE_SETSIGMASK = 16907
+const PTRACE_SET_THREAD_AREA = 26
+const PTRACE_SINGLEBLOCK = 33
+const PTRACE_SINGLESTEP = 9
+const PTRACE_SYSCALL = 24
+const PTRACE_SYSCALL_INFO_ENTRY = 1
+const PTRACE_SYSCALL_INFO_EXIT = 2
+const PTRACE_SYSCALL_INFO_NONE = 0
+const PTRACE_SYSCALL_INFO_SECCOMP = 3
+const PTRACE_SYSEMU = 31
+const PTRACE_SYSEMU_SINGLESTEP = 32
+const PTRACE_TRACEME = 0
+const PT_ARCH_PRCTL = 30
+const PT_ATTACH = 16
+const PT_CONTINUE = 7
+const PT_DETACH = 17
+const PT_GETEVENTMSG = 16897
+const PT_GETFPREGS = 14
+const PT_GETFPXREGS = 18
+const PT_GETREGS = 12
+const PT_GETSIGINFO = 16898
+const PT_GET_THREAD_AREA = 25
+const PT_KILL = 8
+const PT_READ_D = 2
+const PT_READ_I = 1
+const PT_READ_U = 3
+const PT_SETFPREGS = 15
+const PT_SETFPXREGS = 19
+const PT_SETOPTIONS = 16896
+const PT_SETREGS = 13
+const PT_SETSIGINFO = 16899
+const PT_SET_THREAD_AREA = 26
+const PT_STEP = 9
+const PT_STEPBLOCK = 33
+const PT_SYSCALL = 24
+const PT_SYSEMU = 31
+const PT_SYSEMU_SINGLESTEP = 32
+const PT_TRACE_ME = 0
+const PT_WRITE_D = 5
+const PT_WRITE_I = 4
+const PT_WRITE_U = 6
 
 type t__ptrace_peeksiginfo_args = struct {
 	Foff   Tuint64_t
@@ -29563,46 +29450,44 @@ func Xpwritev2(tls *TLS, fd int32, iov uintptr, count int32, ofs Toff_t, flags i
 	return X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_pwritev2), int64(fd), int64(iov), int64(count), ofs, ofs>>Int32FromInt32(32), int64(flags))))
 }
 
-const (
-	GRPQUOTA             = 1
-	IIF_ALL              = 7
-	IIF_BGRACE           = 1
-	IIF_FLAGS            = 4
-	IIF_IGRACE           = 2
-	MAXQUOTAS            = 2
-	MAX_DQ_TIME          = 604800
-	MAX_IQ_TIME          = 604800
-	NR_DQHASH            = 43
-	NR_DQUOTS            = 256
-	QFMT_OCFS2           = 3
-	QFMT_VFS_OLD         = 1
-	QFMT_VFS_V0          = 2
-	QFMT_VFS_V1          = 4
-	QIF_ALL              = 63
-	QIF_BLIMITS          = 1
-	QIF_BTIME            = 16
-	QIF_ILIMITS          = 4
-	QIF_INODES           = 8
-	QIF_ITIME            = 32
-	QIF_LIMITS           = 5
-	QIF_SPACE            = 2
-	QIF_TIMES            = 48
-	QIF_USAGE            = 10
-	QUOTAFILENAME        = "quota"
-	QUOTAGROUP           = "staff"
-	Q_GETFMT             = 8388612
-	Q_GETINFO            = 8388613
-	Q_GETQUOTA           = 8388615
-	Q_QUOTAOFF           = 8388611
-	Q_QUOTAON            = 8388610
-	Q_SETINFO            = 8388614
-	Q_SETQUOTA           = 8388616
-	Q_SYNC               = 8388609
-	SUBCMDMASK           = 255
-	SUBCMDSHIFT          = 8
-	USRQUOTA             = 0
-	_LINUX_QUOTA_VERSION = 2
-)
+const GRPQUOTA = 1
+const IIF_ALL = 7
+const IIF_BGRACE = 1
+const IIF_FLAGS = 4
+const IIF_IGRACE = 2
+const MAXQUOTAS = 2
+const MAX_DQ_TIME = 604800
+const MAX_IQ_TIME = 604800
+const NR_DQHASH = 43
+const NR_DQUOTS = 256
+const QFMT_OCFS2 = 3
+const QFMT_VFS_OLD = 1
+const QFMT_VFS_V0 = 2
+const QFMT_VFS_V1 = 4
+const QIF_ALL = 63
+const QIF_BLIMITS = 1
+const QIF_BTIME = 16
+const QIF_ILIMITS = 4
+const QIF_INODES = 8
+const QIF_ITIME = 32
+const QIF_LIMITS = 5
+const QIF_SPACE = 2
+const QIF_TIMES = 48
+const QIF_USAGE = 10
+const QUOTAFILENAME = "quota"
+const QUOTAGROUP = "staff"
+const Q_GETFMT = 8388612
+const Q_GETINFO = 8388613
+const Q_GETQUOTA = 8388615
+const Q_QUOTAOFF = 8388611
+const Q_QUOTAON = 8388610
+const Q_SETINFO = 8388614
+const Q_SETQUOTA = 8388616
+const Q_SYNC = 8388609
+const SUBCMDMASK = 255
+const SUBCMDSHIFT = 8
+const USRQUOTA = 0
+const _LINUX_QUOTA_VERSION = 2
 
 type Tdqblk = struct {
 	Fdqb_bhardlimit Tuint64_t
@@ -29639,15 +29524,13 @@ func Xreadahead(tls *TLS, fd int32, pos Toff_t, len1 Tsize_t) (r Tssize_t) {
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_readahead), int64(fd), pos, Int64FromUint64(len1))))
 }
 
-const (
-	RB_AUTOBOOT    = 19088743
-	RB_DISABLE_CAD = 0
-	RB_ENABLE_CAD  = 2309737967
-	RB_HALT_SYSTEM = 3454992675
-	RB_KEXEC       = 1163412803
-	RB_POWER_OFF   = 1126301404
-	RB_SW_SUSPEND  = 3489725666
-)
+const RB_AUTOBOOT = 19088743
+const RB_DISABLE_CAD = 0
+const RB_ENABLE_CAD = 2309737967
+const RB_HALT_SYSTEM = 3454992675
+const RB_KEXEC = 1163412803
+const RB_POWER_OFF = 1126301404
+const RB_SW_SUSPEND = 3489725666
 
 func Xreboot(tls *TLS, type1 int32) (r int32) {
 	if __ccgo_strace {
@@ -29676,7 +29559,7 @@ func Xsbrk(tls *TLS, inc Tintptr_t) (r uintptr) {
 	return uintptr(X__syscall1(tls, int64(SYS_brk), int64(Int32FromInt32(0))))
 }
 
-func Xsendfile(tls *TLS, out_fd, in_fd int32, ofs uintptr, count Tsize_t) (r Tssize_t) {
+func Xsendfile(tls *TLS, out_fd int32, in_fd int32, ofs uintptr, count Tsize_t) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v out_fd=%v in_fd=%v ofs=%v count=%v, (%v:)", tls, out_fd, in_fd, ofs, count, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29708,41 +29591,39 @@ func Xsethostname(tls *TLS, name uintptr, len1 Tsize_t) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_sethostname), int64(name), Int64FromUint64(len1)))))
 }
 
-const (
-	CLONE_CHILD_CLEARTID = 2097152
-	CLONE_CHILD_SETTID   = 16777216
-	CLONE_DETACHED       = 4194304
-	CLONE_FILES          = 1024
-	CLONE_FS             = 512
-	CLONE_IO             = 2147483648
-	CLONE_NEWCGROUP      = 33554432
-	CLONE_NEWIPC         = 134217728
-	CLONE_NEWNET         = 1073741824
-	CLONE_NEWNS          = 131072
-	CLONE_NEWPID         = 536870912
-	CLONE_NEWTIME        = 128
-	CLONE_NEWUSER        = 268435456
-	CLONE_NEWUTS         = 67108864
-	CLONE_PARENT         = 32768
-	CLONE_PARENT_SETTID  = 1048576
-	CLONE_PIDFD          = 4096
-	CLONE_PTRACE         = 8192
-	CLONE_SETTLS         = 524288
-	CLONE_SIGHAND        = 2048
-	CLONE_SYSVSEM        = 262144
-	CLONE_THREAD         = 65536
-	CLONE_UNTRACED       = 8388608
-	CLONE_VFORK          = 16384
-	CLONE_VM             = 256
-	CPU_SETSIZE          = 1024
-	CSIGNAL              = 255
-)
+const CLONE_CHILD_CLEARTID = 2097152
+const CLONE_CHILD_SETTID = 16777216
+const CLONE_DETACHED = 4194304
+const CLONE_FILES = 1024
+const CLONE_FS = 512
+const CLONE_IO = 2147483648
+const CLONE_NEWCGROUP = 33554432
+const CLONE_NEWIPC = 134217728
+const CLONE_NEWNET = 1073741824
+const CLONE_NEWNS = 131072
+const CLONE_NEWPID = 536870912
+const CLONE_NEWTIME = 128
+const CLONE_NEWUSER = 268435456
+const CLONE_NEWUTS = 67108864
+const CLONE_PARENT = 32768
+const CLONE_PARENT_SETTID = 1048576
+const CLONE_PIDFD = 4096
+const CLONE_PTRACE = 8192
+const CLONE_SETTLS = 524288
+const CLONE_SIGHAND = 2048
+const CLONE_SYSVSEM = 262144
+const CLONE_THREAD = 65536
+const CLONE_UNTRACED = 8388608
+const CLONE_VFORK = 16384
+const CLONE_VM = 256
+const CPU_SETSIZE = 1024
+const CSIGNAL = 255
 
 type Tcpu_set_t = struct {
 	F__bits [16]uint64
 }
 
-func Xsetns(tls *TLS, fd, nstype int32) (r int32) {
+func Xsetns(tls *TLS, fd int32, nstype int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v nstype=%v, (%v:)", tls, fd, nstype, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29750,10 +29631,8 @@ func Xsetns(tls *TLS, fd, nstype int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_setns), int64(fd), int64(nstype)))))
 }
 
-const (
-	__tm_gmtoff = 0
-	__tm_zone   = 0
-)
+const __tm_gmtoff = 0
+const __tm_zone = 0
 
 type Ttm1 = struct {
 	Ftm_sec    int32
@@ -29769,7 +29648,7 @@ type Ttm1 = struct {
 	Ftm_zone   uintptr
 }
 
-func Xsettimeofday(tls *TLS, tv, tz uintptr) (r int32) {
+func Xsettimeofday(tls *TLS, tv uintptr, tz uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v tv=%v tz=%v, (%v:)", tls, tv, tz, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29789,10 +29668,8 @@ func Xsettimeofday(tls *TLS, tv, tz uintptr) (r int32) {
 	return Xclock_settime(tls, CLOCK_REALTIME, bp)
 }
 
-const (
-	SFD_CLOEXEC  = 524288
-	SFD_NONBLOCK = 2048
-)
+const SFD_CLOEXEC = 524288
+const SFD_NONBLOCK = 2048
 
 type Tsignalfd_siginfo = struct {
 	Fssi_signo     Tuint32_t
@@ -29903,12 +29780,10 @@ func Xstime(tls *TLS, t uintptr) (r int32) {
 	return Xsettimeofday(tls, bp, UintptrFromInt32(0))
 }
 
-const (
-	SWAP_FLAG_DISCARD    = 65536
-	SWAP_FLAG_PREFER     = 32768
-	SWAP_FLAG_PRIO_MASK  = 32767
-	SWAP_FLAG_PRIO_SHIFT = 0
-)
+const SWAP_FLAG_DISCARD = 65536
+const SWAP_FLAG_PREFER = 32768
+const SWAP_FLAG_PRIO_MASK = 32767
+const SWAP_FLAG_PRIO_SHIFT = 0
 
 func Xswapon(tls *TLS, path uintptr, flags int32) (r int32) {
 	if __ccgo_strace {
@@ -29926,7 +29801,7 @@ func Xswapoff(tls *TLS, path uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall1(tls, int64(SYS_swapoff), int64(path)))))
 }
 
-func Xsync_file_range(tls *TLS, fd int32, pos, len1 Toff_t, flags uint32) (r int32) {
+func Xsync_file_range(tls *TLS, fd int32, pos Toff_t, len1 Toff_t, flags uint32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v pos=%v len1=%v flags=%v, (%v:)", tls, fd, pos, len1, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29958,7 +29833,7 @@ func Xsysinfo(tls *TLS, info uintptr) (r int32) {
 	return X__lsysinfo(tls, info)
 }
 
-func Xtee(tls *TLS, src, dest int32, len1 Tsize_t, flags uint32) (r Tssize_t) {
+func Xtee(tls *TLS, src int32, dest int32, len1 Tsize_t, flags uint32) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v src=%v dest=%v len1=%v flags=%v, (%v:)", tls, src, dest, len1, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29966,14 +29841,12 @@ func Xtee(tls *TLS, src, dest int32, len1 Tsize_t, flags uint32) (r Tssize_t) {
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_tee), int64(src), int64(dest), Int64FromUint64(len1), Int64FromUint32(flags))))
 }
 
-const (
-	TFD_CLOEXEC             = 524288
-	TFD_NONBLOCK            = 2048
-	TFD_TIMER_ABSTIME       = 1
-	TFD_TIMER_CANCEL_ON_SET = 2
-)
+const TFD_CLOEXEC = 524288
+const TFD_NONBLOCK = 2048
+const TFD_TIMER_ABSTIME = 1
+const TFD_TIMER_CANCEL_ON_SET = 2
 
-func Xtimerfd_create(tls *TLS, clockid, flags int32) (r int32) {
+func Xtimerfd_create(tls *TLS, clockid int32, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v clockid=%v flags=%v, (%v:)", tls, clockid, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -29981,7 +29854,7 @@ func Xtimerfd_create(tls *TLS, clockid, flags int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_timerfd_create), int64(clockid), int64(flags)))))
 }
 
-func Xtimerfd_settime(tls *TLS, fd, flags int32, new1, old uintptr) (r int32) {
+func Xtimerfd_settime(tls *TLS, fd int32, flags int32, new1 uintptr, old uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v flags=%v new1=%v old=%v, (%v:)", tls, fd, flags, new1, old, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30005,7 +29878,7 @@ func Xunshare(tls *TLS, flags int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall1(tls, int64(SYS_unshare), int64(flags)))))
 }
 
-func Xutimes(tls *TLS, path, times uintptr) (r int32) {
+func Xutimes(tls *TLS, path uintptr, times uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v times=%v, (%v:)", tls, path, times, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30029,40 +29902,36 @@ func Xvmsplice(tls *TLS, fd int32, iov uintptr, cnt Tsize_t, flags uint32) (r Ts
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_vmsplice), int64(fd), int64(iov), Int64FromUint64(cnt), Int64FromUint32(flags))))
 }
 
-const (
-	NSIG              = 65
-	SA_NOMASK         = 1073741824
-	SA_ONESHOT        = 2147483648
-	SYS_SECCOMP       = 1
-	SYS_USER_DISPATCH = 2
-	__ucontext        = 0
-)
+const NSIG = 65
+const SA_NOMASK = 1073741824
+const SA_ONESHOT = 2147483648
+const SYS_SECCOMP = 1
+const SYS_USER_DISPATCH = 2
+const __ucontext = 0
 
-const (
-	_REG_R8      = 0
-	_REG_R9      = 1
-	_REG_R10     = 2
-	_REG_R11     = 3
-	_REG_R12     = 4
-	_REG_R13     = 5
-	_REG_R14     = 6
-	_REG_R15     = 7
-	_REG_RDI     = 8
-	_REG_RSI     = 9
-	_REG_RBP     = 10
-	_REG_RBX     = 11
-	_REG_RDX     = 12
-	_REG_RAX     = 13
-	_REG_RCX     = 14
-	_REG_RSP     = 15
-	_REG_RIP     = 16
-	_REG_EFL     = 17
-	_REG_CSGSFS  = 18
-	_REG_ERR     = 19
-	_REG_TRAPNO  = 20
-	_REG_OLDMASK = 21
-	_REG_CR2     = 22
-)
+const _REG_R8 = 0
+const _REG_R9 = 1
+const _REG_R10 = 2
+const _REG_R11 = 3
+const _REG_R12 = 4
+const _REG_R13 = 5
+const _REG_R14 = 6
+const _REG_R15 = 7
+const _REG_RDI = 8
+const _REG_RSI = 9
+const _REG_RBP = 10
+const _REG_RBX = 11
+const _REG_RDX = 12
+const _REG_RAX = 13
+const _REG_RCX = 14
+const _REG_RSP = 15
+const _REG_RIP = 16
+const _REG_EFL = 17
+const _REG_CSGSFS = 18
+const _REG_ERR = 19
+const _REG_TRAPNO = 20
+const _REG_OLDMASK = 21
+const _REG_CR2 = 22
 
 type Tgreg_t = int64
 
@@ -30182,13 +30051,11 @@ func Xwait4(tls *TLS, pid Tpid_t, status uintptr, options int32, ru uintptr) (r1
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-const (
-	XATTR_CREATE     = 1
-	XATTR_REPLACE    = 2
-	__UAPI_DEF_XATTR = 0
-)
+const XATTR_CREATE = 1
+const XATTR_REPLACE = 2
+const __UAPI_DEF_XATTR = 0
 
-func Xgetxattr(tls *TLS, path, name, value uintptr, size Tsize_t) (r Tssize_t) {
+func Xgetxattr(tls *TLS, path uintptr, name uintptr, value uintptr, size Tsize_t) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v name=%v value=%v size=%v, (%v:)", tls, path, name, value, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30196,7 +30063,7 @@ func Xgetxattr(tls *TLS, path, name, value uintptr, size Tsize_t) (r Tssize_t) {
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_getxattr), int64(path), int64(name), int64(value), Int64FromUint64(size))))
 }
 
-func Xlgetxattr(tls *TLS, path, name, value uintptr, size Tsize_t) (r Tssize_t) {
+func Xlgetxattr(tls *TLS, path uintptr, name uintptr, value uintptr, size Tsize_t) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v name=%v value=%v size=%v, (%v:)", tls, path, name, value, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30204,7 +30071,7 @@ func Xlgetxattr(tls *TLS, path, name, value uintptr, size Tsize_t) (r Tssize_t) 
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_lgetxattr), int64(path), int64(name), int64(value), Int64FromUint64(size))))
 }
 
-func Xfgetxattr(tls *TLS, filedes int32, name, value uintptr, size Tsize_t) (r Tssize_t) {
+func Xfgetxattr(tls *TLS, filedes int32, name uintptr, value uintptr, size Tsize_t) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v filedes=%v name=%v value=%v size=%v, (%v:)", tls, filedes, name, value, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30212,7 +30079,7 @@ func Xfgetxattr(tls *TLS, filedes int32, name, value uintptr, size Tsize_t) (r T
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_fgetxattr), int64(filedes), int64(name), int64(value), Int64FromUint64(size))))
 }
 
-func Xlistxattr(tls *TLS, path, list uintptr, size Tsize_t) (r Tssize_t) {
+func Xlistxattr(tls *TLS, path uintptr, list uintptr, size Tsize_t) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v list=%v size=%v, (%v:)", tls, path, list, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30220,7 +30087,7 @@ func Xlistxattr(tls *TLS, path, list uintptr, size Tsize_t) (r Tssize_t) {
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_listxattr), int64(path), int64(list), Int64FromUint64(size))))
 }
 
-func Xllistxattr(tls *TLS, path, list uintptr, size Tsize_t) (r Tssize_t) {
+func Xllistxattr(tls *TLS, path uintptr, list uintptr, size Tsize_t) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v list=%v size=%v, (%v:)", tls, path, list, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30236,7 +30103,7 @@ func Xflistxattr(tls *TLS, filedes int32, list uintptr, size Tsize_t) (r Tssize_
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_flistxattr), int64(filedes), int64(list), Int64FromUint64(size))))
 }
 
-func Xsetxattr(tls *TLS, path, name, value uintptr, size Tsize_t, flags int32) (r int32) {
+func Xsetxattr(tls *TLS, path uintptr, name uintptr, value uintptr, size Tsize_t, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v name=%v value=%v size=%v flags=%v, (%v:)", tls, path, name, value, size, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30244,7 +30111,7 @@ func Xsetxattr(tls *TLS, path, name, value uintptr, size Tsize_t, flags int32) (
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall5(tls, int64(SYS_setxattr), int64(path), int64(name), int64(value), Int64FromUint64(size), int64(flags)))))
 }
 
-func Xlsetxattr(tls *TLS, path, name, value uintptr, size Tsize_t, flags int32) (r int32) {
+func Xlsetxattr(tls *TLS, path uintptr, name uintptr, value uintptr, size Tsize_t, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v name=%v value=%v size=%v flags=%v, (%v:)", tls, path, name, value, size, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30252,7 +30119,7 @@ func Xlsetxattr(tls *TLS, path, name, value uintptr, size Tsize_t, flags int32) 
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall5(tls, int64(SYS_lsetxattr), int64(path), int64(name), int64(value), Int64FromUint64(size), int64(flags)))))
 }
 
-func Xfsetxattr(tls *TLS, filedes int32, name, value uintptr, size Tsize_t, flags int32) (r int32) {
+func Xfsetxattr(tls *TLS, filedes int32, name uintptr, value uintptr, size Tsize_t, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v filedes=%v name=%v value=%v size=%v flags=%v, (%v:)", tls, filedes, name, value, size, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30260,7 +30127,7 @@ func Xfsetxattr(tls *TLS, filedes int32, name, value uintptr, size Tsize_t, flag
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall5(tls, int64(SYS_fsetxattr), int64(filedes), int64(name), int64(value), Int64FromUint64(size), int64(flags)))))
 }
 
-func Xremovexattr(tls *TLS, path, name uintptr) (r int32) {
+func Xremovexattr(tls *TLS, path uintptr, name uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v name=%v, (%v:)", tls, path, name, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30268,7 +30135,7 @@ func Xremovexattr(tls *TLS, path, name uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_removexattr), int64(path), int64(name)))))
 }
 
-func Xlremovexattr(tls *TLS, path, name uintptr) (r int32) {
+func Xlremovexattr(tls *TLS, path uintptr, name uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v name=%v, (%v:)", tls, path, name, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30284,11 +30151,11 @@ func Xfremovexattr(tls *TLS, fd int32, name uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_fremovexattr), int64(fd), int64(name)))))
 }
 
-func _dummy4(tls *TLS, msg, lm uintptr) (r uintptr) {
+func _dummy4(tls *TLS, msg uintptr, lm uintptr) (r uintptr) {
 	return msg
 }
 
-func X__lctrans(tls *TLS, msg, lm uintptr) (r uintptr) {
+func X__lctrans(tls *TLS, msg uintptr, lm uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v msg=%v lm=%v, (%v:)", tls, msg, lm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30369,7 +30236,7 @@ func X__mo_lookup(tls *TLS, p uintptr, size Tsize_t, s uintptr) (r uintptr) {
 
 const __USE_GNU_GETTEXT = 1
 
-func Xbind_textdomain_codeset(tls *TLS, domainname, codeset uintptr) (r uintptr) {
+func Xbind_textdomain_codeset(tls *TLS, domainname uintptr, codeset uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v domainname=%v codeset=%v, (%v:)", tls, domainname, codeset, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30387,10 +30254,8 @@ var _empty_mo = [5]Tuint32_t{
 	4: Uint32FromInt32(-Int32FromInt32(1)),
 }
 
-const (
-	NL_CAT_LOCALE = 1
-	NL_SETD       = 1
-)
+const NL_CAT_LOCALE = 1
+const NL_SETD = 1
 
 type Tnl_item = int32
 
@@ -30413,7 +30278,7 @@ _3:
 	return 0
 }
 
-func _cmp(tls *TLS, a, b uintptr) (r int32) {
+func _cmp(tls *TLS, a uintptr, b uintptr) (r int32) {
 	var x, y, v1, v2, v4, v5 Tuint32_t
 	var v7, v8 int32
 	_, _, _, _, _, _, _, _ = x, y, v1, v2, v4, v5, v7, v8
@@ -30440,7 +30305,7 @@ _6:
 	return v7
 }
 
-func Xcatgets(tls *TLS, catd Tnl_catd, set_id, msg_id int32, s uintptr) (r uintptr) {
+func Xcatgets(tls *TLS, catd Tnl_catd, set_id int32, msg_id int32, s uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v catd=%v set_id=%v msg_id=%v s=%v, (%v:)", tls, catd, set_id, msg_id, s, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30506,65 +30371,63 @@ _24:
 	return strings + uintptr(v2)
 }
 
-const (
-	ABDAY_1     = 131072
-	ABDAY_2     = 131073
-	ABDAY_3     = 131074
-	ABDAY_4     = 131075
-	ABDAY_5     = 131076
-	ABDAY_6     = 131077
-	ABDAY_7     = 131078
-	ABMON_1     = 131086
-	ABMON_10    = 131095
-	ABMON_11    = 131096
-	ABMON_12    = 131097
-	ABMON_2     = 131087
-	ABMON_3     = 131088
-	ABMON_4     = 131089
-	ABMON_5     = 131090
-	ABMON_6     = 131091
-	ABMON_7     = 131092
-	ABMON_8     = 131093
-	ABMON_9     = 131094
-	ALT_DIGITS  = 131119
-	AM_STR      = 131110
-	CODESET     = 14
-	CRNCYSTR    = 262159
-	DAY_1       = 131079
-	DAY_2       = 131080
-	DAY_3       = 131081
-	DAY_4       = 131082
-	DAY_5       = 131083
-	DAY_6       = 131084
-	DAY_7       = 131085
-	D_FMT       = 131113
-	D_T_FMT     = 131112
-	ERA         = 131116
-	ERA_D_FMT   = 131118
-	ERA_D_T_FMT = 131120
-	ERA_T_FMT   = 131121
-	MON_1       = 131098
-	MON_10      = 131107
-	MON_11      = 131108
-	MON_12      = 131109
-	MON_2       = 131099
-	MON_3       = 131100
-	MON_4       = 131101
-	MON_5       = 131102
-	MON_6       = 131103
-	MON_7       = 131104
-	MON_8       = 131105
-	MON_9       = 131106
-	NOEXPR      = 327681
-	NOSTR       = 327683
-	PM_STR      = 131111
-	RADIXCHAR   = 65536
-	THOUSEP     = 65537
-	T_FMT       = 131114
-	T_FMT_AMPM  = 131115
-	YESEXPR     = 327680
-	YESSTR      = 327682
-)
+const ABDAY_1 = 131072
+const ABDAY_2 = 131073
+const ABDAY_3 = 131074
+const ABDAY_4 = 131075
+const ABDAY_5 = 131076
+const ABDAY_6 = 131077
+const ABDAY_7 = 131078
+const ABMON_1 = 131086
+const ABMON_10 = 131095
+const ABMON_11 = 131096
+const ABMON_12 = 131097
+const ABMON_2 = 131087
+const ABMON_3 = 131088
+const ABMON_4 = 131089
+const ABMON_5 = 131090
+const ABMON_6 = 131091
+const ABMON_7 = 131092
+const ABMON_8 = 131093
+const ABMON_9 = 131094
+const ALT_DIGITS = 131119
+const AM_STR = 131110
+const CODESET = 14
+const CRNCYSTR = 262159
+const DAY_1 = 131079
+const DAY_2 = 131080
+const DAY_3 = 131081
+const DAY_4 = 131082
+const DAY_5 = 131083
+const DAY_6 = 131084
+const DAY_7 = 131085
+const D_FMT = 131113
+const D_T_FMT = 131112
+const ERA = 131116
+const ERA_D_FMT = 131118
+const ERA_D_T_FMT = 131120
+const ERA_T_FMT = 131121
+const MON_1 = 131098
+const MON_10 = 131107
+const MON_11 = 131108
+const MON_12 = 131109
+const MON_2 = 131099
+const MON_3 = 131100
+const MON_4 = 131101
+const MON_5 = 131102
+const MON_6 = 131103
+const MON_7 = 131104
+const MON_8 = 131105
+const MON_9 = 131106
+const NOEXPR = 327681
+const NOSTR = 327683
+const PM_STR = 131111
+const RADIXCHAR = 65536
+const THOUSEP = 65537
+const T_FMT = 131114
+const T_FMT_AMPM = 131115
+const YESEXPR = 327680
+const YESSTR = 327682
 
 func _do_catopen(tls *TLS, name uintptr) (r Tnl_catd) {
 	bp := tls.Alloc(16)
@@ -30714,12 +30577,10 @@ func Xcatopen(tls *TLS, name uintptr, oflag int32) (r Tnl_catd) {
 	return uintptr(-Int32FromInt32(1))
 }
 
-const (
-	calloc  = 0
-	free    = 0
-	malloc  = 0
-	realloc = 0
-)
+const calloc = 0
+const free = 0
+const malloc = 0
+const realloc = 0
 
 type Tbinding = struct {
 	Fnext       uintptr
@@ -30731,7 +30592,7 @@ type Tbinding = struct {
 
 var _bindings uintptr
 
-func _gettextdir(tls *TLS, domainname, dirlen uintptr) (r uintptr) {
+func _gettextdir(tls *TLS, domainname uintptr, dirlen uintptr) (r uintptr) {
 	var p uintptr
 	_ = p
 	p = AtomicLoadPUintptr(uintptr(unsafe.Pointer(&_bindings)))
@@ -30753,7 +30614,7 @@ func _gettextdir(tls *TLS, domainname, dirlen uintptr) (r uintptr) {
 
 var _lock1 [1]int32
 
-func Xbindtextdomain(tls *TLS, domainname, dirname uintptr) (r uintptr) {
+func Xbindtextdomain(tls *TLS, domainname uintptr, dirname uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v domainname=%v dirname=%v, (%v:)", tls, domainname, dirname, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -30871,7 +30732,7 @@ func _dummy_gettextdomain(tls *TLS) (r uintptr) {
 	return __ccgo_ts + 431
 }
 
-func Xdcngettext(tls *TLS, domainname, msgid1, msgid2 uintptr, n uint64, category int32) (r1 uintptr) {
+func Xdcngettext(tls *TLS, domainname uintptr, msgid1 uintptr, msgid2 uintptr, n uint64, category int32) (r1 uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v domainname=%v msgid1=%v msgid2=%v n=%v category=%v, (%v:)", tls, domainname, msgid1, msgid2, n, category, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -31109,7 +30970,7 @@ _2:
 
 var _cats uintptr
 
-func Xdcgettext(tls *TLS, domainname, msgid uintptr, category int32) (r uintptr) {
+func Xdcgettext(tls *TLS, domainname uintptr, msgid uintptr, category int32) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v domainname=%v msgid=%v category=%v, (%v:)", tls, domainname, msgid, category, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -31117,7 +30978,7 @@ func Xdcgettext(tls *TLS, domainname, msgid uintptr, category int32) (r uintptr)
 	return Xdcngettext(tls, domainname, msgid, uintptr(0), uint64(1), category)
 }
 
-func Xdngettext(tls *TLS, domainname, msgid1, msgid2 uintptr, n uint64) (r uintptr) {
+func Xdngettext(tls *TLS, domainname uintptr, msgid1 uintptr, msgid2 uintptr, n uint64) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v domainname=%v msgid1=%v msgid2=%v n=%v, (%v:)", tls, domainname, msgid1, msgid2, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -31125,7 +30986,7 @@ func Xdngettext(tls *TLS, domainname, msgid1, msgid2 uintptr, n uint64) (r uintp
 	return Xdcngettext(tls, domainname, msgid1, msgid2, n, int32(LC_MESSAGES))
 }
 
-func Xdgettext(tls *TLS, domainname, msgid uintptr) (r uintptr) {
+func Xdgettext(tls *TLS, domainname uintptr, msgid uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v domainname=%v msgid=%v, (%v:)", tls, domainname, msgid, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -31175,30 +31036,28 @@ func X__freelocale(tls *TLS, l Tlocale_t) {
 	Xfreelocale(tls, l)
 }
 
-const (
-	BIG5         = 224
-	EUC_JP       = 208
-	EUC_KR       = 232
-	GB18030      = 216
-	GB2312       = 218
-	GBK          = 217
-	ISO2022_JP   = 210
-	SHIFT_JIS    = 209
-	UCS2         = 204
-	UCS2BE       = 196
-	UCS2LE       = 197
-	US_ASCII     = 199
-	UTF_16       = 202
-	UTF_16BE     = 194
-	UTF_16LE     = 193
-	UTF_32       = 203
-	UTF_32BE     = 192
-	UTF_32LE     = 195
-	UTF_8        = 200
-	WCHAR_T      = 198
-	mbrtowc_utf8 = 0
-	wctomb_utf8  = 0
-)
+const BIG5 = 224
+const EUC_JP = 208
+const EUC_KR = 232
+const GB18030 = 216
+const GB2312 = 218
+const GBK = 217
+const ISO2022_JP = 210
+const SHIFT_JIS = 209
+const UCS2 = 204
+const UCS2BE = 196
+const UCS2LE = 197
+const US_ASCII = 199
+const UTF_16 = 202
+const UTF_16BE = 194
+const UTF_16LE = 193
+const UTF_32 = 203
+const UTF_32BE = 192
+const UTF_32LE = 195
+const UTF_8 = 200
+const WCHAR_T = 198
+const mbrtowc_utf8 = 0
+const wctomb_utf8 = 0
 
 type Ticonv_t = uintptr
 
@@ -97321,7 +97180,7 @@ var _rev_jis = [6879]uint16{
 	6878: uint16(78),
 }
 
-func _fuzzycmp(tls *TLS, a, b uintptr) (r int32) {
+func _fuzzycmp(tls *TLS, a uintptr, b uintptr) (r int32) {
 	for {
 		if !(**(**uint8)(__ccgo_up(a)) != 0 && **(**uint8)(__ccgo_up(b)) != 0) {
 			break
@@ -97366,7 +97225,7 @@ func _find_charmap(tls *TLS, name uintptr) (r Tsize_t) {
 		}
 		s = s + uintptr(_strlen(tls, s)+uint64(1))
 		if !(**(**uint8)(__ccgo_up(s)) != 0) {
-			if Int32FromUint8(**(**uint8)(__ccgo_up(s + 1))) > int32(0o200) {
+			if Int32FromUint8(**(**uint8)(__ccgo_up(s + 1))) > int32(0200) {
 				s = s + uintptr(2)
 			} else {
 				s = s + uintptr(uint32(2)+(uint32(64)-uint32(**(**uint8)(__ccgo_up(s + 1))))*uint32(5))
@@ -97383,7 +97242,7 @@ type Tstateful_cd = struct {
 	Fstate   uint32
 }
 
-func _combine_to_from(tls *TLS, t, f Tsize_t) (r Ticonv_t) {
+func _combine_to_from(tls *TLS, t Tsize_t, f Tsize_t) (r Ticonv_t) {
 	return uintptr(f<<Int32FromInt32(16) | t<<Int32FromInt32(1) | Uint64FromInt32(1))
 }
 
@@ -97395,7 +97254,7 @@ func _extract_to(tls *TLS, cd Ticonv_t) (r Tsize_t) {
 	return uint64(cd) >> int32(1) & uint64(0x7fff)
 }
 
-func Xiconv_open(tls *TLS, to, from uintptr) (r Ticonv_t) {
+func Xiconv_open(tls *TLS, to uintptr, from uintptr) (r Ticonv_t) {
 	if __ccgo_strace {
 		trc("tls=%v to=%v from=%v, (%v:)", tls, to, from, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -97411,7 +97270,7 @@ func Xiconv_open(tls *TLS, to, from uintptr) (r Ticonv_t) {
 		v2 = _find_charmap(tls, from)
 		f = v2
 	}
-	if v3 || v2 == Uint64FromInt32(-Int32FromInt32(1)) || Int32FromUint8(_charmaps[t]) >= int32(0o330) {
+	if v3 || v2 == Uint64FromInt32(-Int32FromInt32(1)) || Int32FromUint8(_charmaps[t]) >= int32(0330) {
 		**(**int32)(__ccgo_up(X__errno_location(tls))) = int32(EINVAL)
 		return uintptr(-Int32FromInt32(1))
 	}
@@ -97506,7 +97365,7 @@ func _uni_to_jis(tls *TLS, c uint32) (r uint32) {
 	return r
 }
 
-func Xiconv(tls *TLS, cd Ticonv_t, in, inb, out, outb uintptr) (r Tsize_t) {
+func Xiconv(tls *TLS, cd Ticonv_t, in uintptr, inb uintptr, out uintptr, outb uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v cd=%v in=%v inb=%v out=%v outb=%v, (%v:)", tls, cd, in, inb, out, outb, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -98491,10 +98350,8 @@ func Xiconv_close(tls *TLS, cd Ticonv_t) (r int32) {
 
 var _c_time = [316]int8{'S', 'u', 'n', 0, 'M', 'o', 'n', 0, 'T', 'u', 'e', 0, 'W', 'e', 'd', 0, 'T', 'h', 'u', 0, 'F', 'r', 'i', 0, 'S', 'a', 't', 0, 'S', 'u', 'n', 'd', 'a', 'y', 0, 'M', 'o', 'n', 'd', 'a', 'y', 0, 'T', 'u', 'e', 's', 'd', 'a', 'y', 0, 'W', 'e', 'd', 'n', 'e', 's', 'd', 'a', 'y', 0, 'T', 'h', 'u', 'r', 's', 'd', 'a', 'y', 0, 'F', 'r', 'i', 'd', 'a', 'y', 0, 'S', 'a', 't', 'u', 'r', 'd', 'a', 'y', 0, 'J', 'a', 'n', 0, 'F', 'e', 'b', 0, 'M', 'a', 'r', 0, 'A', 'p', 'r', 0, 'M', 'a', 'y', 0, 'J', 'u', 'n', 0, 'J', 'u', 'l', 0, 'A', 'u', 'g', 0, 'S', 'e', 'p', 0, 'O', 'c', 't', 0, 'N', 'o', 'v', 0, 'D', 'e', 'c', 0, 'J', 'a', 'n', 'u', 'a', 'r', 'y', 0, 'F', 'e', 'b', 'r', 'u', 'a', 'r', 'y', 0, 'M', 'a', 'r', 'c', 'h', 0, 'A', 'p', 'r', 'i', 'l', 0, 'M', 'a', 'y', 0, 'J', 'u', 'n', 'e', 0, 'J', 'u', 'l', 'y', 0, 'A', 'u', 'g', 'u', 's', 't', 0, 'S', 'e', 'p', 't', 'e', 'm', 'b', 'e', 'r', 0, 'O', 'c', 't', 'o', 'b', 'e', 'r', 0, 'N', 'o', 'v', 'e', 'm', 'b', 'e', 'r', 0, 'D', 'e', 'c', 'e', 'm', 'b', 'e', 'r', 0, 'A', 'M', 0, 'P', 'M', 0, '%', 'a', ' ', '%', 'b', ' ', '%', 'e', ' ', '%', 'T', ' ', '%', 'Y', 0, '%', 'm', '/', '%', 'd', '/', '%', 'y', 0, '%', 'H', ':', '%', 'M', ':', '%', 'S', 0, '%', 'I', ':', '%', 'M', ':', '%', 'S', ' ', '%', 'p', 0, 0, 0, '%', 'm', '/', '%', 'd', '/', '%', 'y', 0, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 0, '%', 'a', ' ', '%', 'b', ' ', '%', 'e', ' ', '%', 'T', ' ', '%', 'Y', 0, '%', 'H', ':', '%', 'M', ':', '%', 'S'}
 
-var (
-	_c_messages = [19]int8{'^', '[', 'y', 'Y', ']', 0, '^', '[', 'n', 'N', ']', 0, 'y', 'e', 's', 0, 'n', 'o'}
-	_c_numeric  = [3]int8{'.'}
-)
+var _c_messages = [19]int8{'^', '[', 'y', 'Y', ']', 0, '^', '[', 'n', 'N', ']', 0, 'y', 'e', 's', 0, 'n', 'o'}
+var _c_numeric = [3]int8{'.'}
 
 func X__nl_langinfo_l(tls *TLS, item Tnl_item, loc Tlocale_t) (r uintptr) {
 	if __ccgo_strace {
@@ -98596,7 +98453,7 @@ func Xnl_langinfo_l(tls *TLS, item Tnl_item, loc Tlocale_t) (r uintptr) {
 	return X__nl_langinfo_l(tls, item, loc)
 }
 
-func X__lctrans_impl(tls *TLS, msg, lm uintptr) (r uintptr) {
+func X__lctrans_impl(tls *TLS, msg uintptr, lm uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v msg=%v lm=%v, (%v:)", tls, msg, lm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -98800,11 +98657,9 @@ func Xlocaleconv(tls *TLS) (r uintptr) {
 	return uintptr(unsafe.Pointer(&_posix_lconv))
 }
 
-var (
-	_default_locale_init_done int32
-	_default_locale           t__locale_struct
-	_default_ctype_locale     t__locale_struct
-)
+var _default_locale_init_done int32
+var _default_locale t__locale_struct
+var _default_ctype_locale t__locale_struct
 
 func X__loc_is_allocated(tls *TLS, loc Tlocale_t) (r int32) {
 	if __ccgo_strace {
@@ -98954,7 +98809,7 @@ func _skipspace(tls *TLS, s uintptr) (r uintptr) {
 	return s
 }
 
-func _evalprim(tls *TLS, st, s uintptr, d int32) (r uintptr) {
+func _evalprim(tls *TLS, st uintptr, s uintptr, d int32) (r uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var v1 int32
@@ -99047,7 +98902,7 @@ func _binop(tls *TLS, st uintptr, op int32, left uint64) (r int32) {
 	return int32(1)
 }
 
-func _parseop(tls *TLS, st, s uintptr) (r uintptr) {
+func _parseop(tls *TLS, st uintptr, s uintptr) (r uintptr) {
 	var i int32
 	_ = i
 	i = 0
@@ -99080,7 +98935,7 @@ var _opch = [11]int8{'|', '&', '=', '!', '>', '<', '+', '-', '*', '%', '/'}
 
 var _opch2 = [6]int8{'|', '&', '=', '=', '=', '='}
 
-func _evalbinop(tls *TLS, st, s uintptr, minprec, d int32) (r uintptr) {
+func _evalbinop(tls *TLS, st uintptr, s uintptr, minprec int32, d int32) (r uintptr) {
 	var left uint64
 	var op int32
 	_, _ = left, op
@@ -99124,7 +98979,7 @@ var _prec = [14]int8{
 	12: int8(6),
 }
 
-func _evalexpr(tls *TLS, st, s uintptr, d int32) (r uintptr) {
+func _evalexpr(tls *TLS, st uintptr, s uintptr, d int32) (r uintptr) {
 	var a, b, v2 uint64
 	var v1 int32
 	_, _, _, _ = a, b, v1, v2
@@ -99284,7 +99139,7 @@ func Xsetlocale(tls *TLS, cat int32, name uintptr) (r uintptr) {
 	return ret
 }
 
-func X__strcoll_l(tls *TLS, l, r uintptr, loc Tlocale_t) (r1 int32) {
+func X__strcoll_l(tls *TLS, l uintptr, r uintptr, loc Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v loc=%v, (%v:)", tls, l, r, loc, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -99292,7 +99147,7 @@ func X__strcoll_l(tls *TLS, l, r uintptr, loc Tlocale_t) (r1 int32) {
 	return Xstrcmp(tls, l, r)
 }
 
-func Xstrcoll(tls *TLS, l, r uintptr) (r1 int32) {
+func Xstrcoll(tls *TLS, l uintptr, r uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v, (%v:)", tls, l, r, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -99300,7 +99155,7 @@ func Xstrcoll(tls *TLS, l, r uintptr) (r1 int32) {
 	return X__strcoll_l(tls, l, r, (*t__pthread)(unsafe.Pointer(uintptr(___get_tp(tls)))).Flocale)
 }
 
-func Xstrcoll_l(tls *TLS, l, r uintptr, loc Tlocale_t) (r1 int32) {
+func Xstrcoll_l(tls *TLS, l uintptr, r uintptr, loc Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v loc=%v, (%v:)", tls, l, r, loc, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -99440,7 +99295,7 @@ _1:
 	return int64(s) - int64(s0)
 }
 
-func Xstrfmon_l(tls *TLS, s uintptr, n Tsize_t, loc Tlocale_t, fmt, va uintptr) (r Tssize_t) {
+func Xstrfmon_l(tls *TLS, s uintptr, n Tsize_t, loc Tlocale_t, fmt uintptr, va uintptr) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v loc=%v fmt=%v va=%v, (%v:)", tls, s, n, loc, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99454,7 +99309,7 @@ func Xstrfmon_l(tls *TLS, s uintptr, n Tsize_t, loc Tlocale_t, fmt, va uintptr) 
 	return ret
 }
 
-func Xstrfmon(tls *TLS, s uintptr, n Tsize_t, fmt, va uintptr) (r Tssize_t) {
+func Xstrfmon(tls *TLS, s uintptr, n Tsize_t, fmt uintptr, va uintptr) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v fmt=%v va=%v, (%v:)", tls, s, n, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99468,7 +99323,7 @@ func Xstrfmon(tls *TLS, s uintptr, n Tsize_t, fmt, va uintptr) (r Tssize_t) {
 	return ret
 }
 
-func Xstrtof_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float32) {
+func Xstrtof_l(tls *TLS, s uintptr, p uintptr, l Tlocale_t) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v l=%v, (%v:)", tls, s, p, l, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99476,7 +99331,7 @@ func Xstrtof_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float32) {
 	return Xstrtof(tls, s, p)
 }
 
-func Xstrtod_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
+func Xstrtod_l(tls *TLS, s uintptr, p uintptr, l Tlocale_t) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v l=%v, (%v:)", tls, s, p, l, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99484,7 +99339,7 @@ func Xstrtod_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
 	return Xstrtod(tls, s, p)
 }
 
-func Xstrtold_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
+func Xstrtold_l(tls *TLS, s uintptr, p uintptr, l Tlocale_t) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v l=%v, (%v:)", tls, s, p, l, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99492,7 +99347,7 @@ func Xstrtold_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
 	return Xstrtold(tls, s, p)
 }
 
-func X__strtod_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
+func X__strtod_l(tls *TLS, s uintptr, p uintptr, l Tlocale_t) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v l=%v, (%v:)", tls, s, p, l, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99500,7 +99355,7 @@ func X__strtod_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
 	return Xstrtod_l(tls, s, p, l)
 }
 
-func X__strtof_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float32) {
+func X__strtof_l(tls *TLS, s uintptr, p uintptr, l Tlocale_t) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v l=%v, (%v:)", tls, s, p, l, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99508,7 +99363,7 @@ func X__strtof_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float32) {
 	return Xstrtof_l(tls, s, p, l)
 }
 
-func X__strtold_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
+func X__strtold_l(tls *TLS, s uintptr, p uintptr, l Tlocale_t) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v l=%v, (%v:)", tls, s, p, l, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99519,7 +99374,7 @@ func X__strtold_l(tls *TLS, s, p uintptr, l Tlocale_t) (r float64) {
 // C documentation
 //
 //	/* collate only by code points */
-func X__strxfrm_l(tls *TLS, dest, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
+func X__strxfrm_l(tls *TLS, dest uintptr, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v loc=%v, (%v:)", tls, dest, src, n, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99533,7 +99388,7 @@ func X__strxfrm_l(tls *TLS, dest, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsiz
 	return l
 }
 
-func Xstrxfrm(tls *TLS, dest, src uintptr, n Tsize_t) (r Tsize_t) {
+func Xstrxfrm(tls *TLS, dest uintptr, src uintptr, n Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v, (%v:)", tls, dest, src, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99544,7 +99399,7 @@ func Xstrxfrm(tls *TLS, dest, src uintptr, n Tsize_t) (r Tsize_t) {
 // C documentation
 //
 //	/* collate only by code points */
-func Xstrxfrm_l(tls *TLS, dest, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
+func Xstrxfrm_l(tls *TLS, dest uintptr, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v loc=%v, (%v:)", tls, dest, src, n, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99611,7 +99466,7 @@ func Xgettext(tls *TLS, msgid uintptr) (r uintptr) {
 	return Xdgettext(tls, uintptr(0), msgid)
 }
 
-func Xngettext(tls *TLS, msgid1, msgid2 uintptr, n uint64) (r uintptr) {
+func Xngettext(tls *TLS, msgid1 uintptr, msgid2 uintptr, n uint64) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v msgid1=%v msgid2=%v n=%v, (%v:)", tls, msgid1, msgid2, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99657,7 +99512,7 @@ func Xuselocale(tls *TLS, new1 Tlocale_t) (r Tlocale_t) {
 // C documentation
 //
 //	/* FIXME: stub */
-func X__wcscoll_l(tls *TLS, l, r uintptr, locale Tlocale_t) (r1 int32) {
+func X__wcscoll_l(tls *TLS, l uintptr, r uintptr, locale Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v locale=%v, (%v:)", tls, l, r, locale, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -99665,7 +99520,7 @@ func X__wcscoll_l(tls *TLS, l, r uintptr, locale Tlocale_t) (r1 int32) {
 	return Xwcscmp(tls, l, r)
 }
 
-func Xwcscoll(tls *TLS, l, r uintptr) (r1 int32) {
+func Xwcscoll(tls *TLS, l uintptr, r uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v, (%v:)", tls, l, r, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -99676,7 +99531,7 @@ func Xwcscoll(tls *TLS, l, r uintptr) (r1 int32) {
 // C documentation
 //
 //	/* FIXME: stub */
-func Xwcscoll_l(tls *TLS, l, r uintptr, locale Tlocale_t) (r1 int32) {
+func Xwcscoll_l(tls *TLS, l uintptr, r uintptr, locale Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v locale=%v, (%v:)", tls, l, r, locale, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -99687,7 +99542,7 @@ func Xwcscoll_l(tls *TLS, l, r uintptr, locale Tlocale_t) (r1 int32) {
 // C documentation
 //
 //	/* collate only by code points */
-func X__wcsxfrm_l(tls *TLS, dest, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
+func X__wcsxfrm_l(tls *TLS, dest uintptr, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v loc=%v, (%v:)", tls, dest, src, n, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99706,7 +99561,7 @@ func X__wcsxfrm_l(tls *TLS, dest, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsiz
 	return l
 }
 
-func Xwcsxfrm(tls *TLS, dest, src uintptr, n Tsize_t) (r Tsize_t) {
+func Xwcsxfrm(tls *TLS, dest uintptr, src uintptr, n Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v, (%v:)", tls, dest, src, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99717,7 +99572,7 @@ func Xwcsxfrm(tls *TLS, dest, src uintptr, n Tsize_t) (r Tsize_t) {
 // C documentation
 //
 //	/* collate only by code points */
-func Xwcsxfrm_l(tls *TLS, dest, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
+func Xwcsxfrm_l(tls *TLS, dest uintptr, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v loc=%v, (%v:)", tls, dest, src, n, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99725,7 +99580,7 @@ func Xwcsxfrm_l(tls *TLS, dest, src uintptr, n Tsize_t, loc Tlocale_t) (r Tsize_
 	return X__wcsxfrm_l(tls, dest, src, n, loc)
 }
 
-func Xreallocarray(tls *TLS, ptr uintptr, m, n Tsize_t) (r uintptr) {
+func Xreallocarray(tls *TLS, ptr uintptr, m Tsize_t, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v ptr=%v m=%v n=%v, (%v:)", tls, ptr, m, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99737,21 +99592,18 @@ func Xreallocarray(tls *TLS, ptr uintptr, m, n Tsize_t) (r uintptr) {
 	return Xrealloc(tls, ptr, m*n)
 }
 
-const (
-	LDBL_EPSILON2 = 0
-	LDBL_MAX2     = 0
-	LDBL_MIN2     = 0
-)
+const LDBL_EPSILON2 = 0
+const LDBL_MAX2 = 0
+const LDBL_MIN2 = 0
 
-var (
-	_C1 = float64(0.0416666666666666)                 /* 0x3FA55555, 0x5555554C */
-	_C2 = -Float64FromFloat64(0.001388888888887411)   /* 0xBF56C16C, 0x16C15177 */
-	_C3 = float64(2.480158728947673e-05)              /* 0x3EFA01A0, 0x19CB1590 */
-	_C4 = -Float64FromFloat64(2.7557314351390663e-07) /* 0xBE927E4F, 0x809C52AD */
-	_C5 = float64(2.087572321298175e-09)              /* 0x3E21EE9E, 0xBDB4B1C4 */
-	_C6 = -Float64FromFloat64(1.1359647557788195e-11) /* 0xBDA8FAE9, 0xBE8838D4 */)
+var _C1 = float64(0.0416666666666666)                 /* 0x3FA55555, 0x5555554C */
+var _C2 = -Float64FromFloat64(0.001388888888887411)   /* 0xBF56C16C, 0x16C15177 */
+var _C3 = float64(2.480158728947673e-05)              /* 0x3EFA01A0, 0x19CB1590 */
+var _C4 = -Float64FromFloat64(2.7557314351390663e-07) /* 0xBE927E4F, 0x809C52AD */
+var _C5 = float64(2.087572321298175e-09)              /* 0x3E21EE9E, 0xBDB4B1C4 */
+var _C6 = -Float64FromFloat64(1.1359647557788195e-11) /* 0xBDA8FAE9, 0xBE8838D4 */
 
-func X__cos(tls *TLS, x, y float64) (r1 float64) {
+func X__cos(tls *TLS, x float64, y float64) (r1 float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -99770,11 +99622,10 @@ func X__cos(tls *TLS, x, y float64) (r1 float64) {
 //
 //	/* |cos(x) - c(x)| < 2**-34.1 (~[-5.37e-11, 5.295e-11]). */
 
-var (
-	_C0  = -Float64FromFloat64(0.499999997251031)    /* -0.499999997251031003120 */
-	_C11 = float64(0.04166662332373906)              /*  0.0416666233237390631894 */
-	_C21 = -Float64FromFloat64(0.001388676377460993) /* -0.00138867637746099294692 */
-	_C31 = float64(2.439044879627741e-05) /*  0.0000243904487962774090654 */)
+var _C0 = -Float64FromFloat64(0.499999997251031)     /* -0.499999997251031003120 */
+var _C11 = float64(0.04166662332373906)              /*  0.0416666233237390631894 */
+var _C21 = -Float64FromFloat64(0.001388676377460993) /* -0.00138867637746099294692 */
+var _C31 = float64(2.439044879627741e-05)            /*  0.0000243904487962774090654 */
 
 func X__cosdf(tls *TLS, x float64) (r1 float32) {
 	if __ccgo_strace {
@@ -99793,15 +99644,13 @@ func X__cosdf(tls *TLS, x float64) (r1 float32) {
 // C documentation
 //
 //	/* k is such that k*ln2 has minimal relative error and x - kln2 > log(DBL_MIN) */
-var (
-	_k2    = int32(2043)
-	_kln22 = float64(1416.0996898839683)
-)
+var _k2 = int32(2043)
+var _kln22 = float64(1416.0996898839683)
 
 // C documentation
 //
 //	/* exp(x)/2 for x >= log(DBL_MAX), slightly better than 0.5*exp(x/2)*exp(x/2) */
-func X__expo2(tls *TLS, x, sign float64) (r float64) {
+func X__expo2(tls *TLS, x float64, sign float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v sign=%v, (%v:)", tls, x, sign, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99820,15 +99669,13 @@ func X__expo2(tls *TLS, x, sign float64) (r float64) {
 // C documentation
 //
 //	/* k is such that k*ln2 has minimal relative error and x - kln2 > log(FLT_MIN) */
-var (
-	_k3    = int32(235)
-	_kln23 = Float32FromFloat32(162.88958740234375)
-)
+var _k3 = int32(235)
+var _kln23 = Float32FromFloat32(162.88958740234375)
 
 // C documentation
 //
 //	/* expf(x)/2 for x >= log(FLT_MAX), slightly better than 0.5f*expf(x/2)*expf(x/2) */
-func X__expo2f(tls *TLS, x, sign float32) (r float32) {
+func X__expo2f(tls *TLS, x float32, sign float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v sign=%v, (%v:)", tls, x, sign, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -99934,10 +99781,8 @@ func X__fpclassifyl(tls *TLS, x float64) (r int32) {
 	return X__fpclassify(tls, x)
 }
 
-const (
-	pio2_hi = 0
-	pio2_lo = 0
-)
+const pio2_hi = 0
+const pio2_lo = 0
 
 func X__math_divzero(tls *TLS, sign Tuint32_t) (r float64) {
 	if __ccgo_strace {
@@ -100071,10 +99916,8 @@ _5:
 	return v4
 }
 
-const (
-	DBL_EPSILON1 = 2.220446049250313e-16
-	EPS          = 0
-)
+const DBL_EPSILON1 = 2.220446049250313e-16
+const EPS = 0
 
 // C documentation
 //
@@ -100088,16 +99931,15 @@ const (
 //	 * pio2_3t:  pi/2 - (pio2_1+pio2_2+pio2_3)
 //	 */
 
-var (
-	_toint   = Float64FromFloat64(1.5) / Float64FromFloat64(2.220446049250313e-16)
-	_pio4    = float64(0.7853981633974483)
-	_invpio2 = float64(0.6366197723675814)     /* 0x3FE45F30, 0x6DC9C883 */
-	_pio2_1  = float64(1.5707963267341256)     /* 0x3FF921FB, 0x54400000 */
-	_pio2_1t = float64(6.077100506506192e-11)  /* 0x3DD0B461, 0x1A626331 */
-	_pio2_2  = float64(6.077100506303966e-11)  /* 0x3DD0B461, 0x1A600000 */
-	_pio2_2t = float64(2.0222662487959506e-21) /* 0x3BA3198A, 0x2E037073 */
-	_pio2_3  = float64(2.0222662487111665e-21) /* 0x3BA3198A, 0x2E000000 */
-	_pio2_3t = float64(8.4784276603689e-32) /* 0x397B839A, 0x252049C1 */)
+var _toint = Float64FromFloat64(1.5) / Float64FromFloat64(2.220446049250313e-16)
+var _pio4 = float64(0.7853981633974483)
+var _invpio2 = float64(0.6366197723675814)     /* 0x3FE45F30, 0x6DC9C883 */
+var _pio2_1 = float64(1.5707963267341256)      /* 0x3FF921FB, 0x54400000 */
+var _pio2_1t = float64(6.077100506506192e-11)  /* 0x3DD0B461, 0x1A626331 */
+var _pio2_2 = float64(6.077100506303966e-11)   /* 0x3DD0B461, 0x1A600000 */
+var _pio2_2t = float64(2.0222662487959506e-21) /* 0x3BA3198A, 0x2E037073 */
+var _pio2_3 = float64(2.0222662487111665e-21)  /* 0x3BA3198A, 0x2E000000 */
+var _pio2_3t = float64(8.4784276603689e-32)    /* 0x397B839A, 0x252049C1 */
 
 // C documentation
 //
@@ -100387,7 +100229,7 @@ var _PIo2 = [8]float64{
 	7: float64(2.1674168387780482e-51),
 }
 
-func X__rem_pio2_large(tls *TLS, x, y uintptr, e0, nx, prec int32) (r int32) {
+func X__rem_pio2_large(tls *TLS, x uintptr, y uintptr, e0 int32, nx int32, prec int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v e0=%v nx=%v prec=%v, (%v:)", tls, x, y, e0, nx, prec, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -100788,12 +100630,11 @@ const DBL_EPSILON3 = 2.220446049250313e-16
 //	 * pio2_1t:  pi/2 - pio2_1
 //	 */
 
-var (
-	_toint1   = Float64FromFloat64(1.5) / Float64FromFloat64(2.220446049250313e-16)
-	_pio41    = float64(0.7853981852531433)
-	_invpio21 = float64(0.6366197723675814) /* 0x3FE45F30, 0x6DC9C883 */
-	_pio2_11  = float64(1.5707963109016418) /* 0x3FF921FB, 0x50000000 */
-	_pio2_1t1 = float64(1.5893254773528196e-08) /* 0x3E5110b4, 0x611A6263 */)
+var _toint1 = Float64FromFloat64(1.5) / Float64FromFloat64(2.220446049250313e-16)
+var _pio41 = float64(0.7853981852531433)
+var _invpio21 = float64(0.6366197723675814)     /* 0x3FE45F30, 0x6DC9C883 */
+var _pio2_11 = float64(1.5707963109016418)      /* 0x3FF921FB, 0x50000000 */
+var _pio2_1t1 = float64(1.5893254773528196e-08) /* 0x3E5110b4, 0x611A6263 */
 
 func X__rem_pio2f(tls *TLS, x float32, y uintptr) (r int32) {
 	if __ccgo_strace {
@@ -100919,15 +100760,14 @@ func X__signbitl(tls *TLS, x float64) (r int32) {
 	return X__signbit(tls, x)
 }
 
-var (
-	_S1 = -Float64FromFloat64(0.16666666666666632)    /* 0xBFC55555, 0x55555549 */
-	_S2 = float64(0.00833333333332249)                /* 0x3F811111, 0x1110F8A6 */
-	_S3 = -Float64FromFloat64(0.0001984126982985795)  /* 0xBF2A01A0, 0x19C161D5 */
-	_S4 = float64(2.7557313707070068e-06)             /* 0x3EC71DE3, 0x57B1FE7D */
-	_S5 = -Float64FromFloat64(2.5050760253406863e-08) /* 0xBE5AE5E6, 0x8A2B9CEB */
-	_S6 = float64(1.58969099521155e-10) /* 0x3DE5D93A, 0x5ACFD57C */)
+var _S1 = -Float64FromFloat64(0.16666666666666632)    /* 0xBFC55555, 0x55555549 */
+var _S2 = float64(0.00833333333332249)                /* 0x3F811111, 0x1110F8A6 */
+var _S3 = -Float64FromFloat64(0.0001984126982985795)  /* 0xBF2A01A0, 0x19C161D5 */
+var _S4 = float64(2.7557313707070068e-06)             /* 0x3EC71DE3, 0x57B1FE7D */
+var _S5 = -Float64FromFloat64(2.5050760253406863e-08) /* 0xBE5AE5E6, 0x8A2B9CEB */
+var _S6 = float64(1.58969099521155e-10)               /* 0x3DE5D93A, 0x5ACFD57C */
 
-func X__sin(tls *TLS, x, y float64, iy int32) (r1 float64) {
+func X__sin(tls *TLS, x float64, y float64, iy int32) (r1 float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v iy=%v, (%v:)", tls, x, y, iy, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -100950,11 +100790,10 @@ func X__sin(tls *TLS, x, y float64, iy int32) (r1 float64) {
 //
 //	/* |sin(x)/x - s(x)| < 2**-37.5 (~[-4.89e-12, 4.824e-12]). */
 
-var (
-	_S11 = -Float64FromFloat64(0.16666666641626524)    /* -0.166666666416265235595 */
-	_S21 = float64(0.008333329385889463)               /*  0.0083333293858894631756 */
-	_S31 = -Float64FromFloat64(0.00019839334836096632) /* -0.000198393348360966317347 */
-	_S41 = float64(2.718311493989822e-06) /*  0.0000027183114939898219064 */)
+var _S11 = -Float64FromFloat64(0.16666666641626524)    /* -0.166666666416265235595 */
+var _S21 = float64(0.008333329385889463)               /*  0.0083333293858894631756 */
+var _S31 = -Float64FromFloat64(0.00019839334836096632) /* -0.000198393348360966317347 */
+var _S41 = float64(2.718311493989822e-06)              /*  0.0000027183114939898219064 */
 
 func X__sindf(tls *TLS, x float64) (r1 float32) {
 	if __ccgo_strace {
@@ -100986,12 +100825,10 @@ var _T = [13]float64{
 	11: -Float64FromFloat64(1.8558637485527546e-05),
 	12: float64(2.590730518636337e-05),
 }
+var _pio42 = float64(0.7853981633974483)     /* 3FE921FB, 54442D18 */
+var _pio4lo = float64(3.061616997868383e-17) /* 3C81A626, 33145C07 */
 
-var (
-	_pio42  = float64(0.7853981633974483) /* 3FE921FB, 54442D18 */
-	_pio4lo = float64(3.061616997868383e-17) /* 3C81A626, 33145C07 */)
-
-func X__tan(tls *TLS, x, y float64, odd int32) (r1 float64) {
+func X__tan(tls *TLS, x float64, y float64, odd int32) (r1 float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v odd=%v, (%v:)", tls, x, y, odd, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -101100,19 +100937,18 @@ func X__tandf(tls *TLS, x float64, odd int32) (r1 float32) {
 	return float32(v1)
 }
 
-var (
-	_pio2_hi = float64(1.5707963267948966)              /* 0x3FF921FB, 0x54442D18 */
-	_pio2_lo = float64(6.123233995736766e-17)           /* 0x3C91A626, 0x33145C07 */
-	_pS0     = float64(0.16666666666666666)             /* 0x3FC55555, 0x55555555 */
-	_pS1     = -Float64FromFloat64(0.3255658186224009)  /* 0xBFD4D612, 0x03EB6F7D */
-	_pS2     = float64(0.20121253213486293)             /* 0x3FC9C155, 0x0E884455 */
-	_pS3     = -Float64FromFloat64(0.04005553450067941) /* 0xBFA48228, 0xB5688F3B */
-	_pS4     = float64(0.0007915349942898145)           /* 0x3F49EFE0, 0x7501B288 */
-	_pS5     = float64(3.479331075960212e-05)           /* 0x3F023DE1, 0x0DFDF709 */
-	_qS1     = -Float64FromFloat64(2.403394911734414)   /* 0xC0033A27, 0x1C8A2D4B */
-	_qS2     = float64(2.0209457602335057)              /* 0x40002AE5, 0x9C598AC8 */
-	_qS3     = -Float64FromFloat64(0.6882839716054533)  /* 0xBFE6066C, 0x1B8D0159 */
-	_qS4     = float64(0.07703815055590194) /* 0x3FB3B8C5, 0xB12E9282 */)
+var _pio2_hi = float64(1.5707963267948966)          /* 0x3FF921FB, 0x54442D18 */
+var _pio2_lo = float64(6.123233995736766e-17)       /* 0x3C91A626, 0x33145C07 */
+var _pS0 = float64(0.16666666666666666)             /* 0x3FC55555, 0x55555555 */
+var _pS1 = -Float64FromFloat64(0.3255658186224009)  /* 0xBFD4D612, 0x03EB6F7D */
+var _pS2 = float64(0.20121253213486293)             /* 0x3FC9C155, 0x0E884455 */
+var _pS3 = -Float64FromFloat64(0.04005553450067941) /* 0xBFA48228, 0xB5688F3B */
+var _pS4 = float64(0.0007915349942898145)           /* 0x3F49EFE0, 0x7501B288 */
+var _pS5 = float64(3.479331075960212e-05)           /* 0x3F023DE1, 0x0DFDF709 */
+var _qS1 = -Float64FromFloat64(2.403394911734414)   /* 0xC0033A27, 0x1C8A2D4B */
+var _qS2 = float64(2.0209457602335057)              /* 0x40002AE5, 0x9C598AC8 */
+var _qS3 = -Float64FromFloat64(0.6882839716054533)  /* 0xBFE6066C, 0x1B8D0159 */
+var _qS4 = float64(0.07703815055590194)             /* 0x3FB3B8C5, 0xB12E9282 */
 
 func _R(tls *TLS, z float64) (r float64) {
 	var p, q Tdouble_t
@@ -101170,14 +101006,12 @@ func Xacos(tls *TLS, x float64) (r float64) {
 	return float64(Float64FromInt32(2) * (df + w))
 }
 
-var (
-	_pio2_hi1 = float32(1.5707962513)     /* 0x3fc90fda */
-	_pio2_lo1 = float32(7.5497894159e-08) /* 0x33a22168 */
-	_pS01     = float32(0.16666586697)
-	_pS11     = float32(-Float64FromFloat64(0.042743422091))
-	_pS21     = float32(-Float64FromFloat64(0.008656363003))
-	_qS11     = float32(-Float64FromFloat64(0.7066296339))
-)
+var _pio2_hi1 = float32(1.5707962513)     /* 0x3fc90fda */
+var _pio2_lo1 = float32(7.5497894159e-08) /* 0x33a22168 */
+var _pS01 = float32(0.16666586697)
+var _pS11 = float32(-Float64FromFloat64(0.042743422091))
+var _pS21 = float32(-Float64FromFloat64(0.008656363003))
+var _qS11 = float32(-Float64FromFloat64(0.7066296339))
 
 func _R1(tls *TLS, z float32) (r float32) {
 	var p, q Tfloat_t
@@ -101324,20 +101158,19 @@ func Xacosl(tls *TLS, x float64) (r float64) {
 	return Xacos(tls, x)
 }
 
-var (
-	_pio2_hi2 = float64(1.5707963267948966)    /* 0x3FF921FB, 0x54442D18 */
-	_pio2_lo2 = float64(6.123233995736766e-17) /* 0x3C91A626, 0x33145C07 */
-	/* coefficients for R(x^2) */
-	_pS02 = float64(0.16666666666666666)             /* 0x3FC55555, 0x55555555 */
-	_pS12 = -Float64FromFloat64(0.3255658186224009)  /* 0xBFD4D612, 0x03EB6F7D */
-	_pS22 = float64(0.20121253213486293)             /* 0x3FC9C155, 0x0E884455 */
-	_pS31 = -Float64FromFloat64(0.04005553450067941) /* 0xBFA48228, 0xB5688F3B */
-	_pS41 = float64(0.0007915349942898145)           /* 0x3F49EFE0, 0x7501B288 */
-	_pS51 = float64(3.479331075960212e-05)           /* 0x3F023DE1, 0x0DFDF709 */
-	_qS12 = -Float64FromFloat64(2.403394911734414)   /* 0xC0033A27, 0x1C8A2D4B */
-	_qS21 = float64(2.0209457602335057)              /* 0x40002AE5, 0x9C598AC8 */
-	_qS31 = -Float64FromFloat64(0.6882839716054533)  /* 0xBFE6066C, 0x1B8D0159 */
-	_qS41 = float64(0.07703815055590194) /* 0x3FB3B8C5, 0xB12E9282 */)
+var _pio2_hi2 = float64(1.5707963267948966)    /* 0x3FF921FB, 0x54442D18 */
+var _pio2_lo2 = float64(6.123233995736766e-17) /* 0x3C91A626, 0x33145C07 */
+/* coefficients for R(x^2) */
+var _pS02 = float64(0.16666666666666666)             /* 0x3FC55555, 0x55555555 */
+var _pS12 = -Float64FromFloat64(0.3255658186224009)  /* 0xBFD4D612, 0x03EB6F7D */
+var _pS22 = float64(0.20121253213486293)             /* 0x3FC9C155, 0x0E884455 */
+var _pS31 = -Float64FromFloat64(0.04005553450067941) /* 0xBFA48228, 0xB5688F3B */
+var _pS41 = float64(0.0007915349942898145)           /* 0x3F49EFE0, 0x7501B288 */
+var _pS51 = float64(3.479331075960212e-05)           /* 0x3F023DE1, 0x0DFDF709 */
+var _qS12 = -Float64FromFloat64(2.403394911734414)   /* 0xC0033A27, 0x1C8A2D4B */
+var _qS21 = float64(2.0209457602335057)              /* 0x40002AE5, 0x9C598AC8 */
+var _qS31 = -Float64FromFloat64(0.6882839716054533)  /* 0xBFE6066C, 0x1B8D0159 */
+var _qS41 = float64(0.07703815055590194)             /* 0x3FB3B8C5, 0xB12E9282 */
 
 func _R2(tls *TLS, z float64) (r float64) {
 	var p, q Tdouble_t
@@ -101398,12 +101231,10 @@ func Xasin(tls *TLS, x float64) (r1 float64) {
 var _pio2 = float64(1.5707963267948966)
 
 /* coefficients for R(x^2) */
-var (
-	_pS03 = float32(0.16666586697)
-	_pS13 = float32(-Float64FromFloat64(0.042743422091))
-	_pS23 = float32(-Float64FromFloat64(0.008656363003))
-	_qS13 = float32(-Float64FromFloat64(0.7066296339))
-)
+var _pS03 = float32(0.16666586697)
+var _pS13 = float32(-Float64FromFloat64(0.042743422091))
+var _pS23 = float32(-Float64FromFloat64(0.008656363003))
+var _qS13 = float32(-Float64FromFloat64(0.7066296339))
 
 func _R3(tls *TLS, z float32) (r float32) {
 	var p, q Tfloat_t
@@ -101712,11 +101543,10 @@ func Xatan(tls *TLS, x3 float64) (r float64) {
 	return v3
 }
 
-var (
-	_pi    = float64(3.141592653589793) /* 0x400921FB, 0x54442D18 */
-	_pi_lo = float64(1.2246467991473532e-16) /* 0x3CA1A626, 0x33145C07 */)
+var _pi = float64(3.141592653589793)         /* 0x400921FB, 0x54442D18 */
+var _pi_lo = float64(1.2246467991473532e-16) /* 0x3CA1A626, 0x33145C07 */
 
-func Xatan2(tls *TLS, y, x float64) (r float64) {
+func Xatan2(tls *TLS, y float64, x float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v y=%v x=%v, (%v:)", tls, y, x, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -101835,11 +101665,10 @@ _2:
 	return r
 }
 
-var (
-	_pi1    = float32(3.141592741) /* 0x40490fdb */
-	_pi_lo1 = float32(-Float64FromFloat64(8.7422776573e-08)) /* 0xb3bbbd2e */)
+var _pi1 = float32(3.141592741)                              /* 0x40490fdb */
+var _pi_lo1 = float32(-Float64FromFloat64(8.7422776573e-08)) /* 0xb3bbbd2e */
 
-func Xatan2f(tls *TLS, y, x float32) (r float32) {
+func Xatan2f(tls *TLS, y float32, x float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v y=%v x=%v, (%v:)", tls, y, x, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -101953,7 +101782,7 @@ _2:
 	return r
 }
 
-func Xatan2l(tls *TLS, y, x float64) (r float64) {
+func Xatan2l(tls *TLS, y float64, x float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v y=%v x=%v, (%v:)", tls, y, x, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -102214,20 +102043,18 @@ func Xatanl(tls *TLS, x float64) (r float64) {
 	return Xatan(tls, x)
 }
 
-var (
-	_B1 = uint32(715094163) /* B1 = (1023-1023/3-0.03306235651)*2**20 */
-	_B2 = uint32(696219795) /* B2 = (1023-1023/3-54/3-0.03306235651)*2**20 */)
+var _B1 = uint32(715094163) /* B1 = (1023-1023/3-0.03306235651)*2**20 */
+var _B2 = uint32(696219795) /* B2 = (1023-1023/3-54/3-0.03306235651)*2**20 */
 
 // C documentation
 //
 //	/* |1/cbrt(x) - p(x)| < 2**-23.5 (~[-7.93e-8, 7.929e-8]). */
 
-var (
-	_P0 = float64(1.87595182427177)               /* 0x3ffe03e6, 0x0f61e692 */
-	_P1 = -Float64FromFloat64(1.8849797954337717) /* 0xbffe28e0, 0x92f02420 */
-	_P2 = float64(1.6214297201053545)             /* 0x3ff9f160, 0x4a49d6c2 */
-	_P3 = -Float64FromFloat64(0.758397934778766)  /* 0xbfe844cb, 0xbee751d9 */
-	_P4 = float64(0.14599619288661245) /* 0x3fc2b000, 0xd4e4edd7 */)
+var _P0 = float64(1.87595182427177)               /* 0x3ffe03e6, 0x0f61e692 */
+var _P1 = -Float64FromFloat64(1.8849797954337717) /* 0xbffe28e0, 0x92f02420 */
+var _P2 = float64(1.6214297201053545)             /* 0x3ff9f160, 0x4a49d6c2 */
+var _P3 = -Float64FromFloat64(0.758397934778766)  /* 0xbfe844cb, 0xbee751d9 */
+var _P4 = float64(0.14599619288661245)            /* 0x3fc2b000, 0xd4e4edd7 */
 
 func Xcbrt(tls *TLS, x float64) (r1 float64) {
 	if __ccgo_strace {
@@ -102319,9 +102146,8 @@ func Xcbrt(tls *TLS, x float64) (r1 float64) {
 	return t
 }
 
-var (
-	_B11 = uint32(709958130) /* B1 = (127-127.0/3-0.03306235651)*2**23 */
-	_B21 = uint32(642849266) /* B2 = (127-127.0/3-24/3-0.03306235651)*2**23 */)
+var _B11 = uint32(709958130) /* B1 = (127-127.0/3-0.03306235651)*2**23 */
+var _B21 = uint32(642849266) /* B2 = (127-127.0/3-24/3-0.03306235651)*2**23 */
 
 func Xcbrtf(tls *TLS, x float32) (r1 float32) {
 	if __ccgo_strace {
@@ -102527,7 +102353,7 @@ func Xceill(tls *TLS, x float64) (r float64) {
 	return Xceil(tls, x)
 }
 
-func Xcopysign(tls *TLS, x, y float64) (r float64) {
+func Xcopysign(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -102567,7 +102393,7 @@ func Xcopysign(tls *TLS, x, y float64) (r float64) {
 	return *(*float64)(unsafe.Pointer(bp))
 }
 
-func Xcopysignf(tls *TLS, x, y float32) (r float32) {
+func Xcopysignf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -102603,7 +102429,7 @@ func Xcopysignf(tls *TLS, x, y float32) (r float32) {
 	return *(*float32)(unsafe.Pointer(bp))
 }
 
-func Xcopysignl(tls *TLS, x, y float64) (r float64) {
+func Xcopysignl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -102668,11 +102494,10 @@ const M_PI_23 = 1.5707963267948966
 //
 //	/* Small multiples of pi/2 rounded to double precision. */
 
-var (
-	_c1pio2 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
-	_c2pio2 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
-	_c3pio2 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
-	_c4pio2 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */)
+var _c1pio2 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
+var _c2pio2 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
+var _c3pio2 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
+var _c4pio2 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */
 
 func Xcosf(tls *TLS, x3 float32) (r float32) {
 	if __ccgo_strace {
@@ -102892,74 +102717,73 @@ func Xcosl(tls *TLS, x float64) (r float64) {
 	return Xcos(tls, x)
 }
 
-var (
-	_erx = float64(0.8450629115104675) /* 0x3FEB0AC1, 0x60000000 */
-	/*
-	 * Coefficients for approximation to  erf on [0,0.84375]
-	 */
-	_efx8 = float64(1.0270333367641007)                 /* 0x3FF06EBA, 0x8214DB69 */
-	_pp0  = float64(0.12837916709551256)                /* 0x3FC06EBA, 0x8214DB68 */
-	_pp1  = -Float64FromFloat64(0.3250421072470015)     /* 0xBFD4CD7D, 0x691CB913 */
-	_pp2  = -Float64FromFloat64(0.02848174957559851)    /* 0xBF9D2A51, 0xDBD7194F */
-	_pp3  = -Float64FromFloat64(0.005770270296489442)   /* 0xBF77A291, 0x236668E4 */
-	_pp4  = -Float64FromFloat64(2.3763016656650163e-05) /* 0xBEF8EAD6, 0x120016AC */
-	_qq1  = float64(0.39791722395915535)                /* 0x3FD97779, 0xCDDADC09 */
-	_qq2  = float64(0.0650222499887673)                 /* 0x3FB0A54C, 0x5536CEBA */
-	_qq3  = float64(0.005081306281875766)               /* 0x3F74D022, 0xC4D36B0F */
-	_qq4  = float64(0.00013249473800432164)             /* 0x3F215DC9, 0x221C1A10 */
-	_qq5  = -Float64FromFloat64(3.960228278775368e-06)  /* 0xBED09C43, 0x42A26120 */
-	/*
-	 * Coefficients for approximation to  erf  in [0.84375,1.25]
-	 */
-	_pa0 = -Float64FromFloat64(0.0023621185607526594) /* 0xBF6359B8, 0xBEF77538 */
-	_pa1 = float64(0.41485611868374833)               /* 0x3FDA8D00, 0xAD92B34D */
-	_pa2 = -Float64FromFloat64(0.3722078760357013)    /* 0xBFD7D240, 0xFBB8C3F1 */
-	_pa3 = float64(0.31834661990116175)               /* 0x3FD45FCA, 0x805120E4 */
-	_pa4 = -Float64FromFloat64(0.11089469428239668)   /* 0xBFBC6398, 0x3D3E28EC */
-	_pa5 = float64(0.035478304325618236)              /* 0x3FA22A36, 0x599795EB */
-	_pa6 = -Float64FromFloat64(0.002166375594868791)  /* 0xBF61BF38, 0x0A96073F */
-	_qa1 = float64(0.10642088040084423)               /* 0x3FBB3E66, 0x18EEE323 */
-	_qa2 = float64(0.540397917702171)                 /* 0x3FE14AF0, 0x92EB6F33 */
-	_qa3 = float64(0.07182865441419627)               /* 0x3FB2635C, 0xD99FE9A7 */
-	_qa4 = float64(0.12617121980876164)               /* 0x3FC02660, 0xE763351F */
-	_qa5 = float64(0.01363708391202905)               /* 0x3F8BEDC2, 0x6B51DD1C */
-	_qa6 = float64(0.011984499846799107)              /* 0x3F888B54, 0x5735151D */
-	/*
-	 * Coefficients for approximation to  erfc in [1.25,1/0.35]
-	 */
-	_ra0 = -Float64FromFloat64(0.009864944034847148) /* 0xBF843412, 0x600D6435 */
-	_ra1 = -Float64FromFloat64(0.6938585727071818)   /* 0xBFE63416, 0xE4BA7360 */
-	_ra2 = -Float64FromFloat64(10.558626225323291)   /* 0xC0251E04, 0x41B0E726 */
-	_ra3 = -Float64FromFloat64(62.375332450326006)   /* 0xC04F300A, 0xE4CBA38D */
-	_ra4 = -Float64FromFloat64(162.39666946257347)   /* 0xC0644CB1, 0x84282266 */
-	_ra5 = -Float64FromFloat64(184.60509290671104)   /* 0xC067135C, 0xEBCCABB2 */
-	_ra6 = -Float64FromFloat64(81.2874355063066)     /* 0xC0545265, 0x57E4D2F2 */
-	_ra7 = -Float64FromFloat64(9.814329344169145)    /* 0xC023A0EF, 0xC69AC25C */
-	_sa1 = float64(19.651271667439257)               /* 0x4033A6B9, 0xBD707687 */
-	_sa2 = float64(137.65775414351904)               /* 0x4061350C, 0x526AE721 */
-	_sa3 = float64(434.56587747522923)               /* 0x407B290D, 0xD58A1A71 */
-	_sa4 = float64(645.3872717332679)                /* 0x40842B19, 0x21EC2868 */
-	_sa5 = float64(429.00814002756783)               /* 0x407AD021, 0x57700314 */
-	_sa6 = float64(108.63500554177944)               /* 0x405B28A3, 0xEE48AE2C */
-	_sa7 = float64(6.570249770319282)                /* 0x401A47EF, 0x8E484A93 */
-	_sa8 = -Float64FromFloat64(0.0604244152148581)   /* 0xBFAEEFF2, 0xEE749A62 */
-	/*
-	 * Coefficients for approximation to  erfc in [1/.35,28]
-	 */
-	_rb0 = -Float64FromFloat64(0.0098649429247001) /* 0xBF843412, 0x39E86F4A */
-	_rb1 = -Float64FromFloat64(0.799283237680523)  /* 0xBFE993BA, 0x70C285DE */
-	_rb2 = -Float64FromFloat64(17.757954917754752) /* 0xC031C209, 0x555F995A */
-	_rb3 = -Float64FromFloat64(160.63638485582192) /* 0xC064145D, 0x43C5ED98 */
-	_rb4 = -Float64FromFloat64(637.5664433683896)  /* 0xC083EC88, 0x1375F228 */
-	_rb5 = -Float64FromFloat64(1025.0951316110772) /* 0xC0900461, 0x6A2E5992 */
-	_rb6 = -Float64FromFloat64(483.5191916086514)  /* 0xC07E384E, 0x9BDC383F */
-	_sb1 = float64(30.33806074348246)              /* 0x403E568B, 0x261D5190 */
-	_sb2 = float64(325.7925129965739)              /* 0x40745CAE, 0x221B9F0A */
-	_sb3 = float64(1536.729586084437)              /* 0x409802EB, 0x189D5118 */
-	_sb4 = float64(3199.8582195085955)             /* 0x40A8FFB7, 0x688C246A */
-	_sb5 = float64(2553.0504064331644)             /* 0x40A3F219, 0xCEDF3BE6 */
-	_sb6 = float64(474.52854120695537)             /* 0x407DA874, 0xE79FE763 */
-	_sb7 = -Float64FromFloat64(22.44095244658582) /* 0xC03670E2, 0x42712D62 */)
+var _erx = float64(0.8450629115104675) /* 0x3FEB0AC1, 0x60000000 */
+/*
+ * Coefficients for approximation to  erf on [0,0.84375]
+ */
+var _efx8 = float64(1.0270333367641007)                /* 0x3FF06EBA, 0x8214DB69 */
+var _pp0 = float64(0.12837916709551256)                /* 0x3FC06EBA, 0x8214DB68 */
+var _pp1 = -Float64FromFloat64(0.3250421072470015)     /* 0xBFD4CD7D, 0x691CB913 */
+var _pp2 = -Float64FromFloat64(0.02848174957559851)    /* 0xBF9D2A51, 0xDBD7194F */
+var _pp3 = -Float64FromFloat64(0.005770270296489442)   /* 0xBF77A291, 0x236668E4 */
+var _pp4 = -Float64FromFloat64(2.3763016656650163e-05) /* 0xBEF8EAD6, 0x120016AC */
+var _qq1 = float64(0.39791722395915535)                /* 0x3FD97779, 0xCDDADC09 */
+var _qq2 = float64(0.0650222499887673)                 /* 0x3FB0A54C, 0x5536CEBA */
+var _qq3 = float64(0.005081306281875766)               /* 0x3F74D022, 0xC4D36B0F */
+var _qq4 = float64(0.00013249473800432164)             /* 0x3F215DC9, 0x221C1A10 */
+var _qq5 = -Float64FromFloat64(3.960228278775368e-06)  /* 0xBED09C43, 0x42A26120 */
+/*
+ * Coefficients for approximation to  erf  in [0.84375,1.25]
+ */
+var _pa0 = -Float64FromFloat64(0.0023621185607526594) /* 0xBF6359B8, 0xBEF77538 */
+var _pa1 = float64(0.41485611868374833)               /* 0x3FDA8D00, 0xAD92B34D */
+var _pa2 = -Float64FromFloat64(0.3722078760357013)    /* 0xBFD7D240, 0xFBB8C3F1 */
+var _pa3 = float64(0.31834661990116175)               /* 0x3FD45FCA, 0x805120E4 */
+var _pa4 = -Float64FromFloat64(0.11089469428239668)   /* 0xBFBC6398, 0x3D3E28EC */
+var _pa5 = float64(0.035478304325618236)              /* 0x3FA22A36, 0x599795EB */
+var _pa6 = -Float64FromFloat64(0.002166375594868791)  /* 0xBF61BF38, 0x0A96073F */
+var _qa1 = float64(0.10642088040084423)               /* 0x3FBB3E66, 0x18EEE323 */
+var _qa2 = float64(0.540397917702171)                 /* 0x3FE14AF0, 0x92EB6F33 */
+var _qa3 = float64(0.07182865441419627)               /* 0x3FB2635C, 0xD99FE9A7 */
+var _qa4 = float64(0.12617121980876164)               /* 0x3FC02660, 0xE763351F */
+var _qa5 = float64(0.01363708391202905)               /* 0x3F8BEDC2, 0x6B51DD1C */
+var _qa6 = float64(0.011984499846799107)              /* 0x3F888B54, 0x5735151D */
+/*
+ * Coefficients for approximation to  erfc in [1.25,1/0.35]
+ */
+var _ra0 = -Float64FromFloat64(0.009864944034847148) /* 0xBF843412, 0x600D6435 */
+var _ra1 = -Float64FromFloat64(0.6938585727071818)   /* 0xBFE63416, 0xE4BA7360 */
+var _ra2 = -Float64FromFloat64(10.558626225323291)   /* 0xC0251E04, 0x41B0E726 */
+var _ra3 = -Float64FromFloat64(62.375332450326006)   /* 0xC04F300A, 0xE4CBA38D */
+var _ra4 = -Float64FromFloat64(162.39666946257347)   /* 0xC0644CB1, 0x84282266 */
+var _ra5 = -Float64FromFloat64(184.60509290671104)   /* 0xC067135C, 0xEBCCABB2 */
+var _ra6 = -Float64FromFloat64(81.2874355063066)     /* 0xC0545265, 0x57E4D2F2 */
+var _ra7 = -Float64FromFloat64(9.814329344169145)    /* 0xC023A0EF, 0xC69AC25C */
+var _sa1 = float64(19.651271667439257)               /* 0x4033A6B9, 0xBD707687 */
+var _sa2 = float64(137.65775414351904)               /* 0x4061350C, 0x526AE721 */
+var _sa3 = float64(434.56587747522923)               /* 0x407B290D, 0xD58A1A71 */
+var _sa4 = float64(645.3872717332679)                /* 0x40842B19, 0x21EC2868 */
+var _sa5 = float64(429.00814002756783)               /* 0x407AD021, 0x57700314 */
+var _sa6 = float64(108.63500554177944)               /* 0x405B28A3, 0xEE48AE2C */
+var _sa7 = float64(6.570249770319282)                /* 0x401A47EF, 0x8E484A93 */
+var _sa8 = -Float64FromFloat64(0.0604244152148581)   /* 0xBFAEEFF2, 0xEE749A62 */
+/*
+ * Coefficients for approximation to  erfc in [1/.35,28]
+ */
+var _rb0 = -Float64FromFloat64(0.0098649429247001) /* 0xBF843412, 0x39E86F4A */
+var _rb1 = -Float64FromFloat64(0.799283237680523)  /* 0xBFE993BA, 0x70C285DE */
+var _rb2 = -Float64FromFloat64(17.757954917754752) /* 0xC031C209, 0x555F995A */
+var _rb3 = -Float64FromFloat64(160.63638485582192) /* 0xC064145D, 0x43C5ED98 */
+var _rb4 = -Float64FromFloat64(637.5664433683896)  /* 0xC083EC88, 0x1375F228 */
+var _rb5 = -Float64FromFloat64(1025.0951316110772) /* 0xC0900461, 0x6A2E5992 */
+var _rb6 = -Float64FromFloat64(483.5191916086514)  /* 0xC07E384E, 0x9BDC383F */
+var _sb1 = float64(30.33806074348246)              /* 0x403E568B, 0x261D5190 */
+var _sb2 = float64(325.7925129965739)              /* 0x40745CAE, 0x221B9F0A */
+var _sb3 = float64(1536.729586084437)              /* 0x409802EB, 0x189D5118 */
+var _sb4 = float64(3199.8582195085955)             /* 0x40A8FFB7, 0x688C246A */
+var _sb5 = float64(2553.0504064331644)             /* 0x40A3F219, 0xCEDF3BE6 */
+var _sb6 = float64(474.52854120695537)             /* 0x407DA874, 0xE79FE763 */
+var _sb7 = -Float64FromFloat64(22.44095244658582)  /* 0xC03670E2, 0x42712D62 */
 
 func _erfc1(tls *TLS, x float64) (r float64) {
 	var P, Q, s Tdouble_t
@@ -103078,74 +102902,73 @@ func Xerfc(tls *TLS, x float64) (r1 float64) {
 	return v1
 }
 
-var (
-	_erx1 = float32(0.84506291151) /* 0x3f58560b */
-	/*
-	 * Coefficients for approximation to  erf on [0,0.84375]
-	 */
-	_efx81 = float32(1.027033329)                           /* 0x3f8375d4 */
-	_pp01  = float32(0.12837916613)                         /* 0x3e0375d4 */
-	_pp11  = float32(-Float64FromFloat64(0.32504209876))    /* 0xbea66beb */
-	_pp21  = float32(-Float64FromFloat64(0.028481749818))   /* 0xbce9528f */
-	_pp31  = float32(-Float64FromFloat64(0.005770270247))   /* 0xbbbd1489 */
-	_pp41  = float32(-Float64FromFloat64(2.3763017452e-05)) /* 0xb7c756b1 */
-	_qq11  = float32(0.39791721106)                         /* 0x3ecbbbce */
-	_qq21  = float32(0.0650222525)                          /* 0x3d852a63 */
-	_qq31  = float32(0.0050813062117)                       /* 0x3ba68116 */
-	_qq41  = float32(0.00013249473704)                      /* 0x390aee49 */
-	_qq51  = float32(-Float64FromFloat64(3.9602282413e-06)) /* 0xb684e21a */
-	/*
-	 * Coefficients for approximation to  erf  in [0.84375,1.25]
-	 */
-	_pa01 = float32(-Float64FromFloat64(0.0023621185683)) /* 0xbb1acdc6 */
-	_pa11 = float32(0.41485610604)                        /* 0x3ed46805 */
-	_pa21 = float32(-Float64FromFloat64(0.37220788002))   /* 0xbebe9208 */
-	_pa31 = float32(0.31834661961)                        /* 0x3ea2fe54 */
-	_pa41 = float32(-Float64FromFloat64(0.11089469492))   /* 0xbde31cc2 */
-	_pa51 = float32(0.035478305072)                       /* 0x3d1151b3 */
-	_pa61 = float32(-Float64FromFloat64(0.0021663755178)) /* 0xbb0df9c0 */
-	_qa11 = float32(0.10642088205)                        /* 0x3dd9f331 */
-	_qa21 = float32(0.54039794207)                        /* 0x3f0a5785 */
-	_qa31 = float32(0.071828655899)                       /* 0x3d931ae7 */
-	_qa41 = float32(0.12617121637)                        /* 0x3e013307 */
-	_qa51 = float32(0.013637083583)                       /* 0x3c5f6e13 */
-	_qa61 = float32(0.011984500103)                       /* 0x3c445aa3 */
-	/*
-	 * Coefficients for approximation to  erfc in [1.25,1/0.35]
-	 */
-	_ra01 = float32(-Float64FromFloat64(0.0098649440333)) /* 0xbc21a093 */
-	_ra11 = float32(-Float64FromFloat64(0.6938585639))    /* 0xbf31a0b7 */
-	_ra21 = float32(-Float64FromFloat64(10.558626175))    /* 0xc128f022 */
-	_ra31 = float32(-Float64FromFloat64(62.375331879))    /* 0xc2798057 */
-	_ra41 = float32(-Float64FromFloat64(162.39666748))    /* 0xc322658c */
-	_ra51 = float32(-Float64FromFloat64(184.60508728))    /* 0xc3389ae7 */
-	_ra61 = float32(-Float64FromFloat64(81.287437439))    /* 0xc2a2932b */
-	_ra71 = float32(-Float64FromFloat64(9.8143291473))    /* 0xc11d077e */
-	_sa11 = float32(19.65127182)                          /* 0x419d35ce */
-	_sa21 = float32(137.65776062)                         /* 0x4309a863 */
-	_sa31 = float32(434.56588745)                         /* 0x43d9486f */
-	_sa41 = float32(645.38726807)                         /* 0x442158c9 */
-	_sa51 = float32(429.00814819)                         /* 0x43d6810b */
-	_sa61 = float32(108.63500214)                         /* 0x42d9451f */
-	_sa71 = float32(6.5702495575)                         /* 0x40d23f7c */
-	_sa81 = float32(-Float64FromFloat64(0.060424413532))  /* 0xbd777f97 */
-	/*
-	 * Coefficients for approximation to  erfc in [1/.35,28]
-	 */
-	_rb01 = float32(-Float64FromFloat64(0.009864943102)) /* 0xbc21a092 */
-	_rb11 = float32(-Float64FromFloat64(0.79928326607))  /* 0xbf4c9dd4 */
-	_rb21 = float32(-Float64FromFloat64(17.757955551))   /* 0xc18e104b */
-	_rb31 = float32(-Float64FromFloat64(160.63638306))   /* 0xc320a2ea */
-	_rb41 = float32(-Float64FromFloat64(637.56646729))   /* 0xc41f6441 */
-	_rb51 = float32(-Float64FromFloat64(1025.0950928))   /* 0xc480230b */
-	_rb61 = float32(-Float64FromFloat64(483.51919556))   /* 0xc3f1c275 */
-	_sb11 = float32(30.338060379)                        /* 0x41f2b459 */
-	_sb21 = float32(325.79251099)                        /* 0x43a2e571 */
-	_sb31 = float32(1536.7296143)                        /* 0x44c01759 */
-	_sb41 = float32(3199.8581543)                        /* 0x4547fdbb */
-	_sb51 = float32(2553.050293)                         /* 0x451f90ce */
-	_sb61 = float32(474.52853394)                        /* 0x43ed43a7 */
-	_sb71 = float32(-Float64FromFloat64(22.440952301)) /* 0xc1b38712 */)
+var _erx1 = float32(0.84506291151) /* 0x3f58560b */
+/*
+ * Coefficients for approximation to  erf on [0,0.84375]
+ */
+var _efx81 = float32(1.027033329)                          /* 0x3f8375d4 */
+var _pp01 = float32(0.12837916613)                         /* 0x3e0375d4 */
+var _pp11 = float32(-Float64FromFloat64(0.32504209876))    /* 0xbea66beb */
+var _pp21 = float32(-Float64FromFloat64(0.028481749818))   /* 0xbce9528f */
+var _pp31 = float32(-Float64FromFloat64(0.005770270247))   /* 0xbbbd1489 */
+var _pp41 = float32(-Float64FromFloat64(2.3763017452e-05)) /* 0xb7c756b1 */
+var _qq11 = float32(0.39791721106)                         /* 0x3ecbbbce */
+var _qq21 = float32(0.0650222525)                          /* 0x3d852a63 */
+var _qq31 = float32(0.0050813062117)                       /* 0x3ba68116 */
+var _qq41 = float32(0.00013249473704)                      /* 0x390aee49 */
+var _qq51 = float32(-Float64FromFloat64(3.9602282413e-06)) /* 0xb684e21a */
+/*
+ * Coefficients for approximation to  erf  in [0.84375,1.25]
+ */
+var _pa01 = float32(-Float64FromFloat64(0.0023621185683)) /* 0xbb1acdc6 */
+var _pa11 = float32(0.41485610604)                        /* 0x3ed46805 */
+var _pa21 = float32(-Float64FromFloat64(0.37220788002))   /* 0xbebe9208 */
+var _pa31 = float32(0.31834661961)                        /* 0x3ea2fe54 */
+var _pa41 = float32(-Float64FromFloat64(0.11089469492))   /* 0xbde31cc2 */
+var _pa51 = float32(0.035478305072)                       /* 0x3d1151b3 */
+var _pa61 = float32(-Float64FromFloat64(0.0021663755178)) /* 0xbb0df9c0 */
+var _qa11 = float32(0.10642088205)                        /* 0x3dd9f331 */
+var _qa21 = float32(0.54039794207)                        /* 0x3f0a5785 */
+var _qa31 = float32(0.071828655899)                       /* 0x3d931ae7 */
+var _qa41 = float32(0.12617121637)                        /* 0x3e013307 */
+var _qa51 = float32(0.013637083583)                       /* 0x3c5f6e13 */
+var _qa61 = float32(0.011984500103)                       /* 0x3c445aa3 */
+/*
+ * Coefficients for approximation to  erfc in [1.25,1/0.35]
+ */
+var _ra01 = float32(-Float64FromFloat64(0.0098649440333)) /* 0xbc21a093 */
+var _ra11 = float32(-Float64FromFloat64(0.6938585639))    /* 0xbf31a0b7 */
+var _ra21 = float32(-Float64FromFloat64(10.558626175))    /* 0xc128f022 */
+var _ra31 = float32(-Float64FromFloat64(62.375331879))    /* 0xc2798057 */
+var _ra41 = float32(-Float64FromFloat64(162.39666748))    /* 0xc322658c */
+var _ra51 = float32(-Float64FromFloat64(184.60508728))    /* 0xc3389ae7 */
+var _ra61 = float32(-Float64FromFloat64(81.287437439))    /* 0xc2a2932b */
+var _ra71 = float32(-Float64FromFloat64(9.8143291473))    /* 0xc11d077e */
+var _sa11 = float32(19.65127182)                          /* 0x419d35ce */
+var _sa21 = float32(137.65776062)                         /* 0x4309a863 */
+var _sa31 = float32(434.56588745)                         /* 0x43d9486f */
+var _sa41 = float32(645.38726807)                         /* 0x442158c9 */
+var _sa51 = float32(429.00814819)                         /* 0x43d6810b */
+var _sa61 = float32(108.63500214)                         /* 0x42d9451f */
+var _sa71 = float32(6.5702495575)                         /* 0x40d23f7c */
+var _sa81 = float32(-Float64FromFloat64(0.060424413532))  /* 0xbd777f97 */
+/*
+ * Coefficients for approximation to  erfc in [1/.35,28]
+ */
+var _rb01 = float32(-Float64FromFloat64(0.009864943102)) /* 0xbc21a092 */
+var _rb11 = float32(-Float64FromFloat64(0.79928326607))  /* 0xbf4c9dd4 */
+var _rb21 = float32(-Float64FromFloat64(17.757955551))   /* 0xc18e104b */
+var _rb31 = float32(-Float64FromFloat64(160.63638306))   /* 0xc320a2ea */
+var _rb41 = float32(-Float64FromFloat64(637.56646729))   /* 0xc41f6441 */
+var _rb51 = float32(-Float64FromFloat64(1025.0950928))   /* 0xc480230b */
+var _rb61 = float32(-Float64FromFloat64(483.51919556))   /* 0xc3f1c275 */
+var _sb11 = float32(30.338060379)                        /* 0x41f2b459 */
+var _sb21 = float32(325.79251099)                        /* 0x43a2e571 */
+var _sb31 = float32(1536.7296143)                        /* 0x44c01759 */
+var _sb41 = float32(3199.8581543)                        /* 0x4547fdbb */
+var _sb51 = float32(2553.050293)                         /* 0x451f90ce */
+var _sb61 = float32(474.52853394)                        /* 0x43ed43a7 */
+var _sb71 = float32(-Float64FromFloat64(22.440952301))   /* 0xc1b38712 */
 
 func _erfc11(tls *TLS, x float32) (r float32) {
 	var P, Q, s Tfloat_t
@@ -103280,13 +103103,11 @@ func Xerfcl(tls *TLS, x float64) (r float64) {
 	return Xerfc(tls, x)
 }
 
-const (
-	EXP2_POLY_ORDER      = 5
-	EXP_POLY_ORDER       = 5
-	EXP_TABLE_BITS       = 7
-	EXP_USE_TOINT_NARROW = 0
-	N                    = 128
-)
+const EXP2_POLY_ORDER = 5
+const EXP_POLY_ORDER = 5
+const EXP_TABLE_BITS = 7
+const EXP_USE_TOINT_NARROW = 0
+const N = 128
 
 // C documentation
 //
@@ -103297,7 +103118,7 @@ const (
 //	   a double.  (int32_t)KI is the k used in the argument reduction and exponent
 //	   adjustment of scale, positive k here means the result may overflow and
 //	   negative k means the result may underflow.  */
-func _specialcase(tls *TLS, tmp Tdouble_t, sbits, ki Tuint64_t) (r float64) {
+func _specialcase(tls *TLS, tmp Tdouble_t, sbits Tuint64_t, ki Tuint64_t) (r float64) {
 	var hi, lo, scale, y3 Tdouble_t
 	var y, y1, y2, v1 float64
 	_, _, _, _, _, _, _, _ = hi, lo, scale, y, y1, y2, y3, v1
@@ -103587,7 +103408,7 @@ func Xpow10l(tls *TLS, x float64) (r float64) {
 //	   a double.  (int32_t)KI is the k used in the argument reduction and exponent
 //	   adjustment of scale, positive k here means the result may overflow and
 //	   negative k means the result may underflow.  */
-func _specialcase1(tls *TLS, tmp Tdouble_t, sbits, ki Tuint64_t) (r float64) {
+func _specialcase1(tls *TLS, tmp Tdouble_t, sbits Tuint64_t, ki Tuint64_t) (r float64) {
 	var hi, lo, scale, y3 Tdouble_t
 	var y, y1, y2, v1 float64
 	_, _, _, _, _, _, _, _ = hi, lo, scale, y, y1, y2, y3, v1
@@ -103718,11 +103539,9 @@ _9:
 	return v1
 }
 
-const (
-	EXP2F_POLY_ORDER = 3
-	EXP2F_TABLE_BITS = 5
-	N1               = 32
-)
+const EXP2F_POLY_ORDER = 3
+const EXP2F_TABLE_BITS = 5
+const N1 = 32
 
 /*
 EXP2F_TABLE_BITS = 5
@@ -103906,17 +103725,16 @@ func Xexpl(tls *TLS, x float64) (r float64) {
 	return Xexp(tls, x)
 }
 
-var (
-	_o_threshold = float64(709.782712893384)       /* 0x40862E42, 0xFEFA39EF */
-	_ln2_hi      = float64(0.6931471803691238)     /* 0x3fe62e42, 0xfee00000 */
-	_ln2_lo      = float64(1.9082149292705877e-10) /* 0x3dea39ef, 0x35793c76 */
-	_invln2      = float64(1.4426950408889634)     /* 0x3ff71547, 0x652b82fe */
-	/* Scaled Q's: Qn_here = 2**n * Qn_above, for R(2*z) where z = hxs = x*x/2: */
-	_Q1 = -Float64FromFloat64(0.03333333333333313)  /* BFA11111 111110F4 */
-	_Q2 = float64(0.0015873015872548146)            /* 3F5A01A0 19FE5585 */
-	_Q3 = -Float64FromFloat64(7.93650757867488e-05) /* BF14CE19 9EAADBB7 */
-	_Q4 = float64(4.008217827329362e-06)            /* 3ED0CFCA 86E65239 */
-	_Q5 = -Float64FromFloat64(2.0109921818362437e-07) /* BE8AFDB7 6E09C32D */)
+var _o_threshold = float64(709.782712893384)  /* 0x40862E42, 0xFEFA39EF */
+var _ln2_hi = float64(0.6931471803691238)     /* 0x3fe62e42, 0xfee00000 */
+var _ln2_lo = float64(1.9082149292705877e-10) /* 0x3dea39ef, 0x35793c76 */
+var _invln2 = float64(1.4426950408889634)     /* 0x3ff71547, 0x652b82fe */
+/* Scaled Q's: Qn_here = 2**n * Qn_above, for R(2*z) where z = hxs = x*x/2: */
+var _Q1 = -Float64FromFloat64(0.03333333333333313)    /* BFA11111 111110F4 */
+var _Q2 = float64(0.0015873015872548146)              /* 3F5A01A0 19FE5585 */
+var _Q3 = -Float64FromFloat64(7.93650757867488e-05)   /* BF14CE19 9EAADBB7 */
+var _Q4 = float64(4.008217827329362e-06)              /* 3ED0CFCA 86E65239 */
+var _Q5 = -Float64FromFloat64(2.0109921818362437e-07) /* BE8AFDB7 6E09C32D */
 
 func Xexpm1(tls *TLS, x3 float64) (r float64) {
 	if __ccgo_strace {
@@ -104051,17 +103869,16 @@ func Xexpm1(tls *TLS, x3 float64) (r float64) {
 	return y3
 }
 
-var (
-	_ln2_hi1 = float32(0.69313812256)    /* 0x3f317180 */
-	_ln2_lo1 = float32(9.0580006145e-06) /* 0x3717f7d1 */
-	_invln21 = float32(1.4426950216)     /* 0x3fb8aa3b */
-	/*
-	 * Domain [-0.34568, 0.34568], range ~[-6.694e-10, 6.696e-10]:
-	 * |6 / x * (1 + 2 * (1 / (exp(x) - 1) - 1 / x)) - q(x)| < 2**-30.04
-	 * Scaled coefficients: Qn_here = 2**n * Qn_for_q (see s_expm1.c):
-	 */
-	_Q11 = float32(-Float64FromFloat64(0.033333212137)) /* -0x888868.0p-28 */
-	_Q21 = float32(0.0015807170421) /*  0xcf3010.0p-33 */)
+var _ln2_hi1 = float32(0.69313812256)    /* 0x3f317180 */
+var _ln2_lo1 = float32(9.0580006145e-06) /* 0x3717f7d1 */
+var _invln21 = float32(1.4426950216)     /* 0x3fb8aa3b */
+/*
+ * Domain [-0.34568, 0.34568], range ~[-6.694e-10, 6.696e-10]:
+ * |6 / x * (1 + 2 * (1 / (exp(x) - 1) - 1 / x)) - q(x)| < 2**-30.04
+ * Scaled coefficients: Qn_here = 2**n * Qn_for_q (see s_expm1.c):
+ */
+var _Q11 = float32(-Float64FromFloat64(0.033333212137)) /* -0x888868.0p-28 */
+var _Q21 = float32(0.0015807170421)                     /*  0xcf3010.0p-33 */
 
 func Xexpm1f(tls *TLS, x3 float32) (r float32) {
 	if __ccgo_strace {
@@ -104252,7 +104069,7 @@ func Xfabsl(tls *TLS, x float64) (r float64) {
 	return Xfabs(tls, x)
 }
 
-func Xfdim(tls *TLS, x, y float64) (r float64) {
+func Xfdim(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104288,7 +104105,7 @@ _4:
 	return v5
 }
 
-func Xfdimf(tls *TLS, x, y float32) (r float32) {
+func Xfdimf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104324,7 +104141,7 @@ _4:
 	return v5
 }
 
-func Xfdiml(tls *TLS, x, y float64) (r float64) {
+func Xfdiml(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104511,11 +104328,9 @@ func Xfloorl(tls *TLS, x float64) (r float64) {
 	return Xfloor(tls, x)
 }
 
-const (
-	DBL_MIN1   = 2.2250738585072014e-308
-	FLT_MIN1   = 1.1754943508222875e-38
-	ZEROINFNAN = 971
-)
+const DBL_MIN1 = 2.2250738585072014e-308
+const FLT_MIN1 = 1.1754943508222875e-38
+const ZEROINFNAN = 971
 
 type Tnum = struct {
 	Fm    Tuint64_t
@@ -104554,7 +104369,7 @@ func _normalize(tls *TLS, x float64) (r Tnum) {
 	}
 }
 
-func _mul(tls *TLS, hi, lo uintptr, x, y Tuint64_t) {
+func _mul(tls *TLS, hi uintptr, lo uintptr, x Tuint64_t, y Tuint64_t) {
 	var t1, t2, t3, xhi, xlo, yhi, ylo Tuint64_t
 	_, _, _, _, _, _, _ = t1, t2, t3, xhi, xlo, yhi, ylo
 	xlo = uint64(uint32(x))
@@ -104568,7 +104383,7 @@ func _mul(tls *TLS, hi, lo uintptr, x, y Tuint64_t) {
 	**(**Tuint64_t)(__ccgo_up(hi)) = t3 + t2>>Int32FromInt32(32) + BoolUint64(t1 > **(**Tuint64_t)(__ccgo_up(lo)))
 }
 
-func Xfma(tls *TLS, x1, y, z float64) (r1 float64) {
+func Xfma(tls *TLS, x1 float64, y float64, z float64) (r1 float64) {
 	if __ccgo_strace {
 		trc("tls=%v x1=%v y=%v z=%v, (%v:)", tls, x1, y, z, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -104735,12 +104550,10 @@ func Xfma(tls *TLS, x1, y, z float64) (r1 float64) {
 	return Xscalbn(tls, r, e)
 }
 
-const (
-	DBL_MIN2 = 0
-	FLT_MIN2 = 0
-)
+const DBL_MIN2 = 0
+const FLT_MIN2 = 0
 
-func Xfmal(tls *TLS, x, y, z float64) (r float64) {
+func Xfmal(tls *TLS, x float64, y float64, z float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v z=%v, (%v:)", tls, x, y, z, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104748,7 +104561,7 @@ func Xfmal(tls *TLS, x, y, z float64) (r float64) {
 	return Xfma(tls, x, y, z)
 }
 
-func Xfmax(tls *TLS, x, y float64) (r float64) {
+func Xfmax(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104805,7 +104618,7 @@ _8:
 	return v9
 }
 
-func Xfmaxf(tls *TLS, x, y float32) (r float32) {
+func Xfmaxf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104862,7 +104675,7 @@ _8:
 	return v9
 }
 
-func Xfmaxl(tls *TLS, x, y float64) (r float64) {
+func Xfmaxl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104870,7 +104683,7 @@ func Xfmaxl(tls *TLS, x, y float64) (r float64) {
 	return Xfmax(tls, x, y)
 }
 
-func Xfmin(tls *TLS, x, y float64) (r float64) {
+func Xfmin(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104927,7 +104740,7 @@ _8:
 	return v9
 }
 
-func Xfminf(tls *TLS, x, y float32) (r float32) {
+func Xfminf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104984,7 +104797,7 @@ _8:
 	return v9
 }
 
-func Xfminl(tls *TLS, x, y float64) (r float64) {
+func Xfminl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -104992,7 +104805,7 @@ func Xfminl(tls *TLS, x, y float64) (r float64) {
 	return Xfmin(tls, x, y)
 }
 
-func Xfmod(tls *TLS, x, y float64) (r float64) {
+func Xfmod(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -105138,7 +104951,7 @@ func Xfmod(tls *TLS, x, y float64) (r float64) {
 	return *(*float64)(unsafe.Pointer(bp + 8))
 }
 
-func Xfmodf(tls *TLS, x, y float32) (r float32) {
+func Xfmodf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -105279,7 +105092,7 @@ func Xfmodf(tls *TLS, x, y float32) (r float32) {
 	return *(*float32)(unsafe.Pointer(bp + 4))
 }
 
-func Xfmodl(tls *TLS, x, y float64) (r float64) {
+func Xfmodl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -105385,7 +105198,7 @@ func Xfrexpl(tls *TLS, x float64, e uintptr) (r float64) {
 
 const SPLIT = 1
 
-func _sq(tls *TLS, hi, lo uintptr, x float64) {
+func _sq(tls *TLS, hi uintptr, lo uintptr, x float64) {
 	var xc, xh, xl Tdouble_t
 	_, _, _ = xc, xh, xl
 	xc = Tdouble_t(x * (Float64FromFloat64(1.34217728e+08) + Float64FromInt32(1)))
@@ -105395,7 +105208,7 @@ func _sq(tls *TLS, hi, lo uintptr, x float64) {
 	**(**Tdouble_t)(__ccgo_up(lo)) = Tdouble_t(xh*xh) - **(**Tdouble_t)(__ccgo_up(hi)) + Tdouble_t(Tdouble_t(Float64FromInt32(2)*xh)*xl) + Tdouble_t(xl*xl)
 }
 
-func Xhypot(tls *TLS, x, y float64) (r float64) {
+func Xhypot(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -105496,7 +105309,7 @@ func Xhypot(tls *TLS, x, y float64) (r float64) {
 	return float64(z * Xsqrt(tls, **(**Tdouble_t)(__ccgo_up(bp + 40))+**(**Tdouble_t)(__ccgo_up(bp + 24))+**(**Tdouble_t)(__ccgo_up(bp + 32))+**(**Tdouble_t)(__ccgo_up(bp + 16))))
 }
 
-func Xhypotf(tls *TLS, x, y float32) (r float32) {
+func Xhypotf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -105575,7 +105388,7 @@ func Xhypotf(tls *TLS, x, y float32) (r float32) {
 	return float32(z * Xsqrtf(tls, float32(float64(float64(x)*float64(x))+float64(float64(y)*float64(y)))))
 }
 
-func Xhypotl(tls *TLS, x, y float64) (r float64) {
+func Xhypotl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -105739,9 +105552,8 @@ func Xilogbl(tls *TLS, x float64) (r int32) {
 	return Xilogb(tls, x)
 }
 
-var (
-	_invsqrtpi = float64(0.5641895835477563) /* 0x3FE20DD7, 0x50429B6D */
-	_tpi       = float64(0.6366197723675814) /* 0x3FE45F30, 0x6DC9C883 */)
+var _invsqrtpi = float64(0.5641895835477563) /* 0x3FE20DD7, 0x50429B6D */
+var _tpi = float64(0.6366197723675814)       /* 0x3FE45F30, 0x6DC9C883 */
 
 // C documentation
 //
@@ -105786,15 +105598,14 @@ func _common(tls *TLS, ix Tuint32_t, x float64, y0 int32) (r float64) {
 //
 //	/* R0/S0 on [0, 2.00] */
 
-var (
-	_R02 = float64(0.015624999999999995)               /* 0x3F8FFFFF, 0xFFFFFFFD */
-	_R03 = -Float64FromFloat64(0.00018997929423885472) /* 0xBF28E6A5, 0xB61AC6E9 */
-	_R04 = float64(1.8295404953270067e-06)             /* 0x3EBEB1D1, 0x0C503919 */
-	_R05 = -Float64FromFloat64(4.618326885321032e-09)  /* 0xBE33D5E7, 0x73D63FCE */
-	_S01 = float64(0.015619102946489001)               /* 0x3F8FFCE8, 0x82C8C2A4 */
-	_S02 = float64(0.00011692678466333745)             /* 0x3F1EA6D2, 0xDD57DBF4 */
-	_S03 = float64(5.135465502073181e-07)              /* 0x3EA13B54, 0xCE84D5A9 */
-	_S04 = float64(1.1661400333379e-09) /* 0x3E1408BC, 0xF4745D8F */)
+var _R02 = float64(0.015624999999999995)               /* 0x3F8FFFFF, 0xFFFFFFFD */
+var _R03 = -Float64FromFloat64(0.00018997929423885472) /* 0xBF28E6A5, 0xB61AC6E9 */
+var _R04 = float64(1.8295404953270067e-06)             /* 0x3EBEB1D1, 0x0C503919 */
+var _R05 = -Float64FromFloat64(4.618326885321032e-09)  /* 0xBE33D5E7, 0x73D63FCE */
+var _S01 = float64(0.015619102946489001)               /* 0x3F8FFCE8, 0x82C8C2A4 */
+var _S02 = float64(0.00011692678466333745)             /* 0x3F1EA6D2, 0xDD57DBF4 */
+var _S03 = float64(5.135465502073181e-07)              /* 0x3EA13B54, 0xCE84D5A9 */
+var _S04 = float64(1.1661400333379e-09)                /* 0x3E1408BC, 0xF4745D8F */
 
 func Xj0(tls *TLS, x float64) (r1 float64) {
 	if __ccgo_strace {
@@ -105832,18 +105643,17 @@ func Xj0(tls *TLS, x float64) (r1 float64) {
 	return Float64FromInt32(1) - x
 }
 
-var (
-	_u00 = -Float64FromFloat64(0.07380429510868723)    /* 0xBFB2E4D6, 0x99CBD01F */
-	_u01 = float64(0.17666645250918112)                /* 0x3FC69D01, 0x9DE9E3FC */
-	_u02 = -Float64FromFloat64(0.01381856719455969)    /* 0xBF8C4CE8, 0xB16CFA97 */
-	_u03 = float64(0.00034745343209368365)             /* 0x3F36C54D, 0x20B29B6B */
-	_u04 = -Float64FromFloat64(3.8140705372436416e-06) /* 0xBECFFEA7, 0x73D25CAD */
-	_u05 = float64(1.9559013703502292e-08)             /* 0x3E550057, 0x3B4EABD4 */
-	_u06 = -Float64FromFloat64(3.982051941321034e-11)  /* 0xBDC5E43D, 0x693FB3C8 */
-	_v01 = float64(0.01273048348341237)                /* 0x3F8A1270, 0x91C9C71A */
-	_v02 = float64(7.600686273503533e-05)              /* 0x3F13ECBB, 0xF578C6C1 */
-	_v03 = float64(2.591508518404578e-07)              /* 0x3E91642D, 0x7FF202FD */
-	_v04 = float64(4.4111031133267547e-10) /* 0x3DFE5018, 0x3BD6D9EF */)
+var _u00 = -Float64FromFloat64(0.07380429510868723)    /* 0xBFB2E4D6, 0x99CBD01F */
+var _u01 = float64(0.17666645250918112)                /* 0x3FC69D01, 0x9DE9E3FC */
+var _u02 = -Float64FromFloat64(0.01381856719455969)    /* 0xBF8C4CE8, 0xB16CFA97 */
+var _u03 = float64(0.00034745343209368365)             /* 0x3F36C54D, 0x20B29B6B */
+var _u04 = -Float64FromFloat64(3.8140705372436416e-06) /* 0xBECFFEA7, 0x73D25CAD */
+var _u05 = float64(1.9559013703502292e-08)             /* 0x3E550057, 0x3B4EABD4 */
+var _u06 = -Float64FromFloat64(3.982051941321034e-11)  /* 0xBDC5E43D, 0x693FB3C8 */
+var _v01 = float64(0.01273048348341237)                /* 0x3F8A1270, 0x91C9C71A */
+var _v02 = float64(7.600686273503533e-05)              /* 0x3F13ECBB, 0xF578C6C1 */
+var _v03 = float64(2.591508518404578e-07)              /* 0x3E91642D, 0x7FF202FD */
+var _v04 = float64(4.4111031133267547e-10)             /* 0x3DFE5018, 0x3BD6D9EF */
 
 func Xy0(tls *TLS, x float64) (r float64) {
 	if __ccgo_strace {
@@ -105900,7 +105710,6 @@ var _pR8 = [6]float64{
 	4: -Float64FromFloat64(2485.216410094288),
 	5: -Float64FromFloat64(5253.043804907295),
 }
-
 var _pS8 = [5]float64{
 	0: float64(116.53436461966818),
 	1: float64(3833.7447536412183),
@@ -105917,7 +105726,6 @@ var _pR5 = [6]float64{
 	4: -Float64FromFloat64(331.23129964917297),
 	5: -Float64FromFloat64(346.4333883656049),
 }
-
 var _pS52 = [5]float64{
 	0: float64(60.753938269230034),
 	1: float64(1051.2523059570458),
@@ -105934,7 +105742,6 @@ var _pR3 = [6]float64{
 	4: -Float64FromFloat64(58.07917047017376),
 	5: -Float64FromFloat64(31.44794705948885),
 }
-
 var _pS32 = [5]float64{
 	0: float64(35.85603380552097),
 	1: float64(361.51398305030386),
@@ -105951,7 +105758,6 @@ var _pR2 = [6]float64{
 	4: -Float64FromFloat64(11.193166886035675),
 	5: -Float64FromFloat64(3.2336457935133534),
 }
-
 var _pS24 = [5]float64{
 	0: float64(22.22029975320888),
 	1: float64(136.2067942182152),
@@ -106008,7 +105814,6 @@ var _qR8 = [6]float64{
 	4: float64(8859.197207564686),
 	5: float64(37014.62677768878),
 }
-
 var _qS8 = [6]float64{
 	0: float64(163.77602689568982),
 	1: float64(8098.344946564498),
@@ -106026,7 +105831,6 @@ var _qR5 = [6]float64{
 	4: float64(1027.243765961641),
 	5: float64(1989.9778586460538),
 }
-
 var _qS5 = [6]float64{
 	0: float64(82.77661022365378),
 	1: float64(2077.81416421393),
@@ -106044,7 +105848,6 @@ var _qR3 = [6]float64{
 	4: float64(170.8080913405656),
 	5: float64(166.73394869665117),
 }
-
 var _qS32 = [6]float64{
 	0: float64(48.75887297245872),
 	1: float64(709.689221056606),
@@ -106062,7 +105865,6 @@ var _qR2 = [6]float64{
 	4: float64(31.666231750478154),
 	5: float64(16.252707571092927),
 }
-
 var _qS22 = [6]float64{
 	0: float64(30.36558483552192),
 	1: float64(269.34811860804984),
@@ -106102,9 +105904,8 @@ func _qzero(tls *TLS, x float64) (r1 float64) {
 	return (-Float64FromFloat64(0.125) + r/s) / x
 }
 
-var (
-	_invsqrtpi1 = float32(0.56418961287) /* 0x3f106ebb */
-	_tpi1       = float32(0.63661974669) /* 0x3f22f983 */)
+var _invsqrtpi1 = float32(0.56418961287) /* 0x3f106ebb */
+var _tpi1 = float32(0.63661974669)       /* 0x3f22f983 */
 
 func _common1(tls *TLS, ix Tuint32_t, x float32, y0 int32) (r float32) {
 	var c, cc, s, ss, z float32
@@ -106141,15 +105942,14 @@ func _common1(tls *TLS, ix Tuint32_t, x float32, y0 int32) (r float32) {
 //
 //	/* R0/S0 on [0, 2.00] */
 
-var (
-	_R021 = float32(0.015625)                              /* 0x3c800000 */
-	_R031 = float32(-Float64FromFloat64(0.00018997929874)) /* 0xb947352e */
-	_R041 = float32(1.8295404516e-06)                      /* 0x35f58e88 */
-	_R051 = float32(-Float64FromFloat64(4.6183270541e-09)) /* 0xb19eaf3c */
-	_S011 = float32(0.015619102865)                        /* 0x3c7fe744 */
-	_S021 = float32(0.00011692678527)                      /* 0x38f53697 */
-	_S031 = float32(5.1354652442e-07)                      /* 0x3509daa6 */
-	_S041 = float32(1.1661400734e-09) /* 0x30a045e8 */)
+var _R021 = float32(0.015625)                              /* 0x3c800000 */
+var _R031 = float32(-Float64FromFloat64(0.00018997929874)) /* 0xb947352e */
+var _R041 = float32(1.8295404516e-06)                      /* 0x35f58e88 */
+var _R051 = float32(-Float64FromFloat64(4.6183270541e-09)) /* 0xb19eaf3c */
+var _S011 = float32(0.015619102865)                        /* 0x3c7fe744 */
+var _S021 = float32(0.00011692678527)                      /* 0x38f53697 */
+var _S031 = float32(5.1354652442e-07)                      /* 0x3509daa6 */
+var _S041 = float32(1.1661400734e-09)                      /* 0x30a045e8 */
 
 func Xj0f(tls *TLS, x float32) (r1 float32) {
 	if __ccgo_strace {
@@ -106182,18 +105982,17 @@ func Xj0f(tls *TLS, x float32) (r1 float32) {
 	return Float32FromInt32(1) - x
 }
 
-var (
-	_u001 = float32(-Float64FromFloat64(0.073804296553))   /* 0xbd9726b5 */
-	_u011 = float32(0.17666645348)                         /* 0x3e34e80d */
-	_u021 = float32(-Float64FromFloat64(0.013818567619))   /* 0xbc626746 */
-	_u031 = float32(0.00034745343146)                      /* 0x39b62a69 */
-	_u041 = float32(-Float64FromFloat64(3.8140706238e-06)) /* 0xb67ff53c */
-	_u051 = float32(1.9559013964e-08)                      /* 0x32a802ba */
-	_u061 = float32(-Float64FromFloat64(3.982051841e-11))  /* 0xae2f21eb */
-	_v011 = float32(0.012730483897)                        /* 0x3c509385 */
-	_v021 = float32(7.6006865129e-05)                      /* 0x389f65e0 */
-	_v031 = float32(2.5915085189e-07)                      /* 0x348b216c */
-	_v041 = float32(4.4111031494e-10) /* 0x2ff280c2 */)
+var _u001 = float32(-Float64FromFloat64(0.073804296553))   /* 0xbd9726b5 */
+var _u011 = float32(0.17666645348)                         /* 0x3e34e80d */
+var _u021 = float32(-Float64FromFloat64(0.013818567619))   /* 0xbc626746 */
+var _u031 = float32(0.00034745343146)                      /* 0x39b62a69 */
+var _u041 = float32(-Float64FromFloat64(3.8140706238e-06)) /* 0xb67ff53c */
+var _u051 = float32(1.9559013964e-08)                      /* 0x32a802ba */
+var _u061 = float32(-Float64FromFloat64(3.982051841e-11))  /* 0xae2f21eb */
+var _v011 = float32(0.012730483897)                        /* 0x3c509385 */
+var _v021 = float32(7.6006865129e-05)                      /* 0x389f65e0 */
+var _v031 = float32(2.5915085189e-07)                      /* 0x348b216c */
+var _v041 = float32(4.4111031494e-10)                      /* 0x2ff280c2 */
 
 func Xy0f(tls *TLS, x float32) (r float32) {
 	if __ccgo_strace {
@@ -106245,7 +106044,6 @@ var _pR81 = [6]float32{
 	4: float32(-Float64FromFloat64(2485.2163086)),
 	5: float32(-Float64FromFloat64(5253.0439453)),
 }
-
 var _pS81 = [5]float32{
 	0: float32(116.53436279),
 	1: float32(3833.744873),
@@ -106253,7 +106051,6 @@ var _pS81 = [5]float32{
 	3: float32(116752.96875),
 	4: float32(47627.726562),
 }
-
 var _pR51 = [6]float32{
 	0: float32(-Float64FromFloat64(1.1412546255e-11)),
 	1: float32(-Float64FromFloat64(0.070312492549)),
@@ -106262,7 +106059,6 @@ var _pR51 = [6]float32{
 	4: float32(-Float64FromFloat64(331.23129272)),
 	5: float32(-Float64FromFloat64(346.43338013)),
 }
-
 var _pS53 = [5]float32{
 	0: float32(60.753936768),
 	1: float32(1051.2523193),
@@ -106279,7 +106075,6 @@ var _pR31 = [6]float32{
 	4: float32(-Float64FromFloat64(58.079170227)),
 	5: float32(-Float64FromFloat64(31.447946548)),
 }
-
 var _pS33 = [5]float32{
 	0: float32(35.856033325),
 	1: float32(361.51397705),
@@ -106296,7 +106091,6 @@ var _pR21 = [6]float32{
 	4: float32(-Float64FromFloat64(11.193166733)),
 	5: float32(-Float64FromFloat64(3.2336456776)),
 }
-
 var _pS25 = [5]float32{
 	0: float32(22.220300674),
 	1: float32(136.20678711),
@@ -106353,7 +106147,6 @@ var _qR81 = [6]float32{
 	4: float32(8859.1972656),
 	5: float32(37014.625),
 }
-
 var _qS81 = [6]float32{
 	0: float32(163.77603149),
 	1: float32(8098.3447266),
@@ -106371,7 +106164,6 @@ var _qR51 = [6]float32{
 	4: float32(1027.2437744),
 	5: float32(1989.9779053),
 }
-
 var _qS51 = [6]float32{
 	0: float32(82.776611328),
 	1: float32(2077.814209),
@@ -106389,7 +106181,6 @@ var _qR31 = [6]float32{
 	4: float32(170.80809021),
 	5: float32(166.73394775),
 }
-
 var _qS33 = [6]float32{
 	0: float32(48.758872986),
 	1: float32(709.68920898),
@@ -106407,7 +106198,6 @@ var _qR21 = [6]float32{
 	4: float32(31.666231155),
 	5: float32(16.252708435),
 }
-
 var _qS23 = [6]float32{
 	0: float32(30.365585327),
 	1: float32(269.34811401),
@@ -106447,11 +106237,10 @@ func _qzerof(tls *TLS, x float32) (r1 float32) {
 	return (-Float32FromFloat32(0.125) + r/s) / x
 }
 
-var (
-	_invsqrtpi2 = float64(0.5641895835477563) /* 0x3FE20DD7, 0x50429B6D */
-	_tpi2       = float64(0.6366197723675814) /* 0x3FE45F30, 0x6DC9C883 */)
+var _invsqrtpi2 = float64(0.5641895835477563) /* 0x3FE20DD7, 0x50429B6D */
+var _tpi2 = float64(0.6366197723675814)       /* 0x3FE45F30, 0x6DC9C883 */
 
-func _common2(tls *TLS, ix Tuint32_t, x float64, y1, sign int32) (r float64) {
+func _common2(tls *TLS, ix Tuint32_t, x float64, y1 int32, sign int32) (r float64) {
 	var c, cc, s, ss, z float64
 	_, _, _, _, _ = c, cc, s, ss, z
 	/*
@@ -106494,16 +106283,15 @@ func _common2(tls *TLS, ix Tuint32_t, x float64, y1, sign int32) (r float64) {
 //
 //	/* R0/S0 on [0,2] */
 
-var (
-	_r00 = -Float64FromFloat64(0.0625)                /* 0xBFB00000, 0x00000000 */
-	_r01 = float64(0.001407056669551897)              /* 0x3F570D9F, 0x98472C61 */
-	_r02 = -Float64FromFloat64(1.599556310840356e-05) /* 0xBEF0C5C6, 0xBA169668 */
-	_r03 = float64(4.9672799960958445e-08)            /* 0x3E6AAAFA, 0x46CA0BD9 */
-	_s01 = float64(0.019153759953836346)              /* 0x3F939D0B, 0x12637E53 */
-	_s02 = float64(0.00018594678558863092)            /* 0x3F285F56, 0xB9CDF664 */
-	_s03 = float64(1.1771846404262368e-06)            /* 0x3EB3BFF8, 0x333F8498 */
-	_s04 = float64(5.0463625707621704e-09)            /* 0x3E35AC88, 0xC97DFF2C */
-	_s05 = float64(1.2354227442613791e-11) /* 0x3DAB2ACF, 0xCFB97ED8 */)
+var _r00 = -Float64FromFloat64(0.0625)                /* 0xBFB00000, 0x00000000 */
+var _r01 = float64(0.001407056669551897)              /* 0x3F570D9F, 0x98472C61 */
+var _r02 = -Float64FromFloat64(1.599556310840356e-05) /* 0xBEF0C5C6, 0xBA169668 */
+var _r03 = float64(4.9672799960958445e-08)            /* 0x3E6AAAFA, 0x46CA0BD9 */
+var _s01 = float64(0.019153759953836346)              /* 0x3F939D0B, 0x12637E53 */
+var _s02 = float64(0.00018594678558863092)            /* 0x3F285F56, 0xB9CDF664 */
+var _s03 = float64(1.1771846404262368e-06)            /* 0x3EB3BFF8, 0x333F8498 */
+var _s04 = float64(5.0463625707621704e-09)            /* 0x3E35AC88, 0xC97DFF2C */
+var _s05 = float64(1.2354227442613791e-11)            /* 0x3DAB2ACF, 0xCFB97ED8 */
 
 func Xj1(tls *TLS, x float64) (r1 float64) {
 	if __ccgo_strace {
@@ -106542,7 +106330,6 @@ var _U0 = [5]float64{
 	3: float64(2.352526005616105e-05),
 	4: -Float64FromFloat64(9.190991580398789e-08),
 }
-
 var _V0 = [5]float64{
 	0: float64(0.01991673182366499),
 	1: float64(0.00020255258102513517),
@@ -106602,7 +106389,6 @@ var _pr8 = [6]float64{
 	4: float64(3874.7453891396053),
 	5: float64(7914.479540318917),
 }
-
 var _ps8 = [5]float64{
 	0: float64(114.20737037567841),
 	1: float64(3650.9308342085346),
@@ -106619,7 +106405,6 @@ var _pr5 = [6]float64{
 	4: float64(517.6361395331998),
 	5: float64(528.7152013633375),
 }
-
 var _ps5 = [5]float64{
 	0: float64(59.28059872211313),
 	1: float64(991.4014187336144),
@@ -106636,7 +106421,6 @@ var _pr3 = [6]float64{
 	4: float64(91.05501107507813),
 	5: float64(48.55906851973649),
 }
-
 var _ps3 = [5]float64{
 	0: float64(34.79130950012515),
 	1: float64(336.76245874782575),
@@ -106653,7 +106437,6 @@ var _pr2 = [6]float64{
 	4: float64(17.693971127168773),
 	5: float64(5.073523125888185),
 }
-
 var _ps2 = [5]float64{
 	0: float64(21.43648593638214),
 	1: float64(125.29022716840275),
@@ -106709,7 +106492,6 @@ var _qr8 = [6]float64{
 	4: -Float64FromFloat64(11849.806670242959),
 	5: -Float64FromFloat64(48438.512428575035),
 }
-
 var _qs8 = [6]float64{
 	0: float64(161.3953697007229),
 	1: float64(7825.385999233485),
@@ -106727,7 +106509,6 @@ var _qr5 = [6]float64{
 	4: -Float64FromFloat64(1373.1937606550816),
 	5: -Float64FromFloat64(2612.4444045321566),
 }
-
 var _qs5 = [6]float64{
 	0: float64(81.27655013843358),
 	1: float64(1991.7987346048596),
@@ -106745,7 +106526,6 @@ var _qr3 = [6]float64{
 	4: -Float64FromFloat64(228.2445407376317),
 	5: -Float64FromFloat64(219.21012847890933),
 }
-
 var _qs3 = [6]float64{
 	0: float64(47.66515503237295),
 	1: float64(673.8651126766997),
@@ -106763,7 +106543,6 @@ var _qr2 = [6]float64{
 	4: -Float64FromFloat64(42.32531333728305),
 	5: -Float64FromFloat64(21.371921170370406),
 }
-
 var _qs2 = [6]float64{
 	0: float64(29.533362906052385),
 	1: float64(252.98154998219053),
@@ -106803,11 +106582,10 @@ func _qone(tls *TLS, x float64) (r1 float64) {
 	return (float64(0.375) + r/s) / x
 }
 
-var (
-	_invsqrtpi3 = float32(0.56418961287) /* 0x3f106ebb */
-	_tpi3       = float32(0.63661974669) /* 0x3f22f983 */)
+var _invsqrtpi3 = float32(0.56418961287) /* 0x3f106ebb */
+var _tpi3 = float32(0.63661974669)       /* 0x3f22f983 */
 
-func _common3(tls *TLS, ix Tuint32_t, x float32, y1, sign int32) (r float32) {
+func _common3(tls *TLS, ix Tuint32_t, x float32, y1 int32, sign int32) (r float32) {
 	var c, cc, s, ss, z float64
 	_, _, _, _, _ = c, cc, s, ss, z
 	s = float64(Xsinf(tls, x))
@@ -106841,16 +106619,15 @@ func _common3(tls *TLS, ix Tuint32_t, x float32, y1, sign int32) (r float32) {
 //
 //	/* R0/S0 on [0,2] */
 
-var (
-	_r001 = float32(-Float64FromFloat64(0.0625))           /* 0xbd800000 */
-	_r011 = float32(0.0014070566976)                       /* 0x3ab86cfd */
-	_r021 = float32(-Float64FromFloat64(1.5995563444e-05)) /* 0xb7862e36 */
-	_r031 = float32(4.9672799207e-08)                      /* 0x335557d2 */
-	_s011 = float32(0.019153760746)                        /* 0x3c9ce859 */
-	_s021 = float32(0.00018594678841)                      /* 0x3942fab6 */
-	_s031 = float32(1.1771846857e-06)                      /* 0x359dffc2 */
-	_s041 = float32(5.046362439e-09)                       /* 0x31ad6446 */
-	_s051 = float32(1.2354227016e-11) /* 0x2d59567e */)
+var _r001 = float32(-Float64FromFloat64(0.0625))           /* 0xbd800000 */
+var _r011 = float32(0.0014070566976)                       /* 0x3ab86cfd */
+var _r021 = float32(-Float64FromFloat64(1.5995563444e-05)) /* 0xb7862e36 */
+var _r031 = float32(4.9672799207e-08)                      /* 0x335557d2 */
+var _s011 = float32(0.019153760746)                        /* 0x3c9ce859 */
+var _s021 = float32(0.00018594678841)                      /* 0x3942fab6 */
+var _s031 = float32(1.1771846857e-06)                      /* 0x359dffc2 */
+var _s041 = float32(5.046362439e-09)                       /* 0x31ad6446 */
+var _s051 = float32(1.2354227016e-11)                      /* 0x2d59567e */
 
 func Xj1f(tls *TLS, x float32) (r1 float32) {
 	if __ccgo_strace {
@@ -106888,7 +106665,6 @@ var _U01 = [5]float32{
 	3: float32(2.3525259166e-05),
 	4: float32(-Float64FromFloat64(9.1909917899e-08)),
 }
-
 var _V01 = [5]float32{
 	0: float32(0.019916731864),
 	1: float32(0.0002025525755),
@@ -106944,7 +106720,6 @@ var _pr81 = [6]float32{
 	4: float32(3874.7453613),
 	5: float32(7914.4794922),
 }
-
 var _ps81 = [5]float32{
 	0: float32(114.20736694),
 	1: float32(3650.9309082),
@@ -106961,7 +106736,6 @@ var _pr51 = [6]float32{
 	4: float32(517.63616943),
 	5: float32(528.71520996),
 }
-
 var _ps51 = [5]float32{
 	0: float32(59.280597687),
 	1: float32(991.40142822),
@@ -106978,7 +106752,6 @@ var _pr31 = [6]float32{
 	4: float32(91.055007935),
 	5: float32(48.559066772),
 }
-
 var _ps31 = [5]float32{
 	0: float32(34.791309357),
 	1: float32(336.76245117),
@@ -106995,7 +106768,6 @@ var _pr21 = [6]float32{
 	4: float32(17.693971634),
 	5: float32(5.0735230446),
 }
-
 var _ps21 = [5]float32{
 	0: float32(21.436485291),
 	1: float32(125.2902298),
@@ -107051,7 +106823,6 @@ var _qr81 = [6]float32{
 	4: float32(-Float64FromFloat64(11849.806641)),
 	5: float32(-Float64FromFloat64(48438.511719)),
 }
-
 var _qs81 = [6]float32{
 	0: float32(161.39537048),
 	1: float32(7825.3862305),
@@ -107069,7 +106840,6 @@ var _qr51 = [6]float32{
 	4: float32(-Float64FromFloat64(1373.1937256)),
 	5: float32(-Float64FromFloat64(2612.4443359)),
 }
-
 var _qs51 = [6]float32{
 	0: float32(81.276550293),
 	1: float32(1991.7987061),
@@ -107087,7 +106857,6 @@ var _qr31 = [6]float32{
 	4: float32(-Float64FromFloat64(228.24453735)),
 	5: float32(-Float64FromFloat64(219.21012878)),
 }
-
 var _qs31 = [6]float32{
 	0: float32(47.665153503),
 	1: float32(673.8651123),
@@ -107105,7 +106874,6 @@ var _qr21 = [6]float32{
 	4: float32(-Float64FromFloat64(42.325313568)),
 	5: float32(-Float64FromFloat64(21.371921539)),
 }
-
 var _qs21 = [6]float32{
 	0: float32(29.533363342),
 	1: float32(252.98155212),
@@ -107707,70 +107475,69 @@ func Xlgamma(tls *TLS, x float64) (r float64) {
 	return X__lgamma_r(tls, x, uintptr(unsafe.Pointer(&Xsigngam)))
 }
 
-var (
-	_pi2 = float64(3.141592653589793)               /* 0x400921FB, 0x54442D18 */
-	_a0  = float64(0.07721566490153287)             /* 0x3FB3C467, 0xE37DB0C8 */
-	_a1  = float64(0.3224670334241136)              /* 0x3FD4A34C, 0xC4A60FAD */
-	_a2  = float64(0.06735230105312927)             /* 0x3FB13E00, 0x1A5562A7 */
-	_a3  = float64(0.020580808432516733)            /* 0x3F951322, 0xAC92547B */
-	_a4  = float64(0.007385550860814029)            /* 0x3F7E404F, 0xB68FEFE8 */
-	_a5  = float64(0.0028905138367341563)           /* 0x3F67ADD8, 0xCCB7926B */
-	_a6  = float64(0.0011927076318336207)           /* 0x3F538A94, 0x116F3F5D */
-	_a7  = float64(0.0005100697921535113)           /* 0x3F40B6C6, 0x89B99C00 */
-	_a8  = float64(0.00022086279071390839)          /* 0x3F2CF2EC, 0xED10E54D */
-	_a9  = float64(0.00010801156724758394)          /* 0x3F1C5088, 0x987DFB07 */
-	_a10 = float64(2.5214456545125733e-05)          /* 0x3EFA7074, 0x428CFA52 */
-	_a11 = float64(4.4864094961891516e-05)          /* 0x3F07858E, 0x90A45837 */
-	_tc  = float64(1.4616321449683622)              /* 0x3FF762D8, 0x6356BE3F */
-	_tf  = -Float64FromFloat64(0.12148629053584961) /* 0xBFBF19B9, 0xBCC38A42 */
-	/* tt = -(tail of tf) */
-	_tt  = -Float64FromFloat64(3.638676997039505e-18)  /* 0xBC50C7CA, 0xA48A971F */
-	_t0  = float64(0.48383612272381005)                /* 0x3FDEF72B, 0xC8EE38A2 */
-	_t1  = -Float64FromFloat64(0.1475877229945939)     /* 0xBFC2E427, 0x8DC6C509 */
-	_t2  = float64(0.06462494023913339)                /* 0x3FB08B42, 0x94D5419B */
-	_t3  = -Float64FromFloat64(0.032788541075985965)   /* 0xBFA0C9A8, 0xDF35B713 */
-	_t4  = float64(0.01797067508118204)                /* 0x3F9266E7, 0x970AF9EC */
-	_t5  = -Float64FromFloat64(0.010314224129834144)   /* 0xBF851F9F, 0xBA91EC6A */
-	_t6  = float64(0.006100538702462913)               /* 0x3F78FCE0, 0xE370E344 */
-	_t7  = -Float64FromFloat64(0.0036845201678113826)  /* 0xBF6E2EFF, 0xB3E914D7 */
-	_t8  = float64(0.0022596478090061247)              /* 0x3F6282D3, 0x2E15C915 */
-	_t9  = -Float64FromFloat64(0.0014034646998923284)  /* 0xBF56FE8E, 0xBF2D1AF1 */
-	_t10 = float64(0.000881081882437654)               /* 0x3F4CDF0C, 0xEF61A8E9 */
-	_t11 = -Float64FromFloat64(0.0005385953053567405)  /* 0xBF41A610, 0x9C73E0EC */
-	_t12 = float64(0.00031563207090362595)             /* 0x3F34AF6D, 0x6C0EBBF7 */
-	_t13 = -Float64FromFloat64(0.00031275416837512086) /* 0xBF347F24, 0xECC38C38 */
-	_t14 = float64(0.0003355291926355191)              /* 0x3F35FD3E, 0xE8C2D3F4 */
-	_u0  = -Float64FromFloat64(0.07721566490153287)    /* 0xBFB3C467, 0xE37DB0C8 */
-	_u1  = float64(0.6328270640250934)                 /* 0x3FE4401E, 0x8B005DFF */
-	_u2  = float64(1.4549225013723477)                 /* 0x3FF7475C, 0xD119BD6F */
-	_u3  = float64(0.9777175279633727)                 /* 0x3FEF4976, 0x44EA8450 */
-	_u4  = float64(0.22896372806469245)                /* 0x3FCD4EAE, 0xF6010924 */
-	_u5  = float64(0.013381091853678766)               /* 0x3F8B678B, 0xBF2BAB09 */
-	_v1  = float64(2.4559779371304113)                 /* 0x4003A5D7, 0xC2BD619C */
-	_v2  = float64(2.128489763798934)                  /* 0x40010725, 0xA42B18F5 */
-	_v3  = float64(0.7692851504566728)                 /* 0x3FE89DFB, 0xE45050AF */
-	_v4  = float64(0.10422264559336913)                /* 0x3FBAAE55, 0xD6537C88 */
-	_v5  = float64(0.003217092422824239)               /* 0x3F6A5ABB, 0x57D0CF61 */
-	_s0  = -Float64FromFloat64(0.07721566490153287)    /* 0xBFB3C467, 0xE37DB0C8 */
-	_s1  = float64(0.21498241596060885)                /* 0x3FCB848B, 0x36E20878 */
-	_s2  = float64(0.325778796408931)                  /* 0x3FD4D98F, 0x4F139F59 */
-	_s3  = float64(0.14635047265246445)                /* 0x3FC2BB9C, 0xBEE5F2F7 */
-	_s4  = float64(0.02664227030336386)                /* 0x3F9B481C, 0x7E939961 */
-	_s5  = float64(0.0018402845140733772)              /* 0x3F5E26B6, 0x7368F239 */
-	_s6  = float64(3.194753265841009e-05)              /* 0x3F00BFEC, 0xDD17E945 */
-	_r1  = float64(1.3920053346762105)                 /* 0x3FF645A7, 0x62C4AB74 */
-	_r2  = float64(0.7219355475671381)                 /* 0x3FE71A18, 0x93D3DCDC */
-	_r3  = float64(0.17193386563280308)                /* 0x3FC601ED, 0xCCFBDF27 */
-	_r4  = float64(0.01864591917156529)                /* 0x3F9317EA, 0x742ED475 */
-	_r5  = float64(0.0007779424963818936)              /* 0x3F497DDA, 0xCA41A95B */
-	_r6  = float64(7.326684307446256e-06)              /* 0x3EDEBAF7, 0xA5B38140 */
-	_w0  = float64(0.4189385332046727)                 /* 0x3FDACFE3, 0x90C97D69 */
-	_w1  = float64(0.08333333333333297)                /* 0x3FB55555, 0x5555553B */
-	_w2  = -Float64FromFloat64(0.0027777777772877554)  /* 0xBF66C16C, 0x16B02E5C */
-	_w3  = float64(0.0007936505586430196)              /* 0x3F4A019F, 0x98CF38B6 */
-	_w4  = -Float64FromFloat64(0.00059518755745034)    /* 0xBF4380CB, 0x8C0FE741 */
-	_w5  = float64(0.0008363399189962821)              /* 0x3F4B67BA, 0x4CDAD5D1 */
-	_w6  = -Float64FromFloat64(0.0016309293409657527) /* 0xBF5AB89D, 0x0B9E43E4 */)
+var _pi2 = float64(3.141592653589793)              /* 0x400921FB, 0x54442D18 */
+var _a0 = float64(0.07721566490153287)             /* 0x3FB3C467, 0xE37DB0C8 */
+var _a1 = float64(0.3224670334241136)              /* 0x3FD4A34C, 0xC4A60FAD */
+var _a2 = float64(0.06735230105312927)             /* 0x3FB13E00, 0x1A5562A7 */
+var _a3 = float64(0.020580808432516733)            /* 0x3F951322, 0xAC92547B */
+var _a4 = float64(0.007385550860814029)            /* 0x3F7E404F, 0xB68FEFE8 */
+var _a5 = float64(0.0028905138367341563)           /* 0x3F67ADD8, 0xCCB7926B */
+var _a6 = float64(0.0011927076318336207)           /* 0x3F538A94, 0x116F3F5D */
+var _a7 = float64(0.0005100697921535113)           /* 0x3F40B6C6, 0x89B99C00 */
+var _a8 = float64(0.00022086279071390839)          /* 0x3F2CF2EC, 0xED10E54D */
+var _a9 = float64(0.00010801156724758394)          /* 0x3F1C5088, 0x987DFB07 */
+var _a10 = float64(2.5214456545125733e-05)         /* 0x3EFA7074, 0x428CFA52 */
+var _a11 = float64(4.4864094961891516e-05)         /* 0x3F07858E, 0x90A45837 */
+var _tc = float64(1.4616321449683622)              /* 0x3FF762D8, 0x6356BE3F */
+var _tf = -Float64FromFloat64(0.12148629053584961) /* 0xBFBF19B9, 0xBCC38A42 */
+/* tt = -(tail of tf) */
+var _tt = -Float64FromFloat64(3.638676997039505e-18)   /* 0xBC50C7CA, 0xA48A971F */
+var _t0 = float64(0.48383612272381005)                 /* 0x3FDEF72B, 0xC8EE38A2 */
+var _t1 = -Float64FromFloat64(0.1475877229945939)      /* 0xBFC2E427, 0x8DC6C509 */
+var _t2 = float64(0.06462494023913339)                 /* 0x3FB08B42, 0x94D5419B */
+var _t3 = -Float64FromFloat64(0.032788541075985965)    /* 0xBFA0C9A8, 0xDF35B713 */
+var _t4 = float64(0.01797067508118204)                 /* 0x3F9266E7, 0x970AF9EC */
+var _t5 = -Float64FromFloat64(0.010314224129834144)    /* 0xBF851F9F, 0xBA91EC6A */
+var _t6 = float64(0.006100538702462913)                /* 0x3F78FCE0, 0xE370E344 */
+var _t7 = -Float64FromFloat64(0.0036845201678113826)   /* 0xBF6E2EFF, 0xB3E914D7 */
+var _t8 = float64(0.0022596478090061247)               /* 0x3F6282D3, 0x2E15C915 */
+var _t9 = -Float64FromFloat64(0.0014034646998923284)   /* 0xBF56FE8E, 0xBF2D1AF1 */
+var _t10 = float64(0.000881081882437654)               /* 0x3F4CDF0C, 0xEF61A8E9 */
+var _t11 = -Float64FromFloat64(0.0005385953053567405)  /* 0xBF41A610, 0x9C73E0EC */
+var _t12 = float64(0.00031563207090362595)             /* 0x3F34AF6D, 0x6C0EBBF7 */
+var _t13 = -Float64FromFloat64(0.00031275416837512086) /* 0xBF347F24, 0xECC38C38 */
+var _t14 = float64(0.0003355291926355191)              /* 0x3F35FD3E, 0xE8C2D3F4 */
+var _u0 = -Float64FromFloat64(0.07721566490153287)     /* 0xBFB3C467, 0xE37DB0C8 */
+var _u1 = float64(0.6328270640250934)                  /* 0x3FE4401E, 0x8B005DFF */
+var _u2 = float64(1.4549225013723477)                  /* 0x3FF7475C, 0xD119BD6F */
+var _u3 = float64(0.9777175279633727)                  /* 0x3FEF4976, 0x44EA8450 */
+var _u4 = float64(0.22896372806469245)                 /* 0x3FCD4EAE, 0xF6010924 */
+var _u5 = float64(0.013381091853678766)                /* 0x3F8B678B, 0xBF2BAB09 */
+var _v1 = float64(2.4559779371304113)                  /* 0x4003A5D7, 0xC2BD619C */
+var _v2 = float64(2.128489763798934)                   /* 0x40010725, 0xA42B18F5 */
+var _v3 = float64(0.7692851504566728)                  /* 0x3FE89DFB, 0xE45050AF */
+var _v4 = float64(0.10422264559336913)                 /* 0x3FBAAE55, 0xD6537C88 */
+var _v5 = float64(0.003217092422824239)                /* 0x3F6A5ABB, 0x57D0CF61 */
+var _s0 = -Float64FromFloat64(0.07721566490153287)     /* 0xBFB3C467, 0xE37DB0C8 */
+var _s1 = float64(0.21498241596060885)                 /* 0x3FCB848B, 0x36E20878 */
+var _s2 = float64(0.325778796408931)                   /* 0x3FD4D98F, 0x4F139F59 */
+var _s3 = float64(0.14635047265246445)                 /* 0x3FC2BB9C, 0xBEE5F2F7 */
+var _s4 = float64(0.02664227030336386)                 /* 0x3F9B481C, 0x7E939961 */
+var _s5 = float64(0.0018402845140733772)               /* 0x3F5E26B6, 0x7368F239 */
+var _s6 = float64(3.194753265841009e-05)               /* 0x3F00BFEC, 0xDD17E945 */
+var _r1 = float64(1.3920053346762105)                  /* 0x3FF645A7, 0x62C4AB74 */
+var _r2 = float64(0.7219355475671381)                  /* 0x3FE71A18, 0x93D3DCDC */
+var _r3 = float64(0.17193386563280308)                 /* 0x3FC601ED, 0xCCFBDF27 */
+var _r4 = float64(0.01864591917156529)                 /* 0x3F9317EA, 0x742ED475 */
+var _r5 = float64(0.0007779424963818936)               /* 0x3F497DDA, 0xCA41A95B */
+var _r6 = float64(7.326684307446256e-06)               /* 0x3EDEBAF7, 0xA5B38140 */
+var _w0 = float64(0.4189385332046727)                  /* 0x3FDACFE3, 0x90C97D69 */
+var _w1 = float64(0.08333333333333297)                 /* 0x3FB55555, 0x5555553B */
+var _w2 = -Float64FromFloat64(0.0027777777772877554)   /* 0xBF66C16C, 0x16B02E5C */
+var _w3 = float64(0.0007936505586430196)               /* 0x3F4A019F, 0x98CF38B6 */
+var _w4 = -Float64FromFloat64(0.00059518755745034)     /* 0xBF4380CB, 0x8C0FE741 */
+var _w5 = float64(0.0008363399189962821)               /* 0x3F4B67BA, 0x4CDAD5D1 */
+var _w6 = -Float64FromFloat64(0.0016309293409657527)   /* 0xBF5AB89D, 0x0B9E43E4 */
 
 // C documentation
 //
@@ -107964,70 +107731,69 @@ func Xlgammaf(tls *TLS, x float32) (r float32) {
 	return X__lgammaf_r(tls, x, uintptr(unsafe.Pointer(&Xsigngam)))
 }
 
-var (
-	_pi3  = float32(3.141592741)                        /* 0x40490fdb */
-	_a01  = float32(0.077215664089)                     /* 0x3d9e233f */
-	_a12  = float32(0.32246702909)                      /* 0x3ea51a66 */
-	_a21  = float32(0.067352302372)                     /* 0x3d89f001 */
-	_a31  = float32(0.020580807701)                     /* 0x3ca89915 */
-	_a41  = float32(0.0073855509982)                    /* 0x3bf2027e */
-	_a51  = float32(0.0028905137442)                    /* 0x3b3d6ec6 */
-	_a61  = float32(0.0011927076848)                    /* 0x3a9c54a1 */
-	_a71  = float32(0.00051006977446)                   /* 0x3a05b634 */
-	_a81  = float32(0.00022086278477)                   /* 0x39679767 */
-	_a91  = float32(0.00010801156895)                   /* 0x38e28445 */
-	_a101 = float32(2.52144564e-05)                     /* 0x37d383a2 */
-	_a111 = float32(4.4864096708e-05)                   /* 0x383c2c75 */
-	_tc1  = float32(1.4616321325)                       /* 0x3fbb16c3 */
-	_tf1  = float32(-Float64FromFloat64(0.12148628384)) /* 0xbdf8cdcd */
-	/* tt = -(tail of tf) */
-	_tt1  = float32(6.6971006518e-09)                      /* 0x31e61c52 */
-	_t01  = float32(0.48383611441)                         /* 0x3ef7b95e */
-	_t15  = float32(-Float64FromFloat64(0.14758771658))    /* 0xbe17213c */
-	_t21  = float32(0.064624942839)                        /* 0x3d845a15 */
-	_t31  = float32(-Float64FromFloat64(0.032788541168))   /* 0xbd064d47 */
-	_t41  = float32(0.017970675603)                        /* 0x3c93373d */
-	_t51  = float32(-Float64FromFloat64(0.010314224288))   /* 0xbc28fcfe */
-	_t61  = float32(0.0061005386524)                       /* 0x3bc7e707 */
-	_t71  = float32(-Float64FromFloat64(0.0036845202558))  /* 0xbb7177fe */
-	_t81  = float32(0.0022596477065)                       /* 0x3b141699 */
-	_t91  = float32(-Float64FromFloat64(0.0014034647029))  /* 0xbab7f476 */
-	_t101 = float32(0.00088108185446)                      /* 0x3a66f867 */
-	_t111 = float32(-Float64FromFloat64(0.00053859531181)) /* 0xba0d3085 */
-	_t121 = float32(0.00031563205994)                      /* 0x39a57b6b */
-	_t131 = float32(-Float64FromFloat64(0.00031275415677)) /* 0xb9a3f927 */
-	_t141 = float32(0.00033552918467)                      /* 0x39afe9f7 */
-	_u07  = float32(-Float64FromFloat64(0.077215664089))   /* 0xbd9e233f */
-	_u11  = float32(0.63282704353)                         /* 0x3f2200f4 */
-	_u21  = float32(1.4549225569)                          /* 0x3fba3ae7 */
-	_u31  = float32(0.97771751881)                         /* 0x3f7a4bb2 */
-	_u41  = float32(0.22896373272)                         /* 0x3e6a7578 */
-	_u51  = float32(0.013381091878)                        /* 0x3c5b3c5e */
-	_v11  = float32(2.4559779167)                          /* 0x401d2ebe */
-	_v21  = float32(2.1284897327)                          /* 0x4008392d */
-	_v31  = float32(0.76928514242)                         /* 0x3f44efdf */
-	_v41  = float32(0.10422264785)                         /* 0x3dd572af */
-	_v51  = float32(0.0032170924824)                       /* 0x3b52d5db */
-	_s06  = float32(-Float64FromFloat64(0.077215664089))   /* 0xbd9e233f */
-	_s11  = float32(0.21498242021)                         /* 0x3e5c245a */
-	_s21  = float32(0.32577878237)                         /* 0x3ea6cc7a */
-	_s31  = float32(0.14635047317)                         /* 0x3e15dce6 */
-	_s41  = float32(0.026642270386)                        /* 0x3cda40e4 */
-	_s51  = float32(0.0018402845599)                       /* 0x3af135b4 */
-	_s61  = float32(3.1947532989e-05)                      /* 0x3805ff67 */
-	_r11  = float32(1.3920053244)                          /* 0x3fb22d3b */
-	_r21  = float32(0.72193557024)                         /* 0x3f38d0c5 */
-	_r31  = float32(0.17193385959)                         /* 0x3e300f6e */
-	_r41  = float32(0.018645919859)                        /* 0x3c98bf54 */
-	_r51  = float32(0.00077794247773)                      /* 0x3a4beed6 */
-	_r61  = float32(7.3266842264e-06)                      /* 0x36f5d7bd */
-	_w01  = float32(0.41893854737)                         /* 0x3ed67f1d */
-	_w11  = float32(0.083333335817)                        /* 0x3daaaaab */
-	_w21  = float32(-Float64FromFloat64(0.002777777845))   /* 0xbb360b61 */
-	_w31  = float32(0.00079365057172)                      /* 0x3a500cfd */
-	_w41  = float32(-Float64FromFloat64(0.00059518753551)) /* 0xba1c065c */
-	_w51  = float32(0.00083633989561)                      /* 0x3a5b3dd2 */
-	_w61  = float32(-Float64FromFloat64(0.0016309292987)) /* 0xbad5c4e8 */)
+var _pi3 = float32(3.141592741)                        /* 0x40490fdb */
+var _a01 = float32(0.077215664089)                     /* 0x3d9e233f */
+var _a12 = float32(0.32246702909)                      /* 0x3ea51a66 */
+var _a21 = float32(0.067352302372)                     /* 0x3d89f001 */
+var _a31 = float32(0.020580807701)                     /* 0x3ca89915 */
+var _a41 = float32(0.0073855509982)                    /* 0x3bf2027e */
+var _a51 = float32(0.0028905137442)                    /* 0x3b3d6ec6 */
+var _a61 = float32(0.0011927076848)                    /* 0x3a9c54a1 */
+var _a71 = float32(0.00051006977446)                   /* 0x3a05b634 */
+var _a81 = float32(0.00022086278477)                   /* 0x39679767 */
+var _a91 = float32(0.00010801156895)                   /* 0x38e28445 */
+var _a101 = float32(2.52144564e-05)                    /* 0x37d383a2 */
+var _a111 = float32(4.4864096708e-05)                  /* 0x383c2c75 */
+var _tc1 = float32(1.4616321325)                       /* 0x3fbb16c3 */
+var _tf1 = float32(-Float64FromFloat64(0.12148628384)) /* 0xbdf8cdcd */
+/* tt = -(tail of tf) */
+var _tt1 = float32(6.6971006518e-09)                       /* 0x31e61c52 */
+var _t01 = float32(0.48383611441)                          /* 0x3ef7b95e */
+var _t15 = float32(-Float64FromFloat64(0.14758771658))     /* 0xbe17213c */
+var _t21 = float32(0.064624942839)                         /* 0x3d845a15 */
+var _t31 = float32(-Float64FromFloat64(0.032788541168))    /* 0xbd064d47 */
+var _t41 = float32(0.017970675603)                         /* 0x3c93373d */
+var _t51 = float32(-Float64FromFloat64(0.010314224288))    /* 0xbc28fcfe */
+var _t61 = float32(0.0061005386524)                        /* 0x3bc7e707 */
+var _t71 = float32(-Float64FromFloat64(0.0036845202558))   /* 0xbb7177fe */
+var _t81 = float32(0.0022596477065)                        /* 0x3b141699 */
+var _t91 = float32(-Float64FromFloat64(0.0014034647029))   /* 0xbab7f476 */
+var _t101 = float32(0.00088108185446)                      /* 0x3a66f867 */
+var _t111 = float32(-Float64FromFloat64(0.00053859531181)) /* 0xba0d3085 */
+var _t121 = float32(0.00031563205994)                      /* 0x39a57b6b */
+var _t131 = float32(-Float64FromFloat64(0.00031275415677)) /* 0xb9a3f927 */
+var _t141 = float32(0.00033552918467)                      /* 0x39afe9f7 */
+var _u07 = float32(-Float64FromFloat64(0.077215664089))    /* 0xbd9e233f */
+var _u11 = float32(0.63282704353)                          /* 0x3f2200f4 */
+var _u21 = float32(1.4549225569)                           /* 0x3fba3ae7 */
+var _u31 = float32(0.97771751881)                          /* 0x3f7a4bb2 */
+var _u41 = float32(0.22896373272)                          /* 0x3e6a7578 */
+var _u51 = float32(0.013381091878)                         /* 0x3c5b3c5e */
+var _v11 = float32(2.4559779167)                           /* 0x401d2ebe */
+var _v21 = float32(2.1284897327)                           /* 0x4008392d */
+var _v31 = float32(0.76928514242)                          /* 0x3f44efdf */
+var _v41 = float32(0.10422264785)                          /* 0x3dd572af */
+var _v51 = float32(0.0032170924824)                        /* 0x3b52d5db */
+var _s06 = float32(-Float64FromFloat64(0.077215664089))    /* 0xbd9e233f */
+var _s11 = float32(0.21498242021)                          /* 0x3e5c245a */
+var _s21 = float32(0.32577878237)                          /* 0x3ea6cc7a */
+var _s31 = float32(0.14635047317)                          /* 0x3e15dce6 */
+var _s41 = float32(0.026642270386)                         /* 0x3cda40e4 */
+var _s51 = float32(0.0018402845599)                        /* 0x3af135b4 */
+var _s61 = float32(3.1947532989e-05)                       /* 0x3805ff67 */
+var _r11 = float32(1.3920053244)                           /* 0x3fb22d3b */
+var _r21 = float32(0.72193557024)                          /* 0x3f38d0c5 */
+var _r31 = float32(0.17193385959)                          /* 0x3e300f6e */
+var _r41 = float32(0.018645919859)                         /* 0x3c98bf54 */
+var _r51 = float32(0.00077794247773)                       /* 0x3a4beed6 */
+var _r61 = float32(7.3266842264e-06)                       /* 0x36f5d7bd */
+var _w01 = float32(0.41893854737)                          /* 0x3ed67f1d */
+var _w11 = float32(0.083333335817)                         /* 0x3daaaaab */
+var _w21 = float32(-Float64FromFloat64(0.002777777845))    /* 0xbb360b61 */
+var _w31 = float32(0.00079365057172)                       /* 0x3a500cfd */
+var _w41 = float32(-Float64FromFloat64(0.00059518753551))  /* 0xba1c065c */
+var _w51 = float32(0.00083633989561)                       /* 0x3a5b3dd2 */
+var _w61 = float32(-Float64FromFloat64(0.0016309292987))   /* 0xbad5c4e8 */
 
 // C documentation
 //
@@ -108290,13 +108056,11 @@ func Xllroundl(tls *TLS, x float64) (r int64) {
 	return int64(Xroundl(tls, x))
 }
 
-const (
-	LOG_POLY1_ORDER = 12
-	LOG_POLY_ORDER  = 6
-	LOG_TABLE_BITS  = 7
-	N4              = 128
-	OFF             = 4604367669032910848
-)
+const LOG_POLY1_ORDER = 12
+const LOG_POLY_ORDER = 6
+const LOG_TABLE_BITS = 7
+const N4 = 128
+const OFF = 4604367669032910848
 
 // C documentation
 //
@@ -108413,18 +108177,17 @@ _11:
 	return v1
 }
 
-var (
-	_ivln10hi  = float64(0.4342944818781689)     /* 0x3fdbcb7b, 0x15200000 */
-	_ivln10lo  = float64(2.5082946711645275e-11) /* 0x3dbb9438, 0xca9aadd5 */
-	_log10_2hi = float64(0.30102999566361177)    /* 0x3FD34413, 0x509F6000 */
-	_log10_2lo = float64(3.694239077158931e-13)  /* 0x3D59FEF3, 0x11F12B36 */
-	_Lg1       = float64(0.6666666666666735)     /* 3FE55555 55555593 */
-	_Lg2       = float64(0.3999999999940942)     /* 3FD99999 9997FA04 */
-	_Lg3       = float64(0.2857142874366239)     /* 3FD24924 94229359 */
-	_Lg4       = float64(0.22222198432149784)    /* 3FCC71C5 1D8E78AF */
-	_Lg5       = float64(0.1818357216161805)     /* 3FC74664 96CB03DE */
-	_Lg6       = float64(0.15313837699209373)    /* 3FC39A09 D078C69F */
-	_Lg7       = float64(0.14798198605116586) /* 3FC2F112 DF3E5244 */)
+var _ivln10hi = float64(0.4342944818781689)     /* 0x3fdbcb7b, 0x15200000 */
+var _ivln10lo = float64(2.5082946711645275e-11) /* 0x3dbb9438, 0xca9aadd5 */
+var _log10_2hi = float64(0.30102999566361177)   /* 0x3FD34413, 0x509F6000 */
+var _log10_2lo = float64(3.694239077158931e-13) /* 0x3D59FEF3, 0x11F12B36 */
+var _Lg1 = float64(0.6666666666666735)          /* 3FE55555 55555593 */
+var _Lg2 = float64(0.3999999999940942)          /* 3FD99999 9997FA04 */
+var _Lg3 = float64(0.2857142874366239)          /* 3FD24924 94229359 */
+var _Lg4 = float64(0.22222198432149784)         /* 3FCC71C5 1D8E78AF */
+var _Lg5 = float64(0.1818357216161805)          /* 3FC74664 96CB03DE */
+var _Lg6 = float64(0.15313837699209373)         /* 3FC39A09 D078C69F */
+var _Lg7 = float64(0.14798198605116586)         /* 3FC2F112 DF3E5244 */
 
 func Xlog10(tls *TLS, x float64) (r float64) {
 	if __ccgo_strace {
@@ -108510,16 +108273,15 @@ func Xlog10(tls *TLS, x float64) (r float64) {
 	return val_lo + val_hi
 }
 
-var (
-	_ivln10hi1  = float32(0.43432617188)                         /* 0x3ede6000 */
-	_ivln10lo1  = float32(-Float64FromFloat64(3.1689971365e-05)) /* 0xb804ead9 */
-	_log10_2hi1 = float32(0.30102920532)                         /* 0x3e9a2080 */
-	_log10_2lo1 = float32(7.9034151668e-07)                      /* 0x355427db */
-	/* |(log(1+s)-log(1-s))/s - Lg(s)| < 2**-34.24 (~[-4.95e-11, 4.97e-11]). */
-	_Lg11 = float32(0.6666666269302368)  /* 0.66666662693 */
-	_Lg21 = float32(0.40000972151756287) /* 0.40000972152 */
-	_Lg31 = float32(0.2849878668785095)  /* 0.28498786688 */
-	_Lg41 = float32(0.24279078841209412) /* 0.24279078841 */)
+var _ivln10hi1 = float32(0.43432617188)                         /* 0x3ede6000 */
+var _ivln10lo1 = float32(-Float64FromFloat64(3.1689971365e-05)) /* 0xb804ead9 */
+var _log10_2hi1 = float32(0.30102920532)                        /* 0x3e9a2080 */
+var _log10_2lo1 = float32(7.9034151668e-07)                     /* 0x355427db */
+/* |(log(1+s)-log(1-s))/s - Lg(s)| < 2**-34.24 (~[-4.95e-11, 4.97e-11]). */
+var _Lg11 = float32(0.6666666269302368)  /* 0.66666662693 */
+var _Lg21 = float32(0.40000972151756287) /* 0.40000972152 */
+var _Lg31 = float32(0.2849878668785095)  /* 0.28498786688 */
+var _Lg41 = float32(0.24279078841209412) /* 0.24279078841 */
 
 func Xlog10f(tls *TLS, x float32) (r float32) {
 	if __ccgo_strace {
@@ -108598,16 +108360,15 @@ func Xlog10l(tls *TLS, x float64) (r float64) {
 	return Xlog10(tls, x)
 }
 
-var (
-	_ln2_hi2 = float64(0.6931471803691238)     /* 3fe62e42 fee00000 */
-	_ln2_lo2 = float64(1.9082149292705877e-10) /* 3dea39ef 35793c76 */
-	_Lg12    = float64(0.6666666666666735)     /* 3FE55555 55555593 */
-	_Lg22    = float64(0.3999999999940942)     /* 3FD99999 9997FA04 */
-	_Lg32    = float64(0.2857142874366239)     /* 3FD24924 94229359 */
-	_Lg42    = float64(0.22222198432149784)    /* 3FCC71C5 1D8E78AF */
-	_Lg51    = float64(0.1818357216161805)     /* 3FC74664 96CB03DE */
-	_Lg61    = float64(0.15313837699209373)    /* 3FC39A09 D078C69F */
-	_Lg71    = float64(0.14798198605116586) /* 3FC2F112 DF3E5244 */)
+var _ln2_hi2 = float64(0.6931471803691238)     /* 3fe62e42 fee00000 */
+var _ln2_lo2 = float64(1.9082149292705877e-10) /* 3dea39ef 35793c76 */
+var _Lg12 = float64(0.6666666666666735)        /* 3FE55555 55555593 */
+var _Lg22 = float64(0.3999999999940942)        /* 3FD99999 9997FA04 */
+var _Lg32 = float64(0.2857142874366239)        /* 3FD24924 94229359 */
+var _Lg42 = float64(0.22222198432149784)       /* 3FCC71C5 1D8E78AF */
+var _Lg51 = float64(0.1818357216161805)        /* 3FC74664 96CB03DE */
+var _Lg61 = float64(0.15313837699209373)       /* 3FC39A09 D078C69F */
+var _Lg71 = float64(0.14798198605116586)       /* 3FC2F112 DF3E5244 */
 
 func Xlog1p(tls *TLS, x3 float64) (r float64) {
 	if __ccgo_strace {
@@ -108701,14 +108462,13 @@ func Xlog1p(tls *TLS, x3 float64) (r float64) {
 	return Tdouble_t(s*(hfsq+R)) + (Tdouble_t(dk*_ln2_lo2) + c) - hfsq + f + Tdouble_t(dk*_ln2_hi2)
 }
 
-var (
-	_ln2_hi3 = float32(0.69313812256)    /* 0x3f317180 */
-	_ln2_lo3 = float32(9.0580006145e-06) /* 0x3717f7d1 */
-	/* |(log(1+s)-log(1-s))/s - Lg(s)| < 2**-34.24 (~[-4.95e-11, 4.97e-11]). */
-	_Lg13 = float32(0.6666666269302368)  /* 0.66666662693 */
-	_Lg23 = float32(0.40000972151756287) /* 0.40000972152 */
-	_Lg33 = float32(0.2849878668785095)  /* 0.28498786688 */
-	_Lg43 = float32(0.24279078841209412) /* 0.24279078841 */)
+var _ln2_hi3 = float32(0.69313812256)    /* 0x3f317180 */
+var _ln2_lo3 = float32(9.0580006145e-06) /* 0x3717f7d1 */
+/* |(log(1+s)-log(1-s))/s - Lg(s)| < 2**-34.24 (~[-4.95e-11, 4.97e-11]). */
+var _Lg13 = float32(0.6666666269302368)  /* 0.66666662693 */
+var _Lg23 = float32(0.40000972151756287) /* 0.40000972152 */
+var _Lg33 = float32(0.2849878668785095)  /* 0.28498786688 */
+var _Lg43 = float32(0.24279078841209412) /* 0.24279078841 */
 
 func Xlog1pf(tls *TLS, x3 float32) (r float32) {
 	if __ccgo_strace {
@@ -108810,12 +108570,10 @@ func Xlog1pl(tls *TLS, x float64) (r float64) {
 	return Xlog1p(tls, x)
 }
 
-const (
-	LOG2_POLY1_ORDER = 11
-	LOG2_POLY_ORDER  = 7
-	LOG2_TABLE_BITS  = 6
-	N5               = 64
-)
+const LOG2_POLY1_ORDER = 11
+const LOG2_POLY_ORDER = 7
+const LOG2_TABLE_BITS = 6
+const N5 = 64
 
 // C documentation
 //
@@ -108953,12 +108711,10 @@ type Tlog2_data = struct {
 	}
 }
 
-const (
-	LOG2F_POLY_ORDER = 4
-	LOG2F_TABLE_BITS = 4
-	N6               = 16
-	OFF1             = 1060306944
-)
+const LOG2F_POLY_ORDER = 4
+const LOG2F_TABLE_BITS = 4
+const N6 = 16
+const OFF1 = 1060306944
 
 /*
 LOG2F_TABLE_BITS = 4
@@ -109150,11 +108906,9 @@ _2:
 	return float64(Xilogbl(tls, x))
 }
 
-const (
-	LOGF_POLY_ORDER = 4
-	LOGF_TABLE_BITS = 4
-	N8              = 16
-)
+const LOGF_POLY_ORDER = 4
+const LOGF_TABLE_BITS = 4
+const N8 = 16
 
 /*
 LOGF_TABLE_BITS = 4
@@ -109457,7 +109211,7 @@ func Xnanl(tls *TLS, s uintptr) (r float64) {
 	return float64(X__builtin_nanf(tls, __ccgo_ts))
 }
 
-func Xnextafter(tls *TLS, x3, y3 float64) (r float64) {
+func Xnextafter(tls *TLS, x3 float64, y3 float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x3=%v y3=%v, (%v:)", tls, x3, y3, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -109558,7 +109312,7 @@ _2:
 	return *(*float64)(unsafe.Pointer(bp + 8))
 }
 
-func Xnextafterf(tls *TLS, x3, y3 float32) (r float32) {
+func Xnextafterf(tls *TLS, x3 float32, y3 float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x3=%v y3=%v, (%v:)", tls, x3, y3, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -109658,7 +109412,7 @@ _2:
 	return *(*float32)(unsafe.Pointer(bp + 4))
 }
 
-func Xnextafterl(tls *TLS, x, y float64) (r float64) {
+func Xnextafterl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -109666,7 +109420,7 @@ func Xnextafterl(tls *TLS, x, y float64) (r float64) {
 	return Xnextafter(tls, x, y)
 }
 
-func Xnexttoward(tls *TLS, x, y float64) (r float64) {
+func Xnexttoward(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -109785,7 +109539,7 @@ _2:
 	return *(*float32)(unsafe.Pointer(bp + 16))
 }
 
-func Xnexttowardl(tls *TLS, x, y float64) (r float64) {
+func Xnexttowardl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -109793,12 +109547,10 @@ func Xnexttowardl(tls *TLS, x, y float64) (r float64) {
 	return Xnextafterl(tls, x, y)
 }
 
-const (
-	OFF2               = 4604531861337669632
-	POW_LOG_POLY_ORDER = 8
-	POW_LOG_TABLE_BITS = 7
-	SIGN_BIAS          = 262144
-)
+const OFF2 = 4604531861337669632
+const POW_LOG_POLY_ORDER = 8
+const POW_LOG_TABLE_BITS = 7
+const SIGN_BIAS = 262144
 
 /*
 Worst-case error: 0.54 ULP (~= ulperr_exp + 1024*Ln2*relerr_log*2^53)
@@ -109891,7 +109643,7 @@ func _log_inline(tls *TLS, ix Tuint64_t, tail uintptr) (r1 Tdouble_t) {
 //	   a double.  (int32_t)KI is the k used in the argument reduction and exponent
 //	   adjustment of scale, positive k here means the result may overflow and
 //	   negative k means the result may underflow.  */
-func _specialcase2(tls *TLS, tmp Tdouble_t, sbits, ki Tuint64_t) (r float64) {
+func _specialcase2(tls *TLS, tmp Tdouble_t, sbits Tuint64_t, ki Tuint64_t) (r float64) {
 	var hi, lo, one, scale, y3 Tdouble_t
 	var y, y1, y2, v1 float64
 	var v5 Tuint64_t
@@ -109949,7 +109701,7 @@ _9:
 //
 //	/* Computes sign*exp(x+xtail) where |xtail| < 2^-8/N and |xtail| <= |x|.
 //	   The sign_bias argument is SIGN_BIAS or 0 and sets the sign to -1 or 1.  */
-func _exp_inline(tls *TLS, x1, xtail Tdouble_t, sign_bias Tuint32_t) (r1 float64) {
+func _exp_inline(tls *TLS, x1 Tdouble_t, xtail Tdouble_t, sign_bias Tuint32_t) (r1 float64) {
 	var abstop Tuint32_t
 	var idx, ki, sbits, top, v6 Tuint64_t
 	var kd, one, r, r2, scale, tail, tmp, z, v1 Tdouble_t
@@ -110054,7 +109806,7 @@ func _zeroinfnan(tls *TLS, i Tuint64_t) (r int32) {
 	return BoolInt32(uint64(2)*i-uint64(1) >= uint64(2)**(*Tuint64_t)(unsafe.Pointer(&v1))-uint64(1))
 }
 
-func Xpow(tls *TLS, x1, y1 float64) (r float64) {
+func Xpow(tls *TLS, x1 float64, y1 float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x1=%v y1=%v, (%v:)", tls, x1, y1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110198,13 +109950,11 @@ type Tpow_log_data = struct {
 	}
 }
 
-const (
-	OFF3                 = 1060306944
-	POWF_LOG2_POLY_ORDER = 5
-	POWF_LOG2_TABLE_BITS = 4
-	POWF_SCALE_BITS      = 0
-	SIGN_BIAS1           = 65536
-)
+const OFF3 = 1060306944
+const POWF_LOG2_POLY_ORDER = 5
+const POWF_LOG2_TABLE_BITS = 4
+const POWF_SCALE_BITS = 0
+const SIGN_BIAS1 = 65536
 
 /*
 POWF_LOG2_POLY_ORDER = 5
@@ -110321,7 +110071,7 @@ func _zeroinfnan1(tls *TLS, ix Tuint32_t) (r int32) {
 	return BoolInt32(uint32(2)*ix-uint32(1) >= Uint32FromUint32(2)*Uint32FromInt32(0x7f800000)-Uint32FromInt32(1))
 }
 
-func Xpowf(tls *TLS, x1, y1 float32) (r float32) {
+func Xpowf(tls *TLS, x1 float32, y1 float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x1=%v y1=%v, (%v:)", tls, x1, y1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110418,7 +110168,7 @@ type Tpowf_log2_data = struct {
 	Fpoly [5]float64
 }
 
-func Xpowl(tls *TLS, x, y float64) (r float64) {
+func Xpowl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110426,7 +110176,7 @@ func Xpowl(tls *TLS, x, y float64) (r float64) {
 	return Xpow(tls, x, y)
 }
 
-func Xremainder(tls *TLS, x, y float64) (r float64) {
+func Xremainder(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110437,7 +110187,7 @@ func Xremainder(tls *TLS, x, y float64) (r float64) {
 	return Xremquo(tls, x, y, bp)
 }
 
-func Xdrem(tls *TLS, x, y float64) (r float64) {
+func Xdrem(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110445,7 +110195,7 @@ func Xdrem(tls *TLS, x, y float64) (r float64) {
 	return Xremainder(tls, x, y)
 }
 
-func Xremainderf(tls *TLS, x, y float32) (r float32) {
+func Xremainderf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110456,7 +110206,7 @@ func Xremainderf(tls *TLS, x, y float32) (r float32) {
 	return Xremquof(tls, x, y, bp)
 }
 
-func Xdremf(tls *TLS, x, y float32) (r float32) {
+func Xdremf(tls *TLS, x float32, y float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110464,7 +110214,7 @@ func Xdremf(tls *TLS, x, y float32) (r float32) {
 	return Xremainderf(tls, x, y)
 }
 
-func Xremainderl(tls *TLS, x, y float64) (r float64) {
+func Xremainderl(tls *TLS, x float64, y float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v, (%v:)", tls, x, y, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110472,7 +110222,7 @@ func Xremainderl(tls *TLS, x, y float64) (r float64) {
 	return Xremainder(tls, x, y)
 }
 
-func Xremquo(tls *TLS, x, y float64, quo uintptr) (r float64) {
+func Xremquo(tls *TLS, x float64, y float64, quo uintptr) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v quo=%v, (%v:)", tls, x, y, quo, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110647,7 +110397,7 @@ end:
 	return v11
 }
 
-func Xremquof(tls *TLS, x, y float32, quo uintptr) (r float32) {
+func Xremquof(tls *TLS, x float32, y float32, quo uintptr) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v quo=%v, (%v:)", tls, x, y, quo, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110818,7 +110568,7 @@ end:
 	return v9
 }
 
-func Xremquol(tls *TLS, x, y float64, quo uintptr) (r float64) {
+func Xremquol(tls *TLS, x float64, y float64, quo uintptr) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v y=%v quo=%v, (%v:)", tls, x, y, quo, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -110874,10 +110624,8 @@ func Xrint(tls *TLS, x float64) (r float64) {
 	return y
 }
 
-const (
-	DBL_EPSILON10 = 0
-	FLT_EPSILON1  = 1.1920928955078125e-07
-)
+const DBL_EPSILON10 = 0
+const FLT_EPSILON1 = 1.1920928955078125e-07
 
 var _toint5 = Float32FromInt32(1) / Float32FromFloat32(1.1920928955078125e-07)
 
@@ -110999,10 +110747,8 @@ func Xround(tls *TLS, x3 float64) (r float64) {
 	return y3
 }
 
-const (
-	DBL_EPSILON12 = 0
-	FLT_EPSILON3  = 1.1920928955078125e-07
-)
+const DBL_EPSILON12 = 0
+const FLT_EPSILON3 = 1.1920928955078125e-07
 
 var _toint7 = Float32FromInt32(1) / Float32FromFloat32(1.1920928955078125e-07)
 
@@ -111075,7 +110821,7 @@ func Xroundl(tls *TLS, x float64) (r float64) {
 	return Xround(tls, x)
 }
 
-func Xscalb(tls *TLS, x, fn float64) (r float64) {
+func Xscalb(tls *TLS, x float64, fn float64) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v fn=%v, (%v:)", tls, x, fn, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -111126,7 +110872,7 @@ _7:
 	return Xscalbn(tls, x, int32(fn))
 }
 
-func Xscalbf(tls *TLS, x, fn float32) (r float32) {
+func Xscalbf(tls *TLS, x float32, fn float32) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v fn=%v, (%v:)", tls, x, fn, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -111392,7 +111138,7 @@ func Xsin(tls *TLS, x3 float64) (r float64) {
 	return r
 }
 
-func Xsincos(tls *TLS, x3 float64, sin, cos uintptr) {
+func Xsincos(tls *TLS, x3 float64, sin uintptr, cos uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v x3=%v sin=%v cos=%v, (%v:)", tls, x3, sin, cos, origin(2))
 	}
@@ -111479,13 +111225,12 @@ const M_PI_25 = 1.5707963267948966
 //
 //	/* Small multiples of pi/2 rounded to double precision. */
 
-var (
-	_s1pio2 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
-	_s2pio2 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
-	_s3pio2 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
-	_s4pio2 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */)
+var _s1pio2 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
+var _s2pio2 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
+var _s3pio2 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
+var _s4pio2 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */
 
-func Xsincosf(tls *TLS, x3 float32, sin, cos uintptr) {
+func Xsincosf(tls *TLS, x3 float32, sin uintptr, cos uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v x3=%v sin=%v cos=%v, (%v:)", tls, x3, sin, cos, origin(2))
 	}
@@ -111623,7 +111368,7 @@ func Xsincosf(tls *TLS, x3 float32, sin, cos uintptr) {
 
 const M_PI_26 = 0
 
-func Xsincosl(tls *TLS, x float64, sin, cos uintptr) {
+func Xsincosl(tls *TLS, x float64, sin uintptr, cos uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v sin=%v cos=%v, (%v:)", tls, x, sin, cos, origin(2))
 	}
@@ -111642,11 +111387,10 @@ const M_PI_27 = 1.5707963267948966
 //
 //	/* Small multiples of pi/2 rounded to double precision. */
 
-var (
-	_s1pio21 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
-	_s2pio21 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
-	_s3pio21 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
-	_s4pio21 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */)
+var _s1pio21 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
+var _s2pio21 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
+var _s3pio21 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
+var _s4pio21 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */
 
 func Xsinf(tls *TLS, x3 float32) (r float32) {
 	if __ccgo_strace {
@@ -111869,14 +111613,14 @@ const FENV_SUPPORT = 1
 // C documentation
 //
 //	/* returns a*b*2^-32 - e, with error 0 <= e < 1.  */
-func _mul32(tls *TLS, a, b Tuint32_t) (r Tuint32_t) {
+func _mul32(tls *TLS, a Tuint32_t, b Tuint32_t) (r Tuint32_t) {
 	return uint32(uint64(a) * uint64(b) >> int32(32))
 }
 
 // C documentation
 //
 //	/* returns a*b*2^-64 - e, with error 0 <= e < 3.  */
-func _mul64(tls *TLS, a, b Tuint64_t) (r Tuint64_t) {
+func _mul64(tls *TLS, a Tuint64_t, b Tuint64_t) (r Tuint64_t) {
 	var ahi, alo, bhi, blo Tuint64_t
 	_, _, _, _ = ahi, alo, bhi, blo
 	ahi = a >> int32(32)
@@ -112032,7 +111776,7 @@ func Xsqrt(tls *TLS, x1 float64) (r1 float64) {
 
 var _three = uint64(0xc0000000)
 
-func _mul321(tls *TLS, a, b Tuint32_t) (r Tuint32_t) {
+func _mul321(tls *TLS, a Tuint32_t, b Tuint32_t) (r Tuint32_t) {
 	return uint32(uint64(a) * uint64(b) >> int32(32))
 }
 
@@ -112194,11 +111938,10 @@ const M_PI_29 = 1.5707963267948966
 //
 //	/* Small multiples of pi/2 rounded to double precision. */
 
-var (
-	_t1pio2 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
-	_t2pio2 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
-	_t3pio2 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
-	_t4pio2 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */)
+var _t1pio2 = float64(Float64FromInt32(1) * Float64FromFloat64(1.5707963267948966)) /* 0x3FF921FB, 0x54442D18 */
+var _t2pio2 = float64(Float64FromInt32(2) * Float64FromFloat64(1.5707963267948966)) /* 0x400921FB, 0x54442D18 */
+var _t3pio2 = float64(Float64FromInt32(3) * Float64FromFloat64(1.5707963267948966)) /* 0x4012D97C, 0x7F3321D2 */
+var _t4pio2 = float64(Float64FromInt32(4) * Float64FromFloat64(1.5707963267948966)) /* 0x401921FB, 0x54442D18 */
 
 func Xtanf(tls *TLS, x3 float32) (r float32) {
 	if __ccgo_strace {
@@ -112496,25 +112239,22 @@ func _sinpi(tls *TLS, x float64) (r float64) {
 // C documentation
 //
 //	//static const double g = 6.024680040776729583740234375;
-var (
-	_gmhalf = float64(5.52468004077673)
-	_Snum   = [13]float64{
-		0:  float64(2.353137688041076e+10),
-		1:  float64(4.29198036426491e+10),
-		2:  float64(3.571195923735567e+10),
-		3:  float64(1.792103442603721e+10),
-		4:  float64(6.039542586352028e+09),
-		5:  float64(1.4397204073117216e+09),
-		6:  float64(2.4887455786205417e+08),
-		7:  float64(3.1426415585400194e+07),
-		8:  float64(2.8763706289353725e+06),
-		9:  float64(186056.26539522348),
-		10: float64(8071.672002365816),
-		11: float64(210.82427775157936),
-		12: float64(2.5066282746310002),
-	}
-)
-
+var _gmhalf = float64(5.52468004077673)
+var _Snum = [13]float64{
+	0:  float64(2.353137688041076e+10),
+	1:  float64(4.29198036426491e+10),
+	2:  float64(3.571195923735567e+10),
+	3:  float64(1.792103442603721e+10),
+	4:  float64(6.039542586352028e+09),
+	5:  float64(1.4397204073117216e+09),
+	6:  float64(2.4887455786205417e+08),
+	7:  float64(3.1426415585400194e+07),
+	8:  float64(2.8763706289353725e+06),
+	9:  float64(186056.26539522348),
+	10: float64(8071.672002365816),
+	11: float64(210.82427775157936),
+	12: float64(2.5066282746310002),
+}
 var _Sden = [13]float64{
 	1:  Float64FromInt32(39916800),
 	2:  Float64FromInt32(120543840),
@@ -113018,29 +112758,27 @@ func Xffsll(tls *TLS, i int64) (r int32) {
 	return v1
 }
 
-const (
-	MM_APPL    = 8
-	MM_CONSOLE = 512
-	MM_ERROR   = 2
-	MM_FIRM    = 4
-	MM_HALT    = 1
-	MM_HARD    = 1
-	MM_INFO    = 4
-	MM_NOCON   = 4
-	MM_NOMSG   = 1
-	MM_NOSEV   = 0
-	MM_NOTOK   = -1
-	MM_NRECOV  = 128
-	MM_NULLMC  = 0
-	MM_NULLSEV = 0
-	MM_OK      = 0
-	MM_OPSYS   = 32
-	MM_PRINT   = 256
-	MM_RECOVER = 64
-	MM_SOFT    = 2
-	MM_UTIL    = 16
-	MM_WARNING = 3
-)
+const MM_APPL = 8
+const MM_CONSOLE = 512
+const MM_ERROR = 2
+const MM_FIRM = 4
+const MM_HALT = 1
+const MM_HARD = 1
+const MM_INFO = 4
+const MM_NOCON = 4
+const MM_NOMSG = 1
+const MM_NOSEV = 0
+const MM_NOTOK = -1
+const MM_NRECOV = 128
+const MM_NULLMC = 0
+const MM_NULLSEV = 0
+const MM_OK = 0
+const MM_OPSYS = 32
+const MM_PRINT = 256
+const MM_RECOVER = 64
+const MM_SOFT = 2
+const MM_UTIL = 16
+const MM_WARNING = 3
 
 // C documentation
 //
@@ -113048,7 +112786,7 @@ const (
 //	 * If lstr is the first part of bstr, check that the next char in bstr
 //	 * is either \0 or :
 //	 */
-func __strcolcmp(tls *TLS, lstr, bstr uintptr) (r int32) {
+func __strcolcmp(tls *TLS, lstr uintptr, bstr uintptr) (r int32) {
 	var i Tsize_t
 	_ = i
 	i = uint64(0)
@@ -113061,7 +112799,7 @@ func __strcolcmp(tls *TLS, lstr, bstr uintptr) (r int32) {
 	return 0
 }
 
-func Xfmtmsg(tls *TLS, classification int64, label uintptr, severity int32, text, action, tag uintptr) (r int32) {
+func Xfmtmsg(tls *TLS, classification int64, label uintptr, severity int32, text uintptr, action uintptr, tag uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v classification=%v label=%v severity=%v text=%v action=%v tag=%v, (%v:)", tls, classification, label, severity, text, action, tag, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113168,7 +112906,7 @@ func Xfmtmsg(tls *TLS, classification int64, label uintptr, severity int32, text
 				i = i + 1
 			}
 			if msgs[i] == UintptrFromInt32(0) {
-				// ignore MSGVERB-unrecognized component
+				//ignore MSGVERB-unrecognized component
 				verb = int32(0xFF)
 				break
 			} else {
@@ -113359,7 +113097,7 @@ const optpos = 0
 
 type t__ucontext1 = Tucontext_t1
 
-func X__getopt_msg(tls *TLS, a, b, c uintptr, l Tsize_t) {
+func X__getopt_msg(tls *TLS, a uintptr, b uintptr, c uintptr, l Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v a=%v b=%v c=%v l=%v, (%v:)", tls, a, b, c, l, origin(2))
 	}
@@ -113380,7 +113118,7 @@ func X__getopt_msg(tls *TLS, a, b, c uintptr, l Tsize_t) {
 	}
 }
 
-func Xgetopt(tls *TLS, argc int32, argv, optstring uintptr) (r int32) {
+func Xgetopt(tls *TLS, argc int32, argv uintptr, optstring uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v argc=%v argv=%v optstring=%v, (%v:)", tls, argc, argv, optstring, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113476,7 +113214,7 @@ func Xgetopt(tls *TLS, argc int32, argv, optstring uintptr) (r int32) {
 	return **(**Twchar_t)(__ccgo_up(bp))
 }
 
-func X__posix_getopt(tls *TLS, argc int32, argv, optstring uintptr) (r int32) {
+func X__posix_getopt(tls *TLS, argc int32, argv uintptr, optstring uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v argc=%v argv=%v optstring=%v, (%v:)", tls, argc, argv, optstring, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113484,11 +113222,9 @@ func X__posix_getopt(tls *TLS, argc int32, argv, optstring uintptr) (r int32) {
 	return Xgetopt(tls, argc, argv, optstring)
 }
 
-const (
-	no_argument       = 0
-	optional_argument = 2
-	required_argument = 1
-)
+const no_argument = 0
+const optional_argument = 2
+const required_argument = 1
 
 type Toption = struct {
 	Fname    uintptr
@@ -113497,7 +113233,7 @@ type Toption = struct {
 	Fval     int32
 }
 
-func _permute(tls *TLS, argv uintptr, dest, src int32) {
+func _permute(tls *TLS, argv uintptr, dest int32, src int32) {
 	var av, tmp uintptr
 	var i int32
 	_, _, _ = av, i, tmp
@@ -113517,7 +113253,7 @@ func _permute(tls *TLS, argv uintptr, dest, src int32) {
 	**(**uintptr)(__ccgo_up(av + uintptr(dest)*8)) = tmp
 }
 
-func ___getopt_long(tls *TLS, argc int32, argv, optstring, longopts, idx uintptr, longonly int32) (r int32) {
+func ___getopt_long(tls *TLS, argc int32, argv uintptr, optstring uintptr, longopts uintptr, idx uintptr, longonly int32) (r int32) {
 	var cnt, i, i1, resumed, ret, skipped int32
 	_, _, _, _, _, _ = cnt, i, i1, resumed, ret, skipped
 	if !(Xoptind != 0) || Xoptreset != 0 {
@@ -113565,7 +113301,7 @@ func ___getopt_long(tls *TLS, argc int32, argv, optstring, longopts, idx uintptr
 	return ret
 }
 
-func ___getopt_long_core(tls *TLS, argc int32, argv, optstring, longopts, idx uintptr, longonly int32) (r int32) {
+func ___getopt_long_core(tls *TLS, argc int32, argv uintptr, optstring uintptr, longopts uintptr, idx uintptr, longonly int32) (r int32) {
 	var arg, name, opt, start, v5 uintptr
 	var cnt, colon, i, j, l, match, v2 int32
 	_, _, _, _, _, _, _, _, _, _, _, _ = arg, cnt, colon, i, j, l, match, name, opt, start, v2, v5
@@ -113689,7 +113425,7 @@ func ___getopt_long_core(tls *TLS, argc int32, argv, optstring, longopts, idx ui
 	return Xgetopt(tls, argc, argv, optstring)
 }
 
-func Xgetopt_long(tls *TLS, argc int32, argv, optstring, longopts, idx uintptr) (r int32) {
+func Xgetopt_long(tls *TLS, argc int32, argv uintptr, optstring uintptr, longopts uintptr, idx uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v argc=%v argv=%v optstring=%v longopts=%v idx=%v, (%v:)", tls, argc, argv, optstring, longopts, idx, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113697,7 +113433,7 @@ func Xgetopt_long(tls *TLS, argc int32, argv, optstring, longopts, idx uintptr) 
 	return ___getopt_long(tls, argc, argv, optstring, longopts, idx, 0)
 }
 
-func Xgetopt_long_only(tls *TLS, argc int32, argv, optstring, longopts, idx uintptr) (r int32) {
+func Xgetopt_long_only(tls *TLS, argc int32, argv uintptr, optstring uintptr, longopts uintptr, idx uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v argc=%v argv=%v optstring=%v longopts=%v idx=%v, (%v:)", tls, argc, argv, optstring, longopts, idx, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113719,7 +113455,7 @@ func Xgetpriority(tls *TLS, which int32, who Tid_t) (r int32) {
 	return int32(20) - ret
 }
 
-func Xgetresgid(tls *TLS, rgid, egid, sgid uintptr) (r int32) {
+func Xgetresgid(tls *TLS, rgid uintptr, egid uintptr, sgid uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v rgid=%v egid=%v sgid=%v, (%v:)", tls, rgid, egid, sgid, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113727,7 +113463,7 @@ func Xgetresgid(tls *TLS, rgid, egid, sgid uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_getresgid), int64(rgid), int64(egid), int64(sgid)))))
 }
 
-func Xgetresuid(tls *TLS, ruid, euid, suid uintptr) (r int32) {
+func Xgetresuid(tls *TLS, ruid uintptr, euid uintptr, suid uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v ruid=%v euid=%v suid=%v, (%v:)", tls, ruid, euid, suid, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113809,7 +113545,7 @@ func Xgetrusage(tls *TLS, who int32, ru uintptr) (r1 int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func Xgetsubopt(tls *TLS, opt, keys, val uintptr) (r int32) {
+func Xgetsubopt(tls *TLS, opt uintptr, keys uintptr, val uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v opt=%v keys=%v val=%v, (%v:)", tls, opt, keys, val, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -113854,11 +113590,9 @@ func Xgetsubopt(tls *TLS, opt, keys, val uintptr) (r int32) {
 	return -int32(1)
 }
 
-const (
-	R  = 2
-	W  = 1
-	WR = 3
-)
+const R = 2
+const W = 1
+const WR = 3
 
 type Tioctl_compat_map = struct {
 	Fnew_req     int32
@@ -114101,7 +113835,7 @@ var _compat_map = [20]Tioctl_compat_map{
 	},
 }
 
-func _convert_ioctl_struct(tls *TLS, map1, old, new1 uintptr, dir int32) {
+func _convert_ioctl_struct(tls *TLS, map1 uintptr, old uintptr, new1 uintptr, dir int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var adj, align, i, len1, new_offset, old_offset, old_size, ts_offset int32
@@ -114171,7 +113905,7 @@ func _convert_ioctl_struct(tls *TLS, map1, old, new1 uintptr, dir int32) {
 	}
 }
 
-func Xioctl(tls *TLS, fd, req int32, va uintptr) (r1 int32) {
+func Xioctl(tls *TLS, fd int32, req int32, va uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v req=%v va=%v, (%v:)", tls, fd, req, va, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -114224,7 +113958,7 @@ func Xissetugid(tls *TLS) (r int32) {
 	return int32(X__libc.Fsecure)
 }
 
-func Xlockf(tls *TLS, fd, op int32, size Toff_t) (r int32) {
+func Xlockf(tls *TLS, fd int32, op int32, size Toff_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v op=%v size=%v, (%v:)", tls, fd, op, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -114260,20 +113994,18 @@ func Xlockf(tls *TLS, fd, op int32, size Toff_t) (r int32) {
 	return -int32(1)
 }
 
-const (
-	ACCOUNTING    = 9
-	UTMP_FILE     = "_PATH_UTMP"
-	UTMP_FILENAME = "_PATH_UTMP"
-	UT_HOSTSIZE   = 256
-	UT_LINESIZE   = 32
-	UT_NAMESIZE   = 32
-	WTMP_FILE     = "_PATH_WTMP"
-	WTMP_FILENAME = "_PATH_WTMP"
-	_PATH_UTMP    = "/dev/null/utmp"
-	_PATH_WTMP    = "/dev/null/wtmp"
-	ut_name       = 0
-	utmp          = 0
-)
+const ACCOUNTING = 9
+const UTMP_FILE = "_PATH_UTMP"
+const UTMP_FILENAME = "_PATH_UTMP"
+const UT_HOSTSIZE = 256
+const UT_LINESIZE = 32
+const UT_NAMESIZE = 32
+const WTMP_FILE = "_PATH_WTMP"
+const WTMP_FILENAME = "_PATH_WTMP"
+const _PATH_UTMP = "/dev/null/utmp"
+const _PATH_WTMP = "/dev/null/wtmp"
+const ut_name = 0
+const utmp = 0
 
 type Tlastlog = struct {
 	Fll_time Ttime_t
@@ -114301,19 +114033,17 @@ func Xlogin_tty(tls *TLS, fd int32) (r int32) {
 	return 0
 }
 
-const (
-	MNTOPT_DEFAULTS = "defaults"
-	MNTOPT_NOAUTO   = "noauto"
-	MNTOPT_NOSUID   = "nosuid"
-	MNTOPT_RO       = "ro"
-	MNTOPT_RW       = "rw"
-	MNTOPT_SUID     = "suid"
-	MNTTYPE_IGNORE  = "ignore"
-	MNTTYPE_NFS     = "nfs"
-	MNTTYPE_SWAP    = "swap"
-	MOUNTED         = "/etc/mtab"
-	SENTINEL        = 0
-)
+const MNTOPT_DEFAULTS = "defaults"
+const MNTOPT_NOAUTO = "noauto"
+const MNTOPT_NOSUID = "nosuid"
+const MNTOPT_RO = "ro"
+const MNTOPT_RW = "rw"
+const MNTOPT_SUID = "suid"
+const MNTTYPE_IGNORE = "ignore"
+const MNTTYPE_NFS = "nfs"
+const MNTTYPE_SWAP = "swap"
+const MOUNTED = "/etc/mtab"
+const SENTINEL = 0
 
 type Tmntent = struct {
 	Fmnt_fsname uintptr
@@ -114333,12 +114063,10 @@ type Tmntent = struct {
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-var (
-	_internal_buf     uintptr
-	_internal_bufsize Tsize_t
-)
+var _internal_buf uintptr
+var _internal_bufsize Tsize_t
 
-func Xsetmntent(tls *TLS, name, mode uintptr) (r uintptr) {
+func Xsetmntent(tls *TLS, name uintptr, mode uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v mode=%v, (%v:)", tls, name, mode, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -114419,7 +114147,7 @@ func _unescape_ent(tls *TLS, beg uintptr) (r uintptr) {
 	return beg
 }
 
-func Xgetmntent_r(tls *TLS, f, mnt, linebuf uintptr, buflen int32) (r uintptr) {
+func Xgetmntent_r(tls *TLS, f uintptr, mnt uintptr, linebuf uintptr, buflen int32) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v mnt=%v linebuf=%v buflen=%v, (%v:)", tls, f, mnt, linebuf, buflen, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -114486,7 +114214,7 @@ func Xgetmntent(tls *TLS, f uintptr) (r uintptr) {
 
 var _mnt Tmntent
 
-func Xaddmntent(tls *TLS, f, mnt uintptr) (r int32) {
+func Xaddmntent(tls *TLS, f uintptr, mnt uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v mnt=%v, (%v:)", tls, f, mnt, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -114499,7 +114227,7 @@ func Xaddmntent(tls *TLS, f, mnt uintptr) (r int32) {
 	return BoolInt32(Xfprintf(tls, f, __ccgo_ts+897, VaList(bp+8, (*Tmntent)(unsafe.Pointer(mnt)).Fmnt_fsname, (*Tmntent)(unsafe.Pointer(mnt)).Fmnt_dir, (*Tmntent)(unsafe.Pointer(mnt)).Fmnt_type, (*Tmntent)(unsafe.Pointer(mnt)).Fmnt_opts, (*Tmntent)(unsafe.Pointer(mnt)).Fmnt_freq, (*Tmntent)(unsafe.Pointer(mnt)).Fmnt_passno)) < 0)
 }
 
-func Xhasmntopt(tls *TLS, mnt, opt uintptr) (r uintptr) {
+func Xhasmntopt(tls *TLS, mnt uintptr, opt uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v mnt=%v opt=%v, (%v:)", tls, mnt, opt, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -114515,7 +114243,7 @@ type Thistory = struct {
 	Fbase  int32
 }
 
-func _do_nftw(tls *TLS, path, __ccgo_fp_fn uintptr, fd_limit, flags int32, h uintptr) (r1 int32) {
+func _do_nftw(tls *TLS, path uintptr, __ccgo_fp_fn uintptr, fd_limit int32, flags int32, h uintptr) (r1 int32) {
 	bp := tls.Alloc(192)
 	defer tls.Free(192)
 	var d, de, v10 uintptr
@@ -114688,7 +114416,7 @@ func _do_nftw(tls *TLS, path, __ccgo_fp_fn uintptr, fd_limit, flags int32, h uin
 
 type t__ccgo_fp__Xnftw_1 = func(*TLS, uintptr, uintptr, int32, uintptr) int32
 
-func Xnftw(tls *TLS, path, __ccgo_fp_fn uintptr, fd_limit, flags int32) (r1 int32) {
+func Xnftw(tls *TLS, path uintptr, __ccgo_fp_fn uintptr, fd_limit int32, flags int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v __ccgo_fp_fn=%v fd_limit=%v flags=%v, (%v:)", tls, path, __ccgo_fp_fn, fd_limit, flags, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -114717,7 +114445,7 @@ func Xnftw(tls *TLS, path, __ccgo_fp_fn uintptr, fd_limit, flags int32) (r1 int3
 
 /* Nonstandard, but vastly superior to the standard functions */
 
-func Xopenpty(tls *TLS, pm, ps, name, tio, ws uintptr) (r int32) {
+func Xopenpty(tls *TLS, pm uintptr, ps uintptr, name uintptr, tio uintptr, ws uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v pm=%v ps=%v name=%v tio=%v ws=%v, (%v:)", tls, pm, ps, name, tio, ws, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -114858,7 +114586,7 @@ func _slash_len(tls *TLS, s uintptr) (r Tsize_t) {
 	return Uint64FromInt64(int64(s) - int64(s0))
 }
 
-func Xrealpath(tls *TLS, filename, resolved uintptr) (r uintptr) {
+func Xrealpath(tls *TLS, filename uintptr, resolved uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v filename=%v resolved=%v, (%v:)", tls, filename, resolved, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -115179,279 +114907,277 @@ func Xsyscall(tls *TLS, n int64, va uintptr) (r int64) {
 	return X__syscall_ret(tls, Uint64FromInt64(X__syscall6(tls, n, a, b, c, d, e, f)))
 }
 
-const (
-	AF_ALG                           = 38
-	AF_APPLETALK                     = 5
-	AF_ASH                           = 18
-	AF_ATMPVC                        = 8
-	AF_ATMSVC                        = 20
-	AF_AX25                          = 3
-	AF_BLUETOOTH                     = 31
-	AF_BRIDGE                        = 7
-	AF_CAIF                          = 37
-	AF_CAN                           = 29
-	AF_DECnet                        = 12
-	AF_ECONET                        = 19
-	AF_FILE                          = 1
-	AF_IB                            = 27
-	AF_IEEE802154                    = 36
-	AF_INET                          = 2
-	AF_INET6                         = 10
-	AF_IPX                           = 4
-	AF_IRDA                          = 23
-	AF_ISDN                          = 34
-	AF_IUCV                          = 32
-	AF_KCM                           = 41
-	AF_KEY                           = 15
-	AF_LLC                           = 26
-	AF_LOCAL                         = 1
-	AF_MAX                           = 45
-	AF_MPLS                          = 28
-	AF_NETBEUI                       = 13
-	AF_NETLINK                       = 16
-	AF_NETROM                        = 6
-	AF_NFC                           = 39
-	AF_PACKET                        = 17
-	AF_PHONET                        = 35
-	AF_PPPOX                         = 24
-	AF_QIPCRTR                       = 42
-	AF_RDS                           = 21
-	AF_ROSE                          = 11
-	AF_ROUTE                         = 16
-	AF_RXRPC                         = 33
-	AF_SECURITY                      = 14
-	AF_SMC                           = 43
-	AF_SNA                           = 22
-	AF_TIPC                          = 30
-	AF_UNIX                          = 1
-	AF_UNSPEC                        = 0
-	AF_VSOCK                         = 40
-	AF_WANPIPE                       = 25
-	AF_X25                           = 9
-	AF_XDP                           = 44
-	LOG_ALERT                        = 1
-	LOG_AUTH                         = 32
-	LOG_AUTHPRIV                     = 80
-	LOG_CONS                         = 2
-	LOG_CRIT                         = 2
-	LOG_CRON                         = 72
-	LOG_DAEMON                       = 24
-	LOG_DEBUG                        = 7
-	LOG_EMERG                        = 0
-	LOG_ERR                          = 3
-	LOG_FACMASK                      = 1016
-	LOG_FTP                          = 88
-	LOG_INFO                         = 6
-	LOG_KERN                         = 0
-	LOG_LOCAL0                       = 128
-	LOG_LOCAL1                       = 136
-	LOG_LOCAL2                       = 144
-	LOG_LOCAL3                       = 152
-	LOG_LOCAL4                       = 160
-	LOG_LOCAL5                       = 168
-	LOG_LOCAL6                       = 176
-	LOG_LOCAL7                       = 184
-	LOG_LPR                          = 48
-	LOG_MAIL                         = 16
-	LOG_NDELAY                       = 8
-	LOG_NEWS                         = 56
-	LOG_NFACILITIES                  = 24
-	LOG_NOTICE                       = 5
-	LOG_NOWAIT                       = 16
-	LOG_ODELAY                       = 4
-	LOG_PERROR                       = 32
-	LOG_PID                          = 1
-	LOG_PRIMASK                      = 7
-	LOG_SYSLOG                       = 40
-	LOG_USER                         = 8
-	LOG_UUCP                         = 64
-	LOG_WARNING                      = 4
-	MSG_BATCH                        = 262144
-	MSG_CMSG_CLOEXEC                 = 1073741824
-	MSG_CONFIRM                      = 2048
-	MSG_CTRUNC                       = 8
-	MSG_DONTROUTE                    = 4
-	MSG_DONTWAIT                     = 64
-	MSG_EOR                          = 128
-	MSG_ERRQUEUE                     = 8192
-	MSG_FASTOPEN                     = 536870912
-	MSG_FIN                          = 512
-	MSG_MORE                         = 32768
-	MSG_NOSIGNAL                     = 16384
-	MSG_OOB                          = 1
-	MSG_PEEK                         = 2
-	MSG_PROXY                        = 16
-	MSG_RST                          = 4096
-	MSG_SYN                          = 1024
-	MSG_TRUNC                        = 32
-	MSG_WAITALL                      = 256
-	MSG_WAITFORONE                   = 65536
-	MSG_ZEROCOPY                     = 67108864
-	PF_ALG                           = 38
-	PF_APPLETALK                     = 5
-	PF_ASH                           = 18
-	PF_ATMPVC                        = 8
-	PF_ATMSVC                        = 20
-	PF_AX25                          = 3
-	PF_BLUETOOTH                     = 31
-	PF_BRIDGE                        = 7
-	PF_CAIF                          = 37
-	PF_CAN                           = 29
-	PF_DECnet                        = 12
-	PF_ECONET                        = 19
-	PF_FILE                          = 1
-	PF_IB                            = 27
-	PF_IEEE802154                    = 36
-	PF_INET                          = 2
-	PF_INET6                         = 10
-	PF_IPX                           = 4
-	PF_IRDA                          = 23
-	PF_ISDN                          = 34
-	PF_IUCV                          = 32
-	PF_KCM                           = 41
-	PF_KEY                           = 15
-	PF_LLC                           = 26
-	PF_LOCAL                         = 1
-	PF_MAX                           = 45
-	PF_MPLS                          = 28
-	PF_NETBEUI                       = 13
-	PF_NETLINK                       = 16
-	PF_NETROM                        = 6
-	PF_NFC                           = 39
-	PF_PACKET                        = 17
-	PF_PHONET                        = 35
-	PF_PPPOX                         = 24
-	PF_QIPCRTR                       = 42
-	PF_RDS                           = 21
-	PF_ROSE                          = 11
-	PF_ROUTE                         = 16
-	PF_RXRPC                         = 33
-	PF_SECURITY                      = 14
-	PF_SMC                           = 43
-	PF_SNA                           = 22
-	PF_TIPC                          = 30
-	PF_UNIX                          = 1
-	PF_UNSPEC                        = 0
-	PF_VSOCK                         = 40
-	PF_WANPIPE                       = 25
-	PF_X25                           = 9
-	PF_XDP                           = 44
-	SCM_CREDENTIALS                  = 2
-	SCM_RIGHTS                       = 1
-	SCM_TIMESTAMP                    = 29
-	SCM_TIMESTAMPING                 = 37
-	SCM_TIMESTAMPING_OPT_STATS       = 54
-	SCM_TIMESTAMPING_PKTINFO         = 58
-	SCM_TIMESTAMPNS                  = 35
-	SCM_TXTIME                       = 61
-	SCM_WIFI_STATUS                  = 41
-	SHUT_RD                          = 0
-	SHUT_RDWR                        = 2
-	SHUT_WR                          = 1
-	SOCK_CLOEXEC                     = 524288
-	SOCK_DCCP                        = 6
-	SOCK_DGRAM                       = 2
-	SOCK_NONBLOCK                    = 2048
-	SOCK_PACKET                      = 10
-	SOCK_RAW                         = 3
-	SOCK_RDM                         = 4
-	SOCK_SEQPACKET                   = 5
-	SOCK_STREAM                      = 1
-	SOL_AAL                          = 265
-	SOL_ALG                          = 279
-	SOL_ATM                          = 264
-	SOL_BLUETOOTH                    = 274
-	SOL_CAIF                         = 278
-	SOL_DCCP                         = 269
-	SOL_DECNET                       = 261
-	SOL_ICMPV6                       = 58
-	SOL_IP                           = 0
-	SOL_IPV6                         = 41
-	SOL_IRDA                         = 266
-	SOL_IUCV                         = 277
-	SOL_KCM                          = 281
-	SOL_LLC                          = 268
-	SOL_NETBEUI                      = 267
-	SOL_NETLINK                      = 270
-	SOL_NFC                          = 280
-	SOL_PACKET                       = 263
-	SOL_PNPIPE                       = 275
-	SOL_PPPOL2TP                     = 273
-	SOL_RAW                          = 255
-	SOL_RDS                          = 276
-	SOL_RXRPC                        = 272
-	SOL_SOCKET                       = 1
-	SOL_TIPC                         = 271
-	SOL_TLS                          = 282
-	SOL_X25                          = 262
-	SOL_XDP                          = 283
-	SOMAXCONN                        = 128
-	SO_ACCEPTCONN                    = 30
-	SO_ATTACH_BPF                    = 50
-	SO_ATTACH_FILTER                 = 26
-	SO_ATTACH_REUSEPORT_CBPF         = 51
-	SO_ATTACH_REUSEPORT_EBPF         = 52
-	SO_BINDTODEVICE                  = 25
-	SO_BINDTOIFINDEX                 = 62
-	SO_BPF_EXTENSIONS                = 48
-	SO_BROADCAST                     = 6
-	SO_BSDCOMPAT                     = 14
-	SO_BUSY_POLL                     = 46
-	SO_BUSY_POLL_BUDGET              = 70
-	SO_CNX_ADVICE                    = 53
-	SO_COOKIE                        = 57
-	SO_DEBUG                         = 1
-	SO_DETACH_BPF                    = 27
-	SO_DETACH_FILTER                 = 27
-	SO_DETACH_REUSEPORT_BPF          = 68
-	SO_DOMAIN                        = 39
-	SO_DONTROUTE                     = 5
-	SO_ERROR                         = 4
-	SO_GET_FILTER                    = 26
-	SO_INCOMING_CPU                  = 49
-	SO_INCOMING_NAPI_ID              = 56
-	SO_KEEPALIVE                     = 9
-	SO_LINGER                        = 13
-	SO_LOCK_FILTER                   = 44
-	SO_MARK                          = 36
-	SO_MAX_PACING_RATE               = 47
-	SO_MEMINFO                       = 55
-	SO_NOFCS                         = 43
-	SO_NO_CHECK                      = 11
-	SO_OOBINLINE                     = 10
-	SO_PASSCRED                      = 16
-	SO_PASSSEC                       = 34
-	SO_PEEK_OFF                      = 42
-	SO_PEERCRED                      = 17
-	SO_PEERGROUPS                    = 59
-	SO_PEERNAME                      = 28
-	SO_PEERSEC                       = 31
-	SO_PREFER_BUSY_POLL              = 69
-	SO_PRIORITY                      = 12
-	SO_PROTOCOL                      = 38
-	SO_RCVBUF                        = 8
-	SO_RCVBUFFORCE                   = 33
-	SO_RCVLOWAT                      = 18
-	SO_RCVTIMEO                      = 20
-	SO_REUSEADDR                     = 2
-	SO_REUSEPORT                     = 15
-	SO_RXQ_OVFL                      = 40
-	SO_SECURITY_AUTHENTICATION       = 22
-	SO_SECURITY_ENCRYPTION_NETWORK   = 24
-	SO_SECURITY_ENCRYPTION_TRANSPORT = 23
-	SO_SELECT_ERR_QUEUE              = 45
-	SO_SNDBUF                        = 7
-	SO_SNDBUFFORCE                   = 32
-	SO_SNDLOWAT                      = 19
-	SO_SNDTIMEO                      = 21
-	SO_TIMESTAMP                     = 29
-	SO_TIMESTAMPING                  = 37
-	SO_TIMESTAMPNS                   = 35
-	SO_TXTIME                        = 61
-	SO_TYPE                          = 3
-	SO_WIFI_STATUS                   = 41
-	SO_ZEROCOPY                      = 60
-)
+const AF_ALG = 38
+const AF_APPLETALK = 5
+const AF_ASH = 18
+const AF_ATMPVC = 8
+const AF_ATMSVC = 20
+const AF_AX25 = 3
+const AF_BLUETOOTH = 31
+const AF_BRIDGE = 7
+const AF_CAIF = 37
+const AF_CAN = 29
+const AF_DECnet = 12
+const AF_ECONET = 19
+const AF_FILE = 1
+const AF_IB = 27
+const AF_IEEE802154 = 36
+const AF_INET = 2
+const AF_INET6 = 10
+const AF_IPX = 4
+const AF_IRDA = 23
+const AF_ISDN = 34
+const AF_IUCV = 32
+const AF_KCM = 41
+const AF_KEY = 15
+const AF_LLC = 26
+const AF_LOCAL = 1
+const AF_MAX = 45
+const AF_MPLS = 28
+const AF_NETBEUI = 13
+const AF_NETLINK = 16
+const AF_NETROM = 6
+const AF_NFC = 39
+const AF_PACKET = 17
+const AF_PHONET = 35
+const AF_PPPOX = 24
+const AF_QIPCRTR = 42
+const AF_RDS = 21
+const AF_ROSE = 11
+const AF_ROUTE = 16
+const AF_RXRPC = 33
+const AF_SECURITY = 14
+const AF_SMC = 43
+const AF_SNA = 22
+const AF_TIPC = 30
+const AF_UNIX = 1
+const AF_UNSPEC = 0
+const AF_VSOCK = 40
+const AF_WANPIPE = 25
+const AF_X25 = 9
+const AF_XDP = 44
+const LOG_ALERT = 1
+const LOG_AUTH = 32
+const LOG_AUTHPRIV = 80
+const LOG_CONS = 2
+const LOG_CRIT = 2
+const LOG_CRON = 72
+const LOG_DAEMON = 24
+const LOG_DEBUG = 7
+const LOG_EMERG = 0
+const LOG_ERR = 3
+const LOG_FACMASK = 1016
+const LOG_FTP = 88
+const LOG_INFO = 6
+const LOG_KERN = 0
+const LOG_LOCAL0 = 128
+const LOG_LOCAL1 = 136
+const LOG_LOCAL2 = 144
+const LOG_LOCAL3 = 152
+const LOG_LOCAL4 = 160
+const LOG_LOCAL5 = 168
+const LOG_LOCAL6 = 176
+const LOG_LOCAL7 = 184
+const LOG_LPR = 48
+const LOG_MAIL = 16
+const LOG_NDELAY = 8
+const LOG_NEWS = 56
+const LOG_NFACILITIES = 24
+const LOG_NOTICE = 5
+const LOG_NOWAIT = 16
+const LOG_ODELAY = 4
+const LOG_PERROR = 32
+const LOG_PID = 1
+const LOG_PRIMASK = 7
+const LOG_SYSLOG = 40
+const LOG_USER = 8
+const LOG_UUCP = 64
+const LOG_WARNING = 4
+const MSG_BATCH = 262144
+const MSG_CMSG_CLOEXEC = 1073741824
+const MSG_CONFIRM = 2048
+const MSG_CTRUNC = 8
+const MSG_DONTROUTE = 4
+const MSG_DONTWAIT = 64
+const MSG_EOR = 128
+const MSG_ERRQUEUE = 8192
+const MSG_FASTOPEN = 536870912
+const MSG_FIN = 512
+const MSG_MORE = 32768
+const MSG_NOSIGNAL = 16384
+const MSG_OOB = 1
+const MSG_PEEK = 2
+const MSG_PROXY = 16
+const MSG_RST = 4096
+const MSG_SYN = 1024
+const MSG_TRUNC = 32
+const MSG_WAITALL = 256
+const MSG_WAITFORONE = 65536
+const MSG_ZEROCOPY = 67108864
+const PF_ALG = 38
+const PF_APPLETALK = 5
+const PF_ASH = 18
+const PF_ATMPVC = 8
+const PF_ATMSVC = 20
+const PF_AX25 = 3
+const PF_BLUETOOTH = 31
+const PF_BRIDGE = 7
+const PF_CAIF = 37
+const PF_CAN = 29
+const PF_DECnet = 12
+const PF_ECONET = 19
+const PF_FILE = 1
+const PF_IB = 27
+const PF_IEEE802154 = 36
+const PF_INET = 2
+const PF_INET6 = 10
+const PF_IPX = 4
+const PF_IRDA = 23
+const PF_ISDN = 34
+const PF_IUCV = 32
+const PF_KCM = 41
+const PF_KEY = 15
+const PF_LLC = 26
+const PF_LOCAL = 1
+const PF_MAX = 45
+const PF_MPLS = 28
+const PF_NETBEUI = 13
+const PF_NETLINK = 16
+const PF_NETROM = 6
+const PF_NFC = 39
+const PF_PACKET = 17
+const PF_PHONET = 35
+const PF_PPPOX = 24
+const PF_QIPCRTR = 42
+const PF_RDS = 21
+const PF_ROSE = 11
+const PF_ROUTE = 16
+const PF_RXRPC = 33
+const PF_SECURITY = 14
+const PF_SMC = 43
+const PF_SNA = 22
+const PF_TIPC = 30
+const PF_UNIX = 1
+const PF_UNSPEC = 0
+const PF_VSOCK = 40
+const PF_WANPIPE = 25
+const PF_X25 = 9
+const PF_XDP = 44
+const SCM_CREDENTIALS = 2
+const SCM_RIGHTS = 1
+const SCM_TIMESTAMP = 29
+const SCM_TIMESTAMPING = 37
+const SCM_TIMESTAMPING_OPT_STATS = 54
+const SCM_TIMESTAMPING_PKTINFO = 58
+const SCM_TIMESTAMPNS = 35
+const SCM_TXTIME = 61
+const SCM_WIFI_STATUS = 41
+const SHUT_RD = 0
+const SHUT_RDWR = 2
+const SHUT_WR = 1
+const SOCK_CLOEXEC = 524288
+const SOCK_DCCP = 6
+const SOCK_DGRAM = 2
+const SOCK_NONBLOCK = 2048
+const SOCK_PACKET = 10
+const SOCK_RAW = 3
+const SOCK_RDM = 4
+const SOCK_SEQPACKET = 5
+const SOCK_STREAM = 1
+const SOL_AAL = 265
+const SOL_ALG = 279
+const SOL_ATM = 264
+const SOL_BLUETOOTH = 274
+const SOL_CAIF = 278
+const SOL_DCCP = 269
+const SOL_DECNET = 261
+const SOL_ICMPV6 = 58
+const SOL_IP = 0
+const SOL_IPV6 = 41
+const SOL_IRDA = 266
+const SOL_IUCV = 277
+const SOL_KCM = 281
+const SOL_LLC = 268
+const SOL_NETBEUI = 267
+const SOL_NETLINK = 270
+const SOL_NFC = 280
+const SOL_PACKET = 263
+const SOL_PNPIPE = 275
+const SOL_PPPOL2TP = 273
+const SOL_RAW = 255
+const SOL_RDS = 276
+const SOL_RXRPC = 272
+const SOL_SOCKET = 1
+const SOL_TIPC = 271
+const SOL_TLS = 282
+const SOL_X25 = 262
+const SOL_XDP = 283
+const SOMAXCONN = 128
+const SO_ACCEPTCONN = 30
+const SO_ATTACH_BPF = 50
+const SO_ATTACH_FILTER = 26
+const SO_ATTACH_REUSEPORT_CBPF = 51
+const SO_ATTACH_REUSEPORT_EBPF = 52
+const SO_BINDTODEVICE = 25
+const SO_BINDTOIFINDEX = 62
+const SO_BPF_EXTENSIONS = 48
+const SO_BROADCAST = 6
+const SO_BSDCOMPAT = 14
+const SO_BUSY_POLL = 46
+const SO_BUSY_POLL_BUDGET = 70
+const SO_CNX_ADVICE = 53
+const SO_COOKIE = 57
+const SO_DEBUG = 1
+const SO_DETACH_BPF = 27
+const SO_DETACH_FILTER = 27
+const SO_DETACH_REUSEPORT_BPF = 68
+const SO_DOMAIN = 39
+const SO_DONTROUTE = 5
+const SO_ERROR = 4
+const SO_GET_FILTER = 26
+const SO_INCOMING_CPU = 49
+const SO_INCOMING_NAPI_ID = 56
+const SO_KEEPALIVE = 9
+const SO_LINGER = 13
+const SO_LOCK_FILTER = 44
+const SO_MARK = 36
+const SO_MAX_PACING_RATE = 47
+const SO_MEMINFO = 55
+const SO_NOFCS = 43
+const SO_NO_CHECK = 11
+const SO_OOBINLINE = 10
+const SO_PASSCRED = 16
+const SO_PASSSEC = 34
+const SO_PEEK_OFF = 42
+const SO_PEERCRED = 17
+const SO_PEERGROUPS = 59
+const SO_PEERNAME = 28
+const SO_PEERSEC = 31
+const SO_PREFER_BUSY_POLL = 69
+const SO_PRIORITY = 12
+const SO_PROTOCOL = 38
+const SO_RCVBUF = 8
+const SO_RCVBUFFORCE = 33
+const SO_RCVLOWAT = 18
+const SO_RCVTIMEO = 20
+const SO_REUSEADDR = 2
+const SO_REUSEPORT = 15
+const SO_RXQ_OVFL = 40
+const SO_SECURITY_AUTHENTICATION = 22
+const SO_SECURITY_ENCRYPTION_NETWORK = 24
+const SO_SECURITY_ENCRYPTION_TRANSPORT = 23
+const SO_SELECT_ERR_QUEUE = 45
+const SO_SNDBUF = 7
+const SO_SNDBUFFORCE = 32
+const SO_SNDLOWAT = 19
+const SO_SNDTIMEO = 21
+const SO_TIMESTAMP = 29
+const SO_TIMESTAMPING = 37
+const SO_TIMESTAMPNS = 35
+const SO_TXTIME = 61
+const SO_TYPE = 3
+const SO_WIFI_STATUS = 41
+const SO_ZEROCOPY = 60
 
 type Tsocklen_t = uint32
 
@@ -115492,14 +115218,12 @@ type Tsockaddr_storage = struct {
 	F__ss_align   uint64
 }
 
-var (
-	_lock2        [1]int32
-	_log_ident    [32]int8
-	_log_opt      int32
-	_log_facility = Int32FromInt32(1) << Int32FromInt32(3)
-	_log_mask     = int32(0xff)
-	_log_fd       = -int32(1)
-)
+var _lock2 [1]int32
+var _log_ident [32]int8
+var _log_opt int32
+var _log_facility = Int32FromInt32(1) << Int32FromInt32(3)
+var _log_mask = int32(0xff)
+var _log_fd = -int32(1)
 
 func Xsetlogmask(tls *TLS, maskpri int32) (r int32) {
 	if __ccgo_strace {
@@ -115547,7 +115271,7 @@ func ___openlog(tls *TLS) {
 	}
 }
 
-func Xopenlog(tls *TLS, ident uintptr, opt, facility int32) {
+func Xopenlog(tls *TLS, ident uintptr, opt int32, facility int32) {
 	if __ccgo_strace {
 		trc("tls=%v ident=%v opt=%v facility=%v, (%v:)", tls, ident, opt, facility, origin(2))
 	}
@@ -115645,7 +115369,7 @@ func ___vsyslog(tls *TLS, priority int32, message uintptr, ap Tva_list) {
 	_pthread_setcancelstate(tls, **(**int32)(__ccgo_up(bp)), uintptr(0))
 }
 
-func Xsyslog(tls *TLS, priority int32, message, va uintptr) {
+func Xsyslog(tls *TLS, priority int32, message uintptr, va uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v priority=%v message=%v va=%v, (%v:)", tls, priority, message, va, origin(2))
 	}
@@ -115713,15 +115437,13 @@ func Xmlockall(tls *TLS, flags int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall1(tls, int64(SYS_mlockall), int64(flags)))))
 }
 
-const (
-	OFF_MASK = 4095
-	UNIT     = 4096
-)
+const OFF_MASK = 4095
+const UNIT = 4096
 
 func _dummy5(tls *TLS) {
 }
 
-func X__mmap(tls *TLS, start uintptr, len1 Tsize_t, prot, flags, fd int32, off Toff_t) (r uintptr) {
+func X__mmap(tls *TLS, start uintptr, len1 Tsize_t, prot int32, flags int32, fd int32, off Toff_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v start=%v len1=%v prot=%v flags=%v fd=%v off=%v, (%v:)", tls, start, len1, prot, flags, fd, off, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -115747,7 +115469,7 @@ func X__mmap(tls *TLS, start uintptr, len1 Tsize_t, prot, flags, fd int32, off T
 	return uintptr(X__syscall_ret(tls, Uint64FromInt64(ret)))
 }
 
-func Xmmap(tls *TLS, start uintptr, len1 Tsize_t, prot, flags, fd int32, off Toff_t) (r uintptr) {
+func Xmmap(tls *TLS, start uintptr, len1 Tsize_t, prot int32, flags int32, fd int32, off Toff_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v start=%v len1=%v prot=%v flags=%v fd=%v off=%v, (%v:)", tls, start, len1, prot, flags, fd, off, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -115778,7 +115500,7 @@ func Xmprotect(tls *TLS, addr uintptr, len1 Tsize_t, prot int32) (r int32) {
 func _dummy6(tls *TLS) {
 }
 
-func X__mremap(tls *TLS, old_addr uintptr, old_len, new_len Tsize_t, flags int32, va uintptr) (r uintptr) {
+func X__mremap(tls *TLS, old_addr uintptr, old_len Tsize_t, new_len Tsize_t, flags int32, va uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v old_addr=%v old_len=%v new_len=%v flags=%v va=%v, (%v:)", tls, old_addr, old_len, new_len, flags, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -115800,7 +115522,7 @@ func X__mremap(tls *TLS, old_addr uintptr, old_len, new_len Tsize_t, flags int32
 	return uintptr(X__syscall_ret(tls, Uint64FromInt64(X__syscall5(tls, int64(SYS_mremap), int64(old_addr), Int64FromUint64(old_len), Int64FromUint64(new_len), int64(flags), int64(new_addr)))))
 }
 
-func Xmremap(tls *TLS, old_addr uintptr, old_len, new_len Tsize_t, flags int32, va uintptr) (r uintptr) {
+func Xmremap(tls *TLS, old_addr uintptr, old_len Tsize_t, new_len Tsize_t, flags int32, va uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v old_addr=%v old_len=%v new_len=%v flags=%v va=%v, (%v:)", tls, old_addr, old_len, new_len, flags, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -115863,7 +115585,7 @@ func Xposix_madvise(tls *TLS, addr uintptr, len1 Tsize_t, advice int32) (r int32
 	return int32(-X__syscall3(tls, int64(SYS_madvise), int64(addr), Int64FromUint64(len1), int64(advice)))
 }
 
-func X__shm_mapname(tls *TLS, name, buf uintptr) (r uintptr) {
+func X__shm_mapname(tls *TLS, name uintptr, buf uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v buf=%v, (%v:)", tls, name, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -115929,11 +115651,9 @@ func Xshm_unlink(tls *TLS, name uintptr) (r int32) {
 	return Xunlink(tls, name)
 }
 
-const (
-	SA     = 194
-	SB     = 244
-	bittab = 0
-)
+const SA = 194
+const SB = 244
+const bittab = 0
 
 func Xbtowc(tls *TLS, c int32) (r Twint_t) {
 	if __ccgo_strace {
@@ -116042,7 +115762,7 @@ func Xmbrlen(tls *TLS, s uintptr, n Tsize_t, st uintptr) (r Tsize_t) {
 
 var _internal uint32
 
-func Xmbrtoc16(tls *TLS, pc16, s uintptr, n Tsize_t, ps uintptr) (r Tsize_t) {
+func Xmbrtoc16(tls *TLS, pc16 uintptr, s uintptr, n Tsize_t, ps uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v pc16=%v s=%v n=%v ps=%v, (%v:)", tls, pc16, s, n, ps, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116084,7 +115804,7 @@ func Xmbrtoc16(tls *TLS, pc16, s uintptr, n Tsize_t, ps uintptr) (r Tsize_t) {
 
 var _internal_state1 uint32
 
-func Xmbrtoc32(tls *TLS, pc32, s uintptr, n Tsize_t, ps uintptr) (r Tsize_t) {
+func Xmbrtoc32(tls *TLS, pc32 uintptr, s uintptr, n Tsize_t, ps uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v pc32=%v s=%v n=%v ps=%v, (%v:)", tls, pc32, s, n, ps, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116109,7 +115829,7 @@ func Xmbrtoc32(tls *TLS, pc32, s uintptr, n Tsize_t, ps uintptr) (r Tsize_t) {
 
 var _internal_state2 uint32
 
-func Xmbrtowc(tls *TLS, wc, src uintptr, n Tsize_t, st uintptr) (r Tsize_t) {
+func Xmbrtowc(tls *TLS, wc uintptr, src uintptr, n Tsize_t, st uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v wc=%v src=%v n=%v st=%v, (%v:)", tls, wc, src, n, st, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116208,7 +115928,7 @@ func Xmbsinit(tls *TLS, st uintptr) (r int32) {
 	return BoolInt32(!(st != 0) || !(**(**uint32)(__ccgo_up(st)) != 0))
 }
 
-func Xmbsnrtowcs(tls *TLS, wcs, src uintptr, n, wn Tsize_t, st uintptr) (r Tsize_t) {
+func Xmbsnrtowcs(tls *TLS, wcs uintptr, src uintptr, n Tsize_t, wn Tsize_t, st uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v wcs=%v src=%v n=%v wn=%v st=%v, (%v:)", tls, wcs, src, n, wn, st, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116293,7 +116013,7 @@ func Xmbsnrtowcs(tls *TLS, wcs, src uintptr, n, wn Tsize_t, st uintptr) (r Tsize
 	return cnt
 }
 
-func Xmbsrtowcs(tls *TLS, ws, src uintptr, wn Tsize_t, st uintptr) (r Tsize_t) {
+func Xmbsrtowcs(tls *TLS, ws uintptr, src uintptr, wn Tsize_t, st uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v ws=%v src=%v wn=%v st=%v, (%v:)", tls, ws, src, wn, st, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116508,7 +116228,7 @@ _8:
 	return Uint64FromInt32(-Int32FromInt32(1))
 }
 
-func Xmbstowcs(tls *TLS, ws, _s uintptr, wn Tsize_t) (r Tsize_t) {
+func Xmbstowcs(tls *TLS, ws uintptr, _s uintptr, wn Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v ws=%v _s=%v wn=%v, (%v:)", tls, ws, _s, wn, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116519,7 +116239,7 @@ func Xmbstowcs(tls *TLS, ws, _s uintptr, wn Tsize_t) (r Tsize_t) {
 	return Xmbsrtowcs(tls, ws, bp, wn, uintptr(0))
 }
 
-func Xmbtowc(tls *TLS, wc, src uintptr, n Tsize_t) (r int32) {
+func Xmbtowc(tls *TLS, wc uintptr, src uintptr, n Tsize_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v wc=%v src=%v n=%v, (%v:)", tls, wc, src, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116668,7 +116388,7 @@ func Xwcrtomb(tls *TLS, s uintptr, wc Twchar_t, st uintptr) (r Tsize_t) {
 	return Uint64FromInt32(-Int32FromInt32(1))
 }
 
-func Xwcsnrtombs(tls *TLS, dst, wcs uintptr, wn, n Tsize_t, st uintptr) (r Tsize_t) {
+func Xwcsnrtombs(tls *TLS, dst uintptr, wcs uintptr, wn Tsize_t, n Tsize_t, st uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v dst=%v wcs=%v wn=%v n=%v st=%v, (%v:)", tls, dst, wcs, wn, n, st, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116719,7 +116439,7 @@ func Xwcsnrtombs(tls *TLS, dst, wcs uintptr, wn, n Tsize_t, st uintptr) (r Tsize
 	return cnt
 }
 
-func Xwcsrtombs(tls *TLS, s, ws uintptr, n Tsize_t, st uintptr) (r Tsize_t) {
+func Xwcsrtombs(tls *TLS, s uintptr, ws uintptr, n Tsize_t, st uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v ws=%v n=%v st=%v, (%v:)", tls, s, ws, n, st, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116803,7 +116523,7 @@ func Xwcsrtombs(tls *TLS, s, ws uintptr, n Tsize_t, st uintptr) (r Tsize_t) {
 	return N
 }
 
-func Xwcstombs(tls *TLS, s, ws uintptr, n Tsize_t) (r Tsize_t) {
+func Xwcstombs(tls *TLS, s uintptr, ws uintptr, n Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v ws=%v n=%v, (%v:)", tls, s, ws, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -116846,7 +116566,7 @@ func Xwctomb(tls *TLS, s uintptr, wc Twchar_t) (r int32) {
 	return Int32FromUint64(Xwcrtomb(tls, s, wc, uintptr(0)))
 }
 
-func Xaccept(tls *TLS, fd int32, addr, len1 uintptr) (r1 int32) {
+func Xaccept(tls *TLS, fd int32, addr uintptr, len1 uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v addr=%v len1=%v, (%v:)", tls, fd, addr, len1, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -116889,7 +116609,7 @@ type Tmmsghdr = struct {
 	Fmsg_len uint32
 }
 
-func Xaccept4(tls *TLS, fd int32, addr, len1 uintptr, flg int32) (r1 int32) {
+func Xaccept4(tls *TLS, fd int32, addr uintptr, len1 uintptr, flg int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v addr=%v len1=%v flg=%v, (%v:)", tls, fd, addr, len1, flg, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -117006,571 +116726,567 @@ _9:
 	return int32(X__syscall_ret(tls, Uint64FromInt64(v8)))
 }
 
-const (
-	ADD                            = 0
-	C_ANY                          = 0
-	C_CHAOS                        = 0
-	C_HS                           = 0
-	C_IN                           = 0
-	C_NONE                         = 0
-	DELETE                         = 0
-	FORMERR                        = 0
-	GETLONG                        = 0
-	GETSHORT                       = 0
-	HFIXEDSZ                       = 12
-	IN6ADDRSZ                      = 16
-	INADDRSZ                       = 4
-	INDIR_MASK                     = 192
-	INET6_ADDRSTRLEN               = 46
-	INET_ADDRSTRLEN                = 16
-	INT16SZ                        = 2
-	INT32SZ                        = 4
-	INT8SZ                         = 1
-	IN_CLASSA_HOST                 = 16777215
-	IN_CLASSA_MAX                  = 128
-	IN_CLASSA_NET                  = 4278190080
-	IN_CLASSA_NSHIFT               = 24
-	IN_CLASSB_HOST                 = 65535
-	IN_CLASSB_MAX                  = 65536
-	IN_CLASSB_NET                  = 4294901760
-	IN_CLASSB_NSHIFT               = 16
-	IN_CLASSC_HOST                 = 255
-	IN_CLASSC_NET                  = 4294967040
-	IN_CLASSC_NSHIFT               = 8
-	IN_LOOPBACKNET                 = 127
-	IPPORT_RESERVED                = 1024
-	IPPROTO_AH                     = 51
-	IPPROTO_BEETPH                 = 94
-	IPPROTO_COMP                   = 108
-	IPPROTO_DCCP                   = 33
-	IPPROTO_DSTOPTS                = 60
-	IPPROTO_EGP                    = 8
-	IPPROTO_ENCAP                  = 98
-	IPPROTO_ESP                    = 50
-	IPPROTO_ETHERNET               = 143
-	IPPROTO_FRAGMENT               = 44
-	IPPROTO_GRE                    = 47
-	IPPROTO_HOPOPTS                = 0
-	IPPROTO_ICMP                   = 1
-	IPPROTO_ICMPV6                 = 58
-	IPPROTO_IDP                    = 22
-	IPPROTO_IGMP                   = 2
-	IPPROTO_IP                     = 0
-	IPPROTO_IPIP                   = 4
-	IPPROTO_IPV6                   = 41
-	IPPROTO_MAX                    = 263
-	IPPROTO_MH                     = 135
-	IPPROTO_MPLS                   = 137
-	IPPROTO_MPTCP                  = 262
-	IPPROTO_MTP                    = 92
-	IPPROTO_NONE                   = 59
-	IPPROTO_PIM                    = 103
-	IPPROTO_PUP                    = 12
-	IPPROTO_RAW                    = 255
-	IPPROTO_ROUTING                = 43
-	IPPROTO_RSVP                   = 46
-	IPPROTO_SCTP                   = 132
-	IPPROTO_TCP                    = 6
-	IPPROTO_TP                     = 29
-	IPPROTO_UDP                    = 17
-	IPPROTO_UDPLITE                = 136
-	IPV6_2292DSTOPTS               = 4
-	IPV6_2292HOPLIMIT              = 8
-	IPV6_2292HOPOPTS               = 3
-	IPV6_2292PKTINFO               = 2
-	IPV6_2292PKTOPTIONS            = 6
-	IPV6_2292RTHDR                 = 5
-	IPV6_ADDRFORM                  = 1
-	IPV6_ADDR_PREFERENCES          = 72
-	IPV6_ADD_MEMBERSHIP            = 20
-	IPV6_AUTHHDR                   = 10
-	IPV6_AUTOFLOWLABEL             = 70
-	IPV6_CHECKSUM                  = 7
-	IPV6_DONTFRAG                  = 62
-	IPV6_DROP_MEMBERSHIP           = 21
-	IPV6_DSTOPTS                   = 59
-	IPV6_FREEBIND                  = 78
-	IPV6_HDRINCL                   = 36
-	IPV6_HOPLIMIT                  = 52
-	IPV6_HOPOPTS                   = 54
-	IPV6_IPSEC_POLICY              = 34
-	IPV6_JOIN_ANYCAST              = 27
-	IPV6_JOIN_GROUP                = 20
-	IPV6_LEAVE_ANYCAST             = 28
-	IPV6_LEAVE_GROUP               = 21
-	IPV6_MINHOPCOUNT               = 73
-	IPV6_MTU                       = 24
-	IPV6_MTU_DISCOVER              = 23
-	IPV6_MULTICAST_ALL             = 29
-	IPV6_MULTICAST_HOPS            = 18
-	IPV6_MULTICAST_IF              = 17
-	IPV6_MULTICAST_LOOP            = 19
-	IPV6_NEXTHOP                   = 9
-	IPV6_ORIGDSTADDR               = 74
-	IPV6_PATHMTU                   = 61
-	IPV6_PKTINFO                   = 50
-	IPV6_PMTUDISC_DO               = 2
-	IPV6_PMTUDISC_DONT             = 0
-	IPV6_PMTUDISC_INTERFACE        = 4
-	IPV6_PMTUDISC_OMIT             = 5
-	IPV6_PMTUDISC_PROBE            = 3
-	IPV6_PMTUDISC_WANT             = 1
-	IPV6_PREFER_SRC_CGA            = 8
-	IPV6_PREFER_SRC_COA            = 4
-	IPV6_PREFER_SRC_HOME           = 1024
-	IPV6_PREFER_SRC_NONCGA         = 2048
-	IPV6_PREFER_SRC_PUBLIC         = 2
-	IPV6_PREFER_SRC_PUBTMP_DEFAULT = 256
-	IPV6_PREFER_SRC_TMP            = 1
-	IPV6_RECVDSTOPTS               = 58
-	IPV6_RECVERR                   = 25
-	IPV6_RECVFRAGSIZE              = 77
-	IPV6_RECVHOPLIMIT              = 51
-	IPV6_RECVHOPOPTS               = 53
-	IPV6_RECVORIGDSTADDR           = 74
-	IPV6_RECVPATHMTU               = 60
-	IPV6_RECVPKTINFO               = 49
-	IPV6_RECVRTHDR                 = 56
-	IPV6_RECVTCLASS                = 66
-	IPV6_ROUTER_ALERT              = 22
-	IPV6_ROUTER_ALERT_ISOLATE      = 30
-	IPV6_RTHDR                     = 57
-	IPV6_RTHDRDSTOPTS              = 55
-	IPV6_RTHDR_LOOSE               = 0
-	IPV6_RTHDR_STRICT              = 1
-	IPV6_RTHDR_TYPE_0              = 0
-	IPV6_RXDSTOPTS                 = 59
-	IPV6_RXHOPOPTS                 = 54
-	IPV6_TCLASS                    = 67
-	IPV6_TRANSPARENT               = 75
-	IPV6_UNICAST_HOPS              = 16
-	IPV6_UNICAST_IF                = 76
-	IPV6_V6ONLY                    = 26
-	IPV6_XFRM_POLICY               = 35
-	IP_ADD_MEMBERSHIP              = 35
-	IP_ADD_SOURCE_MEMBERSHIP       = 39
-	IP_BIND_ADDRESS_NO_PORT        = 24
-	IP_BLOCK_SOURCE                = 38
-	IP_CHECKSUM                    = 23
-	IP_DEFAULT_MULTICAST_LOOP      = 1
-	IP_DEFAULT_MULTICAST_TTL       = 1
-	IP_DROP_MEMBERSHIP             = 36
-	IP_DROP_SOURCE_MEMBERSHIP      = 40
-	IP_FREEBIND                    = 15
-	IP_HDRINCL                     = 3
-	IP_IPSEC_POLICY                = 16
-	IP_MAX_MEMBERSHIPS             = 20
-	IP_MINTTL                      = 21
-	IP_MSFILTER                    = 41
-	IP_MTU                         = 14
-	IP_MTU_DISCOVER                = 10
-	IP_MULTICAST_ALL               = 49
-	IP_MULTICAST_IF                = 32
-	IP_MULTICAST_LOOP              = 34
-	IP_MULTICAST_TTL               = 33
-	IP_NODEFRAG                    = 22
-	IP_OPTIONS                     = 4
-	IP_ORIGDSTADDR                 = 20
-	IP_PASSSEC                     = 18
-	IP_PKTINFO                     = 8
-	IP_PKTOPTIONS                  = 9
-	IP_PMTUDISC                    = 10
-	IP_PMTUDISC_DO                 = 2
-	IP_PMTUDISC_DONT               = 0
-	IP_PMTUDISC_INTERFACE          = 4
-	IP_PMTUDISC_OMIT               = 5
-	IP_PMTUDISC_PROBE              = 3
-	IP_PMTUDISC_WANT               = 1
-	IP_RECVERR                     = 11
-	IP_RECVERR_RFC4884             = 26
-	IP_RECVFRAGSIZE                = 25
-	IP_RECVOPTS                    = 6
-	IP_RECVORIGDSTADDR             = 20
-	IP_RECVRETOPTS                 = 7
-	IP_RECVTOS                     = 13
-	IP_RECVTTL                     = 12
-	IP_RETOPTS                     = 7
-	IP_ROUTER_ALERT                = 5
-	IP_TOS                         = 1
-	IP_TRANSPARENT                 = 19
-	IP_TTL                         = 2
-	IP_UNBLOCK_SOURCE              = 37
-	IP_UNICAST_IF                  = 50
-	IP_XFRM_POLICY                 = 17
-	IQUERY                         = 0
-	LOCALDOMAINPARTS               = 2
-	MAXCDNAME                      = 255
-	MAXDFLSRCH                     = 3
-	MAXDNAME                       = 1025
-	MAXDNSRCH                      = 6
-	MAXLABEL                       = 63
-	MAXNS                          = 3
-	MAXRESOLVSORT                  = 10
-	NAMESERVER_PORT                = 53
-	NOERROR                        = 0
-	NOTAUTH                        = 0
-	NOTIMP                         = 0
-	NOTZONE                        = 0
-	NS_ALG_DH                      = 2
-	NS_ALG_DSA                     = 3
-	NS_ALG_DSS                     = 3
-	NS_ALG_EXPIRE_ONLY             = 253
-	NS_ALG_MD5RSA                  = 1
-	NS_ALG_PRIVATE_OID             = 254
-	NS_CMPRSFLGS                   = 192
-	NS_DEFAULTPORT                 = 53
-	NS_DSA_MAX_BYTES               = 405
-	NS_DSA_MIN_SIZE                = 213
-	NS_DSA_SIG_SIZE                = 41
-	NS_HFIXEDSZ                    = 12
-	NS_IN6ADDRSZ                   = 16
-	NS_INADDRSZ                    = 4
-	NS_INT16SZ                     = 2
-	NS_INT32SZ                     = 4
-	NS_INT8SZ                      = 1
-	NS_KEY_EXTENDED_FLAGS          = 4096
-	NS_KEY_NAME_ENTITY             = 512
-	NS_KEY_NAME_RESERVED           = 768
-	NS_KEY_NAME_TYPE               = 768
-	NS_KEY_NAME_USER               = 0
-	NS_KEY_NAME_ZONE               = 256
-	NS_KEY_NO_AUTH                 = 32768
-	NS_KEY_NO_CONF                 = 16384
-	NS_KEY_PROT_ANY                = 255
-	NS_KEY_PROT_DNSSEC             = 3
-	NS_KEY_PROT_EMAIL              = 2
-	NS_KEY_PROT_IPSEC              = 4
-	NS_KEY_PROT_TLS                = 1
-	NS_KEY_RESERVED10              = 32
-	NS_KEY_RESERVED11              = 16
-	NS_KEY_RESERVED2               = 8192
-	NS_KEY_RESERVED4               = 2048
-	NS_KEY_RESERVED5               = 1024
-	NS_KEY_RESERVED8               = 128
-	NS_KEY_RESERVED9               = 64
-	NS_KEY_RESERVED_BITMASK        = 11504
-	NS_KEY_RESERVED_BITMASK2       = 65535
-	NS_KEY_SIGNATORYMASK           = 15
-	NS_KEY_TYPEMASK                = 49152
-	NS_KEY_TYPE_AUTH_CONF          = 0
-	NS_KEY_TYPE_AUTH_ONLY          = 16384
-	NS_KEY_TYPE_CONF_ONLY          = 32768
-	NS_KEY_TYPE_NO_KEY             = 49152
-	NS_MAXCDNAME                   = 255
-	NS_MAXDNAME                    = 1025
-	NS_MAXLABEL                    = 63
-	NS_MAXMSG                      = 65535
-	NS_MD5RSA_MAX_BASE64           = 10928
-	NS_MD5RSA_MAX_BITS             = 4096
-	NS_MD5RSA_MAX_BYTES            = 8195
-	NS_MD5RSA_MAX_SIZE             = 512
-	NS_MD5RSA_MIN_BITS             = 512
-	NS_MD5RSA_MIN_SIZE             = 64
-	NS_NOTIFY_OP                   = 0
-	NS_NXT_BITS                    = 8
-	NS_NXT_MAX                     = 127
-	NS_OPT_DNSSEC_OK               = 32768
-	NS_OPT_NSID                    = 3
-	NS_PACKETSZ                    = 512
-	NS_QFIXEDSZ                    = 4
-	NS_RRFIXEDSZ                   = 10
-	NS_SIG_ALG                     = 2
-	NS_SIG_EXPIR                   = 8
-	NS_SIG_FOOT                    = 16
-	NS_SIG_LABELS                  = 3
-	NS_SIG_OTTL                    = 4
-	NS_SIG_SIGNED                  = 12
-	NS_SIG_SIGNER                  = 18
-	NS_SIG_TYPE                    = 0
-	NS_TSIG_ALG_HMAC_MD5           = "HMAC-MD5.SIG-ALG.REG.INT"
-	NS_TSIG_ERROR_FORMERR          = -12
-	NS_TSIG_ERROR_NO_SPACE         = -11
-	NS_TSIG_ERROR_NO_TSIG          = -10
-	NS_TSIG_FUDGE                  = 300
-	NS_TSIG_TCP_COUNT              = 100
-	NS_UPDATE_OP                   = 0
-	NXDOMAIN                       = 0
-	NXRRSET                        = 0
-	PACKETSZ                       = 512
-	PRIX16                         = "X"
-	PRIX32                         = "X"
-	PRIX8                          = "X"
-	PRIXFAST16                     = "X"
-	PRIXFAST32                     = "X"
-	PRIXFAST8                      = "X"
-	PRIXLEAST16                    = "X"
-	PRIXLEAST32                    = "X"
-	PRIXLEAST8                     = "X"
-	PRId16                         = "d"
-	PRId32                         = "d"
-	PRId8                          = "d"
-	PRIdFAST16                     = "d"
-	PRIdFAST32                     = "d"
-	PRIdFAST8                      = "d"
-	PRIdLEAST16                    = "d"
-	PRIdLEAST32                    = "d"
-	PRIdLEAST8                     = "d"
-	PRIi16                         = "i"
-	PRIi32                         = "i"
-	PRIi8                          = "i"
-	PRIiFAST16                     = "i"
-	PRIiFAST32                     = "i"
-	PRIiFAST8                      = "i"
-	PRIiLEAST16                    = "i"
-	PRIiLEAST32                    = "i"
-	PRIiLEAST8                     = "i"
-	PRIo16                         = "o"
-	PRIo32                         = "o"
-	PRIo8                          = "o"
-	PRIoFAST16                     = "o"
-	PRIoFAST32                     = "o"
-	PRIoFAST8                      = "o"
-	PRIoLEAST16                    = "o"
-	PRIoLEAST32                    = "o"
-	PRIoLEAST8                     = "o"
-	PRIu16                         = "u"
-	PRIu32                         = "u"
-	PRIu8                          = "u"
-	PRIuFAST16                     = "u"
-	PRIuFAST32                     = "u"
-	PRIuFAST8                      = "u"
-	PRIuLEAST16                    = "u"
-	PRIuLEAST32                    = "u"
-	PRIuLEAST8                     = "u"
-	PRIx16                         = "x"
-	PRIx32                         = "x"
-	PRIx8                          = "x"
-	PRIxFAST16                     = "x"
-	PRIxFAST32                     = "x"
-	PRIxFAST8                      = "x"
-	PRIxLEAST16                    = "x"
-	PRIxLEAST32                    = "x"
-	PRIxLEAST8                     = "x"
-	PUTLONG                        = 0
-	PUTSHORT                       = 0
-	QFIXEDSZ                       = 4
-	QUERY                          = 0
-	REFUSED                        = 0
-	RES_AAONLY                     = 4
-	RES_BLAST                      = 131072
-	RES_DEBUG                      = 2
-	RES_DEFAULT                    = 524992
-	RES_DEFNAMES                   = 128
-	RES_DFLRETRY                   = 2
-	RES_DNSRCH                     = 512
-	RES_EXHAUSTIVE                 = 1
-	RES_F_CONN                     = 2
-	RES_F_EDNS0ERR                 = 4
-	RES_F_VC                       = 1
-	RES_IGNTC                      = 32
-	RES_INIT                       = 1
-	RES_INSECURE1                  = 1024
-	RES_INSECURE2                  = 2048
-	RES_KEEPTSIG                   = 65536
-	RES_MAXNDOTS                   = 15
-	RES_MAXRETRANS                 = 30
-	RES_MAXRETRY                   = 5
-	RES_MAXTIME                    = 65535
-	RES_NOALIASES                  = 4096
-	RES_NOCHECKNAME                = 32768
-	RES_NOIP6DOTINT                = 524288
-	RES_PRF_ADD                    = 128
-	RES_PRF_ANS                    = 32
-	RES_PRF_AUTH                   = 64
-	RES_PRF_CLASS                  = 4
-	RES_PRF_CMD                    = 8
-	RES_PRF_HEAD1                  = 256
-	RES_PRF_HEAD2                  = 512
-	RES_PRF_HEADX                  = 2048
-	RES_PRF_INIT                   = 16384
-	RES_PRF_QUERY                  = 4096
-	RES_PRF_QUES                   = 16
-	RES_PRF_REPLY                  = 8192
-	RES_PRF_STATS                  = 1
-	RES_PRF_TTLID                  = 1024
-	RES_PRF_UPDATE                 = 2
-	RES_PRIMARY                    = 16
-	RES_RECURSE                    = 64
-	RES_ROTATE                     = 16384
-	RES_SNGLKUP                    = 2097152
-	RES_SNGLKUPREOP                = 4194304
-	RES_STAYOPEN                   = 256
-	RES_TIMEOUT                    = 5
-	RES_USEBSTRING                 = 262144
-	RES_USEVC                      = 8
-	RES_USE_DNSSEC                 = 8388608
-	RES_USE_EDNS0                  = 1048576
-	RES_USE_INET6                  = 8192
-	RRFIXEDSZ                      = 10
-	SCNd16                         = "hd"
-	SCNd32                         = "d"
-	SCNd8                          = "hhd"
-	SCNdFAST16                     = "d"
-	SCNdFAST32                     = "d"
-	SCNdFAST8                      = "hhd"
-	SCNdLEAST16                    = "hd"
-	SCNdLEAST32                    = "d"
-	SCNdLEAST8                     = "hhd"
-	SCNi16                         = "hi"
-	SCNi32                         = "i"
-	SCNi8                          = "hhi"
-	SCNiFAST16                     = "i"
-	SCNiFAST32                     = "i"
-	SCNiFAST8                      = "hhi"
-	SCNiLEAST16                    = "hi"
-	SCNiLEAST32                    = "i"
-	SCNiLEAST8                     = "hhi"
-	SCNo16                         = "ho"
-	SCNo32                         = "o"
-	SCNo8                          = "hho"
-	SCNoFAST16                     = "o"
-	SCNoFAST32                     = "o"
-	SCNoFAST8                      = "hho"
-	SCNoLEAST16                    = "ho"
-	SCNoLEAST32                    = "o"
-	SCNoLEAST8                     = "hho"
-	SCNu16                         = "hu"
-	SCNu32                         = "u"
-	SCNu8                          = "hhu"
-	SCNuFAST16                     = "u"
-	SCNuFAST32                     = "u"
-	SCNuFAST8                      = "hhu"
-	SCNuLEAST16                    = "hu"
-	SCNuLEAST32                    = "u"
-	SCNuLEAST8                     = "hhu"
-	SCNx16                         = "hx"
-	SCNx32                         = "x"
-	SCNx8                          = "hhx"
-	SCNxFAST16                     = "x"
-	SCNxFAST32                     = "x"
-	SCNxFAST8                      = "hhx"
-	SCNxLEAST16                    = "hx"
-	SCNxLEAST32                    = "x"
-	SCNxLEAST8                     = "hhx"
-	SERVFAIL                       = 0
-	STATUS                         = 0
-	S_ADDT                         = 0
-	S_PREREQ                       = 0
-	S_UPDATE                       = 0
-	S_ZONE                         = 0
-	T_A                            = 0
-	T_A6                           = 0
-	T_AAAA                         = 0
-	T_AFSDB                        = 0
-	T_ANY                          = 0
-	T_ATMA                         = 0
-	T_AVC                          = 0
-	T_AXFR                         = 0
-	T_CAA                          = 0
-	T_CDNSKEY                      = 0
-	T_CDS                          = 0
-	T_CNAME                        = 0
-	T_CSYNC                        = 0
-	T_DHCID                        = 0
-	T_DLV                          = 0
-	T_DNAME                        = 0
-	T_DNSKEY                       = 0
-	T_DS                           = 0
-	T_EID                          = 0
-	T_EUI48                        = 0
-	T_EUI64                        = 0
-	T_GID                          = 0
-	T_GPOS                         = 0
-	T_HINFO                        = 0
-	T_HIP                          = 0
-	T_IPSECKEY                     = 0
-	T_ISDN                         = 0
-	T_IXFR                         = 0
-	T_KEY                          = 0
-	T_L32                          = 0
-	T_L64                          = 0
-	T_LOC                          = 0
-	T_LP                           = 0
-	T_MAILA                        = 0
-	T_MAILB                        = 0
-	T_MB                           = 0
-	T_MD                           = 0
-	T_MF                           = 0
-	T_MG                           = 0
-	T_MINFO                        = 0
-	T_MR                           = 0
-	T_MX                           = 0
-	T_NAPTR                        = 0
-	T_NID                          = 0
-	T_NIMLOC                       = 0
-	T_NINFO                        = 0
-	T_NS                           = 0
-	T_NSAP                         = 0
-	T_NSAP_PTR                     = 0
-	T_NSEC                         = 0
-	T_NSEC3                        = 0
-	T_NSEC3PARAM                   = 0
-	T_NULL                         = 0
-	T_NXT                          = 0
-	T_OPENPGPKEY                   = 0
-	T_PTR                          = 0
-	T_PX                           = 0
-	T_RKEY                         = 0
-	T_RP                           = 0
-	T_RRSIG                        = 0
-	T_RT                           = 0
-	T_SIG                          = 0
-	T_SMIMEA                       = 0
-	T_SOA                          = 0
-	T_SPF                          = 0
-	T_SRV                          = 0
-	T_SSHFP                        = 0
-	T_TA                           = 0
-	T_TALINK                       = 0
-	T_TKEY                         = 0
-	T_TLSA                         = 0
-	T_TSIG                         = 0
-	T_TXT                          = 0
-	T_UID                          = 0
-	T_UINFO                        = 0
-	T_UNSPEC                       = 0
-	T_URI                          = 0
-	T_WKS                          = 0
-	T_X25                          = 0
-	YXDOMAIN                       = 0
-	YXRRSET                        = 0
-	_PATH_RESCONF                  = "/etc/resolv.conf"
-	__BIND                         = 19950621
-	__NAMESER                      = 19991006
-	__PRI64                        = "l"
-	__PRIPTR                       = "l"
-	__RES                          = 19960801
-	__UAPI_DEF_IN6_ADDR            = 0
-	__UAPI_DEF_IN6_ADDR_ALT        = 0
-	__UAPI_DEF_IN6_PKTINFO         = 0
-	__UAPI_DEF_IN_ADDR             = 0
-	__UAPI_DEF_IN_CLASS            = 0
-	__UAPI_DEF_IN_IPPROTO          = 0
-	__UAPI_DEF_IN_PKTINFO          = 0
-	__UAPI_DEF_IP6_MTUINFO         = 0
-	__UAPI_DEF_IPPROTO_V6          = 0
-	__UAPI_DEF_IPV6_MREQ           = 0
-	__UAPI_DEF_IPV6_OPTIONS        = 0
-	__UAPI_DEF_IP_MREQ             = 0
-	__UAPI_DEF_SOCKADDR_IN         = 0
-	__UAPI_DEF_SOCKADDR_IN6        = 0
-	_res                           = 0
-)
+const ADD = 0
+const C_ANY = 0
+const C_CHAOS = 0
+const C_HS = 0
+const C_IN = 0
+const C_NONE = 0
+const DELETE = 0
+const FORMERR = 0
+const GETLONG = 0
+const GETSHORT = 0
+const HFIXEDSZ = 12
+const IN6ADDRSZ = 16
+const INADDRSZ = 4
+const INDIR_MASK = 192
+const INET6_ADDRSTRLEN = 46
+const INET_ADDRSTRLEN = 16
+const INT16SZ = 2
+const INT32SZ = 4
+const INT8SZ = 1
+const IN_CLASSA_HOST = 16777215
+const IN_CLASSA_MAX = 128
+const IN_CLASSA_NET = 4278190080
+const IN_CLASSA_NSHIFT = 24
+const IN_CLASSB_HOST = 65535
+const IN_CLASSB_MAX = 65536
+const IN_CLASSB_NET = 4294901760
+const IN_CLASSB_NSHIFT = 16
+const IN_CLASSC_HOST = 255
+const IN_CLASSC_NET = 4294967040
+const IN_CLASSC_NSHIFT = 8
+const IN_LOOPBACKNET = 127
+const IPPORT_RESERVED = 1024
+const IPPROTO_AH = 51
+const IPPROTO_BEETPH = 94
+const IPPROTO_COMP = 108
+const IPPROTO_DCCP = 33
+const IPPROTO_DSTOPTS = 60
+const IPPROTO_EGP = 8
+const IPPROTO_ENCAP = 98
+const IPPROTO_ESP = 50
+const IPPROTO_ETHERNET = 143
+const IPPROTO_FRAGMENT = 44
+const IPPROTO_GRE = 47
+const IPPROTO_HOPOPTS = 0
+const IPPROTO_ICMP = 1
+const IPPROTO_ICMPV6 = 58
+const IPPROTO_IDP = 22
+const IPPROTO_IGMP = 2
+const IPPROTO_IP = 0
+const IPPROTO_IPIP = 4
+const IPPROTO_IPV6 = 41
+const IPPROTO_MAX = 263
+const IPPROTO_MH = 135
+const IPPROTO_MPLS = 137
+const IPPROTO_MPTCP = 262
+const IPPROTO_MTP = 92
+const IPPROTO_NONE = 59
+const IPPROTO_PIM = 103
+const IPPROTO_PUP = 12
+const IPPROTO_RAW = 255
+const IPPROTO_ROUTING = 43
+const IPPROTO_RSVP = 46
+const IPPROTO_SCTP = 132
+const IPPROTO_TCP = 6
+const IPPROTO_TP = 29
+const IPPROTO_UDP = 17
+const IPPROTO_UDPLITE = 136
+const IPV6_2292DSTOPTS = 4
+const IPV6_2292HOPLIMIT = 8
+const IPV6_2292HOPOPTS = 3
+const IPV6_2292PKTINFO = 2
+const IPV6_2292PKTOPTIONS = 6
+const IPV6_2292RTHDR = 5
+const IPV6_ADDRFORM = 1
+const IPV6_ADDR_PREFERENCES = 72
+const IPV6_ADD_MEMBERSHIP = 20
+const IPV6_AUTHHDR = 10
+const IPV6_AUTOFLOWLABEL = 70
+const IPV6_CHECKSUM = 7
+const IPV6_DONTFRAG = 62
+const IPV6_DROP_MEMBERSHIP = 21
+const IPV6_DSTOPTS = 59
+const IPV6_FREEBIND = 78
+const IPV6_HDRINCL = 36
+const IPV6_HOPLIMIT = 52
+const IPV6_HOPOPTS = 54
+const IPV6_IPSEC_POLICY = 34
+const IPV6_JOIN_ANYCAST = 27
+const IPV6_JOIN_GROUP = 20
+const IPV6_LEAVE_ANYCAST = 28
+const IPV6_LEAVE_GROUP = 21
+const IPV6_MINHOPCOUNT = 73
+const IPV6_MTU = 24
+const IPV6_MTU_DISCOVER = 23
+const IPV6_MULTICAST_ALL = 29
+const IPV6_MULTICAST_HOPS = 18
+const IPV6_MULTICAST_IF = 17
+const IPV6_MULTICAST_LOOP = 19
+const IPV6_NEXTHOP = 9
+const IPV6_ORIGDSTADDR = 74
+const IPV6_PATHMTU = 61
+const IPV6_PKTINFO = 50
+const IPV6_PMTUDISC_DO = 2
+const IPV6_PMTUDISC_DONT = 0
+const IPV6_PMTUDISC_INTERFACE = 4
+const IPV6_PMTUDISC_OMIT = 5
+const IPV6_PMTUDISC_PROBE = 3
+const IPV6_PMTUDISC_WANT = 1
+const IPV6_PREFER_SRC_CGA = 8
+const IPV6_PREFER_SRC_COA = 4
+const IPV6_PREFER_SRC_HOME = 1024
+const IPV6_PREFER_SRC_NONCGA = 2048
+const IPV6_PREFER_SRC_PUBLIC = 2
+const IPV6_PREFER_SRC_PUBTMP_DEFAULT = 256
+const IPV6_PREFER_SRC_TMP = 1
+const IPV6_RECVDSTOPTS = 58
+const IPV6_RECVERR = 25
+const IPV6_RECVFRAGSIZE = 77
+const IPV6_RECVHOPLIMIT = 51
+const IPV6_RECVHOPOPTS = 53
+const IPV6_RECVORIGDSTADDR = 74
+const IPV6_RECVPATHMTU = 60
+const IPV6_RECVPKTINFO = 49
+const IPV6_RECVRTHDR = 56
+const IPV6_RECVTCLASS = 66
+const IPV6_ROUTER_ALERT = 22
+const IPV6_ROUTER_ALERT_ISOLATE = 30
+const IPV6_RTHDR = 57
+const IPV6_RTHDRDSTOPTS = 55
+const IPV6_RTHDR_LOOSE = 0
+const IPV6_RTHDR_STRICT = 1
+const IPV6_RTHDR_TYPE_0 = 0
+const IPV6_RXDSTOPTS = 59
+const IPV6_RXHOPOPTS = 54
+const IPV6_TCLASS = 67
+const IPV6_TRANSPARENT = 75
+const IPV6_UNICAST_HOPS = 16
+const IPV6_UNICAST_IF = 76
+const IPV6_V6ONLY = 26
+const IPV6_XFRM_POLICY = 35
+const IP_ADD_MEMBERSHIP = 35
+const IP_ADD_SOURCE_MEMBERSHIP = 39
+const IP_BIND_ADDRESS_NO_PORT = 24
+const IP_BLOCK_SOURCE = 38
+const IP_CHECKSUM = 23
+const IP_DEFAULT_MULTICAST_LOOP = 1
+const IP_DEFAULT_MULTICAST_TTL = 1
+const IP_DROP_MEMBERSHIP = 36
+const IP_DROP_SOURCE_MEMBERSHIP = 40
+const IP_FREEBIND = 15
+const IP_HDRINCL = 3
+const IP_IPSEC_POLICY = 16
+const IP_MAX_MEMBERSHIPS = 20
+const IP_MINTTL = 21
+const IP_MSFILTER = 41
+const IP_MTU = 14
+const IP_MTU_DISCOVER = 10
+const IP_MULTICAST_ALL = 49
+const IP_MULTICAST_IF = 32
+const IP_MULTICAST_LOOP = 34
+const IP_MULTICAST_TTL = 33
+const IP_NODEFRAG = 22
+const IP_OPTIONS = 4
+const IP_ORIGDSTADDR = 20
+const IP_PASSSEC = 18
+const IP_PKTINFO = 8
+const IP_PKTOPTIONS = 9
+const IP_PMTUDISC = 10
+const IP_PMTUDISC_DO = 2
+const IP_PMTUDISC_DONT = 0
+const IP_PMTUDISC_INTERFACE = 4
+const IP_PMTUDISC_OMIT = 5
+const IP_PMTUDISC_PROBE = 3
+const IP_PMTUDISC_WANT = 1
+const IP_RECVERR = 11
+const IP_RECVERR_RFC4884 = 26
+const IP_RECVFRAGSIZE = 25
+const IP_RECVOPTS = 6
+const IP_RECVORIGDSTADDR = 20
+const IP_RECVRETOPTS = 7
+const IP_RECVTOS = 13
+const IP_RECVTTL = 12
+const IP_RETOPTS = 7
+const IP_ROUTER_ALERT = 5
+const IP_TOS = 1
+const IP_TRANSPARENT = 19
+const IP_TTL = 2
+const IP_UNBLOCK_SOURCE = 37
+const IP_UNICAST_IF = 50
+const IP_XFRM_POLICY = 17
+const IQUERY = 0
+const LOCALDOMAINPARTS = 2
+const MAXCDNAME = 255
+const MAXDFLSRCH = 3
+const MAXDNAME = 1025
+const MAXDNSRCH = 6
+const MAXLABEL = 63
+const MAXNS = 3
+const MAXRESOLVSORT = 10
+const NAMESERVER_PORT = 53
+const NOERROR = 0
+const NOTAUTH = 0
+const NOTIMP = 0
+const NOTZONE = 0
+const NS_ALG_DH = 2
+const NS_ALG_DSA = 3
+const NS_ALG_DSS = 3
+const NS_ALG_EXPIRE_ONLY = 253
+const NS_ALG_MD5RSA = 1
+const NS_ALG_PRIVATE_OID = 254
+const NS_CMPRSFLGS = 192
+const NS_DEFAULTPORT = 53
+const NS_DSA_MAX_BYTES = 405
+const NS_DSA_MIN_SIZE = 213
+const NS_DSA_SIG_SIZE = 41
+const NS_HFIXEDSZ = 12
+const NS_IN6ADDRSZ = 16
+const NS_INADDRSZ = 4
+const NS_INT16SZ = 2
+const NS_INT32SZ = 4
+const NS_INT8SZ = 1
+const NS_KEY_EXTENDED_FLAGS = 4096
+const NS_KEY_NAME_ENTITY = 512
+const NS_KEY_NAME_RESERVED = 768
+const NS_KEY_NAME_TYPE = 768
+const NS_KEY_NAME_USER = 0
+const NS_KEY_NAME_ZONE = 256
+const NS_KEY_NO_AUTH = 32768
+const NS_KEY_NO_CONF = 16384
+const NS_KEY_PROT_ANY = 255
+const NS_KEY_PROT_DNSSEC = 3
+const NS_KEY_PROT_EMAIL = 2
+const NS_KEY_PROT_IPSEC = 4
+const NS_KEY_PROT_TLS = 1
+const NS_KEY_RESERVED10 = 32
+const NS_KEY_RESERVED11 = 16
+const NS_KEY_RESERVED2 = 8192
+const NS_KEY_RESERVED4 = 2048
+const NS_KEY_RESERVED5 = 1024
+const NS_KEY_RESERVED8 = 128
+const NS_KEY_RESERVED9 = 64
+const NS_KEY_RESERVED_BITMASK = 11504
+const NS_KEY_RESERVED_BITMASK2 = 65535
+const NS_KEY_SIGNATORYMASK = 15
+const NS_KEY_TYPEMASK = 49152
+const NS_KEY_TYPE_AUTH_CONF = 0
+const NS_KEY_TYPE_AUTH_ONLY = 16384
+const NS_KEY_TYPE_CONF_ONLY = 32768
+const NS_KEY_TYPE_NO_KEY = 49152
+const NS_MAXCDNAME = 255
+const NS_MAXDNAME = 1025
+const NS_MAXLABEL = 63
+const NS_MAXMSG = 65535
+const NS_MD5RSA_MAX_BASE64 = 10928
+const NS_MD5RSA_MAX_BITS = 4096
+const NS_MD5RSA_MAX_BYTES = 8195
+const NS_MD5RSA_MAX_SIZE = 512
+const NS_MD5RSA_MIN_BITS = 512
+const NS_MD5RSA_MIN_SIZE = 64
+const NS_NOTIFY_OP = 0
+const NS_NXT_BITS = 8
+const NS_NXT_MAX = 127
+const NS_OPT_DNSSEC_OK = 32768
+const NS_OPT_NSID = 3
+const NS_PACKETSZ = 512
+const NS_QFIXEDSZ = 4
+const NS_RRFIXEDSZ = 10
+const NS_SIG_ALG = 2
+const NS_SIG_EXPIR = 8
+const NS_SIG_FOOT = 16
+const NS_SIG_LABELS = 3
+const NS_SIG_OTTL = 4
+const NS_SIG_SIGNED = 12
+const NS_SIG_SIGNER = 18
+const NS_SIG_TYPE = 0
+const NS_TSIG_ALG_HMAC_MD5 = "HMAC-MD5.SIG-ALG.REG.INT"
+const NS_TSIG_ERROR_FORMERR = -12
+const NS_TSIG_ERROR_NO_SPACE = -11
+const NS_TSIG_ERROR_NO_TSIG = -10
+const NS_TSIG_FUDGE = 300
+const NS_TSIG_TCP_COUNT = 100
+const NS_UPDATE_OP = 0
+const NXDOMAIN = 0
+const NXRRSET = 0
+const PACKETSZ = 512
+const PRIX16 = "X"
+const PRIX32 = "X"
+const PRIX8 = "X"
+const PRIXFAST16 = "X"
+const PRIXFAST32 = "X"
+const PRIXFAST8 = "X"
+const PRIXLEAST16 = "X"
+const PRIXLEAST32 = "X"
+const PRIXLEAST8 = "X"
+const PRId16 = "d"
+const PRId32 = "d"
+const PRId8 = "d"
+const PRIdFAST16 = "d"
+const PRIdFAST32 = "d"
+const PRIdFAST8 = "d"
+const PRIdLEAST16 = "d"
+const PRIdLEAST32 = "d"
+const PRIdLEAST8 = "d"
+const PRIi16 = "i"
+const PRIi32 = "i"
+const PRIi8 = "i"
+const PRIiFAST16 = "i"
+const PRIiFAST32 = "i"
+const PRIiFAST8 = "i"
+const PRIiLEAST16 = "i"
+const PRIiLEAST32 = "i"
+const PRIiLEAST8 = "i"
+const PRIo16 = "o"
+const PRIo32 = "o"
+const PRIo8 = "o"
+const PRIoFAST16 = "o"
+const PRIoFAST32 = "o"
+const PRIoFAST8 = "o"
+const PRIoLEAST16 = "o"
+const PRIoLEAST32 = "o"
+const PRIoLEAST8 = "o"
+const PRIu16 = "u"
+const PRIu32 = "u"
+const PRIu8 = "u"
+const PRIuFAST16 = "u"
+const PRIuFAST32 = "u"
+const PRIuFAST8 = "u"
+const PRIuLEAST16 = "u"
+const PRIuLEAST32 = "u"
+const PRIuLEAST8 = "u"
+const PRIx16 = "x"
+const PRIx32 = "x"
+const PRIx8 = "x"
+const PRIxFAST16 = "x"
+const PRIxFAST32 = "x"
+const PRIxFAST8 = "x"
+const PRIxLEAST16 = "x"
+const PRIxLEAST32 = "x"
+const PRIxLEAST8 = "x"
+const PUTLONG = 0
+const PUTSHORT = 0
+const QFIXEDSZ = 4
+const QUERY = 0
+const REFUSED = 0
+const RES_AAONLY = 4
+const RES_BLAST = 131072
+const RES_DEBUG = 2
+const RES_DEFAULT = 524992
+const RES_DEFNAMES = 128
+const RES_DFLRETRY = 2
+const RES_DNSRCH = 512
+const RES_EXHAUSTIVE = 1
+const RES_F_CONN = 2
+const RES_F_EDNS0ERR = 4
+const RES_F_VC = 1
+const RES_IGNTC = 32
+const RES_INIT = 1
+const RES_INSECURE1 = 1024
+const RES_INSECURE2 = 2048
+const RES_KEEPTSIG = 65536
+const RES_MAXNDOTS = 15
+const RES_MAXRETRANS = 30
+const RES_MAXRETRY = 5
+const RES_MAXTIME = 65535
+const RES_NOALIASES = 4096
+const RES_NOCHECKNAME = 32768
+const RES_NOIP6DOTINT = 524288
+const RES_PRF_ADD = 128
+const RES_PRF_ANS = 32
+const RES_PRF_AUTH = 64
+const RES_PRF_CLASS = 4
+const RES_PRF_CMD = 8
+const RES_PRF_HEAD1 = 256
+const RES_PRF_HEAD2 = 512
+const RES_PRF_HEADX = 2048
+const RES_PRF_INIT = 16384
+const RES_PRF_QUERY = 4096
+const RES_PRF_QUES = 16
+const RES_PRF_REPLY = 8192
+const RES_PRF_STATS = 1
+const RES_PRF_TTLID = 1024
+const RES_PRF_UPDATE = 2
+const RES_PRIMARY = 16
+const RES_RECURSE = 64
+const RES_ROTATE = 16384
+const RES_SNGLKUP = 2097152
+const RES_SNGLKUPREOP = 4194304
+const RES_STAYOPEN = 256
+const RES_TIMEOUT = 5
+const RES_USEBSTRING = 262144
+const RES_USEVC = 8
+const RES_USE_DNSSEC = 8388608
+const RES_USE_EDNS0 = 1048576
+const RES_USE_INET6 = 8192
+const RRFIXEDSZ = 10
+const SCNd16 = "hd"
+const SCNd32 = "d"
+const SCNd8 = "hhd"
+const SCNdFAST16 = "d"
+const SCNdFAST32 = "d"
+const SCNdFAST8 = "hhd"
+const SCNdLEAST16 = "hd"
+const SCNdLEAST32 = "d"
+const SCNdLEAST8 = "hhd"
+const SCNi16 = "hi"
+const SCNi32 = "i"
+const SCNi8 = "hhi"
+const SCNiFAST16 = "i"
+const SCNiFAST32 = "i"
+const SCNiFAST8 = "hhi"
+const SCNiLEAST16 = "hi"
+const SCNiLEAST32 = "i"
+const SCNiLEAST8 = "hhi"
+const SCNo16 = "ho"
+const SCNo32 = "o"
+const SCNo8 = "hho"
+const SCNoFAST16 = "o"
+const SCNoFAST32 = "o"
+const SCNoFAST8 = "hho"
+const SCNoLEAST16 = "ho"
+const SCNoLEAST32 = "o"
+const SCNoLEAST8 = "hho"
+const SCNu16 = "hu"
+const SCNu32 = "u"
+const SCNu8 = "hhu"
+const SCNuFAST16 = "u"
+const SCNuFAST32 = "u"
+const SCNuFAST8 = "hhu"
+const SCNuLEAST16 = "hu"
+const SCNuLEAST32 = "u"
+const SCNuLEAST8 = "hhu"
+const SCNx16 = "hx"
+const SCNx32 = "x"
+const SCNx8 = "hhx"
+const SCNxFAST16 = "x"
+const SCNxFAST32 = "x"
+const SCNxFAST8 = "hhx"
+const SCNxLEAST16 = "hx"
+const SCNxLEAST32 = "x"
+const SCNxLEAST8 = "hhx"
+const SERVFAIL = 0
+const STATUS = 0
+const S_ADDT = 0
+const S_PREREQ = 0
+const S_UPDATE = 0
+const S_ZONE = 0
+const T_A = 0
+const T_A6 = 0
+const T_AAAA = 0
+const T_AFSDB = 0
+const T_ANY = 0
+const T_ATMA = 0
+const T_AVC = 0
+const T_AXFR = 0
+const T_CAA = 0
+const T_CDNSKEY = 0
+const T_CDS = 0
+const T_CNAME = 0
+const T_CSYNC = 0
+const T_DHCID = 0
+const T_DLV = 0
+const T_DNAME = 0
+const T_DNSKEY = 0
+const T_DS = 0
+const T_EID = 0
+const T_EUI48 = 0
+const T_EUI64 = 0
+const T_GID = 0
+const T_GPOS = 0
+const T_HINFO = 0
+const T_HIP = 0
+const T_IPSECKEY = 0
+const T_ISDN = 0
+const T_IXFR = 0
+const T_KEY = 0
+const T_L32 = 0
+const T_L64 = 0
+const T_LOC = 0
+const T_LP = 0
+const T_MAILA = 0
+const T_MAILB = 0
+const T_MB = 0
+const T_MD = 0
+const T_MF = 0
+const T_MG = 0
+const T_MINFO = 0
+const T_MR = 0
+const T_MX = 0
+const T_NAPTR = 0
+const T_NID = 0
+const T_NIMLOC = 0
+const T_NINFO = 0
+const T_NS = 0
+const T_NSAP = 0
+const T_NSAP_PTR = 0
+const T_NSEC = 0
+const T_NSEC3 = 0
+const T_NSEC3PARAM = 0
+const T_NULL = 0
+const T_NXT = 0
+const T_OPENPGPKEY = 0
+const T_PTR = 0
+const T_PX = 0
+const T_RKEY = 0
+const T_RP = 0
+const T_RRSIG = 0
+const T_RT = 0
+const T_SIG = 0
+const T_SMIMEA = 0
+const T_SOA = 0
+const T_SPF = 0
+const T_SRV = 0
+const T_SSHFP = 0
+const T_TA = 0
+const T_TALINK = 0
+const T_TKEY = 0
+const T_TLSA = 0
+const T_TSIG = 0
+const T_TXT = 0
+const T_UID = 0
+const T_UINFO = 0
+const T_UNSPEC = 0
+const T_URI = 0
+const T_WKS = 0
+const T_X25 = 0
+const YXDOMAIN = 0
+const YXRRSET = 0
+const _PATH_RESCONF = "/etc/resolv.conf"
+const __BIND = 19950621
+const __NAMESER = 19991006
+const __PRI64 = "l"
+const __PRIPTR = "l"
+const __RES = 19960801
+const __UAPI_DEF_IN6_ADDR = 0
+const __UAPI_DEF_IN6_ADDR_ALT = 0
+const __UAPI_DEF_IN6_PKTINFO = 0
+const __UAPI_DEF_IN_ADDR = 0
+const __UAPI_DEF_IN_CLASS = 0
+const __UAPI_DEF_IN_IPPROTO = 0
+const __UAPI_DEF_IN_PKTINFO = 0
+const __UAPI_DEF_IP6_MTUINFO = 0
+const __UAPI_DEF_IPPROTO_V6 = 0
+const __UAPI_DEF_IPV6_MREQ = 0
+const __UAPI_DEF_IPV6_OPTIONS = 0
+const __UAPI_DEF_IP_MREQ = 0
+const __UAPI_DEF_SOCKADDR_IN = 0
+const __UAPI_DEF_SOCKADDR_IN6 = 0
+const _res = 0
 
 type Tns_sect = int32
 
 type ___ns_sect = int32
 
-const (
-	_ns_s_qd  = 0
-	_ns_s_zn  = 0
-	_ns_s_an  = 1
-	_ns_s_pr  = 1
-	_ns_s_ns  = 2
-	_ns_s_ud  = 2
-	_ns_s_ar  = 3
-	_ns_s_max = 4
-)
+const _ns_s_qd = 0
+const _ns_s_zn = 0
+const _ns_s_an = 1
+const _ns_s_pr = 1
+const _ns_s_ns = 2
+const _ns_s_ud = 2
+const _ns_s_ar = 3
+const _ns_s_max = 4
 
 type Tns_msg = struct {
 	F_msg      uintptr
@@ -117606,65 +117322,57 @@ type Tns_flag = int32
 
 type ___ns_flag = int32
 
-const (
-	_ns_f_qr     = 0
-	_ns_f_opcode = 1
-	_ns_f_aa     = 2
-	_ns_f_tc     = 3
-	_ns_f_rd     = 4
-	_ns_f_ra     = 5
-	_ns_f_z      = 6
-	_ns_f_ad     = 7
-	_ns_f_cd     = 8
-	_ns_f_rcode  = 9
-	_ns_f_max    = 10
-)
+const _ns_f_qr = 0
+const _ns_f_opcode = 1
+const _ns_f_aa = 2
+const _ns_f_tc = 3
+const _ns_f_rd = 4
+const _ns_f_ra = 5
+const _ns_f_z = 6
+const _ns_f_ad = 7
+const _ns_f_cd = 8
+const _ns_f_rcode = 9
+const _ns_f_max = 10
 
 type Tns_opcode = int32
 
 type ___ns_opcode = int32
 
-const (
-	_ns_o_query  = 0
-	_ns_o_iquery = 1
-	_ns_o_status = 2
-	_ns_o_notify = 4
-	_ns_o_update = 5
-	_ns_o_max    = 6
-)
+const _ns_o_query = 0
+const _ns_o_iquery = 1
+const _ns_o_status = 2
+const _ns_o_notify = 4
+const _ns_o_update = 5
+const _ns_o_max = 6
 
 type Tns_rcode = int32
 
 type ___ns_rcode = int32
 
-const (
-	_ns_r_noerror  = 0
-	_ns_r_formerr  = 1
-	_ns_r_servfail = 2
-	_ns_r_nxdomain = 3
-	_ns_r_notimpl  = 4
-	_ns_r_refused  = 5
-	_ns_r_yxdomain = 6
-	_ns_r_yxrrset  = 7
-	_ns_r_nxrrset  = 8
-	_ns_r_notauth  = 9
-	_ns_r_notzone  = 10
-	_ns_r_max      = 11
-	_ns_r_badvers  = 16
-	_ns_r_badsig   = 16
-	_ns_r_badkey   = 17
-	_ns_r_badtime  = 18
-)
+const _ns_r_noerror = 0
+const _ns_r_formerr = 1
+const _ns_r_servfail = 2
+const _ns_r_nxdomain = 3
+const _ns_r_notimpl = 4
+const _ns_r_refused = 5
+const _ns_r_yxdomain = 6
+const _ns_r_yxrrset = 7
+const _ns_r_nxrrset = 8
+const _ns_r_notauth = 9
+const _ns_r_notzone = 10
+const _ns_r_max = 11
+const _ns_r_badvers = 16
+const _ns_r_badsig = 16
+const _ns_r_badkey = 17
+const _ns_r_badtime = 18
 
 type Tns_update_operation = int32
 
 type ___ns_update_operation = int32
 
-const (
-	_ns_uop_delete = 0
-	_ns_uop_add    = 1
-	_ns_uop_max    = 2
-)
+const _ns_uop_delete = 0
+const _ns_uop_add = 1
+const _ns_uop_max = 2
 
 type Tns_tsig_key = struct {
 	Fname [1025]int8
@@ -117685,133 +117393,125 @@ type Tns_type = int32
 
 type ___ns_type = int32
 
-const (
-	_ns_t_invalid    = 0
-	_ns_t_a          = 1
-	_ns_t_ns         = 2
-	_ns_t_md         = 3
-	_ns_t_mf         = 4
-	_ns_t_cname      = 5
-	_ns_t_soa        = 6
-	_ns_t_mb         = 7
-	_ns_t_mg         = 8
-	_ns_t_mr         = 9
-	_ns_t_null       = 10
-	_ns_t_wks        = 11
-	_ns_t_ptr        = 12
-	_ns_t_hinfo      = 13
-	_ns_t_minfo      = 14
-	_ns_t_mx         = 15
-	_ns_t_txt        = 16
-	_ns_t_rp         = 17
-	_ns_t_afsdb      = 18
-	_ns_t_x25        = 19
-	_ns_t_isdn       = 20
-	_ns_t_rt         = 21
-	_ns_t_nsap       = 22
-	_ns_t_nsap_ptr   = 23
-	_ns_t_sig        = 24
-	_ns_t_key        = 25
-	_ns_t_px         = 26
-	_ns_t_gpos       = 27
-	_ns_t_aaaa       = 28
-	_ns_t_loc        = 29
-	_ns_t_nxt        = 30
-	_ns_t_eid        = 31
-	_ns_t_nimloc     = 32
-	_ns_t_srv        = 33
-	_ns_t_atma       = 34
-	_ns_t_naptr      = 35
-	_ns_t_kx         = 36
-	_ns_t_cert       = 37
-	_ns_t_a6         = 38
-	_ns_t_dname      = 39
-	_ns_t_sink       = 40
-	_ns_t_opt        = 41
-	_ns_t_apl        = 42
-	_ns_t_ds         = 43
-	_ns_t_sshfp      = 44
-	_ns_t_ipseckey   = 45
-	_ns_t_rrsig      = 46
-	_ns_t_nsec       = 47
-	_ns_t_dnskey     = 48
-	_ns_t_dhcid      = 49
-	_ns_t_nsec3      = 50
-	_ns_t_nsec3param = 51
-	_ns_t_tlsa       = 52
-	_ns_t_smimea     = 53
-	_ns_t_hip        = 55
-	_ns_t_ninfo      = 56
-	_ns_t_rkey       = 57
-	_ns_t_talink     = 58
-	_ns_t_cds        = 59
-	_ns_t_cdnskey    = 60
-	_ns_t_openpgpkey = 61
-	_ns_t_csync      = 62
-	_ns_t_spf        = 99
-	_ns_t_uinfo      = 100
-	_ns_t_uid        = 101
-	_ns_t_gid        = 102
-	_ns_t_unspec     = 103
-	_ns_t_nid        = 104
-	_ns_t_l32        = 105
-	_ns_t_l64        = 106
-	_ns_t_lp         = 107
-	_ns_t_eui48      = 108
-	_ns_t_eui64      = 109
-	_ns_t_tkey       = 249
-	_ns_t_tsig       = 250
-	_ns_t_ixfr       = 251
-	_ns_t_axfr       = 252
-	_ns_t_mailb      = 253
-	_ns_t_maila      = 254
-	_ns_t_any        = 255
-	_ns_t_zxfr       = 256
-	_ns_t_uri        = 256
-	_ns_t_caa        = 257
-	_ns_t_avc        = 258
-	_ns_t_ta         = 32768
-	_ns_t_dlv        = 32769
-	_ns_t_max        = 65536
-)
+const _ns_t_invalid = 0
+const _ns_t_a = 1
+const _ns_t_ns = 2
+const _ns_t_md = 3
+const _ns_t_mf = 4
+const _ns_t_cname = 5
+const _ns_t_soa = 6
+const _ns_t_mb = 7
+const _ns_t_mg = 8
+const _ns_t_mr = 9
+const _ns_t_null = 10
+const _ns_t_wks = 11
+const _ns_t_ptr = 12
+const _ns_t_hinfo = 13
+const _ns_t_minfo = 14
+const _ns_t_mx = 15
+const _ns_t_txt = 16
+const _ns_t_rp = 17
+const _ns_t_afsdb = 18
+const _ns_t_x25 = 19
+const _ns_t_isdn = 20
+const _ns_t_rt = 21
+const _ns_t_nsap = 22
+const _ns_t_nsap_ptr = 23
+const _ns_t_sig = 24
+const _ns_t_key = 25
+const _ns_t_px = 26
+const _ns_t_gpos = 27
+const _ns_t_aaaa = 28
+const _ns_t_loc = 29
+const _ns_t_nxt = 30
+const _ns_t_eid = 31
+const _ns_t_nimloc = 32
+const _ns_t_srv = 33
+const _ns_t_atma = 34
+const _ns_t_naptr = 35
+const _ns_t_kx = 36
+const _ns_t_cert = 37
+const _ns_t_a6 = 38
+const _ns_t_dname = 39
+const _ns_t_sink = 40
+const _ns_t_opt = 41
+const _ns_t_apl = 42
+const _ns_t_ds = 43
+const _ns_t_sshfp = 44
+const _ns_t_ipseckey = 45
+const _ns_t_rrsig = 46
+const _ns_t_nsec = 47
+const _ns_t_dnskey = 48
+const _ns_t_dhcid = 49
+const _ns_t_nsec3 = 50
+const _ns_t_nsec3param = 51
+const _ns_t_tlsa = 52
+const _ns_t_smimea = 53
+const _ns_t_hip = 55
+const _ns_t_ninfo = 56
+const _ns_t_rkey = 57
+const _ns_t_talink = 58
+const _ns_t_cds = 59
+const _ns_t_cdnskey = 60
+const _ns_t_openpgpkey = 61
+const _ns_t_csync = 62
+const _ns_t_spf = 99
+const _ns_t_uinfo = 100
+const _ns_t_uid = 101
+const _ns_t_gid = 102
+const _ns_t_unspec = 103
+const _ns_t_nid = 104
+const _ns_t_l32 = 105
+const _ns_t_l64 = 106
+const _ns_t_lp = 107
+const _ns_t_eui48 = 108
+const _ns_t_eui64 = 109
+const _ns_t_tkey = 249
+const _ns_t_tsig = 250
+const _ns_t_ixfr = 251
+const _ns_t_axfr = 252
+const _ns_t_mailb = 253
+const _ns_t_maila = 254
+const _ns_t_any = 255
+const _ns_t_zxfr = 256
+const _ns_t_uri = 256
+const _ns_t_caa = 257
+const _ns_t_avc = 258
+const _ns_t_ta = 32768
+const _ns_t_dlv = 32769
+const _ns_t_max = 65536
 
 type Tns_class = int32
 
 type ___ns_class = int32
 
-const (
-	_ns_c_invalid = 0
-	_ns_c_in      = 1
-	_ns_c_2       = 2
-	_ns_c_chaos   = 3
-	_ns_c_hs      = 4
-	_ns_c_none    = 254
-	_ns_c_any     = 255
-	_ns_c_max     = 65536
-)
+const _ns_c_invalid = 0
+const _ns_c_in = 1
+const _ns_c_2 = 2
+const _ns_c_chaos = 3
+const _ns_c_hs = 4
+const _ns_c_none = 254
+const _ns_c_any = 255
+const _ns_c_max = 65536
 
 type Tns_key_types = int32
 
 type ___ns_key_types = int32
 
-const (
-	_ns_kt_rsa     = 1
-	_ns_kt_dh      = 2
-	_ns_kt_dsa     = 3
-	_ns_kt_private = 254
-)
+const _ns_kt_rsa = 1
+const _ns_kt_dh = 2
+const _ns_kt_dsa = 3
+const _ns_kt_private = 254
 
 type Tns_cert_types = int32
 
 type ___ns_cert_types = int32
 
-const (
-	_cert_t_pkix = 1
-	_cert_t_spki = 2
-	_cert_t_pgp  = 3
-	_cert_t_url  = 253
-	_cert_t_oid  = 254
-)
+const _cert_t_pkix = 1
+const _cert_t_spki = 2
+const _cert_t_pgp = 3
+const _cert_t_url = 253
+const _cert_t_oid = 254
 
 type THEADER = struct {
 	F__ccgo0 uint32
@@ -117913,7 +117613,7 @@ type Tres_sym = struct {
 // C documentation
 //
 //	/* label start offsets of a compressed domain name s */
-func _getoffs(tls *TLS, offs, base, s uintptr) (r int32) {
+func _getoffs(tls *TLS, offs uintptr, base uintptr, s uintptr) (r int32) {
 	var i, v2 int32
 	_, _ = i, v2
 	i = 0
@@ -117943,7 +117643,7 @@ func _getoffs(tls *TLS, offs, base, s uintptr) (r int32) {
 // C documentation
 //
 //	/* label lengths of an ascii domain name s */
-func _getlens(tls *TLS, lens, s uintptr, l int32) (r int32) {
+func _getlens(tls *TLS, lens uintptr, s uintptr, l int32) (r int32) {
 	var i, j, k, v3 int32
 	_, _, _, _ = i, j, k, v3
 	i = 0
@@ -117980,7 +117680,7 @@ func _getlens(tls *TLS, lens, s uintptr, l int32) (r int32) {
 // C documentation
 //
 //	/* longest suffix match of an ascii domain with a compressed domain name dn */
-func _match(tls *TLS, offset, base, dn, end, lens uintptr, nlen int32) (r int32) {
+func _match(tls *TLS, offset uintptr, base uintptr, dn uintptr, end uintptr, lens uintptr, nlen int32) (r int32) {
 	bp := tls.Alloc(256)
 	defer tls.Free(256)
 	var l, m, noff, o, v2 int32
@@ -118017,7 +117717,7 @@ func _match(tls *TLS, offset, base, dn, end, lens uintptr, nlen int32) (r int32)
 	return r
 }
 
-func Xdn_comp(tls *TLS, src, dst uintptr, space int32, dnptrs, lastdnptr uintptr) (r int32) {
+func Xdn_comp(tls *TLS, src uintptr, dst uintptr, space int32, dnptrs uintptr, lastdnptr uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v src=%v dst=%v space=%v dnptrs=%v lastdnptr=%v, (%v:)", tls, src, dst, space, dnptrs, lastdnptr, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118117,7 +117817,7 @@ func Xdn_comp(tls *TLS, src, dst uintptr, space int32, dnptrs, lastdnptr uintptr
 	return i
 }
 
-func X__dn_expand(tls *TLS, base, end, src, dest uintptr, space int32) (r int32) {
+func X__dn_expand(tls *TLS, base uintptr, end uintptr, src uintptr, dest uintptr, space int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v base=%v end=%v src=%v dest=%v space=%v, (%v:)", tls, base, end, src, dest, space, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118197,7 +117897,7 @@ func X__dn_expand(tls *TLS, base, end, src, dest uintptr, space int32) (r int32)
 	return -int32(1)
 }
 
-func Xdn_expand(tls *TLS, base, end, src, dest uintptr, space int32) (r int32) {
+func Xdn_expand(tls *TLS, base uintptr, end uintptr, src uintptr, dest uintptr, space int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v base=%v end=%v src=%v dest=%v space=%v, (%v:)", tls, base, end, src, dest, space, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118205,7 +117905,7 @@ func Xdn_expand(tls *TLS, base, end, src, dest uintptr, space int32) (r int32) {
 	return X__dn_expand(tls, base, end, src, dest, space)
 }
 
-func Xdn_skipname(tls *TLS, s, end uintptr) (r int32) {
+func Xdn_skipname(tls *TLS, s uintptr, end uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v end=%v, (%v:)", tls, s, end, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118235,34 +117935,32 @@ func Xdn_skipname(tls *TLS, s, end uintptr) (r int32) {
 	return -int32(1)
 }
 
-const (
-	AI_ADDRCONFIG   = 32
-	AI_ALL          = 16
-	AI_CANONNAME    = 2
-	AI_NUMERICHOST  = 4
-	AI_NUMERICSERV  = 1024
-	AI_PASSIVE      = 1
-	AI_V4MAPPED     = 8
-	EAI_AGAIN       = -3
-	EAI_BADFLAGS    = -1
-	EAI_FAIL        = -4
-	EAI_FAMILY      = -6
-	EAI_MEMORY      = -10
-	EAI_NODATA      = -5
-	EAI_NONAME      = -2
-	EAI_OVERFLOW    = -12
-	EAI_SERVICE     = -8
-	EAI_SOCKTYPE    = -7
-	EAI_SYSTEM      = -11
-	MAXADDRS        = 48
-	MAXSERVS        = 2
-	NI_DGRAM        = 16
-	NI_NAMEREQD     = 8
-	NI_NOFQDN       = 4
-	NI_NUMERICHOST  = 1
-	NI_NUMERICSCOPE = 256
-	NI_NUMERICSERV  = 2
-)
+const AI_ADDRCONFIG = 32
+const AI_ALL = 16
+const AI_CANONNAME = 2
+const AI_NUMERICHOST = 4
+const AI_NUMERICSERV = 1024
+const AI_PASSIVE = 1
+const AI_V4MAPPED = 8
+const EAI_AGAIN = -3
+const EAI_BADFLAGS = -1
+const EAI_FAIL = -4
+const EAI_FAMILY = -6
+const EAI_MEMORY = -10
+const EAI_NODATA = -5
+const EAI_NONAME = -2
+const EAI_OVERFLOW = -12
+const EAI_SERVICE = -8
+const EAI_SOCKTYPE = -7
+const EAI_SYSTEM = -11
+const MAXADDRS = 48
+const MAXSERVS = 2
+const NI_DGRAM = 16
+const NI_NAMEREQD = 8
+const NI_NOFQDN = 4
+const NI_NUMERICHOST = 1
+const NI_NUMERICSCOPE = 256
+const NI_NUMERICSERV = 2
 
 type Taddrinfo = struct {
 	Fai_flags     int32
@@ -118334,7 +118032,7 @@ type Tresolvconf = struct {
 
 type t__ccgo_fp__X__dns_parse_2 = func(*TLS, uintptr, int32, uintptr, int32, uintptr, int32) int32
 
-func X__dns_parse(tls *TLS, r uintptr, rlen int32, __ccgo_fp_callback, ctx uintptr) (r1 int32) {
+func X__dns_parse(tls *TLS, r uintptr, rlen int32, __ccgo_fp_callback uintptr, ctx uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v r=%v rlen=%v __ccgo_fp_callback=%v ctx=%v, (%v:)", tls, r, rlen, __ccgo_fp_callback, ctx, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -118438,219 +118136,217 @@ func Xsetnetent(tls *TLS, x int32) {
 	Xsethostent(tls, x)
 }
 
-const (
-	ARPD_FLUSH                = 3
-	ARPD_LOOKUP               = 2
-	ARPD_UPDATE               = 1
-	ARPHRD_6LOWPAN            = 825
-	ARPHRD_ADAPT              = 264
-	ARPHRD_APPLETLK           = 8
-	ARPHRD_ARCNET             = 7
-	ARPHRD_ASH                = 781
-	ARPHRD_ATM                = 19
-	ARPHRD_AX25               = 3
-	ARPHRD_BIF                = 775
-	ARPHRD_CAIF               = 822
-	ARPHRD_CAN                = 280
-	ARPHRD_CHAOS              = 5
-	ARPHRD_CISCO              = 513
-	ARPHRD_CSLIP              = 257
-	ARPHRD_CSLIP6             = 259
-	ARPHRD_DDCMP              = 517
-	ARPHRD_DLCI               = 15
-	ARPHRD_ECONET             = 782
-	ARPHRD_EETHER             = 2
-	ARPHRD_ETHER              = 1
-	ARPHRD_EUI64              = 27
-	ARPHRD_FCAL               = 785
-	ARPHRD_FCFABRIC           = 787
-	ARPHRD_FCPL               = 786
-	ARPHRD_FCPP               = 784
-	ARPHRD_FDDI               = 774
-	ARPHRD_FRAD               = 770
-	ARPHRD_HDLC               = 513
-	ARPHRD_HIPPI              = 780
-	ARPHRD_HWX25              = 272
-	ARPHRD_IEEE1394           = 24
-	ARPHRD_IEEE802            = 6
-	ARPHRD_IEEE80211          = 801
-	ARPHRD_IEEE80211_PRISM    = 802
-	ARPHRD_IEEE80211_RADIOTAP = 803
-	ARPHRD_IEEE802154         = 804
-	ARPHRD_IEEE802154_MONITOR = 805
-	ARPHRD_IEEE802_TR         = 800
-	ARPHRD_INFINIBAND         = 32
-	ARPHRD_IP6GRE             = 823
-	ARPHRD_IPDDP              = 777
-	ARPHRD_IPGRE              = 778
-	ARPHRD_IRDA               = 783
-	ARPHRD_LAPB               = 516
-	ARPHRD_LOCALTLK           = 773
-	ARPHRD_LOOPBACK           = 772
-	ARPHRD_METRICOM           = 23
-	ARPHRD_NETLINK            = 824
-	ARPHRD_NETROM             = 0
-	ARPHRD_NONE               = 65534
-	ARPHRD_PHONET             = 820
-	ARPHRD_PHONET_PIPE        = 821
-	ARPHRD_PIMREG             = 779
-	ARPHRD_PPP                = 512
-	ARPHRD_PRONET             = 4
-	ARPHRD_RAWHDLC            = 518
-	ARPHRD_RAWIP              = 519
-	ARPHRD_ROSE               = 270
-	ARPHRD_RSRVD              = 260
-	ARPHRD_SIT                = 776
-	ARPHRD_SKIP               = 771
-	ARPHRD_SLIP               = 256
-	ARPHRD_SLIP6              = 258
-	ARPHRD_TUNNEL             = 768
-	ARPHRD_TUNNEL6            = 769
-	ARPHRD_VOID               = 65535
-	ARPHRD_VSOCKMON           = 826
-	ARPHRD_X25                = 271
-	ARPOP_InREPLY             = 9
-	ARPOP_InREQUEST           = 8
-	ARPOP_NAK                 = 10
-	ARPOP_REPLY               = 2
-	ARPOP_REQUEST             = 1
-	ARPOP_RREPLY              = 4
-	ARPOP_RREQUEST            = 3
-	ATF_COM                   = 2
-	ATF_DONTPUB               = 64
-	ATF_MAGIC                 = 128
-	ATF_NETMASK               = 32
-	ATF_PERM                  = 4
-	ATF_PUBL                  = 8
-	ATF_USETRAILERS           = 16
-	ETHERMIN                  = 46
-	ETHERMTU                  = 1500
-	ETHERTYPE_AARP            = 33011
-	ETHERTYPE_ARP             = 2054
-	ETHERTYPE_AT              = 32923
-	ETHERTYPE_IP              = 2048
-	ETHERTYPE_IPV6            = 34525
-	ETHERTYPE_IPX             = 33079
-	ETHERTYPE_LOOPBACK        = 36864
-	ETHERTYPE_NTRAILER        = 16
-	ETHERTYPE_PUP             = 512
-	ETHERTYPE_REVARP          = 32821
-	ETHERTYPE_SPRITE          = 1280
-	ETHERTYPE_TRAIL           = 4096
-	ETHERTYPE_VLAN            = 33024
-	ETHER_ADDR_LEN            = 6
-	ETHER_CRC_LEN             = 4
-	ETHER_HDR_LEN             = 14
-	ETHER_MAX_LEN             = 1518
-	ETHER_MIN_LEN             = 64
-	ETHER_TYPE_LEN            = 2
-	ETH_ALEN                  = 6
-	ETH_DATA_LEN              = 1500
-	ETH_FCS_LEN               = 4
-	ETH_FRAME_LEN             = 1514
-	ETH_HLEN                  = 14
-	ETH_MAX_MTU               = 65535
-	ETH_MIN_MTU               = 68
-	ETH_P_1588                = 35063
-	ETH_P_8021AD              = 34984
-	ETH_P_8021AH              = 35047
-	ETH_P_8021Q               = 33024
-	ETH_P_80221               = 35095
-	ETH_P_802_2               = 4
-	ETH_P_802_3               = 1
-	ETH_P_802_3_MIN           = 1536
-	ETH_P_802_EX1             = 34997
-	ETH_P_AARP                = 33011
-	ETH_P_AF_IUCV             = 64507
-	ETH_P_ALL                 = 3
-	ETH_P_AOE                 = 34978
-	ETH_P_ARCNET              = 26
-	ETH_P_ARP                 = 2054
-	ETH_P_ATALK               = 32923
-	ETH_P_ATMFATE             = 34948
-	ETH_P_ATMMPOA             = 34892
-	ETH_P_AX25                = 2
-	ETH_P_BATMAN              = 17157
-	ETH_P_BPQ                 = 2303
-	ETH_P_CAIF                = 247
-	ETH_P_CAN                 = 12
-	ETH_P_CANFD               = 13
-	ETH_P_CFM                 = 35074
-	ETH_P_CONTROL             = 22
-	ETH_P_CUST                = 24582
-	ETH_P_DDCMP               = 6
-	ETH_P_DEC                 = 24576
-	ETH_P_DIAG                = 24581
-	ETH_P_DNA_DL              = 24577
-	ETH_P_DNA_RC              = 24578
-	ETH_P_DNA_RT              = 24579
-	ETH_P_DSA                 = 27
-	ETH_P_DSA_8021Q           = 56027
-	ETH_P_ECONET              = 24
-	ETH_P_EDSA                = 56026
-	ETH_P_ERSPAN              = 35006
-	ETH_P_ERSPAN2             = 8939
-	ETH_P_FCOE                = 35078
-	ETH_P_FIP                 = 35092
-	ETH_P_HDLC                = 25
-	ETH_P_HSR                 = 35119
-	ETH_P_IBOE                = 35093
-	ETH_P_IEEE802154          = 246
-	ETH_P_IEEEPUP             = 2560
-	ETH_P_IEEEPUPAT           = 2561
-	ETH_P_IFE                 = 60734
-	ETH_P_IP                  = 2048
-	ETH_P_IPV6                = 34525
-	ETH_P_IPX                 = 33079
-	ETH_P_IRDA                = 23
-	ETH_P_LAT                 = 24580
-	ETH_P_LINK_CTL            = 34924
-	ETH_P_LLDP                = 35020
-	ETH_P_LOCALTALK           = 9
-	ETH_P_LOOP                = 96
-	ETH_P_LOOPBACK            = 36864
-	ETH_P_MACSEC              = 35045
-	ETH_P_MAP                 = 249
-	ETH_P_MOBITEX             = 21
-	ETH_P_MPLS_MC             = 34888
-	ETH_P_MPLS_UC             = 34887
-	ETH_P_MRP                 = 35043
-	ETH_P_MVRP                = 35061
-	ETH_P_NCSI                = 35064
-	ETH_P_NSH                 = 35151
-	ETH_P_PAE                 = 34958
-	ETH_P_PAUSE               = 34824
-	ETH_P_PHONET              = 245
-	ETH_P_PPPTALK             = 16
-	ETH_P_PPP_DISC            = 34915
-	ETH_P_PPP_MP              = 8
-	ETH_P_PPP_SES             = 34916
-	ETH_P_PREAUTH             = 35015
-	ETH_P_PRP                 = 35067
-	ETH_P_PUP                 = 512
-	ETH_P_PUPAT               = 513
-	ETH_P_QINQ1               = 37120
-	ETH_P_QINQ2               = 37376
-	ETH_P_QINQ3               = 37632
-	ETH_P_RARP                = 32821
-	ETH_P_SCA                 = 24583
-	ETH_P_SLOW                = 34825
-	ETH_P_SNAP                = 5
-	ETH_P_TDLS                = 35085
-	ETH_P_TEB                 = 25944
-	ETH_P_TIPC                = 35018
-	ETH_P_TRAILER             = 28
-	ETH_P_TR_802_2            = 17
-	ETH_P_TSN                 = 8944
-	ETH_P_WAN_PPP             = 7
-	ETH_P_WCCP                = 34878
-	ETH_P_X25                 = 2053
-	ETH_P_XDSA                = 248
-	ETH_TLEN                  = 2
-	ETH_ZLEN                  = 60
-	MAX_ADDR_LEN              = 7
-	__UAPI_DEF_ETHHDR         = 0
-)
+const ARPD_FLUSH = 3
+const ARPD_LOOKUP = 2
+const ARPD_UPDATE = 1
+const ARPHRD_6LOWPAN = 825
+const ARPHRD_ADAPT = 264
+const ARPHRD_APPLETLK = 8
+const ARPHRD_ARCNET = 7
+const ARPHRD_ASH = 781
+const ARPHRD_ATM = 19
+const ARPHRD_AX25 = 3
+const ARPHRD_BIF = 775
+const ARPHRD_CAIF = 822
+const ARPHRD_CAN = 280
+const ARPHRD_CHAOS = 5
+const ARPHRD_CISCO = 513
+const ARPHRD_CSLIP = 257
+const ARPHRD_CSLIP6 = 259
+const ARPHRD_DDCMP = 517
+const ARPHRD_DLCI = 15
+const ARPHRD_ECONET = 782
+const ARPHRD_EETHER = 2
+const ARPHRD_ETHER = 1
+const ARPHRD_EUI64 = 27
+const ARPHRD_FCAL = 785
+const ARPHRD_FCFABRIC = 787
+const ARPHRD_FCPL = 786
+const ARPHRD_FCPP = 784
+const ARPHRD_FDDI = 774
+const ARPHRD_FRAD = 770
+const ARPHRD_HDLC = 513
+const ARPHRD_HIPPI = 780
+const ARPHRD_HWX25 = 272
+const ARPHRD_IEEE1394 = 24
+const ARPHRD_IEEE802 = 6
+const ARPHRD_IEEE80211 = 801
+const ARPHRD_IEEE80211_PRISM = 802
+const ARPHRD_IEEE80211_RADIOTAP = 803
+const ARPHRD_IEEE802154 = 804
+const ARPHRD_IEEE802154_MONITOR = 805
+const ARPHRD_IEEE802_TR = 800
+const ARPHRD_INFINIBAND = 32
+const ARPHRD_IP6GRE = 823
+const ARPHRD_IPDDP = 777
+const ARPHRD_IPGRE = 778
+const ARPHRD_IRDA = 783
+const ARPHRD_LAPB = 516
+const ARPHRD_LOCALTLK = 773
+const ARPHRD_LOOPBACK = 772
+const ARPHRD_METRICOM = 23
+const ARPHRD_NETLINK = 824
+const ARPHRD_NETROM = 0
+const ARPHRD_NONE = 65534
+const ARPHRD_PHONET = 820
+const ARPHRD_PHONET_PIPE = 821
+const ARPHRD_PIMREG = 779
+const ARPHRD_PPP = 512
+const ARPHRD_PRONET = 4
+const ARPHRD_RAWHDLC = 518
+const ARPHRD_RAWIP = 519
+const ARPHRD_ROSE = 270
+const ARPHRD_RSRVD = 260
+const ARPHRD_SIT = 776
+const ARPHRD_SKIP = 771
+const ARPHRD_SLIP = 256
+const ARPHRD_SLIP6 = 258
+const ARPHRD_TUNNEL = 768
+const ARPHRD_TUNNEL6 = 769
+const ARPHRD_VOID = 65535
+const ARPHRD_VSOCKMON = 826
+const ARPHRD_X25 = 271
+const ARPOP_InREPLY = 9
+const ARPOP_InREQUEST = 8
+const ARPOP_NAK = 10
+const ARPOP_REPLY = 2
+const ARPOP_REQUEST = 1
+const ARPOP_RREPLY = 4
+const ARPOP_RREQUEST = 3
+const ATF_COM = 2
+const ATF_DONTPUB = 64
+const ATF_MAGIC = 128
+const ATF_NETMASK = 32
+const ATF_PERM = 4
+const ATF_PUBL = 8
+const ATF_USETRAILERS = 16
+const ETHERMIN = 46
+const ETHERMTU = 1500
+const ETHERTYPE_AARP = 33011
+const ETHERTYPE_ARP = 2054
+const ETHERTYPE_AT = 32923
+const ETHERTYPE_IP = 2048
+const ETHERTYPE_IPV6 = 34525
+const ETHERTYPE_IPX = 33079
+const ETHERTYPE_LOOPBACK = 36864
+const ETHERTYPE_NTRAILER = 16
+const ETHERTYPE_PUP = 512
+const ETHERTYPE_REVARP = 32821
+const ETHERTYPE_SPRITE = 1280
+const ETHERTYPE_TRAIL = 4096
+const ETHERTYPE_VLAN = 33024
+const ETHER_ADDR_LEN = 6
+const ETHER_CRC_LEN = 4
+const ETHER_HDR_LEN = 14
+const ETHER_MAX_LEN = 1518
+const ETHER_MIN_LEN = 64
+const ETHER_TYPE_LEN = 2
+const ETH_ALEN = 6
+const ETH_DATA_LEN = 1500
+const ETH_FCS_LEN = 4
+const ETH_FRAME_LEN = 1514
+const ETH_HLEN = 14
+const ETH_MAX_MTU = 65535
+const ETH_MIN_MTU = 68
+const ETH_P_1588 = 35063
+const ETH_P_8021AD = 34984
+const ETH_P_8021AH = 35047
+const ETH_P_8021Q = 33024
+const ETH_P_80221 = 35095
+const ETH_P_802_2 = 4
+const ETH_P_802_3 = 1
+const ETH_P_802_3_MIN = 1536
+const ETH_P_802_EX1 = 34997
+const ETH_P_AARP = 33011
+const ETH_P_AF_IUCV = 64507
+const ETH_P_ALL = 3
+const ETH_P_AOE = 34978
+const ETH_P_ARCNET = 26
+const ETH_P_ARP = 2054
+const ETH_P_ATALK = 32923
+const ETH_P_ATMFATE = 34948
+const ETH_P_ATMMPOA = 34892
+const ETH_P_AX25 = 2
+const ETH_P_BATMAN = 17157
+const ETH_P_BPQ = 2303
+const ETH_P_CAIF = 247
+const ETH_P_CAN = 12
+const ETH_P_CANFD = 13
+const ETH_P_CFM = 35074
+const ETH_P_CONTROL = 22
+const ETH_P_CUST = 24582
+const ETH_P_DDCMP = 6
+const ETH_P_DEC = 24576
+const ETH_P_DIAG = 24581
+const ETH_P_DNA_DL = 24577
+const ETH_P_DNA_RC = 24578
+const ETH_P_DNA_RT = 24579
+const ETH_P_DSA = 27
+const ETH_P_DSA_8021Q = 56027
+const ETH_P_ECONET = 24
+const ETH_P_EDSA = 56026
+const ETH_P_ERSPAN = 35006
+const ETH_P_ERSPAN2 = 8939
+const ETH_P_FCOE = 35078
+const ETH_P_FIP = 35092
+const ETH_P_HDLC = 25
+const ETH_P_HSR = 35119
+const ETH_P_IBOE = 35093
+const ETH_P_IEEE802154 = 246
+const ETH_P_IEEEPUP = 2560
+const ETH_P_IEEEPUPAT = 2561
+const ETH_P_IFE = 60734
+const ETH_P_IP = 2048
+const ETH_P_IPV6 = 34525
+const ETH_P_IPX = 33079
+const ETH_P_IRDA = 23
+const ETH_P_LAT = 24580
+const ETH_P_LINK_CTL = 34924
+const ETH_P_LLDP = 35020
+const ETH_P_LOCALTALK = 9
+const ETH_P_LOOP = 96
+const ETH_P_LOOPBACK = 36864
+const ETH_P_MACSEC = 35045
+const ETH_P_MAP = 249
+const ETH_P_MOBITEX = 21
+const ETH_P_MPLS_MC = 34888
+const ETH_P_MPLS_UC = 34887
+const ETH_P_MRP = 35043
+const ETH_P_MVRP = 35061
+const ETH_P_NCSI = 35064
+const ETH_P_NSH = 35151
+const ETH_P_PAE = 34958
+const ETH_P_PAUSE = 34824
+const ETH_P_PHONET = 245
+const ETH_P_PPPTALK = 16
+const ETH_P_PPP_DISC = 34915
+const ETH_P_PPP_MP = 8
+const ETH_P_PPP_SES = 34916
+const ETH_P_PREAUTH = 35015
+const ETH_P_PRP = 35067
+const ETH_P_PUP = 512
+const ETH_P_PUPAT = 513
+const ETH_P_QINQ1 = 37120
+const ETH_P_QINQ2 = 37376
+const ETH_P_QINQ3 = 37632
+const ETH_P_RARP = 32821
+const ETH_P_SCA = 24583
+const ETH_P_SLOW = 34825
+const ETH_P_SNAP = 5
+const ETH_P_TDLS = 35085
+const ETH_P_TEB = 25944
+const ETH_P_TIPC = 35018
+const ETH_P_TRAILER = 28
+const ETH_P_TR_802_2 = 17
+const ETH_P_TSN = 8944
+const ETH_P_WAN_PPP = 7
+const ETH_P_WCCP = 34878
+const ETH_P_X25 = 2053
+const ETH_P_XDSA = 248
+const ETH_TLEN = 2
+const ETH_ZLEN = 60
+const MAX_ADDR_LEN = 7
+const __UAPI_DEF_ETHHDR = 0
 
 type Tethhdr = struct {
 	Fh_dest   [6]Tuint8_t
@@ -118708,7 +118404,7 @@ type Tether_arp = struct {
 	Farp_tpa [4]Tuint8_t
 }
 
-func Xether_aton_r(tls *TLS, x, p_a uintptr) (r uintptr) {
+func Xether_aton_r(tls *TLS, x uintptr, p_a uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v p_a=%v, (%v:)", tls, x, p_a, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118760,7 +118456,7 @@ func Xether_aton(tls *TLS, x uintptr) (r uintptr) {
 
 var _a Tether_addr
 
-func Xether_ntoa_r(tls *TLS, p_a, x uintptr) (r uintptr) {
+func Xether_ntoa_r(tls *TLS, p_a uintptr, x uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v p_a=%v x=%v, (%v:)", tls, p_a, x, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118800,7 +118496,7 @@ func Xether_ntoa(tls *TLS, p_a uintptr) (r uintptr) {
 
 var _x [18]int8
 
-func Xether_line(tls *TLS, l, e, hostname uintptr) (r int32) {
+func Xether_line(tls *TLS, l uintptr, e uintptr, hostname uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v e=%v hostname=%v, (%v:)", tls, l, e, hostname, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118808,7 +118504,7 @@ func Xether_line(tls *TLS, l, e, hostname uintptr) (r int32) {
 	return -int32(1)
 }
 
-func Xether_ntohost(tls *TLS, hostname, e uintptr) (r int32) {
+func Xether_ntohost(tls *TLS, hostname uintptr, e uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v hostname=%v e=%v, (%v:)", tls, hostname, e, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118816,7 +118512,7 @@ func Xether_ntohost(tls *TLS, hostname, e uintptr) (r int32) {
 	return -int32(1)
 }
 
-func Xether_hostton(tls *TLS, hostname, e uintptr) (r int32) {
+func Xether_hostton(tls *TLS, hostname uintptr, e uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v hostname=%v e=%v, (%v:)", tls, hostname, e, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -118890,7 +118586,7 @@ func Xgai_strerror(tls *TLS, ecode int32) (r uintptr) {
 	return X__lctrans_cur(tls, s)
 }
 
-func Xgetaddrinfo(tls *TLS, host, serv, hint, res uintptr) (r1 int32) {
+func Xgetaddrinfo(tls *TLS, host uintptr, serv uintptr, hint uintptr, res uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v host=%v serv=%v hint=%v res=%v, (%v:)", tls, host, serv, hint, res, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -119094,32 +118790,30 @@ var _lo6 = Tsockaddr_in6{
 	},
 }
 
-const (
-	EAI_ADDRFAMILY           = -9
-	EAI_ALLDONE              = -103
-	EAI_CANCELED             = -101
-	EAI_IDN_ENCODE           = -105
-	EAI_INPROGRESS           = -100
-	EAI_INTR                 = -104
-	EAI_NOTCANCELED          = -102
-	HOST_NOT_FOUND           = 1
-	MCAST_BLOCK_SOURCE       = 43
-	MCAST_EXCLUDE            = 0
-	MCAST_INCLUDE            = 1
-	MCAST_JOIN_GROUP         = 42
-	MCAST_JOIN_SOURCE_GROUP  = 46
-	MCAST_LEAVE_GROUP        = 45
-	MCAST_LEAVE_SOURCE_GROUP = 47
-	MCAST_MSFILTER           = 48
-	MCAST_UNBLOCK_SOURCE     = 44
-	NI_MAXHOST               = 255
-	NI_MAXSERV               = 32
-	NO_ADDRESS               = 4
-	NO_DATA                  = 4
-	NO_RECOVERY              = 3
-	TRY_AGAIN                = 2
-	h_errno                  = 0
-)
+const EAI_ADDRFAMILY = -9
+const EAI_ALLDONE = -103
+const EAI_CANCELED = -101
+const EAI_IDN_ENCODE = -105
+const EAI_INPROGRESS = -100
+const EAI_INTR = -104
+const EAI_NOTCANCELED = -102
+const HOST_NOT_FOUND = 1
+const MCAST_BLOCK_SOURCE = 43
+const MCAST_EXCLUDE = 0
+const MCAST_INCLUDE = 1
+const MCAST_JOIN_GROUP = 42
+const MCAST_JOIN_SOURCE_GROUP = 46
+const MCAST_LEAVE_GROUP = 45
+const MCAST_LEAVE_SOURCE_GROUP = 47
+const MCAST_MSFILTER = 48
+const MCAST_UNBLOCK_SOURCE = 44
+const NI_MAXHOST = 255
+const NI_MAXSERV = 32
+const NO_ADDRESS = 4
+const NO_DATA = 4
+const NO_RECOVERY = 3
+const TRY_AGAIN = 2
+const h_errno = 0
 
 type Tip_mreq = struct {
 	Fimr_multiaddr Tin_addr
@@ -119208,7 +118902,7 @@ func Xgethostbyaddr(tls *TLS, a uintptr, l Tsocklen_t, af int32) (r uintptr) {
 
 var _h uintptr
 
-func Xgethostbyaddr_r(tls *TLS, a uintptr, l Tsocklen_t, af int32, h, buf uintptr, buflen Tsize_t, res, err uintptr) (r int32) {
+func Xgethostbyaddr_r(tls *TLS, a uintptr, l Tsocklen_t, af int32, h uintptr, buf uintptr, buflen Tsize_t, res uintptr, err uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v a=%v l=%v af=%v h=%v buf=%v buflen=%v res=%v err=%v, (%v:)", tls, a, l, af, h, buf, buflen, res, err, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -119331,7 +119025,7 @@ func Xgethostbyname2(tls *TLS, name uintptr, af int32) (r uintptr) {
 
 var _h1 uintptr
 
-func Xgethostbyname2_r(tls *TLS, name uintptr, af int32, h, buf uintptr, buflen Tsize_t, res, err uintptr) (r int32) {
+func Xgethostbyname2_r(tls *TLS, name uintptr, af int32, h uintptr, buf uintptr, buflen Tsize_t, res uintptr, err uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v af=%v h=%v buf=%v buflen=%v res=%v err=%v, (%v:)", tls, name, af, h, buf, buflen, res, err, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -119420,7 +119114,7 @@ func Xgethostbyname2_r(tls *TLS, name uintptr, af int32, h, buf uintptr, buflen 
 	return 0
 }
 
-func Xgethostbyname_r(tls *TLS, name, h, buf uintptr, buflen Tsize_t, res, err uintptr) (r int32) {
+func Xgethostbyname_r(tls *TLS, name uintptr, h uintptr, buf uintptr, buflen Tsize_t, res uintptr, err uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v h=%v buf=%v buflen=%v res=%v err=%v, (%v:)", tls, name, h, buf, buflen, res, err, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -119428,62 +119122,60 @@ func Xgethostbyname_r(tls *TLS, name, h, buf uintptr, buflen Tsize_t, res, err u
 	return Xgethostbyname2_r(tls, name, int32(PF_INET), h, buf, buflen, res, err)
 }
 
-const (
-	IFADDRS_HASH_SIZE                                    = 64
-	IFA_ADDRESS                                          = 1
-	IFA_BROADCAST                                        = 4
-	IFA_LABEL                                            = 3
-	IFA_LOCAL                                            = 2
-	IFF_ALLMULTI                                         = 512
-	IFF_AUTOMEDIA                                        = 16384
-	IFF_BROADCAST                                        = 2
-	IFF_DEBUG                                            = 4
-	IFF_DORMANT                                          = 131072
-	IFF_DYNAMIC                                          = 32768
-	IFF_ECHO                                             = 262144
-	IFF_LOOPBACK                                         = 8
-	IFF_LOWER_UP                                         = 65536
-	IFF_MASTER                                           = 1024
-	IFF_MULTICAST                                        = 4096
-	IFF_NOARP                                            = 128
-	IFF_NOTRAILERS                                       = 32
-	IFF_POINTOPOINT                                      = 16
-	IFF_PORTSEL                                          = 8192
-	IFF_PROMISC                                          = 256
-	IFF_RUNNING                                          = 64
-	IFF_SLAVE                                            = 2048
-	IFF_UP                                               = 1
-	IFF_VOLATILE                                         = 461914
-	IFHWADDRLEN                                          = 6
-	IFLA_ADDRESS                                         = 1
-	IFLA_BROADCAST                                       = 2
-	IFLA_IFNAME                                          = 3
-	IFLA_STATS                                           = 7
-	IFNAMSIZ                                             = 16
-	IF_NAMESIZE                                          = 16
-	NETLINK_ROUTE                                        = 0
-	NLMSG_DONE                                           = 3
-	NLMSG_ERROR                                          = 2
-	NLMSG_NOOP                                           = 1
-	NLMSG_OVERRUN                                        = 4
-	NLM_F_ACK                                            = 4
-	NLM_F_ATOMIC                                         = 1024
-	NLM_F_DUMP                                           = 768
-	NLM_F_MATCH                                          = 512
-	NLM_F_MULTI                                          = 2
-	NLM_F_REQUEST                                        = 1
-	NLM_F_ROOT                                           = 256
-	RTM_GETADDR                                          = 22
-	RTM_GETLINK                                          = 18
-	RTM_NEWADDR                                          = 20
-	RTM_NEWLINK                                          = 16
-	__UAPI_DEF_IF_IFCONF                                 = 0
-	__UAPI_DEF_IF_IFMAP                                  = 0
-	__UAPI_DEF_IF_IFNAMSIZ                               = 0
-	__UAPI_DEF_IF_IFREQ                                  = 0
-	__UAPI_DEF_IF_NET_DEVICE_FLAGS                       = 0
-	__UAPI_DEF_IF_NET_DEVICE_FLAGS_LOWER_UP_DORMANT_ECHO = 0
-)
+const IFADDRS_HASH_SIZE = 64
+const IFA_ADDRESS = 1
+const IFA_BROADCAST = 4
+const IFA_LABEL = 3
+const IFA_LOCAL = 2
+const IFF_ALLMULTI = 512
+const IFF_AUTOMEDIA = 16384
+const IFF_BROADCAST = 2
+const IFF_DEBUG = 4
+const IFF_DORMANT = 131072
+const IFF_DYNAMIC = 32768
+const IFF_ECHO = 262144
+const IFF_LOOPBACK = 8
+const IFF_LOWER_UP = 65536
+const IFF_MASTER = 1024
+const IFF_MULTICAST = 4096
+const IFF_NOARP = 128
+const IFF_NOTRAILERS = 32
+const IFF_POINTOPOINT = 16
+const IFF_PORTSEL = 8192
+const IFF_PROMISC = 256
+const IFF_RUNNING = 64
+const IFF_SLAVE = 2048
+const IFF_UP = 1
+const IFF_VOLATILE = 461914
+const IFHWADDRLEN = 6
+const IFLA_ADDRESS = 1
+const IFLA_BROADCAST = 2
+const IFLA_IFNAME = 3
+const IFLA_STATS = 7
+const IFNAMSIZ = 16
+const IF_NAMESIZE = 16
+const NETLINK_ROUTE = 0
+const NLMSG_DONE = 3
+const NLMSG_ERROR = 2
+const NLMSG_NOOP = 1
+const NLMSG_OVERRUN = 4
+const NLM_F_ACK = 4
+const NLM_F_ATOMIC = 1024
+const NLM_F_DUMP = 768
+const NLM_F_MATCH = 512
+const NLM_F_MULTI = 2
+const NLM_F_REQUEST = 1
+const NLM_F_ROOT = 256
+const RTM_GETADDR = 22
+const RTM_GETLINK = 18
+const RTM_NEWADDR = 20
+const RTM_NEWLINK = 16
+const __UAPI_DEF_IF_IFCONF = 0
+const __UAPI_DEF_IF_IFMAP = 0
+const __UAPI_DEF_IF_IFNAMSIZ = 0
+const __UAPI_DEF_IF_IFREQ = 0
+const __UAPI_DEF_IF_NET_DEVICE_FLAGS = 0
+const __UAPI_DEF_IF_NET_DEVICE_FLAGS_LOWER_UP_DORMANT_ECHO = 0
 
 type Tifaddrs = struct {
 	Fifa_next    uintptr
@@ -119636,7 +119328,7 @@ func Xfreeifaddrs(tls *TLS, ifp uintptr) {
 	}
 }
 
-func _copy_addr(tls *TLS, r uintptr, af int32, sa, addr uintptr, addrlen Tsize_t, ifindex int32) {
+func _copy_addr(tls *TLS, r uintptr, af int32, sa uintptr, addr uintptr, addrlen Tsize_t, ifindex int32) {
 	var dst uintptr
 	var len1 int32
 	_, _ = dst, len1
@@ -119681,7 +119373,7 @@ func _gen_netmask(tls *TLS, r uintptr, af int32, sa uintptr, prefixlen int32) {
 	_copy_addr(tls, r, af, sa, bp, uint64(16), 0)
 }
 
-func _copy_lladdr(tls *TLS, r, sa, addr uintptr, addrlen Tsize_t, ifindex int32, hatype uint16) {
+func _copy_lladdr(tls *TLS, r uintptr, sa uintptr, addr uintptr, addrlen Tsize_t, ifindex int32, hatype uint16) {
 	if addrlen > uint64(24) {
 		return
 	}
@@ -119693,7 +119385,7 @@ func _copy_lladdr(tls *TLS, r, sa, addr uintptr, addrlen Tsize_t, ifindex int32,
 	**(**uintptr)(__ccgo_up(r)) = sa
 }
 
-func _netlink_msg_to_ifaddr(tls *TLS, pctx, h uintptr) (r int32) {
+func _netlink_msg_to_ifaddr(tls *TLS, pctx uintptr, h uintptr) (r int32) {
 	var bucket uint32
 	var ctx, ifa, ifi, ifs, ifs0, rta uintptr
 	var stats_len int32
@@ -119871,13 +119563,13 @@ func _itoa(tls *TLS, p uintptr, x uint32) (r uintptr) {
 	return p
 }
 
-func _mkptr4(tls *TLS, s, ip uintptr) {
+func _mkptr4(tls *TLS, s uintptr, ip uintptr) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	Xsprintf(tls, s, __ccgo_ts+999, VaList(bp+8, Int32FromUint8(**(**uint8)(__ccgo_up(ip + 3))), Int32FromUint8(**(**uint8)(__ccgo_up(ip + 2))), Int32FromUint8(**(**uint8)(__ccgo_up(ip + 1))), Int32FromUint8(**(**uint8)(__ccgo_up(ip)))))
 }
 
-func _mkptr6(tls *TLS, s, ip uintptr) {
+func _mkptr6(tls *TLS, s uintptr, ip uintptr) {
 	var i int32
 	var v2 uintptr
 	_, _ = i, v2
@@ -119908,7 +119600,7 @@ func _mkptr6(tls *TLS, s, ip uintptr) {
 
 var _xdigits = [17]int8{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'}
 
-func _reverse_hosts(tls *TLS, buf, a uintptr, scopeid uint32, family int32) {
+func _reverse_hosts(tls *TLS, buf uintptr, a uintptr, scopeid uint32, family int32) {
 	bp := tls.Alloc(1824)
 	defer tls.Free(1824)
 	var f, p, z, v1, v2 uintptr
@@ -120011,7 +119703,7 @@ func _reverse_hosts(tls *TLS, buf, a uintptr, scopeid uint32, family int32) {
 	X__fclose_ca(tls, f)
 }
 
-func _reverse_services(tls *TLS, buf uintptr, port, dgram int32) {
+func _reverse_services(tls *TLS, buf uintptr, port int32, dgram int32) {
 	bp := tls.Alloc(1408)
 	defer tls.Free(1408)
 	var f, p, v1, v2 uintptr
@@ -120186,7 +119878,7 @@ func Xgetnameinfo(tls *TLS, sa uintptr, sl Tsocklen_t, node uintptr, nodelen Tso
 	return 0
 }
 
-func Xgetpeername(tls *TLS, fd int32, addr, len1 uintptr) (r1 int32) {
+func Xgetpeername(tls *TLS, fd int32, addr uintptr, len1 uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v addr=%v len1=%v, (%v:)", tls, fd, addr, len1, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -120218,7 +119910,7 @@ _9:
 	return int32(X__syscall_ret(tls, Uint64FromInt64(v8)))
 }
 
-func Xgetservbyname(tls *TLS, name, prots uintptr) (r uintptr) {
+func Xgetservbyname(tls *TLS, name uintptr, prots uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v prots=%v, (%v:)", tls, name, prots, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -120238,7 +119930,7 @@ var _buf3 [2]uintptr
 
 const ALIGN = 0
 
-func Xgetservbyname_r(tls *TLS, name, prots, se, buf uintptr, buflen Tsize_t, res uintptr) (r int32) {
+func Xgetservbyname_r(tls *TLS, name uintptr, prots uintptr, se uintptr, buf uintptr, buflen Tsize_t, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v prots=%v se=%v buf=%v buflen=%v res=%v, (%v:)", tls, name, prots, se, buf, buflen, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -120302,7 +119994,7 @@ func Xgetservbyname_r(tls *TLS, name, prots, se, buf uintptr, buflen Tsize_t, re
 	return 0
 }
 
-func Xgetsockname(tls *TLS, fd int32, addr, len1 uintptr) (r1 int32) {
+func Xgetsockname(tls *TLS, fd int32, addr uintptr, len1 uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v addr=%v len1=%v, (%v:)", tls, fd, addr, len1, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -120334,7 +120026,7 @@ _9:
 	return int32(X__syscall_ret(tls, Uint64FromInt64(v8)))
 }
 
-func Xgetsockopt(tls *TLS, fd, level, optname int32, optval, optlen uintptr) (r2 int32) {
+func Xgetsockopt(tls *TLS, fd int32, level int32, optname int32, optval uintptr, optlen uintptr) (r2 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v level=%v optname=%v optval=%v optlen=%v, (%v:)", tls, fd, level, optname, optval, optlen, origin(2))
 		defer func() { trc("-> %v", r2) }()
@@ -120631,7 +120323,7 @@ type Tifnameindexctx = struct {
 	Fhash      [64]uint32
 }
 
-func _netlink_msg_to_nameindex(tls *TLS, pctx, h uintptr) (r int32) {
+func _netlink_msg_to_nameindex(tls *TLS, pctx uintptr, h uintptr) (r int32) {
 	var a Tsize_t
 	var bucket, index, namelen, type1 int32
 	var ctx, ifa, ifi, map1, rta uintptr
@@ -120800,7 +120492,7 @@ func Xinet_addr(tls *TLS, p uintptr) (r Tin_addr_t) {
 	return (**(**Tin_addr)(__ccgo_up(bp))).Fs_addr
 }
 
-func X__inet_aton(tls *TLS, s0, dest uintptr) (r int32) {
+func X__inet_aton(tls *TLS, s0 uintptr, dest uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s0=%v dest=%v, (%v:)", tls, s0, dest, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -120866,7 +120558,7 @@ func X__inet_aton(tls *TLS, s0, dest uintptr) (r int32) {
 	return int32(1)
 }
 
-func Xinet_aton(tls *TLS, s0, dest uintptr) (r int32) {
+func Xinet_aton(tls *TLS, s0 uintptr, dest uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s0=%v dest=%v, (%v:)", tls, s0, dest, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -120882,7 +120574,7 @@ func Xinet_network(tls *TLS, p uintptr) (r Tin_addr_t) {
 	return Xntohl(tls, Xinet_addr(tls, p))
 }
 
-func Xinet_makeaddr(tls *TLS, n, h Tin_addr_t) (r Tin_addr) {
+func Xinet_makeaddr(tls *TLS, n Tin_addr_t, h Tin_addr_t) (r Tin_addr) {
 	if __ccgo_strace {
 		trc("tls=%v n=%v h=%v, (%v:)", tls, n, h, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -120952,7 +120644,7 @@ func Xinet_ntoa(tls *TLS, _in Tin_addr) (r uintptr) {
 
 var _buf4 [16]int8
 
-func Xinet_ntop(tls *TLS, af int32, a0, s uintptr, l Tsocklen_t) (r uintptr) {
+func Xinet_ntop(tls *TLS, af int32, a0 uintptr, s uintptr, l Tsocklen_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v af=%v a0=%v s=%v l=%v, (%v:)", tls, af, a0, s, l, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -121027,7 +120719,7 @@ func _hexval(tls *TLS, c uint32) (r int32) {
 	return -int32(1)
 }
 
-func Xinet_pton(tls *TLS, af int32, s, a0 uintptr) (r int32) {
+func Xinet_pton(tls *TLS, af int32, s uintptr, a0 uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v af=%v s=%v a0=%v, (%v:)", tls, af, s, a0, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -121184,7 +120876,7 @@ func Xinet_pton(tls *TLS, af int32, s, a0 uintptr) (r int32) {
 	return int32(1)
 }
 
-func Xlisten(tls *TLS, fd, backlog int32) (r1 int32) {
+func Xlisten(tls *TLS, fd int32, backlog int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v backlog=%v, (%v:)", tls, fd, backlog, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -121216,7 +120908,7 @@ _9:
 	return int32(X__syscall_ret(tls, Uint64FromInt64(v8)))
 }
 
-func X__lookup_ipliteral(tls *TLS, buf, name uintptr, family int32) (r int32) {
+func X__lookup_ipliteral(tls *TLS, buf uintptr, name uintptr, family int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v buf=%v name=%v family=%v, (%v:)", tls, buf, name, family, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -121279,19 +120971,17 @@ func X__lookup_ipliteral(tls *TLS, buf, name uintptr, family int32) (r int32) {
 	return int32(1)
 }
 
-const (
-	ABUF_SIZE         = 4800
-	DAS_MATCHINGLABEL = 268435456
-	DAS_MATCHINGSCOPE = 536870912
-	DAS_ORDER_SHIFT   = 0
-	DAS_PREC_SHIFT    = 20
-	DAS_PREFIX_SHIFT  = 8
-	DAS_SCOPE_SHIFT   = 16
-	DAS_USABLE        = 1073741824
-	RR_A              = 1
-	RR_AAAA           = 28
-	RR_CNAME          = 5
-)
+const ABUF_SIZE = 4800
+const DAS_MATCHINGLABEL = 268435456
+const DAS_MATCHINGSCOPE = 536870912
+const DAS_ORDER_SHIFT = 0
+const DAS_PREC_SHIFT = 20
+const DAS_PREFIX_SHIFT = 8
+const DAS_SCOPE_SHIFT = 16
+const DAS_USABLE = 1073741824
+const RR_A = 1
+const RR_AAAA = 28
+const RR_CNAME = 5
 
 func _is_valid_hostname(tls *TLS, host uintptr) (r int32) {
 	var s uintptr
@@ -121312,7 +121002,7 @@ func _is_valid_hostname(tls *TLS, host uintptr) (r int32) {
 	return BoolInt32(!(**(**uint8)(__ccgo_up(s)) != 0))
 }
 
-func _name_from_null(tls *TLS, buf, name uintptr, family, flags int32) (r int32) {
+func _name_from_null(tls *TLS, buf uintptr, name uintptr, family int32, flags int32) (r int32) {
 	var cnt, v1 int32
 	_, _ = cnt, v1
 	cnt = 0
@@ -121360,11 +121050,11 @@ func _name_from_null(tls *TLS, buf, name uintptr, family, flags int32) (r int32)
 	return cnt
 }
 
-func _name_from_numeric(tls *TLS, buf, name uintptr, family int32) (r int32) {
+func _name_from_numeric(tls *TLS, buf uintptr, name uintptr, family int32) (r int32) {
 	return X__lookup_ipliteral(tls, buf, name, family)
 }
 
-func _name_from_hosts(tls *TLS, buf, canon, name uintptr, family int32) (r int32) {
+func _name_from_hosts(tls *TLS, buf uintptr, canon uintptr, name uintptr, family int32) (r int32) {
 	bp := tls.Alloc(1776)
 	defer tls.Free(1776)
 	var badfam, cnt, have_canon, v5, v6, v8, v9 int32
@@ -121557,7 +121247,7 @@ func _dns_parse_callback1(tls *TLS, c uintptr, rr int32, data uintptr, len1 int3
 	return 0
 }
 
-func _name_from_dns(tls *TLS, buf, canon, name uintptr, family int32, conf uintptr) (r int32) {
+func _name_from_dns(tls *TLS, buf uintptr, canon uintptr, name uintptr, family int32, conf uintptr) (r int32) {
 	bp := tls.Alloc(10240)
 	defer tls.Free(10240)
 	var i, nq int32
@@ -121663,7 +121353,7 @@ var _afrr = [2]struct {
 	},
 }
 
-func _name_from_dns_search(tls *TLS, buf, canon, name uintptr, family int32) (r int32) {
+func _name_from_dns_search(tls *TLS, buf uintptr, canon uintptr, name uintptr, family int32) (r int32) {
 	bp := tls.Alloc(368)
 	defer tls.Free(368)
 	var cnt, v5, v6 int32
@@ -121856,7 +121546,7 @@ func _scopeof(tls *TLS, a uintptr) (r int32) {
 	return int32(14)
 }
 
-func _prefixmatch(tls *TLS, s, d uintptr) (r int32) {
+func _prefixmatch(tls *TLS, s uintptr, d uintptr) (r int32) {
 	var i uint32
 	_ = i
 	i = uint32(0)
@@ -121872,7 +121562,7 @@ func _prefixmatch(tls *TLS, s, d uintptr) (r int32) {
 	return Int32FromUint32(i)
 }
 
-func _addrcmp(tls *TLS, _a, _b uintptr) (r int32) {
+func _addrcmp(tls *TLS, _a uintptr, _b uintptr) (r int32) {
 	var a, b uintptr
 	_, _ = a, b
 	a = _a
@@ -121880,7 +121570,7 @@ func _addrcmp(tls *TLS, _a, _b uintptr) (r int32) {
 	return (*Taddress)(unsafe.Pointer(b)).Fsortkey - (*Taddress)(unsafe.Pointer(a)).Fsortkey
 }
 
-func X__lookup_name(tls *TLS, buf, canon, name uintptr, family, flags int32) (r int32) {
+func X__lookup_name(tls *TLS, buf uintptr, canon uintptr, name uintptr, family int32, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v buf=%v canon=%v name=%v family=%v flags=%v, (%v:)", tls, buf, canon, name, family, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -122091,7 +121781,7 @@ func X__lookup_name(tls *TLS, buf, canon, name uintptr, family, flags int32) (r 
 	return cnt
 }
 
-func X__lookup_serv(tls *TLS, buf, name uintptr, proto, socktype, flags int32) (r int32) {
+func X__lookup_serv(tls *TLS, buf uintptr, name uintptr, proto int32, socktype int32, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v buf=%v name=%v proto=%v socktype=%v flags=%v, (%v:)", tls, buf, name, proto, socktype, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -122279,7 +121969,7 @@ func X__lookup_serv(tls *TLS, buf, name uintptr, proto, socktype, flags int32) (
 	return v1
 }
 
-func ___netlink_enumerate(tls *TLS, fd int32, seq uint32, type1, af int32, __ccgo_fp_cb, ctx uintptr) (r1 int32) {
+func ___netlink_enumerate(tls *TLS, fd int32, seq uint32, type1 int32, af int32, __ccgo_fp_cb uintptr, ctx uintptr) (r1 int32) {
 	bp := tls.Alloc(8192)
 	defer tls.Free(8192)
 	var h uintptr
@@ -122384,7 +122074,7 @@ func ___netlink_enumerate(tls *TLS, fd int32, seq uint32, type1, af int32, __ccg
 
 type t__ccgo_fp__X__rtnetlink_enumerate_2 = func(*TLS, uintptr, uintptr) int32
 
-func X__rtnetlink_enumerate(tls *TLS, link_af, addr_af int32, __ccgo_fp_cb, ctx uintptr) (r1 int32) {
+func X__rtnetlink_enumerate(tls *TLS, link_af int32, addr_af int32, __ccgo_fp_cb uintptr, ctx uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v link_af=%v addr_af=%v __ccgo_fp_cb=%v ctx=%v, (%v:)", tls, link_af, addr_af, __ccgo_fp_cb, ctx, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -122531,7 +122221,7 @@ bad:
 	return -int32(1)
 }
 
-func Xns_skiprr(tls *TLS, ptr, eom uintptr, section Tns_sect, count int32) (r1 int32) {
+func Xns_skiprr(tls *TLS, ptr uintptr, eom uintptr, section Tns_sect, count int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v ptr=%v eom=%v section=%v count=%v, (%v:)", tls, ptr, eom, section, count, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -122666,7 +122356,7 @@ size:
 	return -int32(1)
 }
 
-func Xns_name_uncompress(tls *TLS, msg, eom, src, dst uintptr, dstsiz Tsize_t) (r1 int32) {
+func Xns_name_uncompress(tls *TLS, msg uintptr, eom uintptr, src uintptr, dst uintptr, dstsiz Tsize_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v msg=%v eom=%v src=%v dst=%v dstsiz=%v, (%v:)", tls, msg, eom, src, dst, dstsiz, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -122738,10 +122428,8 @@ func Xntohs(tls *TLS, n Tuint16_t) (r Tuint16_t) {
 
 /* do we really need all these?? */
 
-var (
-	_idx    int32
-	_protos = [239]uint8{0, 'i', 'p', 0, 1, 'i', 'c', 'm', 'p', 0, 2, 'i', 'g', 'm', 'p', 0, 3, 'g', 'g', 'p', 0, 4, 'i', 'p', 'e', 'n', 'c', 'a', 'p', 0, 5, 's', 't', 0, 6, 't', 'c', 'p', 0, 8, 'e', 'g', 'p', 0, 12, 'p', 'u', 'p', 0, 17, 'u', 'd', 'p', 0, 20, 'h', 'm', 'p', 0, 22, 'x', 'n', 's', '-', 'i', 'd', 'p', 0, 27, 'r', 'd', 'p', 0, 29, 'i', 's', 'o', '-', 't', 'p', '4', 0, '$', 'x', 't', 'p', 0, '%', 'd', 'd', 'p', 0, '&', 'i', 'd', 'p', 'r', '-', 'c', 'm', 't', 'p', 0, ')', 'i', 'p', 'v', '6', 0, '+', 'i', 'p', 'v', '6', '-', 'r', 'o', 'u', 't', 'e', 0, ',', 'i', 'p', 'v', '6', '-', 'f', 'r', 'a', 'g', 0, '-', 'i', 'd', 'r', 'p', 0, '.', 'r', 's', 'v', 'p', 0, '/', 'g', 'r', 'e', 0, '2', 'e', 's', 'p', 0, '3', 'a', 'h', 0, '9', 's', 'k', 'i', 'p', 0, ':', 'i', 'p', 'v', '6', '-', 'i', 'c', 'm', 'p', 0, ';', 'i', 'p', 'v', '6', '-', 'n', 'o', 'n', 'x', 't', 0, '<', 'i', 'p', 'v', '6', '-', 'o', 'p', 't', 's', 0, 'I', 'r', 's', 'p', 'f', 0, 'Q', 'v', 'm', 't', 'p', 0, 'Y', 'o', 's', 'p', 'f', 0, '^', 'i', 'p', 'i', 'p', 0, 'b', 'e', 'n', 'c', 'a', 'p', 0, 'g', 'p', 'i', 'm', 0, 255, 'r', 'a', 'w'}
-)
+var _idx int32
+var _protos = [239]uint8{0, 'i', 'p', 0, 1, 'i', 'c', 'm', 'p', 0, 2, 'i', 'g', 'm', 'p', 0, 3, 'g', 'g', 'p', 0, 4, 'i', 'p', 'e', 'n', 'c', 'a', 'p', 0, 5, 's', 't', 0, 6, 't', 'c', 'p', 0, 8, 'e', 'g', 'p', 0, 12, 'p', 'u', 'p', 0, 17, 'u', 'd', 'p', 0, 20, 'h', 'm', 'p', 0, 22, 'x', 'n', 's', '-', 'i', 'd', 'p', 0, 27, 'r', 'd', 'p', 0, 29, 'i', 's', 'o', '-', 't', 'p', '4', 0, '$', 'x', 't', 'p', 0, '%', 'd', 'd', 'p', 0, '&', 'i', 'd', 'p', 'r', '-', 'c', 'm', 't', 'p', 0, ')', 'i', 'p', 'v', '6', 0, '+', 'i', 'p', 'v', '6', '-', 'r', 'o', 'u', 't', 'e', 0, ',', 'i', 'p', 'v', '6', '-', 'f', 'r', 'a', 'g', 0, '-', 'i', 'd', 'r', 'p', 0, '.', 'r', 's', 'v', 'p', 0, '/', 'g', 'r', 'e', 0, '2', 'e', 's', 'p', 0, '3', 'a', 'h', 0, '9', 's', 'k', 'i', 'p', 0, ':', 'i', 'p', 'v', '6', '-', 'i', 'c', 'm', 'p', 0, ';', 'i', 'p', 'v', '6', '-', 'n', 'o', 'n', 'x', 't', 0, '<', 'i', 'p', 'v', '6', '-', 'o', 'p', 't', 's', 0, 'I', 'r', 's', 'p', 'f', 0, 'Q', 'v', 'm', 't', 'p', 0, 'Y', 'o', 's', 'p', 'f', 0, '^', 'i', 'p', 'i', 'p', 0, 'b', 'e', 'n', 'c', 'a', 'p', 0, 'g', 'p', 'i', 'm', 0, 255, 'r', 'a', 'w'}
 
 func Xendprotoent(tls *TLS) {
 	if __ccgo_strace {
@@ -122812,7 +122500,7 @@ func Xrecv(tls *TLS, fd int32, buf uintptr, len1 Tsize_t, flags int32) (r Tssize
 	return Xrecvfrom(tls, fd, buf, len1, flags, uintptr(0), uintptr(0))
 }
 
-func Xrecvfrom(tls *TLS, fd int32, buf uintptr, len1 Tsize_t, flags int32, addr, alen uintptr) (r1 Tssize_t) {
+func Xrecvfrom(tls *TLS, fd int32, buf uintptr, len1 Tsize_t, flags int32, addr uintptr, alen uintptr) (r1 Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v buf=%v len1=%v flags=%v addr=%v alen=%v, (%v:)", tls, fd, buf, len1, flags, addr, alen, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -122844,7 +122532,7 @@ _9:
 	return X__syscall_ret(tls, Uint64FromInt64(v8))
 }
 
-func Xrecvmmsg(tls *TLS, fd int32, msgvec uintptr, vlen, flags uint32, timeout uintptr) (r int32) {
+func Xrecvmmsg(tls *TLS, fd int32, msgvec uintptr, vlen uint32, flags uint32, timeout uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v msgvec=%v vlen=%v flags=%v timeout=%v, (%v:)", tls, fd, msgvec, vlen, flags, timeout, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -123022,7 +122710,7 @@ func Xres_init(tls *TLS) (r int32) {
 	return 0
 }
 
-func X__res_mkquery(tls *TLS, op int32, dname uintptr, class, type1 int32, data uintptr, datalen int32, newrr, buf uintptr, buflen int32) (r int32) {
+func X__res_mkquery(tls *TLS, op int32, dname uintptr, class int32, type1 int32, data uintptr, datalen int32, newrr uintptr, buf uintptr, buflen int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v op=%v dname=%v class=%v type1=%v data=%v datalen=%v newrr=%v buf=%v buflen=%v, (%v:)", tls, op, dname, class, type1, data, datalen, newrr, buf, buflen, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -123086,7 +122774,7 @@ func X__res_mkquery(tls *TLS, op int32, dname uintptr, class, type1 int32, data 
 	return n
 }
 
-func Xres_mkquery(tls *TLS, op int32, dname uintptr, class, type1 int32, data uintptr, datalen int32, newrr, buf uintptr, buflen int32) (r int32) {
+func Xres_mkquery(tls *TLS, op int32, dname uintptr, class int32, type1 int32, data uintptr, datalen int32, newrr uintptr, buf uintptr, buflen int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v op=%v dname=%v class=%v type1=%v data=%v datalen=%v newrr=%v buf=%v buflen=%v, (%v:)", tls, op, dname, class, type1, data, datalen, newrr, buf, buflen, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -123094,98 +122782,94 @@ func Xres_mkquery(tls *TLS, op int32, dname uintptr, class, type1 int32, data ui
 	return X__res_mkquery(tls, op, dname, class, type1, data, datalen, newrr, buf, buflen)
 }
 
-const (
-	POLLERR                  = 8
-	POLLHUP                  = 16
-	POLLIN                   = 1
-	POLLMSG                  = 1024
-	POLLNVAL                 = 32
-	POLLOUT                  = 4
-	POLLPRI                  = 2
-	POLLRDBAND               = 128
-	POLLRDHUP                = 8192
-	POLLRDNORM               = 64
-	POLLWRBAND               = 512
-	POLLWRNORM               = 256
-	TCP_CC_INFO              = 26
-	TCP_CLOSE                = 7
-	TCP_CLOSE_WAIT           = 8
-	TCP_CLOSING              = 11
-	TCP_CM_INQ               = 36
-	TCP_CONGESTION           = 13
-	TCP_CORK                 = 3
-	TCP_DEFER_ACCEPT         = 9
-	TCP_ESTABLISHED          = 1
-	TCP_FASTOPEN             = 23
-	TCP_FASTOPEN_CONNECT     = 30
-	TCP_FASTOPEN_KEY         = 33
-	TCP_FASTOPEN_NO_COOKIE   = 34
-	TCP_FIN_WAIT1            = 4
-	TCP_FIN_WAIT2            = 5
-	TCP_INFO                 = 11
-	TCP_INQ                  = 36
-	TCP_KEEPCNT              = 6
-	TCP_KEEPIDLE             = 4
-	TCP_KEEPINTVL            = 5
-	TCP_LAST_ACK             = 9
-	TCP_LINGER2              = 8
-	TCP_LISTEN               = 10
-	TCP_MAXSEG               = 2
-	TCP_MD5SIG               = 14
-	TCP_MD5SIG_EXT           = 32
-	TCP_NODELAY              = 1
-	TCP_NOTSENT_LOWAT        = 25
-	TCP_QUEUE_SEQ            = 21
-	TCP_QUICKACK             = 12
-	TCP_REPAIR               = 19
-	TCP_REPAIR_OPTIONS       = 22
-	TCP_REPAIR_QUEUE         = 20
-	TCP_REPAIR_WINDOW        = 29
-	TCP_SAVED_SYN            = 28
-	TCP_SAVE_SYN             = 27
-	TCP_SYNCNT               = 7
-	TCP_SYN_RECV             = 3
-	TCP_SYN_SENT             = 2
-	TCP_THIN_DUPACK          = 17
-	TCP_THIN_LINEAR_TIMEOUTS = 16
-	TCP_TIMESTAMP            = 24
-	TCP_TIME_WAIT            = 6
-	TCP_TX_DELAY             = 37
-	TCP_ULP                  = 31
-	TCP_USER_TIMEOUT         = 18
-	TCP_WINDOW_CLAMP         = 10
-	TCP_ZEROCOPY_RECEIVE     = 35
-)
+const POLLERR = 8
+const POLLHUP = 16
+const POLLIN = 1
+const POLLMSG = 1024
+const POLLNVAL = 32
+const POLLOUT = 4
+const POLLPRI = 2
+const POLLRDBAND = 128
+const POLLRDHUP = 8192
+const POLLRDNORM = 64
+const POLLWRBAND = 512
+const POLLWRNORM = 256
+const TCP_CC_INFO = 26
+const TCP_CLOSE = 7
+const TCP_CLOSE_WAIT = 8
+const TCP_CLOSING = 11
+const TCP_CM_INQ = 36
+const TCP_CONGESTION = 13
+const TCP_CORK = 3
+const TCP_DEFER_ACCEPT = 9
+const TCP_ESTABLISHED = 1
+const TCP_FASTOPEN = 23
+const TCP_FASTOPEN_CONNECT = 30
+const TCP_FASTOPEN_KEY = 33
+const TCP_FASTOPEN_NO_COOKIE = 34
+const TCP_FIN_WAIT1 = 4
+const TCP_FIN_WAIT2 = 5
+const TCP_INFO = 11
+const TCP_INQ = 36
+const TCP_KEEPCNT = 6
+const TCP_KEEPIDLE = 4
+const TCP_KEEPINTVL = 5
+const TCP_LAST_ACK = 9
+const TCP_LINGER2 = 8
+const TCP_LISTEN = 10
+const TCP_MAXSEG = 2
+const TCP_MD5SIG = 14
+const TCP_MD5SIG_EXT = 32
+const TCP_NODELAY = 1
+const TCP_NOTSENT_LOWAT = 25
+const TCP_QUEUE_SEQ = 21
+const TCP_QUICKACK = 12
+const TCP_REPAIR = 19
+const TCP_REPAIR_OPTIONS = 22
+const TCP_REPAIR_QUEUE = 20
+const TCP_REPAIR_WINDOW = 29
+const TCP_SAVED_SYN = 28
+const TCP_SAVE_SYN = 27
+const TCP_SYNCNT = 7
+const TCP_SYN_RECV = 3
+const TCP_SYN_SENT = 2
+const TCP_THIN_DUPACK = 17
+const TCP_THIN_LINEAR_TIMEOUTS = 16
+const TCP_TIMESTAMP = 24
+const TCP_TIME_WAIT = 6
+const TCP_TX_DELAY = 37
+const TCP_ULP = 31
+const TCP_USER_TIMEOUT = 18
+const TCP_WINDOW_CLAMP = 10
+const TCP_ZEROCOPY_RECEIVE = 35
 
-const (
-	_TCP_NLA_PAD                   = 0
-	_TCP_NLA_BUSY                  = 1
-	_TCP_NLA_RWND_LIMITED          = 2
-	_TCP_NLA_SNDBUF_LIMITED        = 3
-	_TCP_NLA_DATA_SEGS_OUT         = 4
-	_TCP_NLA_TOTAL_RETRANS         = 5
-	_TCP_NLA_PACING_RATE           = 6
-	_TCP_NLA_DELIVERY_RATE         = 7
-	_TCP_NLA_SND_CWND              = 8
-	_TCP_NLA_REORDERING            = 9
-	_TCP_NLA_MIN_RTT               = 10
-	_TCP_NLA_RECUR_RETRANS         = 11
-	_TCP_NLA_DELIVERY_RATE_APP_LMT = 12
-	_TCP_NLA_SNDQ_SIZE             = 13
-	_TCP_NLA_CA_STATE              = 14
-	_TCP_NLA_SND_SSTHRESH          = 15
-	_TCP_NLA_DELIVERED             = 16
-	_TCP_NLA_DELIVERED_CE          = 17
-	_TCP_NLA_BYTES_SENT            = 18
-	_TCP_NLA_BYTES_RETRANS         = 19
-	_TCP_NLA_DSACK_DUPS            = 20
-	_TCP_NLA_REORD_SEEN            = 21
-	_TCP_NLA_SRTT                  = 22
-	_TCP_NLA_TIMEOUT_REHASH        = 23
-	_TCP_NLA_BYTES_NOTSENT         = 24
-	_TCP_NLA_EDT                   = 25
-	_TCP_NLA_TTL                   = 26
-)
+const _TCP_NLA_PAD = 0
+const _TCP_NLA_BUSY = 1
+const _TCP_NLA_RWND_LIMITED = 2
+const _TCP_NLA_SNDBUF_LIMITED = 3
+const _TCP_NLA_DATA_SEGS_OUT = 4
+const _TCP_NLA_TOTAL_RETRANS = 5
+const _TCP_NLA_PACING_RATE = 6
+const _TCP_NLA_DELIVERY_RATE = 7
+const _TCP_NLA_SND_CWND = 8
+const _TCP_NLA_REORDERING = 9
+const _TCP_NLA_MIN_RTT = 10
+const _TCP_NLA_RECUR_RETRANS = 11
+const _TCP_NLA_DELIVERY_RATE_APP_LMT = 12
+const _TCP_NLA_SNDQ_SIZE = 13
+const _TCP_NLA_CA_STATE = 14
+const _TCP_NLA_SND_SSTHRESH = 15
+const _TCP_NLA_DELIVERED = 16
+const _TCP_NLA_DELIVERED_CE = 17
+const _TCP_NLA_BYTES_SENT = 18
+const _TCP_NLA_BYTES_RETRANS = 19
+const _TCP_NLA_DSACK_DUPS = 20
+const _TCP_NLA_REORD_SEEN = 21
+const _TCP_NLA_SRTT = 22
+const _TCP_NLA_TIMEOUT_REHASH = 23
+const _TCP_NLA_BYTES_NOTSENT = 24
+const _TCP_NLA_EDT = 25
+const _TCP_NLA_TTL = 26
 
 type Tnfds_t = uint64
 
@@ -123294,7 +122978,7 @@ func _step_mh(tls *TLS, mh uintptr, n Tsize_t) {
  * must be sufficiently small to be safe as VLA size. In practice it's
  * either 1 or 2, anyway. */
 
-func X__res_msend_rc(tls *TLS, nqueries int32, queries, qlens, answers, alens uintptr, asize int32, conf uintptr) (r1 int32) {
+func X__res_msend_rc(tls *TLS, nqueries int32, queries uintptr, qlens uintptr, answers uintptr, alens uintptr, asize int32, conf uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v nqueries=%v queries=%v qlens=%v answers=%v alens=%v asize=%v conf=%v, (%v:)", tls, nqueries, queries, qlens, answers, alens, asize, conf, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -123753,7 +123437,7 @@ out:
 	return 0
 }
 
-func X__res_msend(tls *TLS, nqueries int32, queries, qlens, answers, alens uintptr, asize int32) (r int32) {
+func X__res_msend(tls *TLS, nqueries int32, queries uintptr, qlens uintptr, answers uintptr, alens uintptr, asize int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v nqueries=%v queries=%v qlens=%v answers=%v alens=%v asize=%v, (%v:)", tls, nqueries, queries, qlens, answers, alens, asize, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -123822,7 +123506,7 @@ func X__res_state(tls *TLS) (r uintptr) {
 
 var _res1 t__res_state
 
-func X__get_resolv_conf(tls *TLS, conf, search uintptr, search_sz Tsize_t) (r int32) {
+func X__get_resolv_conf(tls *TLS, conf uintptr, search uintptr, search_sz Tsize_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v conf=%v search=%v search_sz=%v, (%v:)", tls, conf, search, search_sz, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -124013,7 +123697,7 @@ func Xsend(tls *TLS, fd int32, buf uintptr, len1 Tsize_t, flags int32) (r Tssize
 	return Xsendto(tls, fd, buf, len1, flags, uintptr(0), uint32(0))
 }
 
-func Xsendmmsg(tls *TLS, fd int32, msgvec uintptr, vlen, flags uint32) (r1 int32) {
+func Xsendmmsg(tls *TLS, fd int32, msgvec uintptr, vlen uint32, flags uint32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v msgvec=%v vlen=%v flags=%v, (%v:)", tls, fd, msgvec, vlen, flags, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -124183,7 +123867,7 @@ func Xgetservent(tls *TLS) (r uintptr) {
 	return uintptr(0)
 }
 
-func Xsetsockopt(tls *TLS, fd, level, optname int32, optval uintptr, optlen Tsocklen_t) (r2 int32) {
+func Xsetsockopt(tls *TLS, fd int32, level int32, optname int32, optval uintptr, optlen Tsocklen_t) (r2 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v level=%v optname=%v optval=%v optlen=%v, (%v:)", tls, fd, level, optname, optval, optlen, origin(2))
 		defer func() { trc("-> %v", r2) }()
@@ -124314,7 +123998,7 @@ _9:
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r1)))
 }
 
-func Xshutdown(tls *TLS, fd, how int32) (r1 int32) {
+func Xshutdown(tls *TLS, fd int32, how int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v how=%v, (%v:)", tls, fd, how, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -124360,7 +124044,7 @@ func Xsockatmark(tls *TLS, s int32) (r int32) {
 	return **(**int32)(__ccgo_up(bp))
 }
 
-func Xsocket(tls *TLS, domain, type1, protocol int32) (r1 int32) {
+func Xsocket(tls *TLS, domain int32, type1 int32, protocol int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v domain=%v type1=%v protocol=%v, (%v:)", tls, domain, type1, protocol, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -124425,7 +124109,7 @@ _9:
 	return int32(X__syscall_ret(tls, Uint64FromInt32(s)))
 }
 
-func Xsocketpair(tls *TLS, domain, type1, protocol int32, fd uintptr) (r2 int32) {
+func Xsocketpair(tls *TLS, domain int32, type1 int32, protocol int32, fd uintptr) (r2 int32) {
 	if __ccgo_strace {
 		trc("tls=%v domain=%v type1=%v protocol=%v fd=%v, (%v:)", tls, domain, type1, protocol, fd, origin(2))
 		defer func() { trc("-> %v", r2) }()
@@ -124553,39 +124237,37 @@ var _line2 uintptr
 
 var _pw Tpasswd
 
-const (
-	GETGRBYGID    = 3
-	GETGRBYNAME   = 2
-	GETINITGR     = 15
-	GETPWBYNAME   = 0
-	GETPWBYUID    = 1
-	GRFOUND       = 1
-	GRGID         = 4
-	GRMEMCNT      = 5
-	GRNAMELEN     = 2
-	GRPASSWDLEN   = 3
-	GRVERSION     = 0
-	GR_LEN        = 6
-	INITGRFOUND   = 1
-	INITGRNGRPS   = 2
-	INITGRVERSION = 0
-	INITGR_LEN    = 3
-	NSCDVERSION   = 2
-	PWDIRLEN      = 7
-	PWFOUND       = 1
-	PWGECOSLEN    = 6
-	PWGID         = 5
-	PWNAMELEN     = 2
-	PWPASSWDLEN   = 3
-	PWSHELLLEN    = 8
-	PWUID         = 4
-	PWVERSION     = 0
-	PW_LEN        = 9
-	REQKEYLEN     = 2
-	REQTYPE       = 1
-	REQVERSION    = 0
-	REQ_LEN       = 3
-)
+const GETGRBYGID = 3
+const GETGRBYNAME = 2
+const GETINITGR = 15
+const GETPWBYNAME = 0
+const GETPWBYUID = 1
+const GRFOUND = 1
+const GRGID = 4
+const GRMEMCNT = 5
+const GRNAMELEN = 2
+const GRPASSWDLEN = 3
+const GRVERSION = 0
+const GR_LEN = 6
+const INITGRFOUND = 1
+const INITGRNGRPS = 2
+const INITGRVERSION = 0
+const INITGR_LEN = 3
+const NSCDVERSION = 2
+const PWDIRLEN = 7
+const PWFOUND = 1
+const PWGECOSLEN = 6
+const PWGID = 5
+const PWNAMELEN = 2
+const PWPASSWDLEN = 3
+const PWSHELLLEN = 8
+const PWUID = 4
+const PWVERSION = 0
+const PW_LEN = 9
+const REQKEYLEN = 2
+const REQTYPE = 1
+const REQVERSION = 0
+const REQ_LEN = 3
 
 func _itoa1(tls *TLS, p uintptr, x Tuint32_t) (r uintptr) {
 	var v1 uintptr
@@ -124604,7 +124286,7 @@ func _itoa1(tls *TLS, p uintptr, x Tuint32_t) (r uintptr) {
 	return p
 }
 
-func X__getgr_a(tls *TLS, name uintptr, gid Tgid_t, gr, buf, size, mem, nmem, res uintptr) (r int32) {
+func X__getgr_a(tls *TLS, name uintptr, gid Tgid_t, gr uintptr, buf uintptr, size uintptr, mem uintptr, nmem uintptr, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v gid=%v gr=%v buf=%v size=%v mem=%v nmem=%v res=%v, (%v:)", tls, name, gid, gr, buf, size, mem, nmem, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -124798,7 +124480,7 @@ done:
 	return rv
 }
 
-func _getgr_r(tls *TLS, name uintptr, gid Tgid_t, gr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
+func _getgr_r(tls *TLS, name uintptr, gid Tgid_t, gr uintptr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var i Tsize_t
@@ -124849,7 +124531,7 @@ func _getgr_r(tls *TLS, name uintptr, gid Tgid_t, gr, buf uintptr, size Tsize_t,
 	return rv
 }
 
-func Xgetgrnam_r(tls *TLS, name, gr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
+func Xgetgrnam_r(tls *TLS, name uintptr, gr uintptr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v gr=%v buf=%v size=%v res=%v, (%v:)", tls, name, gr, buf, size, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -124857,7 +124539,7 @@ func Xgetgrnam_r(tls *TLS, name, gr, buf uintptr, size Tsize_t, res uintptr) (r 
 	return _getgr_r(tls, name, uint32(0), gr, buf, size, res)
 }
 
-func Xgetgrgid_r(tls *TLS, gid Tgid_t, gr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
+func Xgetgrgid_r(tls *TLS, gid Tgid_t, gr uintptr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v gid=%v gr=%v buf=%v size=%v res=%v, (%v:)", tls, gid, gr, buf, size, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -124865,12 +124547,10 @@ func Xgetgrgid_r(tls *TLS, gid Tgid_t, gr, buf uintptr, size Tsize_t, res uintpt
 	return _getgr_r(tls, uintptr(0), gid, gr, buf, size, res)
 }
 
-var (
-	_f1    uintptr
-	_line3 uintptr
-	_mem1  uintptr
-	_gr1   Tgroup
-)
+var _f1 uintptr
+var _line3 uintptr
+var _mem1 uintptr
+var _gr1 Tgroup
 
 func Xsetgrent(tls *TLS) {
 	if __ccgo_strace {
@@ -124960,7 +124640,7 @@ func _atou(tls *TLS, s uintptr) (r uint32) {
 	return x
 }
 
-func X__getgrent_a(tls *TLS, f, gr, line, size, mem, nmem, res uintptr) (r int32) {
+func X__getgrent_a(tls *TLS, f uintptr, gr uintptr, line uintptr, size uintptr, mem uintptr, nmem uintptr, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v gr=%v line=%v size=%v mem=%v nmem=%v res=%v, (%v:)", tls, f, gr, line, size, mem, nmem, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125086,7 +124766,7 @@ end:
 	return rv
 }
 
-func Xgetgrouplist(tls *TLS, user uintptr, gid Tgid_t, groups, ngroups uintptr) (r int32) {
+func Xgetgrouplist(tls *TLS, user uintptr, gid Tgid_t, groups uintptr, ngroups uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v user=%v gid=%v groups=%v ngroups=%v, (%v:)", tls, user, gid, groups, ngroups, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125265,7 +124945,7 @@ func _itoa2(tls *TLS, p uintptr, x Tuint32_t) (r uintptr) {
 	return p
 }
 
-func X__getpw_a(tls *TLS, name uintptr, uid Tuid_t, pw, buf, size, res uintptr) (r int32) {
+func X__getpw_a(tls *TLS, name uintptr, uid Tuid_t, pw uintptr, buf uintptr, size uintptr, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v uid=%v pw=%v buf=%v size=%v res=%v, (%v:)", tls, name, uid, pw, buf, size, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125400,7 +125080,7 @@ done:
 	return rv
 }
 
-func _getpw_r(tls *TLS, name uintptr, uid Tuid_t, pw, buf uintptr, size Tsize_t, res uintptr) (r int32) {
+func _getpw_r(tls *TLS, name uintptr, uid Tuid_t, pw uintptr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var rv int32
@@ -125433,7 +125113,7 @@ func _getpw_r(tls *TLS, name uintptr, uid Tuid_t, pw, buf uintptr, size Tsize_t,
 	return rv
 }
 
-func Xgetpwnam_r(tls *TLS, name, pw, buf uintptr, size Tsize_t, res uintptr) (r int32) {
+func Xgetpwnam_r(tls *TLS, name uintptr, pw uintptr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v name=%v pw=%v buf=%v size=%v res=%v, (%v:)", tls, name, pw, buf, size, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125441,7 +125121,7 @@ func Xgetpwnam_r(tls *TLS, name, pw, buf uintptr, size Tsize_t, res uintptr) (r 
 	return _getpw_r(tls, name, uint32(0), pw, buf, size, res)
 }
 
-func Xgetpwuid_r(tls *TLS, uid Tuid_t, pw, buf uintptr, size Tsize_t, res uintptr) (r int32) {
+func Xgetpwuid_r(tls *TLS, uid Tuid_t, pw uintptr, buf uintptr, size Tsize_t, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v uid=%v pw=%v buf=%v size=%v res=%v, (%v:)", tls, uid, pw, buf, size, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125449,12 +125129,10 @@ func Xgetpwuid_r(tls *TLS, uid Tuid_t, pw, buf uintptr, size Tsize_t, res uintpt
 	return _getpw_r(tls, uintptr(0), uid, pw, buf, size, res)
 }
 
-var (
-	_f2    uintptr
-	_line4 uintptr
-	_pw1   Tpasswd
-	_size  Tsize_t
-)
+var _f2 uintptr
+var _line4 uintptr
+var _pw1 Tpasswd
+var _size Tsize_t
 
 func Xsetpwent(tls *TLS) {
 	if __ccgo_strace {
@@ -125532,7 +125210,7 @@ func _atou1(tls *TLS, s uintptr) (r uint32) {
 	return x
 }
 
-func X__getpwent_a(tls *TLS, f, pw, line, size, res uintptr) (r int32) {
+func X__getpwent_a(tls *TLS, f uintptr, pw uintptr, line uintptr, size uintptr, res uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v pw=%v line=%v size=%v res=%v, (%v:)", tls, f, pw, line, size, res, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125673,7 +125351,7 @@ var _addr = struct {
 	Fsun_path:   [21]int8{'/', 'v', 'a', 'r', '/', 'r', 'u', 'n', '/', 'n', 's', 'c', 'd', '/', 's', 'o', 'c', 'k', 'e', 't'},
 }
 
-func X__nscd_query(tls *TLS, req Tint32_t, key, buf uintptr, len1 Tsize_t, swap uintptr) (r uintptr) {
+func X__nscd_query(tls *TLS, req Tint32_t, key uintptr, buf uintptr, len1 Tsize_t, swap uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v req=%v key=%v buf=%v len1=%v swap=%v, (%v:)", tls, req, key, buf, len1, swap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125814,7 +125492,7 @@ error:
 	return uintptr(0)
 }
 
-func Xputgrent(tls *TLS, gr, f uintptr) (r1 int32) {
+func Xputgrent(tls *TLS, gr uintptr, f uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v gr=%v f=%v, (%v:)", tls, gr, f, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -125866,7 +125544,7 @@ done:
 	return v1
 }
 
-func Xputpwent(tls *TLS, pw, f uintptr) (r int32) {
+func Xputpwent(tls *TLS, pw uintptr, f uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v pw=%v f=%v, (%v:)", tls, pw, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125883,7 +125561,7 @@ func Xputpwent(tls *TLS, pw, f uintptr) (r int32) {
 	return v1
 }
 
-func Xputspent(tls *TLS, sp, f uintptr) (r int32) {
+func Xputspent(tls *TLS, sp uintptr, f uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v sp=%v f=%v, (%v:)", tls, sp, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -125983,7 +125661,7 @@ func Xputspent(tls *TLS, sp, f uintptr) (r int32) {
 	return v1
 }
 
-func X__rand48_step(tls *TLS, xi, lc uintptr) (r Tuint64_t) {
+func X__rand48_step(tls *TLS, xi uintptr, lc uintptr) (r Tuint64_t) {
 	if __ccgo_strace {
 		trc("tls=%v xi=%v lc=%v, (%v:)", tls, xi, lc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126146,13 +125824,11 @@ var _init = [32]Tuint32_t{
 	31: uint32(0x37521657),
 }
 
-var (
-	_n     = int32(31)
-	_i     = int32(3)
-	_j     = int32(0)
-	_x1    = uintptr(unsafe.Pointer(&_init)) + uintptr(1)*4
-	_lock3 [1]int32
-)
+var _n = int32(31)
+var _i = int32(3)
+var _j = int32(0)
+var _x1 = uintptr(unsafe.Pointer(&_init)) + uintptr(1)*4
+var _lock3 [1]int32
 
 func _lcg31(tls *TLS, x Tuint32_t) (r Tuint32_t) {
 	return (uint32(1103515245)*x + uint32(12345)) & uint32(0x7fffffff)
@@ -126326,7 +126002,7 @@ func Xsrand48(tls *TLS, seed int64) {
 	Xseed48(tls, bp)
 }
 
-func Xexecl(tls *TLS, path, argv0, va uintptr) (r int32) {
+func Xexecl(tls *TLS, path uintptr, argv0 uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v argv0=%v va=%v, (%v:)", tls, path, argv0, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126370,7 +126046,7 @@ func Xexecl(tls *TLS, path, argv0, va uintptr) (r int32) {
 	return r
 }
 
-func Xexecle(tls *TLS, path, argv0, va uintptr) (r int32) {
+func Xexecle(tls *TLS, path uintptr, argv0 uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v argv0=%v va=%v, (%v:)", tls, path, argv0, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126414,7 +126090,7 @@ func Xexecle(tls *TLS, path, argv0, va uintptr) (r int32) {
 	return r
 }
 
-func Xexeclp(tls *TLS, file, argv0, va uintptr) (r int32) {
+func Xexeclp(tls *TLS, file uintptr, argv0 uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v file=%v argv0=%v va=%v, (%v:)", tls, file, argv0, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126458,7 +126134,7 @@ func Xexeclp(tls *TLS, file, argv0, va uintptr) (r int32) {
 	return r
 }
 
-func Xexecv(tls *TLS, path, argv uintptr) (r int32) {
+func Xexecv(tls *TLS, path uintptr, argv uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v argv=%v, (%v:)", tls, path, argv, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126466,7 +126142,7 @@ func Xexecv(tls *TLS, path, argv uintptr) (r int32) {
 	return Xexecve(tls, path, argv, Xenviron)
 }
 
-func Xexecve(tls *TLS, path, argv, envp uintptr) (r int32) {
+func Xexecve(tls *TLS, path uintptr, argv uintptr, envp uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v argv=%v envp=%v, (%v:)", tls, path, argv, envp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126475,7 +126151,7 @@ func Xexecve(tls *TLS, path, argv, envp uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_execve), int64(path), int64(argv), int64(envp)))))
 }
 
-func X__execvpe(tls *TLS, file, argv, envp uintptr) (r int32) {
+func X__execvpe(tls *TLS, file uintptr, argv uintptr, envp uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v file=%v argv=%v envp=%v, (%v:)", tls, file, argv, envp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126547,7 +126223,7 @@ func X__execvpe(tls *TLS, file, argv, envp uintptr) (r int32) {
 	return -int32(1)
 }
 
-func Xexecvp(tls *TLS, file, argv uintptr) (r int32) {
+func Xexecvp(tls *TLS, file uintptr, argv uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v file=%v argv=%v, (%v:)", tls, file, argv, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126555,7 +126231,7 @@ func Xexecvp(tls *TLS, file, argv uintptr) (r int32) {
 	return X__execvpe(tls, file, argv, Xenviron)
 }
 
-func Xexecvpe(tls *TLS, file, argv, envp uintptr) (r int32) {
+func Xexecvpe(tls *TLS, file uintptr, argv uintptr, envp uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v file=%v argv=%v envp=%v, (%v:)", tls, file, argv, envp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126563,7 +126239,7 @@ func Xexecvpe(tls *TLS, file, argv, envp uintptr) (r int32) {
 	return X__execvpe(tls, file, argv, envp)
 }
 
-func Xfexecve(tls *TLS, fd int32, argv, envp uintptr) (r1 int32) {
+func Xfexecve(tls *TLS, fd int32, argv uintptr, envp uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v argv=%v envp=%v, (%v:)", tls, fd, argv, envp, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -126606,21 +126282,19 @@ func _dummy8(tls *TLS, x int32) {
 func _dummy_0(tls *TLS) {
 }
 
-const (
-	FDOP_CHDIR                = 4
-	FDOP_CLOSE                = 1
-	FDOP_DUP2                 = 2
-	FDOP_FCHDIR               = 5
-	FDOP_OPEN                 = 3
-	POSIX_SPAWN_RESETIDS      = 1
-	POSIX_SPAWN_SETPGROUP     = 2
-	POSIX_SPAWN_SETSCHEDPARAM = 16
-	POSIX_SPAWN_SETSCHEDULER  = 32
-	POSIX_SPAWN_SETSID        = 128
-	POSIX_SPAWN_SETSIGDEF     = 4
-	POSIX_SPAWN_SETSIGMASK    = 8
-	POSIX_SPAWN_USEVFORK      = 64
-)
+const FDOP_CHDIR = 4
+const FDOP_CLOSE = 1
+const FDOP_DUP2 = 2
+const FDOP_FCHDIR = 5
+const FDOP_OPEN = 3
+const POSIX_SPAWN_RESETIDS = 1
+const POSIX_SPAWN_SETPGROUP = 2
+const POSIX_SPAWN_SETSCHEDPARAM = 16
+const POSIX_SPAWN_SETSCHEDULER = 32
+const POSIX_SPAWN_SETSID = 128
+const POSIX_SPAWN_SETSIGDEF = 4
+const POSIX_SPAWN_SETSIGMASK = 8
+const POSIX_SPAWN_USEVFORK = 64
 
 type Tposix_spawnattr_t = struct {
 	F__flags int32
@@ -126649,7 +126323,7 @@ type Tfdop = struct {
 	Fmode  Tmode_t
 }
 
-func Xposix_spawn_file_actions_addchdir_np(tls *TLS, fa, path uintptr) (r int32) {
+func Xposix_spawn_file_actions_addchdir_np(tls *TLS, fa uintptr, path uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fa=%v path=%v, (%v:)", tls, fa, path, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126699,7 +126373,7 @@ func Xposix_spawn_file_actions_addclose(tls *TLS, fa uintptr, fd int32) (r int32
 	return 0
 }
 
-func Xposix_spawn_file_actions_adddup2(tls *TLS, fa uintptr, srcfd, fd int32) (r int32) {
+func Xposix_spawn_file_actions_adddup2(tls *TLS, fa uintptr, srcfd int32, fd int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fa=%v srcfd=%v fd=%v, (%v:)", tls, fa, srcfd, fd, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126814,7 +126488,7 @@ func Xposix_spawnattr_destroy(tls *TLS, attr uintptr) (r int32) {
 	return 0
 }
 
-func Xposix_spawnattr_getflags(tls *TLS, attr, flags uintptr) (r int32) {
+func Xposix_spawnattr_getflags(tls *TLS, attr uintptr, flags uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v flags=%v, (%v:)", tls, attr, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126823,7 +126497,7 @@ func Xposix_spawnattr_getflags(tls *TLS, attr, flags uintptr) (r int32) {
 	return 0
 }
 
-func Xposix_spawnattr_getpgroup(tls *TLS, attr, pgrp uintptr) (r int32) {
+func Xposix_spawnattr_getpgroup(tls *TLS, attr uintptr, pgrp uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v pgrp=%v, (%v:)", tls, attr, pgrp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126832,7 +126506,7 @@ func Xposix_spawnattr_getpgroup(tls *TLS, attr, pgrp uintptr) (r int32) {
 	return 0
 }
 
-func Xposix_spawnattr_getsigdefault(tls *TLS, attr, def uintptr) (r int32) {
+func Xposix_spawnattr_getsigdefault(tls *TLS, attr uintptr, def uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v def=%v, (%v:)", tls, attr, def, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126841,7 +126515,7 @@ func Xposix_spawnattr_getsigdefault(tls *TLS, attr, def uintptr) (r int32) {
 	return 0
 }
 
-func Xposix_spawnattr_getsigmask(tls *TLS, attr, mask uintptr) (r int32) {
+func Xposix_spawnattr_getsigmask(tls *TLS, attr uintptr, mask uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v mask=%v, (%v:)", tls, attr, mask, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126859,7 +126533,7 @@ func Xposix_spawnattr_init(tls *TLS, attr uintptr) (r int32) {
 	return 0
 }
 
-func Xposix_spawnattr_getschedparam(tls *TLS, attr, schedparam uintptr) (r int32) {
+func Xposix_spawnattr_getschedparam(tls *TLS, attr uintptr, schedparam uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v schedparam=%v, (%v:)", tls, attr, schedparam, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126867,7 +126541,7 @@ func Xposix_spawnattr_getschedparam(tls *TLS, attr, schedparam uintptr) (r int32
 	return int32(ENOSYS)
 }
 
-func Xposix_spawnattr_setschedparam(tls *TLS, attr, schedparam uintptr) (r int32) {
+func Xposix_spawnattr_setschedparam(tls *TLS, attr uintptr, schedparam uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v schedparam=%v, (%v:)", tls, attr, schedparam, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126875,7 +126549,7 @@ func Xposix_spawnattr_setschedparam(tls *TLS, attr, schedparam uintptr) (r int32
 	return int32(ENOSYS)
 }
 
-func Xposix_spawnattr_getschedpolicy(tls *TLS, attr, policy uintptr) (r int32) {
+func Xposix_spawnattr_getschedpolicy(tls *TLS, attr uintptr, policy uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v policy=%v, (%v:)", tls, attr, policy, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126915,7 +126589,7 @@ func Xposix_spawnattr_setpgroup(tls *TLS, attr uintptr, pgrp Tpid_t) (r int32) {
 	return 0
 }
 
-func Xposix_spawnattr_setsigdefault(tls *TLS, attr, def uintptr) (r int32) {
+func Xposix_spawnattr_setsigdefault(tls *TLS, attr uintptr, def uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v def=%v, (%v:)", tls, attr, def, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126924,7 +126598,7 @@ func Xposix_spawnattr_setsigdefault(tls *TLS, attr, def uintptr) (r int32) {
 	return 0
 }
 
-func Xposix_spawnattr_setsigmask(tls *TLS, attr, mask uintptr) (r int32) {
+func Xposix_spawnattr_setsigmask(tls *TLS, attr uintptr, mask uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v attr=%v mask=%v, (%v:)", tls, attr, mask, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -126966,21 +126640,19 @@ func Xwaitpid(tls *TLS, pid Tpid_t, status uintptr, options int32) (r Tpid_t) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_wait4), int64(pid), int64(status), int64(options), int64(Int32FromInt32(0)), 0, 0))))
 }
 
-const (
-	BRACKET         = -3
-	END             = 0
-	FNM_CASEFOLD    = 16
-	FNM_FILE_NAME   = 1
-	FNM_LEADING_DIR = 8
-	FNM_NOESCAPE    = 2
-	FNM_NOMATCH     = 1
-	FNM_NOSYS       = -1
-	FNM_PATHNAME    = 1
-	FNM_PERIOD      = 4
-	QUESTION        = -4
-	STAR            = -5
-	UNMATCHABLE     = -2
-)
+const BRACKET = -3
+const END = 0
+const FNM_CASEFOLD = 16
+const FNM_FILE_NAME = 1
+const FNM_LEADING_DIR = 8
+const FNM_NOESCAPE = 2
+const FNM_NOMATCH = 1
+const FNM_NOSYS = -1
+const FNM_PATHNAME = 1
+const FNM_PERIOD = 4
+const QUESTION = -4
+const STAR = -5
+const UNMATCHABLE = -2
 
 func _str_next(tls *TLS, str uintptr, n Tsize_t, step uintptr) (r int32) {
 	bp := tls.Alloc(16)
@@ -127099,7 +126771,7 @@ func _casefold(tls *TLS, k int32) (r int32) {
 	return Int32FromUint32(v1)
 }
 
-func _match_bracket(tls *TLS, p uintptr, k, kfold int32) (r int32) {
+func _match_bracket(tls *TLS, p uintptr, k int32, kfold int32) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var inv, l, l1, z int32
@@ -127405,7 +127077,7 @@ func _fnmatch_internal(tls *TLS, pat uintptr, m Tsize_t, str uintptr, n Tsize_t,
 	return 0
 }
 
-func Xfnmatch(tls *TLS, pat, str uintptr, flags int32) (r int32) {
+func Xfnmatch(tls *TLS, pat uintptr, str uintptr, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v pat=%v str=%v flags=%v, (%v:)", tls, pat, str, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -127477,22 +127149,20 @@ func Xfnmatch(tls *TLS, pat, str uintptr, flags int32) (r int32) {
 	return _fnmatch_internal(tls, pat, Uint64FromInt32(-Int32FromInt32(1)), str, Uint64FromInt32(-Int32FromInt32(1)), flags)
 }
 
-const (
-	GLOB_ABORTED     = 2
-	GLOB_APPEND      = 32
-	GLOB_DOOFFS      = 8
-	GLOB_ERR         = 1
-	GLOB_MARK        = 2
-	GLOB_NOCHECK     = 16
-	GLOB_NOESCAPE    = 64
-	GLOB_NOMATCH     = 3
-	GLOB_NOSORT      = 4
-	GLOB_NOSPACE     = 1
-	GLOB_NOSYS       = 4
-	GLOB_PERIOD      = 128
-	GLOB_TILDE       = 4096
-	GLOB_TILDE_CHECK = 16384
-)
+const GLOB_ABORTED = 2
+const GLOB_APPEND = 32
+const GLOB_DOOFFS = 8
+const GLOB_ERR = 1
+const GLOB_MARK = 2
+const GLOB_NOCHECK = 16
+const GLOB_NOESCAPE = 64
+const GLOB_NOMATCH = 3
+const GLOB_NOSORT = 4
+const GLOB_NOSPACE = 1
+const GLOB_NOSYS = 4
+const GLOB_PERIOD = 128
+const GLOB_TILDE = 4096
+const GLOB_TILDE_CHECK = 16384
 
 type Tglob_t = struct {
 	Fgl_pathc Tsize_t
@@ -127506,7 +127176,7 @@ type Tmatch = struct {
 	Fnext uintptr
 }
 
-func _append(tls *TLS, tail, name uintptr, len1 Tsize_t, mark int32) (r int32) {
+func _append(tls *TLS, tail uintptr, name uintptr, len1 Tsize_t, mark int32) (r int32) {
 	var new1 uintptr
 	_ = new1
 	new1 = Xmalloc(tls, uint64(8)+len1+uint64(2))
@@ -127524,7 +127194,7 @@ func _append(tls *TLS, tail, name uintptr, len1 Tsize_t, mark int32) (r int32) {
 	return 0
 }
 
-func _do_glob(tls *TLS, buf uintptr, pos Tsize_t, type1 int32, pat uintptr, flags int32, __ccgo_fp_errfunc, tail uintptr) (r1 int32) {
+func _do_glob(tls *TLS, buf uintptr, pos Tsize_t, type1 int32, pat uintptr, flags int32, __ccgo_fp_errfunc uintptr, tail uintptr) (r1 int32) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var de, dir, p, p2, v2 uintptr
@@ -127761,11 +127431,11 @@ func _freelist(tls *TLS, head uintptr) {
 	}
 }
 
-func _sort(tls *TLS, a, b uintptr) (r int32) {
+func _sort(tls *TLS, a uintptr, b uintptr) (r int32) {
 	return Xstrcmp(tls, **(**uintptr)(__ccgo_up(a)), **(**uintptr)(__ccgo_up(b)))
 }
 
-func _expand_tilde(tls *TLS, pat, buf, pos uintptr) (r int32) {
+func _expand_tilde(tls *TLS, pat uintptr, buf uintptr, pos uintptr) (r int32) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var delim, v1 int8
@@ -127847,7 +127517,7 @@ func _expand_tilde(tls *TLS, pat, buf, pos uintptr) (r int32) {
 
 type t__ccgo_fp__Xglob_2 = func(*TLS, uintptr, int32) int32
 
-func Xglob(tls *TLS, pat uintptr, flags int32, __ccgo_fp_errfunc, g uintptr) (r int32) {
+func Xglob(tls *TLS, pat uintptr, flags int32, __ccgo_fp_errfunc uintptr, g uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v pat=%v flags=%v __ccgo_fp_errfunc=%v g=%v, (%v:)", tls, pat, flags, __ccgo_fp_errfunc, g, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -127997,73 +127667,71 @@ func Xglobfree(tls *TLS, g uintptr) {
 	(*Tglob_t)(unsafe.Pointer(g)).Fgl_pathv = UintptrFromInt32(0)
 }
 
-const (
-	ASSERTION               = -2
-	ASSERT_AT_BOL           = 1
-	ASSERT_AT_BOW           = 16
-	ASSERT_AT_EOL           = 2
-	ASSERT_AT_EOW           = 32
-	ASSERT_AT_WB            = 64
-	ASSERT_AT_WB_NEG        = 128
-	ASSERT_BACKREF          = 256
-	ASSERT_CHAR_CLASS       = 4
-	ASSERT_CHAR_CLASS_NEG   = 8
-	ASSERT_LAST             = 256
-	BACKREF                 = -4
-	COPY_MAXIMIZE_FIRST_TAG = 2
-	COPY_REMOVE_TAGS        = 1
-	EMPTY1                  = -1
-	MAX_NEG_CLASSES         = 64
-	REG_BADBR               = 10
-	REG_BADPAT              = 2
-	REG_BADRPT              = 13
-	REG_EBRACE              = 9
-	REG_EBRACK              = 7
-	REG_ECOLLATE            = 3
-	REG_ECTYPE              = 4
-	REG_EESCAPE             = 5
-	REG_ENOSYS              = -1
-	REG_EPAREN              = 8
-	REG_ERANGE              = 11
-	REG_ESPACE              = 12
-	REG_ESUBREG             = 6
-	REG_EXTENDED            = 1
-	REG_ICASE               = 2
-	REG_NEWLINE             = 4
-	REG_NOMATCH             = 1
-	REG_NOSUB               = 8
-	REG_NOTBOL              = 1
-	REG_NOTEOL              = 2
-	REG_OK                  = 0
-	TAG                     = -3
-	TRE_CHAR_MAX            = 1114111
-	TRE_MEM_BLOCK_SIZE      = 1024
-	TRE_REGEX_T_FIELD       = 0
-	tre_ctype               = 0
-	tre_isalnum             = 0
-	tre_isalpha             = 0
-	tre_isblank             = 0
-	tre_iscntrl             = 0
-	tre_isctype             = 0
-	tre_isdigit             = 0
-	tre_isgraph             = 0
-	tre_islower             = 0
-	tre_isprint             = 0
-	tre_ispunct             = 0
-	tre_isspace             = 0
-	tre_isupper             = 0
-	tre_isxdigit            = 0
-	tre_mem_alloc_impl      = 0
-	tre_mem_destroy         = 0
-	tre_mem_new_impl        = 0
-	tre_strlen              = 0
-	tre_tolower             = 0
-	tre_toupper             = 0
-	xcalloc                 = 0
-	xfree                   = 0
-	xmalloc                 = 0
-	xrealloc                = 0
-)
+const ASSERTION = -2
+const ASSERT_AT_BOL = 1
+const ASSERT_AT_BOW = 16
+const ASSERT_AT_EOL = 2
+const ASSERT_AT_EOW = 32
+const ASSERT_AT_WB = 64
+const ASSERT_AT_WB_NEG = 128
+const ASSERT_BACKREF = 256
+const ASSERT_CHAR_CLASS = 4
+const ASSERT_CHAR_CLASS_NEG = 8
+const ASSERT_LAST = 256
+const BACKREF = -4
+const COPY_MAXIMIZE_FIRST_TAG = 2
+const COPY_REMOVE_TAGS = 1
+const EMPTY1 = -1
+const MAX_NEG_CLASSES = 64
+const REG_BADBR = 10
+const REG_BADPAT = 2
+const REG_BADRPT = 13
+const REG_EBRACE = 9
+const REG_EBRACK = 7
+const REG_ECOLLATE = 3
+const REG_ECTYPE = 4
+const REG_EESCAPE = 5
+const REG_ENOSYS = -1
+const REG_EPAREN = 8
+const REG_ERANGE = 11
+const REG_ESPACE = 12
+const REG_ESUBREG = 6
+const REG_EXTENDED = 1
+const REG_ICASE = 2
+const REG_NEWLINE = 4
+const REG_NOMATCH = 1
+const REG_NOSUB = 8
+const REG_NOTBOL = 1
+const REG_NOTEOL = 2
+const REG_OK = 0
+const TAG = -3
+const TRE_CHAR_MAX = 1114111
+const TRE_MEM_BLOCK_SIZE = 1024
+const TRE_REGEX_T_FIELD = 0
+const tre_ctype = 0
+const tre_isalnum = 0
+const tre_isalpha = 0
+const tre_isblank = 0
+const tre_iscntrl = 0
+const tre_isctype = 0
+const tre_isdigit = 0
+const tre_isgraph = 0
+const tre_islower = 0
+const tre_isprint = 0
+const tre_ispunct = 0
+const tre_isspace = 0
+const tre_isupper = 0
+const tre_isxdigit = 0
+const tre_mem_alloc_impl = 0
+const tre_mem_destroy = 0
+const tre_mem_new_impl = 0
+const tre_strlen = 0
+const tre_tolower = 0
+const tre_toupper = 0
+const xcalloc = 0
+const xfree = 0
+const xmalloc = 0
+const xrealloc = 0
 
 type Tregoff_t = int64
 
@@ -128108,10 +127776,8 @@ type Ttnfa_transition = Ttre_tnfa_transition_t
 
 type Ttre_tag_direction_t = int32
 
-const (
-	_TRE_TAG_MINIMIZE = 0
-	_TRE_TAG_MAXIMIZE = 1
-)
+const _TRE_TAG_MINIMIZE = 0
+const _TRE_TAG_MAXIMIZE = 1
 
 type Ttre_submatch_data = struct {
 	Fso_tag  int32
@@ -128189,12 +127855,10 @@ type Ttre_pos_and_tags_t = struct {
 //	/* The different AST node types. */
 type Ttre_ast_type_t = int32
 
-const (
-	_LITERAL    = 0
-	_CATENATION = 1
-	_ITERATION  = 2
-	_UNION      = 3
-)
+const _LITERAL = 0
+const _CATENATION = 1
+const _ITERATION = 2
+const _UNION = 3
 
 /* Special subtypes of TRE_LITERAL. */
 
@@ -128270,7 +127934,7 @@ func _tre_ast_new_node(tls *TLS, mem Ttre_mem_t, type1 int32, obj uintptr) (r ui
 	return node
 }
 
-func _tre_ast_new_literal(tls *TLS, mem Ttre_mem_t, code_min, code_max, position int32) (r uintptr) {
+func _tre_ast_new_literal(tls *TLS, mem Ttre_mem_t, code_min int32, code_max int32, position int32) (r uintptr) {
 	var lit, node uintptr
 	_, _ = lit, node
 	lit = X__tre_mem_alloc_impl(tls, mem, 0, UintptrFromInt32(0), int32(1), uint64(40))
@@ -128284,7 +127948,7 @@ func _tre_ast_new_literal(tls *TLS, mem Ttre_mem_t, code_min, code_max, position
 	return node
 }
 
-func _tre_ast_new_iter(tls *TLS, mem Ttre_mem_t, arg uintptr, min, max, minimal int32) (r uintptr) {
+func _tre_ast_new_iter(tls *TLS, mem Ttre_mem_t, arg uintptr, min int32, max int32, minimal int32) (r uintptr) {
 	var iter, node uintptr
 	_, _ = iter, node
 	iter = X__tre_mem_alloc_impl(tls, mem, 0, UintptrFromInt32(0), int32(1), uint64(24))
@@ -128300,7 +127964,7 @@ func _tre_ast_new_iter(tls *TLS, mem Ttre_mem_t, arg uintptr, min, max, minimal 
 	return node
 }
 
-func _tre_ast_new_union(tls *TLS, mem Ttre_mem_t, left, right uintptr) (r uintptr) {
+func _tre_ast_new_union(tls *TLS, mem Ttre_mem_t, left uintptr, right uintptr) (r uintptr) {
 	var node, un uintptr
 	_, _ = node, un
 	if !(left != 0) {
@@ -128317,7 +127981,7 @@ func _tre_ast_new_union(tls *TLS, mem Ttre_mem_t, left, right uintptr) (r uintpt
 	return node
 }
 
-func _tre_ast_new_catenation(tls *TLS, mem Ttre_mem_t, left, right uintptr) (r uintptr) {
+func _tre_ast_new_catenation(tls *TLS, mem Ttre_mem_t, left uintptr, right uintptr) (r uintptr) {
 	var cat, node uintptr
 	_, _ = cat, node
 	if !(left != 0) {
@@ -128359,7 +128023,7 @@ type Ttre_stack_item = struct {
 	Fvoidptr_value uintptr
 }
 
-func _tre_stack_new(tls *TLS, size, max_size, increment int32) (r uintptr) {
+func _tre_stack_new(tls *TLS, size int32, max_size int32, increment int32) (r uintptr) {
 	var s uintptr
 	_ = s
 	s = Xmalloc(tls, uint64(24))
@@ -128420,7 +128084,7 @@ func _tre_stack_push_int(tls *TLS, s uintptr, value int32) (r Treg_errcode_t) {
 	return _tre_stack_push(tls, s, item)
 }
 
-func _tre_stack_push_voidptr(tls *TLS, s, value uintptr) (r Treg_errcode_t) {
+func _tre_stack_push_voidptr(tls *TLS, s uintptr, value uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var _ /* item at bp+0 */ Ttre_stack_item
@@ -128546,7 +128210,7 @@ func _tre_expand_macro(tls *TLS, s uintptr) (r uintptr) {
 	return _tre_macros[i].Fexpansion
 }
 
-func _tre_compare_lit(tls *TLS, a, b uintptr) (r int32) {
+func _tre_compare_lit(tls *TLS, a uintptr, b uintptr) (r int32) {
 	var la, lb uintptr
 	_, _ = la, lb
 	la = a
@@ -128585,7 +128249,7 @@ func _tre_new_lit(tls *TLS, p uintptr) (r uintptr) {
 	return **(**uintptr)(__ccgo_up(a))
 }
 
-func _add_icase_literals(tls *TLS, ls uintptr, min, max int32) (r int32) {
+func _add_icase_literals(tls *TLS, ls uintptr, min int32, max int32) (r int32) {
 	var b, c, e, v2 int32
 	var lit uintptr
 	_, _, _, _, _ = b, c, e, lit, v2
@@ -128682,7 +128346,7 @@ coll_single is a single char collating element but it can be
  '^' anywhere except after the openning '['
 */
 
-func _parse_bracket_terms(tls *TLS, ctx, s, ls, neg uintptr) (r Treg_errcode_t) {
+func _parse_bracket_terms(tls *TLS, ctx uintptr, s uintptr, ls uintptr, neg uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var class Ttre_ctype_t
@@ -128791,7 +128455,7 @@ func _parse_bracket_terms(tls *TLS, ctx, s, ls, neg uintptr) (r Treg_errcode_t) 
 	return r
 }
 
-func _parse_bracket(tls *TLS, ctx, s uintptr) (r Treg_errcode_t) {
+func _parse_bracket(tls *TLS, ctx uintptr, s uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(544)
 	defer tls.Free(544)
 	var err Treg_errcode_t
@@ -128905,7 +128569,7 @@ parse_bracket_done:
 	return err
 }
 
-func _parse_dup_count(tls *TLS, s, n uintptr) (r uintptr) {
+func _parse_dup_count(tls *TLS, s uintptr, n uintptr) (r uintptr) {
 	**(**int32)(__ccgo_up(n)) = -int32(1)
 	if !(BoolInt32(Uint32FromInt8(**(**int8)(__ccgo_up(s)))-Uint32FromUint8('0') < Uint32FromInt32(10)) != 0) {
 		return s
@@ -128923,7 +128587,7 @@ func _parse_dup_count(tls *TLS, s, n uintptr) (r uintptr) {
 	return s
 }
 
-func _parse_dup(tls *TLS, s uintptr, ere int32, pmin, pmax uintptr) (r uintptr) {
+func _parse_dup(tls *TLS, s uintptr, ere int32, pmin uintptr, pmax uintptr) (r uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var v1, v4 uintptr
@@ -128966,7 +128630,7 @@ func _hexval1(tls *TLS, c uint32) (r int32) {
 	return -int32(1)
 }
 
-func _marksub(tls *TLS, ctx, node uintptr, subid int32) (r Treg_errcode_t) {
+func _marksub(tls *TLS, ctx uintptr, node uintptr, subid int32) (r Treg_errcode_t) {
 	var n uintptr
 	_ = n
 	if (*Ttre_ast_node_t)(unsafe.Pointer(node)).Fsubmatch_id >= 0 {
@@ -129005,7 +128669,7 @@ Dup    =  '*'  |  '+'  |  '?'  |  '{' Count '}'  |  '{' Count ',}'  |  '{' Count
 (a*+?, ^*, $+, \X, {, (|a) are unspecified)
 */
 
-func _parse_atom(tls *TLS, ctx, s uintptr) (r Treg_errcode_t) {
+func _parse_atom(tls *TLS, ctx uintptr, s uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var c, ere, i, len1, v, val, v16 int32
@@ -129497,15 +129161,13 @@ func _tre_add_tag_right(tls *TLS, mem Ttre_mem_t, node uintptr, tag_id int32) (r
 
 type Ttre_addtags_symbol_t = int32
 
-const (
-	_ADDTAGS_RECURSE           = 0
-	_ADDTAGS_AFTER_ITERATION   = 1
-	_ADDTAGS_AFTER_UNION_LEFT  = 2
-	_ADDTAGS_AFTER_UNION_RIGHT = 3
-	_ADDTAGS_AFTER_CAT_LEFT    = 4
-	_ADDTAGS_AFTER_CAT_RIGHT   = 5
-	_ADDTAGS_SET_SUBMATCH_END  = 6
-)
+const _ADDTAGS_RECURSE = 0
+const _ADDTAGS_AFTER_ITERATION = 1
+const _ADDTAGS_AFTER_UNION_LEFT = 2
+const _ADDTAGS_AFTER_UNION_RIGHT = 3
+const _ADDTAGS_AFTER_CAT_LEFT = 4
+const _ADDTAGS_AFTER_CAT_RIGHT = 5
+const _ADDTAGS_SET_SUBMATCH_END = 6
 
 type Ttre_tag_states_t = struct {
 	Ftag      int32
@@ -129516,7 +129178,7 @@ type Ttre_tag_states_t = struct {
 //
 //	/* Go through `regset' and set submatch data for submatches that are
 //	   using this tag. */
-func _tre_purge_regset(tls *TLS, regset, tnfa uintptr, tag int32) {
+func _tre_purge_regset(tls *TLS, regset uintptr, tnfa uintptr, tag int32) {
 	var i, id, start int32
 	_, _, _ = i, id, start
 	i = 0
@@ -129543,7 +129205,7 @@ func _tre_purge_regset(tls *TLS, regset, tnfa uintptr, tag int32) {
 //
 //	/* Adds tags to appropriate locations in the parse tree in `tree', so that
 //	   subexpressions marked for submatch addressing can be traced. */
-func _tre_add_tags(tls *TLS, mem Ttre_mem_t, stack, tree, tnfa uintptr) (r Treg_errcode_t) {
+func _tre_add_tags(tls *TLS, mem Ttre_mem_t, stack uintptr, tree uintptr, tnfa uintptr) (r Treg_errcode_t) {
 	var added_tags, bottom, enter_tag, first_pass, i1, i2, i3, i4, i5, i6, i7, id, id1, left_tag, minimal, minimal_tag, new_tag, next_tag, num_minimals, num_tags, reserved_tag, right_tag, tag, tag_left, tag_right, v22 int32
 	var cat, iter, left, left1, left2, lit, node, orig_regset, p, parents, regset, right, right1, right2, saved_states, uni uintptr
 	var direction Ttre_tag_direction_t
@@ -130122,14 +129784,12 @@ func _tre_add_tags(tls *TLS, mem Ttre_mem_t, stack, tree, tnfa uintptr) (r Treg_
 
 type Ttre_copyast_symbol_t = int32
 
-const (
-	_COPY_RECURSE        = 0
-	_COPY_SET_RESULT_PTR = 1
-)
+const _COPY_RECURSE = 0
+const _COPY_SET_RESULT_PTR = 1
 
 /* Flags for tre_copy_ast(). */
 
-func _tre_copy_ast(tls *TLS, mem Ttre_mem_t, stack, ast uintptr, flags int32, pos_add, tag_directions, copy1, max_pos uintptr) (r Treg_errcode_t) {
+func _tre_copy_ast(tls *TLS, mem Ttre_mem_t, stack uintptr, ast uintptr, flags int32, pos_add uintptr, tag_directions uintptr, copy1 uintptr, max_pos uintptr) (r Treg_errcode_t) {
 	var bottom, first_tag, max, min, num_copied, pos, v1 int32
 	var cat, iter, lit, node, p, result, tmp, tmp1, uni uintptr
 	var status Treg_errcode_t
@@ -130287,16 +129947,14 @@ func _tre_copy_ast(tls *TLS, mem Ttre_mem_t, stack, ast uintptr, flags int32, po
 
 type Ttre_expand_ast_symbol_t = int32
 
-const (
-	_EXPAND_RECURSE    = 0
-	_EXPAND_AFTER_ITER = 1
-)
+const _EXPAND_RECURSE = 0
+const _EXPAND_AFTER_ITER = 1
 
 // C documentation
 //
 //	/* Expands each iteration node that has a finite nonzero minimum or maximum
 //	   iteration count to a catenated sequence of copies of the node. */
-func _tre_expand_ast(tls *TLS, mem Ttre_mem_t, stack, ast, position, tag_directions uintptr) (r Treg_errcode_t) {
+func _tre_expand_ast(tls *TLS, mem Ttre_mem_t, stack uintptr, ast uintptr, position uintptr, tag_directions uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var _status, _status1, status Treg_errcode_t
@@ -130538,7 +130196,7 @@ func _tre_set_empty(tls *TLS, mem Ttre_mem_t) (r uintptr) {
 	return new_set
 }
 
-func _tre_set_one(tls *TLS, mem Ttre_mem_t, position, code_min, code_max int32, class Ttre_ctype_t, neg_classes uintptr, backref int32) (r uintptr) {
+func _tre_set_one(tls *TLS, mem Ttre_mem_t, position int32, code_min int32, code_max int32, class Ttre_ctype_t, neg_classes uintptr, backref int32) (r uintptr) {
 	var new_set uintptr
 	_ = new_set
 	new_set = X__tre_mem_alloc_impl(tls, mem, 0, UintptrFromInt32(0), int32(1), Uint64FromInt64(56)*Uint64FromInt32(2))
@@ -130557,7 +130215,7 @@ func _tre_set_one(tls *TLS, mem Ttre_mem_t, position, code_min, code_max int32, 
 	return new_set
 }
 
-func _tre_set_union(tls *TLS, mem Ttre_mem_t, set1, set2, tags uintptr, assertions int32) (r uintptr) {
+func _tre_set_union(tls *TLS, mem Ttre_mem_t, set1 uintptr, set2 uintptr, tags uintptr, assertions int32) (r uintptr) {
 	var i, j, num_tags, s1, s2 int32
 	var new_set, new_tags uintptr
 	_, _, _, _, _, _, _ = i, j, new_set, new_tags, num_tags, s1, s2
@@ -130713,7 +130371,7 @@ func _tre_set_union(tls *TLS, mem Ttre_mem_t, set1, set2, tags uintptr, assertio
 //	   taken according to POSIX.2 rules, and adds the tags on that path to
 //	   `tags'.   `tags' may be NULL.  If `num_tags_seen' is not NULL, it is
 //	   set to the number of tags seen on the path. */
-func _tre_match_empty(tls *TLS, stack, node, tags, assertions, num_tags_seen uintptr) (r Treg_errcode_t) {
+func _tre_match_empty(tls *TLS, stack uintptr, node uintptr, tags uintptr, assertions uintptr, num_tags_seen uintptr) (r Treg_errcode_t) {
 	var bottom, i int32
 	var cat, iter, lit, uni, v2 uintptr
 	var status Treg_errcode_t
@@ -130815,18 +130473,16 @@ func _tre_match_empty(tls *TLS, stack, node, tags, assertions, num_tags_seen uin
 
 type Ttre_nfl_stack_symbol_t = int32
 
-const (
-	_NFL_RECURSE         = 0
-	_NFL_POST_UNION      = 1
-	_NFL_POST_CATENATION = 2
-	_NFL_POST_ITERATION  = 3
-)
+const _NFL_RECURSE = 0
+const _NFL_POST_UNION = 1
+const _NFL_POST_CATENATION = 2
+const _NFL_POST_ITERATION = 3
 
 // C documentation
 //
 //	/* Computes and fills in the fields `nullable', `firstpos', and `lastpos' for
 //	   the nodes of the AST `tree'. */
-func _tre_compute_nfl(tls *TLS, mem Ttre_mem_t, stack, tree uintptr) (r Treg_errcode_t) {
+func _tre_compute_nfl(tls *TLS, mem Ttre_mem_t, stack uintptr, tree uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var _status, _status1, _status10, _status11, _status12, _status13, _status14, _status15, _status16, _status17, _status2, _status3, _status4, _status5, _status6, _status7, _status8, _status9, status Treg_errcode_t
@@ -131062,7 +130718,7 @@ func _tre_compute_nfl(tls *TLS, mem Ttre_mem_t, stack, tree uintptr) (r Treg_err
 // C documentation
 //
 //	/* Adds a transition from each position in `p1' to each position in `p2'. */
-func _tre_make_trans(tls *TLS, p1, p2, transitions, counts, offs uintptr) (r Treg_errcode_t) {
+func _tre_make_trans(tls *TLS, p1 uintptr, p2 uintptr, transitions uintptr, counts uintptr, offs uintptr) (r Treg_errcode_t) {
 	var dup, i, j, k, l, prev_p2_pos, v1, v2 int32
 	var orig_p2, trans uintptr
 	_, _, _, _, _, _, _, _, _, _ = dup, i, j, k, l, orig_p2, prev_p2_pos, trans, v1, v2
@@ -131226,7 +130882,7 @@ func _tre_make_trans(tls *TLS, p1, p2, transitions, counts, offs uintptr) (r Tre
 //	   labelled with one character range (there are no transitions on empty
 //	   strings).  The TNFA takes O(n^2) space in the worst case, `n' is size of
 //	   the regexp. */
-func _tre_ast_to_tnfa(tls *TLS, node, transitions, counts, offs uintptr) (r Treg_errcode_t) {
+func _tre_ast_to_tnfa(tls *TLS, node uintptr, transitions uintptr, counts uintptr, offs uintptr) (r Treg_errcode_t) {
 	var cat, iter, uni uintptr
 	var errcode Treg_errcode_t
 	_, _, _, _ = cat, errcode, iter, uni
@@ -131270,7 +130926,7 @@ func _tre_ast_to_tnfa(tls *TLS, node, transitions, counts, offs uintptr) (r Treg
 	return errcode
 }
 
-func Xregcomp(tls *TLS, preg, regex uintptr, cflags int32) (r int32) {
+func Xregcomp(tls *TLS, preg uintptr, regex uintptr, cflags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v preg=%v regex=%v cflags=%v, (%v:)", tls, preg, regex, cflags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -131639,7 +131295,7 @@ func Xregfree(tls *TLS, preg uintptr) {
 
 var _messages = [286]int8{'N', 'o', ' ', 'e', 'r', 'r', 'o', 'r', 0, 'N', 'o', ' ', 'm', 'a', 't', 'c', 'h', 0, 'I', 'n', 'v', 'a', 'l', 'i', 'd', ' ', 'r', 'e', 'g', 'e', 'x', 'p', 0, 'U', 'n', 'k', 'n', 'o', 'w', 'n', ' ', 'c', 'o', 'l', 'l', 'a', 't', 'i', 'n', 'g', ' ', 'e', 'l', 'e', 'm', 'e', 'n', 't', 0, 'U', 'n', 'k', 'n', 'o', 'w', 'n', ' ', 'c', 'h', 'a', 'r', 'a', 'c', 't', 'e', 'r', ' ', 'c', 'l', 'a', 's', 's', ' ', 'n', 'a', 'm', 'e', 0, 'T', 'r', 'a', 'i', 'l', 'i', 'n', 'g', ' ', 'b', 'a', 'c', 'k', 's', 'l', 'a', 's', 'h', 0, 'I', 'n', 'v', 'a', 'l', 'i', 'd', ' ', 'b', 'a', 'c', 'k', ' ', 'r', 'e', 'f', 'e', 'r', 'e', 'n', 'c', 'e', 0, 'M', 'i', 's', 's', 'i', 'n', 'g', ' ', '\'', ']', '\'', 0, 'M', 'i', 's', 's', 'i', 'n', 'g', ' ', '\'', ')', '\'', 0, 'M', 'i', 's', 's', 'i', 'n', 'g', ' ', '\'', '}', '\'', 0, 'I', 'n', 'v', 'a', 'l', 'i', 'd', ' ', 'c', 'o', 'n', 't', 'e', 'n', 't', 's', ' ', 'o', 'f', ' ', '{', '}', 0, 'I', 'n', 'v', 'a', 'l', 'i', 'd', ' ', 'c', 'h', 'a', 'r', 'a', 'c', 't', 'e', 'r', ' ', 'r', 'a', 'n', 'g', 'e', 0, 'O', 'u', 't', ' ', 'o', 'f', ' ', 'm', 'e', 'm', 'o', 'r', 'y', 0, 'R', 'e', 'p', 'e', 't', 'i', 't', 'i', 'o', 'n', ' ', 'n', 'o', 't', ' ', 'p', 'r', 'e', 'c', 'e', 'd', 'e', 'd', ' ', 'b', 'y', ' ', 'v', 'a', 'l', 'i', 'd', ' ', 'e', 'x', 'p', 'r', 'e', 's', 's', 'i', 'o', 'n', 0, 0, 'U', 'n', 'k', 'n', 'o', 'w', 'n', ' ', 'e', 'r', 'r', 'o', 'r'}
 
-func Xregerror(tls *TLS, e int32, preg, buf uintptr, size Tsize_t) (r Tsize_t) {
+func Xregerror(tls *TLS, e int32, preg uintptr, buf uintptr, size Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v e=%v preg=%v buf=%v size=%v, (%v:)", tls, e, preg, buf, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -131666,11 +131322,9 @@ func Xregerror(tls *TLS, e int32, preg, buf uintptr, size Tsize_t) (r Tsize_t) {
 	return Uint64FromInt32(int32(1) + Xsnprintf(tls, buf, size, __ccgo_ts+15, VaList(bp+8, s)))
 }
 
-const (
-	tre_bt_mem_alloc   = 0
-	tre_bt_mem_destroy = 0
-	tre_bt_mem_new     = 0
-)
+const tre_bt_mem_alloc = 0
+const tre_bt_mem_destroy = 0
+const tre_bt_mem_new = 0
 
 /***********************************************************************
  from tre-match-utils.h
@@ -131679,7 +131333,7 @@ const (
 // C documentation
 //
 //	/* Returns 1 if `t1' wins `t2', 0 otherwise. */
-func _tre_tag_order(tls *TLS, num_tags int32, tag_directions, t1, t2 uintptr) (r int32) {
+func _tre_tag_order(tls *TLS, num_tags int32, tag_directions uintptr, t1 uintptr, t2 uintptr) (r int32) {
 	var i int32
 	_ = i
 	i = 0
@@ -131752,7 +131406,7 @@ type Ttre_reach_pos_t = struct {
 	Ftags uintptr
 }
 
-func _tre_tnfa_run_parallel(tls *TLS, tnfa, string1, match_tags uintptr, eflags int32, match_end_ofs uintptr) (r Treg_errcode_t) {
+func _tre_tnfa_run_parallel(tls *TLS, tnfa uintptr, string1 uintptr, match_tags uintptr, eflags int32, match_end_ofs uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var buf, reach, reach_i, reach_next, reach_next_i, reach_pos, str_byte, tag_i, tmp_buf, tmp_iptr, tmp_tags, trans_i uintptr
@@ -132172,7 +131826,7 @@ type Ttre_backtrack_struct = struct {
 	Fnext uintptr
 }
 
-func _tre_tnfa_run_backtrack(tls *TLS, tnfa, string1, match_tags uintptr, eflags int32, match_end_ofs uintptr) (r Treg_errcode_t) {
+func _tre_tnfa_run_backtrack(tls *TLS, tnfa uintptr, string1 uintptr, match_tags uintptr, eflags int32, match_end_ofs uintptr) (r Treg_errcode_t) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var bt, empty_br_match, i, i1, i2, i3, i4, next_c_start, reg_newline, reg_notbol, reg_noteol, result, ret, v20 int32
@@ -132641,7 +132295,7 @@ error_exit:
 //
 //	/* Fills the POSIX.2 regmatch_t array according to the TNFA tag and match
 //	   endpoint values. */
-func _tre_fill_pmatch(tls *TLS, nmatch Tsize_t, pmatch uintptr, cflags int32, tnfa, tags uintptr, match_eo Tregoff_t) {
+func _tre_fill_pmatch(tls *TLS, nmatch Tsize_t, pmatch uintptr, cflags int32, tnfa uintptr, tags uintptr, match_eo Tregoff_t) {
 	var i, j uint32
 	var parents, submatch_data uintptr
 	var v1 Tregoff_t
@@ -132708,7 +132362,7 @@ func _tre_fill_pmatch(tls *TLS, nmatch Tsize_t, pmatch uintptr, cflags int32, tn
   Wrapper functions for POSIX compatible regexp matching.
 */
 
-func Xregexec(tls *TLS, preg, string1 uintptr, nmatch Tsize_t, pmatch uintptr, eflags int32) (r int32) {
+func Xregexec(tls *TLS, preg uintptr, string1 uintptr, nmatch Tsize_t, pmatch uintptr, eflags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v preg=%v string1=%v nmatch=%v pmatch=%v eflags=%v, (%v:)", tls, preg, string1, nmatch, pmatch, eflags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -132867,26 +132521,20 @@ func X__tre_mem_alloc_impl(tls *TLS, mem Ttre_mem_t, provided int32, provided_bl
 	return ptr
 }
 
-const (
-	MAXSIZE = 1
-	MINSIZE = 8
-)
+const MAXSIZE = 1
+const MINSIZE = 8
 
 type TACTION = int32
 
-const (
-	_FIND  = 0
-	_ENTER = 1
-)
+const _FIND = 0
+const _ENTER = 1
 
 type TVISIT = int32
 
-const (
-	_preorder  = 0
-	_postorder = 1
-	_endorder  = 2
-	_leaf      = 3
-)
+const _preorder = 0
+const _postorder = 1
+const _endorder = 2
+const _leaf = 3
 
 type TENTRY = struct {
 	Fkey  uintptr
@@ -133068,7 +132716,7 @@ func ___hdestroy_r(tls *TLS, htab uintptr) {
 	(*Thsearch_data)(unsafe.Pointer(htab)).F__tab = uintptr(0)
 }
 
-func ___hsearch_r(tls *TLS, item TENTRY, action TACTION, retval, htab uintptr) (r int32) {
+func ___hsearch_r(tls *TLS, item TENTRY, action TACTION, retval uintptr, htab uintptr) (r int32) {
 	var e, v2 uintptr
 	var hash, v1 Tsize_t
 	_, _, _, _ = e, hash, v1, v2
@@ -133104,7 +132752,7 @@ type Tnode = struct {
 	Fprev uintptr
 }
 
-func Xinsque(tls *TLS, element, pred uintptr) {
+func Xinsque(tls *TLS, element uintptr, pred uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v element=%v pred=%v, (%v:)", tls, element, pred, origin(2))
 	}
@@ -133143,7 +132791,7 @@ func Xremque(tls *TLS, element uintptr) {
 
 type t__ccgo_fp__Xlsearch_4 = func(*TLS, uintptr, uintptr) int32
 
-func Xlsearch(tls *TLS, key, base, nelp uintptr, width Tsize_t, __ccgo_fp_compar uintptr) (r uintptr) {
+func Xlsearch(tls *TLS, key uintptr, base uintptr, nelp uintptr, width Tsize_t, __ccgo_fp_compar uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v base=%v nelp=%v width=%v __ccgo_fp_compar=%v, (%v:)", tls, key, base, nelp, width, __ccgo_fp_compar, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133175,7 +132823,7 @@ func Xlsearch(tls *TLS, key, base, nelp uintptr, width Tsize_t, __ccgo_fp_compar
 
 type t__ccgo_fp__Xlfind_4 = func(*TLS, uintptr, uintptr) int32
 
-func Xlfind(tls *TLS, key, base, nelp uintptr, width Tsize_t, __ccgo_fp_compar uintptr) (r uintptr) {
+func Xlfind(tls *TLS, key uintptr, base uintptr, nelp uintptr, width Tsize_t, __ccgo_fp_compar uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v base=%v nelp=%v width=%v __ccgo_fp_compar=%v, (%v:)", tls, key, base, nelp, width, __ccgo_fp_compar, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133214,7 +132862,7 @@ type Tnode1 = struct {
 
 type t__ccgo_fp__Xtdelete_2 = func(*TLS, uintptr, uintptr) int32
 
-func Xtdelete(tls *TLS, key, rootp, __ccgo_fp_cmp uintptr) (r uintptr) {
+func Xtdelete(tls *TLS, key uintptr, rootp uintptr, __ccgo_fp_cmp uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v rootp=%v __ccgo_fp_cmp=%v, (%v:)", tls, key, rootp, __ccgo_fp_cmp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133287,7 +132935,7 @@ func Xtdelete(tls *TLS, key, rootp, __ccgo_fp_cmp uintptr) (r uintptr) {
 
 type t__ccgo_fp__Xtdestroy_1 = func(*TLS, uintptr)
 
-func Xtdestroy(tls *TLS, root, __ccgo_fp_freekey uintptr) {
+func Xtdestroy(tls *TLS, root uintptr, __ccgo_fp_freekey uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v root=%v __ccgo_fp_freekey=%v, (%v:)", tls, root, __ccgo_fp_freekey, origin(2))
 	}
@@ -133307,7 +132955,7 @@ func Xtdestroy(tls *TLS, root, __ccgo_fp_freekey uintptr) {
 
 type t__ccgo_fp__Xtfind_2 = func(*TLS, uintptr, uintptr) int32
 
-func Xtfind(tls *TLS, key, rootp, __ccgo_fp_cmp uintptr) (r uintptr) {
+func Xtfind(tls *TLS, key uintptr, rootp uintptr, __ccgo_fp_cmp uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v rootp=%v __ccgo_fp_cmp=%v, (%v:)", tls, key, rootp, __ccgo_fp_cmp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133345,7 +132993,7 @@ func _height(tls *TLS, n uintptr) (r int32) {
 	return v1
 }
 
-func _rot(tls *TLS, p, x uintptr, dir int32) (r int32) {
+func _rot(tls *TLS, p uintptr, x uintptr, dir int32) (r int32) {
 	var hx, hz int32
 	var y, z uintptr
 	_, _, _, _ = hx, hz, y, z
@@ -133413,7 +133061,7 @@ func X__tsearch_balance(tls *TLS, p uintptr) (r int32) {
 
 type t__ccgo_fp__Xtsearch_2 = func(*TLS, uintptr, uintptr) int32
 
-func Xtsearch(tls *TLS, key, rootp, __ccgo_fp_cmp uintptr) (r1 uintptr) {
+func Xtsearch(tls *TLS, key uintptr, rootp uintptr, __ccgo_fp_cmp uintptr) (r1 uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v rootp=%v __ccgo_fp_cmp=%v, (%v:)", tls, key, rootp, __ccgo_fp_cmp, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -133471,7 +133119,7 @@ func Xtsearch(tls *TLS, key, rootp, __ccgo_fp_cmp uintptr) (r1 uintptr) {
 	return r
 }
 
-func _walk(tls *TLS, r, __ccgo_fp_action uintptr, d int32) {
+func _walk(tls *TLS, r uintptr, __ccgo_fp_action uintptr, d int32) {
 	if !(r != 0) {
 		return
 	}
@@ -133488,7 +133136,7 @@ func _walk(tls *TLS, r, __ccgo_fp_action uintptr, d int32) {
 
 type t__ccgo_fp__Xtwalk_1 = func(*TLS, uintptr, int32, int32)
 
-func Xtwalk(tls *TLS, root, __ccgo_fp_action uintptr) {
+func Xtwalk(tls *TLS, root uintptr, __ccgo_fp_action uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v root=%v __ccgo_fp_action=%v, (%v:)", tls, root, __ccgo_fp_action, origin(2))
 	}
@@ -133503,7 +133151,7 @@ func Xpoll(tls *TLS, fds uintptr, n Tnfds_t, timeout int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_poll), int64(fds), Int64FromUint64(n), int64(timeout), 0, 0, 0))))
 }
 
-func Xppoll(tls *TLS, fds uintptr, n Tnfds_t, to, mask uintptr) (r int32) {
+func Xppoll(tls *TLS, fds uintptr, n Tnfds_t, to uintptr, mask uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fds=%v n=%v to=%v mask=%v, (%v:)", tls, fds, n, to, mask, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133538,7 +133186,7 @@ func Xppoll(tls *TLS, fds uintptr, n Tnfds_t, to, mask uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_ppoll), int64(fds), Int64FromUint64(n), int64(v3), int64(mask), int64(Int32FromInt32(_NSIG)/Int32FromInt32(8)), 0))))
 }
 
-func Xpselect(tls *TLS, n int32, rfds, wfds, efds, ts, mask uintptr) (r int32) {
+func Xpselect(tls *TLS, n int32, rfds uintptr, wfds uintptr, efds uintptr, ts uintptr, mask uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v n=%v rfds=%v wfds=%v efds=%v ts=%v mask=%v, (%v:)", tls, n, rfds, wfds, efds, ts, mask, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133578,7 +133226,7 @@ func Xpselect(tls *TLS, n int32, rfds, wfds, efds, ts, mask uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_pselect6), int64(n), int64(rfds), int64(wfds), int64(efds), int64(v3), int64(bp+16)))))
 }
 
-func Xselect(tls *TLS, n int32, rfds, wfds, efds, tv uintptr) (r int32) {
+func Xselect(tls *TLS, n int32, rfds uintptr, wfds uintptr, efds uintptr, tv uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v n=%v rfds=%v wfds=%v efds=%v tv=%v, (%v:)", tls, n, rfds, wfds, efds, tv, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133699,7 +133347,7 @@ func Xkillpg(tls *TLS, pgid Tpid_t, sig int32) (r int32) {
 	return Xkill(tls, -pgid, sig)
 }
 
-func Xpsiginfo(tls *TLS, si, msg uintptr) {
+func Xpsiginfo(tls *TLS, si uintptr, msg uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v si=%v msg=%v, (%v:)", tls, si, msg, origin(2))
 	}
@@ -133780,7 +133428,7 @@ func X__restore_rt(tls *TLS) {
 	}
 }
 
-func Xsetitimer(tls *TLS, which int32, new1, old uintptr) (r1 int32) {
+func Xsetitimer(tls *TLS, which int32, new1 uintptr, old uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v which=%v new1=%v old=%v, (%v:)", tls, which, new1, old, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -133827,10 +133475,8 @@ type Tk_sigaction = struct {
 	Fmask     [2]uint32
 }
 
-var (
-	_unmask_done int32
-	_handler_set [1]uint64
-)
+var _unmask_done int32
+var _handler_set [1]uint64
 
 func X__get_handler_set(tls *TLS, set uintptr) {
 	if __ccgo_strace {
@@ -133839,7 +133485,7 @@ func X__get_handler_set(tls *TLS, set uintptr) {
 	Xmemcpy(tls, set, uintptr(unsafe.Pointer(&_handler_set)), uint64(8))
 }
 
-func X__libc_sigaction(tls *TLS, sig int32, sa, old uintptr) (r1 int32) {
+func X__libc_sigaction(tls *TLS, sig int32, sa uintptr, old uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v sig=%v sa=%v old=%v, (%v:)", tls, sig, sa, old, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -133922,7 +133568,7 @@ func X__libc_sigaction(tls *TLS, sig int32, sa, old uintptr) (r1 int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func X__sigaction(tls *TLS, sig int32, sa, old uintptr) (r1 int32) {
+func X__sigaction(tls *TLS, sig int32, sa uintptr, old uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v sig=%v sa=%v old=%v, (%v:)", tls, sig, sa, old, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -133951,7 +133597,7 @@ func X__sigaction(tls *TLS, sig int32, sa, old uintptr) (r1 int32) {
 	return r
 }
 
-func Xsigaction(tls *TLS, sig int32, sa, old uintptr) (r int32) {
+func Xsigaction(tls *TLS, sig int32, sa uintptr, old uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v sig=%v sa=%v old=%v, (%v:)", tls, sig, sa, old, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133975,7 +133621,7 @@ func Xsigaddset(tls *TLS, set uintptr, sig int32) (r int32) {
 	return 0
 }
 
-func Xsigaltstack(tls *TLS, ss, old uintptr) (r int32) {
+func Xsigaltstack(tls *TLS, ss uintptr, old uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v ss=%v old=%v, (%v:)", tls, ss, old, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -133995,7 +133641,7 @@ func Xsigaltstack(tls *TLS, ss, old uintptr) (r int32) {
 
 const SST_SIZE = 8
 
-func Xsigandset(tls *TLS, dest, left, right uintptr) (r1 int32) {
+func Xsigandset(tls *TLS, dest uintptr, left uintptr, right uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v left=%v right=%v, (%v:)", tls, dest, left, right, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -134110,7 +133756,7 @@ func Xsigismember(tls *TLS, set uintptr, sig int32) (r int32) {
 	return BoolInt32(!!(**(**uint64)(__ccgo_up(set + uintptr(uint64(s/uint32(8))/uint64(8))*8))&(Uint64FromUint64(1)<<(uint64(s)&(Uint64FromInt32(8)*Uint64FromInt64(8)-Uint64FromInt32(1)))) != 0))
 }
 
-func Xsigorset(tls *TLS, dest, left, right uintptr) (r1 int32) {
+func Xsigorset(tls *TLS, dest uintptr, left uintptr, right uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v left=%v right=%v, (%v:)", tls, dest, left, right, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -134143,7 +133789,7 @@ func Xsigpending(tls *TLS, set uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_rt_sigpending), int64(set), int64(Int32FromInt32(_NSIG)/Int32FromInt32(8))))))
 }
 
-func Xsigprocmask(tls *TLS, how int32, set, old uintptr) (r1 int32) {
+func Xsigprocmask(tls *TLS, how int32, set uintptr, old uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v how=%v set=%v old=%v, (%v:)", tls, how, set, old, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -134239,11 +133885,11 @@ func Xsigsuspend(tls *TLS, mask uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_rt_sigsuspend), int64(mask), int64(Int32FromInt32(_NSIG)/Int32FromInt32(8)), 0, 0, 0, 0))))
 }
 
-func _do_sigtimedwait(tls *TLS, mask, si, ts uintptr) (r int32) {
+func _do_sigtimedwait(tls *TLS, mask uintptr, si uintptr, ts uintptr) (r int32) {
 	return int32(___syscall_cp(tls, int64(SYS_rt_sigtimedwait), int64(mask), int64(si), int64(ts), int64(Int32FromInt32(_NSIG)/Int32FromInt32(8)), 0, 0))
 }
 
-func Xsigtimedwait(tls *TLS, mask, si, timeout uintptr) (r int32) {
+func Xsigtimedwait(tls *TLS, mask uintptr, si uintptr, timeout uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v mask=%v si=%v timeout=%v, (%v:)", tls, mask, si, timeout, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134256,7 +133902,7 @@ func Xsigtimedwait(tls *TLS, mask, si, timeout uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(ret)))
 }
 
-func Xsigwait(tls *TLS, mask, sig uintptr) (r int32) {
+func Xsigwait(tls *TLS, mask uintptr, sig uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v mask=%v sig=%v, (%v:)", tls, mask, sig, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134271,7 +133917,7 @@ func Xsigwait(tls *TLS, mask, sig uintptr) (r int32) {
 	return 0
 }
 
-func Xsigwaitinfo(tls *TLS, mask, si uintptr) (r int32) {
+func Xsigwaitinfo(tls *TLS, mask uintptr, si uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v mask=%v si=%v, (%v:)", tls, mask, si, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134279,7 +133925,7 @@ func Xsigwaitinfo(tls *TLS, mask, si uintptr) (r int32) {
 	return Xsigtimedwait(tls, mask, si, uintptr(0))
 }
 
-func X__fxstat(tls *TLS, ver, fd int32, buf uintptr) (r int32) {
+func X__fxstat(tls *TLS, ver int32, fd int32, buf uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v ver=%v fd=%v buf=%v, (%v:)", tls, ver, fd, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134287,7 +133933,7 @@ func X__fxstat(tls *TLS, ver, fd int32, buf uintptr) (r int32) {
 	return Xfstat(tls, fd, buf)
 }
 
-func X__fxstatat(tls *TLS, ver, fd int32, path, buf uintptr, flag int32) (r int32) {
+func X__fxstatat(tls *TLS, ver int32, fd int32, path uintptr, buf uintptr, flag int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v ver=%v fd=%v path=%v buf=%v flag=%v, (%v:)", tls, ver, fd, path, buf, flag, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134295,7 +133941,7 @@ func X__fxstatat(tls *TLS, ver, fd int32, path, buf uintptr, flag int32) (r int3
 	return Xfstatat(tls, fd, path, buf, flag)
 }
 
-func X__lxstat(tls *TLS, ver int32, path, buf uintptr) (r int32) {
+func X__lxstat(tls *TLS, ver int32, path uintptr, buf uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v ver=%v path=%v buf=%v, (%v:)", tls, ver, path, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134303,7 +133949,7 @@ func X__lxstat(tls *TLS, ver int32, path, buf uintptr) (r int32) {
 	return Xlstat(tls, path, buf)
 }
 
-func X__xstat(tls *TLS, ver int32, path, buf uintptr) (r int32) {
+func X__xstat(tls *TLS, ver int32, path uintptr, buf uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v ver=%v path=%v buf=%v, (%v:)", tls, ver, path, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134319,7 +133965,7 @@ func X__xmknod(tls *TLS, ver int32, path uintptr, mode Tmode_t, dev uintptr) (r 
 	return Xmknod(tls, path, mode, **(**Tdev_t)(__ccgo_up(dev)))
 }
 
-func X__xmknodat(tls *TLS, ver, fd int32, path uintptr, mode Tmode_t, dev uintptr) (r int32) {
+func X__xmknodat(tls *TLS, ver int32, fd int32, path uintptr, mode Tmode_t, dev uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v ver=%v fd=%v path=%v mode=%v dev=%v, (%v:)", tls, ver, fd, path, mode, dev, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134460,7 +134106,7 @@ type Tstatx1 = struct {
 	Fspare          [14]Tuint64_t
 }
 
-func _fstatat_statx(tls *TLS, fd int32, path, st uintptr, flag int32) (r int32) {
+func _fstatat_statx(tls *TLS, fd int32, path uintptr, st uintptr, flag int32) (r int32) {
 	bp := tls.Alloc(256)
 	defer tls.Free(256)
 	var ret int32
@@ -134519,7 +134165,7 @@ type Tkstat = struct {
 	F__unused      [3]int64
 }
 
-func _fstatat_kstat(tls *TLS, fd int32, path, st uintptr, flag int32) (r int32) {
+func _fstatat_kstat(tls *TLS, fd int32, path uintptr, st uintptr, flag int32) (r int32) {
 	bp := tls.Alloc(176)
 	defer tls.Free(176)
 	var ret int32
@@ -134576,7 +134222,7 @@ func _fstatat_kstat(tls *TLS, fd int32, path, st uintptr, flag int32) (r int32) 
 	return 0
 }
 
-func X__fstatat(tls *TLS, fd int32, path, st uintptr, flag int32) (r int32) {
+func X__fstatat(tls *TLS, fd int32, path uintptr, st uintptr, flag int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v path=%v st=%v flag=%v, (%v:)", tls, fd, path, st, flag, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134593,7 +134239,7 @@ func X__fstatat(tls *TLS, fd int32, path, st uintptr, flag int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(ret)))
 }
 
-func Xfstatat(tls *TLS, fd int32, path, st uintptr, flag int32) (r int32) {
+func Xfstatat(tls *TLS, fd int32, path uintptr, st uintptr, flag int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v path=%v st=%v flag=%v, (%v:)", tls, fd, path, st, flag, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134609,7 +134255,7 @@ func Xfutimens(tls *TLS, fd int32, times uintptr) (r int32) {
 	return Xutimensat(tls, fd, uintptr(0), times, 0)
 }
 
-func X__futimesat(tls *TLS, dirfd int32, pathname, times uintptr) (r int32) {
+func X__futimesat(tls *TLS, dirfd int32, pathname uintptr, times uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v dirfd=%v pathname=%v times=%v, (%v:)", tls, dirfd, pathname, times, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134645,7 +134291,7 @@ func X__futimesat(tls *TLS, dirfd int32, pathname, times uintptr) (r int32) {
 	return Xutimensat(tls, dirfd, pathname, v2, 0)
 }
 
-func Xfutimesat(tls *TLS, dirfd int32, pathname, times uintptr) (r int32) {
+func Xfutimesat(tls *TLS, dirfd int32, pathname uintptr, times uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v dirfd=%v pathname=%v times=%v, (%v:)", tls, dirfd, pathname, times, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134661,7 +134307,7 @@ func Xlchmod(tls *TLS, path uintptr, mode Tmode_t) (r int32) {
 	return Xfchmodat(tls, -int32(100), path, mode, int32(AT_SYMLINK_NOFOLLOW))
 }
 
-func Xlstat(tls *TLS, path, buf uintptr) (r int32) {
+func Xlstat(tls *TLS, path uintptr, buf uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v buf=%v, (%v:)", tls, path, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134717,7 +134363,7 @@ func Xmknodat(tls *TLS, fd int32, path uintptr, mode Tmode_t, dev Tdev_t) (r int
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall4(tls, int64(SYS_mknodat), int64(fd), int64(path), Int64FromUint32(mode), Int64FromUint64(dev)))))
 }
 
-func Xstat(tls *TLS, path, buf uintptr) (r int32) {
+func Xstat(tls *TLS, path uintptr, buf uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v buf=%v, (%v:)", tls, path, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134725,7 +134371,7 @@ func Xstat(tls *TLS, path, buf uintptr) (r int32) {
 	return Xfstatat(tls, -int32(100), path, buf, 0)
 }
 
-func ___statfs(tls *TLS, path, buf uintptr) (r int32) {
+func ___statfs(tls *TLS, path uintptr, buf uintptr) (r int32) {
 	**(**Tstatfs)(__ccgo_up(buf)) = Tstatfs{}
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_statfs), int64(path), int64(buf)))))
 }
@@ -134739,7 +134385,7 @@ func Xfstatfs(tls *TLS, fd int32, buf uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_fstatfs), int64(fd), int64(buf)))))
 }
 
-func _fixup(tls *TLS, out, in uintptr) {
+func _fixup(tls *TLS, out uintptr, in uintptr) {
 	var v1 uint64
 	_ = v1
 	**(**Tstatvfs)(__ccgo_up(out)) = Tstatvfs{}
@@ -134762,7 +134408,7 @@ func _fixup(tls *TLS, out, in uintptr) {
 	(*Tstatvfs)(unsafe.Pointer(out)).Ff_type = uint32((*Tstatfs)(unsafe.Pointer(in)).Ff_type)
 }
 
-func Xstatvfs(tls *TLS, path, buf uintptr) (r int32) {
+func Xstatvfs(tls *TLS, path uintptr, buf uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v buf=%v, (%v:)", tls, path, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -134800,7 +134446,7 @@ func Xumask(tls *TLS, mode Tmode_t) (r Tmode_t) {
 	return Uint32FromInt64(X__syscall_ret(tls, Uint64FromInt64(X__syscall1(tls, int64(SYS_umask), Int64FromUint32(mode)))))
 }
 
-func Xutimensat(tls *TLS, fd int32, path, times uintptr, flags int32) (r1 int32) {
+func Xutimensat(tls *TLS, fd int32, path uintptr, times uintptr, flags int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v path=%v times=%v flags=%v, (%v:)", tls, fd, path, times, flags, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -134963,7 +134609,7 @@ func X__fmodeflags(tls *TLS, mode uintptr) (r int32) {
 	return flags
 }
 
-func X__fopen_rb_ca(tls *TLS, filename, f, buf uintptr, len1 Tsize_t) (r uintptr) {
+func X__fopen_rb_ca(tls *TLS, filename uintptr, f uintptr, buf uintptr, len1 Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v filename=%v f=%v buf=%v len1=%v, (%v:)", tls, filename, f, buf, len1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135071,7 +134717,7 @@ func X__stdio_exit_needed(tls *TLS) {
 	X__stdio_exit(tls)
 }
 
-func X__stdio_read(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func X__stdio_read(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v buf=%v len1=%v, (%v:)", tls, f, buf, len1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135132,7 +134778,7 @@ func X__stdio_seek(tls *TLS, f uintptr, off Toff_t, whence int32) (r Toff_t) {
 	return X__lseek(tls, (*TFILE)(unsafe.Pointer(f)).Ffd, off, whence)
 }
 
-func X__stdio_write(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func X__stdio_write(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v buf=%v len1=%v, (%v:)", tls, f, buf, len1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135196,7 +134842,7 @@ func X__stdio_write(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	return r
 }
 
-func X__stdout_write(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func X__stdout_write(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v buf=%v len1=%v, (%v:)", tls, f, buf, len1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135298,7 +134944,7 @@ func X__uflow(tls *TLS, f uintptr) (r int32) {
 	return -int32(1)
 }
 
-func Xasprintf(tls *TLS, s, fmt, va uintptr) (r int32) {
+func Xasprintf(tls *TLS, s uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v va=%v, (%v:)", tls, s, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135337,7 +134983,7 @@ func Xclearerr_unlocked(tls *TLS, f uintptr) {
 	Xclearerr(tls, f)
 }
 
-func Xdprintf(tls *TLS, fd int32, fmt, va uintptr) (r int32) {
+func Xdprintf(tls *TLS, fd int32, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v fmt=%v va=%v, (%v:)", tls, fd, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135351,11 +134997,9 @@ func Xdprintf(tls *TLS, fd int32, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-const (
-	FSETLOCKING_BYCALLER = 2
-	FSETLOCKING_INTERNAL = 1
-	FSETLOCKING_QUERY    = 0
-)
+const FSETLOCKING_BYCALLER = 2
+const FSETLOCKING_INTERNAL = 1
+const FSETLOCKING_QUERY = 0
 
 func X_flushlbf(tls *TLS) {
 	if __ccgo_strace {
@@ -135479,7 +135123,7 @@ func X__freadahead(tls *TLS, f uintptr) (r Tsize_t) {
 	return Uint64FromInt64(v1)
 }
 
-func X__freadptr(tls *TLS, f, sizep uintptr) (r uintptr) {
+func X__freadptr(tls *TLS, f uintptr, sizep uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v sizep=%v, (%v:)", tls, f, sizep, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135792,7 +135436,7 @@ _3:
 	return v2
 }
 
-func Xfgetln(tls *TLS, f, plen uintptr) (r uintptr) {
+func Xfgetln(tls *TLS, f uintptr, plen uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v plen=%v, (%v:)", tls, f, plen, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -135845,7 +135489,7 @@ func Xfgetln(tls *TLS, f, plen uintptr) (r uintptr) {
 	return ret
 }
 
-func Xfgetpos(tls *TLS, f, pos uintptr) (r int32) {
+func Xfgetpos(tls *TLS, f uintptr, pos uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v pos=%v, (%v:)", tls, f, pos, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136217,7 +135861,7 @@ _1:
 	return Int64FromUint64(v2)
 }
 
-func _mread(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _mread(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var c uintptr
 	var rem Tsize_t
 	_, _ = c, rem
@@ -136243,7 +135887,7 @@ func _mread(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	return len1
 }
 
-func _mwrite(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _mwrite(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var c uintptr
 	var len2, rem Tsize_t
 	_, _, _ = c, len2, rem
@@ -136353,7 +135997,7 @@ func Xfmemopen(tls *TLS, buf uintptr, size Tsize_t, mode uintptr) (r uintptr) {
 	return X__ofl_add(tls, f)
 }
 
-func Xfopen(tls *TLS, filename, mode uintptr) (r uintptr) {
+func Xfopen(tls *TLS, filename uintptr, mode uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v filename=%v mode=%v, (%v:)", tls, filename, mode, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136368,7 +136012,7 @@ func Xfopen(tls *TLS, filename, mode uintptr) (r uintptr) {
 	}
 	/* Compute the flags to pass to open() */
 	flags = X__fmodeflags(tls, mode)
-	fd = int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_open), int64(filename), int64(flags|Int32FromInt32(O_LARGEFILE)), int64(Int32FromInt32(0o666))))))
+	fd = int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_open), int64(filename), int64(flags|Int32FromInt32(O_LARGEFILE)), int64(Int32FromInt32(0666))))))
 	if fd < 0 {
 		return uintptr(0)
 	}
@@ -136394,7 +136038,7 @@ type Tcookie_FILE = struct {
 	Fbuf [1032]uint8
 }
 
-func _cookieread(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _cookieread(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var fc, v2, v3 uintptr
 	var len2, readlen, remain, v1 Tsize_t
 	var ret Tssize_t
@@ -136447,7 +136091,7 @@ bail:
 	return readlen
 }
 
-func _cookiewrite(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _cookiewrite(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var fc, v1, v2 uintptr
 	var len2 Tsize_t
 	var ret Tssize_t
@@ -136509,7 +136153,7 @@ func _cookieclose(tls *TLS, f uintptr) (r int32) {
 	return 0
 }
 
-func Xfopencookie(tls *TLS, cookie, mode uintptr, iofuncs Tcookie_io_functions_t) (r uintptr) {
+func Xfopencookie(tls *TLS, cookie uintptr, mode uintptr, iofuncs Tcookie_io_functions_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v cookie=%v mode=%v iofuncs=%v, (%v:)", tls, cookie, mode, iofuncs, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136556,7 +136200,7 @@ func Xfopencookie(tls *TLS, cookie, mode uintptr, iofuncs Tcookie_io_functions_t
 	return X__ofl_add(tls, f)
 }
 
-func Xfprintf(tls *TLS, f, fmt, va uintptr) (r int32) {
+func Xfprintf(tls *TLS, f uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v va=%v, (%v:)", tls, f, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136654,7 +136298,7 @@ _4:
 	return v3
 }
 
-func Xfputs(tls *TLS, s, f uintptr) (r int32) {
+func Xfputs(tls *TLS, s uintptr, f uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v f=%v, (%v:)", tls, s, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136665,7 +136309,7 @@ func Xfputs(tls *TLS, s, f uintptr) (r int32) {
 	return BoolInt32(Xfwrite(tls, s, uint64(1), l, f) == l) - int32(1)
 }
 
-func Xfputs_unlocked(tls *TLS, s, f uintptr) (r int32) {
+func Xfputs_unlocked(tls *TLS, s uintptr, f uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v f=%v, (%v:)", tls, s, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136762,7 +136406,7 @@ func Xputwc_unlocked(tls *TLS, c Twchar_t, f uintptr) (r Twint_t) {
 	return X__fputwc_unlocked(tls, c, f)
 }
 
-func Xfputws(tls *TLS, _ws, f uintptr) (r int32) {
+func Xfputws(tls *TLS, _ws uintptr, f uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v _ws=%v f=%v, (%v:)", tls, _ws, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136811,7 +136455,7 @@ func Xfputws(tls *TLS, _ws, f uintptr) (r int32) {
 	return Int32FromUint64(l) /* 0 or -1 */
 }
 
-func Xfputws_unlocked(tls *TLS, _ws, f uintptr) (r int32) {
+func Xfputws_unlocked(tls *TLS, _ws uintptr, f uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v _ws=%v f=%v, (%v:)", tls, _ws, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136819,7 +136463,7 @@ func Xfputws_unlocked(tls *TLS, _ws, f uintptr) (r int32) {
 	return Xfputws(tls, _ws, f)
 }
 
-func Xfread(tls *TLS, destv uintptr, size, nmemb Tsize_t, f uintptr) (r Tsize_t) {
+func Xfread(tls *TLS, destv uintptr, size Tsize_t, nmemb Tsize_t, f uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v destv=%v size=%v nmemb=%v f=%v, (%v:)", tls, destv, size, nmemb, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136884,7 +136528,7 @@ func Xfread(tls *TLS, destv uintptr, size, nmemb Tsize_t, f uintptr) (r Tsize_t)
 	return nmemb
 }
 
-func Xfread_unlocked(tls *TLS, destv uintptr, size, nmemb Tsize_t, f uintptr) (r Tsize_t) {
+func Xfread_unlocked(tls *TLS, destv uintptr, size Tsize_t, nmemb Tsize_t, f uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v destv=%v size=%v nmemb=%v f=%v, (%v:)", tls, destv, size, nmemb, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136900,7 +136544,7 @@ func Xfread_unlocked(tls *TLS, destv uintptr, size, nmemb Tsize_t, f uintptr) (r
  * lock, via flockfile or otherwise, when freopen is called, and in that
  * case, freopen cannot act until the lock is released. */
 
-func Xfreopen(tls *TLS, filename, mode, f uintptr) (r uintptr) {
+func Xfreopen(tls *TLS, filename uintptr, mode uintptr, f uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v filename=%v mode=%v f=%v, (%v:)", tls, filename, mode, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136960,7 +136604,7 @@ fail:
 	return UintptrFromInt32(0)
 }
 
-func Xfscanf(tls *TLS, f, fmt, va uintptr) (r int32) {
+func Xfscanf(tls *TLS, f uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v va=%v, (%v:)", tls, f, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -136974,7 +136618,7 @@ func Xfscanf(tls *TLS, f, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func X__isoc99_fscanf(tls *TLS, f, fmt, va uintptr) (r int32) {
+func X__isoc99_fscanf(tls *TLS, f uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v va=%v, (%v:)", tls, f, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137059,7 +136703,7 @@ func Xfseeko(tls *TLS, f uintptr, off Toff_t, whence int32) (r int32) {
 	return X__fseeko(tls, f, off, whence)
 }
 
-func Xfsetpos(tls *TLS, f, pos uintptr) (r int32) {
+func Xfsetpos(tls *TLS, f uintptr, pos uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v pos=%v, (%v:)", tls, f, pos, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137299,7 +136943,7 @@ func Xfwide(tls *TLS, f uintptr, mode int32) (r int32) {
 	return mode
 }
 
-func Xfwprintf(tls *TLS, f, fmt, va uintptr) (r int32) {
+func Xfwprintf(tls *TLS, f uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v va=%v, (%v:)", tls, f, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137353,7 +136997,7 @@ func X__fwritex(tls *TLS, s uintptr, l Tsize_t, f uintptr) (r Tsize_t) {
 	return l + i
 }
 
-func Xfwrite(tls *TLS, src uintptr, size, nmemb Tsize_t, f uintptr) (r Tsize_t) {
+func Xfwrite(tls *TLS, src uintptr, size Tsize_t, nmemb Tsize_t, f uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v src=%v size=%v nmemb=%v f=%v, (%v:)", tls, src, size, nmemb, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137384,7 +137028,7 @@ func Xfwrite(tls *TLS, src uintptr, size, nmemb Tsize_t, f uintptr) (r Tsize_t) 
 	return v2
 }
 
-func Xfwrite_unlocked(tls *TLS, src uintptr, size, nmemb Tsize_t, f uintptr) (r Tsize_t) {
+func Xfwrite_unlocked(tls *TLS, src uintptr, size Tsize_t, nmemb Tsize_t, f uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v src=%v size=%v nmemb=%v f=%v, (%v:)", tls, src, size, nmemb, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137392,7 +137036,7 @@ func Xfwrite_unlocked(tls *TLS, src uintptr, size, nmemb Tsize_t, f uintptr) (r 
 	return Xfwrite(tls, src, size, nmemb, f)
 }
 
-func Xfwscanf(tls *TLS, f, fmt, va uintptr) (r int32) {
+func Xfwscanf(tls *TLS, f uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v va=%v, (%v:)", tls, f, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137406,7 +137050,7 @@ func Xfwscanf(tls *TLS, f, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func X__isoc99_fwscanf(tls *TLS, f, fmt, va uintptr) (r int32) {
+func X__isoc99_fwscanf(tls *TLS, f uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v va=%v, (%v:)", tls, f, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137630,7 +137274,7 @@ func Xgetchar_unlocked(tls *TLS) (r int32) {
 	return v1
 }
 
-func Xgetdelim(tls *TLS, s, n uintptr, delim int32, f uintptr) (r Tssize_t) {
+func Xgetdelim(tls *TLS, s uintptr, n uintptr, delim int32, f uintptr) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v delim=%v f=%v, (%v:)", tls, s, n, delim, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137753,7 +137397,7 @@ func Xgetdelim(tls *TLS, s, n uintptr, delim int32, f uintptr) (r Tssize_t) {
 	return Int64FromUint64(i)
 }
 
-func X__getdelim(tls *TLS, s, n uintptr, delim int32, f uintptr) (r Tssize_t) {
+func X__getdelim(tls *TLS, s uintptr, n uintptr, delim int32, f uintptr) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v delim=%v f=%v, (%v:)", tls, s, n, delim, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137761,7 +137405,7 @@ func X__getdelim(tls *TLS, s, n uintptr, delim int32, f uintptr) (r Tssize_t) {
 	return Xgetdelim(tls, s, n, delim, f)
 }
 
-func Xgetline(tls *TLS, s, n, f uintptr) (r Tssize_t) {
+func Xgetline(tls *TLS, s uintptr, n uintptr, f uintptr) (r Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v f=%v, (%v:)", tls, s, n, f, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -137855,10 +137499,8 @@ func Xgetwchar_unlocked(tls *TLS) (r Twint_t) {
 	return Xgetwchar(tls)
 }
 
-var (
-	_ofl_head uintptr
-	_ofl_lock [1]int32
-)
+var _ofl_head uintptr
+var _ofl_lock [1]int32
 
 func X__ofl_lock(tls *TLS) (r uintptr) {
 	if __ccgo_strace {
@@ -137939,7 +137581,7 @@ _1:
 	return Int64FromUint64(v2)
 }
 
-func _ms_write(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _ms_write(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var c, newbuf, v1 uintptr
 	var len2 Tsize_t
 	_, _, _, _ = c, len2, newbuf, v1
@@ -137976,7 +137618,7 @@ func _ms_close(tls *TLS, f uintptr) (r int32) {
 	return 0
 }
 
-func Xopen_memstream(tls *TLS, bufp, sizep uintptr) (r uintptr) {
+func Xopen_memstream(tls *TLS, bufp uintptr, sizep uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v bufp=%v sizep=%v, (%v:)", tls, bufp, sizep, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138074,7 +137716,7 @@ _1:
 	return Int64FromUint64(v2)
 }
 
-func _wms_write(tls *TLS, f, _buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _wms_write(tls *TLS, f uintptr, _buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	*(*uintptr)(unsafe.Pointer(bp)) = _buf
@@ -138120,7 +137762,7 @@ func _wms_close(tls *TLS, f uintptr) (r int32) {
 	return 0
 }
 
-func Xopen_wmemstream(tls *TLS, bufp, sizep uintptr) (r uintptr) {
+func Xopen_wmemstream(tls *TLS, bufp uintptr, sizep uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v bufp=%v sizep=%v, (%v:)", tls, bufp, sizep, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138229,7 +137871,7 @@ func Xperror(tls *TLS, msg uintptr) {
 	}
 }
 
-func Xprintf(tls *TLS, fmt, va uintptr) (r int32) {
+func Xprintf(tls *TLS, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138563,7 +138205,7 @@ func Xremove(tls *TLS, path uintptr) (r1 int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func Xrename(tls *TLS, old, new1 uintptr) (r int32) {
+func Xrename(tls *TLS, old uintptr, new1 uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v old=%v new1=%v, (%v:)", tls, old, new1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138590,7 +138232,7 @@ func Xrewind(tls *TLS, f uintptr) {
 	}
 }
 
-func Xscanf(tls *TLS, fmt, va uintptr) (r int32) {
+func Xscanf(tls *TLS, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138604,7 +138246,7 @@ func Xscanf(tls *TLS, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func X__isoc99_scanf(tls *TLS, fmt, va uintptr) (r int32) {
+func X__isoc99_scanf(tls *TLS, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138612,7 +138254,7 @@ func X__isoc99_scanf(tls *TLS, fmt, va uintptr) (r int32) {
 	return Xscanf(tls, fmt, va)
 }
 
-func Xsetbuf(tls *TLS, f, buf uintptr) {
+func Xsetbuf(tls *TLS, f uintptr, buf uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v buf=%v, (%v:)", tls, f, buf, origin(2))
 	}
@@ -138626,7 +138268,7 @@ func Xsetbuf(tls *TLS, f, buf uintptr) {
 	Xsetvbuf(tls, f, buf, v1, uint64(BUFSIZ))
 }
 
-func Xsetbuffer(tls *TLS, f, buf uintptr, size Tsize_t) {
+func Xsetbuffer(tls *TLS, f uintptr, buf uintptr, size Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v buf=%v size=%v, (%v:)", tls, f, buf, size, origin(2))
 	}
@@ -138653,7 +138295,7 @@ func Xsetlinebuf(tls *TLS, f uintptr) {
  * performed here. No allocation of buffers is performed, but a buffer
  * provided by the caller is used as long as it is suitably sized. */
 
-func Xsetvbuf(tls *TLS, f, buf uintptr, type1 int32, size Tsize_t) (r int32) {
+func Xsetvbuf(tls *TLS, f uintptr, buf uintptr, type1 int32, size Tsize_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v buf=%v type1=%v size=%v, (%v:)", tls, f, buf, type1, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138678,7 +138320,7 @@ func Xsetvbuf(tls *TLS, f, buf uintptr, type1 int32, size Tsize_t) (r int32) {
 	return 0
 }
 
-func Xsnprintf(tls *TLS, s uintptr, n Tsize_t, fmt, va uintptr) (r int32) {
+func Xsnprintf(tls *TLS, s uintptr, n Tsize_t, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v fmt=%v va=%v, (%v:)", tls, s, n, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138692,7 +138334,7 @@ func Xsnprintf(tls *TLS, s uintptr, n Tsize_t, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func Xsprintf(tls *TLS, s, fmt, va uintptr) (r int32) {
+func Xsprintf(tls *TLS, s uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v va=%v, (%v:)", tls, s, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138706,7 +138348,7 @@ func Xsprintf(tls *TLS, s, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func Xsscanf(tls *TLS, s, fmt, va uintptr) (r int32) {
+func Xsscanf(tls *TLS, s uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v va=%v, (%v:)", tls, s, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138720,7 +138362,7 @@ func Xsscanf(tls *TLS, s, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func X__isoc99_sscanf(tls *TLS, s, fmt, va uintptr) (r int32) {
+func X__isoc99_sscanf(tls *TLS, s uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v va=%v, (%v:)", tls, s, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138755,7 +138397,7 @@ func init() {
 	*(*uintptr)(unsafe.Add(p, 80)) = __ccgo_fp(X__stdio_seek)
 }
 
-func Xswprintf(tls *TLS, s uintptr, n Tsize_t, fmt, va uintptr) (r int32) {
+func Xswprintf(tls *TLS, s uintptr, n Tsize_t, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v fmt=%v va=%v, (%v:)", tls, s, n, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138769,7 +138411,7 @@ func Xswprintf(tls *TLS, s uintptr, n Tsize_t, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func Xswscanf(tls *TLS, s, fmt, va uintptr) (r int32) {
+func Xswscanf(tls *TLS, s uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v va=%v, (%v:)", tls, s, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138783,7 +138425,7 @@ func Xswscanf(tls *TLS, s, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func X__isoc99_swscanf(tls *TLS, s, fmt, va uintptr) (r int32) {
+func X__isoc99_swscanf(tls *TLS, s uintptr, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v va=%v, (%v:)", tls, s, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -138793,7 +138435,7 @@ func X__isoc99_swscanf(tls *TLS, s, fmt, va uintptr) (r int32) {
 
 const MAXTRIES = 100
 
-func Xtempnam(tls *TLS, dir, pfx uintptr) (r1 uintptr) {
+func Xtempnam(tls *TLS, dir uintptr, pfx uintptr) (r1 uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dir=%v pfx=%v, (%v:)", tls, dir, pfx, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -138859,7 +138501,7 @@ func Xtmpfile(tls *TLS) (r uintptr) {
 			break
 		}
 		___randname(tls, bp+uintptr(13))
-		fd = int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_open), int64(bp), int64(Int32FromInt32(O_RDWR)|Int32FromInt32(O_CREAT)|Int32FromInt32(O_EXCL)|Int32FromInt32(O_LARGEFILE)), int64(Int32FromInt32(0o600))))))
+		fd = int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_open), int64(bp), int64(Int32FromInt32(O_RDWR)|Int32FromInt32(O_CREAT)|Int32FromInt32(O_EXCL)|Int32FromInt32(O_LARGEFILE)), int64(Int32FromInt32(0600))))))
 		if fd >= 0 {
 			X__syscall1(tls, int64(SYS_unlink), int64(bp))
 			f = X__fdopen(tls, fd, __ccgo_ts+1600)
@@ -139008,7 +138650,7 @@ func Xungetwc(tls *TLS, c Twint_t, f uintptr) (r Twint_t) {
 	return c
 }
 
-func Xvasprintf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
+func Xvasprintf(tls *TLS, s uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v ap=%v, (%v:)", tls, s, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -139049,48 +138691,44 @@ func Xvdprintf(tls *TLS, fd int32, fmt uintptr, ap Tva_list) (r int32) {
 	return Xvfprintf(tls, bp, fmt, ap)
 }
 
-const (
-	ALT_FORM      = 8
-	FLAGMASK      = 75913
-	GROUPED       = 128
-	LDBL_EPSILON3 = 2.22044604925031308085e-16
-	LEFT_ADJ      = 8192
-	MARK_POS      = 2048
-	PAD_POS       = 1
-	ZERO_PAD      = 65536
-)
+const ALT_FORM = 8
+const FLAGMASK = 75913
+const GROUPED = 128
+const LDBL_EPSILON3 = 2.22044604925031308085e-16
+const LEFT_ADJ = 8192
+const MARK_POS = 2048
+const PAD_POS = 1
+const ZERO_PAD = 65536
 
-const (
-	_BARE     = 0
-	_LPRE     = 1
-	_LLPRE    = 2
-	_HPRE     = 3
-	_HHPRE    = 4
-	_BIGLPRE  = 5
-	_ZTPRE    = 6
-	_JPRE     = 7
-	_STOP     = 8
-	_PTR      = 9
-	_INT      = 10
-	_UINT     = 11
-	_ULLONG   = 12
-	_LONG     = 13
-	_ULONG    = 14
-	_SHORT    = 15
-	_USHORT   = 16
-	_CHAR     = 17
-	_UCHAR    = 18
-	_LLONG    = 19
-	_SIZET    = 20
-	_IMAX     = 21
-	_UMAX     = 22
-	_PDIFF    = 23
-	_UIPTR    = 24
-	_DBL      = 25
-	_LDBL     = 26
-	_NOARG    = 27
-	_MAXSTATE = 28
-)
+const _BARE = 0
+const _LPRE = 1
+const _LLPRE = 2
+const _HPRE = 3
+const _HHPRE = 4
+const _BIGLPRE = 5
+const _ZTPRE = 6
+const _JPRE = 7
+const _STOP = 8
+const _PTR = 9
+const _INT = 10
+const _UINT = 11
+const _ULLONG = 12
+const _LONG = 13
+const _ULONG = 14
+const _SHORT = 15
+const _USHORT = 16
+const _CHAR = 17
+const _UCHAR = 18
+const _LLONG = 19
+const _SIZET = 20
+const _IMAX = 21
+const _UMAX = 22
+const _PDIFF = 23
+const _UIPTR = 24
+const _DBL = 25
+const _LDBL = 26
+const _NOARG = 27
+const _MAXSTATE = 28
 
 var _states = [8][58]uint8{
 	0: {
@@ -139248,13 +138886,13 @@ func _pop_arg(tls *TLS, arg uintptr, type1 int32, ap uintptr) {
 	}
 }
 
-func _out(tls *TLS, f, s uintptr, l Tsize_t) {
+func _out(tls *TLS, f uintptr, s uintptr, l Tsize_t) {
 	if !((*TFILE)(unsafe.Pointer(f)).Fflags&Uint32FromInt32(F_ERR) != 0) {
 		X__fwritex(tls, s, l, f)
 	}
 }
 
-func _pad3(tls *TLS, f uintptr, c int8, w, l, fl int32) {
+func _pad3(tls *TLS, f uintptr, c int8, w int32, l int32, fl int32) {
 	bp := tls.Alloc(256)
 	defer tls.Free(256)
 	var v1 uint64
@@ -139360,7 +138998,7 @@ func _fmt_u(tls *TLS, x Tuintmax_t, s uintptr) (r uintptr) {
 //	 * may overflow the stack. */
 type Tcompiler_defines_long_double_incorrectly = [1]int8
 
-func _fmt_fp(tls *TLS, f uintptr, y float64, w, p, fl, t int32) (r1 int32) {
+func _fmt_fp(tls *TLS, f uintptr, y float64, w int32, p int32, fl int32, t int32) (r1 int32) {
 	bp := tls.Alloc(560)
 	defer tls.Free(560)
 	var a, b, d, ebuf, estr, prefix, r, s, s1, s2, s3, s4, z, v5, v6 uintptr
@@ -139959,7 +139597,7 @@ func _getint(tls *TLS, s uintptr) (r int32) {
 	return i
 }
 
-func _printf_core(tls *TLS, f, fmt, ap, nl_arg, nl_type uintptr) (r int32) {
+func _printf_core(tls *TLS, f uintptr, fmt uintptr, ap uintptr, nl_arg uintptr, nl_type uintptr) (r int32) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var a, prefix, ws, z, v8 uintptr
@@ -140500,7 +140138,7 @@ overflow:
 	return -int32(1)
 }
 
-func Xvfprintf(tls *TLS, f, fmt uintptr, ap Tva_list) (r int32) {
+func Xvfprintf(tls *TLS, f uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v ap=%v, (%v:)", tls, f, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -140569,14 +140207,12 @@ func Xvfprintf(tls *TLS, f, fmt uintptr, ap Tva_list) (r int32) {
 	return ret
 }
 
-const (
-	SIZE_L   = 2
-	SIZE_def = 0
-	SIZE_h   = -1
-	SIZE_hh  = -2
-	SIZE_l   = 1
-	SIZE_ll  = 3
-)
+const SIZE_L = 2
+const SIZE_def = 0
+const SIZE_h = -1
+const SIZE_hh = -2
+const SIZE_l = 1
+const SIZE_ll = 3
 
 func _store_int(tls *TLS, dest uintptr, size int32, i uint64) {
 	if !(dest != 0) {
@@ -140619,7 +140255,7 @@ func _arg_n(tls *TLS, ap Tva_list, n uint32) (r uintptr) {
 	return p
 }
 
-func Xvfscanf(tls *TLS, f, fmt uintptr, ap Tva_list) (r int32) {
+func Xvfscanf(tls *TLS, f uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v ap=%v, (%v:)", tls, f, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -141269,7 +140905,7 @@ _80:
 	return matches
 }
 
-func X__isoc99_vfscanf(tls *TLS, f, fmt uintptr, ap Tva_list) (r int32) {
+func X__isoc99_vfscanf(tls *TLS, f uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v ap=%v, (%v:)", tls, f, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -141427,7 +141063,7 @@ func _pop_arg1(tls *TLS, arg uintptr, type1 int32, ap uintptr) {
 	}
 }
 
-func _out1(tls *TLS, f, s uintptr, l Tsize_t) {
+func _out1(tls *TLS, f uintptr, s uintptr, l Tsize_t) {
 	var v1 Tsize_t
 	var v2 uintptr
 	_, _ = v1, v2
@@ -141443,7 +141079,7 @@ func _out1(tls *TLS, f, s uintptr, l Tsize_t) {
 	}
 }
 
-func _pad4(tls *TLS, f uintptr, n, fl int32) {
+func _pad4(tls *TLS, f uintptr, n int32, fl int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	if Uint32FromInt32(fl)&(Uint32FromUint32(1)<<(Int32FromUint8('-')-Int32FromUint8(' '))) != 0 || !(n != 0) || (*TFILE)(unsafe.Pointer(f)).Fflags&uint32(F_ERR) != 0 {
@@ -141486,7 +141122,7 @@ var _sizeprefix = [24]int8{
 	23: int8('j'),
 }
 
-func _wprintf_core(tls *TLS, f, fmt, ap, nl_arg, nl_type uintptr) (r int32) {
+func _wprintf_core(tls *TLS, f uintptr, fmt uintptr, ap uintptr, nl_arg uintptr, nl_type uintptr) (r int32) {
 	bp := tls.Alloc(112)
 	defer tls.Free(112)
 	var a, bs, z, v8 uintptr
@@ -141855,7 +141491,7 @@ overflow:
 	return -int32(1)
 }
 
-func Xvfwprintf(tls *TLS, f, fmt uintptr, ap Tva_list) (r int32) {
+func Xvfwprintf(tls *TLS, f uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v ap=%v, (%v:)", tls, f, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -141986,7 +141622,7 @@ func _in_set(tls *TLS, set uintptr, c int32) (r int32) {
 	return 0
 }
 
-func Xvfwscanf(tls *TLS, f, fmt uintptr, ap Tva_list) (r int32) {
+func Xvfwscanf(tls *TLS, f uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v ap=%v, (%v:)", tls, f, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142524,7 +142160,7 @@ var _spaces1 = [22]Twchar_t{
 	20: int32(0x3000),
 }
 
-func X__isoc99_vfwscanf(tls *TLS, f, fmt uintptr, ap Tva_list) (r int32) {
+func X__isoc99_vfwscanf(tls *TLS, f uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v f=%v fmt=%v ap=%v, (%v:)", tls, f, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142561,7 +142197,7 @@ type Tcookie3 = struct {
 	Fn Tsize_t
 }
 
-func _sn_write(tls *TLS, f, s uintptr, l Tsize_t) (r Tsize_t) {
+func _sn_write(tls *TLS, f uintptr, s uintptr, l Tsize_t) (r Tsize_t) {
 	var c, v3 uintptr
 	var k Tsize_t
 	var v1 uint64
@@ -142645,7 +142281,7 @@ func Xvsnprintf(tls *TLS, s uintptr, n Tsize_t, fmt uintptr, ap Tva_list) (r int
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func Xvsprintf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
+func Xvsprintf(tls *TLS, s uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v ap=%v, (%v:)", tls, s, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142653,7 +142289,7 @@ func Xvsprintf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
 	return Xvsnprintf(tls, s, uint64(INT_MAX), fmt, ap)
 }
 
-func _string_read(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _string_read(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var end, src uintptr
 	var k Tsize_t
 	_, _, _ = end, k, src
@@ -142673,7 +142309,7 @@ func _string_read(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	return len1
 }
 
-func Xvsscanf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
+func Xvsscanf(tls *TLS, s uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v ap=%v, (%v:)", tls, s, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142690,7 +142326,7 @@ func Xvsscanf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
 	return Xvfscanf(tls, bp, fmt, ap)
 }
 
-func X__isoc99_vsscanf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
+func X__isoc99_vsscanf(tls *TLS, s uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v ap=%v, (%v:)", tls, s, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142703,7 +142339,7 @@ type Tcookie4 = struct {
 	Fl  Tsize_t
 }
 
-func _sw_write(tls *TLS, f, s uintptr, l Tsize_t) (r Tsize_t) {
+func _sw_write(tls *TLS, f uintptr, s uintptr, l Tsize_t) (r Tsize_t) {
 	var c, v3, v4 uintptr
 	var i, v1 int32
 	var l0 Tsize_t
@@ -142785,7 +142421,7 @@ func Xvswprintf(tls *TLS, s uintptr, n Tsize_t, fmt uintptr, ap Tva_list) (r1 in
 	return v1
 }
 
-func _wstring_read(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _wstring_read(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var k Tsize_t
@@ -142816,7 +142452,7 @@ func _wstring_read(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	return uint64(1)
 }
 
-func Xvswscanf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
+func Xvswscanf(tls *TLS, s uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v ap=%v, (%v:)", tls, s, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142835,7 +142471,7 @@ func Xvswscanf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
 	return Xvfwscanf(tls, bp+256, fmt, ap)
 }
 
-func X__isoc99_vswscanf(tls *TLS, s, fmt uintptr, ap Tva_list) (r int32) {
+func X__isoc99_vswscanf(tls *TLS, s uintptr, fmt uintptr, ap Tva_list) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v fmt=%v ap=%v, (%v:)", tls, s, fmt, ap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142867,7 +142503,7 @@ func X__isoc99_vwscanf(tls *TLS, fmt uintptr, ap Tva_list) (r int32) {
 	return Xvwscanf(tls, fmt, ap)
 }
 
-func Xwprintf(tls *TLS, fmt, va uintptr) (r int32) {
+func Xwprintf(tls *TLS, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142881,7 +142517,7 @@ func Xwprintf(tls *TLS, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func Xwscanf(tls *TLS, fmt, va uintptr) (r int32) {
+func Xwscanf(tls *TLS, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -142895,7 +142531,7 @@ func Xwscanf(tls *TLS, fmt, va uintptr) (r int32) {
 	return ret
 }
 
-func X__isoc99_wscanf(tls *TLS, fmt, va uintptr) (r int32) {
+func X__isoc99_wscanf(tls *TLS, fmt uintptr, va uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fmt=%v va=%v, (%v:)", tls, fmt, va, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143053,7 +142689,7 @@ func Xatoll(tls *TLS, s uintptr) (r int64) {
 
 type t__ccgo_fp__Xbsearch_4 = func(*TLS, uintptr, uintptr) int32
 
-func Xbsearch(tls *TLS, key, base uintptr, nel, width Tsize_t, __ccgo_fp_cmp uintptr) (r uintptr) {
+func Xbsearch(tls *TLS, key uintptr, base uintptr, nel Tsize_t, width Tsize_t, __ccgo_fp_cmp uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v key=%v base=%v nel=%v width=%v __ccgo_fp_cmp=%v, (%v:)", tls, key, base, nel, width, __ccgo_fp_cmp, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143078,7 +142714,7 @@ func Xbsearch(tls *TLS, key, base uintptr, nel, width Tsize_t, __ccgo_fp_cmp uin
 	return UintptrFromInt32(0)
 }
 
-func Xdiv(tls *TLS, num, den int32) (r Tdiv_t) {
+func Xdiv(tls *TLS, num int32, den int32) (r Tdiv_t) {
 	if __ccgo_strace {
 		trc("tls=%v num=%v den=%v, (%v:)", tls, num, den, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143089,7 +142725,7 @@ func Xdiv(tls *TLS, num, den int32) (r Tdiv_t) {
 	}
 }
 
-func Xecvt(tls *TLS, x float64, n int32, dp, sign uintptr) (r uintptr) {
+func Xecvt(tls *TLS, x float64, n int32, dp uintptr, sign uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v n=%v dp=%v sign=%v, (%v:)", tls, x, n, dp, sign, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143126,7 +142762,7 @@ func Xecvt(tls *TLS, x float64, n int32, dp, sign uintptr) (r uintptr) {
 
 var _buf8 [16]int8
 
-func Xfcvt(tls *TLS, x float64, n int32, dp, sign uintptr) (r uintptr) {
+func Xfcvt(tls *TLS, x float64, n int32, dp uintptr, sign uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v x=%v n=%v dp=%v sign=%v, (%v:)", tls, x, n, dp, sign, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143183,7 +142819,7 @@ func Ximaxabs(tls *TLS, a Tintmax_t) (r Tintmax_t) {
 	return v1
 }
 
-func Ximaxdiv(tls *TLS, num, den Tintmax_t) (r Timaxdiv_t) {
+func Ximaxdiv(tls *TLS, num Tintmax_t, den Tintmax_t) (r Timaxdiv_t) {
 	if __ccgo_strace {
 		trc("tls=%v num=%v den=%v, (%v:)", tls, num, den, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143209,7 +142845,7 @@ func Xlabs(tls *TLS, a int64) (r int64) {
 	return v1
 }
 
-func Xldiv(tls *TLS, num, den int64) (r Tldiv_t) {
+func Xldiv(tls *TLS, num int64, den int64) (r Tldiv_t) {
 	if __ccgo_strace {
 		trc("tls=%v num=%v den=%v, (%v:)", tls, num, den, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143235,7 +142871,7 @@ func Xllabs(tls *TLS, a int64) (r int64) {
 	return v1
 }
 
-func Xlldiv(tls *TLS, num, den int64) (r Tlldiv_t) {
+func Xlldiv(tls *TLS, num int64, den int64) (r Tlldiv_t) {
 	if __ccgo_strace {
 		trc("tls=%v num=%v den=%v, (%v:)", tls, num, den, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143356,7 +142992,7 @@ func _sift(tls *TLS, head uintptr, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg uin
 	_cycle(tls, width, bp, i)
 }
 
-func _trinkle(tls *TLS, head uintptr, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg, pp uintptr, pshift, trusty int32, lp uintptr) {
+func _trinkle(tls *TLS, head uintptr, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg uintptr, pp uintptr, pshift int32, trusty int32, lp uintptr) {
 	bp := tls.Alloc(928)
 	defer tls.Free(928)
 	var i, trail, v1 int32
@@ -143397,7 +143033,7 @@ func _trinkle(tls *TLS, head uintptr, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg,
 
 type t__ccgo_fp__X__qsort_r_3 = func(*TLS, uintptr, uintptr, uintptr) int32
 
-func X__qsort_r(tls *TLS, base uintptr, nel, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg uintptr) {
+func X__qsort_r(tls *TLS, base uintptr, nel Tsize_t, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v base=%v nel=%v width=%v __ccgo_fp_cmp=%v arg=%v, (%v:)", tls, base, nel, width, __ccgo_fp_cmp, arg, origin(2))
 	}
@@ -143479,27 +143115,27 @@ func X__qsort_r(tls *TLS, base uintptr, nel, width Tsize_t, __ccgo_fp_cmp Tcmpfu
 
 type t__ccgo_fp__Xqsort_r_3 = func(*TLS, uintptr, uintptr, uintptr) int32
 
-func Xqsort_r(tls *TLS, base uintptr, nel, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg uintptr) {
+func Xqsort_r(tls *TLS, base uintptr, nel Tsize_t, width Tsize_t, __ccgo_fp_cmp Tcmpfun, arg uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v base=%v nel=%v width=%v __ccgo_fp_cmp=%v arg=%v, (%v:)", tls, base, nel, width, __ccgo_fp_cmp, arg, origin(2))
 	}
 	X__qsort_r(tls, base, nel, width, __ccgo_fp_cmp, arg)
 }
 
-func _wrapper_cmp(tls *TLS, v1, v2, cmp uintptr) (r int32) {
+func _wrapper_cmp(tls *TLS, v1 uintptr, v2 uintptr, cmp uintptr) (r int32) {
 	return (*(*func(*TLS, uintptr, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{cmp})))(tls, v1, v2)
 }
 
 type t__ccgo_fp__Xqsort_3 = func(*TLS, uintptr, uintptr) int32
 
-func Xqsort(tls *TLS, base uintptr, nel, width Tsize_t, __ccgo_fp_cmp Tcmpfun) {
+func Xqsort(tls *TLS, base uintptr, nel Tsize_t, width Tsize_t, __ccgo_fp_cmp Tcmpfun) {
 	if __ccgo_strace {
 		trc("tls=%v base=%v nel=%v width=%v __ccgo_fp_cmp=%v, (%v:)", tls, base, nel, width, __ccgo_fp_cmp, origin(2))
 	}
 	X__qsort_r(tls, base, nel, width, __ccgo_fp(_wrapper_cmp), __ccgo_fp_cmp)
 }
 
-func _strtox(tls *TLS, s, p uintptr, prec int32) (r float64) {
+func _strtox(tls *TLS, s uintptr, p uintptr, prec int32) (r float64) {
 	bp := tls.Alloc(240)
 	defer tls.Free(240)
 	var cnt Toff_t
@@ -143525,7 +143161,7 @@ func _strtox(tls *TLS, s, p uintptr, prec int32) (r float64) {
 	return y
 }
 
-func Xstrtof(tls *TLS, s, p uintptr) (r float32) {
+func Xstrtof(tls *TLS, s uintptr, p uintptr) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", tls, s, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143533,7 +143169,7 @@ func Xstrtof(tls *TLS, s, p uintptr) (r float32) {
 	return float32(_strtox(tls, s, p, 0))
 }
 
-func Xstrtod(tls *TLS, s, p uintptr) (r float64) {
+func Xstrtod(tls *TLS, s uintptr, p uintptr) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", tls, s, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143541,7 +143177,7 @@ func Xstrtod(tls *TLS, s, p uintptr) (r float64) {
 	return _strtox(tls, s, p, int32(1))
 }
 
-func Xstrtold(tls *TLS, s, p uintptr) (r float64) {
+func Xstrtold(tls *TLS, s uintptr, p uintptr) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", tls, s, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143549,7 +143185,7 @@ func Xstrtold(tls *TLS, s, p uintptr) (r float64) {
 	return _strtox(tls, s, p, int32(2))
 }
 
-func _strtox1(tls *TLS, s, p uintptr, base int32, lim uint64) (r uint64) {
+func _strtox1(tls *TLS, s uintptr, p uintptr, base int32, lim uint64) (r uint64) {
 	bp := tls.Alloc(240)
 	defer tls.Free(240)
 	var cnt Tsize_t
@@ -143570,7 +143206,7 @@ func _strtox1(tls *TLS, s, p uintptr, base int32, lim uint64) (r uint64) {
 	return y
 }
 
-func Xstrtoull(tls *TLS, s, p uintptr, base int32) (r uint64) {
+func Xstrtoull(tls *TLS, s uintptr, p uintptr, base int32) (r uint64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143578,7 +143214,7 @@ func Xstrtoull(tls *TLS, s, p uintptr, base int32) (r uint64) {
 	return _strtox1(tls, s, p, base, Uint64FromUint64(2)*Uint64FromInt64(0x7fffffffffffffff)+Uint64FromInt32(1))
 }
 
-func Xstrtoll(tls *TLS, s, p uintptr, base int32) (r int64) {
+func Xstrtoll(tls *TLS, s uintptr, p uintptr, base int32) (r int64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143586,7 +143222,7 @@ func Xstrtoll(tls *TLS, s, p uintptr, base int32) (r int64) {
 	return Int64FromUint64(_strtox1(tls, s, p, base, Uint64FromInt64(-Int64FromInt64(0x7fffffffffffffff)-Int64FromInt32(1))))
 }
 
-func Xstrtoul(tls *TLS, s, p uintptr, base int32) (r uint64) {
+func Xstrtoul(tls *TLS, s uintptr, p uintptr, base int32) (r uint64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143594,7 +143230,7 @@ func Xstrtoul(tls *TLS, s, p uintptr, base int32) (r uint64) {
 	return _strtox1(tls, s, p, base, uint64(Uint64FromUint64(2)*Uint64FromInt64(0x7fffffffffffffff)+Uint64FromInt32(1)))
 }
 
-func Xstrtol(tls *TLS, s, p uintptr, base int32) (r int64) {
+func Xstrtol(tls *TLS, s uintptr, p uintptr, base int32) (r int64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143602,7 +143238,7 @@ func Xstrtol(tls *TLS, s, p uintptr, base int32) (r int64) {
 	return Int64FromUint64(_strtox1(tls, s, p, base, uint64(Uint64FromUint64(0)+Uint64FromInt64(-Int64FromInt64(0x7fffffffffffffff)-Int64FromInt32(1)))))
 }
 
-func Xstrtoimax(tls *TLS, s, p uintptr, base int32) (r Tintmax_t) {
+func Xstrtoimax(tls *TLS, s uintptr, p uintptr, base int32) (r Tintmax_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143610,7 +143246,7 @@ func Xstrtoimax(tls *TLS, s, p uintptr, base int32) (r Tintmax_t) {
 	return Xstrtoll(tls, s, p, base)
 }
 
-func Xstrtoumax(tls *TLS, s, p uintptr, base int32) (r Tuintmax_t) {
+func Xstrtoumax(tls *TLS, s uintptr, p uintptr, base int32) (r Tuintmax_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143618,7 +143254,7 @@ func Xstrtoumax(tls *TLS, s, p uintptr, base int32) (r Tuintmax_t) {
 	return Xstrtoull(tls, s, p, base)
 }
 
-func X__strtoimax_internal(tls *TLS, s, p uintptr, base int32) (r Tintmax_t) {
+func X__strtoimax_internal(tls *TLS, s uintptr, p uintptr, base int32) (r Tintmax_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143626,7 +143262,7 @@ func X__strtoimax_internal(tls *TLS, s, p uintptr, base int32) (r Tintmax_t) {
 	return Xstrtoimax(tls, s, p, base)
 }
 
-func X__strtol_internal(tls *TLS, s, p uintptr, base int32) (r int64) {
+func X__strtol_internal(tls *TLS, s uintptr, p uintptr, base int32) (r int64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143634,7 +143270,7 @@ func X__strtol_internal(tls *TLS, s, p uintptr, base int32) (r int64) {
 	return Xstrtol(tls, s, p, base)
 }
 
-func X__strtoll_internal(tls *TLS, s, p uintptr, base int32) (r int64) {
+func X__strtoll_internal(tls *TLS, s uintptr, p uintptr, base int32) (r int64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143642,7 +143278,7 @@ func X__strtoll_internal(tls *TLS, s, p uintptr, base int32) (r int64) {
 	return Xstrtoll(tls, s, p, base)
 }
 
-func X__strtoul_internal(tls *TLS, s, p uintptr, base int32) (r uint64) {
+func X__strtoul_internal(tls *TLS, s uintptr, p uintptr, base int32) (r uint64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143650,7 +143286,7 @@ func X__strtoul_internal(tls *TLS, s, p uintptr, base int32) (r uint64) {
 	return Xstrtoul(tls, s, p, base)
 }
 
-func X__strtoull_internal(tls *TLS, s, p uintptr, base int32) (r uint64) {
+func X__strtoull_internal(tls *TLS, s uintptr, p uintptr, base int32) (r uint64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143658,7 +143294,7 @@ func X__strtoull_internal(tls *TLS, s, p uintptr, base int32) (r uint64) {
 	return Xstrtoull(tls, s, p, base)
 }
 
-func X__strtoumax_internal(tls *TLS, s, p uintptr, base int32) (r Tuintmax_t) {
+func X__strtoumax_internal(tls *TLS, s uintptr, p uintptr, base int32) (r Tuintmax_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143670,7 +143306,7 @@ func X__strtoumax_internal(tls *TLS, s, p uintptr, base int32) (r Tuintmax_t) {
  *  (1) len will always be 1
  *  (2) non-ascii characters don't matter */
 
-func _do_read(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _do_read(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var i Tsize_t
 	var wcs, v3, v4 uintptr
 	var v2 int32
@@ -143708,7 +143344,7 @@ func _do_read(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	return uint64(0)
 }
 
-func _wcstox(tls *TLS, s, p uintptr, prec int32) (r float64) {
+func _wcstox(tls *TLS, s uintptr, p uintptr, prec int32) (r float64) {
 	bp := tls.Alloc(304)
 	defer tls.Free(304)
 	var cnt Tsize_t
@@ -143746,7 +143382,7 @@ func _wcstox(tls *TLS, s, p uintptr, prec int32) (r float64) {
 	return y
 }
 
-func Xwcstof(tls *TLS, s, p uintptr) (r float32) {
+func Xwcstof(tls *TLS, s uintptr, p uintptr) (r float32) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", tls, s, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143754,7 +143390,7 @@ func Xwcstof(tls *TLS, s, p uintptr) (r float32) {
 	return float32(_wcstox(tls, s, p, 0))
 }
 
-func Xwcstod(tls *TLS, s, p uintptr) (r float64) {
+func Xwcstod(tls *TLS, s uintptr, p uintptr) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", tls, s, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143762,7 +143398,7 @@ func Xwcstod(tls *TLS, s, p uintptr) (r float64) {
 	return _wcstox(tls, s, p, int32(1))
 }
 
-func Xwcstold(tls *TLS, s, p uintptr) (r float64) {
+func Xwcstold(tls *TLS, s uintptr, p uintptr) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", tls, s, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143774,7 +143410,7 @@ func Xwcstold(tls *TLS, s, p uintptr) (r float64) {
  *  (1) len will always be 1
  *  (2) non-ascii characters don't matter */
 
-func _do_read1(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
+func _do_read1(tls *TLS, f uintptr, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	var i Tsize_t
 	var wcs, v3, v4 uintptr
 	var v2 int32
@@ -143812,7 +143448,7 @@ func _do_read1(tls *TLS, f, buf uintptr, len1 Tsize_t) (r Tsize_t) {
 	return uint64(0)
 }
 
-func _wcstox1(tls *TLS, s, p uintptr, base int32, lim uint64) (r uint64) {
+func _wcstox1(tls *TLS, s uintptr, p uintptr, base int32, lim uint64) (r uint64) {
 	bp := tls.Alloc(304)
 	defer tls.Free(304)
 	var cnt Tsize_t
@@ -143850,7 +143486,7 @@ func _wcstox1(tls *TLS, s, p uintptr, base int32, lim uint64) (r uint64) {
 	return y
 }
 
-func Xwcstoull(tls *TLS, s, p uintptr, base int32) (r uint64) {
+func Xwcstoull(tls *TLS, s uintptr, p uintptr, base int32) (r uint64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143858,7 +143494,7 @@ func Xwcstoull(tls *TLS, s, p uintptr, base int32) (r uint64) {
 	return _wcstox1(tls, s, p, base, Uint64FromUint64(2)*Uint64FromInt64(0x7fffffffffffffff)+Uint64FromInt32(1))
 }
 
-func Xwcstoll(tls *TLS, s, p uintptr, base int32) (r int64) {
+func Xwcstoll(tls *TLS, s uintptr, p uintptr, base int32) (r int64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143866,7 +143502,7 @@ func Xwcstoll(tls *TLS, s, p uintptr, base int32) (r int64) {
 	return Int64FromUint64(_wcstox1(tls, s, p, base, Uint64FromInt64(-Int64FromInt64(0x7fffffffffffffff)-Int64FromInt32(1))))
 }
 
-func Xwcstoul(tls *TLS, s, p uintptr, base int32) (r uint64) {
+func Xwcstoul(tls *TLS, s uintptr, p uintptr, base int32) (r uint64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143874,7 +143510,7 @@ func Xwcstoul(tls *TLS, s, p uintptr, base int32) (r uint64) {
 	return _wcstox1(tls, s, p, base, uint64(Uint64FromUint64(2)*Uint64FromInt64(0x7fffffffffffffff)+Uint64FromInt32(1)))
 }
 
-func Xwcstol(tls *TLS, s, p uintptr, base int32) (r int64) {
+func Xwcstol(tls *TLS, s uintptr, p uintptr, base int32) (r int64) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143882,7 +143518,7 @@ func Xwcstol(tls *TLS, s, p uintptr, base int32) (r int64) {
 	return Int64FromUint64(_wcstox1(tls, s, p, base, uint64(Uint64FromUint64(0)+Uint64FromInt64(-Int64FromInt64(0x7fffffffffffffff)-Int64FromInt32(1)))))
 }
 
-func Xwcstoimax(tls *TLS, s, p uintptr, base int32) (r Tintmax_t) {
+func Xwcstoimax(tls *TLS, s uintptr, p uintptr, base int32) (r Tintmax_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143890,7 +143526,7 @@ func Xwcstoimax(tls *TLS, s, p uintptr, base int32) (r Tintmax_t) {
 	return Xwcstoll(tls, s, p, base)
 }
 
-func Xwcstoumax(tls *TLS, s, p uintptr, base int32) (r Tuintmax_t) {
+func Xwcstoumax(tls *TLS, s uintptr, p uintptr, base int32) (r Tuintmax_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v base=%v, (%v:)", tls, s, p, base, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143898,7 +143534,7 @@ func Xwcstoumax(tls *TLS, s, p uintptr, base int32) (r Tuintmax_t) {
 	return Xwcstoull(tls, s, p, base)
 }
 
-func Xbcmp(tls *TLS, s1, s2 uintptr, n Tsize_t) (r int32) {
+func Xbcmp(tls *TLS, s1 uintptr, s2 uintptr, n Tsize_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v s1=%v s2=%v n=%v, (%v:)", tls, s1, s2, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -143906,7 +143542,7 @@ func Xbcmp(tls *TLS, s1, s2 uintptr, n Tsize_t) (r int32) {
 	return Xmemcmp(tls, s1, s2, n)
 }
 
-func Xbcopy(tls *TLS, s1, s2 uintptr, n Tsize_t) {
+func Xbcopy(tls *TLS, s1 uintptr, s2 uintptr, n Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s1=%v s2=%v n=%v, (%v:)", tls, s1, s2, n, origin(2))
 	}
@@ -143935,11 +143571,9 @@ func Xindex(tls *TLS, s uintptr, c int32) (r uintptr) {
 	return Xstrchr(tls, s, c)
 }
 
-const (
-	ALIGN1 = -1
-	HIGHS  = 0
-	ONES   = 0
-)
+const ALIGN1 = -1
+const HIGHS = 0
+const ONES = 0
 
 /* Support signed or unsigned plain-char */
 
@@ -143950,7 +143584,7 @@ const (
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func Xmemccpy(tls *TLS, dest, src uintptr, c int32, n Tsize_t) (r uintptr) {
+func Xmemccpy(tls *TLS, dest uintptr, src uintptr, c int32, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v c=%v n=%v, (%v:)", tls, dest, src, c, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -144088,7 +143722,7 @@ func Xmemchr(tls *TLS, src uintptr, c int32, n Tsize_t) (r uintptr) {
 	return v4
 }
 
-func Xmemcmp(tls *TLS, vl, vr uintptr, n Tsize_t) (r1 int32) {
+func Xmemcmp(tls *TLS, vl uintptr, vr uintptr, n Tsize_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v vl=%v vr=%v n=%v, (%v:)", tls, vl, vr, n, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -144117,12 +143751,10 @@ func Xmemcmp(tls *TLS, vl, vr uintptr, n Tsize_t) (r1 int32) {
 	return v2
 }
 
-const (
-	LS = 0
-	RS = 0
-)
+const LS = 0
+const RS = 0
 
-func Xmemcpy(tls *TLS, dest, src uintptr, n Tsize_t) (r uintptr) {
+func Xmemcpy(tls *TLS, dest uintptr, src uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v, (%v:)", tls, dest, src, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -144563,7 +144195,7 @@ func _fourbyte_memmem(tls *TLS, h uintptr, k Tsize_t, n uintptr) (r uintptr) {
 	return v2
 }
 
-func _twoway_memmem(tls *TLS, h, z, n uintptr, l Tsize_t) (r uintptr) {
+func _twoway_memmem(tls *TLS, h uintptr, z uintptr, n uintptr, l Tsize_t) (r uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var i, ip, jp, k, mem, mem0, ms, p, p0, v2 Tsize_t
@@ -144770,7 +144402,7 @@ const WS = 0
 
 type TWT = uint64
 
-func Xmemmove(tls *TLS, dest, src uintptr, n Tsize_t) (r uintptr) {
+func Xmemmove(tls *TLS, dest uintptr, src uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v, (%v:)", tls, dest, src, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -144850,7 +144482,7 @@ func Xmemmove(tls *TLS, dest, src uintptr, n Tsize_t) (r uintptr) {
 	return dest
 }
 
-func Xmempcpy(tls *TLS, dest, src uintptr, n Tsize_t) (r uintptr) {
+func Xmempcpy(tls *TLS, dest uintptr, src uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v n=%v, (%v:)", tls, dest, src, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145003,7 +144635,7 @@ const ALIGN2 = 0
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func X__stpcpy(tls *TLS, d, s uintptr) (r uintptr) {
+func X__stpcpy(tls *TLS, d uintptr, s uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v, (%v:)", tls, d, s, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145069,7 +144701,7 @@ func X__stpcpy(tls *TLS, d, s uintptr) (r uintptr) {
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func Xstpcpy(tls *TLS, d, s uintptr) (r uintptr) {
+func Xstpcpy(tls *TLS, d uintptr, s uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v, (%v:)", tls, d, s, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145088,7 +144720,7 @@ const ALIGN3 = -1
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func X__stpncpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func X__stpncpy(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145164,7 +144796,7 @@ tail:
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func Xstpncpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xstpncpy(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145172,7 +144804,7 @@ func Xstpncpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
 	return X__stpncpy(tls, d, s, n)
 }
 
-func Xstrcasecmp(tls *TLS, _l, _r uintptr) (r1 int32) {
+func Xstrcasecmp(tls *TLS, _l uintptr, _r uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v _l=%v _r=%v, (%v:)", tls, _l, _r, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145194,7 +144826,7 @@ func Xstrcasecmp(tls *TLS, _l, _r uintptr) (r1 int32) {
 	return Xtolower(tls, Int32FromUint8(**(**uint8)(__ccgo_up(l)))) - Xtolower(tls, Int32FromUint8(**(**uint8)(__ccgo_up(r))))
 }
 
-func X__strcasecmp_l(tls *TLS, l, r uintptr, loc Tlocale_t) (r1 int32) {
+func X__strcasecmp_l(tls *TLS, l uintptr, r uintptr, loc Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v loc=%v, (%v:)", tls, l, r, loc, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145202,7 +144834,7 @@ func X__strcasecmp_l(tls *TLS, l, r uintptr, loc Tlocale_t) (r1 int32) {
 	return Xstrcasecmp(tls, l, r)
 }
 
-func Xstrcasecmp_l(tls *TLS, l, r uintptr, loc Tlocale_t) (r1 int32) {
+func Xstrcasecmp_l(tls *TLS, l uintptr, r uintptr, loc Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v loc=%v, (%v:)", tls, l, r, loc, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145210,7 +144842,7 @@ func Xstrcasecmp_l(tls *TLS, l, r uintptr, loc Tlocale_t) (r1 int32) {
 	return X__strcasecmp_l(tls, l, r, loc)
 }
 
-func Xstrcasestr(tls *TLS, h, n uintptr) (r uintptr) {
+func Xstrcasestr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v h=%v n=%v, (%v:)", tls, h, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145233,7 +144865,7 @@ func Xstrcasestr(tls *TLS, h, n uintptr) (r uintptr) {
 	return uintptr(0)
 }
 
-func Xstrcat(tls *TLS, dest, src uintptr) (r uintptr) {
+func Xstrcat(tls *TLS, dest uintptr, src uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v, (%v:)", tls, dest, src, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145334,7 +144966,7 @@ func Xstrchrnul(tls *TLS, s uintptr, c int32) (r uintptr) {
 	return X__strchrnul(tls, s, c)
 }
 
-func Xstrcmp(tls *TLS, l, r uintptr) (r1 int32) {
+func Xstrcmp(tls *TLS, l uintptr, r uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v, (%v:)", tls, l, r, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145352,7 +144984,7 @@ func Xstrcmp(tls *TLS, l, r uintptr) (r1 int32) {
 	return Int32FromUint8(**(**uint8)(__ccgo_up(l))) - Int32FromUint8(**(**uint8)(__ccgo_up(r)))
 }
 
-func Xstrcpy(tls *TLS, dest, src uintptr) (r uintptr) {
+func Xstrcpy(tls *TLS, dest uintptr, src uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v, (%v:)", tls, dest, src, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145361,7 +144993,7 @@ func Xstrcpy(tls *TLS, dest, src uintptr) (r uintptr) {
 	return dest
 }
 
-func Xstrcspn(tls *TLS, s, c uintptr) (r Tsize_t) {
+func Xstrcspn(tls *TLS, s uintptr, c uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v c=%v, (%v:)", tls, s, c, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145447,7 +145079,7 @@ func X__xpg_strerror_r(tls *TLS, err int32, buf uintptr, buflen Tsize_t) (r int3
 	return Xstrerror_r(tls, err, buf, buflen)
 }
 
-func Xstrlcat(tls *TLS, d, s uintptr, n Tsize_t) (r Tsize_t) {
+func Xstrlcat(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145472,7 +145104,7 @@ const ALIGN5 = -1
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func Xstrlcpy(tls *TLS, d, s uintptr, n Tsize_t) (r Tsize_t) {
+func Xstrlcpy(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145548,7 +145180,7 @@ finish:
 
 const ALIGN6 = 0
 
-func Xstrncasecmp(tls *TLS, _l, _r uintptr, n Tsize_t) (r1 int32) {
+func Xstrncasecmp(tls *TLS, _l uintptr, _r uintptr, n Tsize_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v _l=%v _r=%v n=%v, (%v:)", tls, _l, _r, n, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145577,7 +145209,7 @@ func Xstrncasecmp(tls *TLS, _l, _r uintptr, n Tsize_t) (r1 int32) {
 	return Xtolower(tls, Int32FromUint8(**(**uint8)(__ccgo_up(l)))) - Xtolower(tls, Int32FromUint8(**(**uint8)(__ccgo_up(r))))
 }
 
-func X__strncasecmp_l(tls *TLS, l, r uintptr, n Tsize_t, loc Tlocale_t) (r1 int32) {
+func X__strncasecmp_l(tls *TLS, l uintptr, r uintptr, n Tsize_t, loc Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v n=%v loc=%v, (%v:)", tls, l, r, n, loc, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145585,7 +145217,7 @@ func X__strncasecmp_l(tls *TLS, l, r uintptr, n Tsize_t, loc Tlocale_t) (r1 int3
 	return Xstrncasecmp(tls, l, r, n)
 }
 
-func Xstrncasecmp_l(tls *TLS, l, r uintptr, n Tsize_t, loc Tlocale_t) (r1 int32) {
+func Xstrncasecmp_l(tls *TLS, l uintptr, r uintptr, n Tsize_t, loc Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v n=%v loc=%v, (%v:)", tls, l, r, n, loc, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145593,7 +145225,7 @@ func Xstrncasecmp_l(tls *TLS, l, r uintptr, n Tsize_t, loc Tlocale_t) (r1 int32)
 	return X__strncasecmp_l(tls, l, r, n, loc)
 }
 
-func Xstrncat(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xstrncat(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145616,7 +145248,7 @@ func Xstrncat(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
 	return a
 }
 
-func Xstrncmp(tls *TLS, _l, _r uintptr, n Tsize_t) (r1 int32) {
+func Xstrncmp(tls *TLS, _l uintptr, _r uintptr, n Tsize_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v _l=%v _r=%v n=%v, (%v:)", tls, _l, _r, n, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -145645,7 +145277,7 @@ func Xstrncmp(tls *TLS, _l, _r uintptr, n Tsize_t) (r1 int32) {
 	return Int32FromUint8(**(**uint8)(__ccgo_up(l))) - Int32FromUint8(**(**uint8)(__ccgo_up(r)))
 }
 
-func Xstrncpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xstrncpy(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145689,7 +145321,7 @@ func Xstrnlen(tls *TLS, s uintptr, n Tsize_t) (r Tsize_t) {
 	return v1
 }
 
-func Xstrpbrk(tls *TLS, s, b uintptr) (r uintptr) {
+func Xstrpbrk(tls *TLS, s uintptr, b uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v b=%v, (%v:)", tls, s, b, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145713,7 +145345,7 @@ func Xstrrchr(tls *TLS, s uintptr, c int32) (r uintptr) {
 	return X__memrchr(tls, s, c, _strlen(tls, s)+uint64(1))
 }
 
-func Xstrsep(tls *TLS, str, sep uintptr) (r uintptr) {
+func Xstrsep(tls *TLS, str uintptr, sep uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v str=%v sep=%v, (%v:)", tls, str, sep, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145774,7 +145406,7 @@ func Xstrsignal(tls *TLS, signum int32) (r uintptr) {
 	return X__lctrans_cur(tls, s)
 }
 
-func Xstrspn(tls *TLS, s, c uintptr) (r Tsize_t) {
+func Xstrspn(tls *TLS, s uintptr, c uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v c=%v, (%v:)", tls, s, c, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -145827,7 +145459,7 @@ func Xstrspn(tls *TLS, s, c uintptr) (r Tsize_t) {
 	return Uint64FromInt64(int64(s) - int64(a))
 }
 
-func _twobyte_strstr(tls *TLS, h, n uintptr) (r uintptr) {
+func _twobyte_strstr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	var hw, nw Tuint16_t
 	var v2 uintptr
 	_, _, _ = hw, nw, v2
@@ -145853,7 +145485,7 @@ func _twobyte_strstr(tls *TLS, h, n uintptr) (r uintptr) {
 	return v2
 }
 
-func _threebyte_strstr(tls *TLS, h, n uintptr) (r uintptr) {
+func _threebyte_strstr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	var hw, nw Tuint32_t
 	var v2 uintptr
 	_, _, _ = hw, nw, v2
@@ -145879,7 +145511,7 @@ func _threebyte_strstr(tls *TLS, h, n uintptr) (r uintptr) {
 	return v2
 }
 
-func _fourbyte_strstr(tls *TLS, h, n uintptr) (r uintptr) {
+func _fourbyte_strstr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	var hw, nw Tuint32_t
 	var v2 uintptr
 	_, _, _ = hw, nw, v2
@@ -145905,7 +145537,7 @@ func _fourbyte_strstr(tls *TLS, h, n uintptr) (r uintptr) {
 	return v2
 }
 
-func _twoway_strstr(tls *TLS, h, n uintptr) (r uintptr) {
+func _twoway_strstr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var grow, ip, jp, k, l, mem, mem0, ms, p, p0, v2 Tsize_t
@@ -146086,7 +145718,7 @@ func _twoway_strstr(tls *TLS, h, n uintptr) (r uintptr) {
 	return r
 }
 
-func Xstrstr(tls *TLS, h, n uintptr) (r uintptr) {
+func Xstrstr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v h=%v n=%v, (%v:)", tls, h, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146121,7 +145753,7 @@ func Xstrstr(tls *TLS, h, n uintptr) (r uintptr) {
 	return _twoway_strstr(tls, h, n)
 }
 
-func Xstrtok(tls *TLS, s, sep uintptr) (r uintptr) {
+func Xstrtok(tls *TLS, s uintptr, sep uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v sep=%v, (%v:)", tls, s, sep, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146155,7 +145787,7 @@ func Xstrtok(tls *TLS, s, sep uintptr) (r uintptr) {
 
 var _p2 uintptr
 
-func Xstrtok_r(tls *TLS, s, sep, p uintptr) (r uintptr) {
+func Xstrtok_r(tls *TLS, s uintptr, sep uintptr, p uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v sep=%v p=%v, (%v:)", tls, s, sep, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146188,7 +145820,7 @@ func Xstrtok_r(tls *TLS, s, sep, p uintptr) (r uintptr) {
 	return s
 }
 
-func Xstrverscmp(tls *TLS, l0, r0 uintptr) (r1 int32) {
+func Xstrverscmp(tls *TLS, l0 uintptr, r0 uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l0=%v r0=%v, (%v:)", tls, l0, r0, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146255,7 +145887,7 @@ func Xstrverscmp(tls *TLS, l0, r0 uintptr) (r1 int32) {
 	return Int32FromUint8(**(**uint8)(__ccgo_up(l + uintptr(i)))) - Int32FromUint8(**(**uint8)(__ccgo_up(r + uintptr(i))))
 }
 
-func Xswab(tls *TLS, _src, _dest uintptr, n Tssize_t) {
+func Xswab(tls *TLS, _src uintptr, _dest uintptr, n Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v _src=%v _dest=%v n=%v, (%v:)", tls, _src, _dest, n, origin(2))
 	}
@@ -146278,7 +145910,7 @@ func Xswab(tls *TLS, _src, _dest uintptr, n Tssize_t) {
 	}
 }
 
-func Xwcpcpy(tls *TLS, d, s uintptr) (r uintptr) {
+func Xwcpcpy(tls *TLS, d uintptr, s uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v, (%v:)", tls, d, s, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146286,7 +145918,7 @@ func Xwcpcpy(tls *TLS, d, s uintptr) (r uintptr) {
 	return Xwcscpy(tls, d, s) + uintptr(Xwcslen(tls, s))*4
 }
 
-func Xwcpncpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xwcpncpy(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146294,7 +145926,7 @@ func Xwcpncpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
 	return Xwcsncpy(tls, d, s, n) + uintptr(Xwcsnlen(tls, s, n))*4
 }
 
-func Xwcscasecmp(tls *TLS, l, r uintptr) (r1 int32) {
+func Xwcscasecmp(tls *TLS, l uintptr, r uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v, (%v:)", tls, l, r, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146302,7 +145934,7 @@ func Xwcscasecmp(tls *TLS, l, r uintptr) (r1 int32) {
 	return Xwcsncasecmp(tls, l, r, Uint64FromInt32(-Int32FromInt32(1)))
 }
 
-func Xwcscasecmp_l(tls *TLS, l, r uintptr, locale Tlocale_t) (r1 int32) {
+func Xwcscasecmp_l(tls *TLS, l uintptr, r uintptr, locale Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v locale=%v, (%v:)", tls, l, r, locale, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146310,7 +145942,7 @@ func Xwcscasecmp_l(tls *TLS, l, r uintptr, locale Tlocale_t) (r1 int32) {
 	return Xwcscasecmp(tls, l, r)
 }
 
-func Xwcscat(tls *TLS, dest, src uintptr) (r uintptr) {
+func Xwcscat(tls *TLS, dest uintptr, src uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v dest=%v src=%v, (%v:)", tls, dest, src, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146346,7 +145978,7 @@ func Xwcschr(tls *TLS, s uintptr, c Twchar_t) (r uintptr) {
 	return v2
 }
 
-func Xwcscmp(tls *TLS, l, r uintptr) (r1 int32) {
+func Xwcscmp(tls *TLS, l uintptr, r uintptr) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v, (%v:)", tls, l, r, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146371,7 +146003,7 @@ func Xwcscmp(tls *TLS, l, r uintptr) (r1 int32) {
 	return v2
 }
 
-func Xwcscpy(tls *TLS, d, s uintptr) (r uintptr) {
+func Xwcscpy(tls *TLS, d uintptr, s uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v, (%v:)", tls, d, s, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146394,7 +146026,7 @@ func Xwcscpy(tls *TLS, d, s uintptr) (r uintptr) {
 	return a
 }
 
-func Xwcscspn(tls *TLS, s, c uintptr) (r Tsize_t) {
+func Xwcscspn(tls *TLS, s uintptr, c uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v c=%v, (%v:)", tls, s, c, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146466,7 +146098,7 @@ func Xwcslen(tls *TLS, s uintptr) (r Tsize_t) {
 	return Uint64FromInt64((int64(s) - int64(a)) / 4)
 }
 
-func Xwcsncasecmp(tls *TLS, l, r uintptr, n Tsize_t) (r1 int32) {
+func Xwcsncasecmp(tls *TLS, l uintptr, r uintptr, n Tsize_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v n=%v, (%v:)", tls, l, r, n, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146492,7 +146124,7 @@ func Xwcsncasecmp(tls *TLS, l, r uintptr, n Tsize_t) (r1 int32) {
 	return Int32FromUint32(Xtowlower(tls, Uint32FromInt32(**(**Twchar_t)(__ccgo_up(l)))) - Xtowlower(tls, Uint32FromInt32(**(**Twchar_t)(__ccgo_up(r)))))
 }
 
-func Xwcsncasecmp_l(tls *TLS, l, r uintptr, n Tsize_t, locale Tlocale_t) (r1 int32) {
+func Xwcsncasecmp_l(tls *TLS, l uintptr, r uintptr, n Tsize_t, locale Tlocale_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v n=%v locale=%v, (%v:)", tls, l, r, n, locale, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146500,7 +146132,7 @@ func Xwcsncasecmp_l(tls *TLS, l, r uintptr, n Tsize_t, locale Tlocale_t) (r1 int
 	return Xwcsncasecmp(tls, l, r, n)
 }
 
-func Xwcsncat(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xwcsncat(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146523,7 +146155,7 @@ func Xwcsncat(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
 	return a
 }
 
-func Xwcsncmp(tls *TLS, l, r uintptr, n Tsize_t) (r1 int32) {
+func Xwcsncmp(tls *TLS, l uintptr, r uintptr, n Tsize_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v n=%v, (%v:)", tls, l, r, n, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146554,7 +146186,7 @@ func Xwcsncmp(tls *TLS, l, r uintptr, n Tsize_t) (r1 int32) {
 	return v2
 }
 
-func Xwcsncpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xwcsncpy(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146588,7 +146220,7 @@ func Xwcsnlen(tls *TLS, s uintptr, n Tsize_t) (r Tsize_t) {
 	return n
 }
 
-func Xwcspbrk(tls *TLS, s, b uintptr) (r uintptr) {
+func Xwcspbrk(tls *TLS, s uintptr, b uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v b=%v, (%v:)", tls, s, b, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146629,7 +146261,7 @@ func Xwcsrchr(tls *TLS, s uintptr, c Twchar_t) (r uintptr) {
 	return v2
 }
 
-func Xwcsspn(tls *TLS, s, c uintptr) (r Tsize_t) {
+func Xwcsspn(tls *TLS, s uintptr, c uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v c=%v, (%v:)", tls, s, c, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146649,7 +146281,7 @@ func Xwcsspn(tls *TLS, s, c uintptr) (r Tsize_t) {
 	return Uint64FromInt64((int64(s) - int64(a)) / 4)
 }
 
-func _twoway_wcsstr(tls *TLS, h, n uintptr) (r uintptr) {
+func _twoway_wcsstr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	var grow, ip, jp, k, l, mem, mem0, ms, p, p0, v2 Tsize_t
 	var z, z2 uintptr
 	var v8 uint64
@@ -146807,7 +146439,7 @@ func _twoway_wcsstr(tls *TLS, h, n uintptr) (r uintptr) {
 	return r
 }
 
-func Xwcsstr(tls *TLS, h, n uintptr) (r uintptr) {
+func Xwcsstr(tls *TLS, h uintptr, n uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v h=%v n=%v, (%v:)", tls, h, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146830,7 +146462,7 @@ func Xwcsstr(tls *TLS, h, n uintptr) (r uintptr) {
 	return _twoway_wcsstr(tls, h, n)
 }
 
-func Xwcstok(tls *TLS, s, sep, p uintptr) (r uintptr) {
+func Xwcstok(tls *TLS, s uintptr, sep uintptr, p uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v sep=%v p=%v, (%v:)", tls, s, sep, p, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146863,7 +146495,7 @@ func Xwcstok(tls *TLS, s, sep, p uintptr) (r uintptr) {
 	return s
 }
 
-func Xwcswcs(tls *TLS, haystack, needle uintptr) (r uintptr) {
+func Xwcswcs(tls *TLS, haystack uintptr, needle uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v haystack=%v needle=%v, (%v:)", tls, haystack, needle, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146896,7 +146528,7 @@ func Xwmemchr(tls *TLS, s uintptr, c Twchar_t, n Tsize_t) (r uintptr) {
 	return v2
 }
 
-func Xwmemcmp(tls *TLS, l, r uintptr, n Tsize_t) (r1 int32) {
+func Xwmemcmp(tls *TLS, l uintptr, r uintptr, n Tsize_t) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v l=%v r=%v n=%v, (%v:)", tls, l, r, n, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -146927,7 +146559,7 @@ func Xwmemcmp(tls *TLS, l, r uintptr, n Tsize_t) (r1 int32) {
 	return v2
 }
 
-func Xwmemcpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xwmemcpy(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -146951,7 +146583,7 @@ func Xwmemcpy(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
 	return a
 }
 
-func Xwmemmove(tls *TLS, d, s uintptr, n Tsize_t) (r uintptr) {
+func Xwmemmove(tls *TLS, d uintptr, s uintptr, n Tsize_t) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v d=%v s=%v n=%v, (%v:)", tls, d, s, n, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147027,7 +146659,7 @@ func Xmkdtemp(tls *TLS, template uintptr) (r uintptr) {
 	}
 	for {
 		___randname(tls, template+uintptr(l)-uintptr(6))
-		if !(Xmkdir(tls, template, uint32(0o700)) != 0) {
+		if !(Xmkdir(tls, template, uint32(0700)) != 0) {
 			return template
 		}
 		goto _2
@@ -147051,7 +146683,7 @@ func Xmkostemp(tls *TLS, template uintptr, flags int32) (r int32) {
 	return X__mkostemps(tls, template, 0, flags)
 }
 
-func X__mkostemps(tls *TLS, template uintptr, len1, flags int32) (r int32) {
+func X__mkostemps(tls *TLS, template uintptr, len1 int32, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v template=%v len1=%v flags=%v, (%v:)", tls, template, len1, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147066,11 +146698,11 @@ func X__mkostemps(tls *TLS, template uintptr, len1, flags int32) (r int32) {
 		**(**int32)(__ccgo_up(X__errno_location(tls))) = int32(EINVAL)
 		return -int32(1)
 	}
-	flags = flags - flags&(Int32FromInt32(0o3)|Int32FromInt32(O_PATH))
+	flags = flags - flags&(Int32FromInt32(03)|Int32FromInt32(O_PATH))
 	retries = int32(100)
 	for {
 		___randname(tls, template+uintptr(l)-uintptr(len1)-uintptr(6))
-		v1 = Xopen(tls, template, flags|int32(O_RDWR)|int32(O_CREAT)|int32(O_EXCL), VaList(bp+8, int32(0o600)))
+		v1 = Xopen(tls, template, flags|int32(O_RDWR)|int32(O_CREAT)|int32(O_EXCL), VaList(bp+8, int32(0600)))
 		fd = v1
 		if v1 >= 0 {
 			return fd
@@ -147088,7 +146720,7 @@ func X__mkostemps(tls *TLS, template uintptr, len1, flags int32) (r int32) {
 	return -int32(1)
 }
 
-func Xmkostemps(tls *TLS, template uintptr, len1, flags int32) (r int32) {
+func Xmkostemps(tls *TLS, template uintptr, len1 int32, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v template=%v len1=%v flags=%v, (%v:)", tls, template, len1, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147226,7 +146858,7 @@ func Xtcdrain(tls *TLS, fd int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, int64(SYS_ioctl), int64(fd), int64(Int32FromInt32(TCSBRK)), int64(Int32FromInt32(1)), 0, 0, 0))))
 }
 
-func Xtcflow(tls *TLS, fd, action int32) (r int32) {
+func Xtcflow(tls *TLS, fd int32, action int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v action=%v, (%v:)", tls, fd, action, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147236,7 +146868,7 @@ func Xtcflow(tls *TLS, fd, action int32) (r int32) {
 	return Xioctl(tls, fd, int32(TCXONC), VaList(bp+8, action))
 }
 
-func Xtcflush(tls *TLS, fd, queue int32) (r int32) {
+func Xtcflush(tls *TLS, fd int32, queue int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v queue=%v, (%v:)", tls, fd, queue, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147281,7 +146913,7 @@ func Xtcgetwinsize(tls *TLS, fd int32, wsz uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_ioctl), int64(fd), int64(Int32FromInt32(TIOCGWINSZ)), int64(wsz)))))
 }
 
-func Xtcsendbreak(tls *TLS, fd, dur int32) (r int32) {
+func Xtcsendbreak(tls *TLS, fd int32, dur int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v dur=%v, (%v:)", tls, fd, dur, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147292,7 +146924,7 @@ func Xtcsendbreak(tls *TLS, fd, dur int32) (r int32) {
 	return Xioctl(tls, fd, int32(TCSBRK), VaList(bp+8, 0))
 }
 
-func Xtcsetattr(tls *TLS, fd, act int32, tio uintptr) (r int32) {
+func Xtcsetattr(tls *TLS, fd int32, act int32, tio uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v act=%v tio=%v, (%v:)", tls, fd, act, tio, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147314,7 +146946,7 @@ func Xtcsetwinsize(tls *TLS, fd int32, wsz uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_ioctl), int64(fd), int64(Int32FromInt32(TIOCSWINSZ)), int64(wsz)))))
 }
 
-func X__map_file(tls *TLS, pathname, size uintptr) (r uintptr) {
+func X__map_file(tls *TLS, pathname uintptr, size uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v pathname=%v size=%v, (%v:)", tls, pathname, size, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147343,7 +146975,7 @@ func X__map_file(tls *TLS, pathname, size uintptr) (r uintptr) {
 	return v1
 }
 
-func X__month_to_secs(tls *TLS, month, is_leap int32) (r int32) {
+func X__month_to_secs(tls *TLS, month int32, is_leap int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v month=%v is_leap=%v, (%v:)", tls, month, is_leap, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -147371,12 +147003,10 @@ var _secs_through_month = [12]int32{
 	11: Int32FromInt32(334) * Int32FromInt32(86400),
 }
 
-const (
-	DAYS_PER_100Y = 36524
-	DAYS_PER_400Y = 146097
-	DAYS_PER_4Y   = 1461
-	LEAPOCH       = 951868800
-)
+const DAYS_PER_100Y = 36524
+const DAYS_PER_400Y = 146097
+const DAYS_PER_4Y = 1461
+const LEAPOCH = 951868800
 
 /* Support signed or unsigned plain-char */
 
@@ -147514,32 +147144,24 @@ func X__tm_to_secs(tls *TLS, tm uintptr) (r int64) {
 	return t
 }
 
-var (
-	_std_name [7]int8
-	_dst_name [7]int8
-)
+var _std_name [7]int8
+var _dst_name [7]int8
 
-var (
-	_dst_off int32
-	_r0      [5]int32
-	_r12     [5]int32
-)
+var _dst_off int32
+var _r0 [5]int32
+var _r12 [5]int32
 
-var (
-	_zi          uintptr
-	_trans       uintptr
-	_index       uintptr
-	_types       uintptr
-	_abbrevs     uintptr
-	_abbrevs_end uintptr
-	_map_size    Tsize_t
-)
+var _zi uintptr
+var _trans uintptr
+var _index uintptr
+var _types uintptr
+var _abbrevs uintptr
+var _abbrevs_end uintptr
+var _map_size Tsize_t
 
-var (
-	_old_tz_buf  [32]int8
-	_old_tz      = uintptr(unsafe.Pointer(&_old_tz_buf))
-	_old_tz_size = uint64(32)
-)
+var _old_tz_buf [32]int8
+var _old_tz = uintptr(unsafe.Pointer(&_old_tz_buf))
+var _old_tz_size = uint64(32)
 
 var _lock4 [1]int32
 
@@ -147589,7 +147211,7 @@ func _getoff(tls *TLS, p uintptr) (r int32) {
 	return v1
 }
 
-func _getrule(tls *TLS, p, rule uintptr) {
+func _getrule(tls *TLS, p uintptr, rule uintptr) {
 	var r, v1 int32
 	_, _ = r, v1
 	v1 = int32(**(**int8)(__ccgo_up(**(**uintptr)(__ccgo_up(p)))))
@@ -147618,7 +147240,7 @@ func _getrule(tls *TLS, p, rule uintptr) {
 	}
 }
 
-func _getname(tls *TLS, d, p uintptr) {
+func _getname(tls *TLS, d uintptr, p uintptr) {
 	var i, v3 int32
 	_, _ = i, v3
 	if int32(**(**int8)(__ccgo_up(**(**uintptr)(__ccgo_up(p))))) == int32('<') {
@@ -147667,7 +147289,7 @@ func _zi_read32(tls *TLS, z uintptr) (r Tuint32_t) {
 	return uint32(**(**uint8)(__ccgo_up(z)))<<int32(24) | Uint32FromInt32(Int32FromUint8(**(**uint8)(__ccgo_up(z + 1)))<<int32(16)) | Uint32FromInt32(Int32FromUint8(**(**uint8)(__ccgo_up(z + 2)))<<int32(8)) | uint32(**(**uint8)(__ccgo_up(z + 3)))
 }
 
-func _zi_dotprod(tls *TLS, z, v uintptr, n Tsize_t) (r Tsize_t) {
+func _zi_dotprod(tls *TLS, z uintptr, v uintptr, n Tsize_t) (r Tsize_t) {
 	var x Tuint32_t
 	var y Tsize_t
 	_, _ = x, y
@@ -147995,7 +147617,7 @@ func _scan_trans(tls *TLS, t int64, local int32, alt uintptr) (r Tsize_t) {
 	return uint64(**(**uint8)(__ccgo_up(_index + uintptr(a))))
 }
 
-func _days_in_month1(tls *TLS, m, is_leap int32) (r int32) {
+func _days_in_month1(tls *TLS, m int32, is_leap int32) (r int32) {
 	if m == int32(2) {
 		return int32(28) + is_leap
 	} else {
@@ -148046,7 +147668,7 @@ func _rule_to_secs(tls *TLS, rule uintptr, year int32) (r int64) {
  * enables a caller to efficiently adjust for the case where an explicit
  * DST specification mismatches what would be in effect at the time. */
 
-func X__secs_to_zone(tls *TLS, t int64, local int32, isdst, offset, oppoff, zonename uintptr) {
+func X__secs_to_zone(tls *TLS, t int64, local int32, isdst uintptr, offset uintptr, oppoff uintptr, zonename uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v t=%v local=%v isdst=%v offset=%v oppoff=%v zonename=%v, (%v:)", tls, t, local, isdst, offset, oppoff, zonename, origin(2))
 	}
@@ -148224,7 +147846,7 @@ func Xasctime(tls *TLS, tm uintptr) (r uintptr) {
 
 var _buf9 [26]int8
 
-func X__asctime_r(tls *TLS, tm, buf uintptr) (r uintptr) {
+func X__asctime_r(tls *TLS, tm uintptr, buf uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v tm=%v buf=%v, (%v:)", tls, tm, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148245,7 +147867,7 @@ func X__asctime_r(tls *TLS, tm, buf uintptr) (r uintptr) {
 	return buf
 }
 
-func Xasctime_r(tls *TLS, tm, buf uintptr) (r uintptr) {
+func Xasctime_r(tls *TLS, tm uintptr, buf uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v tm=%v buf=%v, (%v:)", tls, tm, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148339,7 +147961,7 @@ func Xclock_gettime(tls *TLS, clk Tclockid_t, ts uintptr) (r int32) {
 	return X__clock_gettime(tls, clk, ts)
 }
 
-func X__clock_nanosleep(tls *TLS, clk Tclockid_t, flags int32, req, rem uintptr) (r int32) {
+func X__clock_nanosleep(tls *TLS, clk Tclockid_t, flags int32, req uintptr, rem uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v clk=%v flags=%v req=%v rem=%v, (%v:)", tls, clk, flags, req, rem, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148353,7 +147975,7 @@ func X__clock_nanosleep(tls *TLS, clk Tclockid_t, flags int32, req, rem uintptr)
 	return int32(-___syscall_cp(tls, int64(SYS_clock_nanosleep), int64(clk), int64(flags), int64(req), int64(rem), 0, 0))
 }
 
-func Xclock_nanosleep(tls *TLS, clk Tclockid_t, flags int32, req, rem uintptr) (r int32) {
+func Xclock_nanosleep(tls *TLS, clk Tclockid_t, flags int32, req uintptr, rem uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v clk=%v flags=%v req=%v rem=%v, (%v:)", tls, clk, flags, req, rem, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148383,7 +148005,7 @@ func Xctime(tls *TLS, t uintptr) (r uintptr) {
 	return Xasctime(tls, tm)
 }
 
-func Xctime_r(tls *TLS, t, buf uintptr) (r uintptr) {
+func Xctime_r(tls *TLS, t uintptr, buf uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v t=%v buf=%v, (%v:)", tls, t, buf, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148402,7 +148024,7 @@ func Xctime_r(tls *TLS, t, buf uintptr) (r uintptr) {
 	return v1
 }
 
-func Xdifftime(tls *TLS, t1, t0 Ttime_t) (r float64) {
+func Xdifftime(tls *TLS, t1 Ttime_t, t0 Ttime_t) (r float64) {
 	if __ccgo_strace {
 		trc("tls=%v t1=%v t0=%v, (%v:)", tls, t1, t0, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148488,7 +148110,7 @@ out:
 
 var _tmbuf Ttm
 
-func Xgettimeofday(tls *TLS, tv, tz uintptr) (r int32) {
+func Xgettimeofday(tls *TLS, tv uintptr, tz uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v tv=%v tz=%v, (%v:)", tls, tv, tz, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148515,7 +148137,7 @@ func Xgmtime(tls *TLS, t uintptr) (r uintptr) {
 
 var _tm Ttm
 
-func X__gmtime_r(tls *TLS, t, tm uintptr) (r uintptr) {
+func X__gmtime_r(tls *TLS, t uintptr, tm uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v t=%v tm=%v, (%v:)", tls, t, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148530,7 +148152,7 @@ func X__gmtime_r(tls *TLS, t, tm uintptr) (r uintptr) {
 	return tm
 }
 
-func Xgmtime_r(tls *TLS, t, tm uintptr) (r uintptr) {
+func Xgmtime_r(tls *TLS, t uintptr, tm uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v t=%v tm=%v, (%v:)", tls, t, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148557,7 +148179,7 @@ var _tm1 Ttm
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func X__localtime_r(tls *TLS, t, tm uintptr) (r uintptr) {
+func X__localtime_r(tls *TLS, t uintptr, tm uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v t=%v tm=%v, (%v:)", tls, t, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148585,7 +148207,7 @@ func X__localtime_r(tls *TLS, t, tm uintptr) (r uintptr) {
 /* POSIX/SUS requirements follow. These numbers come directly
  * from SUS and have nothing to do with the host system. */
 
-func Xlocaltime_r(tls *TLS, t, tm uintptr) (r uintptr) {
+func Xlocaltime_r(tls *TLS, t uintptr, tm uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v t=%v tm=%v, (%v:)", tls, t, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148626,7 +148248,7 @@ error:
 	return int64(-int32(1))
 }
 
-func Xnanosleep(tls *TLS, req, rem uintptr) (r int32) {
+func Xnanosleep(tls *TLS, req uintptr, rem uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v req=%v rem=%v, (%v:)", tls, req, rem, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148675,7 +148297,7 @@ func _week_num(tls *TLS, tm uintptr) (r int32) {
 	return val
 }
 
-func X__strftime_fmt_1(tls *TLS, s, l uintptr, f int32, tm uintptr, loc Tlocale_t, pad int32) (r uintptr) {
+func X__strftime_fmt_1(tls *TLS, s uintptr, l uintptr, f int32, tm uintptr, loc Tlocale_t, pad int32) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v l=%v f=%v tm=%v loc=%v pad=%v, (%v:)", tls, s, l, f, tm, loc, pad, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -148942,7 +148564,7 @@ recu_strftime:
 	return s
 }
 
-func X__strftime_l(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr, loc Tlocale_t) (r Tsize_t) {
+func X__strftime_l(tls *TLS, s uintptr, n Tsize_t, f uintptr, tm uintptr, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v f=%v tm=%v loc=%v, (%v:)", tls, s, n, f, tm, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149089,7 +148711,7 @@ func X__strftime_l(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr, loc Tlocale_t)
 	return uint64(0)
 }
 
-func Xstrftime(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr) (r Tsize_t) {
+func Xstrftime(tls *TLS, s uintptr, n Tsize_t, f uintptr, tm uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v f=%v tm=%v, (%v:)", tls, s, n, f, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149097,7 +148719,7 @@ func Xstrftime(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr) (r Tsize_t) {
 	return X__strftime_l(tls, s, n, f, tm, (*t__pthread)(unsafe.Pointer(uintptr(___get_tp(tls)))).Flocale)
 }
 
-func Xstrftime_l(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr, loc Tlocale_t) (r Tsize_t) {
+func Xstrftime_l(tls *TLS, s uintptr, n Tsize_t, f uintptr, tm uintptr, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v f=%v tm=%v loc=%v, (%v:)", tls, s, n, f, tm, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149105,7 +148727,7 @@ func Xstrftime_l(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr, loc Tlocale_t) (
 	return X__strftime_l(tls, s, n, f, tm, loc)
 }
 
-func Xstrptime(tls *TLS, s, f, tm uintptr) (r uintptr) {
+func Xstrptime(tls *TLS, s uintptr, f uintptr, tm uintptr) (r uintptr) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v f=%v tm=%v, (%v:)", tls, s, f, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149529,7 +149151,7 @@ func Xstrptime(tls *TLS, s, f, tm uintptr) (r uintptr) {
 		goto update
 	update:
 		;
-		// FIXME
+		//FIXME
 	_41:
 	}
 	if want_century != 0 {
@@ -149630,7 +149252,7 @@ func Xtimer_gettime(tls *TLS, t Ttimer_t, val uintptr) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall2(tls, int64(SYS_timer_gettime), int64(t), int64(val)))))
 }
 
-func Xtimer_settime(tls *TLS, t Ttimer_t, flags int32, val, old uintptr) (r int32) {
+func Xtimer_settime(tls *TLS, t Ttimer_t, flags int32, val uintptr, old uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v t=%v flags=%v val=%v old=%v, (%v:)", tls, t, flags, val, old, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149687,7 +149309,7 @@ type Tutimbuf = struct {
 	Fmodtime Ttime_t
 }
 
-func Xutime(tls *TLS, path, times uintptr) (r int32) {
+func Xutime(tls *TLS, path uintptr, times uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v times=%v, (%v:)", tls, path, times, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149712,7 +149334,7 @@ func Xutime(tls *TLS, path, times uintptr) (r int32) {
 	return Xutimensat(tls, -int32(100), path, v1, 0)
 }
 
-func X__wcsftime_l(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr, loc Tlocale_t) (r Tsize_t) {
+func X__wcsftime_l(tls *TLS, s uintptr, n Tsize_t, f uintptr, tm uintptr, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v f=%v tm=%v loc=%v, (%v:)", tls, s, n, f, tm, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149833,7 +149455,7 @@ func X__wcsftime_l(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr, loc Tlocale_t)
 	return uint64(0)
 }
 
-func Xwcsftime(tls *TLS, wcs uintptr, n Tsize_t, f, tm uintptr) (r Tsize_t) {
+func Xwcsftime(tls *TLS, wcs uintptr, n Tsize_t, f uintptr, tm uintptr) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v wcs=%v n=%v f=%v tm=%v, (%v:)", tls, wcs, n, f, tm, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149841,7 +149463,7 @@ func Xwcsftime(tls *TLS, wcs uintptr, n Tsize_t, f, tm uintptr) (r Tsize_t) {
 	return X__wcsftime_l(tls, wcs, n, f, tm, (*t__pthread)(unsafe.Pointer(uintptr(___get_tp(tls)))).Flocale)
 }
 
-func Xwcsftime_l(tls *TLS, s uintptr, n Tsize_t, f, tm uintptr, loc Tlocale_t) (r Tsize_t) {
+func Xwcsftime_l(tls *TLS, s uintptr, n Tsize_t, f uintptr, tm uintptr, loc Tlocale_t) (r Tsize_t) {
 	if __ccgo_strace {
 		trc("tls=%v s=%v n=%v f=%v tm=%v loc=%v, (%v:)", tls, s, n, f, tm, loc, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -149949,7 +149571,7 @@ func Xdup(tls *TLS, fd int32) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall1(tls, int64(SYS_dup), int64(fd)))))
 }
 
-func Xdup2(tls *TLS, old, new1 int32) (r1 int32) {
+func Xdup2(tls *TLS, old int32, new1 int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v old=%v new1=%v, (%v:)", tls, old, new1, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -149966,7 +149588,7 @@ func Xdup2(tls *TLS, old, new1 int32) (r1 int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func X__dup3(tls *TLS, old, new1, flags int32) (r1 int32) {
+func X__dup3(tls *TLS, old int32, new1 int32, flags int32) (r1 int32) {
 	if __ccgo_strace {
 		trc("tls=%v old=%v new1=%v flags=%v, (%v:)", tls, old, new1, flags, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -150004,7 +149626,7 @@ func X__dup3(tls *TLS, old, new1, flags int32) (r1 int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt32(r)))
 }
 
-func Xdup3(tls *TLS, old, new1, flags int32) (r int32) {
+func Xdup3(tls *TLS, old int32, new1 int32, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v old=%v new1=%v flags=%v, (%v:)", tls, old, new1, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -150034,7 +149656,7 @@ func _checker(tls *TLS, p uintptr) (r int32) {
 	return 0
 }
 
-func Xfaccessat(tls *TLS, fd int32, filename uintptr, amode, flag int32) (r int32) {
+func Xfaccessat(tls *TLS, fd int32, filename uintptr, amode int32, flag int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v filename=%v amode=%v flag=%v, (%v:)", tls, fd, filename, amode, flag, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -150336,7 +149958,7 @@ func Xlchown(tls *TLS, path uintptr, uid Tuid_t, gid Tgid_t) (r int32) {
 	return int32(X__syscall_ret(tls, Uint64FromInt64(X__syscall3(tls, int64(SYS_lchown), int64(path), Int64FromUint32(uid), Int64FromUint32(gid)))))
 }
 
-func Xlink(tls *TLS, existing, new1 uintptr) (r int32) {
+func Xlink(tls *TLS, existing uintptr, new1 uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v existing=%v new1=%v, (%v:)", tls, existing, new1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -150446,7 +150068,7 @@ func Xpipe2(tls *TLS, fd uintptr, flag int32) (r int32) {
 	return 0
 }
 
-func Xposix_close(tls *TLS, fd, flags int32) (r int32) {
+func Xposix_close(tls *TLS, fd int32, flags int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v flags=%v, (%v:)", tls, fd, flags, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -150494,7 +150116,7 @@ func Xread(tls *TLS, fd int32, buf uintptr, count Tsize_t) (r Tssize_t) {
 	return X__syscall_ret(tls, Uint64FromInt64(___syscall_cp(tls, SYS_read, int64(fd), int64(buf), Int64FromUint64(count), 0, 0, 0)))
 }
 
-func Xreadlink(tls *TLS, path, buf uintptr, bufsize Tsize_t) (r1 Tssize_t) {
+func Xreadlink(tls *TLS, path uintptr, buf uintptr, bufsize Tsize_t) (r1 Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v path=%v buf=%v bufsize=%v, (%v:)", tls, path, buf, bufsize, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -150515,7 +150137,7 @@ func Xreadlink(tls *TLS, path, buf uintptr, bufsize Tsize_t) (r1 Tssize_t) {
 	return X__syscall_ret(tls, Uint64FromInt32(r))
 }
 
-func Xreadlinkat(tls *TLS, fd int32, path, buf uintptr, bufsize Tsize_t) (r1 Tssize_t) {
+func Xreadlinkat(tls *TLS, fd int32, path uintptr, buf uintptr, bufsize Tsize_t) (r1 Tssize_t) {
 	if __ccgo_strace {
 		trc("tls=%v fd=%v path=%v buf=%v bufsize=%v, (%v:)", tls, fd, path, buf, bufsize, origin(2))
 		defer func() { trc("-> %v", r1) }()
@@ -150568,7 +150190,7 @@ func Xsetgid(tls *TLS, gid Tgid_t) (r int32) {
 	return X__setxid(tls, int32(SYS_setgid), Int32FromUint32(gid), 0, 0)
 }
 
-func Xsetpgid(tls *TLS, pid, pgid Tpid_t) (r int32) {
+func Xsetpgid(tls *TLS, pid Tpid_t, pgid Tpid_t) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v pid=%v pgid=%v, (%v:)", tls, pid, pgid, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -150628,7 +150250,7 @@ func _do_setxid(tls *TLS, p uintptr) {
 	(*Tctx2)(unsafe.Pointer(c)).Fret = ret
 }
 
-func X__setxid(tls *TLS, nr, id, eid, sid int32) (r int32) {
+func X__setxid(tls *TLS, nr int32, id int32, eid int32, sid int32) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v nr=%v id=%v eid=%v sid=%v, (%v:)", tls, nr, id, eid, sid, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -150673,7 +150295,7 @@ func Xsleep(tls *TLS, seconds uint32) (r uint32) {
 	return uint32(0)
 }
 
-func Xsymlink(tls *TLS, existing, new1 uintptr) (r int32) {
+func Xsymlink(tls *TLS, existing uintptr, new1 uintptr) (r int32) {
 	if __ccgo_strace {
 		trc("tls=%v existing=%v new1=%v, (%v:)", tls, existing, new1, origin(2))
 		defer func() { trc("-> %v", r) }()
@@ -150791,7 +150413,7 @@ func Xttyname_r(tls *TLS, fd int32, name uintptr, size Tsize_t) (r int32) {
 	return 0
 }
 
-func Xualarm(tls *TLS, value, interval uint32) (r uint32) {
+func Xualarm(tls *TLS, value uint32, interval uint32) (r uint32) {
 	if __ccgo_strace {
 		trc("tls=%v value=%v interval=%v, (%v:)", tls, value, interval, origin(2))
 		defer func() { trc("-> %v", r) }()

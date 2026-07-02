@@ -4,9 +4,9 @@
 
 CBOR is a [trusted alternative](https://www.rfc-editor.org/rfc/rfc8949.html#name-comparison-of-other-binary-) to JSON, MessagePack, Protocol Buffers, etc.&nbsp; CBOR is an Internet&nbsp;Standard defined by [IETF&nbsp;STD&nbsp;94 (RFC&nbsp;8949)](https://www.rfc-editor.org/info/std94) and is designed to be relevant for decades.
 
-`fxamacker/cbor` is used in projects by Arm Ltd., EdgeX&nbsp;Foundry, Flow Foundation, Fraunhofer&#8209;AISEC, IBM, Kubernetes[\*](https://github.com/search?q=org%3Akubernetes%20fxamacker%2Fcbor&type=code), Let's&nbsp;Encrypt, Linux&nbsp;Foundation, Microsoft, Oasis&nbsp;Protocol, Red Hat[\*](https://github.com/search?q=org%3Aopenshift+fxamacker%2Fcbor&type=code), Tailscale[\*](https://github.com/search?q=org%3Atailscale+fxamacker%2Fcbor&type=code), Veraison[\*](https://github.com/search?q=org%3Averaison+fxamacker%2Fcbor&type=code), [etc](https://github.com/fxamacker/cbor#who-uses-fxamackercbor).
+`fxamacker/cbor` is used in projects by Arm Ltd., EdgeX&nbsp;Foundry, Flow Foundation, Fraunhofer&#8209;AISEC, IBM, Kubernetes[*](https://github.com/search?q=org%3Akubernetes%20fxamacker%2Fcbor&type=code), Let's&nbsp;Encrypt, Linux&nbsp;Foundation, Microsoft, Oasis&nbsp;Protocol, Red Hat[*](https://github.com/search?q=org%3Aopenshift+fxamacker%2Fcbor&type=code), Tailscale[*](https://github.com/search?q=org%3Atailscale+fxamacker%2Fcbor&type=code), Veraison[*](https://github.com/search?q=org%3Averaison+fxamacker%2Fcbor&type=code), [etc](https://github.com/fxamacker/cbor#who-uses-fxamackercbor).
 
-See [Quick&nbsp;Start](#quick-start) and [Releases](https://github.com/fxamacker/cbor/releases/). 🆕 `UnmarshalFirst` and `DiagnoseFirst` can decode CBOR Sequences. `MarshalToBuffer` and `UserBufferEncMode` accepts user-specified buffer.
+See [Quick&nbsp;Start](#quick-start) and [Releases](https://github.com/fxamacker/cbor/releases/).  🆕 `UnmarshalFirst` and `DiagnoseFirst` can decode CBOR Sequences.  `MarshalToBuffer` and `UserBufferEncMode` accepts user-specified buffer.
 
 ## fxamacker/cbor
 
@@ -27,29 +27,29 @@ Design balances trade-offs between security, speed, concurrency, encoded data si
 
 <details><summary> 🔎&nbsp; Highlights</summary><p/>
 
-**🚀&nbsp; Speed**
+__🚀&nbsp; Speed__
 
-Encoding and decoding is fast without using Go's `unsafe` package. Slower settings are opt-in. Default limits allow very fast and memory efficient rejection of malformed CBOR data.
+Encoding and decoding is fast without using Go's `unsafe` package.  Slower settings are opt-in.  Default limits allow very fast and memory efficient rejection of malformed CBOR data.
 
-**🔒&nbsp; Security**
+__🔒&nbsp; Security__
 
-Decoder has configurable limits that defend against malicious inputs. Duplicate map key detection is supported. By contrast, `encoding/gob` is [not designed to be hardened against adversarial inputs](https://pkg.go.dev/encoding/gob#hdr-Security).
+Decoder has configurable limits that defend against malicious inputs.  Duplicate map key detection is supported.  By contrast, `encoding/gob` is [not designed to be hardened against adversarial inputs](https://pkg.go.dev/encoding/gob#hdr-Security).
 
-Codec passed multiple confidential security assessments in 2022. No vulnerabilities found in subset of codec in a [nonconfidential security assessment](https://github.com/veraison/go-cose/blob/v1.0.0-rc.1/reports/NCC_Microsoft-go-cose-Report_2022-05-26_v1.0.pdf) prepared by NCC&nbsp;Group for Microsoft&nbsp;Corporation.
+Codec passed multiple confidential security assessments in 2022.  No vulnerabilities found in subset of codec in a [nonconfidential security assessment](https://github.com/veraison/go-cose/blob/v1.0.0-rc.1/reports/NCC_Microsoft-go-cose-Report_2022-05-26_v1.0.pdf) prepared by NCC&nbsp;Group for Microsoft&nbsp;Corporation.
 
-**🗜️&nbsp; Data Size**
+__🗜️&nbsp; Data Size__
 
 Struct tag options (`toarray`, `keyasint`, `omitempty`, `omitzero`) and field tag "-" automatically reduce size of encoded structs. Encoding optionally shrinks float64→32→16 when values fit.
 
-**:jigsaw:&nbsp; Usability**
+__:jigsaw:&nbsp; Usability__
 
-API is mostly same as `encoding/json` plus interfaces that simplify concurrency for CBOR options. Encoding and decoding modes can be created at startup and reused by any goroutines.
+API is mostly same as `encoding/json` plus interfaces that simplify concurrency for CBOR options.  Encoding and decoding modes can be created at startup and reused by any goroutines.
 
 Presets include Core Deterministic Encoding, Preferred Serialization, CTAP2 Canonical CBOR, etc.
 
-**📆&nbsp; Extensibility**
+__📆&nbsp;  Extensibility__
 
-Features include CBOR [extension points](https://www.rfc-editor.org/rfc/rfc8949.html#section-7.1) (e.g. CBOR tags) and extensive settings. API has interfaces that allow users to create custom encoding and decoding without modifying this library.
+Features include CBOR [extension points](https://www.rfc-editor.org/rfc/rfc8949.html#section-7.1) (e.g. CBOR tags) and extensive settings.  API has interfaces that allow users to create custom encoding and decoding without modifying this library.
 
 <hr/>
 
@@ -63,42 +63,41 @@ Notably, `fxamacker/cbor` is fast at rejecting malformed CBOR data.
 
 > [!NOTE]  
 > Benchmarks rejecting 10 bytes of malicious CBOR data decoding to `[]byte`:
->
-> | Codec                | Speed (ns/op) |        Memory |       Allocs |
-> | :------------------- | ------------: | ------------: | -----------: |
-> | fxamacker/cbor 2.7.0 |       47 ± 7% |       32 B/op |  2 allocs/op |
-> | ugorji/go 1.2.12     |  5878187 ± 3% | 67111556 B/op | 13 allocs/op |
+> 
+> | Codec | Speed (ns/op) | Memory | Allocs |
+> | :---- | ------------: | -----: | -----: |
+> | fxamacker/cbor 2.7.0 | 47 ± 7% | 32 B/op | 2 allocs/op |
+> | ugorji/go 1.2.12 | 5878187 ± 3% | 67111556 B/op |  13 allocs/op |
 >
 > Faster hardware (overclocked DDR4 or DDR5) can reduce speed difference.
->
+> 
 > <details><summary> 🔎&nbsp; Benchmark details </summary><p/>
->
+> 
 > Latest comparison for decoding CBOR data to Go `[]byte`:
->
 > - Input: `[]byte{0x9B, 0x00, 0x00, 0x42, 0xFA, 0x42, 0xFA, 0x42, 0xFA, 0x42}`
 > - go1.22.7, linux/amd64, i5-13600K (DDR4-2933, disabled e-cores)
 > - go test -bench=. -benchmem -count=20
->
+> 
 > #### Prior comparisons
->
-> | Codec                        |   Speed (ns/op) |         Memory |          Allocs |
-> | :--------------------------- | --------------: | -------------: | --------------: |
-> | fxamacker/cbor 2.5.0-beta2   |      44.33 ± 2% |        32 B/op |     2 allocs/op |
-> | fxamacker/cbor 0.1.0 - 2.4.0 |     ~44.68 ± 6% |        32 B/op |     2 allocs/op |
-> | ugorji/go 1.2.10             | 5524792.50 ± 3% |  67110491 B/op |    12 allocs/op |
-> | ugorji/go 1.1.0 - 1.2.6      |     💥 runtime: | out of memory: | cannot allocate |
->
+> 
+> | Codec | Speed (ns/op) | Memory | Allocs |
+> | :---- | ------------: | -----: | -----: |
+> | fxamacker/cbor 2.5.0-beta2 | 44.33 ± 2% | 32 B/op | 2 allocs/op |
+> | fxamacker/cbor 0.1.0 - 2.4.0 | ~44.68 ± 6% | 32 B/op |  2 allocs/op |
+> | ugorji/go 1.2.10 | 5524792.50 ± 3% | 67110491 B/op |  12 allocs/op |
+> | ugorji/go 1.1.0 - 1.2.6 | 💥 runtime: | out of memory: | cannot allocate |
+> 
 > - Input: `[]byte{0x9B, 0x00, 0x00, 0x42, 0xFA, 0x42, 0xFA, 0x42, 0xFA, 0x42}`
 > - go1.19.6, linux/amd64, i5-13600K (DDR4)
 > - go test -bench=. -benchmem -count=20
->
+> 
 > </details>
 
 In contrast, some codecs can crash or use excessive resources while decoding bad data.
 
 > [!WARNING]  
 > Go's `encoding/gob` is [not designed to be hardened against adversarial inputs](https://pkg.go.dev/encoding/gob#hdr-Security).
->
+> 
 > <details><summary> 🔎&nbsp; gob fatal error (out of memory) 💥 decoding 181 bytes</summary><p/>
 >
 > ```Go
@@ -111,7 +110,7 @@ In contrast, some codecs can crash or use excessive resources while decoding bad
 > 	"encoding/hex"
 > 	"fmt"
 > )
->
+> 
 > // Example data is from https://github.com/golang/go/issues/24446
 > // (shortened to 181 bytes).
 > const data = "4dffb503010102303001ff30000109010130010800010130010800010130" +
@@ -121,21 +120,22 @@ In contrast, some codecs can crash or use excessive resources while decoding bad
 > 	"3030303001ff3000010c000030ffb6040405fcff00303030303030303030" +
 > 	"303030303030303030303030303030303030303030303030303030303030" +
 > 	"30"
->
+> 
 > type X struct {
 > 	J *X
 > 	K map[string]int
 > }
->
+> 
 > func main() {
 > 	raw, _ := hex.DecodeString(data)
 > 	decoder := gob.NewDecoder(bytes.NewReader(raw))
->
+> 
 > 	var x X
 > 	decoder.Decode(&x) // fatal error: runtime: out of memory
 > 	fmt.Println("Decoding finished.")
 > }
 > ```
+>
 >
 > </details>
 
@@ -144,7 +144,6 @@ In contrast, some codecs can crash or use excessive resources while decoding bad
 Struct tags automatically reduce encoded size of structs and improve speed.
 
 We can write less code by using struct tag options:
-
 - `toarray`: encode without field names (decode back to original struct)
 - `keyasint`: encode field names as integers (decode back to original struct)
 - `omitempty`: omit empty field when encoding
@@ -158,68 +157,66 @@ NOTE: When a struct uses `toarray`, the encoder will ignore `omitempty` and `omi
 
 > [!NOTE]  
 >  `fxamacker/cbor` can encode a 3-level nested Go struct to 1 byte!
->
-> - `encoding/json`: 18 bytes of JSON
-> - `fxamacker/cbor`: 1 byte of CBOR
+> - `encoding/json`:  18 bytes of JSON
+> - `fxamacker/cbor`:  1 byte of CBOR  
 >
 > <details><summary> 🔎&nbsp; Encoding 3-level nested Go struct with omitempty</summary><p/>
 >
 > https://go.dev/play/p/YxwvfPdFQG2
->
+> 
 > ```Go
 > // Example encoding nested struct (with omitempty tag)
 > // - encoding/json:  18 byte JSON
 > // - fxamacker/cbor:  1 byte CBOR
->
+> 
 > package main
->
+> 
 > import (
 > 	"encoding/hex"
 > 	"encoding/json"
 > 	"fmt"
->
+> 
 > 	"github.com/fxamacker/cbor/v2"
 > )
->
+> 
 > type GrandChild struct {
 > 	Quux int `json:",omitempty"`
 > }
->
+> 
 > type Child struct {
 > 	Baz int        `json:",omitempty"`
 > 	Qux GrandChild `json:",omitempty"`
 > }
->
+> 
 > type Parent struct {
 > 	Foo Child `json:",omitempty"`
 > 	Bar int   `json:",omitempty"`
 > }
->
+> 
 > func cb() {
 > 	results, _ := cbor.Marshal(Parent{})
 > 	fmt.Println("hex(CBOR): " + hex.EncodeToString(results))
->
+> 
 > 	text, _ := cbor.Diagnose(results) // Diagnostic Notation
 > 	fmt.Println("DN: " + text)
 > }
->
+> 
 > func js() {
 > 	results, _ := json.Marshal(Parent{})
 > 	fmt.Println("hex(JSON): " + hex.EncodeToString(results))
->
+> 
 > 	text := string(results) // JSON
 > 	fmt.Println("JSON: " + text)
 > }
->
+> 
 > func main() {
 > 	cb()
 > 	fmt.Println("-------------")
 > 	js()
 > }
 > ```
->
+> 
 > Output (DN is Diagnostic Notation):
->
 > ```
 > hex(CBOR): a0
 > DN: {}
@@ -227,14 +224,15 @@ NOTE: When a struct uses `toarray`, the encoder will ignore `omitempty` and `omi
 > hex(JSON): 7b22466f6f223a7b22517578223a7b7d7d7d
 > JSON: {"Foo":{"Qux":{}}}
 > ```
->
+> 
 > </details>
+
 
 ## Quick Start
 
-**Install**: `go get github.com/fxamacker/cbor/v2` and `import "github.com/fxamacker/cbor/v2"`.
+__Install__: `go get github.com/fxamacker/cbor/v2` and `import "github.com/fxamacker/cbor/v2"`.
 
-> [!TIP]
+> [!TIP]  
 >
 > Tinygo users can try beta/experimental branch [feature/cbor-tinygo-beta](https://github.com/fxamacker/cbor/tree/feature/cbor-tinygo-beta).
 >
@@ -248,25 +246,24 @@ NOTE: When a struct uses `toarray`, the encoder will ignore `omitempty` and `omi
 >
 > :warning: The `feature/cbor-tinygo-beta` branch does not get fuzz tested yet.
 >
-> Changes in this feature branch only affect tinygo compiled software. Summary of changes:
->
-> - default `DecOptions.MaxNestedLevels` is reduced to 16 (was 32). User can specify higher limit but 24+ crashes tests when compiled with tinygo v0.33.
+> Changes in this feature branch only affect tinygo compiled software.  Summary of changes:
+> - default `DecOptions.MaxNestedLevels` is reduced to 16 (was 32).  User can specify higher limit but 24+ crashes tests when compiled with tinygo v0.33.
 > - disabled decoding CBOR tag data to Go interface because tinygo v0.33 is missing needed feature.
 > - encoding error message can be different when encoding function type.
 >
 > Related tinygo issues:
->
 > - https://github.com/tinygo-org/tinygo/issues/4277
 > - https://github.com/tinygo-org/tinygo/issues/4458
 >
 > </details>
 
+
 ### Key Points
 
 This library can encode and decode CBOR (RFC 8949) and CBOR Sequences (RFC 8742).
 
-- **CBOR data item** is a single piece of CBOR data and its structure may contain 0 or more nested data items.
-- **CBOR sequence** is a concatenation of 0 or more encoded CBOR data items.
+- __CBOR data item__ is a single piece of CBOR data and its structure may contain 0 or more nested data items.
+- __CBOR sequence__ is a concatenation of 0 or more encoded CBOR data items.
 
 Configurable limits and options can be used to balance trade-offs.
 
@@ -470,7 +467,6 @@ func main() {
 ```
 
 Output (DN is Diagnostic Notation):
-
 ```
 hex(CBOR): a0
 DN: {}
@@ -496,14 +492,14 @@ Struct tag options simplify use of CBOR-based protocols that require CBOR arrays
 CBOR tags are specified in a `TagSet`.
 
 Custom modes can be created with a `TagSet` to handle CBOR tags.
-
+ 
 ```go
 em, err := opts.EncMode()                  // no CBOR tags
 em, err := opts.EncModeWithTags(ts)        // immutable CBOR tags
 em, err := opts.EncModeWithSharedTags(ts)  // mutable shared CBOR tags
 ```
 
-`TagSet` and modes using it are safe for concurrent use. Equivalent API is available for `DecMode`.
+`TagSet` and modes using it are safe for concurrent use.  Equivalent API is available for `DecMode`.
 
 <details><summary> 🔎&nbsp; Example using TagSet and TagOptions</summary><p/>
 
@@ -513,9 +509,9 @@ em, err := opts.EncModeWithSharedTags(ts)  // mutable shared CBOR tags
 // Create TagSet (safe for concurrency).
 tags := cbor.NewTagSet()
 // Register tag COSE_Sign1 18 with signedCWT type.
-tags.Add(
-	cbor.TagOptions{EncTag: cbor.EncTagRequired, DecTag: cbor.DecTagRequired},
-	reflect.TypeOf(signedCWT{}),
+tags.Add(	
+	cbor.TagOptions{EncTag: cbor.EncTagRequired, DecTag: cbor.DecTagRequired}, 
+	reflect.TypeOf(signedCWT{}), 
 	18)
 
 // Create DecMode with immutable tags.
@@ -542,7 +538,7 @@ if data, err := em.Marshal(v); err != nil {
 
 Basically, `MarshalCBOR` and `UnmarshalCBOR` functions can be implemented by user apps and those functions will automatically be called by this CBOR codec's `Marshal`, `Unmarshal`, etc.
 
-The following [example](https://github.com/fxamacker/cbor/blob/master/example_embedded_json_tag_for_cbor_test.go) shows how to encode and decode a tagged CBOR data item with tag number 262. The tag content is a JSON object "embedded" as a CBOR byte string (major type 2).
+The following [example](https://github.com/fxamacker/cbor/blob/master/example_embedded_json_tag_for_cbor_test.go) shows how to encode and decode a tagged CBOR data item with tag number 262.  The tag content is a JSON object "embedded" as a CBOR byte string (major type 2).
 
 <details><summary> 🔎&nbsp; Example using Embedded JSON Tag for CBOR (tag 262)</summary>
 
@@ -670,23 +666,21 @@ func Example_embeddedJSONTagForCBOR() {
 
 </details>
 
+
 ### Functions and Interfaces
 
 <details><summary> 🔎&nbsp; Functions and interfaces at a glance</summary><p/>
 
-Common functions with same API as `encoding/json`:
-
+Common functions with same API as `encoding/json`:  
 - `Marshal`, `Unmarshal`
 - `NewEncoder`, `(*Encoder).Encode`
 - `NewDecoder`, `(*Decoder).Decode`
 
 NOTE: `Unmarshal` will return `ExtraneousDataError` if there are remaining bytes
 because RFC 8949 treats CBOR data item with remaining bytes as malformed.
-
 - 💡 Use `UnmarshalFirst` to decode first CBOR data item and return any remaining bytes.
 
-Other useful functions:
-
+Other useful functions: 
 - `Diagnose`, `DiagnoseFirst` produce human-readable [Extended Diagnostic Notation](https://www.rfc-editor.org/rfc/rfc8610.html#appendix-G) from CBOR data.
 - `UnmarshalFirst` decodes first CBOR data item and return any remaining bytes.
 - `Wellformed` returns nil error if the CBOR data item is well-formed.
@@ -718,21 +712,21 @@ For more details, see [v2.9.2 release notes](https://github.com/fxamacker/cbor/r
 
 ### Prior Releases
 
-Releases and commits tend to be on Sundays because my work schedule didn't leave time to work on this during weekdays (sometimes consecutive weekends and consecutive Christmas breaks, too). Monday morning releases were to allow more fuzzing to run overnight before clicking the release button.
+Releases and commits tend to be on Sundays because my work schedule didn't leave time to work on this during weekdays (sometimes consecutive weekends and consecutive Christmas breaks, too).  Monday morning releases were to allow more fuzzing to run overnight before clicking the release button.
 
-[v2.9.1](https://github.com/fxamacker/cbor/releases/tag/v2.9.1) (Monday, Mar 30, 2026) includes important bugfixes, defensive checks, improved code quality, and more tests. Although not public, the fuzzer was also improved by adding more fuzz tests. It passed fuzz tests (billions of executions) and is production quality.
+[v2.9.1](https://github.com/fxamacker/cbor/releases/tag/v2.9.1) (Monday, Mar 30, 2026) includes important bugfixes, defensive checks, improved code quality, and more tests.  Although not public, the fuzzer was also improved by adding more fuzz tests.  It passed fuzz tests (billions of executions) and is production quality.
 
-[v2.9.0](https://github.com/fxamacker/cbor/releases/tag/v2.9.0) (Sunday, Jul 13, 2025) improved interoperability/transcoding between CBOR & JSON, refactored tests, and improved docs. It passed fuzz tests (billions of executions) and is production quality.
+[v2.9.0](https://github.com/fxamacker/cbor/releases/tag/v2.9.0) (Sunday, Jul 13, 2025) improved interoperability/transcoding between CBOR & JSON, refactored tests, and improved docs.   It passed fuzz tests (billions of executions) and is production quality.
 
-[v2.8.0](https://github.com/fxamacker/cbor/releases/tag/v2.8.0) (Sunday, March 30, 2025) is a small release primarily to add `omitzero` option to struct field tags and fix bugs. It passed fuzz tests (billions of executions) and is production quality.
+[v2.8.0](https://github.com/fxamacker/cbor/releases/tag/v2.8.0) (Sunday, March 30, 2025) is a small release primarily to add `omitzero` option to struct field tags and fix bugs.   It passed fuzz tests (billions of executions) and is production quality.
 
-[v2.7.0](https://github.com/fxamacker/cbor/releases/tag/v2.7.0) (Monday, June 23, 2024) adds features and improvements that help large projects (e.g. Kubernetes) use CBOR as an alternative to JSON and Protocol Buffers. Other improvements include speedups, improved memory use, bug fixes, new serialization options, etc. It passed fuzz tests (5+ billion executions) and is production quality.
+[v2.7.0](https://github.com/fxamacker/cbor/releases/tag/v2.7.0) (Monday, June 23, 2024) adds features and improvements that help large projects (e.g. Kubernetes) use CBOR as an alternative to JSON and Protocol Buffers. Other improvements include speedups, improved memory use, bug fixes, new serialization options, etc.   It passed fuzz tests (5+ billion executions) and is production quality.
 
-[v2.6.0](https://github.com/fxamacker/cbor/releases/tag/v2.6.0) (Sunday, Feb 11, 2024) adds important new features, optimizations, and bug fixes. It is especially useful to systems that need to convert data between CBOR and JSON. New options and optimizations improve handling of bignum, integers, maps, and strings.
+[v2.6.0](https://github.com/fxamacker/cbor/releases/tag/v2.6.0) (Sunday, Feb 11, 2024) adds important new features, optimizations, and bug fixes. It is especially useful to systems that need to convert data between CBOR and JSON.  New options and optimizations improve handling of bignum, integers, maps, and strings.
 
-[v2.5.0](https://github.com/fxamacker/cbor/releases/tag/v2.5.0) (Sunday, August 13, 2023) adds new features and important bug fixes. It is fuzz tested and production quality after extended beta [v2.5.0-beta](https://github.com/fxamacker/cbor/releases/tag/v2.5.0-beta) (Dec 2022) -> [v2.5.0](https://github.com/fxamacker/cbor/releases/tag/v2.5.0) (Aug 2023).
+[v2.5.0](https://github.com/fxamacker/cbor/releases/tag/v2.5.0) (Sunday, August 13, 2023) adds new features and important bug fixes.  It is fuzz tested and production quality after extended beta [v2.5.0-beta](https://github.com/fxamacker/cbor/releases/tag/v2.5.0-beta) (Dec 2022) -> [v2.5.0](https://github.com/fxamacker/cbor/releases/tag/v2.5.0) (Aug 2023).
 
-**IMPORTANT**: 👉 Before upgrading from v2.4 or older release, please read the notable changes highlighted in the release notes. v2.5.0 is a large release with bug fixes to error handling for extraneous data in `Unmarshal`, etc. that should be reviewed before upgrading.
+__IMPORTANT__:  👉 Before upgrading from v2.4 or older release, please read the notable changes highlighted in the release notes.  v2.5.0 is a large release with bug fixes to error handling for extraneous data in `Unmarshal`, etc. that should be reviewed before upgrading.
 
 See [v2.5.0 release notes](https://github.com/fxamacker/cbor/releases/tag/v2.5.0) for list of new features, improvements, and bug fixes.
 
@@ -748,7 +742,7 @@ Comparison of v2.4.0 vs v2.5.0-beta2 provided by @448 (edited to fit width).
 PR [#382](https://github.com/fxamacker/cbor/pull/382) returns buffer to pool in `Encode()`. It adds a bit of overhead to `Encode()` but `NewEncoder().Encode()` is a lot faster and uses less memory as shown here:
 
 ```
-$ benchstat bench-v2.4.0.log bench-f9e6291.log
+$ benchstat bench-v2.4.0.log bench-f9e6291.log 
 goos: linux
 goarch: amd64
 pkg: github.com/fxamacker/cbor/v2
@@ -801,7 +795,7 @@ geomean                                                      2.782              
 
 `fxamacker/cbor` is used in projects by Arm Ltd., Berlin Institute of Health at Charité, Chainlink, Confidential&nbsp;Computing&nbsp;Consortium, ConsenSys, EdgeX&nbsp;Foundry, F5, Flow&nbsp;Foundation, Fraunhofer&#8209;AISEC, IBM, Kubernetes, Let's&nbsp;Encrypt&nbsp;(ISRG), Linaro, Linux&nbsp;Foundation, Matrix.org, Microsoft, National&nbsp;Cybersecurity&nbsp;Agency&nbsp;of&nbsp;France&nbsp;(govt), Netherlands&nbsp;(govt), Oasis&nbsp;Protocol, Red Hat OpenShift, Smallstep, Tailscale, Taurus SA, TIBCO, Veraison, and others.
 
-`fxamacker/cbor` passed multiple confidential security assessments in 2022. A [nonconfidential security assessment](https://github.com/veraison/go-cose/blob/v1.0.0-rc.1/reports/NCC_Microsoft-go-cose-Report_2022-05-26_v1.0.pdf) (prepared by NCC Group for Microsoft Corporation) assessed a subset of fxamacker/cbor v2.4.
+`fxamacker/cbor` passed multiple confidential security assessments in 2022.  A [nonconfidential security assessment](https://github.com/veraison/go-cose/blob/v1.0.0-rc.1/reports/NCC_Microsoft-go-cose-Report_2022-05-26_v1.0.pdf) (prepared by NCC Group for Microsoft Corporation) assessed a subset of fxamacker/cbor v2.4.
 
 ## Standards
 
@@ -809,42 +803,42 @@ geomean                                                      2.782              
 
 Notable CBOR features include:
 
-| CBOR Feature            | Description                                                                  |
-| :---------------------- | :--------------------------------------------------------------------------- |
-| CBOR tags               | API supports built-in and user-defined tags.                                 |
-| Preferred serialization | Integers encode to fewest bytes. Optional float64 → float32 → float16.       |
-| Map key sorting         | Unsorted, length-first (Canonical CBOR), and bytewise-lexicographic (CTAP2). |
-| Duplicate map keys      | Always forbid for encoding and option to allow/forbid for decoding.          |
-| Indefinite length data  | Option to allow/forbid for encoding and decoding.                            |
-| Well-formedness         | Always checked and enforced.                                                 |
-| Basic validity checks   | Optionally check UTF-8 validity and duplicate map keys.                      |
-| Security considerations | Prevent integer overflow and resource exhaustion (RFC 8949 Section 10).      |
+| CBOR Feature  | Description  |
+| :--- | :--- |
+| CBOR tags | API supports built-in and user-defined tags.  |
+| Preferred serialization | Integers encode to fewest bytes. Optional float64 → float32 → float16. |
+| Map key sorting | Unsorted, length-first (Canonical CBOR), and bytewise-lexicographic (CTAP2). |
+| Duplicate map keys | Always forbid for encoding and option to allow/forbid for decoding.   |
+| Indefinite length data | Option to allow/forbid for encoding and decoding. |
+| Well-formedness | Always checked and enforced. |
+| Basic validity checks | Optionally check UTF-8 validity and duplicate map keys. |
+| Security considerations | Prevent integer overflow and resource exhaustion (RFC 8949 Section 10). |
 
-Known limitations are noted in the [Limitations section](#limitations).
+Known limitations are noted in the [Limitations section](#limitations). 
 
-Go nil values for slices, maps, pointers, etc. are encoded as CBOR null. Empty slices, maps, etc. are encoded as empty CBOR arrays and maps.
+Go nil values for slices, maps, pointers, etc. are encoded as CBOR null.  Empty slices, maps, etc. are encoded as empty CBOR arrays and maps.
 
 Decoder checks for all required well-formedness errors, including all "subkinds" of syntax errors and too little data.
 
 After well-formedness is verified, basic validity errors are handled as follows:
 
-- Invalid UTF-8 string: Decoder has option to check and return invalid UTF-8 string error. This check is enabled by default.
-- Duplicate keys in a map: Decoder has options to ignore or enforce rejection of duplicate map keys.
+* Invalid UTF-8 string: Decoder has option to check and return invalid UTF-8 string error. This check is enabled by default.
+* Duplicate keys in a map: Decoder has options to ignore or enforce rejection of duplicate map keys.
 
-When decoding well-formed CBOR arrays and maps, decoder saves the first error it encounters and continues with the next item. Options to handle this differently may be added in the future.
+When decoding well-formed CBOR arrays and maps, decoder saves the first error it encounters and continues with the next item.  Options to handle this differently may be added in the future.
 
 By default, decoder treats time values of floating-point NaN and Infinity as if they are CBOR Null or CBOR Undefined.
 
-**Click to expand topic:**
+__Click to expand topic:__
 
 <details>
  <summary> 🔎&nbsp; Duplicate Map Keys</summary><p>
 
-This library provides options for fast detection and rejection of duplicate map keys based on applying a Go-specific data model to CBOR's extended generic data model in order to determine duplicate vs distinct map keys. Detection relies on whether the CBOR map key would be a duplicate "key" when decoded and applied to the user-provided Go map or struct.
+This library provides options for fast detection and rejection of duplicate map keys based on applying a Go-specific data model to CBOR's extended generic data model in order to determine duplicate vs distinct map keys. Detection relies on whether the CBOR map key would be a duplicate "key" when decoded and applied to the user-provided Go map or struct. 
 
 `DupMapKeyQuiet` turns off detection of duplicate map keys. It tries to use a "keep fastest" method by choosing either "keep first" or "keep last" depending on the Go data type.
 
-`DupMapKeyEnforcedAPF` enforces detection and rejection of duplidate map keys. Decoding stops immediately and returns `DupMapKeyError` when the first duplicate key is detected. The error includes the duplicate map key and the index number.
+`DupMapKeyEnforcedAPF` enforces detection and rejection of duplidate map keys. Decoding stops immediately and returns `DupMapKeyError` when the first duplicate key is detected. The error includes the duplicate map key and the index number. 
 
 APF suffix means "Allow Partial Fill" so the destination map or struct can contain some decoded values at the time of error. It is the caller's responsibility to respond to the `DupMapKeyError` by discarding the partially filled result if that's required by their protocol.
 
@@ -855,15 +849,15 @@ APF suffix means "Allow Partial Fill" so the destination map or struct can conta
 
 This library checks tag validity for built-in tags (currently tag numbers 0, 1, 2, 3, and 55799):
 
-- Inadmissible type for tag content
-- Inadmissible value for tag content
+* Inadmissible type for tag content 
+* Inadmissible value for tag content
 
 Unknown tag data items (not tag number 0, 1, 2, 3, or 55799) are handled in two ways:
 
-- When decoding into an empty interface, unknown tag data item will be decoded into `cbor.Tag` data type, which contains tag number and tag content. The tag content will be decoded into the default Go data type for the CBOR data type.
-- When decoding into other Go types, unknown tag data item is decoded into the specified Go type. If Go type is registered with a tag number, the tag number can optionally be verified.
+* When decoding into an empty interface, unknown tag data item will be decoded into `cbor.Tag` data type, which contains tag number and tag content.  The tag content will be decoded into the default Go data type for the CBOR data type.
+* When decoding into other Go types, unknown tag data item is decoded into the specified Go type.  If Go type is registered with a tag number, the tag number can optionally be verified.
 
-Decoder also has an option to forbid tag data items (treat any tag data item as error) which is specified by protocols such as CTAP2 Canonical CBOR.
+Decoder also has an option to forbid tag data items (treat any tag data item as error) which is specified by protocols such as CTAP2 Canonical CBOR.  
 
 For more information, see [decoding options](#decoding-options-1) and [tag options](#tag-options).
 
@@ -873,40 +867,38 @@ For more information, see [decoding options](#decoding-options-1) and [tag optio
 
 If any of these limitations prevent you from using this library, please open an issue along with a link to your project.
 
-- CBOR `Undefined` (0xf7) value decodes to Go's `nil` value. CBOR `Null` (0xf6) more closely matches Go's `nil`.
-- CBOR map keys with data types not supported by Go for map keys are ignored and an error is returned after continuing to decode remaining items.
-- When decoding registered CBOR tag data to interface type, decoder creates a pointer to registered Go type matching CBOR tag number. Requiring a pointer for this is a Go limitation.
+* CBOR `Undefined` (0xf7) value decodes to Go's `nil` value.  CBOR `Null` (0xf6) more closely matches Go's `nil`.
+* CBOR map keys with data types not supported by Go for map keys are ignored and an error is returned after continuing to decode remaining items.  
+* When decoding registered CBOR tag data to interface type, decoder creates a pointer to registered Go type matching CBOR tag number.  Requiring a pointer for this is a Go limitation. 
 
 ## Fuzzing and Code Coverage
 
-**Code coverage** is always 95% or higher (with `go test -cover`) when tagging a release.
+__Code coverage__ is always 95% or higher (with `go test -cover`) when tagging a release.
 
-**Coverage-guided fuzzing** must pass billions of execs using before tagging a release. Fuzzing is done using nonpublic code which may eventually get merged into this project. Until then, reports like OpenSSF&nbsp;Scorecard can't detect fuzz tests being used by this project.
+__Coverage-guided fuzzing__ must pass billions of execs using before tagging a release.  Fuzzing is done using nonpublic code which may eventually get merged into this project.  Until then, reports like OpenSSF&nbsp;Scorecard can't detect fuzz tests being used by this project.
 
 <hr>
 
 ## Versions and API Changes
-
-This project uses [Semantic Versioning](https://semver.org), so the API is always backwards compatible unless the major version number changes.
+This project uses [Semantic Versioning](https://semver.org), so the API is always backwards compatible unless the major version number changes.  
 
 These functions have signatures identical to encoding/json and their API will continue to match `encoding/json` even after major new releases:  
 `Marshal`, `Unmarshal`, `NewEncoder`, `NewDecoder`, `(*Encoder).Encode`, and `(*Decoder).Decode`.
 
 Exclusions from SemVer:
-
 - Newly added API documented as "subject to change".
 - Newly added API in the master branch that has never been tagged in non-beta release.
-- If function parameters are unchanged, bug fixes that change behavior (e.g. return error for edge case was missed in prior version). We try to highlight these in the release notes and add extended beta period. E.g. [v2.5.0-beta](https://github.com/fxamacker/cbor/releases/tag/v2.5.0-beta) (Dec 2022) -> [v2.5.0](https://github.com/fxamacker/cbor/releases/tag/v2.5.0) (Aug 2023).
+- If function parameters are unchanged, bug fixes that change behavior (e.g. return error for edge case was missed in prior version).  We try to highlight these in the release notes and add extended beta period.  E.g. [v2.5.0-beta](https://github.com/fxamacker/cbor/releases/tag/v2.5.0-beta) (Dec 2022) -> [v2.5.0](https://github.com/fxamacker/cbor/releases/tag/v2.5.0) (Aug 2023).
 
-This project avoids breaking changes to behavior of encoding and decoding functions unless required to improve conformance with supported RFCs (e.g. RFC 8949, RFC 8742, etc.) Visible changes that don't improve conformance to standards are typically made available as new opt-in settings or new functions.
+This project avoids breaking changes to behavior of encoding and decoding functions unless required to improve conformance with supported RFCs (e.g. RFC 8949, RFC 8742, etc.)  Visible changes that don't improve conformance to standards are typically made available as new opt-in settings or new functions.
 
-## Code of Conduct
+## Code of Conduct 
 
-This project has adopted the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). Contact [faye.github@gmail.com](mailto:faye.github@gmail.com) with any questions or comments.
+This project has adopted the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).  Contact [faye.github@gmail.com](mailto:faye.github@gmail.com) with any questions or comments.
 
 ## Contributing
 
-Please open an issue before beginning work on a PR. The improvement may have already been considered, etc.
+Please open an issue before beginning work on a PR.  The improvement may have already been considered, etc.
 
 For more info, see [How to Contribute](CONTRIBUTING.md).
 
@@ -932,12 +924,12 @@ Special thanks to Laurence Lundblade and Jeffrey Yasskin for their help on IETF 
 
 Huge thanks to The Go Authors for creating a fun and practical programming language with batteries included!
 
-This library uses `x448/float16` which used to be included. As a standalone package, `x448/float16` is useful to other projects as well.
+This library uses `x448/float16` which used to be included.  As a standalone package, `x448/float16` is useful to other projects as well.
 
 ## License
 
 Copyright © 2019-2024 [Faye Amacker](https://github.com/fxamacker).
 
-fxamacker/cbor is licensed under the MIT License. See [LICENSE](LICENSE) for the full license text.
+fxamacker/cbor is licensed under the MIT License.  See [LICENSE](LICENSE) for the full license text.
 
 <hr>

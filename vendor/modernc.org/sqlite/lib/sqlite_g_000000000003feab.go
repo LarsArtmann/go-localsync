@@ -804,7 +804,7 @@ func Xsqlite3_db_release_memory(tls *libc.TLS, db uintptr) (r int32) {
 //	** External API to drop all virtual-table modules, except those named
 //	** on the azNames list.
 //	*/
-func Xsqlite3_drop_modules(tls *libc.TLS, db, azNames uintptr) (r int32) {
+func Xsqlite3_drop_modules(tls *libc.TLS, db uintptr, azNames uintptr) (r int32) {
 	var ii int32
 	var pMod, pNext, pThis uintptr
 	_, _, _, _ = ii, pMod, pNext, pThis
@@ -905,7 +905,7 @@ func Xsqlite3_free_table(tls *libc.TLS, azResult uintptr) {
 //	/*
 //	** Find existing client data.
 //	*/
-func Xsqlite3_get_clientdata(tls *libc.TLS, db, zName uintptr) (r uintptr) {
+func Xsqlite3_get_clientdata(tls *libc.TLS, db uintptr, zName uintptr) (r uintptr) {
 	var p, pResult uintptr
 	_, _ = p, pResult
 	Xsqlite3_mutex_enter(tls, (*Tsqlite3)(unsafe.Pointer(db)).Fmutex)
@@ -959,7 +959,7 @@ func Xsqlite3_is_interrupted(tls *libc.TLS, db uintptr) (r int32) {
 //	** It merely prevents new constructs that exceed the limit
 //	** from forming.
 //	*/
-func Xsqlite3_limit(tls *libc.TLS, db uintptr, limitId, newLimit int32) (r int32) {
+func Xsqlite3_limit(tls *libc.TLS, db uintptr, limitId int32, newLimit int32) (r int32) {
 	var oldLimit int32
 	_ = oldLimit
 	/* EVIDENCE-OF: R-30189-54097 For each limit category SQLITE_LIMIT_NAME
@@ -994,7 +994,7 @@ func Xsqlite3_limit(tls *libc.TLS, db uintptr, limitId, newLimit int32) (r int32
 //	** profile is a pointer to a function that is invoked at the conclusion of
 //	** each SQL statement that is run.
 //	*/
-func Xsqlite3_profile(tls *libc.TLS, db, __ccgo_fp_xProfile, pArg uintptr) (r uintptr) {
+func Xsqlite3_profile(tls *libc.TLS, db uintptr, __ccgo_fp_xProfile uintptr, pArg uintptr) (r uintptr) {
 	var pOld, v1 uintptr
 	_, _ = pOld, v1
 	Xsqlite3_mutex_enter(tls, (*Tsqlite3)(unsafe.Pointer(db)).Fmutex)
@@ -1025,7 +1025,7 @@ func Xsqlite3_result_subtype(tls *libc.TLS, pCtx uintptr, eSubtype uint32) {
 //	/*
 //	** Register a new geometry function for use with the r-tree MATCH operator.
 //	*/
-func Xsqlite3_rtree_geometry_callback(tls *libc.TLS, db, zGeom, __ccgo_fp_xGeom, pContext uintptr) (r int32) {
+func Xsqlite3_rtree_geometry_callback(tls *libc.TLS, db uintptr, zGeom uintptr, __ccgo_fp_xGeom uintptr, pContext uintptr) (r int32) {
 	var pGeomCtx uintptr
 	_ = pGeomCtx /* Context object for new user-function */
 	/* Allocate and populate the context object. */
@@ -1046,7 +1046,7 @@ func Xsqlite3_rtree_geometry_callback(tls *libc.TLS, db, zGeom, __ccgo_fp_xGeom,
 //	** Register a new 2nd-generation geometry function for use with the
 //	** r-tree MATCH operator.
 //	*/
-func Xsqlite3_rtree_query_callback(tls *libc.TLS, db, zQueryFunc, __ccgo_fp_xQueryFunc, pContext, __ccgo_fp_xDestructor uintptr) (r int32) {
+func Xsqlite3_rtree_query_callback(tls *libc.TLS, db uintptr, zQueryFunc uintptr, __ccgo_fp_xQueryFunc uintptr, pContext uintptr, __ccgo_fp_xDestructor uintptr) (r int32) {
 	var pGeomCtx uintptr
 	_ = pGeomCtx /* Context object for new user-function */
 	/* Allocate and populate the context object. */
@@ -1486,7 +1486,7 @@ func Xsqlite3_rtree_query_callback(tls *libc.TLS, db, zQueryFunc, __ccgo_fp_xQue
 //	** to all functions within the current prepared statement using iArg as an
 //	** access code.
 //	*/
-func Xsqlite3_set_auxdata(tls *libc.TLS, pCtx uintptr, iArg int32, pAux, __ccgo_fp_xDelete uintptr) {
+func Xsqlite3_set_auxdata(tls *libc.TLS, pCtx uintptr, iArg int32, pAux uintptr, __ccgo_fp_xDelete uintptr) {
 	var pAuxData, pVdbe uintptr
 	_, _ = pAuxData, pVdbe
 	pVdbe = (*Tsqlite3_context)(unsafe.Pointer(pCtx)).FpVdbe
@@ -1580,7 +1580,7 @@ func Xsqlite3_shutdown(tls *libc.TLS) (r int32) {
 //	** Recover as many snapshots as possible from the wal file associated with
 //	** schema zDb of database db.
 //	*/
-func Xsqlite3_snapshot_recover(tls *libc.TLS, db, zDb uintptr) (r int32) {
+func Xsqlite3_snapshot_recover(tls *libc.TLS, db uintptr, zDb uintptr) (r int32) {
 	var iDb, rc int32
 	var pBt uintptr
 	_, _, _ = iDb, pBt, rc
@@ -1660,7 +1660,7 @@ func Xsqlite3_str_new(tls *libc.TLS, db uintptr) (r uintptr) {
 //
 //	/* Register a trace callback using the version-2 interface.
 //	*/
-func Xsqlite3_trace_v2(tls *libc.TLS, db uintptr, mTrace uint32, __ccgo_fp_xTrace, pArg uintptr) (r int32) {
+func Xsqlite3_trace_v2(tls *libc.TLS, db uintptr, mTrace uint32, __ccgo_fp_xTrace uintptr, pArg uintptr) (r int32) {
 	Xsqlite3_mutex_enter(tls, (*Tsqlite3)(unsafe.Pointer(db)).Fmutex)
 	if mTrace == uint32(0) {
 		__ccgo_fp_xTrace = uintptr(0)
@@ -1689,7 +1689,7 @@ func Xsqlite3_trace_v2(tls *libc.TLS, db uintptr, mTrace uint32, __ccgo_fp_xTrac
 //	** an SQLITE_ERROR is returned.  Nothing else can go wrong, so otherwise
 //	** SQLITE_OK is returned.
 //	*/
-func Xsqlite3_transfer_bindings(tls *libc.TLS, pFromStmt, pToStmt uintptr) (r int32) {
+func Xsqlite3_transfer_bindings(tls *libc.TLS, pFromStmt uintptr, pToStmt uintptr) (r int32) {
 	var pFrom, pTo uintptr
 	_, _ = pFrom, pTo
 	pFrom = pFromStmt
@@ -1712,7 +1712,7 @@ func Xsqlite3_transfer_bindings(tls *libc.TLS, pFromStmt, pToStmt uintptr) (r in
 //	** Return the transaction state for a single databse, or the maximum
 //	** transaction state over all attached databases if zSchema is null.
 //	*/
-func Xsqlite3_txn_state(tls *libc.TLS, db, zSchema uintptr) (r int32) {
+func Xsqlite3_txn_state(tls *libc.TLS, db uintptr, zSchema uintptr) (r int32) {
 	var iDb, iTxn, nDb, x, v1 int32
 	var pBt uintptr
 	_, _, _, _, _, _ = iDb, iTxn, nDb, pBt, x, v1
@@ -1811,7 +1811,7 @@ func Xsqlite3_vtab_distinct(tls *libc.TLS, pIdxInfo uintptr) (r int32) {
 //	** false otherwise. If iCons is an IN(...) constraint, set (if bHandle!=0)
 //	** or clear (if bHandle==0) the flag to handle it using an iterator.
 //	*/
-func Xsqlite3_vtab_in(tls *libc.TLS, pIdxInfo uintptr, iCons, bHandle int32) (r int32) {
+func Xsqlite3_vtab_in(tls *libc.TLS, pIdxInfo uintptr, iCons int32, bHandle int32) (r int32) {
 	var m Tu32
 	var pHidden uintptr
 	var v1 uint32
@@ -2058,7 +2058,7 @@ func Xsqlite3session_delete(tls *libc.TLS, pSession uintptr) {
 //	** This function implements the ChooseLeaf algorithm from Gutman[84].
 //	** ChooseSubTree in r*tree terminology.
 //	*/
-func _ChooseLeaf(tls *libc.TLS, pRtree, pCell uintptr, iHeight int32, ppLeaf uintptr) (r int32) {
+func _ChooseLeaf(tls *libc.TLS, pRtree uintptr, pCell uintptr, iHeight int32, ppLeaf uintptr) (r int32) {
 	bp := tls.Alloc(112)
 	defer tls.Free(112)
 	var area, area1, fMinArea, fMinGrowth, growth TRtreeDValue
@@ -2170,7 +2170,7 @@ const __UINTPTR_MAX__ = 18446744073709551615
 //	** Add a new element to the pAggInfo->aCol[] array.  Return the index of
 //	** the new element.  Return a negative number if malloc fails.
 //	*/
-func _addAggInfoColumn(tls *libc.TLS, db, pInfo uintptr) (r int32) {
+func _addAggInfoColumn(tls *libc.TLS, db uintptr, pInfo uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var _ /* i at bp+0 */ int32
@@ -2184,7 +2184,7 @@ func _addAggInfoColumn(tls *libc.TLS, db, pInfo uintptr) (r int32) {
 //	** Add a new element to the pAggInfo->aFunc[] array.  Return the index of
 //	** the new element.  Return a negative number if malloc fails.
 //	*/
-func _addAggInfoFunc(tls *libc.TLS, db, pInfo uintptr) (r int32) {
+func _addAggInfoFunc(tls *libc.TLS, db uintptr, pInfo uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var _ /* i at bp+0 */ int32
@@ -2250,7 +2250,7 @@ func _addToSavepointBitvecs(tls *libc.TLS, pPager uintptr, pgno TPgno) (r int32)
 //	** Add the virtual table pVTab to the array sqlite3.aVTrans[]. Space should
 //	** have already been reserved using growVTrans().
 //	*/
-func _addToVTrans(tls *libc.TLS, db, pVTab uintptr) {
+func _addToVTrans(tls *libc.TLS, db uintptr, pVTab uintptr) {
 	var v1 int32
 	var v2 uintptr
 	_, _ = v1, v2
@@ -2278,7 +2278,7 @@ func _addToVTrans(tls *libc.TLS, db, pVTab uintptr) {
 //	** opcode array of prepared state for other memory needs of the prepared
 //	** statement.
 //	*/
-func _allocSpace(tls *libc.TLS, p, pBuf uintptr, nByte Tsqlite3_int64) (r uintptr) {
+func _allocSpace(tls *libc.TLS, p uintptr, pBuf uintptr, nByte Tsqlite3_int64) (r uintptr) {
 	if pBuf == uintptr(0) {
 		nByte = nByte
 		if nByte <= (*TReusableSpace)(unsafe.Pointer(p)).FnFree {
@@ -2302,7 +2302,7 @@ func _allocSpace(tls *libc.TLS, p, pBuf uintptr, nByte Tsqlite3_int64) (r uintpt
 //	** If the table cannot be located, return NULL. The value of the two output
 //	** parameters is undefined in this case.
 //	*/
-func _alterFindTable(tls *libc.TLS, pParse, pSrc, piDb, pzDb uintptr, bAuth int32) (r uintptr) {
+func _alterFindTable(tls *libc.TLS, pParse uintptr, pSrc uintptr, piDb uintptr, pzDb uintptr, bAuth int32) (r uintptr) {
 	var db, pTab uintptr
 	var iDb int32
 	_, _, _ = db, iDb, pTab
@@ -2425,7 +2425,7 @@ func _applyNumericAffinity(tls *libc.TLS, pRec uintptr, bTryForInt int32) {
 //	**     *  The AggInfoColumnReg() and AggInfoFuncReg() macros may be used
 //	**
 //	*/
-func _assignAggregateRegisters(tls *libc.TLS, pParse, pAggInfo uintptr) {
+func _assignAggregateRegisters(tls *libc.TLS, pParse uintptr, pAggInfo uintptr) {
 	(*TAggInfo)(unsafe.Pointer(pAggInfo)).FiFirstReg = (*TParse)(unsafe.Pointer(pParse)).FnMem + int32(1)
 	**(**int32)(__ccgo_up(pParse + 60)) += (*TAggInfo)(unsafe.Pointer(pAggInfo)).FnColumn + (*TAggInfo)(unsafe.Pointer(pAggInfo)).FnFunc
 }
@@ -2575,7 +2575,7 @@ func _callFinaliser(tls *libc.TLS, db uintptr, offset int32) {
 //	** This function does processing common to the _change_int64(), _change_text()
 //	** and other similar APIs.
 //	*/
-func _checkChangeParams(tls *libc.TLS, pGrp uintptr, bNew, iCol int32, nReq Tsqlite3_int64, ppBuf uintptr) (r int32) {
+func _checkChangeParams(tls *libc.TLS, pGrp uintptr, bNew int32, iCol int32, nReq Tsqlite3_int64, ppBuf uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pBuf uintptr
@@ -2616,7 +2616,7 @@ func _checkChangeParams(tls *libc.TLS, pGrp uintptr, bNew, iCol int32, nReq Tsql
 //	** it matches anything so always return true.  Return false only
 //	** if there is no match.
 //	*/
-func _checkColumnOverlap(tls *libc.TLS, pIdList, pEList uintptr) (r int32) {
+func _checkColumnOverlap(tls *libc.TLS, pIdList uintptr, pEList uintptr) (r int32) {
 	var e int32
 	_ = e
 	if pIdList == uintptr(0) || pEList == uintptr(0) {
@@ -2822,7 +2822,7 @@ func _closeCursorsInFrame(tls *libc.TLS, p uintptr) {
 //	** collation sequences that should be used for the comparisons if
 //	** eTnctType is WHERE_DISTINCT_ORDERED.
 //	*/
-func _codeDistinct(tls *libc.TLS, pParse uintptr, eTnctType, iTab, addrRepeat int32, pEList uintptr, regElem int32) (r int32) {
+func _codeDistinct(tls *libc.TLS, pParse uintptr, eTnctType int32, iTab int32, addrRepeat int32, pEList uintptr, regElem int32) (r int32) {
 	var i, iJump, iRet, nResultCol, r1, regPrev, v1 int32
 	var pColl, v uintptr
 	_, _, _, _, _, _, _, _, _ = i, iJump, iRet, nResultCol, pColl, r1, regPrev, v, v1
@@ -2882,7 +2882,7 @@ func _codeDistinct(tls *libc.TLS, pParse uintptr, eTnctType, iTab, addrRepeat in
 //	** this case, generate code to evaluate the expression and leave the
 //	** result in register iReg.
 //	*/
-func _codeExprOrVector(tls *libc.TLS, pParse, p uintptr, iReg, nReg int32) {
+func _codeExprOrVector(tls *libc.TLS, pParse uintptr, p uintptr, iReg int32, nReg int32) {
 	var i, iSelect int32
 	var pList, v uintptr
 	_, _, _, _ = i, iSelect, pList, v
@@ -2980,7 +2980,7 @@ func _connectionIsBusy(tls *libc.TLS, db uintptr) (r int32) {
 //	**    sqlite3_create_function_v2()
 //	**    sqlite3_create_window_function()
 //	*/
-func _createFunctionApi(tls *libc.TLS, db, zFunc uintptr, nArg, enc int32, p, __ccgo_fp_xSFunc, __ccgo_fp_xStep, __ccgo_fp_xFinal, __ccgo_fp_xValue, __ccgo_fp_xInverse, __ccgo_fp_xDestroy uintptr) (r int32) {
+func _createFunctionApi(tls *libc.TLS, db uintptr, zFunc uintptr, nArg int32, enc int32, p uintptr, __ccgo_fp_xSFunc uintptr, __ccgo_fp_xStep uintptr, __ccgo_fp_xFinal uintptr, __ccgo_fp_xValue uintptr, __ccgo_fp_xInverse uintptr, __ccgo_fp_xDestroy uintptr) (r int32) {
 	var pArg uintptr
 	var rc int32
 	_, _ = pArg, rc
@@ -3195,7 +3195,7 @@ func _estimateTableWidth(tls *libc.TLS, pTab uintptr) {
 //	/*
 //	** Delete an entire expression list.
 //	*/
-func _exprListDeleteNN(tls *libc.TLS, db, pList uintptr) {
+func _exprListDeleteNN(tls *libc.TLS, db uintptr, pList uintptr) {
 	var i, v1 int32
 	var pItem uintptr
 	_, _, _ = i, pItem, v1
@@ -3225,7 +3225,7 @@ func _exprListDeleteNN(tls *libc.TLS, db, pList uintptr) {
 //	** Return true if all expressions in the expression-list passed as the
 //	** only argument are constant.
 //	*/
-func _exprListIsConstant(tls *libc.TLS, pParse, pRow uintptr) (r int32) {
+func _exprListIsConstant(tls *libc.TLS, pParse uintptr, pRow uintptr) (r int32) {
 	var ii int32
 	_ = ii
 	ii = 0
@@ -3249,7 +3249,7 @@ func _exprListIsConstant(tls *libc.TLS, pParse, pRow uintptr) (r int32) {
 //	/*
 //	** sqlite3WalkExpr() callback used by sqlite3ExprIsConstantOrGroupBy().
 //	*/
-func _exprNodeIsConstantOrGroupBy(tls *libc.TLS, pWalker, pExpr uintptr) (r int32) {
+func _exprNodeIsConstantOrGroupBy(tls *libc.TLS, pWalker uintptr, pExpr uintptr) (r int32) {
 	var i int32
 	var p, pColl, pGroupBy uintptr
 	_, _, _, _ = i, p, pColl, pGroupBy
@@ -3293,7 +3293,7 @@ func _exprNodeIsConstantOrGroupBy(tls *libc.TLS, pWalker, pExpr uintptr) (r int3
 //	** Or, if the TK_COLUMN cannot be replaced by a constant, zero is
 //	** returned.
 //	*/
-func _exprPartidxExprLookup(tls *libc.TLS, pParse, pExpr uintptr, iTarget int32) (r int32) {
+func _exprPartidxExprLookup(tls *libc.TLS, pParse uintptr, pExpr uintptr, iTarget int32) (r int32) {
 	var addr, ret int32
 	var p, v uintptr
 	_, _, _, _ = addr, p, ret, v
@@ -3331,7 +3331,7 @@ func _exprPartidxExprLookup(tls *libc.TLS, pParse, pExpr uintptr, iTarget int32)
 //	** a bitmask indicating which tables are used in that expression
 //	** tree.
 //	*/
-func _exprSelectUsage(tls *libc.TLS, pMaskSet, pS uintptr) (r TBitmask) {
+func _exprSelectUsage(tls *libc.TLS, pMaskSet uintptr, pS uintptr) (r TBitmask) {
 	var i int32
 	var mask TBitmask
 	var pSrc uintptr
@@ -3376,7 +3376,7 @@ func _exprSelectUsage(tls *libc.TLS, pMaskSet, pS uintptr) (r TBitmask) {
 //	** Return an Expr object that refers to column iCol of table pTab which
 //	** has cursor iCur.
 //	*/
-func _exprTableColumn(tls *libc.TLS, db, pTab uintptr, iCursor int32, iCol Ti16) (r uintptr) {
+func _exprTableColumn(tls *libc.TLS, db uintptr, pTab uintptr, iCursor int32, iCol Ti16) (r uintptr) {
 	var pExpr uintptr
 	_ = pExpr
 	pExpr = _sqlite3Expr(tls, db, int32(TK_COLUMN), uintptr(0))
@@ -3468,7 +3468,7 @@ func _findConstraintFunc(tls *libc.TLS, ctx uintptr, NotUsed int32, argv uintptr
 //	** a pointer to a static null element with HashElem.data==0 is returned.
 //	** If pH is not NULL, then the hash for this key is written to *pH.
 //	*/
-func _findElementWithHash(tls *libc.TLS, pH, pKey, pHash uintptr) (r uintptr) {
+func _findElementWithHash(tls *libc.TLS, pH uintptr, pKey uintptr, pHash uintptr) (r uintptr) {
 	var count, h uint32
 	var elem, pEntry uintptr
 	_, _, _, _ = count, elem, h, pEntry /* The computed hash */
@@ -3508,7 +3508,7 @@ func _findElementWithHash(tls *libc.TLS, pH, pKey, pHash uintptr) (r uintptr) {
 //	** This function returns true if any of the columns that are part of the
 //	** child key for FK constraint *p are modified.
 //	*/
-func _fkChildIsModified(tls *libc.TLS, pTab, p, aChange uintptr, bChngRowid int32) (r int32) {
+func _fkChildIsModified(tls *libc.TLS, pTab uintptr, p uintptr, aChange uintptr, bChngRowid int32) (r int32) {
 	var i, iChildKey int32
 	_, _ = i, iChildKey
 	i = 0
@@ -3537,7 +3537,7 @@ func _fkChildIsModified(tls *libc.TLS, pTab, p, aChange uintptr, bChngRowid int3
 //	** Free an sqlite3_index_info structure allocated by allocateIndexInfo()
 //	** and possibly modified by xBestIndex methods.
 //	*/
-func _freeIndexInfo(tls *libc.TLS, db, pIdxInfo uintptr) {
+func _freeIndexInfo(tls *libc.TLS, db uintptr, pIdxInfo uintptr) {
 	var i int32
 	var pHidden uintptr
 	_, _ = i, pHidden
@@ -3576,7 +3576,7 @@ func _freeTempSpace(tls *libc.TLS, pBt uintptr) {
 //	/*
 //	** Implementation of API function xQueryPhrase().
 //	*/
-func _fts5ApiQueryPhrase(tls *libc.TLS, pCtx uintptr, iPhrase int32, pUserData, __ccgo_fp_xCallback uintptr) (r int32) {
+func _fts5ApiQueryPhrase(tls *libc.TLS, pCtx uintptr, iPhrase int32, pUserData uintptr, __ccgo_fp_xCallback uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pCsr, pTab uintptr
@@ -3622,7 +3622,7 @@ func _fts5ApiQueryPhrase(tls *libc.TLS, pCtx uintptr, iPhrase int32, pUserData, 
 //	/*
 //	** Implementation of the xSetAuxdata() method.
 //	*/
-func _fts5ApiSetAuxdata(tls *libc.TLS, pCtx, pPtr, __ccgo_fp_xDelete uintptr) (r int32) {
+func _fts5ApiSetAuxdata(tls *libc.TLS, pCtx uintptr, pPtr uintptr, __ccgo_fp_xDelete uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pCsr, pData uintptr
@@ -3702,7 +3702,7 @@ func _fts5CloseMethod(tls *libc.TLS, pCursor uintptr) (r int32) {
 //	** This is the xColumn method, called by SQLite to request a value from
 //	** the row that the supplied cursor currently points to.
 //	*/
-func _fts5ColumnMethod(tls *libc.TLS, pCursor, pCtx uintptr, iCol int32) (r int32) {
+func _fts5ColumnMethod(tls *libc.TLS, pCursor uintptr, pCtx uintptr, iCol int32) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pConfig, pCsr, pTab, pVal uintptr
@@ -3788,7 +3788,7 @@ func _fts5CsrNewrow(tls *libc.TLS, pCsr uintptr) {
 //	** which case the position-list was read from the fts index) or for other
 //	** detail= modes if the row content is available.
 //	*/
-func _fts5CsrPoslist(tls *libc.TLS, pCsr uintptr, iPhrase int32, pa, pn uintptr) (r int32) {
+func _fts5CsrPoslist(tls *libc.TLS, pCsr uintptr, iPhrase int32, pa uintptr, pn uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var aPopulator, pConfig, pSorter uintptr
@@ -3863,7 +3863,7 @@ func _fts5CsrPoslist(tls *libc.TLS, pCsr uintptr, iPhrase int32, pa, pn uintptr)
 	return rc
 }
 
-func _fts5CursorFirst(tls *libc.TLS, pTab, pCsr uintptr, bDesc int32) (r int32) {
+func _fts5CursorFirst(tls *libc.TLS, pTab uintptr, pCsr uintptr, bDesc int32) (r int32) {
 	var pExpr uintptr
 	var rc int32
 	_, _ = pExpr, rc
@@ -3890,7 +3890,7 @@ func _fts5CursorFirst(tls *libc.TLS, pTab, pCsr uintptr, bDesc int32) (r int32) 
 //	** Return SQLITE_OK if successful or if no reseek was required, or an
 //	** error code if an error occurred.
 //	*/
-func _fts5CursorReseek(tls *libc.TLS, pCsr, pbSkip uintptr) (r int32) {
+func _fts5CursorReseek(tls *libc.TLS, pCsr uintptr, pbSkip uintptr) (r int32) {
 	var bDesc, rc int32
 	var iRowid Ti64
 	var pTab uintptr
@@ -3996,7 +3996,7 @@ func _fts5ExprClearPoslists(tls *libc.TLS, pNode uintptr) {
 //	** Return an SQLite error code if an error occurs, or SQLITE_OK otherwise.
 //	** It is not an error if there are no matches.
 //	*/
-func _fts5ExprNodeFirst(tls *libc.TLS, pExpr, pNode uintptr) (r int32) {
+func _fts5ExprNodeFirst(tls *libc.TLS, pExpr uintptr, pNode uintptr) (r int32) {
 	var i, nEof, rc int32
 	var pChild uintptr
 	_, _, _, _ = i, nEof, pChild, rc
@@ -4046,7 +4046,7 @@ func _fts5ExprNodeFirst(tls *libc.TLS, pExpr, pNode uintptr) (r int32) {
 	return rc
 }
 
-func _fts5ExprNodeNext_AND(tls *libc.TLS, pExpr, pNode uintptr, bFromValid int32, iFrom Ti64) (r int32) {
+func _fts5ExprNodeNext_AND(tls *libc.TLS, pExpr uintptr, pNode uintptr, bFromValid int32, iFrom Ti64) (r int32) {
 	var rc int32
 	_ = rc
 	rc = (*(*func(*libc.TLS, uintptr, uintptr, int32, Ti64) int32)(unsafe.Pointer(&struct{ uintptr }{(*TFts5ExprNode)(unsafe.Pointer(*(*uintptr)(unsafe.Pointer(pNode + 48)))).FxNext})))(tls, pExpr, *(*uintptr)(unsafe.Pointer(pNode + 48)), bFromValid, iFrom)
@@ -4058,7 +4058,7 @@ func _fts5ExprNodeNext_AND(tls *libc.TLS, pExpr, pNode uintptr, bFromValid int32
 	return rc
 }
 
-func _fts5ExprNodeNext_NOT(tls *libc.TLS, pExpr, pNode uintptr, bFromValid int32, iFrom Ti64) (r int32) {
+func _fts5ExprNodeNext_NOT(tls *libc.TLS, pExpr uintptr, pNode uintptr, bFromValid int32, iFrom Ti64) (r int32) {
 	var rc int32
 	_ = rc
 	rc = (*(*func(*libc.TLS, uintptr, uintptr, int32, Ti64) int32)(unsafe.Pointer(&struct{ uintptr }{(*TFts5ExprNode)(unsafe.Pointer(*(*uintptr)(unsafe.Pointer(pNode + 48)))).FxNext})))(tls, pExpr, *(*uintptr)(unsafe.Pointer(pNode + 48)), bFromValid, iFrom)
@@ -4071,7 +4071,7 @@ func _fts5ExprNodeNext_NOT(tls *libc.TLS, pExpr, pNode uintptr, bFromValid int32
 	return rc
 }
 
-func _fts5ExprNodeNext_OR(tls *libc.TLS, pExpr, pNode uintptr, bFromValid int32, iFrom Ti64) (r int32) {
+func _fts5ExprNodeNext_OR(tls *libc.TLS, pExpr uintptr, pNode uintptr, bFromValid int32, iFrom Ti64) (r int32) {
 	var i, rc int32
 	var iLast Ti64
 	var p1 uintptr
@@ -4106,7 +4106,7 @@ func _fts5ExprNodeNext_OR(tls *libc.TLS, pExpr, pNode uintptr, bFromValid int32,
 //	/*
 //	** Argument pNode is an FTS5_AND node.
 //	*/
-func _fts5ExprNodeTest_AND(tls *libc.TLS, pExpr, pAnd uintptr) (r int32) {
+func _fts5ExprNodeTest_AND(tls *libc.TLS, pExpr uintptr, pAnd uintptr) (r int32) {
 	var bMatch, cmp, iChild, rc int32
 	var iLast Ti64
 	var pChild uintptr
@@ -4161,7 +4161,7 @@ func _fts5ExprNodeTest_AND(tls *libc.TLS, pExpr, pAnd uintptr) (r int32) {
 	return SQLITE_OK
 }
 
-func _fts5ExprNodeTest_NOT(tls *libc.TLS, pExpr, pNode uintptr) (r int32) {
+func _fts5ExprNodeTest_NOT(tls *libc.TLS, pExpr uintptr, pNode uintptr) (r int32) {
 	var cmp, rc int32
 	var p1, p2 uintptr
 	_, _, _, _ = cmp, p1, p2, rc
@@ -4188,7 +4188,7 @@ func _fts5ExprNodeTest_NOT(tls *libc.TLS, pExpr, pNode uintptr) (r int32) {
 	return rc
 }
 
-func _fts5ExprNodeTest_OR(tls *libc.TLS, pExpr, pNode uintptr) {
+func _fts5ExprNodeTest_OR(tls *libc.TLS, pExpr uintptr, pNode uintptr) {
 	var cmp, i int32
 	var pChild, pNext uintptr
 	_, _, _, _ = cmp, i, pChild, pNext
@@ -4226,7 +4226,7 @@ func _fts5ExprNodeTest_OR(tls *libc.TLS, pExpr, pNode uintptr) {
 //	** otherwise. It is not considered an error code if an iterator reaches
 //	** EOF.
 //	*/
-func _fts5ExprNodeTest_STRING(tls *libc.TLS, pExpr, pNode uintptr) (r int32) {
+func _fts5ExprNodeTest_STRING(tls *libc.TLS, pExpr uintptr, pNode uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var bDesc, bMatch, i, j int32
@@ -4300,7 +4300,7 @@ func _fts5ExprNodeTest_STRING(tls *libc.TLS, pExpr, pNode uintptr) (r int32) {
 	return **(**int32)(__ccgo_up(bp))
 }
 
-func _fts5ExprNodeTest_TERM(tls *libc.TLS, pExpr, pNode uintptr) (r int32) {
+func _fts5ExprNodeTest_TERM(tls *libc.TLS, pExpr uintptr, pNode uintptr) (r int32) {
 	var pIter, pPhrase uintptr
 	_, _ = pIter, pPhrase
 	/* As this "NEAR" object is actually a single phrase that consists
@@ -4420,7 +4420,7 @@ func _fts5ExprSetEof(tls *libc.TLS, pNode uintptr) {
 //	** Find a tokenizer. This is the implementation of the
 //	** fts5_api.xFindTokenizer_v2() method.
 //	*/
-func _fts5FindTokenizer_v2(tls *libc.TLS, pApi, zName, ppUserData, ppTokenizer uintptr) (r int32) {
+func _fts5FindTokenizer_v2(tls *libc.TLS, pApi uintptr, zName uintptr, ppUserData uintptr, ppTokenizer uintptr) (r int32) {
 	var pMod uintptr
 	var rc int32
 	_, _ = pMod, rc
@@ -4446,7 +4446,7 @@ func _fts5FindTokenizer_v2(tls *libc.TLS, pApi, zName, ppUserData, ppTokenizer u
 //	/*
 //	** Tokenizer callback used by implementation of highlight() function.
 //	*/
-func _fts5HighlightCb(tls *libc.TLS, pContext uintptr, tflags int32, pToken uintptr, nToken, iStartOff, iEndOff int32) (r int32) {
+func _fts5HighlightCb(tls *libc.TLS, pContext uintptr, tflags int32, pToken uintptr, nToken int32, iStartOff int32, iEndOff int32) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var iPos, v1 int32
@@ -4538,7 +4538,7 @@ func _fts5IdxMalloc(tls *libc.TLS, p uintptr, nByte Tsqlite3_int64) (r uintptr) 
 **     res = *pLeft - *pRight
  */
 
-func _fts5IndexCrisismerge(tls *libc.TLS, p, ppStruct uintptr) {
+func _fts5IndexCrisismerge(tls *libc.TLS, p uintptr, ppStruct uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var iLvl, nCrisis int32
@@ -4589,7 +4589,7 @@ func _fts5IndexFreeArray(tls *libc.TLS, ap uintptr, n int32) {
 //	**
 //	** Return true if any changes were actually made, or false otherwise.
 //	*/
-func _fts5IndexMerge(tls *libc.TLS, p, ppStruct uintptr, nPg, nMin int32) (r int32) {
+func _fts5IndexMerge(tls *libc.TLS, p uintptr, ppStruct uintptr, nPg int32, nMin int32) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var bRet, iBestLvl, iLvl, nBest int32
@@ -4659,7 +4659,7 @@ func _fts5IndexMerge(tls *libc.TLS, p, ppStruct uintptr, nPg, nMin int32) (r int
 //	**   argv[2]   -> table name
 //	**   argv[...] -> "column name" and other module argument fields.
 //	*/
-func _fts5InitVtab(tls *libc.TLS, bCreate int32, db, pAux uintptr, argc int32, argv, ppVTab, pzErr uintptr) (r int32) {
+func _fts5InitVtab(tls *libc.TLS, bCreate int32, db uintptr, pAux uintptr, argc int32, argv uintptr, ppVTab uintptr, pzErr uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var azConfig, pGlobal, pTab uintptr
@@ -4727,7 +4727,7 @@ func _fts5InitVtab(tls *libc.TLS, bCreate int32, db, pAux uintptr, argc int32, a
 //	** and there are 100 or more columns. Also called as a fallback from
 //	** fts5IterSetOutputs_Col100 if the column-list spans more than one page.
 //	*/
-func _fts5IterSetOutputs_Col(tls *libc.TLS, pIter, pSeg uintptr) {
+func _fts5IterSetOutputs_Col(tls *libc.TLS, pIter uintptr, pSeg uintptr) {
 	_sqlite3Fts5BufferZero(tls, pIter+40)
 	_fts5SegiterPoslist(tls, (*TFts5Iter)(unsafe.Pointer(pIter)).FpIndex, pSeg, (*TFts5Iter)(unsafe.Pointer(pIter)).FpColset, pIter+40)
 	(*TFts5Iter)(unsafe.Pointer(pIter)).Fbase.FiRowid = (*TFts5SegIter)(unsafe.Pointer(pSeg)).FiRowid
@@ -4740,7 +4740,7 @@ func _fts5IterSetOutputs_Col(tls *libc.TLS, pIter, pSeg uintptr) {
 //	/*
 //	** xSetOutputs callback used by detail=full when there is a column filter.
 //	*/
-func _fts5IterSetOutputs_Full(tls *libc.TLS, pIter, pSeg uintptr) {
+func _fts5IterSetOutputs_Full(tls *libc.TLS, pIter uintptr, pSeg uintptr) {
 	var a, pColset, pRc uintptr
 	_, _, _ = a, pColset, pRc
 	pColset = (*TFts5Iter)(unsafe.Pointer(pIter)).FpColset
@@ -4769,7 +4769,7 @@ func _fts5IterSetOutputs_Full(tls *libc.TLS, pIter, pSeg uintptr) {
 //	** xSetOutputs callback used by detail=full and detail=col tables when no
 //	** column filters are specified.
 //	*/
-func _fts5IterSetOutputs_Nocolset(tls *libc.TLS, pIter, pSeg uintptr) {
+func _fts5IterSetOutputs_Nocolset(tls *libc.TLS, pIter uintptr, pSeg uintptr) {
 	(*TFts5Iter)(unsafe.Pointer(pIter)).Fbase.FiRowid = (*TFts5SegIter)(unsafe.Pointer(pSeg)).FiRowid
 	(*TFts5Iter)(unsafe.Pointer(pIter)).Fbase.FnData = (*TFts5SegIter)(unsafe.Pointer(pSeg)).FnPos
 	if (*TFts5SegIter)(unsafe.Pointer(pSeg)).FiLeafOffset+int64((*TFts5SegIter)(unsafe.Pointer(pSeg)).FnPos) <= int64((*TFts5Data)(unsafe.Pointer((*TFts5SegIter)(unsafe.Pointer(pSeg)).FpLeaf)).FszLeaf) {
@@ -4794,7 +4794,7 @@ func _fts5LookaheadReaderNext(tls *libc.TLS, p uintptr) (r int32) {
 	return libc.BoolInt32((*TFts5LookaheadReader)(unsafe.Pointer(p)).FiPos == libc.Int64FromInt32(1)<<libc.Int32FromInt32(62))
 }
 
-func _fts5MultiIterAdvanced(tls *libc.TLS, p, pIter uintptr, iChanged, iMinset int32) {
+func _fts5MultiIterAdvanced(tls *libc.TLS, p uintptr, pIter uintptr, iChanged int32, iMinset int32) {
 	var i, iEq, v2 int32
 	var pSeg uintptr
 	_, _, _, _ = i, iEq, pSeg, v2
@@ -4849,7 +4849,7 @@ func _fts5MultiIterFree(tls *libc.TLS, pIter uintptr) {
 //	** points to a delete marker. A delete marker is an entry with a 0 byte
 //	** position-list.
 //	*/
-func _fts5MultiIterIsEmpty(tls *libc.TLS, p, pIter uintptr) (r int32) {
+func _fts5MultiIterIsEmpty(tls *libc.TLS, p uintptr, pIter uintptr) (r int32) {
 	var pSeg uintptr
 	_ = pSeg
 	pSeg = pIter + 104 + uintptr((**(**TFts5CResult)(__ccgo_up((*TFts5Iter)(unsafe.Pointer(pIter)).FaFirst + 1*4))).FiFirst)*128
@@ -4869,7 +4869,7 @@ func _fts5MultiIterIsEmpty(tls *libc.TLS, p, pIter uintptr) (r int32) {
 //	** The iterator initially points to the first term/rowid entry in the
 //	** iterated data.
 //	*/
-func _fts5MultiIterNew(tls *libc.TLS, p, pStruct uintptr, flags int32, pColset, pTerm uintptr, nTerm, iLevel, nSegment int32, ppOut uintptr) {
+func _fts5MultiIterNew(tls *libc.TLS, p uintptr, pStruct uintptr, flags int32, pColset uintptr, pTerm uintptr, nTerm int32, iLevel int32, nSegment int32, ppOut uintptr) {
 	var iIter, iSeg, nSeg, v1 int32
 	var pEnd, pIter, pIter1, pLvl, pNew, pSeg, v2 uintptr
 	_, _, _, _, _, _, _, _, _, _, _ = iIter, iSeg, nSeg, pEnd, pIter, pIter1, pLvl, pNew, pSeg, v1, v2
@@ -5009,7 +5009,7 @@ func _fts5MultiIterSetEof(tls *libc.TLS, pIter uintptr) {
 //	** Return a pointer to a buffer containing the term associated with the
 //	** entry that the iterator currently points to.
 //	*/
-func _fts5MultiIterTerm(tls *libc.TLS, pIter, pn uintptr) (r uintptr) {
+func _fts5MultiIterTerm(tls *libc.TLS, pIter uintptr, pn uintptr) (r uintptr) {
 	var p uintptr
 	_ = p
 	p = pIter + 104 + uintptr((**(**TFts5CResult)(__ccgo_up((*TFts5Iter)(unsafe.Pointer(pIter)).FaFirst + 1*4))).FiFirst)*128
@@ -5025,7 +5025,7 @@ func _fts5MultiIterTerm(tls *libc.TLS, pIter, pn uintptr) (r uintptr) {
 //	** of pColset. This function may use the spare copy and set (*ppFree) to
 //	** zero, or it may create copies of pColset using fts5CloneColset().
 //	*/
-func _fts5ParseSetColset(tls *libc.TLS, pParse, pNode, pColset, ppFree uintptr) {
+func _fts5ParseSetColset(tls *libc.TLS, pParse uintptr, pNode uintptr, pColset uintptr, ppFree uintptr) {
 	var i int32
 	var pNear uintptr
 	_, _ = i, pNear
@@ -5067,7 +5067,7 @@ func _fts5ParseSetColset(tls *libc.TLS, pParse, pNode, pColset, ppFree uintptr) 
 //	/*
 //	** Tokenize using the porter tokenizer.
 //	*/
-func _fts5PorterTokenize(tls *libc.TLS, pTokenizer, pCtx uintptr, flags int32, pText uintptr, nText int32, pLoc uintptr, nLoc int32, __ccgo_fp_xToken uintptr) (r int32) {
+func _fts5PorterTokenize(tls *libc.TLS, pTokenizer uintptr, pCtx uintptr, flags int32, pText uintptr, nText int32, pLoc uintptr, nLoc int32, __ccgo_fp_xToken uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var p uintptr
@@ -5080,7 +5080,7 @@ func _fts5PorterTokenize(tls *libc.TLS, pTokenizer, pCtx uintptr, flags int32, p
 	return (*(*func(*libc.TLS, uintptr, uintptr, int32, uintptr, int32, uintptr, int32, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{(*TPorterTokenizer)(unsafe.Pointer(p)).Ftokenizer_v2.FxTokenize})))(tls, (*TPorterTokenizer)(unsafe.Pointer(p)).FpTokenizer, bp, flags, pText, nText, pLoc, nLoc, __ccgo_fp(_fts5PorterCb))
 }
 
-func _fts5PrefixMergerInsertByPosition(tls *libc.TLS, ppHead, p uintptr) {
+func _fts5PrefixMergerInsertByPosition(tls *libc.TLS, ppHead uintptr, p uintptr) {
 	var pp uintptr
 	_ = pp
 	if (*TPrefixMerger)(unsafe.Pointer(p)).FiPos >= 0 {
@@ -5093,7 +5093,7 @@ func _fts5PrefixMergerInsertByPosition(tls *libc.TLS, ppHead, p uintptr) {
 	}
 }
 
-func _fts5PrefixMergerInsertByRowid(tls *libc.TLS, ppHead, p uintptr) {
+func _fts5PrefixMergerInsertByRowid(tls *libc.TLS, ppHead uintptr, p uintptr) {
 	var pp uintptr
 	_ = pp
 	if (*TPrefixMerger)(unsafe.Pointer(p)).Fiter.FaPoslist != 0 {
@@ -5111,7 +5111,7 @@ func _fts5PrefixMergerInsertByRowid(tls *libc.TLS, ppHead, p uintptr) {
 //	/*
 //	** Load the next leaf page into the segment iterator.
 //	*/
-func _fts5SegIterNextPage(tls *libc.TLS, p, pIter uintptr) {
+func _fts5SegIterNextPage(tls *libc.TLS, p uintptr, pIter uintptr) {
 	var pLeaf, pSeg uintptr
 	_, _ = pLeaf, pSeg
 	pSeg = (*TFts5SegIter)(unsafe.Pointer(pIter)).FpSeg
@@ -5145,7 +5145,7 @@ func _fts5SegIterNextPage(tls *libc.TLS, p, pIter uintptr) {
 //	**
 //	** This version of fts5SegIterNext() is only used by reverse iterators.
 //	*/
-func _fts5SegIterNext_Reverse(tls *libc.TLS, p, pIter, pbUnused uintptr) {
+func _fts5SegIterNext_Reverse(tls *libc.TLS, p uintptr, pIter uintptr, pbUnused uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var a, v1 uintptr
@@ -5251,7 +5251,7 @@ func _fts5SorterNext(tls *libc.TLS, pCsr uintptr) (r int32) {
 	return rc
 }
 
-func _fts5SpecialDelete(tls *libc.TLS, pTab, apVal uintptr) (r int32) {
+func _fts5SpecialDelete(tls *libc.TLS, pTab uintptr, apVal uintptr) (r int32) {
 	var eType1, rc int32
 	var iDel Tsqlite3_int64
 	_, _, _ = eType1, iDel, rc
@@ -5428,7 +5428,7 @@ func _fts5SyncMethod(tls *libc.TLS, pVtab uintptr) (r int32) {
 //	** occurs, an SQLite error code is returned. The final values of the two
 //	** output parameters are undefined in this case.
 //	*/
-func _fts5TextFromStmt(tls *libc.TLS, pConfig, pStmt uintptr, iCol int32, ppText, pnText uintptr) (r int32) {
+func _fts5TextFromStmt(tls *libc.TLS, pConfig uintptr, pStmt uintptr, iCol int32, ppText uintptr, pnText uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pVal uintptr
@@ -5487,7 +5487,7 @@ func _fts5TokendataIterDelete(tls *libc.TLS, pSet uintptr) {
 //	** If the segment-iterator passed as the first argument is at EOF, then
 //	** set pIter->term to a copy of buffer pTerm.
 //	*/
-func _fts5TokendataSetTermIfEof(tls *libc.TLS, pIter, pTerm uintptr) {
+func _fts5TokendataSetTermIfEof(tls *libc.TLS, pIter uintptr, pTerm uintptr) {
 	if pIter != 0 && (*(*TFts5SegIter)(unsafe.Pointer(pIter + 104))).FpLeaf == uintptr(0) {
 		_sqlite3Fts5BufferSet(tls, (*TFts5Iter)(unsafe.Pointer(pIter)).FpIndex+60, pIter+104+96, (*TFts5Buffer)(unsafe.Pointer(pTerm)).Fn, (*TFts5Buffer)(unsafe.Pointer(pTerm)).Fp)
 	}
@@ -5562,7 +5562,7 @@ func _fts5VocabCloseMethod(tls *libc.TLS, pCursor uintptr) (r int32) {
 	return SQLITE_OK
 }
 
-func _fts5VocabColumnMethod(tls *libc.TLS, pCursor, pCtx uintptr, iCol int32) (r int32) {
+func _fts5VocabColumnMethod(tls *libc.TLS, pCursor uintptr, pCtx uintptr, iCol int32) (r int32) {
 	var eDetail, eType, ii, ii1 int32
 	var iVal Ti64
 	var pCsr, z, z1 uintptr
@@ -5660,7 +5660,7 @@ func _fts5VocabInstanceNext(tls *libc.TLS, pCsr uintptr) (r int32) {
 //	** Create a wrapper tokenizer. The context argument pCtx points to the
 //	** Fts5TokenizerModule object.
 //	*/
-func _fts5VtoVCreate(tls *libc.TLS, pCtx, azArg uintptr, nArg int32, ppOut uintptr) (r int32) {
+func _fts5VtoVCreate(tls *libc.TLS, pCtx uintptr, azArg uintptr, nArg int32, ppOut uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pMod, pNew uintptr
@@ -5694,7 +5694,7 @@ func _fts5VtoVCreate(tls *libc.TLS, pCtx, azArg uintptr, nArg int32, ppOut uintp
 //	** This function is called when flushing a leaf page that contains no
 //	** terms at all to disk.
 //	*/
-func _fts5WriteBtreeNoTerm(tls *libc.TLS, p, pWriter uintptr) {
+func _fts5WriteBtreeNoTerm(tls *libc.TLS, p uintptr, pWriter uintptr) {
 	var pDlidx uintptr
 	_ = pDlidx
 	/* If there were no rowids on the leaf page either and the doclist-index
@@ -5718,7 +5718,7 @@ func _fts5WriteBtreeNoTerm(tls *libc.TLS, p, pWriter uintptr) {
 //	** If an error occurs, an error code is left in Fts5Index.rc. If an error
 //	** has already occurred when this function is called, it is a no-op.
 //	*/
-func _fts5WriteBtreeTerm(tls *libc.TLS, p, pWriter uintptr, nTerm int32, pTerm uintptr) {
+func _fts5WriteBtreeTerm(tls *libc.TLS, p uintptr, pWriter uintptr, nTerm int32, pTerm uintptr) {
 	_fts5WriteFlushBtree(tls, p, pWriter)
 	if (*TFts5Index)(unsafe.Pointer(p)).Frc == SQLITE_OK {
 		_sqlite3Fts5BufferSet(tls, p+60, pWriter+96, nTerm, pTerm)
@@ -5732,7 +5732,7 @@ func _fts5WriteBtreeTerm(tls *libc.TLS, p, pWriter uintptr, nTerm int32, pTerm u
 //	** Flush any data cached by the writer object to the database. Free any
 //	** allocations associated with the writer.
 //	*/
-func _fts5WriteFinish(tls *libc.TLS, p, pWriter, pnLeaf uintptr) {
+func _fts5WriteFinish(tls *libc.TLS, p uintptr, pWriter uintptr, pnLeaf uintptr) {
 	var i int32
 	var pLeaf uintptr
 	_, _ = i, pLeaf
@@ -5790,7 +5790,7 @@ func _fts5yy_pop_parser_stack(tls *libc.TLS, pParser uintptr) {
 //	** copies of a single function are created when create_function() is called
 //	** with SQLITE_ANY as the encoding.
 //	*/
-func _functionDestroy(tls *libc.TLS, db, p uintptr) {
+func _functionDestroy(tls *libc.TLS, db uintptr, p uintptr) {
 	var pDestructor uintptr
 	_ = pDestructor
 	pDestructor = *(*uintptr)(unsafe.Pointer(p + 64))
@@ -5815,7 +5815,7 @@ func _gatherSelectWindows(tls *libc.TLS, p uintptr) {
 	_sqlite3WalkSelect(tls, bp, p)
 }
 
-func _gatherSelectWindowsSelectCallback(tls *libc.TLS, pWalker, p uintptr) (r int32) {
+func _gatherSelectWindowsSelectCallback(tls *libc.TLS, pWalker uintptr, p uintptr) (r int32) {
 	var v1 int32
 	_ = v1
 	if p == *(*uintptr)(unsafe.Pointer(pWalker + 40)) {
@@ -5832,7 +5832,7 @@ func _gatherSelectWindowsSelectCallback(tls *libc.TLS, pWalker, p uintptr) (r in
 //	** Generate code that will tell the VDBE the declaration types of columns
 //	** in the result set.
 //	*/
-func _generateColumnTypes(tls *libc.TLS, pParse, pTabList, pEList uintptr) {
+func _generateColumnTypes(tls *libc.TLS, pParse uintptr, pTabList uintptr, pEList uintptr) {
 	bp := tls.Alloc(80)
 	defer tls.Free(80)
 	var i int32
@@ -6094,7 +6094,7 @@ func _getTextArg(tls *libc.TLS, p uintptr) (r uintptr) {
 	return Xsqlite3_value_text(tls, **(**uintptr)(__ccgo_up((*TPrintfArguments)(unsafe.Pointer(p)).FapArg + uintptr(v1)*8)))
 }
 
-func _heightOfExprList(tls *libc.TLS, p, pnHeight uintptr) {
+func _heightOfExprList(tls *libc.TLS, p uintptr, pnHeight uintptr) {
 	var i int32
 	_ = i
 	if p != 0 {
@@ -6123,7 +6123,7 @@ func _heightOfExprList(tls *libc.TLS, p, pnHeight uintptr) {
 //	** contains a USING clause, or if none of the USING clauses contain zName,
 //	** then return false.
 //	*/
-func _inAnyUsingClause(tls *libc.TLS, zName, pBase uintptr, N int32) (r int32) {
+func _inAnyUsingClause(tls *libc.TLS, zName uintptr, pBase uintptr, N int32) (r int32) {
 	for N > 0 {
 		N = N - 1
 		pBase += 80
@@ -6188,7 +6188,7 @@ func _indexColumnNotNull(tls *libc.TLS, pIdx uintptr, iCol int32) (r int32) {
 // C documentation
 //
 //	/* Return the next index from the list.  Return NULL when out of indexes */
-func _indexIteratorNext(tls *libc.TLS, pIter, pIx uintptr) (r uintptr) {
+func _indexIteratorNext(tls *libc.TLS, pIter uintptr, pIx uintptr) (r uintptr) {
 	var i, v1 int32
 	var v2 uintptr
 	_, _, _ = i, v1, v2
@@ -6298,7 +6298,7 @@ func _isDupColumn(tls *libc.TLS, pIdx uintptr, nKey int32, pPk uintptr, iCol int
 //	/*
 //	** TRUE if p is a lookaside memory allocation from db
 //	*/
-func _isLookaside(tls *libc.TLS, db, p uintptr) (r int32) {
+func _isLookaside(tls *libc.TLS, db uintptr, p uintptr) (r int32) {
 	return libc.BoolInt32(uint64(p) >= uint64((*Tsqlite3)(unsafe.Pointer(db)).Flookaside.FpStart) && uint64(p) < uint64((*Tsqlite3)(unsafe.Pointer(db)).Flookaside.FpTrueEnd))
 }
 
@@ -6312,7 +6312,7 @@ func _isLookaside(tls *libc.TLS, db, p uintptr) (r int32) {
 //	** If pThis is a self-join, then return the SrcItem for the first other
 //	** instance of that view found.  If pThis is not a self-join then return 0.
 //	*/
-func _isSelfJoinView(tls *libc.TLS, pTabList, pThis uintptr, iFirst, iEnd int32) (r uintptr) {
+func _isSelfJoinView(tls *libc.TLS, pTabList uintptr, pThis uintptr, iFirst int32, iEnd int32) (r uintptr) {
 	var pItem, pS1, pSel uintptr
 	var v1 int32
 	_, _, _, _ = pItem, pS1, pSel, v1
@@ -6415,7 +6415,7 @@ func _jsonEachCursorReset(tls *libc.TLS, p uintptr) {
 // C documentation
 //
 //	/* constructor for a JsonEachCursor object for json_each()/json_tree(). */
-func _jsonEachOpen(tls *libc.TLS, p, ppCursor uintptr) (r int32) {
+func _jsonEachOpen(tls *libc.TLS, p uintptr, ppCursor uintptr) (r int32) {
 	var pCur, pVtab uintptr
 	_, _ = pCur, pVtab
 	pVtab = p
@@ -6608,7 +6608,7 @@ func _logFunc(tls *libc.TLS, context uintptr, argc int32, argv uintptr) {
 //	**
 //	** Return the register in which the result is stored.
 //	*/
-func _makeSorterRecord(tls *libc.TLS, pParse, pSort, pSelect uintptr, regBase, nBase int32) (r int32) {
+func _makeSorterRecord(tls *libc.TLS, pParse uintptr, pSort uintptr, pSelect uintptr, regBase int32, nBase int32) (r int32) {
 	var nOBSat, regOut, v1 int32
 	var v, v2 uintptr
 	_, _, _, _, _ = nOBSat, regOut, v, v1, v2
@@ -6630,7 +6630,7 @@ func _makeSorterRecord(tls *libc.TLS, pParse, pSort, pSelect uintptr, regBase, n
 //	/*
 //	** Mark term iChild as being a child of term iParent
 //	*/
-func _markTermAsChild(tls *libc.TLS, pWC uintptr, iChild, iParent int32) {
+func _markTermAsChild(tls *libc.TLS, pWC uintptr, iChild int32, iParent int32) {
 	(**(**TWhereTerm)(__ccgo_up((*TWhereClause)(unsafe.Pointer(pWC)).Fa + uintptr(iChild)*56))).FiParent = iParent
 	(**(**TWhereTerm)(__ccgo_up((*TWhereClause)(unsafe.Pointer(pWC)).Fa + uintptr(iChild)*56))).FtruthProb = (**(**TWhereTerm)(__ccgo_up((*TWhereClause)(unsafe.Pointer(pWC)).Fa + uintptr(iParent)*56))).FtruthProb
 	(**(**TWhereTerm)(__ccgo_up((*TWhereClause)(unsafe.Pointer(pWC)).Fa + uintptr(iParent)*56))).FnChild = (**(**TWhereTerm)(__ccgo_up((*TWhereClause)(unsafe.Pointer(pWC)).Fa + uintptr(iParent)*56))).FnChild + 1
@@ -6839,7 +6839,7 @@ func _moveToParent(tls *libc.TLS, pCur uintptr) {
 //	** The collating sequence for the compound select is taken from the
 //	** left-most term of the select that has a collating sequence.
 //	*/
-func _multiSelectCollSeq(tls *libc.TLS, pParse, p uintptr, iCol int32) (r uintptr) {
+func _multiSelectCollSeq(tls *libc.TLS, pParse uintptr, p uintptr, iCol int32) (r uintptr) {
 	var pRet uintptr
 	_ = pRet
 	if (*TSelect)(unsafe.Pointer(p)).FpPrior != 0 {
@@ -6861,7 +6861,7 @@ func _multiSelectCollSeq(tls *libc.TLS, pParse, p uintptr, iCol int32) (r uintpt
 //	/*
 //	** Remove node pNode from the node hash table.
 //	*/
-func _nodeHashDelete(tls *libc.TLS, pRtree, pNode uintptr) {
+func _nodeHashDelete(tls *libc.TLS, pRtree uintptr, pNode uintptr) {
 	var pp uintptr
 	_ = pp
 	if (*TRtreeNode)(unsafe.Pointer(pNode)).FiNode != 0 {
@@ -7181,7 +7181,7 @@ func _pcache1Free(tls *libc.TLS, p uintptr) {
 //	/*
 //	** Implementation of the sqlite3_pcache.xRekey method.
 //	*/
-func _pcache1Rekey(tls *libc.TLS, p, pPg uintptr, iOld, iNew uint32) {
+func _pcache1Rekey(tls *libc.TLS, p uintptr, pPg uintptr, iOld uint32, iNew uint32) {
 	var hNew, hOld uint32
 	var pCache, pPage, pp uintptr
 	_, _, _, _, _ = hNew, hOld, pCache, pPage, pp
@@ -7390,7 +7390,7 @@ func _pcache1UnderMemoryPressure(tls *libc.TLS, pCache uintptr) (r int32) {
 //	**
 //	** Mark a page as unpinned (eligible for asynchronous recycling).
 //	*/
-func _pcache1Unpin(tls *libc.TLS, p, pPg uintptr, reuseUnlikely int32) {
+func _pcache1Unpin(tls *libc.TLS, p uintptr, pPg uintptr, reuseUnlikely int32) {
 	var pCache, pGroup, pPage, ppFirst, v1 uintptr
 	_, _, _, _, _ = pCache, pGroup, pPage, ppFirst, v1
 	pCache = p
@@ -7421,7 +7421,7 @@ func _pcache1Unpin(tls *libc.TLS, p, pPg uintptr, reuseUnlikely int32) {
 //	** Merge two lists of pages connected by pDirty and in pgno order.
 //	** Do not bother fixing the pDirtyPrev pointers.
 //	*/
-func _pcacheMergeDirtyList(tls *libc.TLS, pA, pB uintptr) (r uintptr) {
+func _pcacheMergeDirtyList(tls *libc.TLS, pA uintptr, pB uintptr) (r uintptr) {
 	bp := tls.Alloc(80)
 	defer tls.Free(80)
 	var pTail uintptr
@@ -7464,7 +7464,7 @@ func _pcacheMergeDirtyList(tls *libc.TLS, pA, pB uintptr) (r uintptr) {
 //	** RBU handle. If an error has already occurred when this function is
 //	** called, it is a no-op.
 //	*/
-func _rbuMPrintfExec(tls *libc.TLS, p, db, zFmt, va uintptr) (r int32) {
+func _rbuMPrintfExec(tls *libc.TLS, p uintptr, db uintptr, zFmt uintptr, va uintptr) (r int32) {
 	var ap Tva_list
 	var zSql uintptr
 	_, _ = ap, zSql
@@ -7677,7 +7677,7 @@ func _releaseAllSavepoints(tls *libc.TLS, pPager uintptr) {
 //	/* Remove a single entry from the hash table given a pointer to that
 //	** element and a hash on the element's key.
 //	*/
-func _removeElement(tls *libc.TLS, pH, elem uintptr) {
+func _removeElement(tls *libc.TLS, pH uintptr, elem uintptr) {
 	var pEntry uintptr
 	_ = pEntry
 	if (*THashElem)(unsafe.Pointer(elem)).Fprev != 0 {
@@ -7735,7 +7735,7 @@ func _removeFromBlockedList(tls *libc.TLS, db uintptr) {
 //	** corresponding rename-token from Parse object pParse and add it
 //	** to the RenameCtx pCtx.
 //	*/
-func _renameColumnElistNames(tls *libc.TLS, pParse, pCtx, pEList, zOld uintptr) {
+func _renameColumnElistNames(tls *libc.TLS, pParse uintptr, pCtx uintptr, pEList uintptr, zOld uintptr) {
 	var i int32
 	var zName uintptr
 	_, _ = i, zName
@@ -7764,7 +7764,7 @@ func _renameColumnElistNames(tls *libc.TLS, pParse, pCtx, pEList, zOld uintptr) 
 //	** that matches the string in zOld, extract the corresponding rename-token
 //	** from Parse object pParse and add it to the RenameCtx pCtx.
 //	*/
-func _renameColumnIdlistNames(tls *libc.TLS, pParse, pCtx, pIdList, zOld uintptr) {
+func _renameColumnIdlistNames(tls *libc.TLS, pParse uintptr, pCtx uintptr, pIdList uintptr, zOld uintptr) {
 	var i int32
 	var zName uintptr
 	_, _ = i, zName
@@ -7839,7 +7839,7 @@ func _renameColumnTokenNext(tls *libc.TLS, pCtx uintptr) (r uintptr) {
 //	** RenameToken object is found, remove it from the Parse object and add it to
 //	** the list maintained by the RenameCtx object.
 //	*/
-func _renameTokenFind(tls *libc.TLS, pParse, pCtx, pPtr uintptr) (r uintptr) {
+func _renameTokenFind(tls *libc.TLS, pParse uintptr, pCtx uintptr, pPtr uintptr) (r uintptr) {
 	var pToken, pp uintptr
 	_, _ = pToken, pp
 	if pPtr == uintptr(0) {
@@ -7874,7 +7874,7 @@ func _renameTokenFind(tls *libc.TLS, pParse, pCtx, pPtr uintptr) (r uintptr) {
 //	** Invoke sqlite3WalkExpr() or sqlite3WalkSelect() on all Select or Expr
 //	** objects that are part of the trigger passed as the second argument.
 //	*/
-func _renameWalkTrigger(tls *libc.TLS, pWalker, pTrigger uintptr) {
+func _renameWalkTrigger(tls *libc.TLS, pWalker uintptr, pTrigger uintptr) {
 	var i int32
 	var pSrc, pStep, pUpsert uintptr
 	_, _, _, _ = i, pSrc, pStep, pUpsert
@@ -7924,7 +7924,7 @@ func _renameWalkTrigger(tls *libc.TLS, pWalker, pTrigger uintptr) {
 //	/*
 //	** *piCursor is a cursor number.  Change it if it needs to be mapped.
 //	*/
-func _renumberCursorDoMapping(tls *libc.TLS, pWalker, piCursor uintptr) {
+func _renumberCursorDoMapping(tls *libc.TLS, pWalker uintptr, piCursor uintptr) {
 	var aCsrMap uintptr
 	var iCsr int32
 	_, _ = aCsrMap, iCsr
@@ -7943,7 +7943,7 @@ func _renumberCursorDoMapping(tls *libc.TLS, pWalker, piCursor uintptr) {
 //	** The input lists are connected via pRight pointers and are
 //	** assumed to each already be in sorted order.
 //	*/
-func _rowSetEntryMerge(tls *libc.TLS, pA, pB uintptr) (r uintptr) {
+func _rowSetEntryMerge(tls *libc.TLS, pA uintptr, pB uintptr) (r uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var pTail, v2 uintptr
@@ -8170,7 +8170,7 @@ func _rtreeSearchPointFirst(tls *libc.TLS, pCur uintptr) (r uintptr) {
 //	/*
 //	** Interchange two search points in a cursor.
 //	*/
-func _rtreeSearchPointSwap(tls *libc.TLS, p uintptr, i, j int32) {
+func _rtreeSearchPointSwap(tls *libc.TLS, p uintptr, i int32, j int32) {
 	var pTemp uintptr
 	var t TRtreeSearchPoint
 	_, _ = pTemp, t
@@ -8223,7 +8223,7 @@ func _rtreeShadowName(tls *libc.TLS, zName uintptr) (r int32) {
 //	** as pSrcItem but has the same alias as p0, then return true.
 //	** Otherwise return false.
 //	*/
-func _sameSrcAlias(tls *libc.TLS, p0, pSrc uintptr) (r int32) {
+func _sameSrcAlias(tls *libc.TLS, p0 uintptr, pSrc uintptr) (r int32) {
 	var i int32
 	var p1 uintptr
 	_, _ = i, p1
@@ -8254,7 +8254,7 @@ func _sameSrcAlias(tls *libc.TLS, p0, pSrc uintptr) (r int32) {
 //
 //	/* Reclaim memory used by a StatSample
 //	*/
-func _sampleClear(tls *libc.TLS, db, p uintptr) {
+func _sampleClear(tls *libc.TLS, db uintptr, p uintptr) {
 	if (*TStatSample)(unsafe.Pointer(p)).FnRowid != 0 {
 		_sqlite3DbFree(tls, db, *(*uintptr)(unsafe.Pointer(p + 24)))
 		(*TStatSample)(unsafe.Pointer(p)).FnRowid = uint32(0)
@@ -8345,7 +8345,7 @@ func _samplePushPrevious(tls *libc.TLS, p uintptr, iChng int32) {
 //
 //	/* Initialize the INTEGER value of a ROWID.
 //	*/
-func _sampleSetRowidInt64(tls *libc.TLS, db, p uintptr, iRowid Ti64) {
+func _sampleSetRowidInt64(tls *libc.TLS, db uintptr, p uintptr, iRowid Ti64) {
 	if (*TStatSample)(unsafe.Pointer(p)).FnRowid != 0 {
 		_sqlite3DbFree(tls, db, *(*uintptr)(unsafe.Pointer(p + 24)))
 	}
@@ -8365,7 +8365,7 @@ func _sampleSetRowidInt64(tls *libc.TLS, db, p uintptr, iRowid Ti64) {
 //	** If a non-NULL value is returned, set *ppContext to point to the With
 //	** object that the returned CTE belongs to.
 //	*/
-func _searchWith(tls *libc.TLS, pWith, pItem, ppContext uintptr) (r uintptr) {
+func _searchWith(tls *libc.TLS, pWith uintptr, pItem uintptr, ppContext uintptr) (r uintptr) {
 	var i int32
 	var p, zName uintptr
 	_, _, _ = i, p, zName
@@ -8400,7 +8400,7 @@ func _searchWith(tls *libc.TLS, pWith, pItem, ppContext uintptr) (r uintptr) {
 	return uintptr(0)
 }
 
-func _selectRefLeave(tls *libc.TLS, pWalker, pSelect uintptr) {
+func _selectRefLeave(tls *libc.TLS, pWalker uintptr, pSelect uintptr) {
 	var p, pSrc uintptr
 	_, _ = p, pSrc
 	p = *(*uintptr)(unsafe.Pointer(pWalker + 40))
@@ -8410,7 +8410,7 @@ func _selectRefLeave(tls *libc.TLS, pWalker, pSelect uintptr) {
 	}
 }
 
-func _selectWindowRewriteSelectCb(tls *libc.TLS, pWalker, pSelect uintptr) (r int32) {
+func _selectWindowRewriteSelectCb(tls *libc.TLS, pWalker uintptr, pSelect uintptr) (r int32) {
 	var p, pSave uintptr
 	_, _ = p, pSave
 	p = *(*uintptr)(unsafe.Pointer(pWalker + 40))
@@ -8456,7 +8456,7 @@ func _sessionAppendByte(tls *libc.TLS, p uintptr, v Tu8, pRc uintptr) {
 //	** Otherwise, if an error occurs, *pRc is set to an SQLite error code
 //	** before returning.
 //	*/
-func _sessionAppendValue(tls *libc.TLS, p, pVal, pRc uintptr) {
+func _sessionAppendValue(tls *libc.TLS, p uintptr, pVal uintptr, pRc uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var v1 uintptr
@@ -8519,7 +8519,7 @@ func _sessionAppendVarint(tls *libc.TLS, p uintptr, v int32, pRc uintptr) {
 //	** returns SQLITE_ABORT. Otherwise, if no error occurs, SQLITE_OK is
 //	** returned.
 //	*/
-func _sessionApplyOneOp(tls *libc.TLS, pIter, p, __ccgo_fp_xConflict, pCtx, pbReplace, pbRetry uintptr) (r int32) {
+func _sessionApplyOneOp(tls *libc.TLS, pIter uintptr, p uintptr, __ccgo_fp_xConflict uintptr, pCtx uintptr, pbReplace uintptr, pbRetry uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var abPK, pNew, pOld, v1 uintptr
@@ -8654,7 +8654,7 @@ func _sessionApplyOneOp(tls *libc.TLS, pIter, p, __ccgo_fp_xConflict, pCtx, pbRe
 //	** error code. If an error occurs and xOutput is NULL, (*ppOut) and (*pnOut)
 //	** are both set to 0 before returning.
 //	*/
-func _sessionChangegroupOutput(tls *libc.TLS, pGrp, __ccgo_fp_xOutput, pOut, pnOut, ppOut uintptr) (r int32) {
+func _sessionChangegroupOutput(tls *libc.TLS, pGrp uintptr, __ccgo_fp_xOutput uintptr, pOut uintptr, pnOut uintptr, ppOut uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var i int32
@@ -8733,7 +8733,7 @@ func _sessionChangegroupOutput(tls *libc.TLS, pGrp, __ccgo_fp_xOutput, pOut, pnO
 //	** Add all changes in the changeset traversed by the iterator passed as
 //	** the first argument to the changegroup hash tables.
 //	*/
-func _sessionChangesetToHash(tls *libc.TLS, pIter, pGrp uintptr, bRebase int32) (r int32) {
+func _sessionChangesetToHash(tls *libc.TLS, pIter uintptr, pGrp uintptr, bRebase int32) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32
@@ -8760,7 +8760,7 @@ func _sessionChangesetToHash(tls *libc.TLS, pIter, pGrp uintptr, bRebase int32) 
 //	** Free the list of table objects passed as the first argument. The contents
 //	** of the changed-rows hash tables are also deleted.
 //	*/
-func _sessionDeleteTable(tls *libc.TLS, pSession, pList uintptr) {
+func _sessionDeleteTable(tls *libc.TLS, pSession uintptr, pList uintptr) {
 	var i int32
 	var p, pNext, pNextChange, pTab uintptr
 	_, _, _, _, _ = i, p, pNext, pNextChange, pTab
@@ -8810,7 +8810,7 @@ func _sessionDeleteTable(tls *libc.TLS, pSession, pList uintptr) {
 //	** call to sessionMalloc64(). If pSession is not NULL, decrease the
 //	** sqlite3_session.nMalloc counter by the number of bytes freed.
 //	*/
-func _sessionFree(tls *libc.TLS, pSession, pFree uintptr) {
+func _sessionFree(tls *libc.TLS, pSession uintptr, pFree uintptr) {
 	var v1 uintptr
 	_ = v1
 	if pSession != 0 {
@@ -8878,7 +8878,7 @@ func _sessionInputBuffer(tls *libc.TLS, pIn uintptr, nByte int32) (r int32) {
 //	** Add the change currently indicated by iterator pIter to the hash table
 //	** belonging to changegroup pGrp.
 //	*/
-func _sessionOneChangeIterToHash(tls *libc.TLS, pGrp, pIter uintptr, bRebase int32) (r int32) {
+func _sessionOneChangeIterToHash(tls *libc.TLS, pGrp uintptr, pIter uintptr, bRebase int32) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var aRec uintptr
@@ -8962,7 +8962,7 @@ func _setAllPagerFlags(tls *libc.TLS, db uintptr) {
 //	** can be checked before any changes are made to the database, it is never
 //	** necessary to undo a write and the checkpoint should not be set.
 //	*/
-func _sqlite3BeginWriteOperation(tls *libc.TLS, pParse uintptr, setStatement, iDb int32) {
+func _sqlite3BeginWriteOperation(tls *libc.TLS, pParse uintptr, setStatement int32, iDb int32) {
 	var pToplevel, v1 uintptr
 	_, _ = pToplevel, v1
 	if (*TParse)(unsafe.Pointer(pParse)).FpToplevel != 0 {
@@ -9026,7 +9026,7 @@ func _sqlite3BitvecDestroy(tls *libc.TLS, p uintptr) {
 //	** Parameter eMode is one of SQLITE_CHECKPOINT_PASSIVE, FULL, RESTART
 //	** or TRUNCATE.
 //	*/
-func _sqlite3Checkpoint(tls *libc.TLS, db uintptr, iDb, eMode int32, pnLog, pnCkpt uintptr) (r int32) {
+func _sqlite3Checkpoint(tls *libc.TLS, db uintptr, iDb int32, eMode int32, pnLog uintptr, pnCkpt uintptr) (r int32) {
 	var bBusy, i, rc, v2 int32
 	_, _, _, _ = bBusy, i, rc, v2
 	rc = SQLITE_OK /* Used to iterate through attached dbs */
@@ -9088,7 +9088,7 @@ func _sqlite3CloseExtensions(tls *libc.TLS, db uintptr) {
 //	** If argument zDb is NULL, then call sqlite3CodeVerifySchema() for each
 //	** attached database. Otherwise, invoke it for the database named zDb only.
 //	*/
-func _sqlite3CodeVerifyNamedSchema(tls *libc.TLS, pParse, zDb uintptr) {
+func _sqlite3CodeVerifyNamedSchema(tls *libc.TLS, pParse uintptr, zDb uintptr) {
 	var db, pDb uintptr
 	var i int32
 	_, _, _ = db, i, pDb
@@ -9131,7 +9131,7 @@ func _sqlite3CodeVerifySchemaAtToplevel(tls *libc.TLS, pToplevel uintptr, iDb in
 //	/*
 //	** Create a new CTE object
 //	*/
-func _sqlite3CteNew(tls *libc.TLS, pParse, pName, pArglist, pQuery uintptr, eM10d Tu8) (r uintptr) {
+func _sqlite3CteNew(tls *libc.TLS, pParse uintptr, pName uintptr, pArglist uintptr, pQuery uintptr, eM10d Tu8) (r uintptr) {
 	var db, pNew uintptr
 	_, _ = db, pNew
 	db = (*TParse)(unsafe.Pointer(pParse)).Fdb
@@ -9155,7 +9155,7 @@ func _sqlite3CteNew(tls *libc.TLS, pParse, pName, pArglist, pQuery uintptr, eM10
 //	** connection.  Calling sqlite3DbFree(D,X) for X==0 is a harmless no-op.
 //	** The sqlite3DbFreeNN(D,X) version requires that X be non-NULL.
 //	*/
-func _sqlite3DbFreeNN(tls *libc.TLS, db, p uintptr) {
+func _sqlite3DbFreeNN(tls *libc.TLS, db uintptr, p uintptr) {
 	var pBuf, pBuf1 uintptr
 	_, _ = pBuf, pBuf1
 	if db != 0 {
@@ -9231,7 +9231,7 @@ func _sqlite3DbMallocRawNN(tls *libc.TLS, db uintptr, n Tu64) (r uintptr) {
 	return _dbMallocRawFinish(tls, db, n)
 }
 
-func _sqlite3DbNNFreeNN(tls *libc.TLS, db, p uintptr) {
+func _sqlite3DbNNFreeNN(tls *libc.TLS, db uintptr, p uintptr) {
 	var pBuf, pBuf1 uintptr
 	_, _ = pBuf, pBuf1
 	if uint64(p) < uint64((*Tsqlite3)(unsafe.Pointer(db)).Flookaside.FpEnd) {
@@ -9260,7 +9260,7 @@ func _sqlite3DbNNFreeNN(tls *libc.TLS, db, p uintptr) {
 //	/*
 //	** Return the Btree pointer identified by zDbName.  Return NULL if not found.
 //	*/
-func _sqlite3DbNameToBtree(tls *libc.TLS, db, zDbName uintptr) (r uintptr) {
+func _sqlite3DbNameToBtree(tls *libc.TLS, db uintptr, zDbName uintptr) (r uintptr) {
 	var iDb, v1 int32
 	var v2 uintptr
 	_, _, _ = iDb, v1, v2
@@ -9284,7 +9284,7 @@ func _sqlite3DbNameToBtree(tls *libc.TLS, db, zDbName uintptr) (r uintptr) {
 //	** Resize the block of memory pointed to by p to n bytes. If the
 //	** resize fails, set the mallocFailed flag in the connection object.
 //	*/
-func _sqlite3DbRealloc(tls *libc.TLS, db, p uintptr, n Tu64) (r uintptr) {
+func _sqlite3DbRealloc(tls *libc.TLS, db uintptr, p uintptr, n Tu64) (r uintptr) {
 	if p == uintptr(0) {
 		return _sqlite3DbMallocRawNN(tls, db, n)
 	}
@@ -9310,7 +9310,7 @@ func _sqlite3DbRealloc(tls *libc.TLS, db, p uintptr, n Tu64) (r uintptr) {
 //	** If the Index.aSample variable is not NULL, delete the aSample[] array
 //	** and its contents.
 //	*/
-func _sqlite3DeleteIndexSamples(tls *libc.TLS, db, pIdx uintptr) {
+func _sqlite3DeleteIndexSamples(tls *libc.TLS, db uintptr, pIdx uintptr) {
 	var j int32
 	var p uintptr
 	_, _ = j, p
@@ -9340,7 +9340,7 @@ func _sqlite3DeleteIndexSamples(tls *libc.TLS, db, pIdx uintptr) {
 //	/*
 //	** Clean up the data structures associated with the RETURNING clause.
 //	*/
-func _sqlite3DeleteReturning(tls *libc.TLS, db, pArg uintptr) {
+func _sqlite3DeleteReturning(tls *libc.TLS, db uintptr, pArg uintptr) {
 	var pHash, pRet uintptr
 	_, _ = pHash, pRet
 	pRet = pArg
@@ -9350,7 +9350,7 @@ func _sqlite3DeleteReturning(tls *libc.TLS, db, pArg uintptr) {
 	_sqlite3DbFree(tls, db, pRet)
 }
 
-func _sqlite3DeleteTable(tls *libc.TLS, db, pTable uintptr) {
+func _sqlite3DeleteTable(tls *libc.TLS, db uintptr, pTable uintptr) {
 	var v1 Tu32
 	var v2 uintptr
 	var v3 bool
@@ -9378,7 +9378,7 @@ func _sqlite3DeleteTable(tls *libc.TLS, db, pTable uintptr) {
 //	**
 //	** If an error is found, the analysis is cut short.
 //	*/
-func _sqlite3ExprAnalyzeAggList(tls *libc.TLS, pNC, pList uintptr) {
+func _sqlite3ExprAnalyzeAggList(tls *libc.TLS, pNC uintptr, pList uintptr) {
 	var i int32
 	var pItem uintptr
 	_, _ = i, pItem
@@ -9410,7 +9410,7 @@ func _sqlite3ExprAnalyzeAggList(tls *libc.TLS, pNC, pList uintptr) {
 //	** This routine should only be called after the expression has been
 //	** analyzed by sqlite3ResolveExprNames().
 //	*/
-func _sqlite3ExprAnalyzeAggregates(tls *libc.TLS, pNC, pExpr uintptr) {
+func _sqlite3ExprAnalyzeAggregates(tls *libc.TLS, pNC uintptr, pExpr uintptr) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var _ /* w at bp+0 */ TWalker
@@ -9431,7 +9431,7 @@ func _sqlite3ExprAnalyzeAggregates(tls *libc.TLS, pNC, pExpr uintptr) {
 //	** columns as the vector on the LHS. Or, if the RHS of the IN() is not
 //	** a sub-query, that the LHS is a vector of size 1.
 //	*/
-func _sqlite3ExprCheckIN(tls *libc.TLS, pParse, pIn uintptr) (r int32) {
+func _sqlite3ExprCheckIN(tls *libc.TLS, pParse uintptr, pIn uintptr) (r int32) {
 	var nVector int32
 	_ = nVector
 	nVector = _sqlite3ExprVectorSize(tls, (*TExpr)(unsafe.Pointer(pIn)).FpLeft)
@@ -9457,7 +9457,7 @@ func _sqlite3ExprCheckIN(tls *libc.TLS, pParse, pIn uintptr) (r int32) {
 //	** in register target.  If the expression is constant, then this routine
 //	** might choose to code the expression at initialization time.
 //	*/
-func _sqlite3ExprCodeFactorable(tls *libc.TLS, pParse, pExpr uintptr, target int32) {
+func _sqlite3ExprCodeFactorable(tls *libc.TLS, pParse uintptr, pExpr uintptr, target int32) {
 	if int32(Tbft(*(*uint16)(unsafe.Pointer(pParse + 40))&0x80>>7)) != 0 && _sqlite3ExprIsConstantNotJoin(tls, pParse, pExpr) != 0 {
 		_sqlite3ExprCodeRunJustOnce(tls, pParse, pExpr, target)
 	} else {
@@ -9470,7 +9470,7 @@ func _sqlite3ExprCodeFactorable(tls *libc.TLS, pParse, pExpr uintptr, target int
 //	/* Generate code that will load into register regOut a value that is
 //	** appropriate for the iIdxCol-th column of index pIdx.
 //	*/
-func _sqlite3ExprCodeLoadIndexColumn(tls *libc.TLS, pParse, pIdx uintptr, iTabCur, iIdxCol, regOut int32) {
+func _sqlite3ExprCodeLoadIndexColumn(tls *libc.TLS, pParse uintptr, pIdx uintptr, iTabCur int32, iIdxCol int32, regOut int32) {
 	var iTabCol Ti16
 	_ = iTabCol
 	iTabCol = **(**Ti16)(__ccgo_up((*TIndex)(unsafe.Pointer(pIdx)).FaiColumn + uintptr(iIdxCol)*2))
@@ -9483,7 +9483,7 @@ func _sqlite3ExprCodeLoadIndexColumn(tls *libc.TLS, pParse, pIdx uintptr, iTabCu
 	}
 }
 
-func _sqlite3ExprListAppend(tls *libc.TLS, pParse, pList, pExpr uintptr) (r uintptr) {
+func _sqlite3ExprListAppend(tls *libc.TLS, pParse uintptr, pList uintptr, pExpr uintptr) (r uintptr) {
 	var pItem, v2 uintptr
 	var v1 int32
 	_, _, _ = pItem, v1, v2
@@ -9539,7 +9539,7 @@ func _sqlite3ExprListFlags(tls *libc.TLS, pList uintptr) (r Tu32) {
 //	** NULL.  If a memory allocation fails, the pParse->db->mallocFailed flag
 //	** is set.
 //	*/
-func _sqlite3ExprListSetSpan(tls *libc.TLS, pParse, pList, zStart, zEnd uintptr) {
+func _sqlite3ExprListSetSpan(tls *libc.TLS, pParse uintptr, pList uintptr, zStart uintptr, zEnd uintptr) {
 	var db, pItem uintptr
 	_, _ = db, pItem
 	db = (*TParse)(unsafe.Pointer(pParse)).Fdb
@@ -9566,7 +9566,7 @@ func _sqlite3ExprListSetSpan(tls *libc.TLS, pParse, pList, zStart, zEnd uintptr)
 //	** TEMP first, then MAIN, then any auxiliary databases added
 //	** using the ATTACH command.
 //	*/
-func _sqlite3FindIndex(tls *libc.TLS, db, zName, zDb uintptr) (r uintptr) {
+func _sqlite3FindIndex(tls *libc.TLS, db uintptr, zName uintptr, zDb uintptr) (r uintptr) {
 	var i, j, v2 int32
 	var p, pSchema uintptr
 	_, _, _, _, _ = i, j, p, pSchema, v2
@@ -9661,7 +9661,7 @@ func _sqlite3FirstAvailableRegister(tls *libc.TLS, pParse uintptr, iMin int32) (
 ** ALTER TABLE logic from the build.
  */
 
-func _sqlite3FixExpr(tls *libc.TLS, pFix, pExpr uintptr) (r int32) {
+func _sqlite3FixExpr(tls *libc.TLS, pFix uintptr, pExpr uintptr) (r int32) {
 	return _sqlite3WalkExpr(tls, pFix+8, pExpr)
 }
 
@@ -9671,7 +9671,7 @@ func _sqlite3FixExpr(tls *libc.TLS, pFix, pExpr uintptr) (r int32) {
 //	** Initialize a DbFixer structure.  This routine must be called prior
 //	** to passing the structure to one of the sqliteFixAAAA() routines below.
 //	*/
-func _sqlite3FixInit(tls *libc.TLS, pFix, pParse uintptr, iDb int32, zType, pName uintptr) {
+func _sqlite3FixInit(tls *libc.TLS, pFix uintptr, pParse uintptr, iDb int32, zType uintptr, pName uintptr) {
 	var db uintptr
 	_ = db
 	db = (*TParse)(unsafe.Pointer(pParse)).Fdb
@@ -9690,11 +9690,11 @@ func _sqlite3FixInit(tls *libc.TLS, pFix, pParse uintptr, iDb int32, zType, pNam
 	*(*uintptr)(unsafe.Pointer(pFix + 8 + 40)) = pFix
 }
 
-func _sqlite3FixSelect(tls *libc.TLS, pFix, pSelect uintptr) (r int32) {
+func _sqlite3FixSelect(tls *libc.TLS, pFix uintptr, pSelect uintptr) (r int32) {
 	return _sqlite3WalkSelect(tls, pFix+8, pSelect)
 }
 
-func _sqlite3FixTriggerStep(tls *libc.TLS, pFix, pStep uintptr) (r int32) {
+func _sqlite3FixTriggerStep(tls *libc.TLS, pFix uintptr, pStep uintptr) (r int32) {
 	var pUp uintptr
 	_ = pUp
 	for pStep != 0 {
@@ -9726,7 +9726,7 @@ func _sqlite3FixTriggerStep(tls *libc.TLS, pFix, pStep uintptr) (r int32) {
 //	** table pTab. Remove the deleted foreign keys from the Schema.fkeyHash
 //	** hash table.
 //	*/
-func _sqlite3FkDelete(tls *libc.TLS, db, pTab uintptr) {
+func _sqlite3FkDelete(tls *libc.TLS, db uintptr, pTab uintptr) {
 	var pFKey, pNext, z, v2 uintptr
 	_, _, _, _ = pFKey, pNext, z, v2 /* Copy of pFKey->pNextFrom */
 	pFKey = (*(*struct {
@@ -9838,7 +9838,7 @@ func _sqlite3ForceNotReadOnly(tls *libc.TLS, pParse uintptr) {
 //	/*
 //	** Reclaim the memory used by an index
 //	*/
-func _sqlite3FreeIndex(tls *libc.TLS, db, p uintptr) {
+func _sqlite3FreeIndex(tls *libc.TLS, db uintptr, p uintptr) {
 	_sqlite3DeleteIndexSamples(tls, db, p)
 	_sqlite3ExprDelete(tls, db, (*TIndex)(unsafe.Pointer(p)).FpPartIdxWhere)
 	_sqlite3ExprListDelete(tls, db, (*TIndex)(unsafe.Pointer(p)).FaColExpr)
@@ -9945,7 +9945,7 @@ func _sqlite3Fts5ExprClearTokens(tls *libc.TLS, pExpr uintptr) {
 //	/*
 //	** Does the work of the fts5_api.xInstToken() API method.
 //	*/
-func _sqlite3Fts5ExprInstToken(tls *libc.TLS, pExpr uintptr, iRowid Ti64, iPhrase, iCol, iOff, iToken int32, ppOut, pnOut uintptr) (r int32) {
+func _sqlite3Fts5ExprInstToken(tls *libc.TLS, pExpr uintptr, iRowid Ti64, iPhrase int32, iCol int32, iOff int32, iToken int32, ppOut uintptr, pnOut uintptr) (r int32) {
 	var pPhrase, pTerm uintptr
 	var rc int32
 	_, _, _ = pPhrase, pTerm, rc
@@ -9974,7 +9974,7 @@ func _sqlite3Fts5ExprInstToken(tls *libc.TLS, pExpr uintptr, iRowid Ti64, iPhras
 //	/*
 //	** This function is only called for detail=columns tables.
 //	*/
-func _sqlite3Fts5ExprPhraseCollist(tls *libc.TLS, pExpr uintptr, iPhrase int32, ppCollist, pnCollist uintptr) (r int32) {
+func _sqlite3Fts5ExprPhraseCollist(tls *libc.TLS, pExpr uintptr, iPhrase int32, ppCollist uintptr, pnCollist uintptr) (r int32) {
 	var pBuf, pNode, pPhrase, pTerm uintptr
 	var rc int32
 	_, _, _, _, _ = pBuf, pNode, pPhrase, pTerm, rc
@@ -10009,7 +10009,7 @@ func _sqlite3Fts5ExprPhraseSize(tls *libc.TLS, pExpr uintptr, iPhrase int32) (r 
 	return (*TFts5ExprPhrase)(unsafe.Pointer(**(**uintptr)(__ccgo_up((*TFts5Expr)(unsafe.Pointer(pExpr)).FapExprPhrase + uintptr(iPhrase)*8)))).FnTerm
 }
 
-func _sqlite3Fts5ExprPopulatePoslists(tls *libc.TLS, pConfig, pExpr, aPopulator uintptr, iCol int32, z uintptr, n int32) (r int32) {
+func _sqlite3Fts5ExprPopulatePoslists(tls *libc.TLS, pConfig uintptr, pExpr uintptr, aPopulator uintptr, iCol int32, z uintptr, n int32) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var i int32
@@ -10066,7 +10066,7 @@ func _sqlite3Fts5ExprPoslist(tls *libc.TLS, pExpr uintptr, iPhrase int32, pa uin
 //	/*
 //	** Does the work of the fts5_api.xQueryToken() API method.
 //	*/
-func _sqlite3Fts5ExprQueryToken(tls *libc.TLS, pExpr uintptr, iPhrase, iToken int32, ppOut, pnOut uintptr) (r int32) {
+func _sqlite3Fts5ExprQueryToken(tls *libc.TLS, pExpr uintptr, iPhrase int32, iToken int32, ppOut uintptr, pnOut uintptr) (r int32) {
 	var pPhrase uintptr
 	_ = pPhrase
 	pPhrase = uintptr(0)
@@ -10082,7 +10082,7 @@ func _sqlite3Fts5ExprQueryToken(tls *libc.TLS, pExpr uintptr, iPhrase, iToken in
 	return SQLITE_OK
 }
 
-func _sqlite3Fts5HashScanInit(tls *libc.TLS, p, pTerm uintptr, nTerm int32) (r int32) {
+func _sqlite3Fts5HashScanInit(tls *libc.TLS, p uintptr, pTerm uintptr, nTerm int32) (r int32) {
 	return _fts5HashEntrySort(tls, p, pTerm, nTerm, p+24)
 }
 
@@ -10156,7 +10156,7 @@ func _sqlite3Fts5IndexOptimize(tls *libc.TLS, p uintptr) (r int32) {
 //	**
 //	** pToken/nToken:
 //	*/
-func _sqlite3Fts5IterToken(tls *libc.TLS, pIndexIter, pToken uintptr, nToken int32, iRowid Ti64, iCol, iOff int32, ppOut, pnOut uintptr) (r int32) {
+func _sqlite3Fts5IterToken(tls *libc.TLS, pIndexIter uintptr, pToken uintptr, nToken int32, iRowid Ti64, iCol int32, iOff int32, ppOut uintptr, pnOut uintptr) (r int32) {
 	var aMap, p, pIter, pMap, pT uintptr
 	var i1, i2, iTest, rc int32
 	var iPos Ti64
@@ -10323,7 +10323,7 @@ func _sqlite3Fts5ParserInit(tls *libc.TLS, fts5yypRawParser uintptr) {
 //	** valid until after the final call to sqlite3Fts5Tokenize() that will use
 //	** the locale.
 //	*/
-func _sqlite3Fts5SetLocale(tls *libc.TLS, pConfig, zLocale uintptr, nLocale int32) {
+func _sqlite3Fts5SetLocale(tls *libc.TLS, pConfig uintptr, zLocale uintptr, nLocale int32) {
 	var pT uintptr
 	_ = pT
 	pT = pConfig + 128
@@ -10337,7 +10337,7 @@ func _sqlite3Fts5SetLocale(tls *libc.TLS, pConfig, zLocale uintptr, nLocale int3
 //	** Obtain an SQLite statement handle that may be used to read data from the
 //	** %_content table.
 //	*/
-func _sqlite3Fts5StorageStmt(tls *libc.TLS, p uintptr, eStmt int32, pp, pzErrMsg uintptr) (r int32) {
+func _sqlite3Fts5StorageStmt(tls *libc.TLS, p uintptr, eStmt int32, pp uintptr, pzErrMsg uintptr) (r int32) {
 	var rc int32
 	_ = rc
 	rc = _fts5StorageGetStmt(tls, p, eStmt, pp, pzErrMsg)
@@ -10439,7 +10439,7 @@ func _sqlite3GetTempRange(tls *libc.TLS, pParse uintptr, nReg int32) (r int32) {
 //	** Return a pointer to the VTable object used by connection db to access
 //	** this virtual-table, if one has been created, or NULL otherwise.
 //	*/
-func _sqlite3GetVTable(tls *libc.TLS, db, pTab uintptr) (r uintptr) {
+func _sqlite3GetVTable(tls *libc.TLS, db uintptr, pTab uintptr) (r uintptr) {
 	var pVtab uintptr
 	_ = pVtab
 	pVtab = (*(*struct {
@@ -10475,7 +10475,7 @@ func _sqlite3GetVTable(tls *libc.TLS, db, pTab uintptr) (r uintptr) {
 //	** If the "data" parameter to this function is NULL, then the
 //	** element corresponding to "key" is removed from the hash table.
 //	*/
-func _sqlite3HashInsert(tls *libc.TLS, pH, pKey, data uintptr) (r uintptr) {
+func _sqlite3HashInsert(tls *libc.TLS, pH uintptr, pKey uintptr, data uintptr) (r uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var elem, new_elem, old_data, v1 uintptr
@@ -10520,7 +10520,7 @@ func _sqlite3HashInsert(tls *libc.TLS, pH, pKey, data uintptr) (r uintptr) {
 //	/*
 //	** Delete an IdList.
 //	*/
-func _sqlite3IdListDelete(tls *libc.TLS, db, pList uintptr) {
+func _sqlite3IdListDelete(tls *libc.TLS, db uintptr, pList uintptr) {
 	var i int32
 	_ = i
 	if pList == uintptr(0) {
@@ -10546,7 +10546,7 @@ func _sqlite3IdListDelete(tls *libc.TLS, db, pList uintptr) {
 //	** Return the index in pList of the identifier named zId.  Return -1
 //	** if not found.
 //	*/
-func _sqlite3IdListIndex(tls *libc.TLS, pList, zName uintptr) (r int32) {
+func _sqlite3IdListIndex(tls *libc.TLS, pList uintptr, zName uintptr) (r int32) {
 	var i int32
 	_ = i
 	i = 0
@@ -10617,7 +10617,7 @@ func _sqlite3JournalSize(tls *libc.TLS, pVfs uintptr) (r int32) {
 //	** Register the JSON table-valued function named zName and return a
 //	** pointer to its Module object.  Return NULL if something goes wrong.
 //	*/
-func _sqlite3JsonVtabRegister(tls *libc.TLS, db, zName uintptr) (r uintptr) {
+func _sqlite3JsonVtabRegister(tls *libc.TLS, db uintptr, zName uintptr) (r uintptr) {
 	var i uint32
 	_ = i
 	i = uint32(0)
@@ -10652,7 +10652,7 @@ func _sqlite3JsonVtabRegister(tls *libc.TLS, db, zName uintptr) (r uintptr) {
 //	** function is responsible for seeing that this structure is eventually
 //	** freed.
 //	*/
-func _sqlite3KeyInfoFromExprList(tls *libc.TLS, pParse, pList uintptr, iStart, nExtra int32) (r uintptr) {
+func _sqlite3KeyInfoFromExprList(tls *libc.TLS, pParse uintptr, pList uintptr, iStart int32, nExtra int32) (r uintptr) {
 	var db, pInfo, pItem uintptr
 	var i, nExpr int32
 	_, _, _, _, _ = db, i, nExpr, pInfo, pItem
@@ -10709,7 +10709,7 @@ func _sqlite3LocateTableItem(tls *libc.TLS, pParse uintptr, flags Tu32, p uintpt
 //	** pWhere argument is an optional WHERE clause that restricts the
 //	** set of rows in the view that are to be added to the ephemeral table.
 //	*/
-func _sqlite3MaterializeView(tls *libc.TLS, pParse, pView, pWhere, pOrderBy, pLimit uintptr, iCur int32) {
+func _sqlite3MaterializeView(tls *libc.TLS, pParse uintptr, pView uintptr, pWhere uintptr, pOrderBy uintptr, pLimit uintptr, iCur int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var db, pFrom, pSel uintptr
@@ -10778,7 +10778,7 @@ func _sqlite3MemSetArrayInt64(tls *libc.TLS, aMem uintptr, iIdx int32, val Ti64)
 //	** that was able to use the co-routine optimization, finish coding the
 //	** co-routine.
 //	*/
-func _sqlite3MultiValuesEnd(tls *libc.TLS, pParse, pVal uintptr) {
+func _sqlite3MultiValuesEnd(tls *libc.TLS, pParse uintptr, pVal uintptr) {
 	var pItem uintptr
 	_ = pItem
 	if pVal != 0 && (*TSrcList)(unsafe.Pointer((*TSelect)(unsafe.Pointer(pVal)).FpSrc)).FnSrc > 0 {
@@ -10801,7 +10801,7 @@ func _sqlite3MultiValuesEnd(tls *libc.TLS, pParse, pVal uintptr) {
 //	** This routine is called from sqlite3_initialize() and so it is guaranteed
 //	** to be serialized already.  There is no need for further mutexing.
 //	*/
-func _sqlite3PCacheBufferSetup(tls *libc.TLS, pBuf uintptr, sz, n int32) {
+func _sqlite3PCacheBufferSetup(tls *libc.TLS, pBuf uintptr, sz int32, n int32) {
 	var p uintptr
 	var v1 int32
 	_, _ = p, v1
@@ -10868,7 +10868,7 @@ func _sqlite3PagerBackupPtr(tls *libc.TLS, pPager uintptr) (r uintptr) {
 //	** reset parameter is non-zero, the cache hit or miss count is zeroed before
 //	** returning.
 //	*/
-func _sqlite3PagerCacheStat(tls *libc.TLS, pPager uintptr, eStat, reset int32, pnVal uintptr) {
+func _sqlite3PagerCacheStat(tls *libc.TLS, pPager uintptr, eStat int32, reset int32, pnVal uintptr) {
 	eStat = eStat - int32(SQLITE_DBSTATUS_CACHE_HIT)
 	**(**Tu64)(__ccgo_up(pnVal)) += uint64(**(**Tu32)(__ccgo_up(pPager + 248 + uintptr(eStat)*4)))
 	if reset != 0 {
@@ -10899,7 +10899,7 @@ func _sqlite3PagerCacheStat(tls *libc.TLS, pPager uintptr, eStat, reset int32, p
 //	** retried. If it returns zero, then the SQLITE_BUSY error is
 //	** returned to the caller of the pager API function.
 //	*/
-func _sqlite3PagerSetBusyHandler(tls *libc.TLS, pPager, __ccgo_fp_xBusyHandler, pBusyHandlerArg uintptr) {
+func _sqlite3PagerSetBusyHandler(tls *libc.TLS, pPager uintptr, __ccgo_fp_xBusyHandler uintptr, pBusyHandlerArg uintptr) {
 	var ap uintptr
 	_ = ap
 	(*TPager)(unsafe.Pointer(pPager)).FxBusyHandler = __ccgo_fp_xBusyHandler
@@ -10938,7 +10938,7 @@ func _sqlite3PagerSetBusyHandler(tls *libc.TLS, pPager, __ccgo_fp_xBusyHandler, 
 //	**
 //	**       pObj = sqlite3ParserAddCleanup(pParse, destructor, pObj);
 //	*/
-func _sqlite3ParserAddCleanup(tls *libc.TLS, pParse, __ccgo_fp_xCleanup, pPtr uintptr) (r uintptr) {
+func _sqlite3ParserAddCleanup(tls *libc.TLS, pParse uintptr, __ccgo_fp_xCleanup uintptr, pPtr uintptr) (r uintptr) {
 	var pCleanup uintptr
 	_ = pCleanup
 	if _sqlite3FaultSim(tls, int32(300)) != 0 {
@@ -10963,7 +10963,7 @@ func _sqlite3ParserAddCleanup(tls *libc.TLS, pParse, __ccgo_fp_xCleanup, pPtr ui
 //
 //	/* Initialize a new parser that has already been allocated.
 //	*/
-func _sqlite3ParserInit(tls *libc.TLS, yypRawParser, pParse uintptr) {
+func _sqlite3ParserInit(tls *libc.TLS, yypRawParser uintptr, pParse uintptr) {
 	var yypParser uintptr
 	_ = yypParser
 	yypParser = yypRawParser
@@ -11156,7 +11156,7 @@ func _sqlite3RealSameAsInt(tls *libc.TLS, _r1 float64, i Tsqlite3_int64) (r int3
 //	** byte offset recorded, try to compute the error byte offset for
 //	** z and set the error byte offset in db.
 //	*/
-func _sqlite3RecordErrorByteOffset(tls *libc.TLS, db, z uintptr) {
+func _sqlite3RecordErrorByteOffset(tls *libc.TLS, db uintptr, z uintptr) {
 	var pParse, zEnd, zText uintptr
 	_, _, _ = pParse, zEnd, zText
 	if db == uintptr(0) {
@@ -11193,7 +11193,7 @@ func _sqlite3RecordErrorByteOffset(tls *libc.TLS, db, z uintptr) {
 //	** All SELECT statements should have been expanded using
 //	** sqlite3SelectExpand() prior to invoking this routine.
 //	*/
-func _sqlite3ResolveSelectNames(tls *libc.TLS, pParse, p, pOuterNC uintptr) {
+func _sqlite3ResolveSelectNames(tls *libc.TLS, pParse uintptr, p uintptr, pOuterNC uintptr) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var _ /* w at bp+0 */ TWalker
@@ -11214,7 +11214,7 @@ func _sqlite3ResolveSelectNames(tls *libc.TLS, pParse, p, pOuterNC uintptr) {
 //	**    (2) Set pWalker->eCode to non-zero so that the caller will know
 //	**        that (1) has happened.
 //	*/
-func _sqlite3ReturningSubqueryCorrelated(tls *libc.TLS, pWalker, pSelect uintptr) (r int32) {
+func _sqlite3ReturningSubqueryCorrelated(tls *libc.TLS, pWalker uintptr, pSelect uintptr) (r int32) {
 	var i int32
 	var pSrc uintptr
 	_, _ = i, pSrc
@@ -11256,7 +11256,7 @@ func _sqlite3ReturningSubqueryCorrelated(tls *libc.TLS, pWalker, pSelect uintptr
 //	** rootpage==iFrom have been converted to have a rootpage of iTo
 //	** in order to be certain that we got the right one.
 //	*/
-func _sqlite3RootPageMoved(tls *libc.TLS, db uintptr, iDb int32, iFrom, iTo TPgno) {
+func _sqlite3RootPageMoved(tls *libc.TLS, db uintptr, iDb int32, iFrom TPgno, iTo TPgno) {
 	var pDb, pElem, pHash, pIdx, pTab uintptr
 	_, _, _, _, _ = pDb, pElem, pHash, pIdx, pTab
 	pDb = (*Tsqlite3)(unsafe.Pointer(db)).FaDb + uintptr(iDb)*32
@@ -11334,7 +11334,7 @@ func _sqlite3RowSetInsert(tls *libc.TLS, p uintptr, rowid Ti64) {
 //	** If the same database is attached more than once, the first
 //	** attached database is returned.
 //	*/
-func _sqlite3SchemaToIndex(tls *libc.TLS, db, pSchema uintptr) (r int32) {
+func _sqlite3SchemaToIndex(tls *libc.TLS, db uintptr, pSchema uintptr) (r int32) {
 	var i int32
 	_ = i
 	i = -int32(32768)
@@ -11376,7 +11376,7 @@ func _sqlite3SchemaToIndex(tls *libc.TLS, db, pSchema uintptr) (r int32) {
 //	**
 //	** Use this routine after name resolution.
 //	*/
-func _sqlite3SelectAddTypeInfo(tls *libc.TLS, pParse, pSelect uintptr) {
+func _sqlite3SelectAddTypeInfo(tls *libc.TLS, pParse uintptr, pSelect uintptr) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var _ /* w at bp+0 */ TWalker
@@ -11402,7 +11402,7 @@ func _sqlite3SelectAddTypeInfo(tls *libc.TLS, pParse, pSelect uintptr) {
 //	** The calling function can detect the problem by looking at pParse->nErr
 //	** and/or pParse->db->mallocFailed.
 //	*/
-func _sqlite3SelectExpand(tls *libc.TLS, pParse, pSelect uintptr) {
+func _sqlite3SelectExpand(tls *libc.TLS, pParse uintptr, pSelect uintptr) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var _ /* w at bp+0 */ TWalker
@@ -11492,7 +11492,7 @@ func _sqlite3SrcItemColumnUsed(tls *libc.TLS, pItem uintptr, iCol int32) {
 //	/*
 //	** Assign VdbeCursor index numbers to all tables in a SrcList
 //	*/
-func _sqlite3SrcListAssignCursors(tls *libc.TLS, pParse, pList uintptr) {
+func _sqlite3SrcListAssignCursors(tls *libc.TLS, pParse uintptr, pList uintptr) {
 	var i, v2 int32
 	var pItem, v3 uintptr
 	_, _, _, _ = i, pItem, v2, v3
@@ -11527,7 +11527,7 @@ func _sqlite3SrcListAssignCursors(tls *libc.TLS, pParse, pList uintptr) {
 //	/*
 //	** Delete an entire SrcList including all its substructure.
 //	*/
-func _sqlite3SrcListDelete(tls *libc.TLS, db, pList uintptr) {
+func _sqlite3SrcListDelete(tls *libc.TLS, db uintptr, pList uintptr) {
 	var i int32
 	var pItem uintptr
 	_, _ = i, pItem
@@ -11583,7 +11583,7 @@ func _sqlite3SrcListDelete(tls *libc.TLS, db, pList uintptr) {
 //	** Add the list of function arguments to the SrcList entry for a
 //	** table-valued-function.
 //	*/
-func _sqlite3SrcListFuncArgs(tls *libc.TLS, pParse, p, pList uintptr) {
+func _sqlite3SrcListFuncArgs(tls *libc.TLS, pParse uintptr, p uintptr, pList uintptr) {
 	var pItem uintptr
 	_ = pItem
 	if p != 0 {
@@ -11601,7 +11601,7 @@ func _sqlite3SrcListFuncArgs(tls *libc.TLS, pParse, p, pList uintptr) {
 //	** Add an INDEXED BY or NOT INDEXED clause to the most recently added
 //	** element of the source-list passed as the second argument.
 //	*/
-func _sqlite3SrcListIndexedBy(tls *libc.TLS, pParse, p, pIndexedBy uintptr) {
+func _sqlite3SrcListIndexedBy(tls *libc.TLS, pParse uintptr, p uintptr, pIndexedBy uintptr) {
 	var pItem uintptr
 	_ = pItem
 	if p != 0 && (*TToken)(unsafe.Pointer(pIndexedBy)).Fn > uint32(0) {
@@ -11634,7 +11634,7 @@ func _sqlite3SrcListIndexedBy(tls *libc.TLS, pParse, p, pIndexedBy uintptr) {
 //	**    pSrc->a[0].u2.pIBIndex  Pointer to the INDEXED BY index, if there is one
 //	**
 //	*/
-func _sqlite3SrcListLookup(tls *libc.TLS, pParse, pSrc uintptr) (r uintptr) {
+func _sqlite3SrcListLookup(tls *libc.TLS, pParse uintptr, pSrc uintptr) (r uintptr) {
 	var pItem, pTab uintptr
 	_, _ = pItem, pTab
 	pItem = pSrc + 8
@@ -11653,7 +11653,7 @@ func _sqlite3SrcListLookup(tls *libc.TLS, pParse, pSrc uintptr) (r uintptr) {
 	return pTab
 }
 
-func _sqlite3StatusDown(tls *libc.TLS, op, N int32) {
+func _sqlite3StatusDown(tls *libc.TLS, op int32, N int32) {
 	**(**Tsqlite3StatValueType)(__ccgo_up(uintptr(unsafe.Pointer(&_sqlite3Stat)) + uintptr(op)*8)) -= int64(N)
 }
 
@@ -11663,7 +11663,7 @@ func _sqlite3StatusDown(tls *libc.TLS, op, N int32) {
 //	** Adjust the highwater mark if necessary.
 //	** The caller must hold the appropriate mutex.
 //	*/
-func _sqlite3StatusHighwater(tls *libc.TLS, op, X int32) {
+func _sqlite3StatusHighwater(tls *libc.TLS, op int32, X int32) {
 	var newValue Tsqlite3StatValueType
 	_ = newValue
 	newValue = int64(X)
@@ -11685,7 +11685,7 @@ func _sqlite3StatusHighwater(tls *libc.TLS, op, X int32) {
 //	** The StatusDown() routine lowers the current value by N.  The highwater
 //	** mark is unchanged.  N must be non-negative for StatusDown().
 //	*/
-func _sqlite3StatusUp(tls *libc.TLS, op, N int32) {
+func _sqlite3StatusUp(tls *libc.TLS, op int32, N int32) {
 	**(**Tsqlite3StatValueType)(__ccgo_up(uintptr(unsafe.Pointer(&_sqlite3Stat)) + uintptr(op)*8)) += int64(N)
 	if **(**Tsqlite3StatValueType)(__ccgo_up(uintptr(unsafe.Pointer(&_sqlite3Stat)) + uintptr(op)*8)) > **(**Tsqlite3StatValueType)(__ccgo_up(uintptr(unsafe.Pointer(&_sqlite3Stat)) + 80 + uintptr(op)*8)) {
 		**(**Tsqlite3StatValueType)(__ccgo_up(uintptr(unsafe.Pointer(&_sqlite3Stat)) + 80 + uintptr(op)*8)) = **(**Tsqlite3StatValueType)(__ccgo_up(uintptr(unsafe.Pointer(&_sqlite3Stat)) + uintptr(op)*8))
@@ -11740,7 +11740,7 @@ func _sqlite3StmtCurrentTime(tls *libc.TLS, p uintptr) (r Tsqlite3_int64) {
 //	** Remove a Subquery from a SrcItem.  Return the associated Select object.
 //	** The returned Select becomes the responsibility of the caller.
 //	*/
-func _sqlite3SubqueryDetach(tls *libc.TLS, db, pItem uintptr) (r uintptr) {
+func _sqlite3SubqueryDetach(tls *libc.TLS, db uintptr, pItem uintptr) (r uintptr) {
 	var pSel uintptr
 	_ = pSel
 	pSel = (*TSubquery)(unsafe.Pointer(*(*uintptr)(unsafe.Pointer(pItem + 72)))).FpSelect
@@ -11765,7 +11765,7 @@ func _sqlite3TableLock(tls *libc.TLS, pParse uintptr, iDb int32, iTab TPgno, isW
 //	/*
 //	** Transfer all bindings from the first statement over to the second.
 //	*/
-func _sqlite3TransferBindings(tls *libc.TLS, pFromStmt, pToStmt uintptr) (r int32) {
+func _sqlite3TransferBindings(tls *libc.TLS, pFromStmt uintptr, pToStmt uintptr) (r int32) {
 	var i int32
 	var pFrom, pTo uintptr
 	_, _, _ = i, pFrom, pTo
@@ -11796,7 +11796,7 @@ func _sqlite3TransferBindings(tls *libc.TLS, pFromStmt, pToStmt uintptr) (r int3
 //	** The parser calls this routine when it finds a SELECT statement in
 //	** body of a TRIGGER.
 //	*/
-func _sqlite3TriggerSelectStep(tls *libc.TLS, db, pSelect, zStart, zEnd uintptr) (r uintptr) {
+func _sqlite3TriggerSelectStep(tls *libc.TLS, db uintptr, pSelect uintptr, zStart uintptr, zEnd uintptr) (r uintptr) {
 	var pTriggerStep uintptr
 	_ = pTriggerStep
 	pTriggerStep = _sqlite3DbMallocZero(tls, db, uint64(88))
@@ -11811,7 +11811,7 @@ func _sqlite3TriggerSelectStep(tls *libc.TLS, db, pSelect, zStart, zEnd uintptr)
 	return pTriggerStep
 }
 
-func _sqlite3TriggersExist(tls *libc.TLS, pParse, pTab uintptr, op int32, pChanges, pMask uintptr) (r uintptr) {
+func _sqlite3TriggersExist(tls *libc.TLS, pParse uintptr, pTab uintptr, op int32, pChanges uintptr, pMask uintptr) (r uintptr) {
 	if (*TTable)(unsafe.Pointer(pTab)).FpTrigger == uintptr(0) && !(_tempTriggersExist(tls, (*TParse)(unsafe.Pointer(pParse)).Fdb) != 0) || int32(Tbft(*(*uint16)(unsafe.Pointer(pParse + 40))&0x1>>0)) != 0 {
 		if pMask != 0 {
 			**(**int32)(__ccgo_up(pMask)) = 0
@@ -11909,7 +11909,7 @@ func _sqlite3UnlinkAndDeleteTrigger(tls *libc.TLS, db uintptr, iDb int32, zName 
 //	/*
 //	** Create a new Upsert object.
 //	*/
-func _sqlite3UpsertNew(tls *libc.TLS, db, pTarget, pTargetWhere, pSet, pWhere, pNext uintptr) (r uintptr) {
+func _sqlite3UpsertNew(tls *libc.TLS, db uintptr, pTarget uintptr, pTargetWhere uintptr, pSet uintptr, pWhere uintptr, pNext uintptr) (r uintptr) {
 	var pNew uintptr
 	_ = pNew
 	pNew = _sqlite3DbMallocZero(tls, db, uint64(88))
@@ -11963,7 +11963,7 @@ func _sqlite3UpsertNew(tls *libc.TLS, db, pTarget, pTargetWhere, pSet, pWhere, p
 //	** transient would cause the database file to appear to be deleted
 //	** following reboot.
 //	*/
-func _sqlite3Vacuum(tls *libc.TLS, pParse, _pNm, pInto uintptr) {
+func _sqlite3Vacuum(tls *libc.TLS, pParse uintptr, _pNm uintptr, pInto uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	*(*uintptr)(unsafe.Pointer(bp)) = _pNm
@@ -12032,7 +12032,7 @@ func _sqlite3ValueNew(tls *libc.TLS, db uintptr) (r uintptr) {
 //	** P4 must not be P4_INT32.  Use sqlite3VdbeChangeP4() in either of
 //	** those cases.
 //	*/
-func _sqlite3VdbeAppendP4(tls *libc.TLS, p, pP4 uintptr, n int32) {
+func _sqlite3VdbeAppendP4(tls *libc.TLS, p uintptr, pP4 uintptr, n int32) {
 	var pOp uintptr
 	_ = pOp
 	if (*Tsqlite3)(unsafe.Pointer((*TVdbe)(unsafe.Pointer(p)).Fdb)).FmallocFailed != 0 {
@@ -12417,7 +12417,7 @@ func _sqlite3VdbeSetVarmask(tls *libc.TLS, v uintptr, iVar int32) {
 //	**    SQLITE_DONE   end of data
 //	**    otherwise     some kind of error.
 //	*/
-func _sqlite3VdbeSorterNext(tls *libc.TLS, db, pCsr uintptr) (r int32) {
+func _sqlite3VdbeSorterNext(tls *libc.TLS, db uintptr, pCsr uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pFree, pSorter uintptr
@@ -12483,7 +12483,7 @@ func _sqlite3VdbeUsesBtree(tls *libc.TLS, p uintptr, i int32) {
 //	** If the xBegin call is successful, place the sqlite3_vtab pointer
 //	** in the sqlite3.aVTrans array.
 //	*/
-func _sqlite3VtabBegin(tls *libc.TLS, db, pVTab uintptr) (r int32) {
+func _sqlite3VtabBegin(tls *libc.TLS, db uintptr, pVTab uintptr) (r int32) {
 	var i, iSvpt, rc int32
 	var pModule uintptr
 	_, _, _, _ = i, iSvpt, pModule, rc
@@ -12549,7 +12549,7 @@ func _sqlite3VtabBegin(tls *libc.TLS, db, pVTab uintptr) (r int32) {
 //	** in the list are moved to the sqlite3.pDisconnect list of the associated
 //	** database connection.
 //	*/
-func _sqlite3VtabClear(tls *libc.TLS, db, p uintptr) {
+func _sqlite3VtabClear(tls *libc.TLS, db uintptr, p uintptr) {
 	var i int32
 	_ = i
 	if (*Tsqlite3)(unsafe.Pointer(db)).FpnBytesFreed == uintptr(0) {
@@ -12599,7 +12599,7 @@ func _sqlite3VtabClear(tls *libc.TLS, db, p uintptr) {
 //	** objects without disturbing the rest of the Schema object (which may
 //	** be being used by other shared-cache connections).
 //	*/
-func _sqlite3VtabDisconnect(tls *libc.TLS, db, p uintptr) {
+func _sqlite3VtabDisconnect(tls *libc.TLS, db uintptr, p uintptr) {
 	var pVTab, ppVTab uintptr
 	_, _ = pVTab, ppVTab
 	ppVTab = p + 64 + 16
@@ -12626,7 +12626,7 @@ func _sqlite3VtabDisconnect(tls *libc.TLS, db, p uintptr) {
 //	** Erase the eponymous virtual table instance associated with
 //	** virtual table module pMod, if it exists.
 //	*/
-func _sqlite3VtabEponymousTableClear(tls *libc.TLS, db, pMod uintptr) {
+func _sqlite3VtabEponymousTableClear(tls *libc.TLS, db uintptr, pMod uintptr) {
 	var pTab uintptr
 	_ = pTab
 	pTab = (*TModule)(unsafe.Pointer(pMod)).FpEpoTab
@@ -12657,7 +12657,7 @@ func _sqlite3VtabEponymousTableClear(tls *libc.TLS, db, pMod uintptr) {
 //	** function immediately. If all calls to virtual table methods are successful,
 //	** SQLITE_OK is returned.
 //	*/
-func _sqlite3VtabSavepoint(tls *libc.TLS, db uintptr, op, iSavepoint int32) (r int32) {
+func _sqlite3VtabSavepoint(tls *libc.TLS, db uintptr, op int32, iSavepoint int32) (r int32) {
 	var i, rc int32
 	var pMod, pVTab, xMethod uintptr
 	var savedFlags Tu64
@@ -12709,7 +12709,7 @@ func _sqlite3VtabSavepoint(tls *libc.TLS, db uintptr, op, iSavepoint int32) (r i
 //	**
 //	** If an error message is available, leave it in p->zErrMsg.
 //	*/
-func _sqlite3VtabSync(tls *libc.TLS, db, p uintptr) (r int32) {
+func _sqlite3VtabSync(tls *libc.TLS, db uintptr, p uintptr) (r int32) {
 	var aVTrans, pVtab, x, v2 uintptr
 	var i, rc int32
 	var v3 bool
@@ -12793,7 +12793,7 @@ func _sqlite3WalBeginWriteTransaction(tls *libc.TLS, pWal uintptr) (r int32) {
 //	** is greater than sqlite3.pWalArg cast to an integer (the value configured by
 //	** wal_autocheckpoint()).
 //	*/
-func _sqlite3WalDefaultHook(tls *libc.TLS, pClientData, db, zDb uintptr, nFrame int32) (r int32) {
+func _sqlite3WalDefaultHook(tls *libc.TLS, pClientData uintptr, db uintptr, zDb uintptr, nFrame int32) (r int32) {
 	if nFrame >= int32(int64(pClientData)) {
 		_sqlite3BeginBenignMalloc(tls)
 		Xsqlite3_wal_checkpoint(tls, db, zDb)
@@ -12810,7 +12810,7 @@ func _sqlite3WalDefaultHook(tls *libc.TLS, pClientData, db, zDb uintptr, nFrame 
 //	** "rollback" the write position of the WAL handle back to the current
 //	** point in the event of a savepoint rollback (via WalSavepointUndo()).
 //	*/
-func _sqlite3WalSavepoint(tls *libc.TLS, pWal, aWalData uintptr) {
+func _sqlite3WalSavepoint(tls *libc.TLS, pWal uintptr, aWalData uintptr) {
 	**(**Tu32)(__ccgo_up(aWalData)) = (*TWal)(unsafe.Pointer(pWal)).Fhdr.FmxFrame
 	**(**Tu32)(__ccgo_up(aWalData + 1*4)) = **(**Tu32)(__ccgo_up(pWal + 72 + 24))
 	**(**Tu32)(__ccgo_up(aWalData + 2*4)) = **(**Tu32)(__ccgo_up(pWal + 72 + 24 + 1*4))
@@ -12825,7 +12825,7 @@ func _sqlite3WalSavepoint(tls *libc.TLS, pWal, aWalData uintptr) {
 //	** of WAL_SAVEPOINT_NDATA u32 values that has been previously populated
 //	** by a call to WalSavepoint().
 //	*/
-func _sqlite3WalSavepointUndo(tls *libc.TLS, pWal, aWalData uintptr) (r int32) {
+func _sqlite3WalSavepointUndo(tls *libc.TLS, pWal uintptr, aWalData uintptr) (r int32) {
 	var rc int32
 	_ = rc
 	rc = SQLITE_OK
@@ -12862,7 +12862,7 @@ func _sqlite3WalSavepointUndo(tls *libc.TLS, pWal, aWalData uintptr) (r int32) {
 //	** occurs (any value other than SQLITE_OK is returned), the CHECKPOINTER
 //	** lock is released before returning.
 //	*/
-func _sqlite3WalSnapshotCheck(tls *libc.TLS, pWal, pSnapshot uintptr) (r int32) {
+func _sqlite3WalSnapshotCheck(tls *libc.TLS, pWal uintptr, pSnapshot uintptr) (r int32) {
 	var pNew uintptr
 	var rc int32
 	_, _ = pNew, rc
@@ -12883,7 +12883,7 @@ func _sqlite3WalSnapshotCheck(tls *libc.TLS, pWal, pSnapshot uintptr) (r int32) 
 //	** Call sqlite3WalkExpr() for every expression in list p or until
 //	** an abort request is seen.
 //	*/
-func _sqlite3WalkExprList(tls *libc.TLS, pWalker, p uintptr) (r int32) {
+func _sqlite3WalkExprList(tls *libc.TLS, pWalker uintptr, p uintptr) (r int32) {
 	var i int32
 	var pItem uintptr
 	_, _ = i, pItem
@@ -12916,7 +12916,7 @@ func _sqlite3WalkExprList(tls *libc.TLS, pWalker, p uintptr) (r int32) {
 //	** and on any subqueries further down in the tree.  Return
 //	** WRC_Abort or WRC_Continue;
 //	*/
-func _sqlite3WalkSelectFrom(tls *libc.TLS, pWalker, p uintptr) (r int32) {
+func _sqlite3WalkSelectFrom(tls *libc.TLS, pWalker uintptr, p uintptr) (r int32) {
 	var i int32
 	var pItem, pSrc uintptr
 	_, _, _ = i, pItem, pSrc
@@ -12944,7 +12944,7 @@ func _sqlite3WalkSelectFrom(tls *libc.TLS, pWalker, p uintptr) (r int32) {
 	return WRC_Continue
 }
 
-func _sqlite3WhereExprListUsage(tls *libc.TLS, pMaskSet, pList uintptr) (r TBitmask) {
+func _sqlite3WhereExprListUsage(tls *libc.TLS, pMaskSet uintptr, pList uintptr) (r TBitmask) {
 	var i int32
 	var mask TBitmask
 	_, _ = i, mask
@@ -13011,7 +13011,7 @@ func _sqlite3WhereUsesDeferredSeek(tls *libc.TLS, pWInfo uintptr) (r int32) {
 //	** third argument. Set the Window.pOwner field of the new object to
 //	** pOwner.
 //	*/
-func _sqlite3WindowDup(tls *libc.TLS, db, pOwner, p uintptr) (r uintptr) {
+func _sqlite3WindowDup(tls *libc.TLS, db uintptr, pOwner uintptr, p uintptr) (r uintptr) {
 	var pNew uintptr
 	_ = pNew
 	pNew = uintptr(0)
@@ -13050,7 +13050,7 @@ func _sqlite3WindowDup(tls *libc.TLS, db, pOwner, p uintptr) (r uintptr) {
 //	** in if either (a) there are no other windows already linked to this
 //	** SELECT, or (b) the windows already linked use a compatible window frame.
 //	*/
-func _sqlite3WindowLink(tls *libc.TLS, pSel, pWin uintptr) {
+func _sqlite3WindowLink(tls *libc.TLS, pSel uintptr, pWin uintptr) {
 	if pSel != 0 {
 		if uintptr(0) == (*TSelect)(unsafe.Pointer(pSel)).FpWin || 0 == _sqlite3WindowCompare(tls, uintptr(0), (*TSelect)(unsafe.Pointer(pSel)).FpWin, pWin, 0) {
 			(*TWindow)(unsafe.Pointer(pWin)).FpNextWin = (*TSelect)(unsafe.Pointer(pSel)).FpWin
@@ -13073,7 +13073,7 @@ func _sqlite3WindowLink(tls *libc.TLS, pSel, pWin uintptr) {
 //	** Return a copy of the linked list of Window objects passed as the
 //	** second argument.
 //	*/
-func _sqlite3WindowListDup(tls *libc.TLS, db, p uintptr) (r uintptr) {
+func _sqlite3WindowListDup(tls *libc.TLS, db uintptr, p uintptr) (r uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pWin, pp uintptr
@@ -13104,7 +13104,7 @@ func _sqlite3WindowListDup(tls *libc.TLS, db, p uintptr) (r uintptr) {
 //	/*
 //	** Free the contents of the With object passed as the second argument.
 //	*/
-func _sqlite3WithDelete(tls *libc.TLS, db, pWith uintptr) {
+func _sqlite3WithDelete(tls *libc.TLS, db uintptr, pWith uintptr) {
 	var i int32
 	_ = i
 	if pWith != 0 {
@@ -13138,7 +13138,7 @@ func _sqlite3WithDelete(tls *libc.TLS, db, pWith uintptr) {
 //	** If pSrc contains any sub-selects, call this routine recursively
 //	** on the FROM clause of each such sub-select, with iExcept set to -1.
 //	*/
-func _srclistRenumberCursors(tls *libc.TLS, pParse, aCsrMap, pSrc uintptr, iExcept int32) {
+func _srclistRenumberCursors(tls *libc.TLS, pParse uintptr, aCsrMap uintptr, pSrc uintptr, iExcept int32) {
 	var i, v2 int32
 	var p, pItem, v3 uintptr
 	_, _, _, _, _ = i, p, pItem, v2, v3
@@ -13283,7 +13283,7 @@ func _subjRequiresPage(tls *libc.TLS, pPg uintptr) (r int32) {
 	return 0
 }
 
-func _substExprList(tls *libc.TLS, pSubst, pList uintptr) {
+func _substExprList(tls *libc.TLS, pSubst uintptr, pList uintptr) {
 	var i int32
 	_ = i
 	if pList == uintptr(0) {
@@ -13302,7 +13302,7 @@ func _substExprList(tls *libc.TLS, pSubst, pList uintptr) {
 	}
 }
 
-func _substSelect(tls *libc.TLS, pSubst, p uintptr, doPrior int32) {
+func _substSelect(tls *libc.TLS, pSubst uintptr, p uintptr, doPrior int32) {
 	var i int32
 	var pItem, pSrc, v1 uintptr
 	var v2 bool
@@ -13397,7 +13397,7 @@ func _termFromWhereClause(tls *libc.TLS, pWC uintptr, iTerm int32) (r uintptr) {
 //	/*
 //	** Unmap all tokens in the IdList object passed as the second argument.
 //	*/
-func _unmapColumnIdlistNames(tls *libc.TLS, pParse, pIdList uintptr) {
+func _unmapColumnIdlistNames(tls *libc.TLS, pParse uintptr, pIdList uintptr) {
 	var ii int32
 	_ = ii
 	ii = 0
@@ -13483,7 +13483,7 @@ func _vdbeCloseStatement(tls *libc.TLS, p uintptr, eOp int32) (r int32) {
 //	** or positive value if *pMem1 is less than, equal to or greater than
 //	** *pMem2, respectively. Similar in spirit to "rc = (*pMem1) - (*pMem2);".
 //	*/
-func _vdbeCompareMemStringWithEncodingChange(tls *libc.TLS, pMem1, pMem2, pColl, prcErr uintptr) (r int32) {
+func _vdbeCompareMemStringWithEncodingChange(tls *libc.TLS, pMem1 uintptr, pMem2 uintptr, pColl uintptr, prcErr uintptr) (r int32) {
 	bp := tls.Alloc(112)
 	defer tls.Free(112)
 	var rc int32
@@ -13517,7 +13517,7 @@ func _vdbeCompareMemStringWithEncodingChange(tls *libc.TLS, pMem1, pMem2, pColl,
 //	** opcodes contained within. If aOp is not NULL it is assumed to contain
 //	** nOp entries.
 //	*/
-func _vdbeFreeOpArray(tls *libc.TLS, db, aOp uintptr, nOp int32) {
+func _vdbeFreeOpArray(tls *libc.TLS, db uintptr, aOp uintptr, nOp int32) {
 	var pOp uintptr
 	_ = pOp
 	if aOp != 0 {
@@ -13598,7 +13598,7 @@ func _vdbeIncrFree(tls *libc.TLS, pIncr uintptr) {
 //	** If an OOM condition is encountered, return NULL. In this case free the
 //	** pMerger argument before returning.
 //	*/
-func _vdbeIncrMergerNew(tls *libc.TLS, pTask, pMerger, ppOut uintptr) (r int32) {
+func _vdbeIncrMergerNew(tls *libc.TLS, pTask uintptr, pMerger uintptr, ppOut uintptr) (r int32) {
 	var pIncr, v1, v2 uintptr
 	var rc, v3 int32
 	_, _, _, _, _ = pIncr, rc, v1, v2, v3
@@ -13799,7 +13799,7 @@ func _vdbeMergeEngineFree(tls *libc.TLS, pMerger uintptr) {
 //	** PMA before returning. If an error does occur, then the final value of
 //	** *piOffset is undefined.
 //	*/
-func _vdbeMergeEngineLevel0(tls *libc.TLS, pTask uintptr, nPMA int32, piOffset, ppOut uintptr) (r int32) {
+func _vdbeMergeEngineLevel0(tls *libc.TLS, pTask uintptr, nPMA int32, piOffset uintptr, ppOut uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var i, rc int32
@@ -13949,7 +13949,7 @@ func _vdbePmaReaderIncrMergeInit(tls *libc.TLS, pReadr uintptr, eMode int32) (r 
 //	** If successful, SQLITE_OK is returned. If an error occurs, an SQLite error
 //	** code is returned and pLeaf is freed.
 //	*/
-func _vdbeSorterAddToTree(tls *libc.TLS, pTask uintptr, nDepth, iSeq int32, pRoot, pLeaf uintptr) (r int32) {
+func _vdbeSorterAddToTree(tls *libc.TLS, pTask uintptr, nDepth int32, iSeq int32, pRoot uintptr, pLeaf uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var i, iIter, nDiv, rc int32
@@ -14045,7 +14045,7 @@ func _vdbeSorterJoinThread(tls *libc.TLS, pTask uintptr) (r int32) {
 //	/*
 //	** Merge the two sorted lists p1 and p2 into a single list.
 //	*/
-func _vdbeSorterMerge(tls *libc.TLS, pTask, p1, p2 uintptr) (r uintptr) {
+func _vdbeSorterMerge(tls *libc.TLS, pTask uintptr, p1 uintptr, p2 uintptr) (r uintptr) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var pp uintptr
@@ -14087,7 +14087,7 @@ func _vdbeSorterMerge(tls *libc.TLS, pTask, p1, p2 uintptr) (r uintptr) {
 //	/*
 //	** Free the list of sorted records starting at pRecord.
 //	*/
-func _vdbeSorterRecordFree(tls *libc.TLS, db, pRecord uintptr) {
+func _vdbeSorterRecordFree(tls *libc.TLS, db uintptr, pRecord uintptr) {
 	var p, pNext uintptr
 	_, _ = p, pNext
 	p = pRecord
@@ -14110,7 +14110,7 @@ func _vdbeSorterRecordFree(tls *libc.TLS, db, pRecord uintptr) {
 //	** Return a pointer to a buffer owned by the sorter that contains the
 //	** current key.
 //	*/
-func _vdbeSorterRowkey(tls *libc.TLS, pSorter, pnKey uintptr) (r uintptr) {
+func _vdbeSorterRowkey(tls *libc.TLS, pSorter uintptr, pnKey uintptr) (r uintptr) {
 	var pKey, pReader uintptr
 	_, _ = pKey, pReader
 	if (*TVdbeSorter)(unsafe.Pointer(pSorter)).FbUsePMA != 0 {
@@ -14138,7 +14138,7 @@ func _vdbeSorterRowkey(tls *libc.TLS, pSorter, pnKey uintptr) (r uintptr) {
 //	** Except, if argument db is not NULL, then the entry associated with
 //	** connection db is left in the p->u.vtab.p list.
 //	*/
-func _vtabDisconnectAll(tls *libc.TLS, db, p uintptr) (r uintptr) {
+func _vtabDisconnectAll(tls *libc.TLS, db uintptr, p uintptr) (r uintptr) {
 	var db2, pNext, pRet, pVTable uintptr
 	_, _, _, _ = db2, pNext, pRet, pVTable
 	pRet = uintptr(0)
@@ -14221,7 +14221,7 @@ func _walIndexPage(tls *libc.TLS, pWal uintptr, iPage int32, ppPage uintptr) (r 
 //	/*
 //	** Free a WhereInfo structure
 //	*/
-func _whereInfoFree(tls *libc.TLS, db, pWInfo uintptr) {
+func _whereInfoFree(tls *libc.TLS, db uintptr, pWInfo uintptr) {
 	var p, pNext uintptr
 	_, _ = p, pNext
 	_sqlite3WhereClauseClear(tls, pWInfo+104)
@@ -14264,7 +14264,7 @@ func _whereInfoFree(tls *libc.TLS, db, pWInfo uintptr) {
 //	**    (3)  The template has same or fewer dependencies than the current loop
 //	**    (4)  The template has the same or lower cost than the current loop
 //	*/
-func _whereLoopInsert(tls *libc.TLS, pBuilder, pTemplate uintptr) (r int32) {
+func _whereLoopInsert(tls *libc.TLS, pBuilder uintptr, pTemplate uintptr) (r int32) {
 	var db, p, pIndex, pToDel, pWInfo, ppPrev, ppTail, v1 uintptr
 	var rc int32
 	_, _, _, _, _, _, _, _, _ = db, p, pIndex, pToDel, pWInfo, ppPrev, ppTail, rc, v1
@@ -14381,7 +14381,7 @@ func _windowArgCount(tls *libc.TLS, pWin uintptr) (r int32) {
 //	** any equivalent initialization required by any built-in window functions
 //	** in the list.
 //	*/
-func _windowInitAccum(tls *libc.TLS, pParse, pMWin uintptr) (r int32) {
+func _windowInitAccum(tls *libc.TLS, pParse uintptr, pMWin uintptr) (r int32) {
 	var nArg, regArg, v2 int32
 	var pFunc, pWin, v uintptr
 	_, _, _, _, _, _ = nArg, pFunc, pWin, regArg, v, v2

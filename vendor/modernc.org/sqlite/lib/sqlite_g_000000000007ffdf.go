@@ -85,7 +85,7 @@ func _geopolySine(tls *libc.TLS, r float64) (r1 float64) {
 //	** The left-most coordinate min(x1,x2) is not considered to be part of
 //	** the line segment for the purposes of this analysis.
 //	*/
-func _pointBeneathLine(tls *libc.TLS, x0, y0, x1, y1, x2, y2 float64) (r int32) {
+func _pointBeneathLine(tls *libc.TLS, x0 float64, y0 float64, x1 float64, y1 float64, x2 float64, y2 float64) (r int32) {
 	var y float64
 	_ = y
 	if x0 == x1 && y0 == y1 {
@@ -168,7 +168,7 @@ func _rtreeValueUp(tls *libc.TLS, v uintptr) (r TRtreeValue) {
 	return f
 }
 
-func _sqlite3OsCurrentTimeInt64(tls *libc.TLS, pVfs, pTimeOut uintptr) (r int32) {
+func _sqlite3OsCurrentTimeInt64(tls *libc.TLS, pVfs uintptr, pTimeOut uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var rc int32

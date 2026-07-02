@@ -13,7 +13,7 @@ import (
 // C documentation
 //
 //	/* Create a new thread */
-func _sqlite3ThreadCreate(tls *libc.TLS, ppThread, __ccgo_fp_xTask, pIn uintptr) (r int32) {
+func _sqlite3ThreadCreate(tls *libc.TLS, ppThread uintptr, __ccgo_fp_xTask uintptr, pIn uintptr) (r int32) {
 	var p uintptr
 	_ = p
 	**(**uintptr)(__ccgo_up(ppThread)) = uintptr(0)

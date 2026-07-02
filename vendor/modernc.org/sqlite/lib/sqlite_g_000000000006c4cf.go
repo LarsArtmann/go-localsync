@@ -108,7 +108,7 @@ func Xsqlite3_filename_journal(tls *libc.TLS, zFilename uintptr) (r uintptr) {
 	return zFilename + uintptr(1)
 }
 
-func Xsqlite3_snprintf(tls *libc.TLS, n int32, zBuf, zFormat, va uintptr) (r uintptr) {
+func Xsqlite3_snprintf(tls *libc.TLS, n int32, zBuf uintptr, zFormat uintptr, va uintptr) (r uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var ap Tva_list
@@ -223,7 +223,7 @@ var Xsqlite3_version = [7]int8{'3', '.', '5', '3', '.', '2'}
 //	**
 //	** sqlite3_vsnprintf() is the varargs version.
 //	*/
-func Xsqlite3_vsnprintf(tls *libc.TLS, n int32, zBuf, zFormat uintptr, ap Tva_list) (r uintptr) {
+func Xsqlite3_vsnprintf(tls *libc.TLS, n int32, zBuf uintptr, zFormat uintptr, ap Tva_list) (r uintptr) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var _ /* acc at bp+0 */ TStrAccum
@@ -302,7 +302,7 @@ var _aXformType = [6]struct {
 	},
 }
 
-func _asciiFold(tls *libc.TLS, aOut, aIn uintptr, nByte int32) {
+func _asciiFold(tls *libc.TLS, aOut uintptr, aIn uintptr, nByte int32) {
 	var c int8
 	var i int32
 	_, _ = c, i
@@ -383,7 +383,7 @@ func _clearYMD_HMS_TZ(tls *libc.TLS, p uintptr) {
 //	** This routine makes its own copy of zAff so that the caller is free
 //	** to modify zAff after this routine returns.
 //	*/
-func _codeApplyAffinity(tls *libc.TLS, pParse uintptr, base, n int32, zAff uintptr) {
+func _codeApplyAffinity(tls *libc.TLS, pParse uintptr, base int32, n int32, zAff uintptr) {
 	var v uintptr
 	_ = v
 	v = (*TParse)(unsafe.Pointer(pParse)).FpVdbe
@@ -707,7 +707,7 @@ var _dense_rankName = [11]int8{'d', 'e', 'n', 's', 'e', '_', 'r', 'a', 'n', 'k'}
 //	** a host parameter.  If the text contains no host parameters, return
 //	** the total number of bytes in the text.
 //	*/
-func _findNextHostParameter(tls *libc.TLS, zSql, pnToken uintptr) (r Ti64) {
+func _findNextHostParameter(tls *libc.TLS, zSql uintptr, pnToken uintptr) (r Ti64) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var n, nTotal Ti64
@@ -1012,7 +1012,7 @@ func _fts5ExprIsspace(tls *libc.TLS, t int8) (r int32) {
 	return libc.BoolInt32(int32(t) == int32(' ') || int32(t) == int32('\t') || int32(t) == int32('\n') || int32(t) == int32('\r'))
 }
 
-func _fts5PorterGobbleVC(tls *libc.TLS, zStem uintptr, nStem, bPrevCons int32) (r int32) {
+func _fts5PorterGobbleVC(tls *libc.TLS, zStem uintptr, nStem int32, bPrevCons int32) (r int32) {
 	var bCons, i, v2 int32
 	_, _, _ = bCons, i, v2
 	bCons = bPrevCons
@@ -1055,7 +1055,7 @@ func _fts5PorterIsVowel(tls *libc.TLS, c int8, bYIsVowel int32) (r int32) {
 	return libc.BoolInt32(int32(c) == int32('a') || int32(c) == int32('e') || int32(c) == int32('i') || int32(c) == int32('o') || int32(c) == int32('u') || bYIsVowel != 0 && int32(c) == int32('y'))
 }
 
-func _fts5PorterStep1A(tls *libc.TLS, aBuf, pnBuf uintptr) {
+func _fts5PorterStep1A(tls *libc.TLS, aBuf uintptr, pnBuf uintptr) {
 	var nBuf int32
 	_ = nBuf
 	nBuf = **(**int32)(__ccgo_up(pnBuf))
@@ -1166,7 +1166,7 @@ func _fts5QueryTerm(tls *libc.TLS, pToken uintptr, nToken int32) (r int32) {
 //	** function. Its job is to identify tokens that are the first in a sentence.
 //	** For each such token, an entry is added to the SFinder.aFirst[] array.
 //	*/
-func _fts5SentenceFinderCb(tls *libc.TLS, pContext uintptr, tflags int32, pToken uintptr, nToken, iStartOff, iEndOff int32) (r int32) {
+func _fts5SentenceFinderCb(tls *libc.TLS, pContext uintptr, tflags int32, pToken uintptr, nToken int32, iStartOff int32, iEndOff int32) (r int32) {
 	var c int8
 	var i, rc int32
 	var p uintptr
@@ -1334,7 +1334,7 @@ func _jsonAppendSeparator(tls *libc.TLS, p uintptr) {
 //	** then set *pOp to JSONB_TEXTJ and return true.  If not, do not make
 //	** any changes to *pOp and return false.
 //	*/
-func _jsonIs4HexB(tls *libc.TLS, z, pOp uintptr) (r int32) {
+func _jsonIs4HexB(tls *libc.TLS, z uintptr, pOp uintptr) (r int32) {
 	if int32(**(**int8)(__ccgo_up(z))) != int32('u') {
 		return 0
 	}
@@ -1688,7 +1688,7 @@ var _row_numberName = [11]int8{'r', 'o', 'w', '_', 'n', 'u', 'm', 'b', 'e', 'r'}
 //	**
 //	** Return the number of errors.
 //	*/
-func _setDateTimeToCurrent(tls *libc.TLS, context, p uintptr) (r int32) {
+func _setDateTimeToCurrent(tls *libc.TLS, context uintptr, p uintptr) (r int32) {
 	(*TDateTime)(unsafe.Pointer(p)).FiJD = _sqlite3StmtCurrentTime(tls, context)
 	if (*TDateTime)(unsafe.Pointer(p)).FiJD > 0 {
 		(*TDateTime)(unsafe.Pointer(p)).FvalidJD = int8(1)
@@ -1797,7 +1797,7 @@ func _sqlite3ExprTruthValue(tls *libc.TLS, pExpr uintptr) (r int32) {
 //	** Or, if an error occurs, then an SQLite error code is returned. The final
 //	** value of the four output parameters is undefined in this case.
 //	*/
-func _sqlite3Fts5DecodeLocaleValue(tls *libc.TLS, pVal, ppText, pnText, ppLoc, pnLoc uintptr) (r int32) {
+func _sqlite3Fts5DecodeLocaleValue(tls *libc.TLS, pVal uintptr, ppText uintptr, pnText uintptr, ppLoc uintptr, pnLoc uintptr) (r int32) {
 	var n, nLoc int32
 	var p uintptr
 	_, _, _ = n, nLoc, p
@@ -1860,7 +1860,7 @@ func _sqlite3Fts5Dequote(tls *libc.TLS, z uintptr) {
 //	** unique token in the document with an iCol value less than zero. The iPos
 //	** argument is ignored for a delete.
 //	*/
-func _sqlite3Fts5IndexWrite(tls *libc.TLS, p uintptr, iCol, iPos int32, pToken uintptr, nToken int32) (r int32) {
+func _sqlite3Fts5IndexWrite(tls *libc.TLS, p uintptr, iCol int32, iPos int32, pToken uintptr, nToken int32) (r int32) {
 	var i, nByte, nChar, rc int32
 	var pConfig uintptr
 	_, _, _, _, _ = i, nByte, nChar, pConfig, rc /* Used to iterate through indexes */
@@ -1970,7 +1970,7 @@ func _sqlite3Fts5IsBareword(tls *libc.TLS, t int8) (r int32) {
 	return libc.BoolInt32(int32(t)&int32(0x80) != 0 || aBareword[int32(t)] != 0)
 }
 
-func _sqlite3Fts5UnicodeCatParse(tls *libc.TLS, zCat, aArray uintptr) (r int32) {
+func _sqlite3Fts5UnicodeCatParse(tls *libc.TLS, zCat uintptr, aArray uintptr) (r int32) {
 	**(**Tu8)(__ccgo_up(aArray)) = uint8(1)
 	switch int32(**(**int8)(__ccgo_up(zCat))) {
 	case int32('C'):
@@ -2140,7 +2140,7 @@ func _sqlite3IndexAffinityOk(tls *libc.TLS, pExpr uintptr, idx_affinity int8) (r
 //	/*
 //	** Return the affinity for a single column of an index.
 //	*/
-func _sqlite3IndexColumnAffinity(tls *libc.TLS, db, pIdx uintptr, iCol int32) (r int8) {
+func _sqlite3IndexColumnAffinity(tls *libc.TLS, db uintptr, pIdx uintptr, iCol int32) (r int8) {
 	if !((*TIndex)(unsafe.Pointer(pIdx)).FzColAff != 0) {
 		if _sqlite3IndexAffinityStr(tls, db, pIdx) == uintptr(0) {
 			return int8(SQLITE_AFF_BLOB)
@@ -2149,7 +2149,7 @@ func _sqlite3IndexColumnAffinity(tls *libc.TLS, db, pIdx uintptr, iCol int32) (r
 	return **(**int8)(__ccgo_up((*TIndex)(unsafe.Pointer(pIdx)).FzColAff + uintptr(iCol)))
 }
 
-func _sqlite3OsFullPathname(tls *libc.TLS, pVfs, zPath uintptr, nPathOut int32, zPathOut uintptr) (r int32) {
+func _sqlite3OsFullPathname(tls *libc.TLS, pVfs uintptr, zPath uintptr, nPathOut int32, zPathOut uintptr) (r int32) {
 	**(**int8)(__ccgo_up(zPathOut)) = 0
 	return (*(*func(*libc.TLS, uintptr, uintptr, int32, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{(*Tsqlite3_vfs)(unsafe.Pointer(pVfs)).FxFullPathname})))(tls, pVfs, zPath, nPathOut, zPathOut)
 }
@@ -2183,7 +2183,7 @@ var _sqlite3StrBINARY = [7]int8{'B', 'I', 'N', 'A', 'R', 'Y'}
 //	** If the input string does not end with "X" then an OP_ResultRow instruction
 //	** is generated for the values inserted.
 //	*/
-func _sqlite3VdbeMultiLoad(tls *libc.TLS, p uintptr, iDest int32, zTypes, va uintptr) {
+func _sqlite3VdbeMultiLoad(tls *libc.TLS, p uintptr, iDest int32, zTypes uintptr, va uintptr) {
 	var ap Tva_list
 	var c, v2 int8
 	var i, v3 int32
@@ -2324,7 +2324,7 @@ func _updateRangeAffinityStr(tls *libc.TLS, pRight uintptr, n int32, zAff uintpt
 //	** This routine does the core work of extracting URI parameters from a
 //	** database filename for the sqlite3_uri_parameter() interface.
 //	*/
-func _uriParameter(tls *libc.TLS, zFilename, zParam uintptr) (r uintptr) {
+func _uriParameter(tls *libc.TLS, zFilename uintptr, zParam uintptr) (r uintptr) {
 	var x int32
 	_ = x
 	zFilename = zFilename + uintptr(_sqlite3Strlen30(tls, zFilename)+int32(1))

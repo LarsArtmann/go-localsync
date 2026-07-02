@@ -17,7 +17,7 @@ import (
 //	** that invoke a subprogram in the bytecode, the code for RETURNING
 //	** is generated in-line.
 //	*/
-func _codeReturningTrigger(tls *libc.TLS, pParse, pTrigger, pTab uintptr, regIn int32) {
+func _codeReturningTrigger(tls *libc.TLS, pParse uintptr, pTrigger uintptr, pTab uintptr, regIn int32) {
 	bp := tls.Alloc(272)
 	defer tls.Free(272)
 	var db, pCol, pFrom, pNew, pReturning, v, v2 uintptr
@@ -116,7 +116,7 @@ func _codeReturningTrigger(tls *libc.TLS, pParse, pTrigger, pTab uintptr, regIn 
 //	** If there are zero parameters (if even argv[0] is undefined)
 //	** then assume a default value of "now" for argv[0].
 //	*/
-func _isDate(tls *libc.TLS, context uintptr, argc int32, argv, p uintptr) (r int32) {
+func _isDate(tls *libc.TLS, context uintptr, argc int32, argv uintptr, p uintptr) (r int32) {
 	var eType, i, n, v1 int32
 	var z uintptr
 	_, _, _, _, _ = eType, i, n, z, v1
@@ -234,7 +234,7 @@ func _jsonGroupInverse(tls *libc.TLS, ctx uintptr, argc int32, argv uintptr) {
 	}
 }
 
-func _sqlite3DbStrNDup(tls *libc.TLS, db, z uintptr, n Tu64) (r uintptr) {
+func _sqlite3DbStrNDup(tls *libc.TLS, db uintptr, z uintptr, n Tu64) (r uintptr) {
 	var zNew, v1 uintptr
 	_, _ = zNew, v1
 	if z != 0 {
@@ -265,7 +265,7 @@ func _sqlite3DbStrNDup(tls *libc.TLS, db, z uintptr, n Tu64) (r uintptr) {
 //	**      SQL functions.  In other words, it is not possible to override a
 //	**      built-in function.
 //	*/
-func _sqlite3NestedParse(tls *libc.TLS, pParse, zFormat, va uintptr) {
+func _sqlite3NestedParse(tls *libc.TLS, pParse uintptr, zFormat uintptr, va uintptr) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var ap Tva_list

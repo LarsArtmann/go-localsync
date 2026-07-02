@@ -187,12 +187,10 @@ func Must(uuid UUID, err error) UUID {
 }
 
 // Validate returns an error if s is not a properly formatted UUID in one of the following formats:
-//
-//	xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-//	urn:uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-//	xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-//	{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
-//
+//   xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+//   urn:uuid:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+//   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//   {xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}
 // It returns an error if the format is invalid, otherwise nil.
 func Validate(s string) error {
 	switch len(s) {
@@ -359,7 +357,7 @@ type UUIDs []UUID
 
 // Strings returns a string slice containing the string form of each UUID in uuids.
 func (uuids UUIDs) Strings() []string {
-	uuidStrs := make([]string, len(uuids))
+	var uuidStrs = make([]string, len(uuids))
 	for i, uuid := range uuids {
 		uuidStrs[i] = uuid.String()
 	}

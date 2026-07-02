@@ -266,7 +266,7 @@ const __UINT_FAST32_MAX__ = 18446744073709551615
 //	** around a bug in BSD NFS lockd (also seen on MacOSX 10.3+) that fails to
 //	** remove the write lock on a region when a read lock is set.
 //	*/
-func _posixUnlock(tls *libc.TLS, id uintptr, eFileLock, handleNFSUnlock int32) (r int32) {
+func _posixUnlock(tls *libc.TLS, id uintptr, eFileLock int32, handleNFSUnlock int32) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var pFile, pInode uintptr
@@ -532,7 +532,7 @@ func _sqlite3MutexInit(tls *libc.TLS) (r int32) {
 // C documentation
 //
 //	/* Create a new thread */
-func _sqlite3ThreadCreate(tls *libc.TLS, ppThread, __ccgo_fp_xTask, pIn uintptr) (r int32) {
+func _sqlite3ThreadCreate(tls *libc.TLS, ppThread uintptr, __ccgo_fp_xTask uintptr, pIn uintptr) (r int32) {
 	var p uintptr
 	var rc int32
 	_, _ = p, rc
@@ -572,7 +572,7 @@ func _sqlite3ThreadCreate(tls *libc.TLS, ppThread, __ccgo_fp_xTask, pIn uintptr)
 //	** SQLite error code. The final value of *piOut is undefined in this
 //	** case.
 //	*/
-func _unixFcntlExternalReader(tls *libc.TLS, pFile, piOut uintptr) (r int32) {
+func _unixFcntlExternalReader(tls *libc.TLS, pFile uintptr, piOut uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var pShmNode uintptr
@@ -654,7 +654,7 @@ func _unixIsSharingShmNode(tls *libc.TLS, pFile uintptr) (r int32) {
 //	** to shared and back or from unlocked to exclusive and back.  But one may
 //	** not go from shared to exclusive or from exclusive to shared.
 //	*/
-func _unixShmLock(tls *libc.TLS, fd uintptr, ofst, n, flags int32) (r int32) {
+func _unixShmLock(tls *libc.TLS, fd uintptr, ofst int32, n int32, flags int32) (r int32) {
 	var aLock, p, pDbFd, pShmNode, v1 uintptr
 	var bUnlock, ii, rc int32
 	var mask Tu16

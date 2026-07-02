@@ -56,6 +56,7 @@ const (
 func init() {
 	sql.Register(driverName, newDriver())
 	sqlite3.PatchIssue199() // https://gitlab.com/cznic/sqlite/-/issues/199
+
 }
 
 // Inspired by mattn/go-sqlite3: https://github.com/mattn/go-sqlite3/blob/ab91e934/sqlite3.go#L210-L226
@@ -594,6 +595,7 @@ func registerFunction(
 	zFuncName string,
 	impl *FunctionImpl,
 ) error {
+
 	if _, ok := d.udfs[zFuncName]; ok {
 		return fmt.Errorf("a function named %q is already registered", zFuncName)
 	}
@@ -961,6 +963,7 @@ func funcTrampoline(tls *libc.TLS, ctx uintptr, argc int32, argv uintptr) {
 	sp := functionArgs(tls, argc, argv, entry.volatile)
 	defer releaseUDFArgs(sp)
 	res, err := entry.fn(&FunctionContext{}, *sp)
+
 	if err != nil {
 		setErrorResult(err)
 		return
@@ -1090,7 +1093,7 @@ func collationTrampoline(tls *libc.TLS, pApp uintptr, nLeft int32, zLeft uintptr
 // the particular instance of 'c', so getting a new connection only to pass it
 // to Limit is possibly not useful above querying what are the various
 // configured default values.
-func Limit(c *sql.Conn, id, newVal int) (r int, err error) {
+func Limit(c *sql.Conn, id int, newVal int) (r int, err error) {
 	err = c.Raw(func(driverConn any) error {
 		switch dc := driverConn.(type) {
 		case *conn:
@@ -1101,6 +1104,7 @@ func Limit(c *sql.Conn, id, newVal int) (r int, err error) {
 		}
 	})
 	return r, err
+
 }
 
 // ColumnInfo describes one output column of a prepared SQL statement.

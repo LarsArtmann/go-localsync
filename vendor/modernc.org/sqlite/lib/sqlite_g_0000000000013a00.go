@@ -46,7 +46,7 @@ import (
 //	** to which the constraint applies. The leftmost coordinate column
 //	** is 'a', the second from the left 'b' etc.
 //	*/
-func _rtreeBestIndex(tls *libc.TLS, tab, pIdxInfo uintptr) (r int32) {
+func _rtreeBestIndex(tls *libc.TLS, tab uintptr, pIdxInfo uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var bMatch, iIdx, ii, jj, rc, v4 int32

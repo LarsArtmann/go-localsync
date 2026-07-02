@@ -406,7 +406,7 @@ func _sqlite3OsUnfetch(tls *libc.TLS, id uintptr, iOff Ti64, p uintptr) (r int32
 //	** to a non-zero value otherwise *pResOut is set to zero.  The return value
 //	** is set to SQLITE_OK unless an I/O error occurs during lock checking.
 //	*/
-func _unixCheckReservedLock(tls *libc.TLS, id, pResOut uintptr) (r int32) {
+func _unixCheckReservedLock(tls *libc.TLS, id uintptr, pResOut uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var pFile uintptr
@@ -466,7 +466,7 @@ func _unixCheckReservedLock(tls *libc.TLS, id, pResOut uintptr) (r int32) {
 //	** SQLite error code. The final value of *piOut is undefined in this
 //	** case.
 //	*/
-func _unixFcntlExternalReader(tls *libc.TLS, pFile, piOut uintptr) (r int32) {
+func _unixFcntlExternalReader(tls *libc.TLS, pFile uintptr, piOut uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var pShmNode uintptr
@@ -960,7 +960,7 @@ end_lock:
 //	** bytes were read successfully and SQLITE_IOERR if anything goes
 //	** wrong.
 //	*/
-func _unixRead(tls *libc.TLS, id, pBuf uintptr, amt int32, offset Tsqlite3_int64) (r int32) {
+func _unixRead(tls *libc.TLS, id uintptr, pBuf uintptr, amt int32, offset Tsqlite3_int64) (r int32) {
 	var got int32
 	var pFile uintptr
 	_, _ = got, pFile
@@ -1074,7 +1074,7 @@ func _unixUnfetch(tls *libc.TLS, fd uintptr, iOff Ti64, p uintptr) (r int32) {
 //	**       Each record consists of a varint followed by a blob of data (the
 //	**       key). The varint is the number of bytes in the blob of data.
 //	*/
-func _vdbeSorterListToPMA(tls *libc.TLS, pTask, pList uintptr) (r int32) {
+func _vdbeSorterListToPMA(tls *libc.TLS, pTask uintptr, pList uintptr) (r int32) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var db, p, pNext uintptr

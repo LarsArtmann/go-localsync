@@ -1,4 +1,4 @@
-package storage
+package view
 
 import (
 	"fmt"
@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	sqlTypeText   = "TEXT"
-	keyColumnName = "key"
+	sqlTypeText    = "TEXT"
+	sqlTypeInteger = "INTEGER"
+	keyColumnName  = "key"
 )
 
 // AutoMapper generates a [ViewMapper] from struct tags on V. Fields tagged
@@ -50,6 +51,9 @@ func AutoMapper[V any](table string) ViewMapper[V] {
 // AutoMapperWithTombstone is like [AutoMapper] but also sets the
 // TombstoneColumn on the generated mapper. The tombstone column must be a
 // tagged boolean field. Pass an empty string to disable tombstone pushdown.
+//
+// Panics if V is not a struct or a pointer to a struct — this is a programmer
+// error detected at startup, not a runtime condition.
 func AutoMapperWithTombstone[V any](table, tombstoneCol string) ViewMapper[V] {
 	var zero V
 
@@ -165,11 +169,11 @@ func goTypeToSQL(rt reflect.Type) (string, bool) {
 	case reflect.String:
 		return sqlTypeText, false
 	case reflect.Int, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint32, reflect.Uint64:
-		return "INTEGER", false
+		return sqlTypeInteger, false
 	case reflect.Float32, reflect.Float64:
 		return "REAL", false
 	case reflect.Bool:
-		return "INTEGER", true
+		return sqlTypeInteger, true
 	default:
 		if rt == reflect.TypeFor[time.Time]() {
 			return sqlTypeText, false

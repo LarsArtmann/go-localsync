@@ -5,12 +5,11 @@
 package libc // import "modernc.org/libc"
 
 import (
+	"golang.org/x/sys/windows"
 	"math"
 	"os"
 	"strings"
 	"unsafe"
-
-	"golang.org/x/sys/windows"
 
 	"modernc.org/libc/errno"
 	"modernc.org/libc/sys/types"
@@ -504,7 +503,7 @@ func Xfopen64(t *TLS, pathname, mode uintptr) uintptr {
 		panic(m)
 	}
 	//TODO- flags |= fcntl.O_LARGEFILE
-	h, err := windows.Open(GoString(pathname), int(flags), uint32(0o666))
+	h, err := windows.Open(GoString(pathname), int(flags), uint32(0666))
 	if err != nil {
 		t.setErrno(err)
 		return 0
@@ -540,7 +539,7 @@ func Xshutdown(t *TLS, sockfd uint64, how int32) int32 {
 	panic(todo(""))
 }
 
-func Xgetpeername(t *TLS, sockfd uint64, addr, addrlen uintptr) int32 {
+func Xgetpeername(t *TLS, sockfd uint64, addr uintptr, addrlen uintptr) int32 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -582,7 +581,7 @@ func Xlisten(t *TLS, sockfd uint64, backlog int32) int32 {
 	panic(todo(""))
 }
 
-func Xaccept(t *TLS, sockfd uint64, addr, addrlen uintptr) uint64 {
+func Xaccept(t *TLS, sockfd uint64, addr uintptr, addrlen uintptr) uint64 {
 	if __ccgo_strace {
 		trc("t=%v sockfd=%v addr=%v addrlen=%v, (%v:)", t, sockfd, addr, addrlen, origin(2))
 	}
@@ -605,7 +604,7 @@ func XSendMessageTimeoutW(t *TLS, _ ...interface{}) int64 {
 	panic(todo(""))
 }
 
-func Xstrspn(tls *TLS, s, c uintptr) size_t { /* strspn.c:6:8: */
+func Xstrspn(tls *TLS, s uintptr, c uintptr) size_t { /* strspn.c:6:8: */
 	if __ccgo_strace {
 		trc("tls=%v s=%v c=%v, (%v:)", tls, s, c, origin(2))
 	}
@@ -631,7 +630,7 @@ func Xstrspn(tls *TLS, s, c uintptr) size_t { /* strspn.c:6:8: */
 	return size_t((int64(s) - int64(a)) / 1)
 }
 
-func Xstrtod(t *TLS, s, p uintptr) float64 {
+func Xstrtod(t *TLS, s uintptr, p uintptr) float64 {
 	if __ccgo_strace {
 		trc("tls=%v s=%v p=%v, (%v:)", t, s, p, origin(2))
 	}

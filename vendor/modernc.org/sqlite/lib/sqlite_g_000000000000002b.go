@@ -33,7 +33,7 @@ const __UINTMAX_FMTx__ = "lx"
 //	** responsibility of the caller to eventually release the structure
 //	** by passing the pointer returned by this function to freeIndexInfo().
 //	*/
-func _allocateIndexInfo(tls *libc.TLS, pWInfo, pWC uintptr, mUnusable TBitmask, pSrc, pmNoOmit uintptr) (r uintptr) {
+func _allocateIndexInfo(tls *libc.TLS, pWInfo uintptr, pWC uintptr, mUnusable TBitmask, pSrc uintptr, pmNoOmit uintptr) (r uintptr) {
 	var bSortByGroup, eDistinct, i, iCol, j, n, nLast, nOrderBy, nTerm, v10 int32
 	var mNoOmit, op Tu16
 	var p, pE2, pExpr, pExpr1, pHidden, pIdxCons, pIdxInfo, pIdxOrderBy, pOrderBy, pParse, pPk, pTab, pTerm, pUsage, zColl, v3 uintptr
@@ -402,7 +402,7 @@ func _sqlite3OomFault(tls *libc.TLS, db uintptr) (r uintptr) {
 //	** Set the value stored in *pMem should already be a NULL.
 //	** Also store a pointer to go with it.
 //	*/
-func _sqlite3VdbeMemSetPointer(tls *libc.TLS, pMem, pPtr, zPType, __ccgo_fp_xDestructor uintptr) {
+func _sqlite3VdbeMemSetPointer(tls *libc.TLS, pMem uintptr, pPtr uintptr, zPType uintptr, __ccgo_fp_xDestructor uintptr) {
 	var v1 uintptr
 	_ = v1
 	_vdbeMemClear(tls, pMem)
@@ -616,7 +616,7 @@ func _unixRemapfile(tls *libc.TLS, pFd uintptr, nNew Ti64) {
 //	** a numeric type (real or integer), then the result of the addition
 //	** or subtraction is a a copy of csr1.peerVal.
 //	*/
-func _windowCodeRangeTest(tls *libc.TLS, p uintptr, op, csr1, regVal, csr2, lbl int32) {
+func _windowCodeRangeTest(tls *libc.TLS, p uintptr, op int32, csr1 int32, regVal int32, csr2 int32, lbl int32) {
 	var addr, addrDone, addrGe, arith, reg1, reg2, regString, v1 int32
 	var pColl, pOrderBy, pParse, v, v2 uintptr
 	_, _, _, _, _, _, _, _, _, _, _, _, _ = addr, addrDone, addrGe, arith, pColl, pOrderBy, pParse, reg1, reg2, regString, v, v1, v2

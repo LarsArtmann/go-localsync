@@ -23,16 +23,14 @@ import (
 // SQLITE_MISUSE and the engine cannot switch its page cache backend.
 var ErrPageCacheTooLate = errors.New(
 	"sqlite: RegisterPageCache called after first Open; " +
-		"SQLITE_CONFIG_PCACHE2 must be installed before any connection is opened",
-)
+		"SQLITE_CONFIG_PCACHE2 must be installed before any connection is opened")
 
 // ErrPageCacheConflict is returned when a different PageCache has
 // already been registered in this process. The same module value may be
 // re-registered without error, which lets multiple library imports share
 // a singleton without coordination.
 var ErrPageCacheConflict = errors.New(
-	"sqlite: a different page cache module is already registered",
-)
+	"sqlite: a different page cache module is already registered")
 
 // FetchMode tells Cache.Fetch how aggressively to allocate when the
 // requested key is absent. It matches the createFlag of SQLite's xFetch
@@ -285,8 +283,7 @@ func RegisterPageCache(m PageCache) error {
 		defer func() {
 			if r := recover(); r != nil {
 				pcacheState.configErr = fmt.Errorf(
-					"sqlite: panic during PCACHE2 install: %v", r,
-				)
+					"sqlite: panic during PCACHE2 install: %v", r)
 				pcacheState.registered = nil
 				pcacheState.cMethods = 0
 			}
@@ -316,8 +313,7 @@ func RegisterPageCache(m PageCache) error {
 		if rc != sqlite3.SQLITE_OK {
 			libc.Xfree(tls, methodsPtr)
 			pcacheState.configErr = fmt.Errorf(
-				"sqlite: Xsqlite3_config(SQLITE_CONFIG_PCACHE2) returned %d", rc,
-			)
+				"sqlite: Xsqlite3_config(SQLITE_CONFIG_PCACHE2) returned %d", rc)
 			return
 		}
 

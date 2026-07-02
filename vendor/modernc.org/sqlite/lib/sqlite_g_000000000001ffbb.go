@@ -48,7 +48,7 @@ func _fts5DoclistIterNext(tls *libc.TLS, pIter uintptr) {
 //	** If an error occurs, set the Fts5Index.rc error code. If an error has
 //	** already occurred, this function is a no-op.
 //	*/
-func _fts5IndexAutomerge(tls *libc.TLS, p, ppStruct uintptr, nLeaf int32) {
+func _fts5IndexAutomerge(tls *libc.TLS, p uintptr, ppStruct uintptr, nLeaf int32) {
 	var nRem, nWork int32
 	var nWrite Tu64
 	var pStruct uintptr
@@ -70,7 +70,7 @@ func _fts5IndexAutomerge(tls *libc.TLS, p, ppStruct uintptr, nLeaf int32) {
 //	** Check the RTree node or entry given by pCellData and p against the MATCH
 //	** constraint pConstraint.
 //	*/
-func _rtreeCallbackConstraint(tls *libc.TLS, pConstraint uintptr, eInt int32, pCellData, pSearch, prScore, peWithin uintptr) (r int32) {
+func _rtreeCallbackConstraint(tls *libc.TLS, pConstraint uintptr, eInt int32, pCellData uintptr, pSearch uintptr, prScore uintptr, peWithin uintptr) (r int32) {
 	bp := tls.Alloc(96)
 	defer tls.Free(96)
 	var nCoord, rc, v2 int32
@@ -364,7 +364,7 @@ func _sumStep(tls *libc.TLS, context uintptr, argc int32, argv uintptr) {
 //	** for a UTF conversion required for comparison.  The error is stored
 //	** in the pParse structure.
 //	*/
-func _whereEqualScanEst(tls *libc.TLS, pParse, pBuilder, pExpr, pnRow uintptr) (r int32) {
+func _whereEqualScanEst(tls *libc.TLS, pParse uintptr, pBuilder uintptr, pExpr uintptr, pnRow uintptr) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var nEq, rc int32
@@ -424,7 +424,7 @@ func _whereEqualScanEst(tls *libc.TLS, pParse, pBuilder, pExpr, pnRow uintptr) (
 //	** appended, or it might be discarded.  Do whatever is the right thing
 //	** so that pSet keeps the N_OR_COST best entries seen so far.
 //	*/
-func _whereOrInsert(tls *libc.TLS, pSet uintptr, prereq TBitmask, rRun, nOut TLogEst) (r int32) {
+func _whereOrInsert(tls *libc.TLS, pSet uintptr, prereq TBitmask, rRun TLogEst, nOut TLogEst) (r int32) {
 	var i, v2 Tu16
 	var p, v3 uintptr
 	_, _, _, _ = i, p, v2, v3
@@ -524,7 +524,7 @@ whereOrInsert_done:
 //	** and a pair of constraints (x>? AND x<?) reduces the expected number of
 //	** rows visited by a factor of 64.
 //	*/
-func _whereRangeScanEst(tls *libc.TLS, pParse, pBuilder, pLower, pUpper, pLoop uintptr) (r int32) {
+func _whereRangeScanEst(tls *libc.TLS, pParse uintptr, pBuilder uintptr, pLower uintptr, pUpper uintptr, pLoop uintptr) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var iLower, iNew, iNew1, iUpper TtRowcnt

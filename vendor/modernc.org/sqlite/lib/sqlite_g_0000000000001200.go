@@ -15,7 +15,7 @@ import (
 //	/*
 //	** Append a single path element to the DbPath under construction
 //	*/
-func _appendOnePathElement(tls *libc.TLS, pPath, zName uintptr, nName int32) {
+func _appendOnePathElement(tls *libc.TLS, pPath uintptr, zName uintptr, nName int32) {
 	bp := tls.Alloc(4240)
 	defer tls.Free(4240)
 	var got Tssize_t
@@ -203,7 +203,7 @@ func _robust_open(tls *libc.TLS, z uintptr, f int32, m Tmode_t) (r int32) {
 	}
 	if fd >= 0 {
 		if m != uint32(0) {
-			if (*(*func(*libc.TLS, int32, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(5)].FpCurrent})))(tls, fd, bp) == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_size == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_mode&uint32(0o777) != m {
+			if (*(*func(*libc.TLS, int32, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(5)].FpCurrent})))(tls, fd, bp) == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_size == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_mode&uint32(0777) != m {
 				(*(*func(*libc.TLS, int32, Tmode_t) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(14)].FpCurrent})))(tls, fd, m)
 			}
 		}
@@ -302,10 +302,10 @@ func _unixOpenSharedMemory(tls *libc.TLS, pDbFd uintptr) (r int32) {
 		}
 		if libc.Int32FromUint8((*TunixInodeInfo)(unsafe.Pointer(pInode)).FbProcessLock) == 0 {
 			if 0 == Xsqlite3_uri_boolean(tls, (*TunixFile)(unsafe.Pointer(pDbFd)).FzPath, __ccgo_ts+3965, 0) {
-				(*TunixShmNode)(unsafe.Pointer(pShmNode)).FhShm = _robust_open(tls, zShm, libc.Int32FromInt32(O_RDWR)|libc.Int32FromInt32(O_CREAT)|libc.Int32FromInt32(O_NOFOLLOW), (**(**Tstat)(__ccgo_up(bp))).Fst_mode&libc.Uint32FromInt32(0o777))
+				(*TunixShmNode)(unsafe.Pointer(pShmNode)).FhShm = _robust_open(tls, zShm, libc.Int32FromInt32(O_RDWR)|libc.Int32FromInt32(O_CREAT)|libc.Int32FromInt32(O_NOFOLLOW), (**(**Tstat)(__ccgo_up(bp))).Fst_mode&libc.Uint32FromInt32(0777))
 			}
 			if (*TunixShmNode)(unsafe.Pointer(pShmNode)).FhShm < 0 {
-				(*TunixShmNode)(unsafe.Pointer(pShmNode)).FhShm = _robust_open(tls, zShm, libc.Int32FromInt32(O_RDONLY)|libc.Int32FromInt32(O_NOFOLLOW), (**(**Tstat)(__ccgo_up(bp))).Fst_mode&libc.Uint32FromInt32(0o777))
+				(*TunixShmNode)(unsafe.Pointer(pShmNode)).FhShm = _robust_open(tls, zShm, libc.Int32FromInt32(O_RDONLY)|libc.Int32FromInt32(O_NOFOLLOW), (**(**Tstat)(__ccgo_up(bp))).Fst_mode&libc.Uint32FromInt32(0777))
 				if (*TunixShmNode)(unsafe.Pointer(pShmNode)).FhShm < 0 {
 					rc = _unixLogErrorAtLine(tls, _sqlite3CantopenError(tls, int32(45227)), __ccgo_ts+3542, zShm, int32(45227))
 					goto shm_open_err
@@ -371,7 +371,7 @@ shm_open_err:
 //	** address space (if it is not already), *pp is set to point to the mapped
 //	** memory and SQLITE_OK returned.
 //	*/
-func _unixShmMap(tls *libc.TLS, fd uintptr, iRegion, szRegion, bExtend int32, pp uintptr) (r int32) {
+func _unixShmMap(tls *libc.TLS, fd uintptr, iRegion int32, szRegion int32, bExtend int32, pp uintptr) (r int32) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var apNew, p, pDbFd, pMem, pShmNode, zFile, v4 uintptr

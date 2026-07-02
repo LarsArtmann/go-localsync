@@ -31,7 +31,7 @@ func Xsqlite3_bind_text64(tls *libc.TLS, pStmt uintptr, i int32, zData uintptr, 
 //	/*
 //	** Register a new collation sequence with the database handle db.
 //	*/
-func Xsqlite3_create_collation16(tls *libc.TLS, db, zName uintptr, enc int32, pCtx, __ccgo_fp_xCompare uintptr) (r int32) {
+func Xsqlite3_create_collation16(tls *libc.TLS, db uintptr, zName uintptr, enc int32, pCtx uintptr, __ccgo_fp_xCompare uintptr) (r int32) {
 	var rc int32
 	var zName8 uintptr
 	_, _ = rc, zName8
@@ -47,11 +47,11 @@ func Xsqlite3_create_collation16(tls *libc.TLS, db, zName uintptr, enc int32, pC
 	return rc
 }
 
-func Xsqlite3_result_text16(tls *libc.TLS, pCtx, z uintptr, n int32, __ccgo_fp_xDel uintptr) {
+func Xsqlite3_result_text16(tls *libc.TLS, pCtx uintptr, z uintptr, n int32, __ccgo_fp_xDel uintptr) {
 	_setResultStrOrError(tls, pCtx, z, libc.Int32FromUint64(libc.Uint64FromInt32(n) & ^libc.Uint64FromInt32(1)), uint8(SQLITE_UTF16LE), __ccgo_fp_xDel)
 }
 
-func Xsqlite3_result_text64(tls *libc.TLS, pCtx, z uintptr, n Tsqlite3_uint64, __ccgo_fp_xDel uintptr, enc uint8) {
+func Xsqlite3_result_text64(tls *libc.TLS, pCtx uintptr, z uintptr, n Tsqlite3_uint64, __ccgo_fp_xDel uintptr, enc uint8) {
 	if libc.Int32FromUint8(enc) != int32(SQLITE_UTF8) && libc.Int32FromUint8(enc) != int32(SQLITE_UTF8_ZT) {
 		if libc.Int32FromUint8(enc) == int32(SQLITE_UTF16) {
 			enc = uint8(SQLITE_UTF16LE)
@@ -280,7 +280,7 @@ func _indexCellCompare(tls *libc.TLS, pPage uintptr, idx int32, pIdxKey uintptr,
 //	** PTRMAP_OVERFLOW2: pPage is an overflow-page. The pointer points at the next
 //	**                   overflow page in the list.
 //	*/
-func _modifyPagePointer(tls *libc.TLS, pPage uintptr, iFrom, iTo TPgno, eType Tu8) (r int32) {
+func _modifyPagePointer(tls *libc.TLS, pPage uintptr, iFrom TPgno, iTo TPgno, eType Tu8) (r int32) {
 	bp := tls.Alloc(32)
 	defer tls.Free(32)
 	var i, nCell, rc, v1 int32

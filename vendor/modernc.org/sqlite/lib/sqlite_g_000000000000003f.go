@@ -687,7 +687,7 @@ func _dotlockLock(tls *libc.TLS, id uintptr, eFileLock int32) (r int32) {
 		return SQLITE_OK
 	}
 	/* grab an exclusive lock */
-	rc = (*(*func(*libc.TLS, uintptr, Tmode_t) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(18)].FpCurrent})))(tls, zLockFile, uint16(0o777))
+	rc = (*(*func(*libc.TLS, uintptr, Tmode_t) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(18)].FpCurrent})))(tls, zLockFile, uint16(0777))
 	if rc < 0 {
 		/* failed to open/create the lock directory */
 		tErrno = **(**int32)(__ccgo_up(libc.X__error(tls)))
@@ -782,7 +782,7 @@ func _fts5ValueToText(tls *libc.TLS, pVal uintptr) (r uintptr) {
 //	**
 //	** Fts5SegWriter.btterm currently contains the first term on page iBtPage.
 //	*/
-func _fts5WriteFlushBtree(tls *libc.TLS, p, pWriter uintptr) {
+func _fts5WriteFlushBtree(tls *libc.TLS, p uintptr, pWriter uintptr) {
 	var bFlag int32
 	var z, v1 uintptr
 	_, _, _ = bFlag, z, v1
@@ -862,7 +862,7 @@ func _logBadConnection(tls *libc.TLS, zType uintptr) {
 //	** as there is a time string.  The time string can be omitted as long
 //	** as there is a year and date.
 //	*/
-func _parseDateOrTime(tls *libc.TLS, context, zDate, p uintptr) (r int32) {
+func _parseDateOrTime(tls *libc.TLS, context uintptr, zDate uintptr, p uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var _ /* r at bp+0 */ float64
@@ -913,7 +913,7 @@ func _parseDateOrTime(tls *libc.TLS, context, zDate, p uintptr) (r int32) {
 //	** So we don't even try to recover from an EINTR.  Just log the error
 //	** and move on.
 //	*/
-func _robust_close(tls *libc.TLS, pFile uintptr, h, lineno int32) {
+func _robust_close(tls *libc.TLS, pFile uintptr, h int32, lineno int32) {
 	var v1 uintptr
 	_ = v1
 	if (*(*func(*libc.TLS, int32) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(1)].FpCurrent})))(tls, h) != 0 {
@@ -950,7 +950,7 @@ func _robust_ftruncate(tls *libc.TLS, h int32, sz Tsqlite3_int64) (r int32) {
 //	** Use the content of the StrAccum passed as the second argument
 //	** as the result of an SQL function.
 //	*/
-func _sqlite3ResultStrAccum(tls *libc.TLS, pCtx, p uintptr) {
+func _sqlite3ResultStrAccum(tls *libc.TLS, pCtx uintptr, p uintptr) {
 	if (*TStrAccum)(unsafe.Pointer(p)).FaccError != 0 {
 		Xsqlite3_result_error_code(tls, pCtx, libc.Int32FromUint8((*TStrAccum)(unsafe.Pointer(p)).FaccError))
 		Xsqlite3_str_reset(tls, p)
@@ -1371,7 +1371,7 @@ end_lock:
 //	** failed (e.g. "unlink", "open") and the associated file-system path,
 //	** if any.
 //	*/
-func _unixLogErrorAtLine(tls *libc.TLS, errcode int32, zFunc, zPath uintptr, iLine int32) (r int32) {
+func _unixLogErrorAtLine(tls *libc.TLS, errcode int32, zFunc uintptr, zPath uintptr, iLine int32) (r int32) {
 	bp := tls.Alloc(48)
 	defer tls.Free(48)
 	var iErrno int32
@@ -1435,7 +1435,7 @@ func _unixTruncate(tls *libc.TLS, id uintptr, nByte Ti64) (r int32) {
 //	** code to check that the value is a non-negative integer and throws an
 //	** exception if it is not.
 //	*/
-func _windowCheckValue(tls *libc.TLS, pParse uintptr, reg, eCond int32) {
+func _windowCheckValue(tls *libc.TLS, pParse uintptr, reg int32, eCond int32) {
 	var regString, regZero int32
 	var v uintptr
 	_, _, _ = regString, regZero, v

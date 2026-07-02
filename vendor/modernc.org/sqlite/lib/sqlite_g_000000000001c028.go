@@ -22,7 +22,7 @@ type Tkey_t = int64
 //	** to shared and back or from unlocked to exclusive and back.  But one may
 //	** not go from shared to exclusive or from exclusive to shared.
 //	*/
-func _unixShmLock(tls *libc.TLS, fd uintptr, ofst, n, flags int32) (r int32) {
+func _unixShmLock(tls *libc.TLS, fd uintptr, ofst int32, n int32, flags int32) (r int32) {
 	var aLock, p, pDbFd, pShmNode, v1 uintptr
 	var bUnlock, ii, rc int32
 	var mask Tu16

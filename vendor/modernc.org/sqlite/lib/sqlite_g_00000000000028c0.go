@@ -15,7 +15,7 @@ import (
 //	/*
 //	** Find the mode, uid and gid of file zFile.
 //	*/
-func _getFileMode(tls *libc.TLS, zFile, pMode, pUid, pGid uintptr) (r int32) {
+func _getFileMode(tls *libc.TLS, zFile uintptr, pMode uintptr, pUid uintptr, pGid uintptr) (r int32) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var rc int32
@@ -23,7 +23,7 @@ func _getFileMode(tls *libc.TLS, zFile, pMode, pUid, pGid uintptr) (r int32) {
 	_ = rc /* Output of stat() on database file */
 	rc = SQLITE_OK
 	if 0 == (*(*func(*libc.TLS, uintptr, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(4)].FpCurrent})))(tls, zFile, bp) {
-		**(**Tmode_t)(__ccgo_up(pMode)) = (**(**Tstat)(__ccgo_up(bp))).Fst_mode & uint32(0o777)
+		**(**Tmode_t)(__ccgo_up(pMode)) = (**(**Tstat)(__ccgo_up(bp))).Fst_mode & uint32(0777)
 		**(**Tuid_t)(__ccgo_up(pUid)) = (**(**Tstat)(__ccgo_up(bp))).Fst_uid
 		**(**Tgid_t)(__ccgo_up(pGid)) = (**(**Tstat)(__ccgo_up(bp))).Fst_gid
 	} else {
@@ -88,7 +88,7 @@ func _robust_open(tls *libc.TLS, z uintptr, f int32, m Tmode_t) (r int32) {
 	}
 	if fd >= 0 {
 		if m != uint32(0) {
-			if (*(*func(*libc.TLS, int32, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(5)].FpCurrent})))(tls, fd, bp) == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_size == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_mode&uint32(0o777) != m {
+			if (*(*func(*libc.TLS, int32, uintptr) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(5)].FpCurrent})))(tls, fd, bp) == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_size == 0 && (**(**Tstat)(__ccgo_up(bp))).Fst_mode&uint32(0777) != m {
 				(*(*func(*libc.TLS, int32, Tmode_t) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(14)].FpCurrent})))(tls, fd, m)
 			}
 		}
@@ -108,7 +108,7 @@ func _robust_open(tls *libc.TLS, z uintptr, f int32, m Tmode_t) (r int32) {
 //	**
 //	** Otherwise return 0.
 //	*/
-func _unixAccess(tls *libc.TLS, NotUsed, zPath uintptr, flags int32, pResOut uintptr) (r int32) {
+func _unixAccess(tls *libc.TLS, NotUsed uintptr, zPath uintptr, flags int32, pResOut uintptr) (r int32) {
 	bp := tls.Alloc(144)
 	defer tls.Free(144)
 	var _ /* buf at bp+0 */ Tstat

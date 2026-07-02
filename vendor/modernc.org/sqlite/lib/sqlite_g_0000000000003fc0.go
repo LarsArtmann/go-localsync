@@ -1526,7 +1526,7 @@ func _dotlockLock(tls *libc.TLS, id uintptr, eFileLock int32) (r int32) {
 		return SQLITE_OK
 	}
 	/* grab an exclusive lock */
-	rc = (*(*func(*libc.TLS, uintptr, Tmode_t) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(18)].FpCurrent})))(tls, zLockFile, uint32(0o777))
+	rc = (*(*func(*libc.TLS, uintptr, Tmode_t) int32)(unsafe.Pointer(&struct{ uintptr }{_aSyscall[int32(18)].FpCurrent})))(tls, zLockFile, uint32(0777))
 	if rc < 0 {
 		/* failed to open/create the lock directory */
 		tErrno = **(**int32)(__ccgo_up(libc.X__errno_location(tls)))
@@ -1760,7 +1760,7 @@ func _sqlite3MemoryBarrier(tls *libc.TLS) {
 // C documentation
 //
 //	/* Get the results of the thread */
-func _sqlite3ThreadJoin(tls *libc.TLS, p, ppOut uintptr) (r int32) {
+func _sqlite3ThreadJoin(tls *libc.TLS, p uintptr, ppOut uintptr) (r int32) {
 	var rc, v1 int32
 	_, _ = rc, v1
 	if p == uintptr(0) {

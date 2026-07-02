@@ -15,7 +15,7 @@ import (
 //	/*
 //	** Open a new database handle.
 //	*/
-func Xsqlite3_open16(tls *libc.TLS, zFilename, ppDb uintptr) (r int32) {
+func Xsqlite3_open16(tls *libc.TLS, zFilename uintptr, ppDb uintptr) (r int32) {
 	var pVal, zFilename8 uintptr
 	var rc int32
 	var v1 Tu8

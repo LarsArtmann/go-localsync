@@ -25,7 +25,7 @@ func Xsqlite3_str_truncate(tls *libc.TLS, p uintptr, N int32) {
 //	/*
 //	** Append all path elements in zPath to the DbPath under construction.
 //	*/
-func _appendAllPathElements(tls *libc.TLS, pPath, zPath uintptr) {
+func _appendAllPathElements(tls *libc.TLS, pPath uintptr, zPath uintptr) {
 	var i, j, v1 int32
 	_, _, _ = i, j, v1
 	i = 0
@@ -55,7 +55,7 @@ func _appendAllPathElements(tls *libc.TLS, pPath, zPath uintptr) {
 //	** Return the P5 value that should be used for a binary comparison
 //	** opcode (OP_Eq, OP_Ge etc.) used to compare pExpr1 and pExpr2.
 //	*/
-func _binaryCompareP5(tls *libc.TLS, pExpr1, pExpr2 uintptr, jumpIfNull int32) (r Tu8) {
+func _binaryCompareP5(tls *libc.TLS, pExpr1 uintptr, pExpr2 uintptr, jumpIfNull int32) (r Tu8) {
 	var aff Tu8
 	_ = aff
 	aff = libc.Uint8FromInt8(_sqlite3ExprAffinity(tls, pExpr2))
@@ -63,7 +63,7 @@ func _binaryCompareP5(tls *libc.TLS, pExpr1, pExpr2 uintptr, jumpIfNull int32) (
 	return aff
 }
 
-func _fts5AsciiAddExceptions(tls *libc.TLS, p, zArg uintptr, bTokenChars int32) {
+func _fts5AsciiAddExceptions(tls *libc.TLS, p uintptr, zArg uintptr, bTokenChars int32) {
 	var i int32
 	_ = i
 	i = 0
@@ -86,7 +86,7 @@ func _fts5AsciiAddExceptions(tls *libc.TLS, p, zArg uintptr, bTokenChars int32) 
 //	/*
 //	** Tokenize some text using the ascii tokenizer.
 //	*/
-func _fts5AsciiTokenize(tls *libc.TLS, pTokenizer, pCtx uintptr, iUnused int32, pText uintptr, nText int32, __ccgo_fp_xToken uintptr) (r int32) {
+func _fts5AsciiTokenize(tls *libc.TLS, pTokenizer uintptr, pCtx uintptr, iUnused int32, pText uintptr, nText int32, __ccgo_fp_xToken uintptr) (r int32) {
 	bp := tls.Alloc(64)
 	defer tls.Free(64)
 	var a, p, pFold uintptr
@@ -179,7 +179,7 @@ func _fts5IndexCharlen(tls *libc.TLS, pIn uintptr, nIn int32) (r int32) {
 //	/* Parse out a number.  Write the value into *pVal if pVal!=0.
 //	** return non-zero on success and zero if the next token is not a number.
 //	*/
-func _geopolyParseNumber(tls *libc.TLS, p, pVal uintptr) (r int32) {
+func _geopolyParseNumber(tls *libc.TLS, p uintptr, pVal uintptr) (r int32) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var c int8
@@ -290,7 +290,7 @@ func _geopolySkipSpace(tls *libc.TLS, p uintptr) (r int8) {
 //	**
 //	** The function returns the number of successful conversions.
 //	*/
-func _getDigits(tls *libc.TLS, zDate, zFormat, va uintptr) (r int32) {
+func _getDigits(tls *libc.TLS, zDate uintptr, zFormat uintptr, va uintptr) (r int32) {
 	var N, min, nextC, v1 int8
 	var ap Tva_list
 	var cnt, val int32
@@ -347,7 +347,7 @@ end_getDigits:
 //	** then it is copied to the output buffer exactly as it is. Otherwise,
 //	** it is quoted using double-quotes.
 //	*/
-func _identPut(tls *libc.TLS, z, pIdx, zSignedIdent uintptr) {
+func _identPut(tls *libc.TLS, z uintptr, pIdx uintptr, zSignedIdent uintptr) {
 	var i, j, needQuote, v2 int32
 	var zIdent uintptr
 	_, _, _, _, _ = i, j, needQuote, zIdent, v2
@@ -1307,7 +1307,7 @@ ptrmap_exit:
 //	** If none of the substrings in the above table are found,
 //	** SQLITE_AFF_NUMERIC is returned.
 //	*/
-func _sqlite3AffinityType(tls *libc.TLS, zIn, pCol uintptr) (r int8) {
+func _sqlite3AffinityType(tls *libc.TLS, zIn uintptr, pCol uintptr) (r int8) {
 	bp := tls.Alloc(16)
 	defer tls.Free(16)
 	var aff int8
@@ -1436,7 +1436,7 @@ func _sqlite3AppendOneUtf8Character(tls *libc.TLS, zOut uintptr, v Tu32) (r int3
 //	** The string is not necessarily zero-terminated.  The encoding is
 //	** given by enc.
 //	*/
-func _sqlite3Atoi64(tls *libc.TLS, zNum, pNum uintptr, length int32, enc Tu8) (r int32) {
+func _sqlite3Atoi64(tls *libc.TLS, zNum uintptr, pNum uintptr, length int32, enc Tu8) (r int32) {
 	var c, v3 uint32
 	var i, incr, j, jj, neg, nonNum, rc, v6 int32
 	var u Tu64
@@ -1724,7 +1724,7 @@ func _sqlite3ExprNeedsNoAffinityChange(tls *libc.TLS, p uintptr, aff int8) (r in
 //	** size. Return the number of bytes in the nChar character prefix of the
 //	** buffer, or 0 if there are less than nChar characters in total.
 //	*/
-func _sqlite3Fts5IndexCharlenToBytelen(tls *libc.TLS, p uintptr, nByte, nChar int32) (r int32) {
+func _sqlite3Fts5IndexCharlenToBytelen(tls *libc.TLS, p uintptr, nByte int32, nChar int32) (r int32) {
 	var i, n, v2 int32
 	_, _, _ = i, n, v2
 	n = 0
@@ -1765,7 +1765,7 @@ func _sqlite3Fts5IndexCharlenToBytelen(tls *libc.TLS, p uintptr, nByte, nChar in
 //	/*
 //	** Return a simple checksum value based on the arguments.
 //	*/
-func _sqlite3Fts5IndexEntryCksum(tls *libc.TLS, iRowid Ti64, iCol, iPos, iIdx int32, pTerm uintptr, nTerm int32) (r Tu64) {
+func _sqlite3Fts5IndexEntryCksum(tls *libc.TLS, iRowid Ti64, iCol int32, iPos int32, iIdx int32, pTerm uintptr, nTerm int32) (r Tu64) {
 	var i int32
 	var ret Tu64
 	_, _ = i, ret
@@ -1797,7 +1797,7 @@ func _sqlite3Fts5IndexEntryCksum(tls *libc.TLS, iRowid Ti64, iCol, iPos, iIdx in
 //	**
 //	** Only decimal notation is accepted.
 //	*/
-func _sqlite3GetUInt32(tls *libc.TLS, z, pI uintptr) (r int32) {
+func _sqlite3GetUInt32(tls *libc.TLS, z uintptr, pI uintptr) (r int32) {
 	var i int32
 	var v Tu64
 	_, _ = i, v
@@ -1852,7 +1852,7 @@ func _sqlite3GetUInt32(tls *libc.TLS, z, pI uintptr) (r int32) {
 //	** binary value has been obtained from malloc and must be freed by
 //	** the calling routine.
 //	*/
-func _sqlite3HexToBlob(tls *libc.TLS, db, z uintptr, n int32) (r uintptr) {
+func _sqlite3HexToBlob(tls *libc.TLS, db uintptr, z uintptr, n int32) (r uintptr) {
 	var i int32
 	var zBlob uintptr
 	_, _ = i, zBlob
@@ -1883,7 +1883,7 @@ func _sqlite3HexToBlob(tls *libc.TLS, db, z uintptr, n int32) (r uintptr) {
 //	** return the register into which the value has been read.  If pExpr is
 //	** not an indexed expression, then return negative.
 //	*/
-func _sqlite3IndexedExprLookup(tls *libc.TLS, pParse, pExpr uintptr, target int32) (r int32) {
+func _sqlite3IndexedExprLookup(tls *libc.TLS, pParse uintptr, pExpr uintptr, target int32) (r int32) {
 	var addr, iDataCur int32
 	var exprAff Tu8
 	var p, v uintptr
@@ -1964,7 +1964,7 @@ func _sqlite3IndexedExprLookup(tls *libc.TLS, pParse, pExpr uintptr, target int3
 //	**    (rc&2)==0     =>   The number is expressed as an integer, with no
 //	**                       decimal point or eNNN suffix.
 //	*/
-func _sqlite3MemRealValueRCSlowPath(tls *libc.TLS, pMem, pValue uintptr) (r int32) {
+func _sqlite3MemRealValueRCSlowPath(tls *libc.TLS, pMem uintptr, pValue uintptr) (r int32) {
 	var i, j, n, rc, v2 int32
 	var z, zCopy, zCopy1 uintptr
 	_, _, _, _, _, _, _, _ = i, j, n, rc, z, zCopy, zCopy1, v2
@@ -2066,7 +2066,7 @@ func _sqlite3StrIHash(tls *libc.TLS, z uintptr) (r Tu8) {
 //	** Exported version of applyAffinity(). This one works on sqlite3_value*,
 //	** not the internal Mem* type.
 //	*/
-func _sqlite3ValueApplyAffinity(tls *libc.TLS, pVal uintptr, affinity, enc Tu8) {
+func _sqlite3ValueApplyAffinity(tls *libc.TLS, pVal uintptr, affinity Tu8, enc Tu8) {
 	_applyAffinity(tls, pVal, libc.Int8FromUint8(affinity), enc)
 }
 
@@ -2087,7 +2087,7 @@ func _sqlite3ValueApplyAffinity(tls *libc.TLS, pVal uintptr, affinity, enc Tu8) 
 //	** If this routine fails for any reason (malloc returns NULL or unable
 //	** to read from the disk) then the pMem is left in an inconsistent state.
 //	*/
-func _sqlite3VdbeMemFromBtree(tls *libc.TLS, pCur uintptr, offset, amt Tu32, pMem uintptr) (r int32) {
+func _sqlite3VdbeMemFromBtree(tls *libc.TLS, pCur uintptr, offset Tu32, amt Tu32, pMem uintptr) (r int32) {
 	var rc, v1 int32
 	_, _ = rc, v1
 	(*TMem)(unsafe.Pointer(pMem)).Fflags = uint16(MEM_Null)
@@ -2156,7 +2156,7 @@ func _strHash(tls *libc.TLS, z uintptr) (r uint32) {
 //	** This is an optimization.  No harm comes from returning 0.  But if 1 is
 //	** returned when it should not be, then incorrect answers might result.
 //	*/
-func _termIsEquivalence(tls *libc.TLS, pParse, pExpr, pSrc uintptr) (r int32) {
+func _termIsEquivalence(tls *libc.TLS, pParse uintptr, pExpr uintptr, pSrc uintptr) (r int32) {
 	var aff1, aff2 int8
 	_, _ = aff1, aff2
 	if !((*Tsqlite3)(unsafe.Pointer((*TParse)(unsafe.Pointer(pParse)).Fdb)).FdbOptFlags&libc.Uint32FromInt32(libc.Int32FromInt32(SQLITE_Transitive)) == libc.Uint32FromInt32(0)) {
@@ -2188,7 +2188,7 @@ func _termIsEquivalence(tls *libc.TLS, pParse, pExpr, pSrc uintptr) (r int32) {
 //	** Duplicate a range of text from an SQL statement, then convert all
 //	** whitespace characters into ordinary space characters.
 //	*/
-func _triggerSpanDup(tls *libc.TLS, db, zStart, zEnd uintptr) (r uintptr) {
+func _triggerSpanDup(tls *libc.TLS, db uintptr, zStart uintptr, zEnd uintptr) (r uintptr) {
 	var i int32
 	var z uintptr
 	_, _ = i, z
