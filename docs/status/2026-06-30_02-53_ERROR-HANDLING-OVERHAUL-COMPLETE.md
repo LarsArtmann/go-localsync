@@ -8,17 +8,17 @@
 
 ## TL;DR
 
-| Metric | Value | Trend |
-|--------|-------|-------|
-| Build | ✅ passing | — |
-| Tests | ✅ 177 Test + 7 Bench + 3 Example = **187 total** | +14 test functions this session |
-| Coverage | **80.0%** total | flat |
-| Lint | ✅ 0 issues (golangci-lint v2, `enable-all`) | — |
-| Race | ✅ clean (errors, sync, api, cqrs) | — |
-| Commits this session | **14** (all pushed) | — |
-| Production code TODOs/FIXMEs | **0** | clean |
-| Source LOC | 4,326 (non-test) | +~150 net |
-| Test LOC | 6,291 | +~200 net |
+| Metric                       | Value                                             | Trend                           |
+| ---------------------------- | ------------------------------------------------- | ------------------------------- |
+| Build                        | ✅ passing                                        | —                               |
+| Tests                        | ✅ 177 Test + 7 Bench + 3 Example = **187 total** | +14 test functions this session |
+| Coverage                     | **80.0%** total                                   | flat                            |
+| Lint                         | ✅ 0 issues (golangci-lint v2, `enable-all`)      | —                               |
+| Race                         | ✅ clean (errors, sync, api, cqrs)                | —                               |
+| Commits this session         | **14** (all pushed)                               | —                               |
+| Production code TODOs/FIXMEs | **0**                                             | clean                           |
+| Source LOC                   | 4,326 (non-test)                                  | +~150 net                       |
+| Test LOC                     | 6,291                                             | +~200 net                       |
 
 **The error-handling subsystem was systematically overhauled.** One latent correctness bug was fixed, one entire dead subsystem (user-facing error templates) was activated, two taxonomy split-brains were closed, and validation errors became programmatically field-addressable — all by reusing `go-error-family`'s existing capabilities.
 
@@ -30,22 +30,22 @@ Work that is complete, tested, and shipped this session:
 
 ### Error-Handling Overhaul (session 29)
 
-| # | Commit | What | Impact |
-|---|--------|------|--------|
-| 1 | `21f3acc` | Wire error templates into production via `sync.Once`, called from `api.NewServer` | **Zero → full value:** all 9 user-facing message templates were dead at runtime (only ever called in tests) |
-| 2 | `bcff39a` | `ErrPartialSync` (Transient family + template) replaces ghost `ErrSyncFailed` and package-private `errCompletedWithErrors` | Taxonomy split-brain closed; partial failures are now `errors.Is`-checkable and retryable |
-| 3 | `12cd17a` | Fix `ConflictAwareSyncer` silent partial-failure drop via shared `partialSyncError` helper | **Correctness bug fixed** — 4 tests had encoded the buggy contract |
-| 4 | `408cfa4` | `pkgerrors.HTTPStatus(err)`: per-sentinel overrides + `Family.HTTPStatus()` fallback | Reuses `go-error-family`; mapping is now exhaustive-by-construction |
-| 5 | `aa7a439` | Data-driven `mapSyncError`; route all handlers through it; partial-sync → 200-with-result | Removes brittle 503 catch-all; fixes `ErrDBNil` gap; partial syncs no longer discard data |
-| 6 | `e3a461b` | `context.Canceled` → 499, `context.DeadlineExceeded` → 504 | Client-gone no longer misclassified as server-down |
-| 7 | `393d8bd` | Delete dead `WithUserDetail` | Shrink public surface |
-| 8 | `314bb0b` | Template for `crdt.ErrNilTimestampFunc` | Last template gap closed |
-| 9 | `028df69` | Fix misleading `Count` error detail (`count=0` always zero on error path) | Stops lying in error messages |
-| 10 | `14cc0d5` | `errors.As` → `errors.AsType[retryAfterer]` | Go 1.26 stdlib idiom; `retryAfterer` now embeds `error` (honest shape) |
-| 11 | `a1404cf` | `WithCtx`/`WithCtxf` structured-context helpers | Uses `errorfamily.Error.WithContext` (immutable clone); fixes message-mashing problem |
-| 12 | `1999262` | `InvalidField(field, reason)` + migrate both `Validate` functions | Validation errors now carry structured `field` context for programmatic handling |
-| 13 | `cdf9bd5` | Stop swallowing errors in concurrent read-model tests | Could previously mask races as silent passes; verified `-race` clean |
-| 14 | `bab6daa` | AGENTS.md documentation update | — |
+| #   | Commit    | What                                                                                                                       | Impact                                                                                                      |
+| --- | --------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 1   | `21f3acc` | Wire error templates into production via `sync.Once`, called from `api.NewServer`                                          | **Zero → full value:** all 9 user-facing message templates were dead at runtime (only ever called in tests) |
+| 2   | `bcff39a` | `ErrPartialSync` (Transient family + template) replaces ghost `ErrSyncFailed` and package-private `errCompletedWithErrors` | Taxonomy split-brain closed; partial failures are now `errors.Is`-checkable and retryable                   |
+| 3   | `12cd17a` | Fix `ConflictAwareSyncer` silent partial-failure drop via shared `partialSyncError` helper                                 | **Correctness bug fixed** — 4 tests had encoded the buggy contract                                          |
+| 4   | `408cfa4` | `pkgerrors.HTTPStatus(err)`: per-sentinel overrides + `Family.HTTPStatus()` fallback                                       | Reuses `go-error-family`; mapping is now exhaustive-by-construction                                         |
+| 5   | `aa7a439` | Data-driven `mapSyncError`; route all handlers through it; partial-sync → 200-with-result                                  | Removes brittle 503 catch-all; fixes `ErrDBNil` gap; partial syncs no longer discard data                   |
+| 6   | `e3a461b` | `context.Canceled` → 499, `context.DeadlineExceeded` → 504                                                                 | Client-gone no longer misclassified as server-down                                                          |
+| 7   | `393d8bd` | Delete dead `WithUserDetail`                                                                                               | Shrink public surface                                                                                       |
+| 8   | `314bb0b` | Template for `crdt.ErrNilTimestampFunc`                                                                                    | Last template gap closed                                                                                    |
+| 9   | `028df69` | Fix misleading `Count` error detail (`count=0` always zero on error path)                                                  | Stops lying in error messages                                                                               |
+| 10  | `14cc0d5` | `errors.As` → `errors.AsType[retryAfterer]`                                                                                | Go 1.26 stdlib idiom; `retryAfterer` now embeds `error` (honest shape)                                      |
+| 11  | `a1404cf` | `WithCtx`/`WithCtxf` structured-context helpers                                                                            | Uses `errorfamily.Error.WithContext` (immutable clone); fixes message-mashing problem                       |
+| 12  | `1999262` | `InvalidField(field, reason)` + migrate both `Validate` functions                                                          | Validation errors now carry structured `field` context for programmatic handling                            |
+| 13  | `cdf9bd5` | Stop swallowing errors in concurrent read-model tests                                                                      | Could previously mask races as silent passes; verified `-race` clean                                        |
+| 14  | `bab6daa` | AGENTS.md documentation update                                                                                             | —                                                                                                           |
 
 ### Pre-existing solid foundation (verified still green)
 
@@ -64,14 +64,14 @@ Work that is complete, tested, and shipped this session:
 
 Work that exists but has known gaps:
 
-| Area | Status | Gap |
-|------|--------|-----|
-| **Observability** | Structured logging via `charm.land/log/v2` exists everywhere | No OpenTelemetry, no metrics, no tracing. `go-cqrs-lite` ships an `otel/v3` module that's unused. |
-| **Error HTTP mapping** | Now centralized via `HTTPStatus()` (this session) | `ErrPartialSync` maps to 503 at the family level — but the API layer special-cases it to 200-with-result. The family-level 503 is only reachable if a non-HTTP consumer calls `HTTPStatus` directly. Acceptable but worth noting. |
-| **Schema versioning** | `schema.Version` (V1/V2) carried on every item; `CurrentVersion()` exists | `UpcasterRegistry` from go-cqrs-lite not adopted — the foundation is ready but no upcasters are registered |
-| **Validation** | Now field-addressable via `InvalidField` (this session) | `SyncOptions.Validate()` still uses bare `WithDetail` (only one field, `Source`) — not migrated because it's a single-field check, not worth the noise |
-| **CI/CD** | Build job compiles across 4 platforms; release job creates binary-free GitHub releases | `go-cqrs-lite` is still private → forces committed `vendor/` + `vendorHash = null` in flake.nix |
-| **Test coverage** | 80.0% total; `pkg/cqrs` at 81.2% is the lowest | Below the 80% floor in `pkg/cqrs` store-factory and some error paths |
+| Area                   | Status                                                                                 | Gap                                                                                                                                                                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Observability**      | Structured logging via `charm.land/log/v2` exists everywhere                           | No OpenTelemetry, no metrics, no tracing. `go-cqrs-lite` ships an `otel/v3` module that's unused.                                                                                                                                 |
+| **Error HTTP mapping** | Now centralized via `HTTPStatus()` (this session)                                      | `ErrPartialSync` maps to 503 at the family level — but the API layer special-cases it to 200-with-result. The family-level 503 is only reachable if a non-HTTP consumer calls `HTTPStatus` directly. Acceptable but worth noting. |
+| **Schema versioning**  | `schema.Version` (V1/V2) carried on every item; `CurrentVersion()` exists              | `UpcasterRegistry` from go-cqrs-lite not adopted — the foundation is ready but no upcasters are registered                                                                                                                        |
+| **Validation**         | Now field-addressable via `InvalidField` (this session)                                | `SyncOptions.Validate()` still uses bare `WithDetail` (only one field, `Source`) — not migrated because it's a single-field check, not worth the noise                                                                            |
+| **CI/CD**              | Build job compiles across 4 platforms; release job creates binary-free GitHub releases | `go-cqrs-lite` is still private → forces committed `vendor/` + `vendorHash = null` in flake.nix                                                                                                                                   |
+| **Test coverage**      | 80.0% total; `pkg/cqrs` at 81.2% is the lowest                                         | Below the 80% floor in `pkg/cqrs` store-factory and some error paths                                                                                                                                                              |
 
 ---
 
@@ -79,19 +79,19 @@ Work that exists but has known gaps:
 
 From `TODO_LIST.md` and `ROADMAP.md`, verified against code:
 
-| Task | Source | Why it matters |
-|------|--------|----------------|
-| **Make `go-cqrs-lite` public** | TODO_LIST 🔴 | Eliminates the entire `vendor/` workaround chain; enables real `vendorHash` in nix |
-| **OpenTelemetry instrumentation** | TODO_LIST 🟡 | No production observability today |
-| **API authentication middleware** | TODO_LIST 🟡 | HTTP API is unauthenticated — unsafe to expose on a network |
-| **API pagination headers** | TODO_LIST 🟡 | `X-Total-Count`, cursor-based |
-| **API rate limiting middleware** | TODO_LIST 🟡 | `POST /sync` abuse prevention |
-| **OpenAPI error response schemas** | TODO_LIST 🟡 | Per-endpoint error schemas in the spec |
-| **Adopt `UpcasterRegistry`** | TODO_LIST 🟡 | Schema evolution machinery is ready but unwired |
-| **`govalid` struct tags** | TODO_LIST 🟢 | Code-gen validation for `SyncOptions`, `CQRSConfig` |
-| **Conflict resolution per-sync override** | TODO_LIST 🟢 + ROADMAP | `SyncOptions.ConflictResolver` (currently only `CQRSConfig`-level) |
-| **Export to JSON/CSV** | ROADMAP | No data export |
-| **CONTRIBUTING.md architecture guide** | TODO_LIST 🟢 | Minimal today |
+| Task                                      | Source                 | Why it matters                                                                     |
+| ----------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| **Make `go-cqrs-lite` public**            | TODO_LIST 🔴           | Eliminates the entire `vendor/` workaround chain; enables real `vendorHash` in nix |
+| **OpenTelemetry instrumentation**         | TODO_LIST 🟡           | No production observability today                                                  |
+| **API authentication middleware**         | TODO_LIST 🟡           | HTTP API is unauthenticated — unsafe to expose on a network                        |
+| **API pagination headers**                | TODO_LIST 🟡           | `X-Total-Count`, cursor-based                                                      |
+| **API rate limiting middleware**          | TODO_LIST 🟡           | `POST /sync` abuse prevention                                                      |
+| **OpenAPI error response schemas**        | TODO_LIST 🟡           | Per-endpoint error schemas in the spec                                             |
+| **Adopt `UpcasterRegistry`**              | TODO_LIST 🟡           | Schema evolution machinery is ready but unwired                                    |
+| **`govalid` struct tags**                 | TODO_LIST 🟢           | Code-gen validation for `SyncOptions`, `CQRSConfig`                                |
+| **Conflict resolution per-sync override** | TODO_LIST 🟢 + ROADMAP | `SyncOptions.ConflictResolver` (currently only `CQRSConfig`-level)                 |
+| **Export to JSON/CSV**                    | ROADMAP                | No data export                                                                     |
+| **CONTRIBUTING.md architecture guide**    | TODO_LIST 🟢           | Minimal today                                                                      |
 
 ---
 
@@ -103,11 +103,11 @@ Brutally honest assessment of things that are wrong, broken, or embarrassing:
 
 Every planning doc claims a different number:
 
-| Doc | Claims | Reality |
-|-----|--------|---------|
-| `TODO_LIST.md` | "190 passing" | **177** Test functions |
-| `ROADMAP.md` | "190 tests passing" | **177** |
-| `FEATURES.md` | "190 tests" | **177** |
+| Doc                                | Claims                     | Reality                                  |
+| ---------------------------------- | -------------------------- | ---------------------------------------- |
+| `TODO_LIST.md`                     | "190 passing"              | **177** Test functions                   |
+| `ROADMAP.md`                       | "190 tests passing"        | **177**                                  |
+| `FEATURES.md`                      | "190 tests"                | **177**                                  |
 | `AGENTS.md` (updated this session) | "194 total test functions" | **187** (177 Test + 7 Bench + 3 Example) |
 
 **I made this worse this session.** I wrote "194" in AGENTS.md based on a count that included benchmarks/examples, then didn't reconcile against the other docs. The real number is 177 `func Test*`. This needs a single source of truth.
@@ -136,7 +136,7 @@ Strategic improvements, prioritized by impact:
 
 ### Architecture / Type Model
 
-1. **Unify `SyncResult` and `ConflictResult`** — They share ~80% of their fields (`Fetched`, `Errors`, `ItemErrors`, `Tombstoned`) but have no common base. The partial-failure bug (step 3) happened *because* they diverged. A shared interface or embedded struct would make divergence impossible.
+1. **Unify `SyncResult` and `ConflictResult`** — They share ~80% of their fields (`Fetched`, `Errors`, `ItemErrors`, `Tombstoned`) but have no common base. The partial-failure bug (step 3) happened _because_ they diverged. A shared interface or embedded struct would make divergence impossible.
 
 2. **Make `SyncStore` errors explicitly classified** — The `SyncStore` interface returns `error` from `List`/`Count`/etc. but the contract "must wrap with `ErrDatabase`" is implicit. Tests had to be fixed this session because mocks returned unclassified errors. The interface should document or enforce the wrapping contract.
 
@@ -160,33 +160,33 @@ Strategic improvements, prioritized by impact:
 
 Sorted by **impact × (1/effort) × customer-value**:
 
-| # | Task | Impact | Effort | Category |
-|---|------|--------|--------|----------|
-| 1 | **Fix doc drift: reconcile test counts across all docs to 177** | 🔴 | 🟢 5min | Debt |
-| 2 | **Update `CHANGELOG.md` [Unreleased] with error-handling overhaul** | 🔴 | 🟢 10min | Debt |
-| 3 | **Make `go-cqrs-lite` public** → drop `vendor/`, real `vendorHash` | 🔴 | 🟡 1h | Debt |
-| 4 | **Adopt `encoding/json/v2`** (Go 1.26 policy) | 🟡 | 🟡 30min | Policy |
-| 5 | **Unify `SyncResult`/`ConflictResult`** via shared embedded struct | 🔴 | 🟡 1h | Architecture |
-| 6 | **OpenTelemetry instrumentation** (spans for `Sync`, `SyncItems`, HTTP) | 🔴 | 🟡 2h | Observability |
-| 7 | **API authentication middleware** (API key) | 🔴 | 🟡 1h | Security |
-| 8 | **API rate limiting middleware** | 🟡 | 🟡 1h | Security |
-| 9 | **Integration test: real error-taxonomy provider** | 🟡 | 🟡 1h | Testing |
-| 10 | **Adopt `UpcasterRegistry`** for schema evolution | 🟡 | 🟡 1h | Architecture |
-| 11 | **Delete or implement `retryAfterer`** (YAGNI decision) | 🟢 | 🟢 15min | Debt |
-| 12 | **API pagination headers** (`X-Total-Count`, cursor) | 🟡 | 🟡 1h | Feature |
-| 13 | **Conflict resolution per-sync override** (`SyncOptions.ConflictResolver`) | 🟡 | 🟡 45min | Feature |
-| 14 | **OpenAPI error response schemas** per endpoint | 🟡 | 🟡 45min | Docs |
-| 15 | **Improve `pkg/cqrs` coverage** (81.2% → 85%+) | 🟡 | 🟡 1h | Quality |
-| 16 | **`govalid` struct tags** for `SyncOptions`, `CQRSConfig` | 🟢 | 🟡 30min | Policy |
-| 17 | **Document `SyncStore` error-wrapping contract** in the interface | 🟡 | 🟢 10min | Architecture |
-| 18 | **RFC 7807 problem details** in API error responses (use `field` context) | 🟢 | 🟡 45min | Feature |
-| 19 | **Property-based test for `HTTPStatus`** | 🟢 | 🟡 30min | Testing |
-| 20 | **Export to JSON/CSV** | 🟢 | 🟡 1h | Feature |
-| 21 | **Structured logging fields** consistency (source, page, event_id) | 🟢 | 🟡 30min | Observability |
-| 22 | **CONTRIBUTING.md** architecture guide | 🟢 | 🟡 45min | Docs |
-| 23 | **`ErrContextCancelled` sentinel** for non-HTTP consumers | 🟢 | 🟢 15min | Error handling |
-| 24 | **Snapshot test** for `mapSyncError` HTTP responses (go-snaps) | 🟢 | 🟡 30min | Testing |
-| 25 | **Benchmark `HTTPStatus`** hot path (called on every API error) | 🟢 | 🟢 15min | Performance |
+| #   | Task                                                                       | Impact | Effort   | Category       |
+| --- | -------------------------------------------------------------------------- | ------ | -------- | -------------- |
+| 1   | **Fix doc drift: reconcile test counts across all docs to 177**            | 🔴     | 🟢 5min  | Debt           |
+| 2   | **Update `CHANGELOG.md` [Unreleased] with error-handling overhaul**        | 🔴     | 🟢 10min | Debt           |
+| 3   | **Make `go-cqrs-lite` public** → drop `vendor/`, real `vendorHash`         | 🔴     | 🟡 1h    | Debt           |
+| 4   | **Adopt `encoding/json/v2`** (Go 1.26 policy)                              | 🟡     | 🟡 30min | Policy         |
+| 5   | **Unify `SyncResult`/`ConflictResult`** via shared embedded struct         | 🔴     | 🟡 1h    | Architecture   |
+| 6   | **OpenTelemetry instrumentation** (spans for `Sync`, `SyncItems`, HTTP)    | 🔴     | 🟡 2h    | Observability  |
+| 7   | **API authentication middleware** (API key)                                | 🔴     | 🟡 1h    | Security       |
+| 8   | **API rate limiting middleware**                                           | 🟡     | 🟡 1h    | Security       |
+| 9   | **Integration test: real error-taxonomy provider**                         | 🟡     | 🟡 1h    | Testing        |
+| 10  | **Adopt `UpcasterRegistry`** for schema evolution                          | 🟡     | 🟡 1h    | Architecture   |
+| 11  | **Delete or implement `retryAfterer`** (YAGNI decision)                    | 🟢     | 🟢 15min | Debt           |
+| 12  | **API pagination headers** (`X-Total-Count`, cursor)                       | 🟡     | 🟡 1h    | Feature        |
+| 13  | **Conflict resolution per-sync override** (`SyncOptions.ConflictResolver`) | 🟡     | 🟡 45min | Feature        |
+| 14  | **OpenAPI error response schemas** per endpoint                            | 🟡     | 🟡 45min | Docs           |
+| 15  | **Improve `pkg/cqrs` coverage** (81.2% → 85%+)                             | 🟡     | 🟡 1h    | Quality        |
+| 16  | **`govalid` struct tags** for `SyncOptions`, `CQRSConfig`                  | 🟢     | 🟡 30min | Policy         |
+| 17  | **Document `SyncStore` error-wrapping contract** in the interface          | 🟡     | 🟢 10min | Architecture   |
+| 18  | **RFC 7807 problem details** in API error responses (use `field` context)  | 🟢     | 🟡 45min | Feature        |
+| 19  | **Property-based test for `HTTPStatus`**                                   | 🟢     | 🟡 30min | Testing        |
+| 20  | **Export to JSON/CSV**                                                     | 🟢     | 🟡 1h    | Feature        |
+| 21  | **Structured logging fields** consistency (source, page, event_id)         | 🟢     | 🟡 30min | Observability  |
+| 22  | **CONTRIBUTING.md** architecture guide                                     | 🟢     | 🟡 45min | Docs           |
+| 23  | **`ErrContextCancelled` sentinel** for non-HTTP consumers                  | 🟢     | 🟢 15min | Error handling |
+| 24  | **Snapshot test** for `mapSyncError` HTTP responses (go-snaps)             | 🟢     | 🟡 30min | Testing        |
+| 25  | **Benchmark `HTTPStatus`** hot path (called on every API error)            | 🟢     | 🟢 15min | Performance    |
 
 ---
 
@@ -199,7 +199,7 @@ This is the single highest-leverage decision blocking multiple improvements:
 - **If public:** drop `vendor/` (saves ~400 files from the tree), real `vendorHash` in `flake.nix`, `nix build` / `nix flake check` work in the sandbox, `go mod tidy` stops failing on the nested `eventtest` module, pre-commit hooks stop OOM-ing on vendor/.
 - **If stays private:** every nix build, every `go mod tidy`, every pre-commit hook continues to need a documented workaround. The `vendor/` dir is 400+ generated files that pollute every tree-wide operation.
 
-**I cannot make this decision** because it depends on whether `go-cqrs-lite` contains proprietary logic or licensing constraints that I can't see from inside `go-localsync`. The ADRs and feedback docs don't address *why* it's private — only that it is.
+**I cannot make this decision** because it depends on whether `go-cqrs-lite` contains proprietary logic or licensing constraints that I can't see from inside `go-localsync`. The ADRs and feedback docs don't address _why_ it's private — only that it is.
 
 **What I need from you:** A yes/no on "make `go-cqrs-lite` public." If yes, I can execute the entire vendor-removal + flake fix in one session. If no, I'll document the workaround as permanent and stop treating it as debt.
 

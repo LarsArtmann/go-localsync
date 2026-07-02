@@ -138,17 +138,17 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package           | Tests | Coverage | Status                                                                                                |
-| ----------------- | ----- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`        | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests |
-| `pkg/sync`        | 32    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                    |
-| `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                            |
+| Package           | Tests | Coverage | Status                                                                                                         |
+| ----------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `pkg/cqrs`        | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
+| `pkg/sync`        | 32    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
+| `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
 | `pkg/errors`      | 16    | 100.0%   | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
-| `pkg/provider`    | 2     | 90.9%    | ✅ Item validation                                                                                    |
-| `pkg/api`         | 15    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                                        |
-| `pkg/crdt`        | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                              |
-| `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                         |
-| `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                      |
+| `pkg/provider`    | 2     | 90.9%    | ✅ Item validation                                                                                             |
+| `pkg/api`         | 15    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
+| `pkg/crdt`        | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
+| `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
+| `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                               |
 
 **194 total test functions** across 9 test packages.
 
@@ -229,18 +229,18 @@ Two tables managed by the CQRS stack:
 
 ## go-cqrs-lite Integration
 
-| Area           | go-localsync                                                                                                    | go-cqrs-lite                                                                      |
-| -------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                        | `id.Of[T]` — same memory layout                                                   |
-| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                               | `event.Store` + `event.Bus` via storage/memory + watermill modules                |
-| Conflict       | `DecideSync` produces ItemConflictFound events                                                                  | Error taxonomy with 5 families                                                    |
-| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                                    | Projected from events via custom `Projector` implementing `projection.Projection` |
-| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`)                    | `sync.SyncStore` interface defined in consumer package                            |
-| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                           | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                     |
-| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                                | Eliminates all manual json.Marshal/Unmarshal                                      |
-| Projection     | Direct `bus.SubscribeAll` (sync) + `projectionhost.Host` (managed catch-up with checkpoint + DLQ); see ADR-0006 | `projectionhost/v3` adopted in v3.4; interface from `projection/v3` (ADR-0037)    |
-| Snapshots      | `SQLiteSnapshotStore` (SQLite) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                       | Caps replay cost, persists across restarts                                        |
-| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                        | Unique per sync run for debugging                                                 |
-| Logging        | `middleware.EventLogging` via charm log adapter                                                                 | Structured logging of all domain events                                           |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `pkgerrors.HTTPStatus` (status) + `WithCtx`/`InvalidField` (structured context) | Smart retry classification, error→HTTP, and field-addressable validation errors |
-| Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                            | `int` → `uint64` in v3; no `int()` casts needed                                   |
+| Area           | go-localsync                                                                                                                                | go-cqrs-lite                                                                      |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                                                    | `id.Of[T]` — same memory layout                                                   |
+| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                                                           | `event.Store` + `event.Bus` via storage/memory + watermill modules                |
+| Conflict       | `DecideSync` produces ItemConflictFound events                                                                                              | Error taxonomy with 5 families                                                    |
+| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                                                                | Projected from events via custom `Projector` implementing `projection.Projection` |
+| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`)                                                | `sync.SyncStore` interface defined in consumer package                            |
+| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                                                       | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                     |
+| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                                                            | Eliminates all manual json.Marshal/Unmarshal                                      |
+| Projection     | Direct `bus.SubscribeAll` (sync) + `projectionhost.Host` (managed catch-up with checkpoint + DLQ); see ADR-0006                             | `projectionhost/v3` adopted in v3.4; interface from `projection/v3` (ADR-0037)    |
+| Snapshots      | `SQLiteSnapshotStore` (SQLite) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                                                   | Caps replay cost, persists across restarts                                        |
+| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                                                    | Unique per sync run for debugging                                                 |
+| Logging        | `middleware.EventLogging` via charm log adapter                                                                                             | Structured logging of all domain events                                           |
+| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `pkgerrors.HTTPStatus` (status) + `WithCtx`/`InvalidField` (structured context) | Smart retry classification, error→HTTP, and field-addressable validation errors   |
+| Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                                                        | `int` → `uint64` in v3; no `int()` casts needed                                   |
