@@ -806,6 +806,7 @@
           <a href="#findings">What must change</a>
           <a href="#target">Target shape</a>
           <a href="#matrix">Priority matrix</a>
+          <a href="#revisit">3-month revisit</a>
         </nav>
       </aside>
 
@@ -1338,11 +1339,211 @@
           </table>
         </section>
 
+        <section id="revisit">
+          <h2><span class="num">&diams;</span>Appendix B: 3-month revisit (2026-07-05)</h2>
+          <p>
+            <strong>92 commits</strong> landed since the original report (v0.3.0 → HEAD
+            <code>5b887cf</code>). This appendix evaluates whether any of the six blocking gaps were
+            addressed.
+          </p>
+
+          <div class="scorecard" style="margin-top: 1.5rem">
+            <div class="score-card score-bad">
+              <div class="score">0/6</div>
+              <div class="label">Blocking gaps addressed</div>
+            </div>
+            <div class="score-card score-good">
+              <div class="score">92</div>
+              <div class="label">Commits since report</div>
+            </div>
+            <div class="score-card score-good">
+              <div class="score">191</div>
+              <div class="label">Tests (was ~120)</div>
+            </div>
+            <div class="score-card score-good">
+              <div class="score">v3.5.0</div>
+              <div class="label">go-cqrs-lite (was v3.0.0)</div>
+            </div>
+          </div>
+
+          <h3>What the 92 commits actually fixed</h3>
+          <p>
+            The work was exclusively <strong>correctness and hardening</strong> of the existing
+            single-aggregate sync engine. Serious bugs were found and fixed — but none of the
+            structural adoption barriers moved.
+          </p>
+
+          <table class="compare" style="margin-top: 1rem">
+            <thead>
+              <tr>
+                <th>What was fixed</th>
+                <th>Severity</th>
+                <th>Commit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Projection version-gate TOCTOU race (replay resurrect)</td>
+                <td class="no">Critical</td>
+                <td><code>86dc466</code></td>
+              </tr>
+              <tr>
+                <td>Aggregate-ID collision + content-hash data loss</td>
+                <td class="no">Critical</td>
+                <td><code>e2187ac</code></td>
+              </tr>
+              <tr>
+                <td>NewCQRSStack resource leak on error paths</td>
+                <td class="no">High</td>
+                <td><code>fe49ca7</code></td>
+              </tr>
+              <tr>
+                <td>Conflict-aware sync silently dropping partial failures</td>
+                <td class="no">High</td>
+                <td><code>12cd17a</code></td>
+              </tr>
+              <tr>
+                <td>SQLite read model dropping ContentHash + SchemaVersion</td>
+                <td class="no">High</td>
+                <td><code>d2247a6</code></td>
+              </tr>
+              <tr>
+                <td>SQLite error chains not preserved (errors.Is/As broken)</td>
+                <td class="no">High</td>
+                <td><code>bf70a2a</code></td>
+              </tr>
+              <tr>
+                <td>Provider validation gap (UpdatedAt poisoning)</td>
+                <td class="no">High</td>
+                <td><code>7e9e358</code></td>
+              </tr>
+              <tr>
+                <td>Error-handling overhaul (errorfamily taxonomy, HTTP mapping)</td>
+                <td class="yes">Medium</td>
+                <td><code>aa7a439</code> + 10 more</td>
+              </tr>
+              <tr>
+                <td>projectionhost/v3 adoption + DLQ wiring</td>
+                <td class="yes">Medium</td>
+                <td><code>ADR-0006</code></td>
+              </tr>
+              <tr>
+                <td>go-cqrs-lite v3.0.0 → v3.5.0 (5 major SDK bumps)</td>
+                <td class="yes">Medium</td>
+                <td><code>2e16fe7</code></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>The six gaps: status unchanged</h3>
+
+          <div class="callout callout-amber">
+            <strong>Verdict</strong>
+            The original conclusion still holds. go-localsync got <em>better at what it does</em>
+            (sync GitHub-style activity feeds reliably), but did not move toward being a
+            general-purpose framework DiscordSync could consume. The adoption barriers are
+            structural, not quality issues — fixing bugs within the current architecture cannot
+            close them.
+          </div>
+
+          <table class="compare" style="margin-top: 1rem">
+            <thead>
+              <tr>
+                <th>Gap</th>
+                <th>2026-06-23 status</th>
+                <th>2026-07-05 status</th>
+                <th>Changed?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1. Multi-aggregate registration</td>
+                <td class="no">1 aggregate (<code>sync_item</code>)</td>
+                <td class="no">1 aggregate (<code>sync_item</code>)</td>
+                <td><span class="badge badge-critical">No</span></td>
+              </tr>
+              <tr>
+                <td>2. Consumer-defined event types</td>
+                <td class="no">3 fixed events</td>
+                <td class="no">3 fixed events</td>
+                <td><span class="badge badge-critical">No</span></td>
+              </tr>
+              <tr>
+                <td>3. Multiple projections</td>
+                <td class="no">1 flat read model</td>
+                <td class="no">1 flat read model</td>
+                <td><span class="badge badge-critical">No</span></td>
+              </tr>
+              <tr>
+                <td>4. Push ingestion support</td>
+                <td class="no">Pull-only (<code>Provider.Fetch</code>)</td>
+                <td class="no">Pull-only (<code>Provider.Fetch</code>)</td>
+                <td><span class="badge badge-critical">No</span></td>
+              </tr>
+              <tr>
+                <td>5. De-GitHubify vocabulary</td>
+                <td class="no"><code>ActorLogin</code>, <code>RepoName</code></td>
+                <td class="no"><code>ActorLogin</code>, <code>RepoName</code></td>
+                <td><span class="badge badge-critical">No</span></td>
+              </tr>
+              <tr>
+                <td>6. Consumer-owned query surface</td>
+                <td class="no">4 methods (List/Count/Types)</td>
+                <td class="no">4 methods (List/Count/Types)</td>
+                <td><span class="badge badge-critical">No</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>Evidence (verified against HEAD <code>5b887cf</code>)</h3>
+          <pre><code><span class="tok-comment">// pkg/data/model/item.go — still GitHub-shaped</span>
+<span class="tok-keyword">type</span> Item <span class="tok-keyword">struct</span> {
+    ActorLogin     id.ActorLogin   <span class="tok-comment">// GitHub user</span>
+    RepoName       id.RepoID       <span class="tok-comment">// "owner/repo"</span>
+    RepoURL        <span class="tok-type">string</span>
+    ...
+}
+
+<span class="tok-comment">// pkg/cqrs/events.go — still 3 fixed events</span>
+EventItemSynced        event.Type = <span class="tok-string">"sync_item.synced"</span>
+EventItemConflictFound event.Type = <span class="tok-string">"sync_item.conflict_found"</span>
+EventItemTombstoned    event.Type = <span class="tok-string">"sync_item.tombstoned"</span>
+
+<span class="tok-comment">// pkg/cqrs/events.go — still 1 aggregate</span>
+<span class="tok-keyword">const</span> aggregateType event.AggregateType = <span class="tok-string">"sync_item"</span>
+
+<span class="tok-comment">// pkg/provider/provider.go — still pull-only</span>
+<span class="tok-keyword">func</span> (p *Provider) Fetch(ctx context.Context, opts *FetchOptions) (*FetchResult, <span class="tok-type">error</span>)</code></pre>
+
+          <h3>What did improve (credit where due)</h3>
+          <p>
+            The correctness work materially improved the SDK's reliability for its actual consumers
+            (github-local-sync). The projection race fix and content-hash data-loss fix were real
+            bugs that could have caused silent data corruption. The error-handling overhaul brought
+            structured error families to the entire codebase. The projectionhost adoption with
+            dead-letter queue made poison-message recovery production-grade.
+          </p>
+          <p>
+            This is good engineering — it just doesn't change the adoption calculus. The gaps are
+            architectural, and architecture doesn't shift from bug fixes.
+          </p>
+
+          <div class="callout callout-teal">
+            <strong>Updated recommendation</strong>
+            The original recommendation stands: both projects share <code>go-cqrs-lite v3</code>
+            as their common foundation, which is the correct level of reuse. DiscordSync's
+            push-first, multi-aggregate, multi-projection architecture is fundamentally different
+            from go-localsync's pull-only, single-aggregate, flat-read-model design. Convergence
+            would require a rewrite of go-localsync's core — which the commit history shows no
+            movement toward.
+          </div>
+        </section>
+
         <footer class="footer">
           <p>
-            Generated 2026-06-23 &middot; Reviewed against go-localsync (post-v0.3.0) &amp;
-            DiscordSync (master, commit 979c17d) &middot; All code references verified against
-            source.
+            Generated 2026-06-23 &middot; Appendix B added 2026-07-05 &middot; Reviewed against
+            go-localsync (HEAD <code>5b887cf</code>, post-v0.3.0) &amp; DiscordSync (master, commit
+            <code>d41d040</code>) &middot; All code references verified against source.
           </p>
         </footer>
       </main>
