@@ -23,10 +23,6 @@ type (
 	ExternalBrand struct{}
 	// ProviderBrand distinguishes ProviderID from other identifier types.
 	ProviderBrand struct{}
-	// ActorLoginBrand distinguishes ActorLogin from other identifier types.
-	ActorLoginBrand struct{}
-	// RepoBrand distinguishes RepoID from other identifier types.
-	RepoBrand struct{}
 	// EventTypeBrand distinguishes EventTypeID from other identifier types.
 	EventTypeBrand struct{}
 )
@@ -41,12 +37,6 @@ type (
 	// ProviderID identifies the source provider.
 	// Example: "github", "gitlab".
 	ProviderID = brandid.ID[ProviderBrand, string]
-	// ActorLogin identifies the external user who triggered an event.
-	// Example: "larsartmann".
-	ActorLogin = brandid.ID[ActorLoginBrand, string]
-	// RepoID identifies a repository.
-	// Example: "larsartmann/go-localsync".
-	RepoID = brandid.ID[RepoBrand, string]
 	// EventTypeID identifies the type of event.
 	// Example: "PushEvent", "CreateEvent".
 	EventTypeID = brandid.ID[EventTypeBrand, string]
@@ -77,12 +67,6 @@ func NewExternalID(v string) ExternalID { return brandid.NewID[ExternalBrand](v)
 
 // NewProviderID creates a new ProviderID from a string value.
 func NewProviderID(v string) ProviderID { return brandid.NewID[ProviderBrand](v) }
-
-// NewActorLogin creates a new ActorLogin from a string value.
-func NewActorLogin(v string) ActorLogin { return brandid.NewID[ActorLoginBrand](v) }
-
-// NewRepoID creates a new RepoID from a string value.
-func NewRepoID(v string) RepoID { return brandid.NewID[RepoBrand](v) }
 
 // NewEventTypeID creates a new EventTypeID from a string value.
 func NewEventTypeID(v string) EventTypeID { return brandid.NewID[EventTypeBrand](v) }

@@ -11,18 +11,21 @@ type Version int
 const (
 	// V1 is the original schema — no SchemaVersion field.
 	V1 Version = 1
-	// V2 is the current schema — adds SchemaVersion field.
+	// V2 is the schema that adds SchemaVersion field.
 	V2 Version = 2
+	// V3 replaces provider-specific fields (ActorLogin, ActorAvatarURL,
+	// RepoName, RepoURL) with a single opaque Attributes map.
+	V3 Version = 3
 )
 
 // CurrentVersion returns the latest schema version.
-func CurrentVersion() Version { return V2 }
+func CurrentVersion() Version { return V3 }
 
 // Int returns the version as an int.
 func (v Version) Int() int { return int(v) }
 
 // Valid reports whether this is a known schema version.
-func (v Version) Valid() bool { return v >= V1 && v <= V2 }
+func (v Version) Valid() bool { return v >= V1 && v <= V3 }
 
 // String implements fmt.Stringer.
 func (v Version) String() string { return fmt.Sprintf("v%d", v.Int()) }

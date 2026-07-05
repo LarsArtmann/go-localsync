@@ -24,8 +24,9 @@ func TestVersionValid(t *testing.T) {
 	}{
 		{"V1", V1, true},
 		{"V2", V2, true},
+		{"V3", V3, true},
 		{"unknown-0", 0, false},
-		{"unknown-3", 3, false},
+		{"unknown-4", 4, false},
 	}
 
 	for _, tt := range tests {
@@ -42,8 +43,8 @@ func TestVersionValid(t *testing.T) {
 func TestCurrentVersion(t *testing.T) {
 	t.Parallel()
 
-	if got := CurrentVersion(); got != V2 {
-		t.Errorf("CurrentVersion() = %v, want %v", got, V2)
+	if got := CurrentVersion(); got != V3 {
+		t.Errorf("CurrentVersion() = %v, want %v", got, V3)
 	}
 }
 
@@ -56,5 +57,9 @@ func TestVersionString(t *testing.T) {
 
 	if got, want := V2.String(), "v2"; got != want {
 		t.Errorf("V2.String() = %q, want %q", got, want)
+	}
+
+	if got, want := V3.String(), "v3"; got != want {
+		t.Errorf("V3.String() = %q, want %q", got, want)
 	}
 }

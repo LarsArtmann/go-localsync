@@ -30,10 +30,12 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 		ExternalID: id.NewExternalID("persist-1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
-		ActorLogin: id.NewActorLogin("alice"),
-		RepoName:   id.NewRepoID("org/repo"),
-		CreatedAt:  testFutureNow(0),
-		UpdatedAt:  testFutureNow(0),
+		Attributes: map[string]string{
+			"actor_login": "alice",
+			"repo_name":   "org/repo",
+		},
+		CreatedAt: testFutureNow(0),
+		UpdatedAt: testFutureNow(0),
 	}
 
 	testutil.MustNoError(t, rm1.Upsert(ctx, item))

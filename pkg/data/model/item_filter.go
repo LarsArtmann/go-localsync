@@ -8,13 +8,14 @@ import (
 
 // ItemFilter defines optional filters for querying items. Nil fields are ignored.
 type ItemFilter struct {
-	Type       *id.EventTypeID
-	ActorLogin *id.ActorLogin
-	RepoName   *id.RepoID
-	Source     *id.ProviderID
-	Since      *time.Time
-	Limit      int
-	Offset     int
+	Type   *id.EventTypeID
+	Source *id.ProviderID
+	Since  *time.Time
+	Limit  int
+	Offset int
+	// Attributes filters by key-value pairs. All specified attributes must
+	// match (AND logic). A nil or empty map matches all items.
+	Attributes map[string]string
 	// IncludeTombstoned, when true, returns tombstoned (hidden) items too.
 	// The zero value (false) excludes them — the safe default for a live view.
 	IncludeTombstoned bool
@@ -27,16 +28,14 @@ func (f ItemFilter) WithType(t id.EventTypeID) ItemFilter {
 	return f
 }
 
-// WithActorLogin returns a copy of f with ActorLogin set.
-func (f ItemFilter) WithActorLogin(a id.ActorLogin) ItemFilter {
-	f.ActorLogin = &a
+// WithAttribute returns a copy of f with the given attribute key-value pair
+// added to the Attributes filter. Multiple calls add multiple pairs (AND logic).
+func (f ItemFilter) WithAttribute(key, value string) ItemFilter {
+	if f.Attributes == nil {
+		f.Attributes = map[string]string{}
+	}
 
-	return f
-}
-
-// WithRepoName returns a copy of f with RepoName set.
-func (f ItemFilter) WithRepoName(r id.RepoID) ItemFilter {
-	f.RepoName = &r
+	f.Attributes[key] = value
 
 	return f
 }

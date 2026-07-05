@@ -21,20 +21,29 @@ const (
 )
 
 // ItemSyncedPayload is the event payload for ItemSynced events.
+//
+// Schema V3 replaces ActorLogin/ActorAvatarURL/RepoName/RepoURL with a
+// single Attributes map. The legacy fields are kept (omitempty) so that
+// events persisted under V1/V2 decode correctly; dataItemFromPayload
+// upcasts them into Attributes when Attributes is nil.
 type ItemSyncedPayload struct {
-	ItemID         string          `json:"itemId"`
-	Source         string          `json:"source"`
-	SourceID       string          `json:"sourceId"`
-	Type           string          `json:"type"`
-	ActorLogin     string          `json:"actorLogin,omitempty"`
-	ActorAvatarURL string          `json:"actorAvatarUrl,omitempty"`
-	RepoName       string          `json:"repoName,omitempty"`
-	RepoURL        string          `json:"repoUrl,omitempty"`
-	ContentHash    string          `json:"contentHash,omitempty"`
-	CreatedAt      int64           `json:"createdAt"`
-	UpdatedAt      int64           `json:"updatedAt"`
-	RawJSON        json.RawMessage `json:"rawJson,omitempty"`
-	SchemaVersion  int             `json:"schemaVersion,omitempty"`
+	ItemID        string            `json:"itemId"`
+	Source        string            `json:"source"`
+	SourceID      string            `json:"sourceId"`
+	Type          string            `json:"type"`
+	Attributes    map[string]string `json:"attributes,omitempty"`
+	ContentHash   string            `json:"contentHash,omitempty"`
+	CreatedAt     int64             `json:"createdAt"`
+	UpdatedAt     int64             `json:"updatedAt"`
+	RawJSON       json.RawMessage   `json:"rawJson,omitempty"`
+	SchemaVersion int               `json:"schemaVersion,omitempty"`
+
+	// Legacy fields (schema V1/V2). Kept for backward-compatible event replay.
+	// New events (V3) leave these empty and use Attributes instead.
+	ActorLogin     string `json:"actorLogin,omitempty"`
+	ActorAvatarURL string `json:"actorAvatarUrl,omitempty"`
+	RepoName       string `json:"repoName,omitempty"`
+	RepoURL        string `json:"repoUrl,omitempty"`
 }
 
 // ItemConflictFoundPayload is the event payload for ItemConflictFound events.

@@ -35,8 +35,6 @@ func TestNewExternalIDs(t *testing.T) {
 	}{
 		{"NewExternalID", NewExternalID("event-123").Get(), "event-123"},
 		{"NewProviderID", NewProviderID("github").Get(), "github"},
-		{"NewActorLogin", NewActorLogin("octocat").Get(), "octocat"},
-		{"NewRepoID", NewRepoID("org/repo").Get(), "org/repo"},
 		{"NewEventTypeID", NewEventTypeID("PushEvent").Get(), "PushEvent"},
 	}
 

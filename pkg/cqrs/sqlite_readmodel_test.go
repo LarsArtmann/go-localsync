@@ -37,16 +37,18 @@ func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) 
 	t.Helper()
 
 	return &model.Item{
-		ID:             id.NewItemID(),
-		ExternalID:     id.NewExternalID(extID),
-		Source:         id.NewProviderID(source),
-		Type:           id.NewEventTypeID(eventType),
-		ActorLogin:     id.NewActorLogin(actor),
-		ActorAvatarURL: "https://avatar.example.com/" + actor,
-		RepoName:       id.NewRepoID(repo),
-		RepoURL:        "https://github.com/" + repo,
-		CreatedAt:      time.Now().Truncate(time.Microsecond),
-		UpdatedAt:      time.Now().Truncate(time.Microsecond),
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID(extID),
+		Source:     id.NewProviderID(source),
+		Type:       id.NewEventTypeID(eventType),
+		Attributes: map[string]string{
+			"actor_login":      actor,
+			"actor_avatar_url": "https://avatar.example.com/" + actor,
+			"repo_name":        repo,
+			"repo_url":         "https://github.com/" + repo,
+		},
+		CreatedAt: time.Now().Truncate(time.Microsecond),
+		UpdatedAt: time.Now().Truncate(time.Microsecond),
 	}
 }
 

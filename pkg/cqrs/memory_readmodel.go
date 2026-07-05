@@ -140,20 +140,18 @@ func matchesFilter(item *model.Item, filter model.ItemFilter) bool {
 		return false
 	}
 
-	if filter.ActorLogin != nil && item.ActorLogin.Get() != filter.ActorLogin.Get() {
-		return false
-	}
-
-	if filter.RepoName != nil && item.RepoName.Get() != filter.RepoName.Get() {
-		return false
-	}
-
 	if filter.Source != nil && item.Source.Get() != filter.Source.Get() {
 		return false
 	}
 
 	if filter.Since != nil && item.CreatedAt.Before(*filter.Since) {
 		return false
+	}
+
+	for key, value := range filter.Attributes {
+		if item.Attributes[key] != value {
+			return false
+		}
 	}
 
 	return true

@@ -18,11 +18,13 @@ func benchItems(n int) []*provider.Item {
 			ExternalID: id.NewExternalID(fmt.Sprintf("bench-%d", i)),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorLogin("benchuser"),
-			RepoName:   id.NewRepoID("bench/repo"),
-			CreatedAt:  time.Now(),
-			UpdatedAt:  time.Now(),
-			RawJSON:    []byte(`{"bench":true}`),
+			Attributes: map[string]string{
+				"actor_login": "benchuser",
+				"repo_name":   "bench/repo",
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			RawJSON:   []byte(`{"bench":true}`),
 		})
 	}
 	return items

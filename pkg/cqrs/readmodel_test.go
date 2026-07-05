@@ -44,9 +44,11 @@ func upsertTestItem(
 		ExternalID: id.NewExternalID(extID),
 		Source:     id.NewProviderID(source),
 		Type:       id.NewEventTypeID(eventType),
-		ActorLogin: id.NewActorLogin(actor),
-		RepoName:   id.NewRepoID(repo),
-		CreatedAt:  time.Now(),
+		Attributes: map[string]string{
+			"actor_login": actor,
+			"repo_name":   repo,
+		},
+		CreatedAt: time.Now(),
 	}))
 }
 
@@ -141,8 +143,7 @@ func TestMemoryReadModel_ListWithFilters(t *testing.T) {
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 
-	actorFilter := id.NewActorLogin("alice")
-	items, err = rm.List(ctx, model.ItemFilter{ActorLogin: &actorFilter})
+	items, err = rm.List(ctx, model.ItemFilter{Attributes: map[string]string{"actor_login": "alice"}})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items")
 
@@ -309,8 +310,8 @@ func TestReadModel_Integration(t *testing.T) {
 	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
 	testutil.MustNoError(t, err)
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
-	if got.ActorLogin.Get() != "testuser" {
-		t.Errorf("expected ActorLogin=testuser, got %s", got.ActorLogin.Get())
+	if got.Attributes["actor_login"] != "testuser" {
+		t.Errorf("expected actor_login=testuser, got %s", got.Attributes["actor_login"])
 	}
 
 	count, err := rm.Count(ctx, model.ItemFilter{})

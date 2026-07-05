@@ -20,12 +20,11 @@ func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "2", "PushEvent", "bob", "org/repo")
 	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "alice", "org/repo")
 
-	actor := id.NewActorLogin("alice")
-	items, err := rm.List(ctx, model.ItemFilter{ActorLogin: &actor})
+	items, err := rm.List(ctx, model.ItemFilter{Attributes: map[string]string{"actor_login": "alice"}})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items for alice")
 
-	count, err := rm.Count(ctx, model.ItemFilter{ActorLogin: &actor})
+	count, err := rm.Count(ctx, model.ItemFilter{Attributes: map[string]string{"actor_login": "alice"}})
 	testutil.MustNoError(t, err)
 	testutil.AssertInt64(t, count, 2, "count for alice")
 }
@@ -40,8 +39,7 @@ func TestSQLiteReadModel_List_FilterByRepoName(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "2", "PushEvent", "bob", "org/repo-b")
 	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "charlie", "org/repo-a")
 
-	repo := id.NewRepoID("org/repo-a")
-	items, err := rm.List(ctx, model.ItemFilter{RepoName: &repo})
+	items, err := rm.List(ctx, model.ItemFilter{Attributes: map[string]string{"repo_name": "org/repo-a"}})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 2, "items for org/repo-a")
 }
@@ -126,8 +124,7 @@ func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	sqliteSeed(t, rm, ctx, "github", "3", "IssueEvent", "alice", "org/repo")
 
 	pushType := id.NewEventTypeID("PushEvent")
-	actor := id.NewActorLogin("alice")
-	items, err := rm.List(ctx, model.ItemFilter{Type: &pushType, ActorLogin: &actor})
+	items, err := rm.List(ctx, model.ItemFilter{Type: &pushType, Attributes: map[string]string{"actor_login": "alice"}})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "PushEvent by alice")
 	testutil.AssertEqual(t, items[0].ExternalID.Get(), "1", "ExternalID")

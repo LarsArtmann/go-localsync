@@ -14,21 +14,20 @@ import (
 )
 
 // Item is the canonical domain entity for a synced item.
-// It is provider-agnostic — no RawJSON, no API concerns.
+// It is provider-agnostic — no RawJSON, no API concerns, no provider-specific
+// fields. Provider-specific content (actor, repo, channel, etc.) lives in
+// Attributes as an opaque map the sync machinery never inspects.
 type Item struct {
-	ID             id.ItemID
-	ExternalID     id.ExternalID
-	Source         id.ProviderID
-	Type           id.EventTypeID
-	ActorLogin     id.ActorLogin
-	ActorAvatarURL string
-	RepoName       id.RepoID
-	RepoURL        string
-	ContentHash    string
-	Tombstone      Tombstone
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	SchemaVersion  schema.Version
+	ID            id.ItemID
+	ExternalID    id.ExternalID
+	Source        id.ProviderID
+	Type          id.EventTypeID
+	Attributes    map[string]string
+	ContentHash   string
+	Tombstone     Tombstone
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	SchemaVersion schema.Version
 }
 
 // Key returns the composite identifier for this item.
@@ -59,9 +58,9 @@ type ItemReader interface {
 }
 
 // Validate checks that all required identity fields are present.
-// All field errors are collected and returned together via errors.Join
-// so callers see every problem in a single call instead of fixing
-// them one at a time.
+// Attributes is optional — an item with no attributes (e.g. a minimal
+// provider payload) is valid. All field errors are collected and returned
+// together via errors.Join so callers see every problem in a single call.
 func (item Item) Validate() error {
 	return validateIdentity(item.ExternalID, item.Source, item.Type, item.CreatedAt, item.UpdatedAt)
 }

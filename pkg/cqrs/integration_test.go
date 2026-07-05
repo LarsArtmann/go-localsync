@@ -175,11 +175,13 @@ func TestIntegration_SyncItems_ConflictLocal(t *testing.T) {
 		ExternalID: id.NewExternalID("1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
-		ActorLogin: id.NewActorLogin("testuser"),
-		RepoName:   id.NewRepoID("owner/repo"),
-		CreatedAt:  futureTime,
-		UpdatedAt:  futureTime,
-		RawJSON:    []byte(`{"test":true}`),
+		Attributes: map[string]string{
+			"actor_login": "testuser",
+			"repo_name":   "owner/repo",
+		},
+		CreatedAt: futureTime,
+		UpdatedAt: futureTime,
+		RawJSON:   []byte(`{"test":true}`),
 	}
 
 	summary1 := stack.SyncItems(ctx, []*provider.Item{localItem})
@@ -194,11 +196,13 @@ func TestIntegration_SyncItems_ConflictLocal(t *testing.T) {
 		ExternalID: id.NewExternalID("1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
-		ActorLogin: id.NewActorLogin("testuser"),
-		RepoName:   id.NewRepoID("owner/repo"),
-		CreatedAt:  olderTime,
-		UpdatedAt:  olderTime,
-		RawJSON:    []byte(`{"test":true}`),
+		Attributes: map[string]string{
+			"actor_login": "testuser",
+			"repo_name":   "owner/repo",
+		},
+		CreatedAt: olderTime,
+		UpdatedAt: olderTime,
+		RawJSON:   []byte(`{"test":true}`),
 	}
 
 	summary2 := stack.SyncItems(ctx, []*provider.Item{remoteItem})

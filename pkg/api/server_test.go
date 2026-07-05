@@ -76,12 +76,14 @@ func testItem(itemID, eventType string) *model.Item {
 	now := time.Now()
 
 	return &model.Item{
-		ID:            id.NewItemID(),
-		ExternalID:    id.NewExternalID(itemID),
-		Source:        id.NewProviderID("github"),
-		Type:          id.NewEventTypeID(eventType),
-		ActorLogin:    id.NewActorLogin("testuser"),
-		RepoName:      id.NewRepoID("test/repo"),
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID(itemID),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID(eventType),
+		Attributes: map[string]string{
+			"actor_login": "testuser",
+			"repo_name":   "test/repo",
+		},
 		CreatedAt:     now,
 		UpdatedAt:     now,
 		SchemaVersion: schema.CurrentVersion(),
@@ -331,10 +333,12 @@ func TestTriggerSync_PartialFailureReturns200(t *testing.T) {
 		ExternalID: id.NewExternalID("1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
-		ActorLogin: id.NewActorLogin("testuser"),
-		RepoName:   id.NewRepoID("test/repo"),
-		CreatedAt:  now,
-		UpdatedAt:  now,
+		Attributes: map[string]string{
+			"actor_login": "testuser",
+			"repo_name":   "test/repo",
+		},
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 	// Invalid: missing every required field, so Validate fails -> counted as an error.
 	invalid := &provider.Item{ID: id.NewItemID()}
@@ -389,7 +393,7 @@ func TestListItems_AllFilterParams(t *testing.T) {
 	store := newMockStoreWithItems()
 	server := newTestServer(store)
 
-	req := newGETRequest(t, "/items?type=PushEvent&actor=testuser&repo=test/repo&source=github&limit=1&offset=0")
+	req := newGETRequest(t, "/items?type=PushEvent&source=github&limit=1&offset=0")
 	rec := httptest.NewRecorder()
 
 	server.ServeHTTP(rec, req)

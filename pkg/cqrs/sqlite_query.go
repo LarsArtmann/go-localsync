@@ -7,7 +7,7 @@ import (
 )
 
 func buildListQuery(filter model.ItemFilter) (string, []any) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
+	query := `SELECT item_id, source, source_id, type, attributes, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
 		FROM sync_items WHERE 1=1`
 
 	args := appendFilterArgs(&query, filter)
@@ -42,18 +42,6 @@ func appendFilterArgs(query *string, filter model.ItemFilter) []any {
 		args = append(args, filter.Type.Get())
 	}
 
-	if filter.ActorLogin != nil {
-		*query += " AND actor_login = ?"
-
-		args = append(args, filter.ActorLogin.Get())
-	}
-
-	if filter.RepoName != nil {
-		*query += " AND repo_name = ?"
-
-		args = append(args, filter.RepoName.Get())
-	}
-
 	if filter.Source != nil {
 		*query += " AND source = ?"
 
@@ -64,6 +52,12 @@ func appendFilterArgs(query *string, filter model.ItemFilter) []any {
 		*query += " AND created_at >= ?"
 
 		args = append(args, filter.Since.Format(time.RFC3339Nano))
+	}
+
+	for key, value := range filter.Attributes {
+		*query += " AND json_extract(attributes, '$." + key + "') = ?"
+
+		args = append(args, value)
 	}
 
 	return args

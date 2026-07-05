@@ -10,17 +10,19 @@ import (
 
 func testProviderItem() *provider.Item {
 	return &provider.Item{
-		ID:             id.NewItemID(),
-		ExternalID:     id.NewExternalID("12345"),
-		Source:         id.NewProviderID("github"),
-		Type:           id.NewEventTypeID("PushEvent"),
-		ActorLogin:     id.NewActorLogin("testuser"),
-		ActorAvatarURL: "https://example.com/avatar.png",
-		RepoName:       id.NewRepoID("owner/repo"),
-		RepoURL:        "https://github.com/owner/repo",
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
-		RawJSON:        []byte(`{"id":"12345","type":"PushEvent"}`),
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID("12345"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
+		Attributes: map[string]string{
+			"actor_login":      "testuser",
+			"actor_avatar_url": "https://example.com/avatar.png",
+			"repo_name":        "owner/repo",
+			"repo_url":         "https://github.com/owner/repo",
+		},
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		RawJSON:   []byte(`{"id":"12345","type":"PushEvent"}`),
 	}
 }
 

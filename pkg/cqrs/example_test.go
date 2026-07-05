@@ -50,20 +50,24 @@ func ExampleSyncer() {
 			ExternalID: id.NewExternalID("evt-1"),
 			Source:     src,
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorLogin("octocat"),
-			RepoName:   id.NewRepoID("octocat/Hello-World"),
-			CreatedAt:  now,
-			UpdatedAt:  now,
+			Attributes: map[string]string{
+				"actor_login": "octocat",
+				"repo_name":   "octocat/Hello-World",
+			},
+			CreatedAt: now,
+			UpdatedAt: now,
 		},
 		{
 			ID:         id.NewItemID(),
 			ExternalID: id.NewExternalID("evt-2"),
 			Source:     src,
 			Type:       id.NewEventTypeID("WatchEvent"),
-			ActorLogin: id.NewActorLogin("octocat"),
-			RepoName:   id.NewRepoID("octocat/Hello-World"),
-			CreatedAt:  now.Add(time.Hour),
-			UpdatedAt:  now.Add(time.Hour),
+			Attributes: map[string]string{
+				"actor_login": "octocat",
+				"repo_name":   "octocat/Hello-World",
+			},
+			CreatedAt: now.Add(time.Hour),
+			UpdatedAt: now.Add(time.Hour),
 		},
 	}}
 
@@ -85,7 +89,7 @@ func ExampleSyncer() {
 	})
 
 	for _, it := range items {
-		fmt.Printf("%s %s by %s\n", it.ExternalID.Get(), it.Type.Get(), it.ActorLogin.Get())
+		fmt.Printf("%s %s by %s\n", it.ExternalID.Get(), it.Type.Get(), it.Attributes["actor_login"])
 	}
 
 	fmt.Println("tombstoned:", items[0].IsTombstoned())
@@ -116,10 +120,12 @@ func ExampleSyncer_tombstoneResurrect() {
 		ExternalID: id.NewExternalID("evt-1"),
 		Source:     src,
 		Type:       id.NewEventTypeID("PushEvent"),
-		ActorLogin: id.NewActorLogin("octocat"),
-		RepoName:   id.NewRepoID("octocat/Hello-World"),
-		CreatedAt:  now,
-		UpdatedAt:  now,
+		Attributes: map[string]string{
+			"actor_login": "octocat",
+			"repo_name":   "octocat/Hello-World",
+		},
+		CreatedAt: now,
+		UpdatedAt: now,
 	}}}
 	syncer := synclib.NewSyncer(p, stack, nil)
 

@@ -10,27 +10,22 @@ import (
 //
 //nolint:tagalign // doc/example/query tags intentionally kept close to values for readability
 type ListItemsInput struct {
-	Type       string    `doc:"Filter by event type"                           example:"PushEvent"                query:"type"`
-	ActorLogin string    `doc:"Filter by actor login"                          example:"larsartmann"              query:"actor"`
-	RepoName   string    `doc:"Filter by repository name"                      example:"larsartmann/go-localsync" query:"repo"`
-	Source     string    `doc:"Filter by source provider"                      example:"github"                   query:"source"`
-	Since      time.Time `doc:"Filter items updated since this time (RFC3339)"                                    query:"since"`
-	Limit      int       `doc:"Maximum items to return"                                                           query:"limit"  default:"100"`
-	Offset     int       `doc:"Offset for pagination"                                                             query:"offset" default:"0"`
+	Type   string    `doc:"Filter by event type"                           example:"PushEvent" query:"type"`
+	Source string    `doc:"Filter by source provider"                      example:"github"    query:"source"`
+	Since  time.Time `doc:"Filter items updated since this time (RFC3339)"                     query:"since"`
+	Limit  int       `doc:"Maximum items to return"                                            query:"limit"  default:"100"`
+	Offset int       `doc:"Offset for pagination"                                              query:"offset" default:"0"`
 }
 
 // ItemResponse is the API DTO for a synced item.
 type ItemResponse struct {
-	ID             string    `json:"id"`
-	ExternalID     string    `json:"externalId"`
-	Source         string    `json:"source"`
-	Type           string    `json:"type"`
-	ActorLogin     string    `json:"actorLogin"`
-	ActorAvatarURL string    `json:"actorAvatarUrl,omitempty"`
-	RepoName       string    `json:"repoName"`
-	RepoURL        string    `json:"repoUrl,omitempty"`
-	CreatedAt      time.Time `json:"createdAt"`
-	UpdatedAt      time.Time `json:"updatedAt"`
+	ID         string            `json:"id"`
+	ExternalID string            `json:"externalId"`
+	Source     string            `json:"source"`
+	Type       string            `json:"type"`
+	Attributes map[string]string `json:"attributes,omitempty"`
+	CreatedAt  time.Time         `json:"createdAt"`
+	UpdatedAt  time.Time         `json:"updatedAt"`
 }
 
 func toItemResponse(item *model.Item) *ItemResponse {
@@ -39,16 +34,13 @@ func toItemResponse(item *model.Item) *ItemResponse {
 	}
 
 	return &ItemResponse{
-		ID:             item.ID.String(),
-		ExternalID:     item.ExternalID.Get(),
-		Source:         item.Source.Get(),
-		Type:           item.Type.Get(),
-		ActorLogin:     item.ActorLogin.Get(),
-		ActorAvatarURL: item.ActorAvatarURL,
-		RepoName:       item.RepoName.Get(),
-		RepoURL:        item.RepoURL,
-		CreatedAt:      item.CreatedAt,
-		UpdatedAt:      item.UpdatedAt,
+		ID:         item.ID.String(),
+		ExternalID: item.ExternalID.Get(),
+		Source:     item.Source.Get(),
+		Type:       item.Type.Get(),
+		Attributes: item.Attributes,
+		CreatedAt:  item.CreatedAt,
+		UpdatedAt:  item.UpdatedAt,
 	}
 }
 

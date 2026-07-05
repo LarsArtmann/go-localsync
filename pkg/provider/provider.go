@@ -25,14 +25,10 @@ type Item struct {
 	Source id.ProviderID `json:"source"`
 	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
 	Type id.EventTypeID `json:"type"`
-	// ActorLogin is the username of the entity that triggered the item.
-	ActorLogin id.ActorLogin `json:"actorLogin"`
-	// ActorAvatarURL is the avatar URL of the actor.
-	ActorAvatarURL string `json:"actorAvatarUrl,omitempty"`
-	// RepoName is the repository name (e.g., "owner/repo").
-	RepoName id.RepoID `json:"repoName"`
-	// RepoURL is the repository URL.
-	RepoURL string `json:"repoUrl,omitempty"`
+	// Attributes carries provider-specific key-value pairs (e.g. actor_login,
+	// repo_name, avatar_url). The sync machinery never inspects these;
+	// they round-trip through events and projections as opaque data.
+	Attributes map[string]string `json:"attributes,omitempty"`
 	// CreatedAt is when the item was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// UpdatedAt is when the item was last modified at the source.
@@ -45,9 +41,9 @@ type Item struct {
 // String returns a human-readable summary of the Item for logging.
 func (item *Item) String() string {
 	return fmt.Sprintf(
-		"Item{Source:%s ExternalID:%s Type:%s Actor:%s Repo:%s}",
+		"Item{Source:%s ExternalID:%s Type:%s Attributes:%d}",
 		item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
-		item.ActorLogin.Get(), item.RepoName.Get(),
+		len(item.Attributes),
 	)
 }
 

@@ -115,11 +115,13 @@ func testSyncItem(externalID, eventType string) *provider.Item {
 		ExternalID: id.NewExternalID(externalID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(eventType),
-		ActorLogin: id.NewActorLogin("testuser"),
-		RepoName:   id.NewRepoID("test/repo"),
-		CreatedAt:  now,
-		UpdatedAt:  now,
-		RawJSON:    []byte(`{}`),
+		Attributes: map[string]string{
+			"actor_login": "testuser",
+			"repo_name":   "test/repo",
+		},
+		CreatedAt: now,
+		UpdatedAt: now,
+		RawJSON:   []byte(`{}`),
 	}
 }
 
@@ -134,12 +136,14 @@ func testDataItem(externalID, eventType string) *model.Item {
 	now := time.Now()
 
 	return &model.Item{
-		ID:            id.NewItemID(),
-		ExternalID:    id.NewExternalID(externalID),
-		Source:        id.NewProviderID("github"),
-		Type:          id.NewEventTypeID(eventType),
-		ActorLogin:    id.NewActorLogin("testuser"),
-		RepoName:      id.NewRepoID("test/repo"),
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID(externalID),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID(eventType),
+		Attributes: map[string]string{
+			"actor_login": "testuser",
+			"repo_name":   "test/repo",
+		},
 		CreatedAt:     now,
 		UpdatedAt:     now,
 		SchemaVersion: schema.CurrentVersion(),

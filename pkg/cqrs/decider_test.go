@@ -177,9 +177,11 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 			ExternalID: id.NewExternalID("123"),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorLogin("testuser"),
-			RepoName:   id.NewRepoID("owner/repo"),
-			UpdatedAt:  now,
+			Attributes: map[string]string{
+				"actor_login": "testuser",
+				"repo_name":   "owner/repo",
+			},
+			UpdatedAt: now,
 		},
 	}
 
@@ -344,13 +346,11 @@ func TestHasChanged(t *testing.T) {
 
 	base := func() *model.Item {
 		return &model.Item{
-			ExternalID: id.NewExternalID("123"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorLogin("octocat"),
-			RepoName:   id.NewRepoID("org/repo"),
-			RepoURL:    "https://github.com/org/repo",
-			UpdatedAt:  time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
+			ExternalID:  id.NewExternalID("123"),
+			Source:      id.NewProviderID("github"),
+			Type:        id.NewEventTypeID("PushEvent"),
+			ContentHash: "hash-1",
+			UpdatedAt:   time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 	}
 
@@ -375,18 +375,8 @@ func TestHasChanged(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "ActorLogin differs",
-			mut:  func(r *model.Item) { r.ActorLogin = id.NewActorLogin("other") },
-			want: true,
-		},
-		{
-			name: "RepoName differs",
-			mut:  func(r *model.Item) { r.RepoName = id.NewRepoID("org/other") },
-			want: true,
-		},
-		{
-			name: "RepoURL differs",
-			mut:  func(r *model.Item) { r.RepoURL = "https://github.com/org/other" },
+			name: "ContentHash differs",
+			mut:  func(r *model.Item) { r.ContentHash = "hash-2" },
 			want: true,
 		},
 		{

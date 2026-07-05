@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -17,10 +18,7 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 	source TEXT NOT NULL,
 	source_id TEXT NOT NULL,
 	type TEXT NOT NULL,
-	actor_login TEXT NOT NULL DEFAULT '',
-	actor_avatar_url TEXT NOT NULL DEFAULT '',
-	repo_name TEXT NOT NULL DEFAULT '',
-	repo_url TEXT NOT NULL DEFAULT '',
+	attributes TEXT NOT NULL DEFAULT '{}',
 	content_hash TEXT NOT NULL DEFAULT '',
 	created_at DATETIME NOT NULL,
 	updated_at DATETIME NOT NULL,
@@ -34,9 +32,7 @@ const syncItemsDDL = `CREATE TABLE IF NOT EXISTS sync_items (
 const syncItemsIndexes = `
 CREATE INDEX IF NOT EXISTS idx_sync_items_type ON sync_items(type);
 CREATE INDEX IF NOT EXISTS idx_sync_items_type_created ON sync_items(type, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_sync_items_actor ON sync_items(actor_login);
-CREATE INDEX IF NOT EXISTS idx_sync_items_repo_name ON sync_items(repo_name);`
+CREATE INDEX IF NOT EXISTS idx_sync_items_created_at ON sync_items(created_at DESC);`
 
 // wrapDBErr wraps a database driver error with the Database sentinel while
 // preserving the original error chain. Callers can use errors.Is(result,
@@ -56,7 +52,8 @@ ALTER TABLE sync_items ADD COLUMN tombstoned INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE sync_items ADD COLUMN tombstone_reason TEXT NOT NULL DEFAULT '';
 ALTER TABLE sync_items ADD COLUMN tombstoned_at DATETIME;
 ALTER TABLE sync_items ADD COLUMN content_hash TEXT NOT NULL DEFAULT '';
-ALTER TABLE sync_items ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 1;`
+ALTER TABLE sync_items ADD COLUMN schema_version INTEGER NOT NULL DEFAULT 1;
+ALTER TABLE sync_items ADD COLUMN attributes TEXT NOT NULL DEFAULT '{}';`
 
 func migrateSyncItems(ctx context.Context, db *sql.DB) error {
 	for stmt := range strings.SplitSeq(syncItemsMigrations, ";") {
@@ -106,7 +103,7 @@ func (m *SQLiteReadModel) Get(
 	source string,
 	sourceID id.ExternalID,
 ) (*model.Item, error) {
-	query := `SELECT item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
+	query := `SELECT item_id, source, source_id, type, attributes, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
 		FROM sync_items WHERE source = ? AND source_id = ?`
 
 	row := m.db.QueryRowContext(ctx, query, source, sourceID.Get())
@@ -186,15 +183,19 @@ func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilt
 func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 	// Tombstone columns reset to defaults on upsert: a sync event always writes a
 	// live item, so re-syncing a previously-tombstoned item resurrects it.
-	query := `INSERT OR REPLACE INTO sync_items
-		(item_id, source, source_id, type, actor_login, actor_avatar_url, repo_name, repo_url, content_hash, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, schema_version)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '', NULL, ?)`
+	attrsJSON, err := json.Marshal(item.Attributes)
+	if err != nil {
+		return wrapDBErr(err, "marshal attributes for upsert")
+	}
 
-	_, err := m.db.ExecContext(
+	query := `INSERT OR REPLACE INTO sync_items
+		(item_id, source, source_id, type, attributes, content_hash, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, schema_version)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, '', NULL, ?)`
+
+	_, err = m.db.ExecContext(
 		ctx, query,
 		item.ID.String(), item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
-		item.ActorLogin.Get(), item.ActorAvatarURL, item.RepoName.Get(),
-		item.RepoURL, item.ContentHash, item.CreatedAt, item.UpdatedAt, item.SchemaVersion.Int(),
+		string(attrsJSON), item.ContentHash, item.CreatedAt, item.UpdatedAt, item.SchemaVersion.Int(),
 	)
 	if err != nil {
 		return wrapDBErr(err, "upsert item")

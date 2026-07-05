@@ -139,11 +139,13 @@ func testItem(sourceID, itemType string) *provider.Item {
 		ExternalID: id.NewExternalID(sourceID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(itemType),
-		ActorLogin: id.NewActorLogin("testuser"),
-		RepoName:   id.NewRepoID("owner/repo"),
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		RawJSON:    json.RawMessage(`{"test":true}`),
+		Attributes: map[string]string{
+			"actor_login": "testuser",
+			"repo_name":   "owner/repo",
+		},
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		RawJSON:   json.RawMessage(`{"test":true}`),
 	}
 }
 

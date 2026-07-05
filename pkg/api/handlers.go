@@ -23,16 +23,6 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 		filter.Type = &t
 	}
 
-	if input.ActorLogin != "" {
-		a := id.NewActorLogin(input.ActorLogin)
-		filter.ActorLogin = &a
-	}
-
-	if input.RepoName != "" {
-		r := id.NewRepoID(input.RepoName)
-		filter.RepoName = &r
-	}
-
 	if input.Source != "" {
 		src := id.NewProviderID(input.Source)
 		filter.Source = &src

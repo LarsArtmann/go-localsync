@@ -19,7 +19,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/storage/memory/v3 v3.5.0
 	github.com/larsartmann/go-cqrs-lite/storage/v3 v3.5.0
 	github.com/larsartmann/go-cqrs-lite/watermill/v3 v3.5.0
-	github.com/larsartmann/go-error-family v0.5.1
+	github.com/larsartmann/go-error-family v0.6.0
 	github.com/oklog/ulid/v2 v2.1.1
 	modernc.org/sqlite v1.53.0
 )

@@ -34,7 +34,7 @@ The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CR
 ### Core Components
 
 - `aggregate_id.go` — deterministic SHA256→hex from (source, sourceID) with sync.Map cache, shared `itemKey` helper
-- `decider.go` — `SyncItemState{Item *model.Item}` (tombstone lives on `Item.Tombstone`; no separate Deleted flag), pure Apply (the event applier) + DecideSync/DecideTombstone, `IsTombstoned()`/`ShouldResurrect()`, `HasChanged` checks UpdatedAt/Type/ActorLogin/RepoName/RepoURL
+- `decider.go` — `SyncItemState{Item *model.Item}` (tombstone lives on `Item.Tombstone`; no separate Deleted flag), pure Apply (the event applier) + DecideSync/DecideTombstone, `IsTombstoned()`/`ShouldResurrect()`, `HasChanged` checks ContentHash/UpdatedAt/Type only (provider-agnostic since ADR-0007)
 - `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemTombstoned` (a sync event always means "live" → resurrects a tombstoned item automatically via projection upsert)
 - `readmodel.go` — `ReadModel` interface (embeds `model.ItemReader`) + `model.ItemFilter`, stores `*model.Item` directly
 - `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
@@ -170,7 +170,7 @@ Event store + read model use the same backend.
 The SDK is a pure contract library — concrete providers live in consumer apps. To add a new provider:
 
 1. Implement the `provider.Provider` interface (`Name`, `Fetch`, `FetchAll`, `GetRateLimit`)
-2. Convert provider-specific data to `provider.Item` using branded types from `pkg/id/`
+2. Convert provider-specific data to `provider.Item` using branded types from `pkg/id/` (for identity) and `Attributes map[string]string` (for provider-specific content like actor, repo, etc.)
 3. Add provider-specific tests
 4. Update documentation with provider configuration
 
@@ -186,10 +186,11 @@ Two tables managed by the CQRS stack:
 
 ### Sync Items (read model projection)
 
-- `item_id`, `source`, `source_id`, `type`, `actor_login`, `actor_avatar_url`
-- `repo_name`, `repo_url`, `created_at`, `updated_at`, `raw_json`
+- `item_id`, `source`, `source_id`, `type`, `attributes` (JSON map of provider-specific key-values)
+- `content_hash`, `created_at`, `updated_at`, `schema_version`
 - `tombstoned`, `tombstone_reason`, `tombstoned_at` (soft-delete columns; `migrateSyncItems` adds them idempotently)
 - Primary key on `(source, source_id)`
+- Legacy columns (`actor_login`, `actor_avatar_url`, `repo_name`, `repo_url`) exist in pre-V3 databases but are no longer read or written (ADR-0007)
 
 ## Dependencies
 

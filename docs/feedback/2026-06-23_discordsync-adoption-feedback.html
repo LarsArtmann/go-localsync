@@ -1357,8 +1357,8 @@
               <div class="label">Commits since report</div>
             </div>
             <div class="score-card score-good">
-              <div class="score">191</div>
-              <div class="label">Tests (was ~120)</div>
+              <div class="score">194</div>
+              <div class="label">Tests (was 225)</div>
             </div>
             <div class="score-card score-good">
               <div class="score">v3.5.0</div>
@@ -1488,12 +1488,25 @@
               </tr>
               <tr>
                 <td>6. Consumer-owned query surface</td>
-                <td class="no">4 methods (List/Count/Types)</td>
-                <td class="no">4 methods (List/Count/Types)</td>
+                <td class="no">4 methods (List/Count/CountByType/GetTypes)</td>
+                <td class="no">3 methods (List/Count/CountByType) &mdash; GetTypes removed</td>
                 <td><span class="badge badge-critical">No</span></td>
               </tr>
             </tbody>
           </table>
+
+          <div class="callout callout-teal">
+            <strong>A note on cosmetic drift (not structural)</strong>
+            Comparing the original findings above against HEAD reveals a few in-window renames that
+            do <em>not</em> alter any verdict: the hard-delete path became a soft-tombstone
+            (<code>EventItemDeleted</code>/<code>sync_item.deleted</code> &rarr;
+            <code>EventItemTombstoned</code>/<code>sync_item.tombstoned</code>, commit
+            <code>8c0847f</code>) and the unused <code>GetTypes</code> ghost method was removed from
+            <code>ItemReader</code> (commit <code>92f50f9</code>, 4 read methods &rarr; 3). The
+            projection also gained a checkpoint store + dead-letter queue via
+            <code>projectionhost/v3</code> (ADR-0006). None of these move any of the six structural
+            gaps &mdash; the counts in the table above reflect HEAD <code>5b887cf</code>.
+          </div>
 
           <h3>Evidence (verified against HEAD <code>5b887cf</code>)</h3>
           <pre><code><span class="tok-comment">// pkg/data/model/item.go — still GitHub-shaped</span>

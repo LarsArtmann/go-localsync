@@ -13,6 +13,15 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
+// Legacy attribute keys from schema V1/V2. Used by upcastLegacyAttributes
+// to reconstruct the Attributes map from old event payloads.
+const (
+	legacyActorLogin     = "actor_login"
+	legacyActorAvatarURL = "actor_avatar_url"
+	legacyRepoName       = "repo_name"
+	legacyRepoURL        = "repo_url"
+)
+
 // toDataItem converts a provider.Item to a data model Item.
 // This is the boundary between the provider DTO and the domain entity.
 func toDataItem(p *provider.Item) *model.Item {
@@ -21,18 +30,15 @@ func toDataItem(p *provider.Item) *model.Item {
 	}
 
 	return &model.Item{
-		ID:             p.ID,
-		ExternalID:     p.ExternalID,
-		Source:         p.Source,
-		Type:           p.Type,
-		ActorLogin:     p.ActorLogin,
-		ActorAvatarURL: p.ActorAvatarURL,
-		RepoName:       p.RepoName,
-		RepoURL:        p.RepoURL,
-		ContentHash:    hashRawJSON(p.RawJSON),
-		CreatedAt:      p.CreatedAt,
-		UpdatedAt:      p.UpdatedAt,
-		SchemaVersion:  schema.CurrentVersion(),
+		ID:            p.ID,
+		ExternalID:    p.ExternalID,
+		Source:        p.Source,
+		Type:          p.Type,
+		Attributes:    p.Attributes,
+		ContentHash:   hashRawJSON(p.RawJSON),
+		CreatedAt:     p.CreatedAt,
+		UpdatedAt:     p.UpdatedAt,
+		SchemaVersion: schema.CurrentVersion(),
 	}
 }
 
@@ -47,6 +53,8 @@ func hashRawJSON(raw []byte) string {
 }
 
 // dataItemFromPayload reconstructs a data.Item from an event payload.
+// For schema V1/V2 events (no Attributes), legacy fields are upcasted
+// into the Attributes map so consumers always see a uniform shape.
 func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 	itemID, err := parseItemID(payload.ItemID)
 	if err != nil {
@@ -58,19 +66,21 @@ func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 		schemaVer = schema.V1
 	}
 
+	attrs := payload.Attributes
+	if attrs == nil {
+		attrs = upcastLegacyAttributes(payload)
+	}
+
 	item := &model.Item{
-		ID:             itemID,
-		ExternalID:     id.NewExternalID(payload.SourceID),
-		Source:         id.NewProviderID(payload.Source),
-		Type:           id.NewEventTypeID(payload.Type),
-		ActorLogin:     id.NewActorLogin(payload.ActorLogin),
-		ActorAvatarURL: payload.ActorAvatarURL,
-		RepoName:       id.NewRepoID(payload.RepoName),
-		RepoURL:        payload.RepoURL,
-		ContentHash:    payload.ContentHash,
-		CreatedAt:      fromUnixNano(payload.CreatedAt),
-		UpdatedAt:      fromUnixNano(payload.UpdatedAt),
-		SchemaVersion:  schemaVer,
+		ID:            itemID,
+		ExternalID:    id.NewExternalID(payload.SourceID),
+		Source:        id.NewProviderID(payload.Source),
+		Type:          id.NewEventTypeID(payload.Type),
+		Attributes:    attrs,
+		ContentHash:   payload.ContentHash,
+		CreatedAt:     fromUnixNano(payload.CreatedAt),
+		UpdatedAt:     fromUnixNano(payload.UpdatedAt),
+		SchemaVersion: schemaVer,
 	}
 
 	if err := item.Validate(); err != nil {
@@ -78,6 +88,31 @@ func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 	}
 
 	return item, nil
+}
+
+// upcastLegacyAttributes reconstructs the Attributes map from V1/V2 event
+// payload fields. Only non-empty legacy fields are included, matching the
+// omitempty semantics of the payload struct.
+func upcastLegacyAttributes(payload ItemSyncedPayload) map[string]string {
+	attrs := map[string]string{}
+
+	if payload.ActorLogin != "" {
+		attrs[legacyActorLogin] = payload.ActorLogin
+	}
+
+	if payload.ActorAvatarURL != "" {
+		attrs[legacyActorAvatarURL] = payload.ActorAvatarURL
+	}
+
+	if payload.RepoName != "" {
+		attrs[legacyRepoName] = payload.RepoName
+	}
+
+	if payload.RepoURL != "" {
+		attrs[legacyRepoURL] = payload.RepoURL
+	}
+
+	return attrs
 }
 
 // dataItemToPayload serializes a data.Item into an event payload.
@@ -88,19 +123,16 @@ func dataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 	}
 
 	return ItemSyncedPayload{
-		ItemID:         item.ID.String(),
-		Source:         item.Source.Get(),
-		SourceID:       item.ExternalID.Get(),
-		Type:           item.Type.Get(),
-		ActorLogin:     item.ActorLogin.Get(),
-		ActorAvatarURL: item.ActorAvatarURL,
-		RepoName:       item.RepoName.Get(),
-		RepoURL:        item.RepoURL,
-		ContentHash:    item.ContentHash,
-		CreatedAt:      unixNano(item.CreatedAt),
-		UpdatedAt:      unixNano(item.UpdatedAt),
-		RawJSON:        rawJSON,
-		SchemaVersion:  item.SchemaVersion.Int(),
+		ItemID:        item.ID.String(),
+		Source:        item.Source.Get(),
+		SourceID:      item.ExternalID.Get(),
+		Type:          item.Type.Get(),
+		Attributes:    item.Attributes,
+		ContentHash:   item.ContentHash,
+		CreatedAt:     unixNano(item.CreatedAt),
+		UpdatedAt:     unixNano(item.UpdatedAt),
+		RawJSON:       rawJSON,
+		SchemaVersion: item.SchemaVersion.Int(),
 	}
 }
 

@@ -97,17 +97,19 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 	t.Parallel()
 
 	original := &Item{
-		ID:             id.NewItemID(),
-		ExternalID:     id.NewExternalID("12345"),
-		Source:         id.NewProviderID("github"),
-		Type:           id.NewEventTypeID("PushEvent"),
-		ActorLogin:     id.NewActorLogin("octocat"),
-		ActorAvatarURL: "https://avatar.url",
-		RepoName:       id.NewRepoID("org/repo"),
-		RepoURL:        "https://github.com/org/repo",
-		CreatedAt:      time.Date(2026, 1, 15, 10, 30, 0, 0, time.UTC),
-		UpdatedAt:      time.Date(2026, 1, 15, 11, 0, 0, 0, time.UTC),
-		RawJSON:        json.RawMessage(`{"action":"push"}`),
+		ID:         id.NewItemID(),
+		ExternalID: id.NewExternalID("12345"),
+		Source:     id.NewProviderID("github"),
+		Type:       id.NewEventTypeID("PushEvent"),
+		Attributes: map[string]string{
+			"actor_login":      "octocat",
+			"actor_avatar_url": "https://avatar.url",
+			"repo_name":        "org/repo",
+			"repo_url":         "https://github.com/org/repo",
+		},
+		CreatedAt: time.Date(2026, 1, 15, 10, 30, 0, 0, time.UTC),
+		UpdatedAt: time.Date(2026, 1, 15, 11, 0, 0, 0, time.UTC),
+		RawJSON:   json.RawMessage(`{"action":"push"}`),
 	}
 
 	data, err := json.Marshal(original)
@@ -137,20 +139,36 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 		t.Errorf("Type: got %s, want %s", decoded.Type.Get(), original.Type.Get())
 	}
 
-	if decoded.ActorLogin.Get() != original.ActorLogin.Get() {
-		t.Errorf("ActorLogin: got %s, want %s", decoded.ActorLogin.Get(), original.ActorLogin.Get())
+	if decoded.Attributes["actor_login"] != original.Attributes["actor_login"] {
+		t.Errorf(
+			"Attributes[actor_login]: got %s, want %s",
+			decoded.Attributes["actor_login"],
+			original.Attributes["actor_login"],
+		)
 	}
 
-	if decoded.ActorAvatarURL != original.ActorAvatarURL {
-		t.Errorf("ActorAvatarURL: got %s, want %s", decoded.ActorAvatarURL, original.ActorAvatarURL)
+	if decoded.Attributes["actor_avatar_url"] != original.Attributes["actor_avatar_url"] {
+		t.Errorf(
+			"Attributes[actor_avatar_url]: got %s, want %s",
+			decoded.Attributes["actor_avatar_url"],
+			original.Attributes["actor_avatar_url"],
+		)
 	}
 
-	if decoded.RepoName.Get() != original.RepoName.Get() {
-		t.Errorf("RepoName: got %s, want %s", decoded.RepoName.Get(), original.RepoName.Get())
+	if decoded.Attributes["repo_name"] != original.Attributes["repo_name"] {
+		t.Errorf(
+			"Attributes[repo_name]: got %s, want %s",
+			decoded.Attributes["repo_name"],
+			original.Attributes["repo_name"],
+		)
 	}
 
-	if decoded.RepoURL != original.RepoURL {
-		t.Errorf("RepoURL: got %s, want %s", decoded.RepoURL, original.RepoURL)
+	if decoded.Attributes["repo_url"] != original.Attributes["repo_url"] {
+		t.Errorf(
+			"Attributes[repo_url]: got %s, want %s",
+			decoded.Attributes["repo_url"],
+			original.Attributes["repo_url"],
+		)
 	}
 
 	if !decoded.CreatedAt.Equal(original.CreatedAt) {

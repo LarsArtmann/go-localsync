@@ -31,37 +31,22 @@ func TestRegression_AggregateID_NoDelimiterCollision(t *testing.T) {
 	}
 }
 
-// TestRegression_HasChanged_AvatarAndContentHash guards the P1.2 fix: changes
-// to ActorAvatarURL alone, and to ContentHash (RawJSON fingerprint) alone, must
-// be detected — previously they were silently dropped.
-func TestRegression_HasChanged_AvatarAndContentHash(t *testing.T) {
+// TestRegression_HasChanged_ContentHash guards the P1.2 fix: changes to
+// ContentHash (RawJSON fingerprint) alone must be detected — previously
+// they were silently dropped.
+func TestRegression_HasChanged_ContentHash(t *testing.T) {
 	t.Parallel()
 
 	now := time.Now()
 	base := func() *model.Item {
 		return &model.Item{
-			ExternalID:     id.NewExternalID("1"),
-			Source:         id.NewProviderID("github"),
-			Type:           id.NewEventTypeID("PushEvent"),
-			ActorLogin:     id.NewActorLogin("alice"),
-			ActorAvatarURL: "old.png",
-			RepoName:       id.NewRepoID("org/repo"),
-			UpdatedAt:      now,
-			ContentHash:    "hash-1",
+			ExternalID:  id.NewExternalID("1"),
+			Source:      id.NewProviderID("github"),
+			Type:        id.NewEventTypeID("PushEvent"),
+			UpdatedAt:   now,
+			ContentHash: "hash-1",
 		}
 	}
-
-	t.Run("avatar-only change", func(t *testing.T) {
-		t.Parallel()
-
-		local := base()
-		remote := *local
-		remote.ActorAvatarURL = "new.png"
-
-		if !hasChanged(local, &remote) {
-			t.Error("avatar-only change must be detected")
-		}
-	})
 
 	t.Run("content-hash-only change", func(t *testing.T) {
 		t.Parallel()

@@ -2,6 +2,7 @@ package cqrs
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
@@ -11,11 +12,12 @@ import (
 )
 
 type scannedItem struct {
-	itemIDStr, source, sourceID, eventType, actorLogin, actorAvatarURL, repoName, repoURL string
-	contentHash, tombstoneReason                                                          string
-	createdAt, updatedAt                                                                  time.Time
-	tombstoned, schemaVersion                                                             int
-	tombstonedAt                                                                          sql.NullTime
+	itemIDStr, source, sourceID, eventType string
+	attributesJSON                         string
+	contentHash, tombstoneReason           string
+	createdAt, updatedAt                   time.Time
+	tombstoned, schemaVersion              int
+	tombstonedAt                           sql.NullTime
 }
 
 func (si *scannedItem) toItem() (*model.Item, error) {
@@ -32,20 +34,24 @@ func (si *scannedItem) toItem() (*model.Item, error) {
 		}
 	}
 
+	var attrs map[string]string
+	if si.attributesJSON != "" && si.attributesJSON != "{}" {
+		if err := json.Unmarshal([]byte(si.attributesJSON), &attrs); err != nil {
+			return nil, pkgerrors.Wrap(err, "unmarshal attributes from row")
+		}
+	}
+
 	return &model.Item{
-		ID:             itemID,
-		ExternalID:     id.NewExternalID(si.sourceID),
-		Source:         id.NewProviderID(si.source),
-		Type:           id.NewEventTypeID(si.eventType),
-		ActorLogin:     id.NewActorLogin(si.actorLogin),
-		ActorAvatarURL: si.actorAvatarURL,
-		RepoName:       id.NewRepoID(si.repoName),
-		RepoURL:        si.repoURL,
-		ContentHash:    si.contentHash,
-		Tombstone:      tombstone,
-		CreatedAt:      si.createdAt,
-		UpdatedAt:      si.updatedAt,
-		SchemaVersion:  schema.Version(si.schemaVersion),
+		ID:            itemID,
+		ExternalID:    id.NewExternalID(si.sourceID),
+		Source:        id.NewProviderID(si.source),
+		Type:          id.NewEventTypeID(si.eventType),
+		Attributes:    attrs,
+		ContentHash:   si.contentHash,
+		Tombstone:     tombstone,
+		CreatedAt:     si.createdAt,
+		UpdatedAt:     si.updatedAt,
+		SchemaVersion: schema.Version(si.schemaVersion),
 	}, nil
 }
 
@@ -55,10 +61,7 @@ func newScannedItem() *scannedItem {
 		source:          "",
 		sourceID:        "",
 		eventType:       "",
-		actorLogin:      "",
-		actorAvatarURL:  "",
-		repoName:        "",
-		repoURL:         "",
+		attributesJSON:  "{}",
 		contentHash:     "",
 		tombstoneReason: "",
 		createdAt:       time.Time{},
@@ -72,9 +75,9 @@ func newScannedItem() *scannedItem {
 func scanItem(row *sql.Row) (*model.Item, error) {
 	si := newScannedItem()
 
-	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.actorLogin,
-		&si.actorAvatarURL, &si.repoName, &si.repoURL, &si.createdAt, &si.updatedAt,
-		&si.tombstoned, &si.tombstoneReason, &si.tombstonedAt, &si.contentHash, &si.schemaVersion)
+	err := row.Scan(&si.itemIDStr, &si.source, &si.sourceID, &si.eventType, &si.attributesJSON,
+		&si.createdAt, &si.updatedAt, &si.tombstoned, &si.tombstoneReason, &si.tombstonedAt,
+		&si.contentHash, &si.schemaVersion)
 	if err != nil {
 		return nil, err
 	}
@@ -94,10 +97,7 @@ func scanItems(rows *sql.Rows) ([]*model.Item, error) {
 			&si.source,
 			&si.sourceID,
 			&si.eventType,
-			&si.actorLogin,
-			&si.actorAvatarURL,
-			&si.repoName,
-			&si.repoURL,
+			&si.attributesJSON,
 			&si.createdAt,
 			&si.updatedAt,
 			&si.tombstoned,

@@ -12,14 +12,12 @@ func TestItemFilter_Builder(t *testing.T) {
 
 	now := time.Now()
 	typeID := id.NewEventTypeID("PushEvent")
-	actorID := id.NewActorLogin("testuser")
-	repoID := id.NewRepoID("test/repo")
 	sourceID := id.NewProviderID("github")
 
 	f := ItemFilter{}.
 		WithType(typeID).
-		WithActorLogin(actorID).
-		WithRepoName(repoID).
+		WithAttribute("actor_login", "testuser").
+		WithAttribute("repo_name", "test/repo").
 		WithSource(sourceID).
 		WithSince(now).
 		WithLimit(10).
@@ -29,12 +27,12 @@ func TestItemFilter_Builder(t *testing.T) {
 		t.Error("Type not set correctly")
 	}
 
-	if f.ActorLogin == nil || *f.ActorLogin != actorID {
-		t.Error("ActorLogin not set correctly")
+	if f.Attributes["actor_login"] != "testuser" {
+		t.Error("actor_login attribute not set correctly")
 	}
 
-	if f.RepoName == nil || *f.RepoName != repoID {
-		t.Error("RepoName not set correctly")
+	if f.Attributes["repo_name"] != "test/repo" {
+		t.Error("repo_name attribute not set correctly")
 	}
 
 	if f.Source == nil || *f.Source != sourceID {
