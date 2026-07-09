@@ -3,6 +3,8 @@ package memory
 import (
 	"context"
 
+	errorfamily "github.com/larsartmann/go-error-family"
+
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	"github.com/larsartmann/go-cqrs-lite/id/v3"
 )
@@ -17,7 +19,8 @@ func (s *MemoryStore) LoadStream(
 ) (event.EventIterator, error) {
 	events, err := s.Load(ctx, ref)
 	if err != nil {
-		return nil, err
+		return nil, errorfamily.WrapInfrastructure(err, "memory.load_stream",
+			"load events for stream")
 	}
 
 	return event.NewSliceIterator(events), nil
@@ -31,7 +34,8 @@ func (s *MemoryStore) LoadStreamFromVersion(
 ) (event.EventIterator, error) {
 	events, err := s.LoadFromVersion(ctx, ref, version)
 	if err != nil {
-		return nil, err
+		return nil, errorfamily.WrapInfrastructure(err, "memory.load_stream_from_version",
+			"load events from version for stream")
 	}
 
 	return event.NewSliceIterator(events), nil
@@ -41,7 +45,8 @@ func (s *MemoryStore) LoadStreamFromVersion(
 func (s *MemoryStore) ReadStream(ctx context.Context) (event.EventIterator, error) {
 	events, err := s.ReadAll(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errorfamily.WrapInfrastructure(err, "memory.read_stream",
+			"read all events for stream")
 	}
 
 	return event.NewSliceIterator(events), nil
@@ -55,7 +60,8 @@ func (s *MemoryStore) ReadStreamFrom(
 ) (event.EventIterator, error) {
 	events, err := s.ReadFrom(ctx, afterEventID, limit)
 	if err != nil {
-		return nil, err
+		return nil, errorfamily.WrapInfrastructure(err, "memory.read_stream_from",
+			"read events from position for stream")
 	}
 
 	return event.NewSliceIterator(events), nil

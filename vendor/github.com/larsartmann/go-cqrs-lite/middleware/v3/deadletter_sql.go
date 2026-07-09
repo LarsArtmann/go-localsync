@@ -9,7 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	errorfamily "github.com/larsartmann/go-error-family"
+
 	"github.com/larsartmann/go-cqrs-lite/id/v3"
 )
 
@@ -50,7 +51,8 @@ func NewSQLDeadLetterStore(db *sql.DB, dialect string) (*SQLDeadLetterStore, err
 	s := &SQLDeadLetterStore{db: db, dialect: dialect}
 
 	if err := s.migrate(); err != nil {
-		return nil, fmt.Errorf("sql dead letter store: migrate: %w", err)
+		return nil, errorfamily.WrapInfrastructure(err, "deadletter.migrate",
+			"migrate dead-letter table")
 	}
 
 	return s, nil
@@ -60,7 +62,8 @@ func (s *SQLDeadLetterStore) migrate() error {
 	ctx := context.Background()
 
 	if _, err := s.db.ExecContext(ctx, s.schemaSQL()); err != nil {
-		return fmt.Errorf("create table %s: %w", tableDeadLetters, err)
+		return errorfamily.WrapInfrastructure(err, "deadletter.create_table",
+			"create dead_letters table")
 	}
 
 	s.migrateColumns(ctx)
@@ -194,7 +197,8 @@ func (s *SQLDeadLetterStore) Entries(ctx context.Context) ([]DeadLetterEntry, er
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("sql dead letter store: query: %w", err)
+		return nil, errorfamily.WrapTransient(err, "deadletter.query",
+			"query dead-letter entries")
 	}
 
 	defer func() { _ = rows.Close() }()
@@ -223,7 +227,8 @@ func (s *SQLDeadLetterStore) Entries(ctx context.Context) ([]DeadLetterEntry, er
 			&attempts,
 			&failedAtRaw,
 		); err != nil {
-			return nil, fmt.Errorf("sql dead letter store: scan: %w", err)
+			return nil, errorfamily.WrapCorruption(err, "deadletter.scan",
+				"scan dead-letter row")
 		}
 
 		entry := DeadLetterEntry{ //nolint:exhaustruct // AggregateID/Error/FailedAt set below
@@ -253,7 +258,8 @@ func (s *SQLDeadLetterStore) Entries(ctx context.Context) ([]DeadLetterEntry, er
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("sql dead letter store: rows: %w", err)
+		return nil, errorfamily.WrapTransient(err, "deadletter.rows_err",
+			"dead-letter rows iteration")
 	}
 
 	return entries, nil
@@ -267,7 +273,8 @@ func (s *SQLDeadLetterStore) Count(ctx context.Context) (int, error) {
 
 	err := s.db.QueryRowContext(ctx, query).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("sql dead letter store: count: %w", err)
+		return 0, errorfamily.WrapTransient(err, "deadletter.count",
+			"count dead-letter entries")
 	}
 
 	return count, nil
@@ -278,7 +285,8 @@ func (s *SQLDeadLetterStore) Clear(ctx context.Context) error {
 	query := "DELETE FROM " + tableDeadLetters
 
 	if _, err := s.db.ExecContext(ctx, query); err != nil {
-		return fmt.Errorf("sql dead letter store: clear: %w", err)
+		return errorfamily.WrapInfrastructure(err, "deadletter.clear",
+			"clear dead-letter table")
 	}
 
 	return nil
@@ -290,21 +298,22 @@ func (s *SQLDeadLetterStore) parseTime(src any) (time.Time, error) {
 			return t, nil
 		}
 
-		return time.Time{}, fmt.Errorf(
-			"%w: expected time.Time, got %T",
-			errUnexpectedTimeTypeDL,
-			src,
-		)
+		return time.Time{}, errorfamily.WrapCorruption(errUnexpectedTimeTypeDL,
+			"middleware.deadletter_sql.unexpected_time_type",
+			fmt.Sprintf("expected time.Time, got %T", src))
 	}
 
 	str, ok := src.(string)
 	if !ok {
-		return time.Time{}, fmt.Errorf("%w: expected string, got %T", errUnexpectedTimeTypeDL, src)
+		return time.Time{}, errorfamily.WrapCorruption(errUnexpectedTimeTypeDL,
+			"middleware.deadletter_sql.unexpected_string_type",
+			fmt.Sprintf("expected string, got %T", src))
 	}
 
 	t, err := time.Parse(time.RFC3339Nano, str)
 	if err != nil {
-		return time.Time{}, fmt.Errorf("parse sqlite time: %w", err)
+		return time.Time{}, errorfamily.WrapCorruption(err,
+			"middleware.deadletter_sql.parse_time", "parse sqlite time")
 	}
 
 	return t, nil
@@ -320,11 +329,11 @@ func deadLetterError(s string) error { return storeError(s) }
 // family name from err using the CQRS taxonomy. Used when storing dead-letter
 // entries so the classification survives the SQL round-trip.
 func classifyDeadLetterError(err error) (string, string) {
-	family := familyToWire(event.Classify(err))
+	family := familyToWire(errorfamily.Classify(err))
 
 	code := ""
 
-	if ce, ok := errors.AsType[*event.Error](err); ok {
+	if ce, ok := errors.AsType[*errorfamily.Error](err); ok {
 		code = ce.Code()
 	}
 
@@ -332,17 +341,17 @@ func classifyDeadLetterError(err error) (string, string) {
 }
 
 // familyToWire maps a taxonomy family to its lowercase wire name.
-func familyToWire(f event.Family) string {
+func familyToWire(f errorfamily.Family) string {
 	switch f {
-	case event.Rejection:
+	case errorfamily.Rejection:
 		return "rejection"
-	case event.Conflict:
+	case errorfamily.Conflict:
 		return "conflict"
-	case event.Transient:
+	case errorfamily.Transient:
 		return "transient"
-	case event.Corruption:
+	case errorfamily.Corruption:
 		return "corruption"
-	case event.Infrastructure:
+	case errorfamily.Infrastructure:
 		return "infrastructure"
 	default:
 		return ""

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	errorfamily "github.com/larsartmann/go-error-family"
+
 	"github.com/larsartmann/go-cqrs-lite/kv/v3"
 )
 
@@ -28,7 +30,7 @@ func (s *SQLViewStore[V, K]) Count(ctx context.Context, q kv.ViewQuery) (int64, 
 
 	err := s.DB.QueryRowContext(ctx, b.String(), args...).Scan(&count)
 	if err != nil {
-		return 0, fmt.Errorf("view-store: count: %w", err)
+		return 0, errorfamily.WrapTransient(err, "storage.view.count", "count records")
 	}
 
 	return count, nil

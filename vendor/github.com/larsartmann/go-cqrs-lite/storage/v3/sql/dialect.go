@@ -6,13 +6,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 // Dialect abstracts SQL differences between database backends (PostgreSQL, SQLite).
 // Each store method delegates placeholder formatting and time handling to a Dialect,
 // eliminating the duplicated PostgreSQL/SQLite store pairs.
-type Dialect interface {
+type Dialect interface { //nolint:interfacebloat // each method returns a distinct schema DDL
 	Placeholder(index int) string
 	FormatTime(t time.Time) any
 	ScanTimeDest() any
@@ -23,6 +23,7 @@ type Dialect interface {
 	SnapshotSchema() string
 	CheckpointSchema() string
 	KVSchema() string
+	TimerSchema() string
 }
 
 // PostgresDialect is the Dialect for PostgreSQL databases.
@@ -41,7 +42,7 @@ func (PostgresDialect) ScanTimeDest() any {
 func (PostgresDialect) ParseTime(src any) (time.Time, error) {
 	tp, ok := src.(*time.Time)
 	if !ok {
-		return time.Time{}, event.WrapCorruption(
+		return time.Time{}, errorfamily.WrapCorruption(
 			ErrUnexpectedTimeType,
 			"storage.unexpected_time_type",
 			fmt.Sprintf("postgres dialect: expected *time.Time, got %T", src),
@@ -130,6 +131,17 @@ func (PostgresDialect) KVSchema() string {
 );`
 }
 
+func (PostgresDialect) TimerSchema() string {
+	return `CREATE TABLE IF NOT EXISTS timers (
+    id         TEXT PRIMARY KEY,
+    fire_at    TIMESTAMP WITH TIME ZONE NOT NULL,
+    payload    BYTEA NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_timers_fire_at ON timers(fire_at);`
+}
+
 // SQLiteDialect is the Dialect for SQLite databases.
 type SQLiteDialect struct{}
 
@@ -146,7 +158,7 @@ func (SQLiteDialect) ScanTimeDest() any {
 func (SQLiteDialect) ParseTime(src any) (time.Time, error) {
 	sp, ok := src.(*string)
 	if !ok {
-		return time.Time{}, event.WrapCorruption(
+		return time.Time{}, errorfamily.WrapCorruption(
 			ErrUnexpectedTimeType,
 			"storage.unexpected_time_type",
 			fmt.Sprintf("sqlite dialect: expected *string, got %T", src),
@@ -233,6 +245,17 @@ func (SQLiteDialect) KVSchema() string {
     key   BLOB PRIMARY KEY,
     value BLOB NOT NULL
 );`
+}
+
+func (SQLiteDialect) TimerSchema() string {
+	return `CREATE TABLE IF NOT EXISTS timers (
+    id         TEXT PRIMARY KEY,
+    fire_at    TEXT NOT NULL,
+    payload    BLOB NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_timers_fire_at ON timers(fire_at);`
 }
 
 // Placeholders returns a comma-separated list of placeholders for the given count.

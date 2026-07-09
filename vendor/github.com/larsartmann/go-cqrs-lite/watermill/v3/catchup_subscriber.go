@@ -8,10 +8,11 @@ import (
 	"time"
 
 	"github.com/ThreeDotsLabs/watermill/message"
+	errorfamily "github.com/larsartmann/go-error-family"
 
+	"github.com/larsartmann/go-cqrs-lite/dedup/v3"
 	"github.com/larsartmann/go-cqrs-lite/event/v3"
 	"github.com/larsartmann/go-cqrs-lite/id/v3"
-	cqrsotel "github.com/larsartmann/go-cqrs-lite/otel/v3"
 )
 
 // CheckpointStore is the interface for persisting the last-processed event ID.
@@ -62,7 +63,7 @@ type catchUpSubscription struct {
 	topic     string
 	output    chan *message.Message
 	cancel    context.CancelFunc
-	replayIDs map[string]struct{} // event IDs seen during replay
+	replayIDs *dedup.Ring // bounded set of event IDs seen during replay
 }
 
 // NewCatchUpSubscriber creates a CatchUpSubscriber.
@@ -79,17 +80,17 @@ func NewCatchUpSubscriber(
 	logger *slog.Logger,
 ) (*CatchUpSubscriber, error) {
 	if journal == nil {
-		return nil, event.NewRejection("watermill.create_catchup_subscriber",
+		return nil, errorfamily.NewRejection("watermill.create_catchup_subscriber",
 			"journal must not be nil")
 	}
 
 	if live == nil {
-		return nil, event.NewRejection("watermill.create_catchup_subscriber",
+		return nil, errorfamily.NewRejection("watermill.create_catchup_subscriber",
 			"live subscriber must not be nil")
 	}
 
 	if checkpoint == nil {
-		return nil, event.NewRejection("watermill.create_catchup_subscriber",
+		return nil, errorfamily.NewRejection("watermill.create_catchup_subscriber",
 			"checkpoint store must not be nil")
 	}
 
@@ -117,7 +118,7 @@ func (s *CatchUpSubscriber) Subscribe(
 	defer s.mu.Unlock()
 
 	if s.closed {
-		return nil, event.NewInfrastructure("watermill.catchup_subscriber_closed",
+		return nil, errorfamily.NewInfrastructure("watermill.catchup_subscriber_closed",
 			"catch-up subscriber is closed")
 	}
 
@@ -129,7 +130,7 @@ func (s *CatchUpSubscriber) Subscribe(
 		topic:     topic,
 		output:    output,
 		cancel:    cancel,
-		replayIDs: make(map[string]struct{}),
+		replayIDs: dedup.NewRing(catchUpDedupRingCapacity),
 	}
 
 	s.subs = append(s.subs, sub)
@@ -158,82 +159,11 @@ func (s *CatchUpSubscriber) runCatchUp(ctx context.Context, sub *catchUpSubscrip
 	}
 }
 
-func (s *CatchUpSubscriber) replayPhase(ctx context.Context, sub *catchUpSubscription) error {
-	ctx, span := cqrsotel.StartSpan(
-		ctx, tracer(), "watermill.replay.from_journal",
-		cqrsotel.SpanKindInternal,
-		cqrsotel.WithAttributes(cqrsotel.AttrString("cqrs.projection.name", sub.topic)),
-	)
-	defer span.End()
-
-	checkpoint, err := s.checkpoint.Load(ctx, sub.topic)
-	if err != nil {
-		cqrsotel.RecordError(span, err)
-
-		return fmt.Errorf("load checkpoint for %s: %w", sub.topic, err)
-	}
-
-	var after id.EventID
-
-	if !checkpoint.IsZero() {
-		after = checkpoint.EventID
-	}
-
-	events, err := s.journal.ReadFrom(ctx, after, 0)
-	if err != nil {
-		cqrsotel.RecordError(span, err)
-
-		return fmt.Errorf("replay read from journal: %w", err)
-	}
-
-	span.SetAttributes(cqrsotel.AttrInt(cqrsotel.AttrEventCount, len(events)))
-
-	s.logger.Info(
-		"catch-up replay",
-		"topic", sub.topic,
-		"events", len(events),
-		"after", after.String(),
-	)
-
-	for _, evt := range events {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-s.closeCh:
-			return nil
-		default:
-		}
-
-		msg := eventToMessage(evt)
-		// Mark ModeReplay in message metadata. Consumers reconstruct it into
-		// the handler context via ProcessingModeMiddleware (the metadata is
-		// the only channel that survives process boundaries in Watermill).
-		msg.Metadata.Set(metaProcessingMode, string(event.ModeReplay))
-
-		sub.replayIDs[evt.ID().String()] = struct{}{}
-
-		select {
-		case sub.output <- msg:
-			// Save checkpoint after forwarding each replay event.
-			// Best-effort: log on error, don't block the stream.
-			if saveErr := s.saveCheckpoint(ctx, sub.topic, evt.ID()); saveErr != nil {
-				s.logger.Warn("catch-up: save checkpoint after replay event",
-					"topic", sub.topic, "event_id", evt.ID().String(), "error", saveErr)
-			}
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-s.closeCh:
-			return nil
-		}
-	}
-
-	return nil
-}
-
 func (s *CatchUpSubscriber) livePhase(ctx context.Context, sub *catchUpSubscription) error {
 	liveMsgs, err := s.live.Subscribe(ctx, sub.topic)
 	if err != nil {
-		return fmt.Errorf("subscribe live for %s: %w", sub.topic, err)
+		return errorfamily.WrapInfrastructure(err, "watermill.catchup.subscribe_live",
+			fmt.Sprintf("subscribe live for %s", sub.topic))
 	}
 
 	for {
@@ -249,12 +179,10 @@ func (s *CatchUpSubscriber) livePhase(ctx context.Context, sub *catchUpSubscript
 
 			// Dedup: skip events already seen during replay.
 			eventID := msg.Metadata.Get(metaEventID)
-			if eventID != "" {
-				if _, seen := sub.replayIDs[eventID]; seen {
-					msg.Ack()
+			if eventID != "" && sub.replayIDs.Has(eventID) {
+				msg.Ack()
 
-					continue
-				}
+				continue
 			}
 
 			select {
@@ -312,5 +240,10 @@ func (s *CatchUpSubscriber) Close() error {
 }
 
 const metaProcessingMode = "processing_mode"
+
+// catchUpDedupRingCapacity bounds the replay→live dedup ring. 1024 entries ×
+// ~90 bytes = ~90KB. The output channel buffer is 256, so 1024 is a 4x safety
+// margin covering any events published during the replay window.
+const catchUpDedupRingCapacity = 1024
 
 var _ message.Subscriber = (*CatchUpSubscriber)(nil)

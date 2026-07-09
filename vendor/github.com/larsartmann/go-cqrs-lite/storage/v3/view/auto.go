@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	errorfamily "github.com/larsartmann/go-error-family"
 )
 
 const (
@@ -140,7 +142,8 @@ func AutoMapperWithTombstone[V any](table, tombstoneCol string) ViewMapper[V] {
 			}
 
 			if err := scan(dest...); err != nil {
-				return nil, err
+				return nil, errorfamily.WrapCorruption(err, "storage.view.auto.scan_row",
+					"scan row via reflection")
 			}
 
 			for i, fi := range scanOrder {

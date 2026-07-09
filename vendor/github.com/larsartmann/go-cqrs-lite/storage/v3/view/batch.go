@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	errorfamily "github.com/larsartmann/go-error-family"
+
 	"github.com/larsartmann/go-cqrs-lite/kv/v3"
 )
 
@@ -31,7 +33,7 @@ func (s *SQLViewStore[V, K]) BatchSet(ctx context.Context, items []kv.ViewItem[V
 		end := min(offset+maxRows, len(items))
 
 		if err := s.batchChunk(ctx, items[offset:end]); err != nil {
-			return fmt.Errorf("view-store: batch set chunk [%d:%d]: %w", offset, end, err)
+			return err
 		}
 	}
 
@@ -48,7 +50,8 @@ func (s *SQLViewStore[V, K]) batchChunk(ctx context.Context, items []kv.ViewItem
 
 	for rowIdx, item := range items {
 		if item.Value == nil {
-			return fmt.Errorf("%w: key %q", errNilViewValue, item.Key.String())
+			return errorfamily.WrapRejection(errNilViewValue, "storage.view.batch_nil",
+				fmt.Sprintf("nil view value: key %q", item.Key.String()))
 		}
 
 		rowPlaceholders := make([]string, 0, paramsPerRow)
@@ -77,7 +80,7 @@ func (s *SQLViewStore[V, K]) batchChunk(ctx context.Context, items []kv.ViewItem
 	)
 
 	if _, err := s.DB.ExecContext(ctx, q, args...); err != nil {
-		return err
+		return errorfamily.WrapTransient(err, "storage.view.batch_chunk", "batch insert chunk")
 	}
 
 	return nil
@@ -99,7 +102,7 @@ func (s *SQLViewStore[V, K]) DeleteAll(ctx context.Context) error {
 	q := "DELETE FROM " + s.mapper.Table
 
 	if _, err := s.DB.ExecContext(ctx, q); err != nil {
-		return fmt.Errorf("view-store: delete all: %w", err)
+		return errorfamily.WrapTransient(err, "storage.view.delete_all", "delete all records")
 	}
 
 	return nil

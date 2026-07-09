@@ -158,11 +158,11 @@ func TestErrorClassification(t *testing.T) {
 		t.Run(tc.err.Error(), func(t *testing.T) {
 			t.Parallel()
 
-			if got := event.Classify(tc.err); got != tc.family {
+			if got := errorfamily.Classify(tc.err); got != tc.family {
 				t.Errorf("Classify(%v) = %v, want %v", tc.err, got, tc.family)
 			}
 
-			if got := event.IsRetryable(tc.err); got != tc.retryable {
+			if got := errorfamily.IsRetryable(tc.err); got != tc.retryable {
 				t.Errorf("IsRetryable(%v) = %v, want %v", tc.err, got, tc.retryable)
 			}
 		})
@@ -173,16 +173,16 @@ func TestErrorClassification_ThroughWrapping(t *testing.T) {
 	t.Parallel()
 
 	wrapped := WithDetail(ErrNotFound, "resource=events")
-	if got := event.Classify(wrapped); got != event.Rejection {
+	if got := errorfamily.Classify(wrapped); got != event.Rejection {
 		t.Errorf("Classify(wrapped ErrNotFound) = %v, want Rejection", got)
 	}
 
 	wrappedSync := Wrapf(ErrPartialSync, "attempt %d", 3)
-	if got := event.Classify(wrappedSync); got != event.Transient {
+	if got := errorfamily.Classify(wrappedSync); got != event.Transient {
 		t.Errorf("Classify(wrapped ErrPartialSync) = %v, want Transient", got)
 	}
 
-	if !event.IsRetryable(wrappedSync) {
+	if !errorfamily.IsRetryable(wrappedSync) {
 		t.Error("IsRetryable(wrapped ErrPartialSync) = false, want true")
 	}
 }
