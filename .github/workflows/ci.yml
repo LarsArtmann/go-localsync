@@ -89,10 +89,7 @@ jobs:
           GITLEAKS_CONFIG: .gitleaks.toml
 
       - name: Run govulncheck (dependency vulnerabilities)
-        uses: golang/govulncheck-action@v1
-        with:
-          go-version: ${{ env.GO_VERSION }}
-          go-package: ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
   build:
     name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
