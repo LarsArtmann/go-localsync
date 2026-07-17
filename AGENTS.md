@@ -8,16 +8,17 @@ Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based 
 
 ## Architecture
 
-| Package         | Purpose                                                                                                                                                                                                                                                                                                                            |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/crdt/`     | Conflict resolution: `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` (timestamp-only) — **wired into DecideSync as pluggable conflict strategy**. No vector clocks/operations (a single-writer pull mirror needs none).                                                                                                     |
-| `pkg/api/`      | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                                                                                                       |
-| `pkg/cqrs/`     | CQRS integration layer using go-cqrs-lite **v3.4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, sqlite\_\*.go)                                                                                                                                                  |
-| `pkg/provider/` | Core interfaces (`Provider`, `Item`, `FetchResult`, `RetryConfig`) and `RateLimitInfo`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                                                                |
-| `pkg/sync/`     | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`, retry/backoff (`retry.go`), per-source mutex, opt-in reconciliation                                                                                                                      |
-| `pkg/data/`     | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`. |
-| `pkg/id/`       | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                 |
-| `pkg/errors/`   | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                                                                                                           |
+| Package              | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pkg/crdt/`          | Conflict resolution: `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` (timestamp-only) — **wired into DecideSync as pluggable conflict strategy**. No vector clocks/operations (a single-writer pull mirror needs none).                                                                                                                                                                                                              |
+| `pkg/api/`           | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                                                                                                                                                                                                                |
+| `pkg/cqrs/`          | CQRS integration layer using go-cqrs-lite **v3.4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, sqlite\_\*.go)                                                                                                                                                                                                                                                           |
+| `pkg/provider/`      | Core interfaces (`Provider`, `Item`, `FetchResult`, `RetryConfig`) and `RateLimitInfo`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                                                                                                                                                                         |
+| `pkg/sync/`          | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`, retry/backoff (`retry.go`), per-source mutex, opt-in reconciliation                                                                                                                                                                                                                               |
+| `pkg/data/`          | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`.                                                                                                          |
+| `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                                                                                                                          |
+| `pkg/errors/`        | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                                                                                                                                                                                                                    |
+| `internal/cqrslint/` | Static architectural-invariant linter for `pkg/cqrs` (ADR-0004 enforcer). 10 AST checks (C0001-C0010): single aggregate type, three fixed events, fold coverage, projector subscriptions, provider-agnostic `hasChanged`, no query dispatcher, `SyncAction` stays in `pkg/sync`, projection mutex guard, payload json tags, `NewEvents` uses `aggregateType` const. CLI: `cmd/cqrs-lint/`. Zero third-party deps (stdlib `go/parser` only). |
 
 ### SyncStore Interface Seam
 
@@ -109,7 +110,8 @@ The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exporte
 3. Test: `go test ./... -count=1`
 4. Lint: `golangci-lint run ./... --timeout=5m`
 5. Format: `golangci-lint fmt ./...`
-6. Full pipeline: `buildflow --build-mode full` (ensure go.work is removed first)
+6. CQRS gate: `go run ./cmd/cqrs-lint -pkg pkg/cqrs` (or `nix run .#cqrs-lint`)
+7. Full pipeline: `buildflow --build-mode full` (ensure go.work is removed first)
 
 ### CI (No go.work)
 
@@ -136,19 +138,20 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 ## Testing
 
-| Package           | Tests | Coverage | Status                                                                                                         |
-| ----------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`        | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
-| `pkg/sync`        | 32    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
-| `pkg/id`          | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
-| `pkg/errors`      | 16    | 100.0%   | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
-| `pkg/provider`    | 2     | 90.9%    | ✅ Item validation                                                                                             |
-| `pkg/api`         | 15    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
-| `pkg/crdt`        | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
-| `pkg/data/model`  | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
-| `pkg/data/schema` | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                               |
+| Package             | Tests | Coverage | Status                                                                                                         |
+| ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `pkg/cqrs`          | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
+| `pkg/sync`          | 32    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
+| `pkg/id`            | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
+| `pkg/errors`        | 16    | 100.0%   | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
+| `pkg/provider`      | 2     | 90.9%    | ✅ Item validation                                                                                             |
+| `pkg/api`           | 15    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
+| `pkg/crdt`          | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
+| `pkg/data/model`    | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
+| `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                               |
+| `internal/cqrslint` | 23    | —        | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog                           |
 
-**194 total test functions** across 9 test packages.
+**217 total test functions** across 10 test packages.
 
 Run: `go test ./... -count=1`
 

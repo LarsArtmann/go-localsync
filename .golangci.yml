@@ -214,7 +214,7 @@ linters:
   exclusions:
     generated: lax
     rules:
-      - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache|model\.Item|model\.Tombstone|sync\.SyncResult|sync\.Syncer|cqrs\.Projector|sql\.NullTime) is missing
+      - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache|model\.Item|model\.Tombstone|sync\.SyncResult|sync\.Syncer|cqrs\.Projector|sql\.NullTime|cqrslint\.Finding) is missing
         linters:
           - exhaustruct
       - path: _test\.go
@@ -254,12 +254,50 @@ linters:
           - gocritic
           - noinlineerr
           - wrapcheck
+      - path: cmd/cqrs-lint/
+        linters:
+          - forbidigo
+          - errcheck
+          - cyclop
+          - gochecknoglobals
+          - mnd
+          - funlen
+          - gosec
+          - gocritic
+          - noinlineerr
+          - wrapcheck
+          - wsl_v5
+          - nlreturn
       - path: pkg/cqrs/
         linters:
           - wrapcheck
           - noinlineerr
           - funlen
           - gosec
+      - path: internal/cqrslint/
+        linters:
+          - wrapcheck
+          - noinlineerr
+          - funlen
+          - gocognit
+          - cyclop
+          - gocritic
+          - wsl_v5
+          - nlreturn
+          - varnamelen
+          - mnd
+      - path: cmd/cqrs-lint/
+        linters:
+          - wrapcheck
+          - noinlineerr
+          - funlen
+          - gocognit
+          - cyclop
+          - gocritic
+          - wsl_v5
+          - nlreturn
+          - varnamelen
+          - mnd
       - path: pkg/errors/errors\.go
         linters:
           - wrapcheck
