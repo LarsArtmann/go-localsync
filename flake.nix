@@ -130,10 +130,12 @@
               doCheck = true;
             });
             # Architectural gate: fails when pkg/cqrs drifts from ADR-0004.
-            cqrs-lint = pkgs.runCommand "cqrs-lint-check" { nativeBuildInputs = [ config.packages.cqrs-lint ]; } ''
-              cqrs-lint -pkg ${./pkg/cqrs}
-              touch $out
-            '';
+            cqrs-lint =
+              pkgs.runCommand "cqrs-lint-check" { nativeBuildInputs = [ config.packages.cqrs-lint ]; }
+                ''
+                  cqrs-lint -pkg ${./pkg/cqrs}
+                  touch $out
+                '';
           };
         };
 
