@@ -1,8 +1,7 @@
 package cqrs
 
 import (
-	"github.com/larsartmann/go-cqrs-lite/codec/v3"
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -47,7 +46,7 @@ func decideWithOutcome(
 			if hasConflictEvent(events) {
 				outcome.ConflictDetected = true
 
-				cp, err := event.DecodePayload[ItemConflictFoundPayload](events[0], codec.JSONCodec{})
+				cp, err := event.DecodePayloadAuto[ItemConflictFoundPayload](events[0])
 				if err != nil {
 					return nil, pkgerrors.Wrapf(err, "decode ItemConflictFoundPayload for event %s", events[0].ID())
 				}

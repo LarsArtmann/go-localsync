@@ -3,10 +3,9 @@ package cqrs
 import (
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/codec/v3"
-	"github.com/larsartmann/go-cqrs-lite/decider/v3"
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
-	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
+	"github.com/larsartmann/go-cqrs-lite/decider/v4"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v4"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -75,7 +74,7 @@ func foldItemSynced(evt event.Event) (SyncItemState, error) {
 // foldItemTombstoned marks the aggregate's current item as tombstoned. The item
 // is kept (not nilled) so its history survives and a later sync can resurrect it.
 func foldItemTombstoned(state SyncItemState, evt event.Event) (SyncItemState, error) {
-	payload, err := event.DecodePayload[ItemTombstonedPayload](evt, codec.JSONCodec{})
+	payload, err := event.DecodePayloadAuto[ItemTombstonedPayload](evt)
 	if err != nil {
 		return SyncItemState{}, pkgerrors.Wrapf(err, "decode ItemTombstonedPayload for event %s", evt.ID())
 	}

@@ -30,12 +30,12 @@
 
 ### Storage Backends
 
-| Item                         | When       | Evidence                                               |
+| Item | When | Evidence |
 | ---------------------------- | ---------- | ------------------------------------------------------ | ------- |
-| Memory backend               | Session 3  | In-memory event store, bus, read model, snapshot store |
-| SQLite backend (pure-Go)     | Session 8  | `modernc.org/sqlite`, WAL mode, indexes                |
-| Backend selection at runtime | Session 3  | `--backend memory                                      | sqlite` |
-| SQLite file persistence test | Session 15 | `TestSQLiteReadModel_FilePersistence`                  |
+| Memory backend | Session 3 | In-memory event store, bus, read model, snapshot store |
+| SQLite backend (pure-Go) | Session 8 | `modernc.org/sqlite`, WAL mode, indexes |
+| Backend selection at runtime | Session 3 | `--backend memory                                      | sqlite` |
+| SQLite file persistence test | Session 15 | `TestSQLiteReadModel_FilePersistence` |
 
 ### Sync Engine
 

@@ -4,9 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/larsartmann/go-cqrs-lite/codec/v3"
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
-	"github.com/larsartmann/go-cqrs-lite/projection/v3"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	"github.com/larsartmann/go-cqrs-lite/projection/v4"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -82,7 +81,7 @@ func (p *Projector) handleItemSynced(ctx context.Context, evt event.Event) error
 }
 
 func (p *Projector) handleItemTombstoned(ctx context.Context, evt event.Event) error {
-	payload, err := event.DecodePayload[ItemTombstonedPayload](evt, codec.JSONCodec{})
+	payload, err := event.DecodePayloadAuto[ItemTombstonedPayload](evt)
 	if err != nil {
 		return pkgerrors.Wrapf(err, "decode ItemTombstonedPayload for event %s", evt.ID())
 	}

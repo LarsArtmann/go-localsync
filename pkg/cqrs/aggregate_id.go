@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"sync"
 
-	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v4"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 

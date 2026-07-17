@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/storage/v3"
+	"github.com/larsartmann/go-cqrs-lite/storage/v4"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"

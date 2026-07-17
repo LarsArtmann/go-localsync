@@ -4,8 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 
-	"github.com/larsartmann/go-cqrs-lite/codec/v3"
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -139,7 +138,7 @@ func dataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 // decodeItemFromEvent decodes an ItemSynced event payload and reconstructs
 // the domain model Item. Shared between decider (fold) and projection (handle).
 func decodeItemFromEvent(evt event.Event) (*model.Item, error) {
-	payload, err := event.DecodePayload[ItemSyncedPayload](evt, codec.JSONCodec{})
+	payload, err := event.DecodePayloadAuto[ItemSyncedPayload](evt)
 	if err != nil {
 		return nil, pkgerrors.Wrapf(err, "decode ItemSyncedPayload for event %s", evt.ID())
 	}

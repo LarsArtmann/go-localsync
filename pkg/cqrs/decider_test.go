@@ -1,11 +1,10 @@
 package cqrs
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -82,8 +81,8 @@ func TestDecideSync_Fold_PreservesItemID(t *testing.T) {
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
 
-	var payload ItemSyncedPayload
-	if err := json.Unmarshal(events[0].Payload(), &payload); err != nil {
+	payload, err := event.DecodePayloadAuto[ItemSyncedPayload](events[0])
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if payload.ItemID != originalID {
@@ -266,8 +265,8 @@ func TestDecideSync_ConflictTimestamps(t *testing.T) {
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 2)
 
-	var conflictPayload ItemConflictFoundPayload
-	if err := json.Unmarshal(events[0].Payload(), &conflictPayload); err != nil {
+	conflictPayload, err := event.DecodePayloadAuto[ItemConflictFoundPayload](events[0])
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

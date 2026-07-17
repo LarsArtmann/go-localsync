@@ -6,13 +6,13 @@ import (
 	"log/slog"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-cqrs-lite/codec/v3"
-	"github.com/larsartmann/go-cqrs-lite/command/v3"
-	"github.com/larsartmann/go-cqrs-lite/decider/v3"
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
-	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
-	"github.com/larsartmann/go-cqrs-lite/middleware/v3"
-	"github.com/larsartmann/go-cqrs-lite/snapshot/v3"
+	"github.com/larsartmann/go-cqrs-lite/codec/v4"
+	"github.com/larsartmann/go-cqrs-lite/command/v4"
+	"github.com/larsartmann/go-cqrs-lite/decider/v4"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v4"
+	"github.com/larsartmann/go-cqrs-lite/middleware/v4"
+	"github.com/larsartmann/go-cqrs-lite/snapshot/v4"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -145,7 +145,7 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 	repo, err = decider.NewRepository(
 		sr.store, sr.bus, deciderSpec,
 		decider.WithSnapshotStore[SyncItemState](snapshotStore),
-		decider.WithCodec[SyncItemState](codec.JSONCodec{}),
+		decider.WithCodec[SyncItemState](codec.CBORCodec{}),
 		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
 	)
 	if err != nil {

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
-	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v3"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v4"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -38,8 +38,8 @@ func unmarshalSyncedPayload(t *testing.T, evt event.Event) ItemSyncedPayload {
 func unmarshalTestPayload[T any](t *testing.T, evt event.Event) T {
 	t.Helper()
 
-	var payload T
-	if err := json.Unmarshal(evt.Payload(), &payload); err != nil {
+	payload, err := event.DecodePayloadAuto[T](evt)
+	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 

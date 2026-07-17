@@ -108,11 +108,12 @@ type Stats struct {
 | Tests now exist for all core packages |
 
 **Coverage:**
-| Package | Tests | Coverage |
-|---------|-------|----------|
-| `pkg/github` | 15 tests | Mock HTTP server, pagination, retry |
-| `pkg/sync` | 5 tests | Mock Fetcher interface |
-| `pkg/storage` | 7 tests | In-memory SQLite |
+
+| Package       | Tests    | Coverage                            |
+| ------------- | -------- | ----------------------------------- |
+| `pkg/github`  | 15 tests | Mock HTTP server, pagination, retry |
+| `pkg/sync`    | 5 tests  | Mock Fetcher interface              |
+| `pkg/storage` | 7 tests  | In-memory SQLite                    |
 
 ### 6. CI/CD Pipeline
 

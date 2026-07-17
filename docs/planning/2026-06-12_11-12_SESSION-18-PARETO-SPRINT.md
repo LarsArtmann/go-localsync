@@ -58,18 +58,18 @@ actionable steps with a strict execution order.
 > proof, real integration test, CLI completion. These are the
 > customer-facing wins that justify the sprint's existence.
 
-| #    | Task                                                                   | Impact        | Effort                                        | Files                                              |
+| # | Task | Impact | Effort | Files |
 | ---- | ---------------------------------------------------------------------- | ------------- | --------------------------------------------- | -------------------------------------------------- | ---------------------------------- | ---------------------------------- |
-| 3.1  | API auth middleware (API-key via header `X-API-Key`, env-configurable) | H             | M                                             | `pkg/api/server.go`, `pkg/api/middleware.go` (new) |
-| 3.2  | API pagination headers (`X-Total-Count`, `Link: rel="next"`)           | M             | M                                             | `pkg/api/handlers.go`                              |
-| 3.3  | API rate limiting middleware (per-IP token bucket)                     | M             | M                                             | `pkg/api/middleware.go` (new)                      |
-| 3.4  | CLI: real GitHub PAT smoke test (subprocess test for `runSync`)        | H             | M                                             | `cmd/examples/github-sync/main_test.go`            |
-| 3.5  | Add `--conflict-strategy=lww                                           | remote        | local`CLI flag →`CQRSConfig.ConflictResolver` | M                                                  | M                                  | `cmd/examples/github-sync/main.go` |
-| 3.6  | Add `--export=json                                                     | csv` CLI flag | L                                             | M                                                  | `cmd/examples/github-sync/main.go` |
-| 3.7  | `pkg/api` coverage: malformed `since` param, concurrent request test   | M             | S                                             | `pkg/api/server_test.go`                           |
-| 3.8  | OpenTelemetry no-op adapter (zero-cost when not enabled)               | M             | M                                             | `pkg/otel/otel.go` (new)                           |
-| 3.9  | `event.AggregateRef` adoption in projection — type safety for replay   | M             | S                                             | `pkg/cqrs/projection.go`                           |
-| 3.10 | `--watch` flag: re-run sync on timer (cron-like, 60s default)          | M             | M                                             | `cmd/examples/github-sync/main.go`                 |
+| 3.1 | API auth middleware (API-key via header `X-API-Key`, env-configurable) | H | M | `pkg/api/server.go`, `pkg/api/middleware.go` (new) |
+| 3.2 | API pagination headers (`X-Total-Count`, `Link: rel="next"`) | M | M | `pkg/api/handlers.go` |
+| 3.3 | API rate limiting middleware (per-IP token bucket) | M | M | `pkg/api/middleware.go` (new) |
+| 3.4 | CLI: real GitHub PAT smoke test (subprocess test for `runSync`) | H | M | `cmd/examples/github-sync/main_test.go` |
+| 3.5 | Add `--conflict-strategy=lww                                           | remote        | local`CLI flag →`CQRSConfig.ConflictResolver` | M | M | `cmd/examples/github-sync/main.go` |
+| 3.6 | Add `--export=json                                                     | csv` CLI flag | L | M | `cmd/examples/github-sync/main.go` |
+| 3.7 | `pkg/api` coverage: malformed `since` param, concurrent request test | M | S | `pkg/api/server_test.go` |
+| 3.8 | OpenTelemetry no-op adapter (zero-cost when not enabled) | M | M | `pkg/otel/otel.go` (new) |
+| 3.9 | `event.AggregateRef` adoption in projection — type safety for replay | M | S | `pkg/cqrs/projection.go` |
+| 3.10 | `--watch` flag: re-run sync on timer (cron-like, 60s default) | M | M | `cmd/examples/github-sync/main.go` |
 
 **Total ~4–5 h. ~30 new tests, ~600 new lines, one new package (`pkg/otel`).**
 

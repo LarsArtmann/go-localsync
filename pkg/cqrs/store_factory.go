@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/larsartmann/go-cqrs-lite/event/v3"
-	"github.com/larsartmann/go-cqrs-lite/snapshot/v3"
-	cqrsmemory "github.com/larsartmann/go-cqrs-lite/storage/memory/v3"
-	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage/v3"
-	cqrswatermill "github.com/larsartmann/go-cqrs-lite/watermill/v3"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	"github.com/larsartmann/go-cqrs-lite/snapshot/v4"
+	cqrsmemory "github.com/larsartmann/go-cqrs-lite/storage/memory/v4"
+	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage/v4"
+	cqrswatermill "github.com/larsartmann/go-cqrs-lite/watermill/v4"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 

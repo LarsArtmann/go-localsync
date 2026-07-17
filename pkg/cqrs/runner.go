@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-cqrs-lite/projection/v3"
-	"github.com/larsartmann/go-cqrs-lite/projectionhost/v3"
+	"github.com/larsartmann/go-cqrs-lite/projection/v4"
+	"github.com/larsartmann/go-cqrs-lite/projectionhost/v4"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 

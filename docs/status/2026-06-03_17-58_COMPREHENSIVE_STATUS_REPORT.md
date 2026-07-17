@@ -162,11 +162,11 @@ Go-LocalSync is a **generic synchronization SDK** with event-sourced CQRS, plugg
 
 ### CLI / UX
 
-| #   | Task                                 | Effort | Impact                                                         |
+| # | Task | Effort | Impact |
 | --- | ------------------------------------ | ------ | -------------------------------------------------------------- | --------------------------- |
-| 16  | **CLI flag for conflict resolver**   | ~1h    | Medium — `--conflict-strategy=remote-wins                      | lww` to expose CRDT wiring. |
-| 17  | **Graceful shutdown for API server** | ~30min | Medium — No `http.Server.Shutdown(ctx)`. Hard close on SIGINT. |
-| 18  | **Add structured logging fields**    | ~1h    | Medium — Inconsistent context fields across log statements.    |
+| 16 | **CLI flag for conflict resolver** | ~1h | Medium — `--conflict-strategy=remote-wins                      | lww` to expose CRDT wiring. |
+| 17 | **Graceful shutdown for API server** | ~30min | Medium — No `http.Server.Shutdown(ctx)`. Hard close on SIGINT. |
+| 18 | **Add structured logging fields** | ~1h | Medium — Inconsistent context fields across log statements. |
 
 ### API Enhancements
 

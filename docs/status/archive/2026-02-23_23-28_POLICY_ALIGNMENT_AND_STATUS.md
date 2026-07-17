@@ -39,12 +39,12 @@ Reviewed project against `HOW_TO_GOLANG.md` policy guidelines. **Overall alignme
 
 ### ❌ NOT ALIGNED (Action Items)
 
-| Policy                        | Gap                           | Effort                   | Priority |
+| Policy | Gap | Effort | Priority |
 | ----------------------------- | ----------------------------- | ------------------------ | -------- | ------ |
-| File size limits (≤250 lines) | `client.go` is ~300 lines     | 15min                    | HIGH     |
-| CLI styling                   | Using plain cobra             | Add `charmbracelet/fang` | 10min    | MEDIUM |
-| Test coverage gaps            | CLI at 0%, event pkg untested | 30min                    | HIGH     |
-| JSON encoding                 | Using `encoding/json` v1      | Use v2 for Go 1.26+      | 5min     | LOW    |
+| File size limits (≤250 lines) | `client.go` is ~300 lines | 15min | HIGH |
+| CLI styling | Using plain cobra | Add `charmbracelet/fang` | 10min | MEDIUM |
+| Test coverage gaps | CLI at 0%, event pkg untested | 30min | HIGH |
+| JSON encoding | Using `encoding/json` v1 | Use v2 for Go 1.26+ | 5min | LOW |
 
 ---
 

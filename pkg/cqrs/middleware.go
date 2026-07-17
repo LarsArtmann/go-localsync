@@ -3,7 +3,7 @@ package cqrs
 import (
 	"context"
 
-	"github.com/larsartmann/go-cqrs-lite/command/v3"
+	"github.com/larsartmann/go-cqrs-lite/command/v4"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
