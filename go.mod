@@ -37,7 +37,6 @@ require (
 	github.com/larsartmann/go-cqrs-lite/dedup/v4 v4.0.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/dispatcher/v4 v4.0.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/event/v4 v4.0.2
-	github.com/larsartmann/go-cqrs-lite/event/v4/eventtest v0.1.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/id/v4 v4.0.1
 	github.com/larsartmann/go-cqrs-lite/idempotency/v4 v4.0.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/kv/v4 v4.0.1 // indirect
@@ -49,7 +48,6 @@ require (
 	github.com/larsartmann/go-cqrs-lite/projectionhost/v4 v4.0.1
 	github.com/larsartmann/go-cqrs-lite/query/v4 v4.0.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.0.1 // indirect
-	github.com/larsartmann/go-cqrs-lite/schema/v4 v4.0.1 // indirect
 	github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.0.1
 	github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.0.0
 	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.0.1

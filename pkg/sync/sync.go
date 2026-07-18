@@ -499,7 +499,7 @@ func (s *Syncer) reportProgress(opts *SyncOptions, syncResult *SyncResult) {
 // If validation fails, the lock is NOT acquired and the error is returned.
 // This consolidates the validate-then-lock pattern shared by Sync,
 // SyncIncremental, and ConflictAwareSyncer.SyncWithConflictDetection.
-func (s *Syncer) lockAndValidate(opts *SyncOptions) (release func(), err error) {
+func (s *Syncer) lockAndValidate(opts *SyncOptions) (func(), error) {
 	if err := s.validateOpts(opts); err != nil {
 		return nil, err
 	}

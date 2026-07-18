@@ -26,6 +26,12 @@
 
       perSystem =
         { config, pkgs, ... }:
+        let
+          goTags = [
+            "goexperiment.jsonv2"
+          ];
+          tagFlags = builtins.concatStringsSep " " (map (t: "-tags=${t}") goTags);
+        in
         {
           packages = {
             default = pkgs.buildGoModule {
@@ -33,6 +39,9 @@
               version = self.rev or self.dirtyRev or "dev";
               src = ./.;
               vendorHash = null;
+              preBuild = ''
+                export GOEXPERIMENT=jsonv2
+              '';
               meta = with pkgs.lib; {
                 description = "Generic synchronization SDK with CQRS";
                 homepage = "https://github.com/larsartmann/go-localsync";
@@ -53,6 +62,9 @@
               src = ./.;
               vendorHash = null;
               subPackages = [ "cmd/cqrs-lint" ];
+              preBuild = ''
+                export GOEXPERIMENT=jsonv2
+              '';
               meta = with pkgs.lib; {
                 description = "Static CQRS architectural-invariant linter";
                 homepage = "https://github.com/larsartmann/go-localsync";
@@ -68,7 +80,7 @@
               program = pkgs.writeShellApplication {
                 name = "run-test";
                 runtimeInputs = [ pkgs.go_1_26 ];
-                text = "go test -race -v -coverprofile=coverage.out ./...";
+                text = "go test ${tagFlags} -race -v -coverprofile=coverage.out ./...";
               };
             };
 
@@ -92,6 +104,7 @@
 
           devShells = {
             default = pkgs.mkShell {
+              GOFLAGS = tagFlags;
               packages = with pkgs; [
                 go_1_26
                 golangci-lint
@@ -102,6 +115,7 @@
             };
 
             ci = pkgs.mkShellNoCC {
+              GOFLAGS = tagFlags;
               packages = with pkgs; [
                 go_1_26
                 golangci-lint

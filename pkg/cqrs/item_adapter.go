@@ -117,7 +117,6 @@ func upcastLegacyAttributes(payload ItemSyncedPayload) map[string]string {
 // dataItemToPayload serializes a data.Item into an event payload.
 func dataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 	if item == nil {
-		//nolint:exhaustruct // zero payload for nil item
 		return ItemSyncedPayload{}
 	}
 

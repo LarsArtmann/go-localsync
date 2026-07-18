@@ -1,0 +1,308 @@
+package decider
+
+import (
+	"context"
+	"log/slog"
+
+	errorfamily "github.com/larsartmann/go-error-family"
+	"golang.org/x/sync/singleflight"
+
+	"github.com/larsartmann/go-cqrs-lite/codec/v4"
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	"github.com/larsartmann/go-cqrs-lite/id/v4"
+	cqrsotel "github.com/larsartmann/go-cqrs-lite/otel/v4"
+	"github.com/larsartmann/go-cqrs-lite/snapshot/v4"
+)
+
+// Decider defines how to reconstruct state from events.
+//
+// State is the aggregate's domain state. Apply applies a single event to the
+// state, returning the updated state. Apply must be a pure function — it should
+// not perform I/O or have side effects.
+//
+// If Apply returns an error (e.g. corrupted payload), Execute aborts and
+// returns ErrApplyFailed wrapping the cause.
+type Decider[State any] struct {
+	Initial State
+	Apply   func(state State, evt event.Event) (State, error)
+}
+
+// Repository loads and saves aggregates using pure functions.
+//
+// It wraps event.Store (persistence) and event.Publisher (publishing) behind a
+// Decider[State], providing load → apply → decide → save → publish semantics
+// without requiring the consumer to implement a mutable aggregate root
+// interface.
+type Repository[State any] struct {
+	store            event.Store
+	publisher        event.Publisher
+	snapshotStore    snapshot.SnapshotStore
+	codec            codec.Codec
+	snapshotStrategy snapshot.SnapshotStrategy
+	enricher         event.ContextEnricher
+	decider          Decider[State]
+	loadGroup        singleflight.Group
+	loadCoalescing   bool
+	stateCache       StateCache[State]
+}
+
+// NewRepository creates a decider-backed repository.
+//
+// Returns an error if store or decider.Apply is nil. The publisher may be nil
+// for pure event-sourcing mode (events are persisted but not published);
+// set one via the publisher parameter or WithPublisher to enable pub/sub.
+func NewRepository[State any](
+	store event.Store,
+	publisher event.Publisher,
+	decider Decider[State],
+	opts ...RepositoryOption[State],
+) (*Repository[State], error) {
+	if store == nil {
+		return nil, ErrNilStore
+	}
+
+	if decider.Apply == nil {
+		return nil, ErrNilApply
+	}
+
+	r := &Repository[State]{ //nolint:exhaustruct // options fill remaining fields
+		store:          store,
+		publisher:      publisher,
+		decider:        decider,
+		loadCoalescing: true,
+	}
+
+	for _, opt := range opts {
+		opt(r)
+	}
+
+	if r.snapshotConfigIncomplete() {
+		return nil, ErrIncompleteSnapshotConfig
+	}
+
+	return r, nil
+}
+
+func (r *Repository[State]) snapshotConfigIncomplete() bool {
+	return r.snapshotStrategy != nil && (r.snapshotStore == nil || r.codec == nil)
+}
+
+// DecideFunc is the signature for a decision function.
+//
+// It receives the current state and version, and returns the events to
+// persist. Return an error to reject the command (no events will be saved).
+type DecideFunc[State any] func(state State, currentVersion event.Version) ([]event.Event, error)
+
+// Execute loads the aggregate's event history, folds it into state, calls
+// decide, and if decide returns events, persists them to the store and
+// publishes them to the bus.
+//
+// The decide function receives the reconstructed state and the current version
+// (derived from the number of loaded events). Use currentVersion + 1, + 2,
+// etc. when creating new events via event.NewEvent.
+//
+// If decide returns an error, no events are saved or published.
+// If store.Save succeeds but bus.Publish fails, events are persisted but not
+// published — the caller can retry publishing via the bus directly.
+func (r *Repository[State]) Execute(
+	ctx context.Context,
+	aggregateID id.AggregateID,
+	aggregateType id.AggregateType,
+	decide DecideFunc[State],
+) error {
+	ref := id.NewAggregateRef(aggregateType, aggregateID)
+
+	ctx, span := cqrsotel.StartSpan(
+		ctx, tracer(), "decider.execute",
+		cqrsotel.SpanKindInternal,
+		cqrsotel.WithAttributes(cqrsotel.AggregateAttrs(aggregateType, aggregateID)...),
+	)
+	defer span.End()
+
+	state, currentVersion, err := r.Load(ctx, aggregateID, aggregateType)
+	if err != nil {
+		cqrsotel.RecordError(span, err)
+
+		return err
+	}
+
+	newEvents, err := decide(state, currentVersion)
+	if err != nil {
+		cqrsotel.RecordError(span, err)
+
+		return err
+	}
+
+	if len(newEvents) == 0 {
+		return nil
+	}
+
+	span.SetAttributes(cqrsotel.AttrInt(cqrsotel.AttrEventCount, len(newEvents)))
+	span.SetAttributes(cqrsotel.AttrString(cqrsotel.AttrEventType, string(newEvents[0].Type())))
+
+	r.applyEnricher(ctx, newEvents)
+
+	err = r.store.Save(ctx, ref, newEvents, currentVersion)
+	if err != nil {
+		cqrsotel.RecordError(span, err)
+
+		return opError(ref, "%w: %w", ErrSaveFailed, err)
+	}
+
+	if r.publisher != nil {
+		err = r.publisher.Publish(ctx, newEvents...)
+		if err != nil {
+			cqrsotel.RecordError(span, err)
+			wrapErr := errorfamily.WrapInfrastructure(err, "event.publish_failed", "publish events")
+
+			return opError(ref, "%w", wrapErr)
+		}
+	}
+
+	newVersion := currentVersion.Add(uint(len(newEvents)))
+
+	r.saveSnapshotAfterEvents(ctx, ref, newVersion, state, newEvents)
+
+	if r.stateCache != nil {
+		r.updateCacheAfterExecute(ref, state, newVersion, newEvents)
+	}
+
+	return nil
+}
+
+// saveSnapshotAfterEvents folds new events onto state to get the final state,
+// then attempts to save a snapshot. Errors are recorded on the active span and
+// swallowed — snapshots are best-effort and must not block the write path.
+func (r *Repository[State]) saveSnapshotAfterEvents(
+	ctx context.Context,
+	ref id.AggregateRef,
+	newVersion event.Version,
+	state State,
+	newEvents []event.Event,
+) {
+	if !r.shouldSnapshot(ref, newVersion) {
+		return
+	}
+
+	finalState := state
+
+	for _, evt := range newEvents {
+		var foldErr error
+
+		finalState, foldErr = r.decider.Apply(finalState, evt)
+		if foldErr != nil {
+			err := opError(ref, "apply event %s for snapshot: %w", evt.Type(), foldErr)
+			cqrsotel.RecordError(cqrsotel.SpanFromContext(ctx), err)
+			slog.WarnContext(
+				ctx,
+				"snapshot apply failed",
+				"ref",
+				ref,
+				"event_type",
+				evt.Type(),
+				"error",
+				foldErr,
+			)
+
+			return
+		}
+	}
+
+	encoded, encErr := r.codec.Encode(finalState)
+	if encErr != nil {
+		err := opError(ref, "encode snapshot: %w", encErr)
+		cqrsotel.RecordError(cqrsotel.SpanFromContext(ctx), err)
+		slog.WarnContext(ctx, "snapshot encode failed", "ref", ref, "error", encErr)
+
+		return
+	}
+
+	saveErr := snapshot.SaveSnapshot(ctx, r.snapshotStore, ref.Type, ref.ID, newVersion, encoded)
+	if saveErr != nil {
+		cqrsotel.RecordError(cqrsotel.SpanFromContext(ctx), saveErr)
+		slog.WarnContext(
+			ctx,
+			"snapshot save failed",
+			"ref",
+			ref,
+			"version",
+			newVersion,
+			"error",
+			saveErr,
+		)
+	}
+}
+
+// updateCacheAfterExecute folds the new events onto the pre-command state
+// and stores the result in the hot-state cache. On fold error the cache
+// entry is invalidated to force a full reload on next access.
+func (r *Repository[State]) updateCacheAfterExecute(
+	ref id.AggregateRef,
+	state State,
+	newVersion event.Version,
+	newEvents []event.Event,
+) {
+	if len(newEvents) == 0 {
+		return
+	}
+
+	finalState, err := r.foldEvents(state, newEvents, ref)
+	if err != nil {
+		r.stateCache.Invalidate(ref)
+
+		return
+	}
+
+	r.stateCache.Put(ref, finalState, newVersion)
+}
+
+// Load reconstructs state from the aggregate's event history without any
+// side effects. Useful for read-only state access or debugging.
+func (r *Repository[State]) Load(
+	ctx context.Context,
+	aggregateID id.AggregateID,
+	aggregateType id.AggregateType,
+) (State, event.Version, error) {
+	ctx, span := cqrsotel.StartSpan(
+		ctx, tracer(), "decider.load",
+		cqrsotel.SpanKindInternal,
+		cqrsotel.WithAttributes(cqrsotel.AggregateAttrs(aggregateType, aggregateID)...),
+	)
+	defer span.End()
+
+	var (
+		state State
+		ver   event.Version
+		err   error
+	)
+
+	if r.stateCache != nil {
+		state, ver, ok := r.loadFromCache(ctx, aggregateID, aggregateType)
+		if ok {
+			r.recordRead(id.NewAggregateRef(aggregateType, aggregateID), ver)
+
+			return state, ver, nil
+		}
+	}
+
+	if r.snapshotStore != nil && r.codec != nil {
+		state, ver, err = r.loadFromSnapshot(ctx, aggregateID, aggregateType)
+	} else {
+		state, ver, err = r.loadFromStore(ctx, aggregateID, aggregateType)
+	}
+
+	if err != nil {
+		cqrsotel.RecordError(span, err)
+
+		return state, ver, err
+	}
+
+	ref := id.NewAggregateRef(aggregateType, aggregateID)
+	r.recordRead(ref, ver)
+
+	if r.stateCache != nil {
+		r.stateCache.Put(ref, state, ver)
+	}
+
+	return state, ver, err
+}
