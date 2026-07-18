@@ -31,12 +31,12 @@ require (
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/codec/v4 v4.0.1
+	github.com/larsartmann/go-cqrs-lite/codec/v4 v4.0.2
 	github.com/larsartmann/go-cqrs-lite/command/v4 v4.0.0
 	github.com/larsartmann/go-cqrs-lite/decider/v4 v4.0.1
 	github.com/larsartmann/go-cqrs-lite/dedup/v4 v4.0.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/dispatcher/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/event/v4 v4.0.1
+	github.com/larsartmann/go-cqrs-lite/event/v4 v4.0.2
 	github.com/larsartmann/go-cqrs-lite/event/v4/eventtest v0.1.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/id/v4 v4.0.1
 	github.com/larsartmann/go-cqrs-lite/idempotency/v4 v4.0.0 // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.0.0
 	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.0.1
 	github.com/larsartmann/go-cqrs-lite/testutil/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.0.1
+	github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.0.2
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.23 // indirect
