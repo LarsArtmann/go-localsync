@@ -3,7 +3,7 @@
 [![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8.svg)](https://go.dev)
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 
-**A Go SDK for building a local, event-sourced mirror of data from any paginated REST provider.** Pull items into an idempotent, offline-first read model with full-fidelity storage, incremental sync, soft-deletes (tombstones), and CQRS-based state management.
+**A Go SDK for building a local-first mirror of any paginated REST API.** Pull every item from GitHub, GitLab, Jira, or your own service into an offline, idempotent read model — with full-fidelity JSON storage, incremental sync, conflict detection, soft-deletes (tombstones), and a CQRS event log you can replay from scratch.
 
 _go-localsync is a **single-writer pull mirror**: the provider is the sole source of truth and there is no local mutation or multi-writer merge. It is a **pure contract library** — not a CLI and not a provider implementation._ It defines the `Provider` interface and the sync/CQRS engine. The reference consumer (GitHub provider + CLI) is [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
 
@@ -12,7 +12,7 @@ _go-localsync is a **single-writer pull mirror**: the provider is the sole sourc
 | Component               | Description                                                                                                                    |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Provider Interface**  | Implement `provider.Provider` to sync from any data source (GitHub, GitLab, Jira, etc.)                                        |
-| **CQRS Stack**          | Event-sourced architecture via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) v3 — Decider, ReadModel, Projection |
+| **CQRS Stack**          | Event-sourced architecture via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) v4 — Decider, ReadModel, Projection |
 | **Sync Engine**         | Full and incremental sync with pagination, rate limiting, retry with backoff, and per-source serialization                     |
 | **Tombstones**          | Soft-delete with reasons (upstream-gone, user-hidden); optional reconciliation tombstones items the provider stopped returning |
 | **Conflict Resolution** | Detects when a re-synced item changed since last sync; remote-wins by default, pluggable `crdt.ConflictResolver`               |
@@ -21,13 +21,15 @@ _go-localsync is a **single-writer pull mirror**: the provider is the sole sourc
 
 ## Who is this for?
 
-This SDK is for Go developers building applications that need:
+Go developers building applications that need to keep a local, queryable copy of data living behind a paginated REST API — and know when that data changed upstream:
 
-- **Offline-first** functionality with local data access
-- **Offline dashboards** that aggregate data from multiple services
-- **Custom sync logic** tailored to specific use cases
-- **Event sourcing** with full audit trail and replay capability
-- **Detecting upstream changes** — know when a re-synced item differs from what you already mirror
+- **Offline-first apps** that read from a local store instead of hitting the network on every view
+- **Dashboards & aggregators** that merge items from several services into one local database
+- **Audit-sensitive pipelines** that need a full event log and the ability to replay state from scratch
+- **Change-aware mirrors** that detect the moment a re-fetched item differs from what you already stored
+- **Custom sync logic** where a generic sync tool won't fit and you need to own the loop
+
+Not for multi-writer or distributed sync: the provider is the sole source of truth per aggregate. If you need push ingestion or multi-node CRDT merge, use [`go-cqrs-lite`](https://github.com/larsartmann/go-cqrs-lite) directly.
 
 ## Installation
 
@@ -81,10 +83,12 @@ func (stubProvider) fetchResult() *provider.FetchResult {
 			ExternalID: id.NewExternalID("event-1"),
 			Source:     id.NewProviderID("stub"),
 			Type:       id.NewEventTypeID("PushEvent"),
-			ActorLogin: id.NewActorLogin("octocat"),
-			RepoName:   id.NewRepoID("octocat/Hello-World"),
-			CreatedAt:  now,
-			UpdatedAt:  now,
+			Attributes: map[string]string{
+				"actor_login": "octocat",
+				"repo_name":   "octocat/Hello-World",
+			},
+			CreatedAt: now,
+			UpdatedAt: now,
 		}},
 	}
 }
@@ -130,17 +134,14 @@ All providers return `provider.Item` objects (the DTO at the SDK boundary) with 
 
 ```go
 type Item struct {
-	ID             id.ItemID      // Internal ULID-based identifier
-	ExternalID     id.ExternalID  // Original ID from source system
-	Source         id.ProviderID  // Provider name (e.g., "github")
-	Type           id.EventTypeID // Item type (e.g., "PushEvent")
-	ActorLogin     id.ActorLogin    // Who triggered it
-	ActorAvatarURL string
-	RepoName       id.RepoID      // Repository (e.g., "owner/repo")
-	RepoURL        string
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	RawJSON        json.RawMessage // Full original payload
+	ID         id.ItemID         // Internal ULID-based identifier
+	ExternalID id.ExternalID     // Original ID from source system
+	Source     id.ProviderID     // Provider name (e.g., "github")
+	Type       id.EventTypeID    // Item type (e.g., "PushEvent")
+	Attributes map[string]string // Provider-specific key-values (actor_login, repo_name, ...)
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	RawJSON    json.RawMessage   // Full original payload
 }
 ```
 
@@ -148,7 +149,7 @@ At the CQRS boundary, `provider.Item` is converted to the domain entity `model.I
 
 ## CQRS Architecture
 
-The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) v3. There is no legacy CRUD path.
+The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) v4. There is no legacy CRUD path.
 
 | Component        | Description                                                                                                                 |
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -244,7 +245,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (190 tests across 9 packages)
+go test ./... -count=1                # Run tests (214 tests across 10 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -260,7 +261,7 @@ pkg/
 ├── sync/             # Syncer + ConflictAwareSyncer + SyncStore interface + SyncAction
 ├── data/
 │   ├── model/        # Domain entity: Item, Key, ItemFilter, ItemReader
-│   └── schema/       # Schema Version (V1/V2) for event upcasting
+│   └── schema/       # Schema Version (V1/V2/V3) for event upcasting
 ├── id/               # Branded ID types (go-branded-id)
 ├── crdt/             # Conflict resolution: Conflict, ConflictResolver, LWWResolver
 ├── errors/           # Structured errors via go-error-family constructors
@@ -270,19 +271,20 @@ pkg/
 
 ## Testing
 
-190 test functions across 9 packages:
+214 test functions across 10 packages:
 
-| Package           | Tests | Coverage | Description                                                             |
-| ----------------- | ----- | -------- | ----------------------------------------------------------------------- |
-| `pkg/cqrs`        | 93    | 81.9%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
-| `pkg/sync`        | 31    | 84.5%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
-| `pkg/crdt`        | 7     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
-| `pkg/id`          | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                 |
-| `pkg/errors`      | 9     | 100.0%   | Sentinel errors, wrapping, classification, IsRetryable                  |
-| `pkg/provider`    | 10    | 96.7%    | Item validation, RateLimitCache                                         |
-| `pkg/api`         | 14    | 94.0%    | Server, routes, handlers, health/stats/items/sync endpoints             |
-| `pkg/data/model`  | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                              |
-| `pkg/data/schema` | 4     | 100.0%   | Schema Version (V1/V2), CurrentVersion, Valid                           |
+| Package             | Tests | Coverage | Description                                                             |
+| ------------------- | ----- | -------- | ----------------------------------------------------------------------- |
+| `pkg/cqrs`          | 93    | 80.9%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
+| `pkg/sync`          | 32    | 88.0%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
+| `pkg/crdt`          | 7     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
+| `pkg/id`            | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                 |
+| `pkg/errors`        | 16    | 92.9%    | Sentinel errors, wrapping, classification, IsRetryable, HTTPStatus      |
+| `pkg/provider`      | 2     | 92.3%    | Item validation                                                         |
+| `pkg/api`           | 15    | 93.1%    | Server, routes, handlers, health/stats/items/sync endpoints             |
+| `pkg/data/model`    | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                              |
+| `pkg/data/schema`   | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
+| `internal/cqrslint` | 23    | 89.5%    | 10 architectural checks (C0001–C0010), loader, rules catalog            |
 
 ## Related Projects
 

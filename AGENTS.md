@@ -15,7 +15,7 @@ Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based 
 | `pkg/cqrs/`          | CQRS integration layer using go-cqrs-lite **v4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, sqlite\_\*.go)                                                                                                                                                                                                                                                             |
 | `pkg/provider/`      | Core interfaces (`Provider`, `Item`, `FetchResult`, `RetryConfig`) and `RateLimitInfo`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                                                                                                                                                                         |
 | `pkg/sync/`          | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `SyncSummary`, retry/backoff (`retry.go`), per-source mutex, opt-in reconciliation                                                                                                                                                                                                                               |
-| `pkg/data/`          | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2 versioning for event upcasting). Decider, read model, events, and conflict resolution all operate on `*model.Item`.                                                                                                          |
+| `pkg/data/`          | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2/V3 versioning for event upcasting; V3 = de-githubify per ADR-0007). Decider, read model, events, and conflict resolution all operate on `*model.Item`.                                                                       |
 | `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                                                                                                                          |
 | `pkg/errors/`        | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                                                                                                                                                                                                                    |
 | `internal/cqrslint/` | Static architectural-invariant linter for `pkg/cqrs` (ADR-0004 enforcer). 10 AST checks (C0001-C0010): single aggregate type, three fixed events, fold coverage, projector subscriptions, provider-agnostic `hasChanged`, no query dispatcher, `SyncAction` stays in `pkg/sync`, projection mutex guard, payload json tags, `NewEvents` uses `aggregateType` const. CLI: `cmd/cqrs-lint/`. Zero third-party deps (stdlib `go/parser` only). |
@@ -140,18 +140,18 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package             | Tests | Coverage | Status                                                                                                         |
 | ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`          | 88    | 82.0%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
-| `pkg/sync`          | 32    | 84.5%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
+| `pkg/cqrs`          | 93    | 80.9%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
+| `pkg/sync`          | 32    | 88.0%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
 | `pkg/id`            | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
-| `pkg/errors`        | 16    | 100.0%   | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
-| `pkg/provider`      | 2     | 90.9%    | ✅ Item validation                                                                                             |
-| `pkg/api`           | 15    | 94.0%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
+| `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
+| `pkg/provider`      | 2     | 92.3%    | ✅ Item validation                                                                                             |
+| `pkg/api`           | 15    | 93.1%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
 | `pkg/crdt`          | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
 | `pkg/data/model`    | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
-| `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2), CurrentVersion, Valid                                                               |
-| `internal/cqrslint` | 23    | —        | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog                           |
+| `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
+| `internal/cqrslint` | 23    | 89.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog                           |
 
-**217 total test functions** across 10 test packages.
+**214 total test functions** across 10 test packages.
 
 Run: `go test ./... -count=1`
 

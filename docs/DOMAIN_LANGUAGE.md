@@ -1,7 +1,7 @@
 # Domain Language — go-localsync
 
 **Project:** go-localsync  
-**Last Updated:** 2026-05-25
+**Last Updated:** 2026-07-18
 
 A Unified Language for the local-sync domain — shared across users, developers, and AI.
 
@@ -42,16 +42,16 @@ Objects with identity and lifecycle.
 
 Immutable objects defined by attributes.
 
-| Value Object      | Definition                                                    |
-| ----------------- | ------------------------------------------------------------- |
-| **ItemID**        | Internal ULID-based identifier (generated on first sync)      |
-| **ExternalID**    | Provider-native string identifier                             |
-| **ProviderID**    | Source identifier (e.g., "github")                            |
-| **EventTypeID**   | Classification of item type (e.g., "PushEvent")               |
-| **ActorID**       | Username of the entity that triggered the item                |
-| **RepoID**        | Repository name (e.g., "owner/repo")                          |
-| **RateLimitInfo** | Rate limiting metadata from provider APIs                     |
-| **ItemFilter**    | Query filter: Type, Actor, Repo, Source, Since, Limit, Offset |
+| Value Object      | Definition                                                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **ItemID**        | Internal ULID-based identifier (generated on first sync)                                                                                  |
+| **ExternalID**    | Provider-native string identifier                                                                                                         |
+| **ProviderID**    | Source identifier (e.g., "github")                                                                                                        |
+| **EventTypeID**   | Classification of item type (e.g., "PushEvent")                                                                                           |
+| **ActorLogin**    | Branded typed value for an external actor (e.g. a username); carried in `Attributes["actor_login"]` rather than a struct field (ADR-0007) |
+| **RepoID**        | Branded typed value for a repository name (e.g. "owner/repo"); carried in `Attributes["repo_name"]`                                       |
+| **RateLimitInfo** | Rate limiting metadata from provider APIs                                                                                                 |
+| **ItemFilter**    | Query filter: Type, Attributes (key-value), Source, Since, Limit, Offset, IncludeTombstoned                                               |
 
 ---
 
@@ -93,12 +93,12 @@ Read-side operations against the read model.
 
 ## Bounded Contexts
 
-| Context         | Description                                                                     |
-| --------------- | ------------------------------------------------------------------------------- |
-| **Sync Engine** | Orchestrates fetching from providers and dispatching to CQRS stack (`pkg/sync`) |
-| **CQRS Core**   | Event sourcing, command/query dispatch, projections (`pkg/cqrs`)                |
-| **Provider**    | External API integration, rate limiting, retry logic (`pkg/providers/github`)   |
-| **Types**       | Branded identifier types for compile-time safety (`pkg/id`)                     |
+| Context         | Description                                                                                                                              |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sync Engine** | Orchestrates fetching from providers and dispatching to CQRS stack (`pkg/sync`)                                                          |
+| **CQRS Core**   | Event sourcing, command/query dispatch, projections (`pkg/cqrs`)                                                                         |
+| **Provider**    | External API integration contract, rate limiting, retry logic (`pkg/provider` — contract only; concrete providers live in consumer apps) |
+| **Types**       | Branded identifier types for compile-time safety (`pkg/id`)                                                                              |
 
 ---
 

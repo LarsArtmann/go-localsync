@@ -1,0 +1,99 @@
+go-localsync: Ideal Target Architecture {
+  direction: down
+
+  consumer: Consumer App {
+    shape: package
+    style.fill: "#1d3557"
+    style.font-color: "#f4f4f0"
+    GitHub Provider
+    GitLab Provider
+    CLI
+  }
+
+  api: pkg/api (HTTP) {
+    shape: package
+    Server: Huma v2
+    OnEvent: "Optional event outflow hook"
+  }
+
+  contracts: pkg/contracts (neutral seam) {
+    shape: package
+    style.fill: "#2d4a3e"
+    SyncStore: "SyncStore (interface)"
+    SyncAction: "SyncAction constants"
+    ItemSyncResult
+    Note: "extracted from pkg/sync so cqrs and sync both depend downward"
+  }
+
+  sync: pkg/sync (Orchestrator) {
+    shape: package
+    style.fill: "#2a2a30"
+    Syncer
+    ConflictAwareSyncer
+    Retry: "Retry/Backoff"
+    PerSourceMutex: "Per-source mutex"
+  }
+
+  cqrs: pkg/cqrs (Infrastructure) {
+    shape: package
+    style.fill: "#3d2b1f"
+    CQRSStack: "CQRSStack implements SyncStore"
+    Decider
+    Projector
+    Runner
+    Commands
+  }
+
+  store_bus: Event Store + Bus {
+    shape: cylinder
+    style.fill: "#18181d"
+    Backends: "memory sqlite future-postgres"
+    Snapshots
+    Journal
+    Checkpoint
+    DLQ
+  }
+
+  readmodel: Read Model {
+    shape: cylinder
+    style.fill: "#18181d"
+    Rows: "MemoryReadModel / SQLiteReadModel"
+    Entity: "*model.Item rows"
+  }
+
+  leaves: Foundational Types {
+    shape: package
+    style.fill: "#0e0e10"
+    IDs: "pkg/id branded IDs"
+    Errors: "pkg/errors go-error-family taxonomy"
+    Model: "pkg/data/model Item, Key, Tombstone, ItemFilter with Validate"
+    Schema: "pkg/data/schema Version V1/V2/V3 with UpcasterRegistry"
+    Crdt: "pkg/crdt Conflict[T], ConflictResolver[T], LWWResolver"
+    Provider: "pkg/provider Provider interface"
+    Attrs: "pkg/data/model/attrs typed accessors optional"
+  }
+
+  lint: cqrs-lint {
+    shape: step
+    style.fill: "#7a3b3b"
+    Rules: "10 AST invariants C0001-C0010"
+  }
+
+  consumer -> api: HTTP
+  api -> sync: "triggerSync / GetStats"
+  api -> cqrs: "reads via ReadModel"
+  sync -> contracts: "depends on seam"
+  cqrs -> contracts: "implements seam"
+  sync -> leaves.Provider: "Fetch / FetchAll"
+
+  cqrs -> store_bus: "repo.Execute"
+  cqrs -> readmodel: "Projector.Handle"
+  store_bus -> cqrs: "live + catch-up"
+
+  cqrs -> leaves: "domain + IDs + resolver"
+  sync -> leaves: "provider.Item + model.Key"
+
+  lint -> cqrs: "enforces scope"
+
+  api -> consumer: "optional event outflow webhooks downstream"
+}

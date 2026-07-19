@@ -1,0 +1,90 @@
+go-localsync: Current Architecture {
+  direction: down
+
+  consumer: Consumer App {
+    shape: package
+    style.fill: "#1d3557"
+    style.font-color: "#f4f4f0"
+    GitHub Provider
+    CLI
+  }
+
+  api: pkg/api (HTTP) {
+    shape: package
+    Server: Huma v2
+    Items: GET /items
+    Stats: GET /stats
+    Sync: POST /sync
+    Health: GET /health
+  }
+
+  sync: pkg/sync (Orchestrator) {
+    shape: package
+    style.fill: "#2a2a30"
+    Syncer
+    ConflictAwareSyncer
+    Retry: "Retry/Backoff"
+    PerSourceMutex: "Per-source mutex"
+    SyncStore: "SyncStore (interface)"
+    SyncAction: SyncAction constants
+  }
+
+  cqrs: pkg/cqrs (Infrastructure) {
+    shape: package
+    style.fill: "#3d2b1f"
+    CQRSStack: "CQRSStack implements SyncStore"
+    Decider: "Apply/DecideSync/DecideTombstone"
+    Projector
+    Runner: "projectionhost.Host + bus.SubscribeAll"
+    SyncItemCommand
+    TombstoneItemCommand
+  }
+
+  store_bus: Event Store + Bus {
+    shape: cylinder
+    style.fill: "#18181d"
+    Backend: "memory or sqlite"
+    Snapshots: "EveryNEvents=10"
+    Journal
+    Checkpoint
+  }
+
+  readmodel: Read Model {
+    shape: cylinder
+    style.fill: "#18181d"
+    Rows: MemoryReadModel / SQLiteReadModel
+    Entity: "*model.Item rows"
+  }
+
+  leaves: Foundational Types {
+    shape: package
+    style.fill: "#0e0e10"
+    IDs: "pkg/id branded IDs"
+    Errors: "pkg/errors go-error-family"
+    Model: "pkg/data/model Item, Key, Tombstone, ItemFilter"
+    Schema: "pkg/data/schema Version V1/V2/V3"
+    Crdt: "pkg/crdt Conflict[T], ConflictResolver[T], LWWResolver"
+    Provider: "pkg/provider Provider interface"
+  }
+
+  lint: cqrs-lint {
+    shape: step
+    style.fill: "#7a3b3b"
+    Rules: "10 AST invariants C0001-C0010"
+  }
+
+  consumer -> api: HTTP
+  api -> sync: "triggerSync / GetStats"
+  api -> cqrs: reads via ReadModel
+  sync -> cqrs: "SyncItems via SyncStore"
+  sync -> leaves.Provider: "Fetch / FetchAll"
+
+  cqrs -> store_bus: "repo.Execute events"
+  cqrs -> readmodel: "Projector.Handle upsert/delete"
+  store_bus -> cqrs: "bus.SubscribeAll live + projectionhost catch-up"
+
+  cqrs -> leaves: "domain + IDs + resolver"
+  sync -> leaves: "provider.Item + model.Key"
+
+  lint -> cqrs: "enforces scope ADR-0004"
+}

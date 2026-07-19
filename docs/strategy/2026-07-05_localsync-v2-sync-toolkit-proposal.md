@@ -411,3 +411,21 @@ The revised vision: **go-localsync = opinionated sync application framework on g
 | DiscordSync wiring       | `cmd/discordsync/init.go` (321 lines), `cmd/discordsync/container.go` (183 lines), `cmd/discordsync/lifecycle.go` (160 lines), `cmd/discordsync/shutdown.go` (74 lines), `internal/storage/dlq_sql.go` (200 lines), `internal/storage/storage.go` (100 lines), `internal/projection/builder.go` (142 lines), `internal/bot/reconcile.go` (200 lines) |
 | go-cqrs-lite stack layer | `stack/sqlite/preset.go`, `stack/materialize.go`, `stack/run_projections.go`, `docs/ECOSYSTEM_BOUNDARIES.md`                                                                                                                                                                                                                                         |
 | Adoption feedback        | `docs/feedback/2026-06-23_discordsync-adoption-feedback.html` (6 structural findings)                                                                                                                                                                                                                                                                |
+
+---
+
+## Resolution (2026-07-19)
+
+**Status as of 2026-07-19: PROPOSED — DORMANT. The `Host` framework was never built.** A reader opening this doc should NOT expect a pending imminent pivot.
+
+**What actually happened (14 days after this proposal, verified against `pkg/` and git history):** the project chose to stay within the ADR-0004 single-aggregate, pull-only scope and shipped the following _within_ that scope instead of the framework rewrite:
+
+- **ADR-0005** — tombstone soft-delete + opt-in upstream reconciliation (the `Reconciler`-shaped need above, met inside the existing engine, not as a new `pkg/reconcile/`)
+- **ADR-0006** — `projectionhost.Host` adoption (checkpoint + DLQ + crash-restart — the "correctness baked in" the proposal argued for, delivered for the projection path without a framework rewrite)
+- **ADR-0007** — de-githubify (`Attributes` map + ContentHash-first `hasChanged`)
+- **go-cqrs-lite v4 + JSON v2** migration (the proposal referenced v3.5 `stack/`; the project moved to v4)
+- **`cqrs-lint`** — a static AST linter that _locks in_ ADR-0004's scope at CI time, making the framework pivot harder to drift into accidentally
+
+**Evidence the proposal did not execute:** `pkg/cqrs/` (1,773 → ~2,089 LOC), `pkg/data/model/`, `pkg/data/schema/`, and `pkg/api/` all still exist and are actively maintained. There is no `pkg/host/`, no `pkg/reconcile/`, no `pkg/projection/` framework package. The "What goes" table in §3 did not happen.
+
+**When to revisit:** the proposal's core diagnosis (consumers hand-write ~3,270 lines of structurally identical integration boilerplate; 2/3 lack checkpoint/DLQ/graceful-shutdown) remains accurate and is the strongest argument FOR reviving ADR-0008. The trigger the proposal itself implies — a 3rd consumer that needs the integration layer — has not materialized. Reopen ADR-0008 if/when bank-sync or DiscordSync actually adopt go-localsync and hit the boilerplate wall; until then it stays Proposed/dormant, and ADR-0004 remains the active scope constraint (now enforced by `cqrs-lint`).

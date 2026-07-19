@@ -1,6 +1,6 @@
 # ADR-0008: Pivot go-localsync to a Sync Application Framework
 
-**Status:** Proposed — awaiting decision
+**Status:** Proposed — dormant (as of 2026-07-19, never executed; the project continued within ADR-0004 scope. See Resolution note at end.)
 **Date:** 2026-07-05
 **Deciders:** Lars Artmann
 **Supersedes:** None. Dissolves the constraint behind [ADR-0004](0004-multi-aggregate-generalisation-deferred.md) without reversing it.
@@ -96,3 +96,13 @@ go-cqrs-lite v3.5's `stack/` presets are mature. The one consumer that uses go-l
 - [ADR-0004](0004-multi-aggregate-generalisation-deferred.md) — multi-aggregate deferral (constraint dissolved)
 - [ADR-0007](0007-de-githubify-domain-model.md) — de-GitHubify (complementary)
 - [Adoption feedback](../feedback/2026-06-23_discordsync-adoption-feedback.html) — 6 structural findings
+
+---
+
+## Resolution (2026-07-19)
+
+**This ADR remains Proposed. It was neither accepted nor formally rejected; it was overtaken by continued work inside the ADR-0004 single-aggregate scope.** The packages this ADR proposes to drop (`pkg/cqrs`, `pkg/data`, `pkg/api`) all still exist and are actively maintained (14 commits across them since this ADR's date). The `pkg/host/`, `pkg/reconcile/`, and `pkg/projection/` framework packages this ADR proposes were never created.
+
+In the same window, the project shipped the correctness properties this ADR argued for, but _within_ the existing engine rather than via a rewrite: tombstones + reconciliation (ADR-0005), `projectionhost.Host` with checkpoint + DLQ + crash-restart (ADR-0006), de-githubify (ADR-0007), and a static AST linter (`cqrs-lint`) that enforces ADR-0004's scope at CI time.
+
+**Trigger to reopen:** a third consumer that actually adopts go-localsync and hits the integration-boilerplate wall described in the full analysis. Until then, treat this ADR as dormant, not pending.

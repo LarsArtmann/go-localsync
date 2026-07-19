@@ -1,8 +1,8 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-06-29
-**Tests:** 190 passing, 9 packages | **Lint:** 0 issues (golangci-lint v2)
+**Last Updated:** 2026-07-18
+**Tests:** 214 passing, 10 packages | **Lint:** 0 issues (golangci-lint v2)
 
 ## Overview
 
@@ -32,7 +32,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 - [ ] **OpenTelemetry instrumentation**
       **Source:** `pkg/sync/sync.go`, `pkg/cqrs/stack.go`, `pkg/api/server.go`
-      **Description:** Add spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, and HTTP middleware. go-cqrs-lite v3 already ships an `otel/v3` module.
+      **Description:** Add spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, and HTTP middleware. go-cqrs-lite v4 already ships an `otel/v4` module.
       **Context:** No observability today; production debugging requires log spelunking.
 
 - [ ] **Structured logging fields**
@@ -48,9 +48,9 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Code Quality
 
-- [ ] **Improve `pkg/cqrs` coverage (81.4%)**
+- [ ] **Improve `pkg/cqrs` coverage (80.9%)**
       **Source:** `pkg/cqrs/`
-      **Description:** Lowest-coverage package. Add tests for remaining error paths and store-factory branches.
+      **Description:** Add tests for remaining error paths and store-factory branches.
 
 - [ ] **Adopt `UpcasterRegistry`** from go-cqrs-lite for schema evolution (the `schema.Version` foundation in `pkg/data/schema/` is ready for it).
 

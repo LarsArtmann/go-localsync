@@ -7,12 +7,23 @@ Release dates and entries are reconciled against the actual git tags (`v0.1.0`, 
 
 ## [Unreleased]
 
+### Added
+
+- **Tombstone soft-delete (ADR-0005)** — tombstones replace hard-deletes; tombstoned items keep full history; re-syncing a tombstoned item resurrects it via projection upsert; opt-in `SyncOptions.Reconcile` tombstones upstream-gone items (`ReasonUpstreamGone`). New `DecideTombstone` + `TombstoneItemCommand`.
+- **`projectionhost.Host` catch-up (ADR-0006)** — managed batch-drainer for resilient SQLite projection: checkpoint persistence, crash auto-restart with backoff, dead-letter queue for poison messages. Replaces the prior bare `replayJournal`. Mutex-guarded version-gate prevents stale replay events from resurrecting tombstoned rows.
+- **`cqrs-lint` architectural linter** — `internal/cqrslint` enforces 10 invariants (C0001–C0010) for `pkg/cqrs` (ADR-0004 scope guard). CLI: `cmd/cqrs-lint`. Zero third-party deps.
+- **Error-handling overhaul** — `go-error-family` constructors with intrinsic classification; central `pkgerrors.HTTPStatus` translator (per-sentinel overrides + family defaults; `context.Canceled`→499, `context.DeadlineExceeded`→504); `WithCtx`/`InvalidField` structured context; partial-sync surfacing (Transient `ErrPartialSync` → HTTP 200-with-result).
+- **Schema versioning** — `pkg/data/schema` `Version` (V1/V2/V3) carried on every `model.Item`, ready for `UpcasterRegistry`.
+- **DTO/domain boundary** — `item_adapter.go` converts `provider.Item` (DTO) → `model.Item` (domain entity). Decider, read model, events, and resolver all operate on `*model.Item`.
+
 ### Changed
 
-- **go-cqrs-lite upgraded from v3.0.0 to v3.1.0** across all 15 modules (direct + transitive: `codec`, `command`, `decider`, `dispatcher`, `event`, `id`, `kv`, `listing`, `middleware`, `otel`, `query`, `snapshot`, `storage`, `storage/memory`, `watermill`). `vendor/` re-synced to match; no API changes required.
-- **go-error-family upgraded from v0.5.0 to v0.5.1.** Vendored dependency re-synced. No code changes needed.
-- `flake.lock` refreshed to the latest nixpkgs revision.
-- `CONTRIBUTING.md` streamlined to a minimal two-command setup guide.
+- **Breaking: provider-agnostic domain model (ADR-0007)** — removed `ActorLogin`, `ActorAvatarURL`, `RepoName`, `RepoURL` from `provider.Item` and `model.Item`. Provider-specific content flows through `Attributes map[string]string`. `hasChanged` is ContentHash-first (with `UpdatedAt`/`Type` fallbacks). SQLite `actor_login` index dropped; indexes now on `type`, `created_at`, `(type, created_at)`. `GET /items` no longer accepts `actor`/`repo` query params.
+- **Breaking: go-cqrs-lite v4 migration** — all modules moved to v4 paths (`event/v4`, `command/v4`, `decider/v4`, `id/v4`, `codec/v4`, `projection/v4`, `projectionhost/v4`, `snapshot/v4`, `storage/v4`, `storage/memory/v4`, `middleware/v4`, `watermill/v4`). Adopted `encoding/json/v2` (gated behind `GOEXPERIMENT=jsonv2` build tag in Go 1.26).
+- **Strategic pivot (ADR-0008)** — re-centred the SDK as a single-aggregate, pull-only sync toolkit; explicit scope boundary against multi-aggregate generalisation (ADR-0004).
+- **Per-source serialization** split into lock-free `runSync`/`runSyncIncremental` to avoid re-entrant deadlock when incremental falls back to full.
+- **Dependencies** — `go-error-family` v0.7.0, `huma/v2` v2.39.0, `go-branded-id` v0.3.2, `modernc.org/sqlite` v1.54.0, `charm.land/log/v2` v2.0.0.
+- `flake.lock` refreshed to the latest nixpkgs revision; `CONTRIBUTING.md` streamlined to a minimal two-command setup guide.
 
 ## [0.3.0] - 2026-06-23
 

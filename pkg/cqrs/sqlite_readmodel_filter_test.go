@@ -145,3 +145,55 @@ func TestSQLiteReadModel_List_ZeroResults(t *testing.T) {
 	}
 	testutil.AssertLen(t, items, 0, "items for non-existent type")
 }
+
+// TestSQLiteReadModel_List_RejectsUnsafeAttributeKey locks in the defense-in-depth
+// guard added to appendFilterArgs: an attribute key that could break out of the
+// json_extract path must be rejected with ErrInvalidInput before it reaches the
+// SQL builder, closing a latent SQL-injection vector if filter.Attributes is
+// ever populated from untrusted input.
+func TestSQLiteReadModel_List_RejectsUnsafeAttributeKey(t *testing.T) {
+	t.Parallel()
+
+	rm := newSQLiteTestDB(t)
+	ctx := context.Background()
+
+	for _, key := range []string{
+		"",                         // empty
+		"1invalid",                 // starts with digit
+		"bad key",                  // space
+		"evil') = 'x' OR 1=1 --",   // classic injection attempt
+		`doubled"quote`,            // double quote
+		"semi;colon",               // semicolon
+	} {
+		filter := model.ItemFilter{Attributes: map[string]string{key: "v"}}
+
+		if _, err := rm.List(ctx, filter); err == nil {
+			t.Errorf("List accepted unsafe attribute key %q; expected error", key)
+		}
+
+		if _, err := rm.Count(ctx, filter); err == nil {
+			t.Errorf("Count accepted unsafe attribute key %q; expected error", key)
+		}
+
+		if _, err := rm.CountByType(ctx, filter); err == nil {
+			t.Errorf("CountByType accepted unsafe attribute key %q; expected error", key)
+		}
+	}
+}
+
+// TestSQLiteReadModel_List_AcceptsSafeAttributeKeys ensures the validation
+// guard does not reject legitimate keys (letters, digits, underscore).
+func TestSQLiteReadModel_List_AcceptsSafeAttributeKeys(t *testing.T) {
+	t.Parallel()
+
+	rm := newSQLiteTestDB(t)
+	ctx := context.Background()
+
+	for _, key := range []string{"actor_login", "repo_name", "_private", "A1_b2", "x"} {
+		sqliteSeed(t, rm, ctx, "github", "ext-"+key, "PushEvent", "alice", "org/repo")
+
+		if _, err := rm.List(ctx, model.ItemFilter{Attributes: map[string]string{key: "v"}}); err != nil {
+			t.Errorf("List rejected safe attribute key %q: %v", key, err)
+		}
+	}
+}
