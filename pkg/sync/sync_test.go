@@ -163,10 +163,10 @@ func TestSyncer_Sync(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
 
 	count, _ := store.Count(ctx, model.ItemFilter{})
-	testutil.AssertInt64(t, count, 2, "count")
+	testutil.AssertEqual(t, count, 2, "count")
 }
 
 func TestSyncer_Sync_EmptyResult(t *testing.T) {
@@ -180,8 +180,8 @@ func TestSyncer_Sync_EmptyResult(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 0, "Fetched")
-	testutil.AssertInt(t, result.Errors, 0, "Errors")
+	testutil.AssertEqual(t, result.Fetched, 0, "Fetched")
+	testutil.AssertEqual(t, result.Errors, 0, "Errors")
 }
 
 func TestSyncer_Sync_InvalidItem(t *testing.T) {
@@ -199,8 +199,8 @@ func TestSyncer_Sync_InvalidItem(t *testing.T) {
 	if !errors.Is(err, pkgerrors.ErrPartialSync) {
 		t.Fatalf("expected ErrPartialSync when all items are invalid, got: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
-	testutil.AssertInt(t, result.Errors, 1, "Errors")
+	testutil.AssertEqual(t, result.Fetched, 1, "Fetched")
+	testutil.AssertEqual(t, result.Errors, 1, "Errors")
 }
 
 func TestSyncer_Sync_NilOptions(t *testing.T) {
@@ -228,10 +228,10 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
+	testutil.AssertEqual(t, result.Fetched, 1, "Fetched")
 
 	count, _ := store.Count(ctx, model.ItemFilter{})
-	testutil.AssertInt64(t, count, 1, "count")
+	testutil.AssertEqual(t, count, 1, "count")
 }
 
 func TestSyncer_GetStats(t *testing.T) {
@@ -252,7 +252,7 @@ func TestSyncer_GetStats(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt64(t, stats.TotalItems, 3, "TotalItems")
+	testutil.AssertEqual(t, stats.TotalItems, 3, "TotalItems")
 	testutil.AssertContains(t, stats.ItemTypes, "PushEvent", "ItemTypes")
 	testutil.AssertContains(t, stats.ItemTypes, "IssueEvent", "ItemTypes")
 }

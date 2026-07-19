@@ -40,13 +40,13 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	items := testItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	result := stack.SyncItems(ctx, items)
-	testutil.AssertInt(t, result.Synced, 3, "Synced")
-	testutil.AssertInt(t, result.Conflicts, 0, "Conflicts")
-	testutil.AssertInt(t, result.Errors, 0, "Errors")
+	testutil.AssertEqual(t, result.Synced, 3, "Synced")
+	testutil.AssertEqual(t, result.Conflicts, 0, "Conflicts")
+	testutil.AssertEqual(t, result.Errors, 0, "Errors")
 
 	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 3, "count")
+	testutil.AssertEqual(t, count, 3, "count")
 }
 
 func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
@@ -63,7 +63,7 @@ func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
 
 	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 1, "count")
+	testutil.AssertEqual(t, count, 1, "count")
 }
 
 func TestCQRSStack_TombstoneItem(t *testing.T) {
@@ -78,13 +78,13 @@ func TestCQRSStack_TombstoneItem(t *testing.T) {
 
 	count, err := stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 1, "count")
+	testutil.AssertEqual(t, count, 1, "count")
 
 	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("123"), model.ReasonUpstreamGone))
 
 	count, err = stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 0, "count after tombstone")
+	testutil.AssertEqual(t, count, 0, "count after tombstone")
 }
 
 func TestCQRSStack_TombstoneThenResurrect(t *testing.T) {
@@ -99,12 +99,12 @@ func TestCQRSStack_TombstoneThenResurrect(t *testing.T) {
 	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("123"), model.ReasonUpstreamGone))
 
 	count, _ := stack.Count(ctx, model.ItemFilter{})
-	testutil.AssertInt64(t, count, 0, "count after tombstone")
+	testutil.AssertEqual(t, count, 0, "count after tombstone")
 
 	syncTestItem(t, stack, ctx, "123", "IssueEvent")
 
 	count, _ = stack.Count(ctx, model.ItemFilter{})
-	testutil.AssertInt64(t, count, 1, "count after resurrect")
+	testutil.AssertEqual(t, count, 1, "count after resurrect")
 
 	got, err := stack.Get(ctx, "github", id.NewExternalID("123"))
 	testutil.MustNoError(t, err)
@@ -117,17 +117,17 @@ func TestCQRSStack_ConflictDetection(t *testing.T) {
 	items := []*provider.Item{testItem("1", "PushEvent")}
 
 	result := stack.SyncItems(ctx, items)
-	testutil.AssertInt(t, result.Synced, 1, "Synced")
-	testutil.AssertInt(t, result.Conflicts, 0, "Conflicts")
-	testutil.AssertInt(t, result.Errors, 0, "Errors")
+	testutil.AssertEqual(t, result.Synced, 1, "Synced")
+	testutil.AssertEqual(t, result.Conflicts, 0, "Conflicts")
+	testutil.AssertEqual(t, result.Errors, 0, "Errors")
 
 	updatedItem := testItem("1", "PushEvent")
 	updatedItem.UpdatedAt = time.Now().Add(time.Hour)
 
 	result = stack.SyncItems(ctx, []*provider.Item{updatedItem})
-	testutil.AssertInt(t, result.Synced, 1, "Synced")
-	testutil.AssertInt(t, result.Conflicts, 1, "Conflicts")
-	testutil.AssertInt(t, result.Errors, 0, "Errors")
+	testutil.AssertEqual(t, result.Synced, 1, "Synced")
+	testutil.AssertEqual(t, result.Conflicts, 1, "Conflicts")
+	testutil.AssertEqual(t, result.Errors, 0, "Errors")
 }
 
 func TestCQRSStack_FilterByType(t *testing.T) {
@@ -140,7 +140,7 @@ func TestCQRSStack_FilterByType(t *testing.T) {
 	items := testItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
 
 	result := stack.SyncItems(ctx, items)
-	testutil.AssertInt(t, result.Synced, 3, "Synced")
+	testutil.AssertEqual(t, result.Synced, 3, "Synced")
 
 	pushType := id.NewEventTypeID("PushEvent")
 	results, err := stack.List(ctx, model.ItemFilter{Type: &pushType})

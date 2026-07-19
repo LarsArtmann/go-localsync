@@ -7,9 +7,15 @@ import (
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
+// baseFromClause is the shared "FROM sync_items WHERE 1=1" suffix used by every
+// read-model query that opts into the appendFilterArgs filter mechanism. The
+// trailing "WHERE 1=1" lets appendFilterArgs unconditionally emit "AND ..." for
+// each active filter without branching on the first clause.
+const baseFromClause = "FROM sync_items WHERE 1=1"
+
 func buildListQuery(filter model.ItemFilter) (string, []any, error) {
 	query := `SELECT item_id, source, source_id, type, attributes, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
-		FROM sync_items WHERE 1=1`
+		` + baseFromClause
 
 	args, err := appendFilterArgs(&query, filter)
 	if err != nil {
@@ -60,6 +66,24 @@ func validateAttributeKey(key string) error {
 	}
 
 	return nil
+}
+
+// buildFilteredQuery assembles a "SELECT <selectClause> " + baseFromClause
+// query and applies the filter conditions via appendFilterArgs. It is the
+// single shared prologue for every read-model query that streams rows out of
+// sync_items; the only differences between callers are the SELECT projection
+// and any trailing clauses (ORDER BY / GROUP BY / LIMIT). Keeping the prologue
+// in one place makes it impossible for a new query to forget to append filters
+// or to skip the 1=1 anchor that lets appendFilterArgs emit "AND ..." freely.
+func buildFilteredQuery(selectClause string, filter model.ItemFilter) (string, []any, error) {
+	query := selectClause + " " + baseFromClause
+
+	args, err := appendFilterArgs(&query, filter)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return query, args, nil
 }
 
 func appendFilterArgs(query *string, filter model.ItemFilter) ([]any, error) {

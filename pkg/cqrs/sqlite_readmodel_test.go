@@ -143,12 +143,12 @@ func TestSQLiteReadModel_Count(t *testing.T) {
 
 	count, err := rm.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 2, "Count")
+	testutil.AssertEqual(t, count, 2, "Count")
 
 	pushType := id.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, model.ItemFilter{Type: &pushType})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 1, "filtered Count")
+	testutil.AssertEqual(t, count, 1, "filtered Count")
 }
 
 func TestSQLiteReadModel_Tombstone(t *testing.T) {
@@ -195,7 +195,7 @@ func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type")
 
 	count, _ := rm.Count(ctx, model.ItemFilter{})
-	testutil.AssertInt64(t, count, 1, "Count")
+	testutil.AssertEqual(t, count, 1, "Count")
 }
 
 // TestSQLiteReadModel_ErrorChainPreserved guards the session-28 fix: database

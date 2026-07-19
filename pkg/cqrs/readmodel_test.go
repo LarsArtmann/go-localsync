@@ -15,7 +15,7 @@ import (
 func assertLen(t *testing.T, rm *MemoryReadModel, want int) {
 	t.Helper()
 
-	testutil.AssertInt(t, rm.Len(), want, "Len")
+	testutil.AssertEqual(t, rm.Len(), want, "Len")
 }
 
 func assertNotFound(t *testing.T, err error, got *model.Item) {
@@ -169,12 +169,12 @@ func TestMemoryReadModel_Count(t *testing.T) {
 
 	count, err := rm.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 2, "count")
+	testutil.AssertEqual(t, count, 2, "count")
 
 	pushTypeFilter := id.NewEventTypeID("PushEvent")
 	count, err = rm.Count(ctx, model.ItemFilter{Type: &pushTypeFilter})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 1, "count")
+	testutil.AssertEqual(t, count, 1, "count")
 }
 
 func TestProjector_ItemSynced(t *testing.T) {

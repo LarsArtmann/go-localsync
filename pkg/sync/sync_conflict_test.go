@@ -29,10 +29,10 @@ func TestConflictAwareSyncer_NewItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Upserted, 2, "Upserted")
-	testutil.AssertInt(t, result.Conflicts, 0, "Conflicts")
-	testutil.AssertInt(t, result.Skipped, 0, "Skipped")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Upserted, 2, "Upserted")
+	testutil.AssertEqual(t, result.Conflicts, 0, "Conflicts")
+	testutil.AssertEqual(t, result.Skipped, 0, "Skipped")
 }
 
 func TestConflictAwareSyncer_NilOptions(t *testing.T) {
@@ -67,9 +67,9 @@ func TestConflictAwareSyncer_InvalidItems_CountedInErrors(t *testing.T) {
 	if !errors.Is(err, pkgerrors.ErrPartialSync) {
 		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Errors, 1, "Errors")
-	testutil.AssertInt(t, result.Upserted, 1, "Upserted")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Errors, 1, "Errors")
+	testutil.AssertEqual(t, result.Upserted, 1, "Upserted")
 }
 
 func TestConflictAwareSyncer_Conflicts(t *testing.T) {
@@ -88,10 +88,10 @@ func TestConflictAwareSyncer_Conflicts(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Conflicts, 1, "Conflicts")
-	testutil.AssertInt(t, result.Upserted, 1, "Upserted")
-	testutil.AssertInt(t, result.Skipped, 1, "Skipped")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Conflicts, 1, "Conflicts")
+	testutil.AssertEqual(t, result.Upserted, 1, "Upserted")
+	testutil.AssertEqual(t, result.Skipped, 1, "Skipped")
 }
 
 // TestConflictAwareSyncer_LocalWinsConflictIsNotUpserted pins the contract
@@ -117,9 +117,9 @@ func TestConflictAwareSyncer_LocalWinsConflictIsNotUpserted(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	testutil.AssertInt(t, result.Conflicts, 1, "Conflicts (local-wins is a conflict)")
-	testutil.AssertInt(t, result.Upserted, 0, "Upserted (local-wins writes no remote data)")
-	testutil.AssertInt(t, result.Errors, 0, "Errors")
+	testutil.AssertEqual(t, result.Conflicts, 1, "Conflicts (local-wins is a conflict)")
+	testutil.AssertEqual(t, result.Upserted, 0, "Upserted (local-wins writes no remote data)")
+	testutil.AssertEqual(t, result.Errors, 0, "Errors")
 }
 
 func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
@@ -138,9 +138,9 @@ func TestConflictAwareSyncer_StoreErrors(t *testing.T) {
 	if !errors.Is(err, pkgerrors.ErrPartialSync) {
 		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Upserted, 1, "Upserted")
-	testutil.AssertInt(t, result.Errors, 1, "Errors")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Upserted, 1, "Upserted")
+	testutil.AssertEqual(t, result.Errors, 1, "Errors")
 }
 
 func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
@@ -162,9 +162,9 @@ func TestConflictAwareSyncer_AllInvalidItems(t *testing.T) {
 	if !errors.Is(err, pkgerrors.ErrPartialSync) {
 		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Errors, 2, "Errors")
-	testutil.AssertInt(t, result.Upserted, 0, "Upserted")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Errors, 2, "Errors")
+	testutil.AssertEqual(t, result.Upserted, 0, "Upserted")
 }
 
 // TestConflictAwareSyncer_RetainsItemErrors guards the split-brain fix: the
@@ -184,7 +184,7 @@ func TestConflictAwareSyncer_RetainsItemErrors(t *testing.T) {
 		t.Fatalf("expected ErrPartialSync for partial failure, got: %v", err)
 	}
 
-	testutil.AssertInt(t, result.Errors, 1, "Errors")
+	testutil.AssertEqual(t, result.Errors, 1, "Errors")
 
 	if len(result.ItemErrors) != 1 {
 		t.Fatalf("expected 1 per-item error retained, got %d", len(result.ItemErrors))

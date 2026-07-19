@@ -159,8 +159,15 @@ func errIfFailed(result *SyncResult, total int) error {
 	return partialSyncError(result.Errors, total)
 }
 
-// Sync fetches all items from the provider and persists them.
-func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
+// withSourceLock acquires the per-source lock, defers its release, and invokes
+// run. Shared by Sync and SyncIncremental so the lock-and-defer prologue cannot
+// drift between them. On lock/validation failure the lock is not held and run
+// is never invoked.
+func (s *Syncer) withSourceLock(
+	ctx context.Context,
+	opts *SyncOptions,
+	run func(ctx context.Context) (*SyncResult, error),
+) (*SyncResult, error) {
 	release, err := s.lockAndValidate(opts)
 	if err != nil {
 		return nil, err
@@ -168,7 +175,14 @@ func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, erro
 
 	defer release()
 
-	return s.runSync(ctx, opts)
+	return run(ctx)
+}
+
+// Sync fetches all items from the provider and persists them.
+func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
+	return s.withSourceLock(ctx, opts, func(ctx context.Context) (*SyncResult, error) {
+		return s.runSync(ctx, opts)
+	})
 }
 
 // runSync is the lock-free full-sync body. Callers must already hold the source
@@ -274,14 +288,9 @@ func (s *Syncer) reconcile(
 }
 
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	release, err := s.lockAndValidate(opts)
-	if err != nil {
-		return nil, err
-	}
-
-	defer release()
-
-	return s.runSyncIncremental(ctx, opts)
+	return s.withSourceLock(ctx, opts, func(ctx context.Context) (*SyncResult, error) {
+		return s.runSyncIncremental(ctx, opts)
+	})
 }
 
 // runSyncIncremental is the lock-free incremental-sync body. It falls back to

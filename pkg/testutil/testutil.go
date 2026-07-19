@@ -27,18 +27,6 @@ func AssertEqual[T comparable](t *testing.T, got, want T, label string) {
 	}
 }
 
-func AssertInt(t *testing.T, got, want int, label string) {
-	t.Helper()
-
-	AssertEqual(t, got, want, label)
-}
-
-func AssertInt64(t *testing.T, got, want int64, label string) {
-	t.Helper()
-
-	AssertEqual(t, got, want, label)
-}
-
 func AssertContains[T comparable](t *testing.T, haystack []T, needle T, label string) {
 	t.Helper()
 

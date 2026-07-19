@@ -40,8 +40,8 @@ func TestSyncer_processIncrementalItems_SkipsOldItems(t *testing.T) {
 		latestItem,
 		[]*provider.Item{oldItem, newItem},
 	)
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Skipped, 1, "Skipped")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Skipped, 1, "Skipped")
 }
 
 func TestSyncer_processIncrementalItems_AllNewItems(t *testing.T) {
@@ -58,8 +58,8 @@ func TestSyncer_processIncrementalItems_AllNewItems(t *testing.T) {
 		nil,
 		items,
 	)
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Skipped, 0, "Skipped")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Skipped, 0, "Skipped")
 }
 
 func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
@@ -77,8 +77,8 @@ func TestSyncer_processIncrementalItems_InvalidItemSkipped(t *testing.T) {
 		nil,
 		[]*provider.Item{invalidItem, validItem},
 	)
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Errors, 1, "Errors")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Errors, 1, "Errors")
 }
 
 func TestSyncer_reportProgress(t *testing.T) {
@@ -92,9 +92,9 @@ func TestSyncer_reportProgress(t *testing.T) {
 		OnProgress: func(fetched, skipped, errors int) {
 			called = true
 
-			testutil.AssertInt(t, fetched, 1, "fetched")
-			testutil.AssertInt(t, skipped, 0, "skipped")
-			testutil.AssertInt(t, errors, 0, "errors")
+			testutil.AssertEqual(t, fetched, 1, "fetched")
+			testutil.AssertEqual(t, skipped, 0, "skipped")
+			testutil.AssertEqual(t, errors, 0, "errors")
 		},
 	}
 
@@ -151,9 +151,9 @@ func TestSyncer_SyncIncremental_WithExistingItems(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 2, "Fetched")
-	testutil.AssertInt(t, result.Skipped, 1, "Skipped")
-	testutil.AssertInt(t, result.Errors, 0, "Errors")
+	testutil.AssertEqual(t, result.Fetched, 2, "Fetched")
+	testutil.AssertEqual(t, result.Skipped, 1, "Skipped")
+	testutil.AssertEqual(t, result.Errors, 0, "Errors")
 }
 
 func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
@@ -176,8 +176,8 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	testutil.AssertInt(t, result.Fetched, 1, "Fetched")
-	testutil.AssertInt(t, result.Skipped, 1, "Skipped")
+	testutil.AssertEqual(t, result.Fetched, 1, "Fetched")
+	testutil.AssertEqual(t, result.Skipped, 1, "Skipped")
 }
 
 func TestSyncer_SyncIncremental_ListItemsError(t *testing.T) {

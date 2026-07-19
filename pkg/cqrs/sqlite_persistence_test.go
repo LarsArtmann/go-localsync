@@ -60,5 +60,5 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 
 	count, err := rm2.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 1, "Count")
+	testutil.AssertEqual(t, count, 1, "Count")
 }

@@ -120,26 +120,55 @@ func (m *SQLiteReadModel) Get(
 	return item, nil
 }
 
+// queryRows runs db.QueryContext, defers rows.Close(), and invokes scan with the
+// resulting *sql.Rows. scan must return the result value to thread back to the
+// caller; any error it returns bubbles up unwrapped so the caller can decorate
+// it with a domain-specific message (e.g. "scan count by type"). After scan
+// returns, rows.Err() is checked and forwarded to satisfy database/sql's
+// documented iteration-completion contract — without this check, a connection
+// error mid-iteration would be silently swallowed. Generic over the result
+// type so List ([]*model.Item) and CountByType (map[string]int64) share one
+// helper without losing type safety.
+func queryRows[T any](
+	ctx context.Context,
+	db *sql.DB,
+	op string,
+	scan func(*sql.Rows) (T, error),
+	query string,
+	args ...any,
+) (T, error) {
+	var zero T
+
+	rows, err := db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return zero, wrapDBErr(err, op)
+	}
+
+	defer func() { _ = rows.Close() }()
+
+	result, err := scan(rows)
+	if err != nil {
+		return zero, err
+	}
+
+	if err := rows.Err(); err != nil {
+		return zero, wrapDBErr(err, op)
+	}
+
+	return result, nil
+}
+
 func (m *SQLiteReadModel) List(ctx context.Context, filter model.ItemFilter) ([]*model.Item, error) {
 	query, args, err := buildListQuery(filter)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := m.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, wrapDBErr(err, "list items")
-	}
-
-	defer func() { _ = rows.Close() }()
-
-	return scanItems(rows)
+	return queryRows(ctx, m.db, "list items", scanItems, query, args...)
 }
 
 func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (int64, error) {
-	query := "SELECT COUNT(*) FROM sync_items WHERE 1=1"
-
-	args, err := appendFilterArgs(&query, filter)
+	query, args, err := buildFilteredQuery("SELECT COUNT(*)", filter)
 	if err != nil {
 		return 0, err
 	}
@@ -155,41 +184,30 @@ func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (i
 }
 
 func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilter) (map[string]int64, error) {
-	query := "SELECT type, COUNT(*) FROM sync_items WHERE 1=1"
-
-	args, err := appendFilterArgs(&query, filter)
+	query, args, err := buildFilteredQuery("SELECT type, COUNT(*)", filter)
 	if err != nil {
 		return nil, err
 	}
 
 	query += " GROUP BY type"
 
-	rows, err := m.db.QueryContext(ctx, query, args...)
-	if err != nil {
-		return nil, wrapDBErr(err, "count by type")
-	}
+	return queryRows(ctx, m.db, "count by type", func(rows *sql.Rows) (map[string]int64, error) {
+		counts := make(map[string]int64)
 
-	defer func() { _ = rows.Close() }()
+		for rows.Next() {
+			var itemType string
 
-	counts := make(map[string]int64)
+			var count int64
 
-	for rows.Next() {
-		var itemType string
+			if err := rows.Scan(&itemType, &count); err != nil {
+				return nil, wrapDBErr(err, "scan count by type")
+			}
 
-		var count int64
-
-		if err := rows.Scan(&itemType, &count); err != nil {
-			return nil, wrapDBErr(err, "scan count by type")
+			counts[itemType] = count
 		}
 
-		counts[itemType] = count
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, wrapDBErr(err, "iterate count by type")
-	}
-
-	return counts, nil
+		return counts, nil
+	}, query, args...)
 }
 
 func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {

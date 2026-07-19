@@ -26,7 +26,7 @@ func TestSQLiteReadModel_List_FilterByActorLogin(t *testing.T) {
 
 	count, err := rm.Count(ctx, model.ItemFilter{Attributes: map[string]string{"actor_login": "alice"}})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 2, "count for alice")
+	testutil.AssertEqual(t, count, 2, "count for alice")
 }
 
 func TestSQLiteReadModel_List_FilterByRepoName(t *testing.T) {
@@ -85,7 +85,7 @@ func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
 
 	count, err := rm.Count(ctx, model.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
-	testutil.AssertInt64(t, count, 1, "count after Since cutoff")
+	testutil.AssertEqual(t, count, 1, "count after Since cutoff")
 }
 
 func TestSQLiteReadModel_List_Pagination(t *testing.T) {
