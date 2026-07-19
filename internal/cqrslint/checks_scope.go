@@ -31,24 +31,16 @@ func checkNoQueryDispatcher(pkg *Package) []Finding {
 					return true
 				}
 
-				outFile, line := pkg.PositionFor(typed)
-
-				findings = append(findings, Finding{
-					Rule: ruleNoQueryDispatcher, Severity: SeverityError, File: outFile, Line: line,
-					Message: "query.Dispatcher is banned; reads must call the ReadModel directly (AGENTS.md)",
-				})
+				findings = append(findings, errorAt(pkg, typed, ruleNoQueryDispatcher,
+					"query.Dispatcher is banned; reads must call the ReadModel directly (AGENTS.md)"))
 
 			case *ast.Ident:
 				if typed.Name != "QueryDispatcher" {
 					return true
 				}
 
-				outFile, line := pkg.PositionFor(typed)
-
-				findings = append(findings, Finding{
-					Rule: ruleNoQueryDispatcher, Severity: SeverityError, File: outFile, Line: line,
-					Message: "QueryDispatcher identifier is banned; reads must call the ReadModel directly (AGENTS.md)",
-				})
+				findings = append(findings, errorAt(pkg, typed, ruleNoQueryDispatcher,
+					"QueryDispatcher identifier is banned; reads must call the ReadModel directly (AGENTS.md)"))
 			}
 
 			return true
@@ -71,13 +63,9 @@ func checkNoSyncActionInCQRS(pkg *Package) []Finding {
 					continue
 				}
 
-				file, line := pkg.PositionFor(typed)
-
-				findings = append(findings, Finding{
-					Rule: ruleNoSyncActionInCQRS, Severity: SeverityError, File: file, Line: line,
-					Message: "type " + typed.Name.Name +
-						" must live in pkg/sync, not pkg/cqrs (architectural seam)",
-				})
+				findings = append(findings, errorAt(pkg, typed, ruleNoSyncActionInCQRS,
+					"type "+typed.Name.Name+
+						" must live in pkg/sync, not pkg/cqrs (architectural seam)"))
 
 			case *ast.ValueSpec:
 				for _, name := range typed.Names {
@@ -85,12 +73,8 @@ func checkNoSyncActionInCQRS(pkg *Package) []Finding {
 						continue
 					}
 
-					file, line := pkg.PositionFor(typed)
-
-					findings = append(findings, Finding{
-						Rule: ruleNoSyncActionInCQRS, Severity: SeverityError, File: file, Line: line,
-						Message: name.Name + " must live in pkg/sync, not pkg/cqrs (architectural seam)",
-					})
+					findings = append(findings, errorAt(pkg, typed, ruleNoSyncActionInCQRS,
+						name.Name+" must live in pkg/sync, not pkg/cqrs (architectural seam)"))
 				}
 			}
 		}

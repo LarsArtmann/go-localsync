@@ -12,6 +12,7 @@ package cqrslint
 
 import (
 	"fmt"
+	"go/ast"
 	"sort"
 )
 
@@ -32,6 +33,37 @@ type Finding struct {
 	File     string
 	Line     int
 	Message  string
+}
+
+// errorAt constructs a SeverityError Finding positioned at node. Centralizes the
+// repeated `Rule, Severity, File, Line` literal so every check reports the same
+// shape and a future field added to Finding only has to be threaded in one place.
+func errorAt(pkg *Package, node ast.Node, rule, message string) Finding {
+	file, line := pkg.PositionFor(node)
+
+	return Finding{
+		Rule: rule, Severity: SeverityError, File: file, Line: line, Message: message,
+	}
+}
+
+// warningAt constructs a SeverityWarning Finding positioned at node.
+func warningAt(pkg *Package, node ast.Node, rule, message string) Finding {
+	file, line := pkg.PositionFor(node)
+
+	return Finding{
+		Rule: rule, Severity: SeverityWarning, File: file, Line: line, Message: message,
+	}
+}
+
+// errorMsg constructs a SeverityError Finding without a position — used for
+// whole-file or whole-package violations where no specific node applies.
+func errorMsg(rule, message string) Finding {
+	return Finding{Rule: rule, Severity: SeverityError, Message: message}
+}
+
+// warningMsg constructs a SeverityWarning Finding without a position.
+func warningMsg(rule, message string) Finding {
+	return Finding{Rule: rule, Severity: SeverityWarning, Message: message}
 }
 
 // String renders a finding in the "<file>:<line>: <rule> <severity>: <msg>" form

@@ -17,66 +17,76 @@ var allowedHasChangedFields = map[string]bool{
 // checkFoldSwitchCoverage (C0003): the fold function's switch must case every
 // declared event const, or replay will hit the default error path.
 func checkFoldSwitchCoverage(pkg *Package) []Finding {
-	fn := findFunc(pkg, "fold")
-	if fn == nil || fn.Body == nil {
-		return []Finding{{
-			Rule: ruleFoldSwitchCoverage, Severity: SeverityWarning,
-			Message: "fold function not found; cannot verify event coverage",
-		}}
-	}
-
-	covered := collectSwitchCaseIdents(fn.Body)
-
-	var findings []Finding
-
-	for eventConst := range canonicalEventConsts {
-		if !covered[eventConst] {
-			findings = append(findings, Finding{
-				Rule: ruleFoldSwitchCoverage, Severity: SeverityError,
-				Message: "fold switch does not case event " + eventConst,
-			})
-		}
-	}
-
-	return findings
+	return checkCanonicalEventCoverage(
+		pkg, "fold",
+		ruleFoldSwitchCoverage,
+		"fold function not found; cannot verify event coverage",
+		collectSwitchCaseIdents,
+		"fold switch does not case event ",
+	)
 }
 
 // checkProjectorEventTypes (C0004): Projector.EventTypes must reference every
 // canonical event const so the projection subscribes to all of them.
 func checkProjectorEventTypes(pkg *Package) []Finding {
-	fn := findFunc(pkg, "EventTypes")
-	if fn == nil || fn.Body == nil {
-		return []Finding{{
-			Rule: ruleProjectorEventTypes, Severity: SeverityWarning,
-			Message: "EventTypes method not found; cannot verify projection subscriptions",
-		}}
+	return checkCanonicalEventCoverage(
+		pkg, "EventTypes",
+		ruleProjectorEventTypes,
+		"EventTypes method not found; cannot verify projection subscriptions",
+		collectEventConstIdents,
+		"Projector.EventTypes does not include event ",
+	)
+}
+
+// checkCanonicalEventCoverage is the shared backbone for C0003 and C0004:
+// locate the named function/method, collect the set of event-const identifiers
+// it references (via extractIds), then emit one error finding per canonical
+// event const that is missing. Returns a single warning finding if the
+// function itself is absent so the user knows the rule did not run.
+func checkCanonicalEventCoverage(
+	pkg *Package,
+	funcName, rule, missingMessage string,
+	extractIds func(*ast.BlockStmt) map[string]bool,
+	missingEventMessage string,
+) []Finding {
+	fn, missing := findFuncOrWarn(pkg, funcName, rule, missingMessage)
+	if missing != nil {
+		return missing
 	}
 
-	referenced := collectEventConstIdents(fn.Body)
+	referenced := extractIds(fn.Body)
 
 	var findings []Finding
 
 	for eventConst := range canonicalEventConsts {
 		if !referenced[eventConst] {
-			findings = append(findings, Finding{
-				Rule: ruleProjectorEventTypes, Severity: SeverityError,
-				Message: "Projector.EventTypes does not include event " + eventConst,
-			})
+			findings = append(findings, errorMsg(rule, missingEventMessage+eventConst))
 		}
 	}
 
 	return findings
 }
 
+// findFuncOrWarn looks up a package-level function or method by name. When the
+// function is missing or has no body, it returns a non-nil warning finding
+// slice so callers can early-return without re-typing the boilerplate. Used
+// by every check that needs to inspect a named function or method.
+func findFuncOrWarn(pkg *Package, funcName, rule, missingMessage string) (*ast.FuncDecl, []Finding) {
+	fn := findFunc(pkg, funcName)
+	if fn == nil || fn.Body == nil {
+		return nil, []Finding{warningMsg(rule, missingMessage)}
+	}
+
+	return fn, nil
+}
+
 // checkHasChangedProviderAgn (C0005): hasChanged may only reference
 // ContentHash, UpdatedAt, or Type on its local/remote operands (ADR-0007).
 func checkHasChangedProviderAgn(pkg *Package) []Finding {
-	fn := findFunc(pkg, "hasChanged")
-	if fn == nil || fn.Body == nil {
-		return []Finding{{
-			Rule: ruleHasChangedProviderAgn, Severity: SeverityWarning,
-			Message: "hasChanged function not found; cannot verify provider-agnostic invariant",
-		}}
+	fn, missing := findFuncOrWarn(pkg, "hasChanged", ruleHasChangedProviderAgn,
+		"hasChanged function not found; cannot verify provider-agnostic invariant")
+	if missing != nil {
+		return missing
 	}
 
 	var findings []Finding
@@ -98,13 +108,9 @@ func checkHasChangedProviderAgn(pkg *Package) []Finding {
 			return true
 		}
 
-		file, line := pkg.PositionFor(sel)
-
-		findings = append(findings, Finding{
-			Rule: ruleHasChangedProviderAgn, Severity: SeverityError, File: file, Line: line,
-			Message: "hasChanged must only read ContentHash/UpdatedAt/Type (ADR-0007); references " +
-				operand.Name + "." + field,
-		})
+		findings = append(findings, errorAt(pkg, sel, ruleHasChangedProviderAgn,
+			"hasChanged must only read ContentHash/UpdatedAt/Type (ADR-0007); references "+
+				operand.Name+"."+field))
 
 		return true
 	})
@@ -115,24 +121,18 @@ func checkHasChangedProviderAgn(pkg *Package) []Finding {
 // checkProjectionLockGuard (C0008): Projector.Handle must acquire a mutex Lock
 // before the version-gate check so concurrent live+replay delivery serializes.
 func checkProjectionLockGuard(pkg *Package) []Finding {
-	fn := findFunc(pkg, "Handle")
-	if fn == nil || fn.Body == nil {
-		return []Finding{{
-			Rule: ruleProjectionLockGuard, Severity: SeverityWarning,
-			Message: "Projector.Handle not found; cannot verify mutex guard",
-		}}
+	fn, missing := findFuncOrWarn(pkg, "Handle", ruleProjectionLockGuard,
+		"Projector.Handle not found; cannot verify mutex guard")
+	if missing != nil {
+		return missing
 	}
 
 	if bodyContainsLockCall(fn.Body) {
 		return nil
 	}
 
-	file, line := pkg.PositionFor(fn)
-
-	return []Finding{{
-		Rule: ruleProjectionLockGuard, Severity: SeverityError, File: file, Line: line,
-		Message: "Projector.Handle must acquire a mutex Lock before the version-gate",
-	}}
+	return []Finding{errorAt(pkg, fn, ruleProjectionLockGuard,
+		"Projector.Handle must acquire a mutex Lock before the version-gate")}
 }
 
 // collectSwitchCaseIdents returns the set of identifier names used as case

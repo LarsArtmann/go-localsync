@@ -56,25 +56,19 @@ func checkAggregateTypeConst(pkg *Package) []Finding {
 	hits := collectConstSpecsByType(pkg, "event", "AggregateType")
 
 	if len(hits) == 0 {
-		return []Finding{{
-			Rule: ruleAggregateTypeConst, Severity: SeverityError,
-			Message: fmt.Sprintf(
-				"missing event.AggregateType const; ADR-0004 requires exactly one valued %q",
-				canonicalAggregateType,
-			),
-		}}
+		return []Finding{errorMsg(ruleAggregateTypeConst, fmt.Sprintf(
+			"missing event.AggregateType const; ADR-0004 requires exactly one valued %q",
+			canonicalAggregateType,
+		))}
 	}
 
 	var findings []Finding
 
 	if len(hits) > 1 {
-		findings = append(findings, Finding{
-			Rule: ruleAggregateTypeConst, Severity: SeverityError,
-			Message: fmt.Sprintf(
-				"only one event.AggregateType const is allowed (ADR-0004 single-aggregate); found %d",
-				len(hits),
-			),
-		})
+		findings = append(findings, errorMsg(ruleAggregateTypeConst, fmt.Sprintf(
+			"only one event.AggregateType const is allowed (ADR-0004 single-aggregate); found %d",
+			len(hits),
+		)))
 	}
 
 	for _, hit := range hits {
@@ -88,15 +82,10 @@ func checkAggregateTypeConst(pkg *Package) []Finding {
 		}
 
 		if value != canonicalAggregateType {
-			file, line := pkg.PositionFor(hit.spec)
-
-			findings = append(findings, Finding{
-				Rule: ruleAggregateTypeConst, Severity: SeverityError, File: file, Line: line,
-				Message: fmt.Sprintf(
-					"aggregate type must be %q (ADR-0004), got %q",
-					canonicalAggregateType, value,
-				),
-			})
+			findings = append(findings, errorAt(pkg, hit.spec, ruleAggregateTypeConst, fmt.Sprintf(
+				"aggregate type must be %q (ADR-0004), got %q",
+				canonicalAggregateType, value,
+			)))
 		}
 	}
 
@@ -123,24 +112,18 @@ func checkEventTypeConsts(pkg *Package) []Finding {
 		declared[name] = value
 
 		if _, canonical := canonicalEventConsts[name]; !canonical {
-			file, line := pkg.PositionFor(hit.spec)
-
-			findings = append(findings, Finding{
-				Rule: ruleEventTypeConsts, Severity: SeverityError, File: file, Line: line,
-				Message: fmt.Sprintf(
-					"unexpected event.Type const %q; adding events requires revisiting ADR-0004",
-					name,
-				),
-			})
+			findings = append(findings, errorAt(pkg, hit.spec, ruleEventTypeConsts, fmt.Sprintf(
+				"unexpected event.Type const %q; adding events requires revisiting ADR-0004",
+				name,
+			)))
 		}
 	}
 
 	for canonicalName := range canonicalEventConsts {
 		if _, present := declared[canonicalName]; !present {
-			findings = append(findings, Finding{
-				Rule: ruleEventTypeConsts, Severity: SeverityError,
-				Message: fmt.Sprintf("required event const %s is missing (ADR-0004)", canonicalName),
-			})
+			findings = append(findings, errorMsg(ruleEventTypeConsts, fmt.Sprintf(
+				"required event const %s is missing (ADR-0004)", canonicalName,
+			)))
 		}
 	}
 
@@ -155,10 +138,9 @@ func checkPayloadJSONTags(pkg *Package) []Finding {
 	for _, structName := range canonicalPayloadStructs {
 		_, st := findStructType(pkg, structName)
 		if st == nil || st.Fields == nil {
-			findings = append(findings, Finding{
-				Rule: rulePayloadJSONTags, Severity: SeverityWarning,
-				Message: fmt.Sprintf("payload struct %s not found; cannot verify json tags", structName),
-			})
+			findings = append(findings, warningMsg(rulePayloadJSONTags, fmt.Sprintf(
+				"payload struct %s not found; cannot verify json tags", structName,
+			)))
 
 			continue
 		}
@@ -172,16 +154,12 @@ func checkPayloadJSONTags(pkg *Package) []Finding {
 				continue
 			}
 
-			file, line := pkg.PositionFor(field)
 			names := joinFieldNames(field.Names)
 
-			findings = append(findings, Finding{
-				Rule: rulePayloadJSONTags, Severity: SeverityError, File: file, Line: line,
-				Message: fmt.Sprintf(
-					"%s.%s is missing a json tag; event payloads are a wire contract",
-					structName, names,
-				),
-			})
+			findings = append(findings, errorAt(pkg, field, rulePayloadJSONTags, fmt.Sprintf(
+				"%s.%s is missing a json tag; event payloads are a wire contract",
+				structName, names,
+			)))
 		}
 	}
 
@@ -213,12 +191,8 @@ func checkNewEventsUsesAggType(pkg *Package) []Finding {
 				return true
 			}
 
-			outFile, line := pkg.PositionFor(call)
-
-			findings = append(findings, Finding{
-				Rule: ruleNewEventsUsesAggType, Severity: SeverityError, File: outFile, Line: line,
-				Message: "event.NewEvents must pass the aggregateType const as its 2nd argument",
-			})
+			findings = append(findings, errorAt(pkg, call, ruleNewEventsUsesAggType,
+				"event.NewEvents must pass the aggregateType const as its 2nd argument"))
 
 			return true
 		})

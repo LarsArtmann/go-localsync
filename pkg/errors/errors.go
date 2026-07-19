@@ -160,7 +160,7 @@ func wrapPreservingFamily(err error, detail string) error {
 
 // WithDetail wraps err with a detail string for debugging context.
 func WithDetail(err error, detail string) error {
-	return wrapPreservingFamily(err, detail)
+	return Wrap(err, detail)
 }
 
 // Wrap wraps an error with additional context.

@@ -1,0 +1,255 @@
+{
+  "version": "1.0",
+  "threshold": 1,
+  "recordedAt": "2026-07-19T02:09:42.412233863Z",
+  "entries": [
+    {
+      "hash": "034ddcb310383261",
+      "files": ["pkg/testutil/testutil.go", "pkg/cqrs/readmodel_concurrent_test.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "21625b26ffb9fefb",
+      "files": ["internal/cqrslint/checks_events.go", "internal/cqrslint/checks_events.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "265bb332eb926b0a",
+      "files": ["pkg/cqrs/stack.go", "pkg/cqrs/sqlite_test.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "2f278a6ae31746ea",
+      "files": ["pkg/cqrs/sqlite_readmodel.go", "pkg/cqrs/sqlite_readmodel.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "30ff63b731605568",
+      "files": [
+        "pkg/testutil/mockprovider.go",
+        "pkg/cqrs/example_test.go",
+        "pkg/cqrs/projection.go"
+      ],
+      "tokens": 3
+    },
+    {
+      "hash": "334af09beccbc526",
+      "files": ["cmd/cqrs-lint/main.go", "cmd/cqrs-lint/main.go", "cmd/cqrs-lint/main.go"],
+      "tokens": 3
+    },
+    {
+      "hash": "340e2f9f4eded31d",
+      "files": [
+        "pkg/cqrs/commands.go",
+        "pkg/cqrs/sqlite_query.go",
+        "pkg/cqrs/memory_readmodel.go",
+        "pkg/cqrs/memory_readmodel.go"
+      ],
+      "tokens": 4
+    },
+    {
+      "hash": "400b142bda08c19e",
+      "files": ["pkg/cqrs/sqlite_readmodel.go", "pkg/cqrs/sqlite_test.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "4baf7b068f3c8373",
+      "files": ["pkg/cqrs/stack_adapters.go", "pkg/provider/provider.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "4f2b9a98f236a25f",
+      "files": [
+        "internal/cqrslint/checks_events.go",
+        "internal/cqrslint/checks_scope.go",
+        "internal/cqrslint/checks_scope.go",
+        "internal/cqrslint/checks_events.go"
+      ],
+      "tokens": 4
+    },
+    {
+      "hash": "55feb587d9c070de",
+      "files": [
+        "pkg/data/model/item_filter.go",
+        "pkg/cqrs/memory_readmodel.go",
+        "pkg/data/model/item_filter.go",
+        "pkg/data/model/item_filter.go",
+        "pkg/data/model/item_filter.go",
+        "pkg/data/model/item_filter.go",
+        "pkg/data/model/item_filter.go",
+        "pkg/data/model/item_filter.go",
+        "pkg/cqrs/conflict_resolver.go",
+        "pkg/sync/retry.go"
+      ],
+      "tokens": 10
+    },
+    {
+      "hash": "6d53203ef77580a4",
+      "files": [
+        "pkg/data/schema/schema_test.go",
+        "pkg/provider/provider_test.go",
+        "pkg/data/schema/schema_test.go",
+        "pkg/data/model/model_test.go",
+        "pkg/data/model/model_test.go",
+        "pkg/api/server_test.go",
+        "pkg/crdt/conflict_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/sync/sync_test.go",
+        "pkg/data/model/model_test.go",
+        "pkg/cqrs/regression_test.go",
+        "pkg/sync/sync_test.go",
+        "pkg/cqrs/stack_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/sync/retry_test.go",
+        "pkg/id/ids_test.go",
+        "pkg/data/model/model_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/data/schema/schema_test.go",
+        "pkg/api/map_error_test.go",
+        "pkg/data/schema/schema_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/id/ids_test.go",
+        "pkg/errors/http_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/api/server_test.go",
+        "pkg/data/model/model_test.go",
+        "pkg/cqrs/decider_resolver_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/id/ids_test.go",
+        "pkg/cqrs/stack_classify_test.go",
+        "pkg/api/server_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/id/ids_test.go",
+        "pkg/crdt/conflict_test.go",
+        "pkg/cqrs/regression_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/data/model/model_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/sync/retry_test.go",
+        "pkg/sync/sync_incremental_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/sync/sync_incremental_test.go",
+        "pkg/data/model/model_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/sync/sync_incremental_test.go",
+        "pkg/errors/http_test.go",
+        "pkg/api/server_test.go",
+        "pkg/id/ids_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/cqrs/stack_test.go",
+        "pkg/api/server_test.go",
+        "pkg/sync/regression_test.go",
+        "pkg/sync/sync_test.go",
+        "pkg/cqrs/decider_test.go",
+        "pkg/errors/http_test.go",
+        "pkg/errors/errors_test.go",
+        "pkg/cqrs/stack_classify_test.go"
+      ],
+      "tokens": 61
+    },
+    {
+      "hash": "6f5993d8005bc827",
+      "files": ["pkg/testutil/mockprovider.go", "pkg/testutil/mockprovider.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "75d65f4d6c58270d",
+      "files": ["internal/cqrslint/checks_events.go", "internal/cqrslint/checks_events.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "7f18d39b41635181",
+      "files": ["pkg/cqrs/sqlite_readmodel.go", "pkg/cqrs/sqlite_readmodel.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "86f41705aae87676",
+      "files": [
+        "pkg/cqrs/testing_test.go",
+        "pkg/crdt/conflict_test.go",
+        "pkg/id/ids_test.go",
+        "pkg/testutil/testutil.go",
+        "pkg/testutil/testutil.go",
+        "pkg/testutil/testutil.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/readmodel_test.go",
+        "pkg/cqrs/sqlite_readmodel_test.go",
+        "internal/cqrslint/checks_test.go",
+        "pkg/cqrs/sqlite_readmodel_test.go",
+        "pkg/testutil/testutil.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/readmodel_bench_test.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/api/integration_test.go",
+        "pkg/testutil/testutil.go",
+        "pkg/api/integration_test.go",
+        "pkg/testutil/testutil.go",
+        "pkg/cqrs/readmodel_test.go",
+        "pkg/id/ids_test.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/regression_test.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/testutil/testutil.go",
+        "pkg/api/server_test.go",
+        "pkg/cqrs/testing_test.go",
+        "internal/cqrslint/load_test.go",
+        "pkg/cqrs/readmodel_test.go",
+        "pkg/api/integration_test.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/sqlite_readmodel_test.go",
+        "pkg/provider/provider_test.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/testing_test.go"
+      ],
+      "tokens": 37
+    },
+    {
+      "hash": "b4260bb5496eb97f",
+      "files": ["pkg/cqrs/aggregate_id.go", "pkg/cqrs/regression_test.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "b7fc240f6b5330ef",
+      "files": [
+        "internal/cqrslint/load.go",
+        "internal/cqrslint/checks_events.go",
+        "pkg/api/integration_test.go",
+        "internal/cqrslint/checks_events.go"
+      ],
+      "tokens": 4
+    },
+    {
+      "hash": "bc4448e73ae79d3f",
+      "files": ["internal/cqrslint/finding.go", "internal/cqrslint/finding.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "d6aaa205ea75dca5",
+      "files": ["pkg/cqrs/item_adapter.go", "pkg/cqrs/memory_readmodel.go"],
+      "tokens": 2
+    },
+    {
+      "hash": "d84065388adfb64e",
+      "files": [
+        "internal/cqrslint/checks_runtime.go",
+        "pkg/cqrs/testing_test.go",
+        "pkg/cqrs/sqlite_readmodel_test.go",
+        "pkg/sync/sync.go",
+        "internal/cqrslint/checks_events.go",
+        "pkg/cqrs/stack.go",
+        "pkg/sync/sync.go"
+      ],
+      "tokens": 7
+    },
+    {
+      "hash": "f5d769f7ab9a3b10",
+      "files": ["pkg/testutil/testutil.go", "pkg/sync/sync.go"],
+      "tokens": 2
+    }
+  ]
+}
