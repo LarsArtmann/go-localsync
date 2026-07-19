@@ -138,6 +138,7 @@ func (m *SQLiteReadModel) List(ctx context.Context, filter model.ItemFilter) ([]
 
 func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (int64, error) {
 	query := "SELECT COUNT(*) FROM sync_items WHERE 1=1"
+
 	args, err := appendFilterArgs(&query, filter)
 	if err != nil {
 		return 0, err
@@ -155,10 +156,12 @@ func (m *SQLiteReadModel) Count(ctx context.Context, filter model.ItemFilter) (i
 
 func (m *SQLiteReadModel) CountByType(ctx context.Context, filter model.ItemFilter) (map[string]int64, error) {
 	query := "SELECT type, COUNT(*) FROM sync_items WHERE 1=1"
+
 	args, err := appendFilterArgs(&query, filter)
 	if err != nil {
 		return nil, err
 	}
+
 	query += " GROUP BY type"
 
 	rows, err := m.db.QueryContext(ctx, query, args...)

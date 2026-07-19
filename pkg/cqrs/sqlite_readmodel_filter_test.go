@@ -158,12 +158,12 @@ func TestSQLiteReadModel_List_RejectsUnsafeAttributeKey(t *testing.T) {
 	ctx := context.Background()
 
 	for _, key := range []string{
-		"",                         // empty
-		"1invalid",                 // starts with digit
-		"bad key",                  // space
-		"evil') = 'x' OR 1=1 --",   // classic injection attempt
-		`doubled"quote`,            // double quote
-		"semi;colon",               // semicolon
+		"",                       // empty
+		"1invalid",               // starts with digit
+		"bad key",                // space
+		"evil') = 'x' OR 1=1 --", // classic injection attempt
+		`doubled"quote`,          // double quote
+		"semi;colon",             // semicolon
 	} {
 		filter := model.ItemFilter{Attributes: map[string]string{key: "v"}}
 
