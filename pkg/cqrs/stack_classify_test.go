@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"errors"
+	"slices"
 	"testing"
 	"time"
 
@@ -158,7 +159,9 @@ func TestCQRSStack_SyncItems_ConflictRemote(t *testing.T) {
 		t.Errorf("expected Synced=1, got %d", second.Synced)
 	}
 
-	if !hasAction(second, synclib.ActionConflictRemote) {
+	if !slices.ContainsFunc(second.Results, func(r synclib.ItemSyncResult) bool {
+		return r.Action == synclib.ActionConflictRemote
+	}) {
 		t.Error("expected ActionConflictRemote in results")
 	}
 }
@@ -220,7 +223,9 @@ func TestCQRSStack_SyncItems_LWWConflictResolution(t *testing.T) {
 				t.Errorf("expected Conflicts=1, got %d", second.Conflicts)
 			}
 
-			if !hasAction(second, tt.wantAction) {
+			if !slices.ContainsFunc(second.Results, func(r synclib.ItemSyncResult) bool {
+				return r.Action == tt.wantAction
+			}) {
 				t.Errorf("expected %v in results", tt.wantAction)
 			}
 
@@ -230,15 +235,4 @@ func TestCQRSStack_SyncItems_LWWConflictResolution(t *testing.T) {
 			testutil.AssertEqual(t, got.Type.Get(), tt.wantWinnerType, "Type")
 		})
 	}
-}
-
-// hasAction returns true if any result in summary has the given action.
-func hasAction(summary *synclib.SyncSummary, action synclib.SyncAction) bool {
-	for _, r := range summary.Results {
-		if r.Action == action {
-			return true
-		}
-	}
-
-	return false
 }
