@@ -1,8 +1,8 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-07-18
-**Tests:** 214 passing, 10 packages | **Lint:** 0 issues (golangci-lint v2)
+**Last Updated:** 2026-07-22
+**Tests:** 216 passing, 10 packages | **Lint:** 0 issues (golangci-lint v2)
 
 ## Overview
 
@@ -13,11 +13,6 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 ---
 
 ## 🔴 HIGH PRIORITY
-
-- [x] **Rework CI build & release jobs**
-      **Source:** `.github/workflows/ci.yml`
-      **Description:** The `build` job cross-compiles `./cmd/examples/github-sync`, which was removed when the SDK became a pure contract library (the example now lives in [`github-local-sync`](https://github.com/larsartmann/github-local-sync)). The `release` job depends on `build`, so neither runs successfully. Rework for a library-appropriate release flow (or remove the jobs).
-      **Context:** **Done (2026-06-29).** The `build` job now verifies the library compiles across linux/darwin × amd64/arm64; the `release` job creates a binary-free GitHub release with auto-generated notes.
 
 - [ ] **Make `go-cqrs-lite` public**
       **Source:** `go.mod`, `flake.nix`, `vendor/`

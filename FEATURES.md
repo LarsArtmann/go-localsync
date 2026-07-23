@@ -1,6 +1,6 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-07-18
+**Updated:** 2026-07-22
 
 > The SDK is a **pure contract library**. It defines the `Provider` interface, the CQRS sync engine, and CRDT primitives — but ships **no provider implementations and no CLI binary**. The reference consumer application — GitHub provider + CLI — lives in [`github.com/larsartmann/github-local-sync`](https://github.com/larsartmann/github-local-sync). New providers (GitLab, Jira, …) are built the same way, in their own consumer apps.
 >
@@ -135,7 +135,7 @@
 
 | #   | Feature      | Status           | Package        | Description                                                                                                                                  |
 | --- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 55  | Test Suite   | FULLY_FUNCTIONAL | all            | 214 test functions across 10 packages, all passing. Run: `go test ./... -count=1`.                                                           |
+| 55  | Test Suite   | FULLY_FUNCTIONAL | all            | 216 test functions across 10 packages, all passing. Run: `go test ./... -count=1`.                                                           |
 | 56  | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.) |
 
 ## Quality
@@ -156,7 +156,7 @@
 - Error taxonomy gives smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
 - Projection via synchronous `bus.SubscribeAll` (live) + `projectionhost.Host` (managed catch-up with checkpoint, crash-restart, DLQ — ADR-0006)
-- 214 tests with good coverage across all packages
+- 216 tests with good coverage across all packages
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 - Clear DTO/domain boundary: `provider.Item` (DTO) → `model.Item` (domain entity) via `item_adapter.go`
 

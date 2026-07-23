@@ -3,27 +3,56 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-Release dates and entries are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.3.0`).
+Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.3.0`, `v0.4.0`).
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependency refresh** — go-cqrs-lite modules bumped to latest patch releases (codec v4.0.3, event v4.0.3, watermill v4.0.3, id v4.0.2, decider v4.0.2, middleware v4.0.2, projectionhost v4.0.2, snapshot v4.0.2, storage v4.0.2); `golang.org/x/exp` refreshed; nix inputs updated to latest nixpkgs.
+- **cqrslint refactoring** — extracted `Finding` helper constructors applied consistently across all 10 checks; extracted `queryRows` helper; consolidated `AssertInt`→`AssertEqual`; shared per-source lock across sync entry points.
+
+### Fixed
+
+- **devShell `GOFLAGS` propagation** — `GOFLAGS=-tags=goexperiment.jsonv2` was not inherited by buildflow's native go subcommands (`test-race`, `go-fix`, `go-auto-upgrade`, `govalid-generate`), causing misleading partial-green results. Now documented and wired consistently.
+- **`slices.Contains` migration bug** — masked iterator-semantics regression from the Go 1.26 `slices` package migration.
+
+## [0.4.0] - 2026-07-18
+
+A major release: tombstone soft-deletes, resilient managed projection (`projectionhost.Host`), a static architectural linter (`cqrs-lint`), a full error-handling overhaul, de-githubification of the domain model, and the go-cqrs-lite v4 + JSON v2 migration.
+
 ### Added
 
-- **Tombstone soft-delete (ADR-0005)** — tombstones replace hard-deletes; tombstoned items keep full history; re-syncing a tombstoned item resurrects it via projection upsert; opt-in `SyncOptions.Reconcile` tombstones upstream-gone items (`ReasonUpstreamGone`). New `DecideTombstone` + `TombstoneItemCommand`.
+- **Tombstone soft-delete (ADR-0005)** — tombstones replace hard-deletes; tombstoned items keep full history on `Item.Tombstone`; re-syncing a tombstoned item resurrects it via projection upsert; opt-in `SyncOptions.Reconcile` tombstones upstream-gone items (`ReasonUpstreamGone`). New `DecideTombstone` + `TombstoneItemCommand`.
 - **`projectionhost.Host` catch-up (ADR-0006)** — managed batch-drainer for resilient SQLite projection: checkpoint persistence, crash auto-restart with backoff, dead-letter queue for poison messages. Replaces the prior bare `replayJournal`. Mutex-guarded version-gate prevents stale replay events from resurrecting tombstoned rows.
-- **`cqrs-lint` architectural linter** — `internal/cqrslint` enforces 10 invariants (C0001–C0010) for `pkg/cqrs` (ADR-0004 scope guard). CLI: `cmd/cqrs-lint`. Zero third-party deps.
-- **Error-handling overhaul** — `go-error-family` constructors with intrinsic classification; central `pkgerrors.HTTPStatus` translator (per-sentinel overrides + family defaults; `context.Canceled`→499, `context.DeadlineExceeded`→504); `WithCtx`/`InvalidField` structured context; partial-sync surfacing (Transient `ErrPartialSync` → HTTP 200-with-result).
-- **Schema versioning** — `pkg/data/schema` `Version` (V1/V2/V3) carried on every `model.Item`, ready for `UpcasterRegistry`.
-- **DTO/domain boundary** — `item_adapter.go` converts `provider.Item` (DTO) → `model.Item` (domain entity). Decider, read model, events, and resolver all operate on `*model.Item`.
+- **`cqrs-lint` architectural linter** — `internal/cqrslint` enforces 10 invariants (C0001–C0010) for `pkg/cqrs` (ADR-0004 scope guard). CLI: `cmd/cqrs-lint`. Zero third-party deps (stdlib `go/parser` only).
+- **Error-handling overhaul** — `go-error-family` constructors with intrinsic classification (Rejection, Transient, Infrastructure); central `pkgerrors.HTTPStatus` translator (per-sentinel overrides + family defaults; `context.Canceled`→499, `context.DeadlineExceeded`→504); `WithCtx`/`WithCtxf`/`InvalidField` structured context; partial-sync surfacing (Transient `ErrPartialSync` → HTTP 200-with-result rather than discarding synced items).
+- **Schema V3 (de-githubify)** — `pkg/data/schema` `Version` extended to V3 (removing GitHub-specific fields from the model). Carried on every `model.Item` for forward event migration (upcasting). V1/V2 were introduced in v0.2.0.
+- **govulncheck + gitleaks** in CI — reachability-based dependency CVE scanning and full-history secret scanning (vendor/ excluded).
 
 ### Changed
 
 - **Breaking: provider-agnostic domain model (ADR-0007)** — removed `ActorLogin`, `ActorAvatarURL`, `RepoName`, `RepoURL` from `provider.Item` and `model.Item`. Provider-specific content flows through `Attributes map[string]string`. `hasChanged` is ContentHash-first (with `UpdatedAt`/`Type` fallbacks). SQLite `actor_login` index dropped; indexes now on `type`, `created_at`, `(type, created_at)`. `GET /items` no longer accepts `actor`/`repo` query params.
 - **Breaking: go-cqrs-lite v4 migration** — all modules moved to v4 paths (`event/v4`, `command/v4`, `decider/v4`, `id/v4`, `codec/v4`, `projection/v4`, `projectionhost/v4`, `snapshot/v4`, `storage/v4`, `storage/memory/v4`, `middleware/v4`, `watermill/v4`). Adopted `encoding/json/v2` (gated behind `GOEXPERIMENT=jsonv2` build tag in Go 1.26).
-- **Strategic pivot (ADR-0008)** — re-centred the SDK as a single-aggregate, pull-only sync toolkit; explicit scope boundary against multi-aggregate generalisation (ADR-0004).
+- **Strategic pivot (ADR-0008)** — re-centred the SDK as a single-aggregate, pull-only sync toolkit; explicit scope boundary against multi-aggregate generalisation (ADR-0004). The broader `Host` framework pivot proposed in ADR-0008 was **not** executed — the project stayed within ADR-0004 scope.
 - **Per-source serialization** split into lock-free `runSync`/`runSyncIncremental` to avoid re-entrant deadlock when incremental falls back to full.
+- **CI hardening** — `cancel-in-progress`, `paths-ignore`, per-job `timeout-minutes`; cross-platform build matrix verifies library compilation (linux/darwin × amd64/arm64).
 - **Dependencies** — `go-error-family` v0.7.0, `huma/v2` v2.39.0, `go-branded-id` v0.3.2, `modernc.org/sqlite` v1.54.0, `charm.land/log/v2` v2.0.0.
-- `flake.lock` refreshed to the latest nixpkgs revision; `CONTRIBUTING.md` streamlined to a minimal two-command setup guide.
+- `flake.nix` now derives `version` from git revision; `CONTRIBUTING.md` streamlined.
+
+### Removed
+
+- **CRDT distributed-sync types** — `VectorClock`, `Operation[T]`, `SyncMessage`, and the multi-writer protocol types deleted. A single-writer pull mirror has no second writer and no causal ordering to track (see ADR-0004).
+- **QueryDispatcher** — removed by design. Reads call the `ReadModel` directly (see note in `stack_adapters.go`); the command side stays dispatched for logging/retry/validation middleware.
+
+### Fixed
+
+- **Projection version-gate TOCTOU race** — concurrent live + replay delivery for the same aggregate could let a stale event resurrect a tombstoned row. Now mutex-guarded so deliveries serialize per aggregate.
+- **`NewCQRSStack` resource leak** — error paths after store creation could leak store/bus/db/goroutine resources. Now uses named returns + cleanup defer.
+- **Aggregate-ID collision and `hasChanged` data loss** — content-hash comparison was silently dropping items; aggregate-ID parsing was swallowing errors and caching zero values.
+- **Partial-sync error dropping** — `ConflictAwareSyncer` silently dropped item-level errors when some items failed validation/persistence but the run completed. Now surfaces `ErrPartialSync` (Transient).
+- **SQLite read model dropping columns** — `ContentHash` and `SchemaVersion` were silently dropped on upsert. SQLite error chains now preserved via multi-`%w` wrapping so `errors.Is` and `errors.As` both work.
+- **`Since` filter boundary** — SQLite exclusive `>` corrected to inclusive `>=` to match the memory read model.
 
 ## [0.3.0] - 2026-06-23
 
