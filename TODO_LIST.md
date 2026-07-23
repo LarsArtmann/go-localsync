@@ -43,7 +43,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Code Quality
 
-- [ ] **Improve `pkg/cqrs` coverage (80.9%)**
+- [ ] **Improve `pkg/cqrs` coverage (82.5%)**
       **Source:** `pkg/cqrs/`
       **Description:** Add tests for remaining error paths and store-factory branches.
 

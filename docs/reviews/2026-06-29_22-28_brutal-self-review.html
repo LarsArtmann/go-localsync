@@ -968,7 +968,7 @@
         <section id="verdict">
           <h2>Verdict</h2>
           <div class="card card-problem">
-            <span class="tag">NOT DONE YET</span>
+            <span class="tag">~~NOT DONE YET~~ RESOLVED (v0.4.0)</span>
             <p>
               Two prior sessions declared "production-ready" while a projection race, a constructor
               leak, and a validation gap sat in the code. This session's three-agent investigation
@@ -980,6 +980,72 @@
                 >correct under concurrent delivery, leak-free on error paths, validated at the
                 boundary.</em
               >
+              <br /><br />
+              <strong>Update 2026-07-22:</strong> All CRITICAL and HIGH findings were fixed and
+              shipped in <strong>v0.4.0</strong> (2026-07-18). See
+              <a href="#resolution">Resolution</a> below for the item-by-item status.
+            </p>
+          </div>
+        </section>
+
+        <section id="resolution">
+          <h2>Resolution (2026-07-22)</h2>
+          <div class="card card-solution">
+            <span class="tag">ALL CRITICAL FIXED</span>
+            <h3>Every CRITICAL and HIGH finding from this review shipped in v0.4.0</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-strong);">
+                  <th style="text-align: left; padding: 0.5rem;">Finding</th>
+                  <th style="text-align: left; padding: 0.5rem;">Severity</th>
+                  <th style="text-align: left; padding: 0.5rem;">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 0.5rem;">Projection version-gate TOCTOU race</td>
+                  <td style="padding: 0.5rem;">CRITICAL</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">FIXED — mutex-guarded</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 0.5rem;">NewCQRSStack resource leak on error paths</td>
+                  <td style="padding: 0.5rem;">CRITICAL</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">FIXED — named returns + defer</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 0.5rem;">provider.Item.Validate omits UpdatedAt</td>
+                  <td style="padding: 0.5rem;">HIGH</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">FIXED — UpdatedAt required</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 0.5rem;">AggregateID swallows parse error + caches zero</td>
+                  <td style="padding: 0.5rem;">HIGH</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">FIXED — error surfaced</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 0.5rem;">SQLite %v wrapping severs error chain</td>
+                  <td style="padding: 0.5rem;">MED</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">FIXED — multi-%w wrapping</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 0.5rem;">SQLite drops ContentHash/SchemaVersion</td>
+                  <td style="padding: 0.5rem;">MED</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">FIXED — columns in DDL</td>
+                </tr>
+                <tr style="border-bottom: 1px solid var(--border);">
+                  <td style="padding: 0.5rem;">Since filter boundary (&gt; vs &gt;=)</td>
+                  <td style="padding: 0.5rem;">MED</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">FIXED — inclusive &gt;=</td>
+                </tr>
+                <tr>
+                  <td style="padding: 0.5rem;">27 ghost systems / 10 split brains</td>
+                  <td style="padding: 0.5rem;">LOW</td>
+                  <td style="padding: 0.5rem; color: var(--solution);">CLEANED — ghosts removed in sessions 26-27</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="margin-top: 1rem;">
+              216 tests, 0 lint issues, race-clean. Full details in CHANGELOG.md <code>[0.4.0] Fixed</code>.
             </p>
           </div>
         </section>

@@ -192,16 +192,16 @@ _Generated 2026-06-29 15:47 CEST. Point-in-time snapshot — verify against code
 
 This snapshot was taken at go-cqrs-lite v3.3–v3.4. Since then, **v0.4.0** shipped (2026-07-18) with major changes:
 
-| Claim in this report | Current state |
-| -------------------- | ------------- |
-| 190 tests, go-cqrs-lite v3.3–v3.4 | **216 tests**, go-cqrs-lite **v4** (all modules at v4.x paths) |
-| CI `build`/`release` jobs broken | **Fixed** — cross-platform compile verify + binary-free GitHub releases |
-| `nix flake check` permanently broken | **Fixed** — nixpkgs `go_1_26` now at 1.26.4 |
-| vendor/ drift recurring | Still requires manual `GOWORK=off go mod vendor` + force-add, but documented in AGENTS.md |
-| `pkg/cqrs` coverage 82.1% | **82.5%** |
-| Tombstones / projectionhost | **Shipped** — ADR-0005 (tombstones) + ADR-0006 (`projectionhost.Host` with checkpoint, DLQ, crash-restart) |
-| Error-handling overhaul | **Shipped** — `go-error-family` constructors, `pkgerrors.HTTPStatus`, `WithCtx`/`InvalidField`, partial-sync surfacing |
-| De-githubify | **Shipped** — ADR-0007, provider-agnostic `Attributes` map |
-| cqrs-lint | **Shipped** — 10 AST invariants (C0001–C0010) |
+| Claim in this report                 | Current state                                                                                                          |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| 190 tests, go-cqrs-lite v3.3–v3.4    | **216 tests**, go-cqrs-lite **v4** (all modules at v4.x paths)                                                         |
+| CI `build`/`release` jobs broken     | **Fixed** — cross-platform compile verify + binary-free GitHub releases                                                |
+| `nix flake check` permanently broken | **Fixed** — nixpkgs `go_1_26` now at 1.26.4                                                                            |
+| vendor/ drift recurring              | Still requires manual `GOWORK=off go mod vendor` + force-add, but documented in AGENTS.md                              |
+| `pkg/cqrs` coverage 82.1%            | **82.5%**                                                                                                              |
+| Tombstones / projectionhost          | **Shipped** — ADR-0005 (tombstones) + ADR-0006 (`projectionhost.Host` with checkpoint, DLQ, crash-restart)             |
+| Error-handling overhaul              | **Shipped** — `go-error-family` constructors, `pkgerrors.HTTPStatus`, `WithCtx`/`InvalidField`, partial-sync surfacing |
+| De-githubify                         | **Shipped** — ADR-0007, provider-agnostic `Attributes` map                                                             |
+| cqrs-lint                            | **Shipped** — 10 AST invariants (C0001–C0010)                                                                          |
 
 **Still open:** OpenTelemetry wiring, API auth/rate-limiting, making `go-cqrs-lite` public. See TODO_LIST.md.
