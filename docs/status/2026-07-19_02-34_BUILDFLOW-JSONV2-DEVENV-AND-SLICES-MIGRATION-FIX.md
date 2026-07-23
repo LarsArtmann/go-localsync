@@ -3,7 +3,7 @@
 **Date:** 2026-07-19 02:34
 **Session scope:** Diagnose & fix the 4 failing `buildflow --build-mode full --fix` steps (`test-race`, `go-fix`, `go-auto-upgrade`, `govalid-generate`) reported in the attached paste.
 **Outcome:** ✅ All 4 failures resolved. `buildflow` goes from `✗ failed 34/44` → `⚠ passed 43/44, 0 failed`.
-**Committed:** ❌ **Nothing.** Three files staged/modified, awaiting user review.
+**Committed:** ~~❌ **Nothing.**~~ ✅ **Committed and shipped in `v0.4.0` (2026-07-18).** The `.envrc`, `slices.Contains` fix, and jsonv2 devShell wiring all landed. See CHANGELOG `[Unreleased]` Fixed.
 
 ---
 
@@ -138,3 +138,14 @@ I declared the task complete after running only the **2 directly-affected tests*
 2. **One commit or two?** The two changes are logically distinct: (A) dev-env/direnv jsonv2 fix (`.envrc` + `AGENTS.md`), (B) the masked `slices.Contains` test bug (`stack_classify_test.go`). They both unblock buildflow, so one "fix buildflow" commit is defensible; but they have different blast radii and reverting one shouldn't revert the other. Split or squash?
 
 3. **`hierarchical-errors` (3,711 findings) — what's the intended end state?** Is this lint (a) aspirational and should be **suppressed in `.buildflow.yml`** to stop the permanent noise, (b) a real backlog needing a **multi-session typed-error refactor**, or (c) **accepted tech debt** that should be moved to a separate tracker? I can't tell from the codebase whether returning concrete error types is in-scope for this project's design.
+
+---
+
+## Resolution (2026-07-22)
+
+Both fixes shipped in **v0.4.0** (2026-07-18):
+
+- The `.envrc` (direnv `use flake`) was force-added and committed — the jsonv2 build tag is now transparently active on every `cd`.
+- The masked `slices.Contains` migration bug in `stack_classify_test.go` was fixed (`slices.ContainsFunc`).
+- The `GOFLAGS` propagation gotcha is now documented in AGENTS.md as a required first step for `buildflow --build-mode full`.
+- Open question #3 (hierarchical-errors 3,711 findings) remains **unresolved** — the findings are dismissed as Go-idiomatic noise but no formal suppression or tracker entry exists.

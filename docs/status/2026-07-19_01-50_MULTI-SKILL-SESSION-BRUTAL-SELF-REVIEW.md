@@ -5,6 +5,8 @@
 **Author:** Crush (multi-skill session)
 
 > This report is brutally honest. The headline: the docs/analysis work landed cleanly, but a code change I made in the full-code-review **broke the project's lint gate** and I shipped it anyway because my "final verification" never ran golangci-lint. Details in §d.
+>
+> **Update 2026-07-22:** The lint regression (4 issues in `sqlite_readmodel.go`) was fixed; the SQL-injection fix and all doc changes shipped in `v0.4.0`. Test count corrected to 216. Full status in [Resolution](#resolution-2026-07-22) below.
 
 ---
 
@@ -242,3 +244,16 @@ I reclassified ADR-0008 from "Proposed — awaiting decision" to "Proposed — d
 ---
 
 _This report reflects only what I observed during this session. No unrelated research was performed. Verdict on the session: the analysis work is sound; the one code change is correct in intent but sloppy in execution (broke lint, stale docs). Fix the lint, recount the tests, commit._
+
+---
+
+## Resolution (2026-07-22)
+
+All work from this session shipped in **v0.4.0** (2026-07-18, tag `v0.4.0`):
+
+- The **lint regression** (4 issues: 1 gci, 3 wsl_v5 in `sqlite_readmodel.go` + `sqlite_readmodel_filter_test.go`) was fixed — golangci-lint back to 0 issues.
+- The **SQL-injection fix** (`validateAttributeKey()` in `sqlite_query.go`) shipped with regression tests.
+- The **test count** was corrected to **216** (not 214) across all living docs.
+- All 9 HTML reports + 2 D2 diagrams from this session are committed.
+- The 3 data-model-review hardening recommendations (`ItemFilter.Validate()`, branded `ContentHash`, typed `attrs` accessors) remain **open** — see TODO_LIST and ROADMAP.
+- ADR-0008 reclassified as **Proposed — dormant** (not Rejected); the Host framework was never built.
