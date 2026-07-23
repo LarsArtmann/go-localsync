@@ -45,7 +45,12 @@
       imports = [ inputs.treefmt-nix.flakeModule ];
 
       perSystem =
-        { config, pkgs, lib, ... }:
+        {
+          config,
+          pkgs,
+          lib,
+          ...
+        }:
         let
           goTags = [
             "goexperiment.jsonv2"
@@ -68,7 +73,7 @@
             };
           };
 
-          vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+          vendorHash = "sha256-KlOSj0kB3UT9JDXZ+NoV1Zqf5XbTk6zVmnqEyFe9uYc=";
 
           modFodAttrs = {
             proxyVendor = false;
@@ -103,7 +108,12 @@
               version = self.rev or self.dirtyRev or "dev";
               src = preparedSrc;
               inherit vendorHash;
-              inherit (modFodAttrs) proxyVendor modBuildPhase modInstallPhase preBuild;
+              inherit (modFodAttrs)
+                proxyVendor
+                modBuildPhase
+                modInstallPhase
+                preBuild
+                ;
               meta = with pkgs.lib; {
                 description = "Generic synchronization SDK with CQRS";
                 homepage = "https://github.com/larsartmann/go-localsync";
@@ -122,7 +132,12 @@
               version = self.rev or self.dirtyRev or "dev";
               src = preparedSrc;
               inherit vendorHash;
-              inherit (modFodAttrs) proxyVendor modBuildPhase modInstallPhase preBuild;
+              inherit (modFodAttrs)
+                proxyVendor
+                modBuildPhase
+                modInstallPhase
+                preBuild
+                ;
               subPackages = [ "cmd/cqrs-lint" ];
               meta = with pkgs.lib; {
                 description = "Static CQRS architectural-invariant linter";
