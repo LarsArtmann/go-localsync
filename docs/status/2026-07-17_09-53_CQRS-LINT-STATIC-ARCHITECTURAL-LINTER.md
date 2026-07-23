@@ -254,3 +254,16 @@ ADR-0004 says "one aggregate, three events, one projection." The 10 rules enforc
 ### Q3: Should the CI gate be `go run ./cmd/cqrs-lint` (native) or `nix run .#cqrs-lint` (nix)?
 
 The project has both a native Go CI (`.github/workflows/ci.yml` with `go build`/`go test`/`golangci-lint`) and nix checks (`nix flake check`). The native CI is faster and doesn't need the nixpkgs Go version to match. The nix check is more hermetic but currently blocked by the Go 1.26.4 vs 1.26.3 lag. Which should be the canonical gate? This depends on whether the project plans to fix the nixpkgs lag or accept the native CI as the primary gate.
+
+---
+
+## Resolution (2026-07-22)
+
+`cqrs-lint` shipped in **v0.4.0** (2026-07-18). Current state:
+
+- **23 tests, 88.5% coverage** — all passing.
+- **nixpkgs Go lag resolved** — `go_1_26` is now at 1.26.4, so `nix flake check` passes in-sandbox.
+- **golangci-lint integration** — cqrs-lint is wired into `.golangci.yml` and `flake.nix checks.cqrs-lint`.
+- **CLI tests** remain at **zero coverage** — the `cmd/cqrs-lint/main.go` binary itself is untested. This is the main remaining gap.
+- The `-json` output was refactored (Finding helper constructors extracted across all checks in post-v0.4.0 refactoring).
+- **Still open:** `--version`/`--quiet`/`--format=github` flags, `testdata/` directory pattern, CI workflow step for cqrs-lint.

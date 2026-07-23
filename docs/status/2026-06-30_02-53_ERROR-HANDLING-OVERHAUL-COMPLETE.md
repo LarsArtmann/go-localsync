@@ -236,3 +236,15 @@ bcff39a Promote partial-sync failure into the error taxonomy
 ```
 
 All pushed to `origin/master` (`ce3a726..bab6daa`).
+
+---
+
+## Resolution (2026-07-22)
+
+The error-handling overhaul shipped in **v0.4.0** (2026-07-18). Since this report:
+
+- **CHANGELOG.md** now has a proper `[0.4.0]` section recording the full overhaul (was stale at the time of this report).
+- **Test count** corrected to **216** across all living docs (this report said 177 + 7 bench + 3 example).
+- The **`retryAfterer` dead-code** concern flagged here was resolved — it's now wired via `errors.AsType` for Retry-After header lookup.
+- The **`Conflict` error family (409) unused** concern remains accepted design — conflicts are tracked as `SyncAction`/event types, not error-family-classified errors (correct for a single-writer pull mirror).
+- **go-error-family** is now at v0.7.0 (was v0.5.0 at time of report).
