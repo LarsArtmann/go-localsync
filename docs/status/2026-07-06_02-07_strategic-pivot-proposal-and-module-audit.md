@@ -219,3 +219,17 @@ This is a fundamental architectural decision I cannot resolve without your input
 - **Option C: Host wraps but doesn't own** (Host takes the Bundle, uses it, but never closes it — consumer closes after `Run` returns). This is what go-localsync's current `CQRSStack` effectively does. Clean separation but requires the consumer to understand drain ordering.
 
 This decision cascades into the entire Host API surface. I can't design the Option pattern, the lifecycle methods, or the error handling until it's resolved. Every consumer does it differently today (github-local-sync: consumer owns; bank-sync: consumer owns; DiscordSync: DI container owns).
+
+---
+
+## Resolution (2026-07-22)
+
+**ADR-0008 was never executed — the Host framework was never built.** The project stayed within ADR-0004 scope (single-aggregate, pull-only). Since this report:
+
+- **`MemoryDeadLetterStore` in production** — **fixed**. The `projectionhost.Host` now uses a persistent DLQ (wired in session 26, shipped in v0.4.0).
+- **projectionhost already existed** — the report's blind spot ("didn't notice go-localsync ALREADY has projectionhost integration") was correct; the integration was further hardened (v3 → v4, DLQ wired).
+- **All 4 proposal phases remain 0%** — no `pkg/host/`, `pkg/reconcile/`, or `pkg/projection/` framework packages exist. `pkg/cqrs/` actually grew (~2,089 LOC).
+- **go-cqrs-lite** upgraded from v3.5 to **v4** (JSON v2). The `stack/` layer the proposal referenced has evolved further.
+- **Trigger to revisit:** a 3rd consumer hitting the boilerplate wall. No such consumer has appeared.
+
+Full resolution in `docs/strategy/2026-07-05_localsync-v2-sync-toolkit-proposal.md` Resolution section.

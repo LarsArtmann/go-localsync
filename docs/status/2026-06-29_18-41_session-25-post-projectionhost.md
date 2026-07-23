@@ -231,3 +231,14 @@ Sorted by **impact ↑ / effort ↓** (Pareto).
 | `019f7b0` | 24      | Justify QueryDispatcher bypass with benchmark data                          |
 | `2f8c270` | 24      | Remove context.Value outcome smuggling and make conflict detection explicit |
 | `5114e4f` | 24      | Stop golangci-lint fmt from reformatting vendored third-party code          |
+
+---
+
+## Resolution (2026-07-22)
+
+projectionhost shipped in **v0.4.0** (2026-07-18) as `projectionhost/v4` (upgraded from v3):
+
+- **DLQ not wired** (the #1 finding in this report) — **fixed**. `projectionhost` is now created with `WithDeadLetterStore`; poison messages are captured instead of crashing the worker.
+- **projectionhost/v3** → **v4** (JSON v2 migration).
+- **Test count** is now **216** (this report said 191).
+- **Still open:** OpenTelemetry wiring, `UpcasterRegistry` adoption, API auth/rate-limiting — see TODO_LIST.md.

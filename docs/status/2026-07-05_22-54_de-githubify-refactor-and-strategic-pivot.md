@@ -210,3 +210,14 @@ The de-GitHubify refactor made the SDK genuinely provider-agnostic. But with onl
 If the answer is "merge into github-local-sync," the pull-mirror machinery becomes internal and the abstraction boundary disappears. If the answer is "keep standalone + upstream to go-cqrs-lite," we invest in making go-cqrs-lite better for both projects. If the answer is "keep standalone as-is," we're betting that a third pull-mirror consumer will appear.
 
 This is a product/ownership decision, not a technical one — I can't resolve it from the code alone.
+
+---
+
+## Resolution (2026-07-22)
+
+The de-githubify refactor shipped in **v0.4.0** (2026-07-18, ADR-0007). Since this report:
+
+- **De-githubify committed** — `ActorLogin`/`ActorAvatarURL`/`RepoName`/`RepoURL` removed from `provider.Item`/`model.Item`; provider-specific content flows through `Attributes map[string]string`; `hasChanged` is ContentHash-first; schema bumped to V3.
+- **ADR-0008** (Host framework pivot) — **Proposed, dormant**. Never executed. The project stayed within ADR-0004 scope.
+- **5 adoption-feedback gaps** — correctly identified as ADR-0004 scope boundaries. They remain **deferred by design**.
+- **The product question** (standalone vs merge vs upstream) — **still open**. go-localsync remains standalone; `go-cqrs-lite` remains private.

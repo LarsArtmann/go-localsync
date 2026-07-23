@@ -236,3 +236,17 @@ Sorted by **impact ↑ / effort ↓** (Pareto).
 - `docs/reviews/2026-06-29_17-52_brutal-self-review.html` — 11-question honest self-review
 - `docs/planning/2026-06-29_17-52_session-24-execution-plan.html` — Pareto-sorted execution plan
 - `docs/status/2026-06-29_18-01_session-24-comprehensive-status.md` — this report
+
+---
+
+## Resolution (2026-07-22)
+
+Session 24's fixes all shipped. Since this report, **v0.4.0** landed:
+
+- **`go mod tidy` broken** — **fixed** by the v4 migration (the v3 nested-`eventtest` blocker is gone; `go mod tidy` now works).
+- **`otel/v3` vendored but unused** — replaced by `otel/v4` (still vendored, still unwired — OpenTelemetry instrumentation remains in TODO_LIST).
+- **CI `build`/`release` broken** — **fixed** (cross-platform compile verify + binary-free releases).
+- **`gopkg.in/yaml.v3` transitive** — resolved in dependency refreshes.
+- **projectionhost/v3** → upgraded to **projectionhost/v4** (ADR-0006), now with DLQ wired.
+- **`encoding/json` v1→v2** — **done** (adopted `encoding/json/v2` via `GOEXPERIMENT=jsonv2`).
+- **Test count** is now **216** (this report said 190).

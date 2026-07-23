@@ -161,3 +161,14 @@ I need to know Lars's actual intent + whether other consumers are real before pr
 | Coverage low spots         | `pkg/data/model` 80.5%, `pkg/cqrs` 82.1% | `go test -cover`                                            |
 | ADRs                       | 0001–0005                                | `docs/adr/`                                                 |
 | `go.work` on disk          | absent (correct)                         | `ls go.work`                                                |
+
+---
+
+## Resolution (2026-07-22)
+
+This session correctly identified doc drift but could not fix it all. Since then:
+
+- **CHANGELOG.md** is no longer frozen at v0.1.0 — it now has `[0.2.0]` through `[0.4.0]` sections.
+- **Test count** is **216** (this report said 190; the "224" in docs was also wrong — it counted benchmarks/examples).
+- **`VectorClock`/`Operation[T]`/`SyncMessage`** — deleted entirely (CRDT distributed types removed, ADR-0004 scope). `LWWResolver` and `Conflict[T]` remain.
+- **`pkg/sync` rename to `pkg/synclib`** — **not done** (accepted tech debt; the stdlib collision is handled with `stdsync` alias).
