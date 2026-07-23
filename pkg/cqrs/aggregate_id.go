@@ -25,25 +25,25 @@ func itemKey(source string, externalID id.ExternalID) string {
 //nolint:gochecknoglobals // immutable append-only cache, not mutable global state
 var aggIDCache sync.Map
 
-// AggregateID returns a deterministic AggregateID derived from (source, externalID).
+// AggregateID returns a deterministic stream ID derived from (source, externalID).
 // Same inputs always produce the same ID. Results are cached for O(1) repeat lookups.
-func AggregateID(source string, externalID id.ExternalID) cqrsid.AggregateID {
+func AggregateID(source string, externalID id.ExternalID) cqrsid.StreamID {
 	key := itemKey(source, externalID)
 
 	if cached, ok := aggIDCache.Load(key); ok {
-		return cached.(cqrsid.AggregateID) //nolint:forcetypeassert // type is always cqrsid.AggregateID
+		return cached.(cqrsid.StreamID) //nolint:forcetypeassert // type is always cqrsid.StreamID
 	}
 
 	h := sha256.Sum256([]byte(key))
 	hexID := hex.EncodeToString(h[:16])
 
-	result, err := cqrsid.ParseAggregateID(hexID)
+	result, err := cqrsid.ParseStreamID(hexID)
 	if err != nil {
-		// ParseAggregateID only fails on empty input. A SHA256 hex of 16
+		// ParseStreamID only fails on empty input. A SHA256 hex of 16
 		// bytes is always 32 chars, so this is unreachable — fail fast
-		// rather than caching a zero AggregateID that would collide every
+		// rather than caching a zero StreamID that would collide every
 		// subsequent call for different keys.
-		panic(fmt.Sprintf("cqrs: ParseAggregateID failed for valid hex %q: %v", hexID, err))
+		panic(fmt.Sprintf("cqrs: ParseStreamID failed for valid hex %q: %v", hexID, err))
 	}
 
 	aggIDCache.Store(key, result)

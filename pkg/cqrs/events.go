@@ -7,7 +7,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
 )
 
-const aggregateType event.AggregateType = "sync_item"
+const aggregateType event.StreamType = "sync_item"
 
 const (
 	// EventItemSynced is emitted when an item is created or updated. Folding it

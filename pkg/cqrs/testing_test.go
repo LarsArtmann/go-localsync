@@ -124,7 +124,7 @@ func mustNewTestEvent(eventType event.Type, payload any) *event.ImmutableEvent {
 		panic(err)
 	}
 
-	aggID := cqrsid.NewAggregateID()
+	aggID := cqrsid.NewStreamID()
 
 	evt, err := event.NewEvent(eventType, aggID, aggregateType, 1, data)
 	if err != nil {

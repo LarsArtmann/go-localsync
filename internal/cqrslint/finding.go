@@ -46,15 +46,6 @@ func errorAt(pkg *Package, node ast.Node, rule, message string) Finding {
 	}
 }
 
-// warningAt constructs a SeverityWarning Finding positioned at node.
-func warningAt(pkg *Package, node ast.Node, rule, message string) Finding {
-	file, line := pkg.PositionFor(node)
-
-	return Finding{
-		Rule: rule, Severity: SeverityWarning, File: file, Line: line, Message: message,
-	}
-}
-
 // errorMsg constructs a SeverityError Finding without a position — used for
 // whole-file or whole-package violations where no specific node applies.
 func errorMsg(rule, message string) Finding {

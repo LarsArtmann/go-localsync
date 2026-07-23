@@ -15,21 +15,26 @@ type specHit struct {
 }
 
 // isSelectorType reports whether expr is the selector `pkgName.selName`
-// (e.g. event.Type, event.AggregateType).
-func isSelectorType(expr ast.Expr, pkgName, selName string) bool {
+// (e.g. event.Type, event.StreamType).
+func isSelectorType(expr ast.Expr, pkgName string, selNames ...string) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
-	if !ok || sel.Sel == nil || sel.Sel.Name != selName {
+	if !ok || sel.Sel == nil {
 		return false
 	}
 
-	ident, ok := sel.X.(*ast.Ident)
+	for _, name := range selNames {
+		if sel.Sel.Name == name {
+			ident, ok := sel.X.(*ast.Ident)
+			return ok && ident.Name == pkgName
+		}
+	}
 
-	return ok && ident.Name == pkgName
+	return false
 }
 
 // collectConstSpecsByType returns every const ValueSpec whose declared type is
-// `pkgName.selName` (e.g. all `event.Type` consts).
-func collectConstSpecsByType(pkg *Package, pkgName, selName string) []specHit {
+// `pkgName.<any selName>` (e.g. all `event.Type` consts).
+func collectConstSpecsByType(pkg *Package, pkgName string, selNames ...string) []specHit {
 	var hits []specHit
 
 	visitGenDecls(pkg, func(_ *ast.File, decl *ast.GenDecl) {
@@ -39,7 +44,7 @@ func collectConstSpecsByType(pkg *Package, pkgName, selName string) []specHit {
 
 		for _, spec := range decl.Specs {
 			valueSpec, ok := spec.(*ast.ValueSpec)
-			if !ok || !isSelectorType(valueSpec.Type, pkgName, selName) {
+			if !ok || !isSelectorType(valueSpec.Type, pkgName, selNames...) {
 				continue
 			}
 

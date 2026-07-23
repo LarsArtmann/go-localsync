@@ -19,7 +19,7 @@ const commandTypeSyncItem command.Type = "sync_item.sync"
 
 const commandTypeTombstone command.Type = "sync_item.tombstone"
 
-func mustNewCommand(cmdType command.Type, aggID cqrsid.AggregateID) command.BasicCommand {
+func mustNewCommand(cmdType command.Type, aggID cqrsid.StreamID) command.BasicCommand {
 	cmd, err := command.New(cmdType, aggID)
 	if err != nil {
 		panic(fmt.Sprintf("command.New(%s): %v", cmdType, err))

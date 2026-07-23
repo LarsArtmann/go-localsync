@@ -220,7 +220,7 @@ func resolveConflict(
 func syncEvents(
 	item *model.Item,
 	rawJSON []byte,
-	aggID cqrsid.AggregateID,
+	aggID cqrsid.StreamID,
 	version event.Version,
 	conflict *conflictMeta,
 	opts ...event.Option,

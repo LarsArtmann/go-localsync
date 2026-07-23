@@ -77,7 +77,7 @@ func TestRegression_HasChanged_ContentHash(t *testing.T) {
 func newVersionedTestEvent(
 	t *testing.T,
 	eventType event.Type,
-	aggID cqrsid.AggregateID,
+	aggID cqrsid.StreamID,
 	version event.Version,
 	payload any,
 ) event.Event {
