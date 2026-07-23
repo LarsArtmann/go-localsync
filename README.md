@@ -155,7 +155,7 @@ The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | **Decider**      | Pure Apply/DecideSync/DecideTombstone — single authority for state transitions (`SyncItemState{Item *model.Item}`)          |
 | **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`                                                                         |
-| **Projection**   | Live events via synchronous `bus.SubscribeAll`; SQLite catch-up via background `runner.replayJournal` (no checkpoint store) |
+| **Projection**   | Live events via synchronous `bus.SubscribeAll`; SQLite catch-up via `projectionhost.Host` (checkpoint persistence, crash auto-restart, DLQ) |
 | **Read Model**   | In-memory or SQLite with filter/pagination, stores `*model.Item`                                                            |
 | **Aggregate ID** | Deterministic SHA256→hex from (source, sourceID) for idempotency                                                            |
 
@@ -170,7 +170,7 @@ The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/
 - **Pluggable conflict resolution**: inject any `crdt.ConflictResolver[*model.Item]` for custom merge logic
 - **Resilient fetch**: exponential backoff with jitter, honors `errors.IsRetryable`, optional Retry-After
 - **Per-source serialization**: concurrent syncs of the same source are ordered; different sources run in parallel
-- **Projection**: synchronous live subscription + background journal replay (idempotent, no checkpoint store needed)
+- **Projection**: synchronous live subscription + managed `projectionhost.Host` catch-up (checkpoint persistence, crash auto-restart, dead-letter queue)
 - **Snapshots**: caps replay cost by persisting aggregate state every N events
 - **Correlation IDs**: unique per sync run for cross-event tracing and debugging
 
@@ -245,7 +245,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (214 tests across 10 packages)
+go test ./... -count=1                # Run tests (216 tests across 10 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -271,12 +271,12 @@ pkg/
 
 ## Testing
 
-214 test functions across 10 packages:
+216 test functions across 10 packages:
 
 | Package             | Tests | Coverage | Description                                                             |
 | ------------------- | ----- | -------- | ----------------------------------------------------------------------- |
-| `pkg/cqrs`          | 93    | 80.9%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
-| `pkg/sync`          | 32    | 88.0%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
+| `pkg/cqrs`          | 95    | 82.5%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
+| `pkg/sync`          | 32    | 88.4%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
 | `pkg/crdt`          | 7     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/id`            | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                 |
 | `pkg/errors`        | 16    | 92.9%    | Sentinel errors, wrapping, classification, IsRetryable, HTTPStatus      |
@@ -284,7 +284,7 @@ pkg/
 | `pkg/api`           | 15    | 93.1%    | Server, routes, handlers, health/stats/items/sync endpoints             |
 | `pkg/data/model`    | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                              |
 | `pkg/data/schema`   | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
-| `internal/cqrslint` | 23    | 89.5%    | 10 architectural checks (C0001–C0010), loader, rules catalog            |
+| `internal/cqrslint` | 23    | 88.5%    | 10 architectural checks (C0001–C0010), loader, rules catalog            |
 
 ## Related Projects
 

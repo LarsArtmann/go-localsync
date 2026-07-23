@@ -147,8 +147,8 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package             | Tests | Coverage | Status                                                                                                         |
 | ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`          | 93    | 80.9%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
-| `pkg/sync`          | 32    | 88.0%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
+| `pkg/cqrs`          | 95    | 82.5%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
+| `pkg/sync`          | 32    | 88.4%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
 | `pkg/id`            | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
 | `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
 | `pkg/provider`      | 2     | 92.3%    | ✅ Item validation                                                                                             |
@@ -156,9 +156,9 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/crdt`          | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
 | `pkg/data/model`    | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
-| `internal/cqrslint` | 23    | 89.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog                           |
+| `internal/cqrslint` | 23    | 88.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog                           |
 
-**214 total test functions** across 10 test packages.
+**216 total test functions** across 10 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -204,19 +204,19 @@ Two tables managed by the CQRS stack:
 
 | Dependency                         | Version | Purpose                                                                                                     |
 | ---------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `go-cqrs-lite/event/v4`            | v4.0.2  | Event types, Store, Bus, Journal, `Version` (uint64), `Instant`/`WallTime` (requires `GOEXPERIMENT=jsonv2`) |
-| `go-cqrs-lite/command/v4`          | v4.0.0  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()`                                        |
+| `go-cqrs-lite/event/v4`            | v4.0.3  | Event types, Store, Bus, Journal, `Version` (uint64), `Instant`/`WallTime` (requires `GOEXPERIMENT=jsonv2`) |
+| `go-cqrs-lite/command/v4`          | v4.0.1  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()`                                        |
 | `go-cqrs-lite/query/v4`            | v4.0.0  | Indirect (transitive); no QueryDispatcher — reads call the ReadModel directly                               |
-| `go-cqrs-lite/decider/v4`          | v4.0.1  | Decider (`Apply` field), Repository, snapshot/codec options                                                 |
-| `go-cqrs-lite/id/v4`               | v4.0.1  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)                                                 |
-| `go-cqrs-lite/codec/v4`            | v4.0.2  | Codec interface, JSONCodec (CBOR `TimeUnixDynamic` nanosecond fix) — uses `encoding/json/v2`                |
-| `go-cqrs-lite/projection/v4`       | v4.0.0  | Projection interface (moved from `event/` in v3.2, ADR-0037)                                                |
-| `go-cqrs-lite/projectionhost/v4`   | v4.0.1  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)                                          |
-| `go-cqrs-lite/snapshot/v4`         | v4.0.1  | SnapshotStore, EveryNEvents strategy                                                                        |
-| `go-cqrs-lite/storage/memory/v4`   | v4.0.0  | In-memory event store + snapshot store (bus deleted in v3)                                                  |
-| `go-cqrs-lite/middleware/v4`       | v4.0.1  | EventLogging + CommandRetry middleware                                                                      |
-| `go-cqrs-lite/watermill/v4`        | v4.0.2  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                              |
-| `go-cqrs-lite/storage/v4`          | v4.0.1  | SQLite event store, snapshot, KV store                                                                      |
+| `go-cqrs-lite/decider/v4`          | v4.0.2  | Decider (`Apply` field), Repository, snapshot/codec options                                                 |
+| `go-cqrs-lite/id/v4`               | v4.0.2  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)                                                 |
+| `go-cqrs-lite/codec/v4`            | v4.0.3  | Codec interface, JSONCodec (CBOR `TimeUnixDynamic` nanosecond fix) — uses `encoding/json/v2`                |
+| `go-cqrs-lite/projection/v4`       | v4.0.1  | Projection interface (moved from `event/` in v3.2, ADR-0037)                                                |
+| `go-cqrs-lite/projectionhost/v4`   | v4.0.2  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)                                          |
+| `go-cqrs-lite/snapshot/v4`         | v4.0.2  | SnapshotStore, EveryNEvents strategy                                                                        |
+| `go-cqrs-lite/storage/memory/v4`   | v4.0.1  | In-memory event store + snapshot store (bus deleted in v3)                                                  |
+| `go-cqrs-lite/middleware/v4`       | v4.0.2  | EventLogging + CommandRetry middleware                                                                      |
+| `go-cqrs-lite/watermill/v4`        | v4.0.3  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                              |
+| `go-cqrs-lite/storage/v4`          | v4.0.2  | SQLite event store, snapshot, KV store                                                                      |
 | `go-branded-id`                    | v0.3.2  | Branded phantom-type IDs for compile-time safety                                                            |
 | `go-error-family`                  | v0.7.0  | Structured error classification + user-facing message templates                                             |
 | `modernc.org/sqlite`               | v1.54.0 | Pure-Go SQLite driver (no CGo)                                                                              |

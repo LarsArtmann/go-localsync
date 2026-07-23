@@ -1,99 +1,48 @@
 # ROADMAP.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-07-18
+**Last Updated:** 2026-07-22
 
 ## Overview
 
-Long-term direction and raw ideas not yet refined into actionable tasks. For short/mid-term work, see [TODO_LIST.md](TODO_LIST.md). For the feature inventory, see [FEATURES.md](FEATURES.md).
+Long-term direction and raw ideas not yet refined into actionable tasks. For short/mid-term work, see [TODO_LIST.md](TODO_LIST.md). For the feature inventory, see [FEATURES.md](FEATURES.md). For what shipped in each release, see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
-## ✅ COMPLETED
-
-- [x] **CQRS migration** — Full event-sourced architecture via go-cqrs-lite. Legacy CRUD deleted.
-- [x] **Deterministic aggregate IDs** — SHA256→hex from (source, sourceID) for idempotency.
-- [x] **Conflict-aware sync** — `DecideSync` detects conflicts and emits `ItemConflictFound` events.
-- [x] **Provider architecture** — Generic `Provider` interface; reference GitHub provider lives in the consumer app [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
-- [x] **Branded type IDs** — 6 phantom types for compile-time safety.
-- [x] **SQLite backend** — SQLite event store + read model + snapshots. Pure-Go via `modernc.org/sqlite`. Catch-up projection now runs via `projectionhost.Host` (ADR-0006) with checkpoint persistence + DLQ.
-- [x] **cockroachdb/errors removal** — Replaced with `go-error-family` constructors.
-- [x] **Zero lint issues** — golangci-lint v2 with `enable-all`, 0 issues.
-- [x] **HTTP API** — Huma v2 with 4 endpoints (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`). OpenAPI 3 spec auto-generated.
-- [x] **Error templates** — `RegisterErrorTemplates()` for all error codes with What/Why/Fix/WayOut.
-- [x] **Nix flake** — `flake.nix` with devShell + `buildGoModule` (vendored private deps).
-- [x] **CRDT conflict resolution** — `crdt.ConflictResolver[T]` wired into `DecideSync`. `LWWResolver` default. `ActionConflictLocal` support.
-- [x] **Pluggable conflict strategy** — `CQRSConfig.ConflictResolver` accepts any resolver. Default nil = remote-wins.
-- [x] **Pure contract library** — Removed all provider implementations and the example CLI. The SDK now defines the contract only; consumers implement providers. Reference consumer: [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
-- [x] **go-cqrs-lite v3 migration** — Migrated all modules to v3.0.0 paths. Adopted `watermill/v3` `EventBus` (replaces deleted `memory.NewMemoryBus`), `middleware.EventLogging` (replaces hand-rolled logging adapter), and `uint64` `event.Version`.
-- [x] **projection.Runner removal** — go-cqrs-lite v3 dropped `projection/`. Replaced with direct `bus.SubscribeAll` (synchronous live delivery) + background `runner.replayJournal` (SQLite catch-up). Idempotent projection tolerates replay/live overlap, so no checkpoint store is needed.
-- [x] **Exported ConflictWinner** — `ConflictWinnerRemote`/`ConflictWinnerLocal` constants + `ParseConflictWinner` for safe payload→enum decoding.
-- [x] **DTO/domain boundary** — `provider.Item` (DTO) ↔ `model.Item` (domain entity) via `item_adapter.go`. Decider, read model, events, and resolver all use `*model.Item`.
-- [x] **go-cqrs-lite v4 migration + JSON v2** — all modules moved to v4 paths; adopted `encoding/json/v2` (gated behind `GOEXPERIMENT=jsonv2` in Go 1.26). `watermill/v4` `EventBus`, `projection/v4` interface, `projectionhost/v4` managed host.
-- [x] **Tombstone soft-delete (ADR-0005)** — tombstones replace hard-deletes; hidden items keep full history; re-syncing resurrects via projection upsert; opt-in upstream reconciliation (`ReasonUpstreamGone`).
-- [x] **projectionhost adoption (ADR-0006)** — managed batch-drainer for resilient SQLite catch-up: checkpoint persistence, crash auto-restart with backoff, dead-letter queue for poison messages. Replaces the prior bare `replayJournal`.
-- [x] **De-githubify domain model (ADR-0007)** — `ActorLogin`/`RepoName`/`RepoURL`/`ActorAvatarURL` removed from `provider.Item`/`model.Item`; provider-specific content now flows through `Attributes map[string]string`. `hasChanged` is ContentHash-first (provider-agnostic).
-- [x] **De-githubify + scope re-affirmation (ADR-0007)** — `provider.Item`/`model.Item` stripped of GitHub-specific fields; SDK re-centred as a single-aggregate, pull-only sync engine. (The broader `Host` framework pivot proposed in ADR-0008 was **not** executed — the project stayed within ADR-0004 scope; ADR-0008 remains Proposed/dormant.)
-- [x] **cqrs-lint static architectural linter** — `internal/cqrslint` enforces 10 invariants (C0001–C0010) for `pkg/cqrs` (ADR-0004 scope guard). CLI: `cmd/cqrs-lint`. Zero third-party deps.
-- [x] **Error-handling overhaul** — `go-error-family` constructors with intrinsic classification, central `pkgerrors.HTTPStatus` mapping, `WithCtx`/`InvalidField` structured context, partial-sync surfacing (Transient `ErrPartialSync` → HTTP 200-with-result).
-- [x] **190 tests passing** — 9 packages, 0 lint issues. _(Now 214 tests across 10 packages — see FEATURES.md.)_
-
----
-
-## 🟢 FUTURE PHASES
+## Future Themes
 
 ### Enhanced Features
 
-- [ ] **Build TUI with Bubble Tea**
-      Interactive terminal UI for browsing events, filtering, and real-time sync. Lives in a consumer app, not the SDK.
-
-- [ ] **Support multiple user sync**
-      Accept multiple sources in one sync run. Requires read model schema to track which user each event belongs to.
-
-- [ ] **Daemon/background mode**
-      Run as cron job or systemd service for periodic sync. (Consumer-app concern.)
+- **TUI with Bubble Tea** — interactive terminal UI for browsing events, filtering, and real-time sync monitoring. Lives in a consumer app, not the SDK.
+- **Multiple-source sync** — accept multiple sources in one sync run. Requires read model schema to track which source each event belongs to.
+- **Daemon / background mode** — run as a cron job or systemd service for periodic sync. Consumer-app concern.
+- **Real-time sync protocol** — live multi-node sync. The former `SyncRequest`/`SyncResponse` types were removed when the CRDT machinery was deleted; this would need to be built from scratch and is out of scope per [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md).
 
 ### Data & Export
 
-- [ ] **Add export to JSON/CSV**
-      Export stored events to file formats.
-
-- [ ] **Conflict resolution per-sync override** — `SyncOptions.ConflictResolver` for per-sync strategy.
-
-- [ ] **Real-time sync protocol** — live multi-node sync. The former `SyncRequest`/`SyncResponse` types were removed when the CRDT machinery was deleted; this would need to be built from scratch and is out of scope per [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md).
+- **Export to JSON/CSV** — export stored events to file formats for analysis in external tools.
 
 ---
 
-## 🔧 TECHNICAL DEBT
+## Open Questions
 
-### CI/CD
-
-- [x] **Rework CI build & release jobs for a pure library**
-      The `build` job cross-compiles the deleted `./cmd/examples/github-sync` path (now in `github-local-sync`), and `release` depends on it — both fail. A pure library has no binary to build; rework to a library-appropriate release flow (or remove these jobs). **High priority.** — **Done (2026-06-29):** `build` now verifies cross-platform library compilation; `release` creates a binary-free GitHub release.
-
-### Code Quality
-
-- [ ] **OpenTelemetry instrumentation** — spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, HTTP middleware.
-
-- [ ] **API authentication middleware** — API key or JWT; the HTTP API is currently unauthenticated.
-
-- [ ] **API pagination headers** — `X-Total-Count`, cursor-based.
-
-- [ ] **Adopt `UpcasterRegistry`** from go-cqrs-lite for schema evolution (the `schema.Version` foundation is already in place).
+1. **Multi-source sync** — Should the read model track which source each event belongs to?
+2. **Event retention / TTL** — Automatic cleanup of old events? Configurable?
+3. **Library release flow** — What does a tagged release of a pure Go module look like without a binary? (CI reworked in v0.4.0 to verify cross-platform compilation + binary-free GitHub releases.)
+4. **Multi-aggregate generalisation** — Should go-localsync generalise beyond a single `sync_item` aggregate into a multi-aggregate event-sourcing framework? **Decided: deferred.** See [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [DiscordSync adoption feedback](docs/feedback/2026-06-23_discordsync-adoption-feedback.html). Revisit only if a third+ consumer needs it or `go-cqrs-lite` can't evolve the ergonomics. `go-cqrs-lite v4` remains the cross-project sharing boundary.
 
 ---
 
-## ❓ OPEN QUESTIONS
+## Non-Goals (Deliberate Scope Boundaries)
 
-1. **Multi-user sync** — Should the read model track which user each event belongs to?
-2. **Event retention/TTL** — Automatic cleanup of old events? Configurable?
-3. **Conflict resolution policy** — Configurable via `CQRSConfig.ConflictResolver`. A per-sync override (`SyncOptions.ConflictResolver`) is pending.
-4. **Library release flow** — What does a tagged release of a pure Go module look like without a binary? (Governs the CI rework above.)
-5. **Multi-aggregate generalisation** — Should go-localsync generalise beyond a single `sync_item` aggregate into a multi-aggregate event-sourcing framework? **Decided: deferred.** See [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [DiscordSync adoption feedback](docs/feedback/2026-06-23_discordsync-adoption-feedback.html). Revisit only if a third+ consumer needs it or `go-cqrs-lite` can't evolve the ergonomics. `go-cqrs-lite v4` remains the cross-project sharing boundary.
+- **Multi-writer / distributed sync** — the provider is the sole source of truth per aggregate. No vector clocks, no operation-based CRDTs, no multi-node merge (see [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md)).
+- **Push ingestion** — go-localsync is pull-only. Push-driven consumers share `go-cqrs-lite v4` directly.
+- **Provider implementations in-repo** — the SDK is a pure contract library. Concrete providers live in consumer apps (reference: [`github-local-sync`](https://github.com/larsartmann/github-local-sync)).
+- **Multi-aggregate framework** — one `sync_item` aggregate, three fixed events, one flat projection. Widening this requires revisiting ADR-0004.
 
 ---
 
-## 📑 RECORDED DECISIONS
+## Recorded Decisions
 
 | ADR                                                                  | Decision                                                                                                                                                                                                                                                                      | Status   |
 | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
