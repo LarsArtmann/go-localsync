@@ -15,6 +15,26 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    go-nix-helpers = {
+      url = "git+ssh://git@github.com/LarsArtmann/go-nix-helpers?ref=master";
+      flake = false;
+    };
+
+    go-cqrs-lite = {
+      url = "git+ssh://git@github.com/LarsArtmann/go-cqrs-lite?ref=master";
+      flake = false;
+    };
+
+    go-branded-id = {
+      url = "git+ssh://git@github.com/LarsArtmann/go-branded-id?ref=master";
+      flake = false;
+    };
+
+    go-error-family = {
+      url = "git+ssh://git@github.com/LarsArtmann/go-error-family?ref=master";
+      flake = false;
+    };
   };
 
   outputs =
@@ -25,23 +45,65 @@
       imports = [ inputs.treefmt-nix.flakeModule ];
 
       perSystem =
-        { config, pkgs, ... }:
+        { config, pkgs, lib, ... }:
         let
           goTags = [
             "goexperiment.jsonv2"
           ];
           tagFlags = builtins.concatStringsSep " " (map (t: "-tags=${t}") goTags);
+
+          mkPreparedSource = import (inputs.go-nix-helpers + "/mkPreparedSource.nix") {
+            inherit pkgs lib;
+            goPkg = pkgs.go_1_26;
+          };
+
+          preparedSrc = mkPreparedSource {
+            name = "go-localsync";
+            version = self.rev or self.dirtyRev or "dev";
+            src = ./.;
+            deps = {
+              "github.com/larsartmann/go-cqrs-lite" = inputs.go-cqrs-lite;
+              "github.com/larsartmann/go-branded-id" = inputs.go-branded-id;
+              "github.com/larsartmann/go-error-family" = inputs.go-error-family;
+            };
+          };
+
+          vendorHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+
+          modFodAttrs = {
+            proxyVendor = false;
+            modBuildPhase = ''
+              runHook preBuild
+              export GOCACHE=$TMPDIR/go-cache
+              export GOPATH="$TMPDIR/go"
+              cd "$modRoot"
+              go mod tidy
+              go mod vendor
+              mkdir -p vendor
+              runHook postBuild
+            '';
+            modInstallPhase = ''
+              cp -r --reflink=auto vendor $out
+              cp go.mod $out/go.mod
+              cp go.sum $out/go.sum
+            '';
+            preBuild = ''
+              if [ -n "''${goModules:-}" ] && [ -f "$goModules/go.mod" ]; then
+                cp "$goModules/go.mod" go.mod
+                cp "$goModules/go.sum" go.sum
+              fi
+              export GOEXPERIMENT=jsonv2
+            '';
+          };
         in
         {
           packages = {
             default = pkgs.buildGoModule {
               pname = "go-localsync";
               version = self.rev or self.dirtyRev or "dev";
-              src = ./.;
-              vendorHash = null;
-              preBuild = ''
-                export GOEXPERIMENT=jsonv2
-              '';
+              src = preparedSrc;
+              inherit vendorHash;
+              inherit (modFodAttrs) proxyVendor modBuildPhase modInstallPhase preBuild;
               meta = with pkgs.lib; {
                 description = "Generic synchronization SDK with CQRS";
                 homepage = "https://github.com/larsartmann/go-localsync";
@@ -55,16 +117,13 @@
               };
             };
 
-            # Static architectural-invariant linter for pkg/cqrs (ADR-0004).
             cqrs-lint = pkgs.buildGoModule {
               pname = "cqrs-lint";
               version = self.rev or self.dirtyRev or "dev";
-              src = ./.;
-              vendorHash = null;
+              src = preparedSrc;
+              inherit vendorHash;
+              inherit (modFodAttrs) proxyVendor modBuildPhase modInstallPhase preBuild;
               subPackages = [ "cmd/cqrs-lint" ];
-              preBuild = ''
-                export GOEXPERIMENT=jsonv2
-              '';
               meta = with pkgs.lib; {
                 description = "Static CQRS architectural-invariant linter";
                 homepage = "https://github.com/larsartmann/go-localsync";
@@ -105,6 +164,7 @@
           devShells = {
             default = pkgs.mkShell {
               GOFLAGS = tagFlags;
+              GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
               packages = with pkgs; [
                 go_1_26
                 golangci-lint
@@ -116,6 +176,7 @@
 
             ci = pkgs.mkShellNoCC {
               GOFLAGS = tagFlags;
+              GOPRIVATE = "github.com/larsartmann/*,github.com/LarsArtmann/*";
               packages = with pkgs; [
                 go_1_26
                 golangci-lint
