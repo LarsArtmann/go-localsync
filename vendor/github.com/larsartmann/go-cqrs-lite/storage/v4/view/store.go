@@ -79,6 +79,12 @@ type IndexSpec struct {
 	// Columns are the indexed column names. Composite indexes list
 	// multiple columns in order.
 	Columns []string
+	// Where optionally adds a partial-index predicate, producing
+	// `CREATE INDEX ... WHERE <where>`. Empty means a full (non-partial)
+	// index. Use partial indexes to keep frequently-filtered subsets small
+	// (e.g. `WHERE deleted_at IS NULL`). The caller is responsible for the
+	// SQL syntax — it is appended verbatim, no parameterisation.
+	Where string
 }
 
 // SQLViewStore is a [kv.ViewStore] backed by a dedicated SQL table with real
@@ -100,6 +106,41 @@ type SQLViewStore[V any, K fmt.Stringer] struct {
 
 	selectCols string // comma-separated column names for SELECT
 	colCount   int    // number of data columns (excluding key)
+
+	// exec optionally scopes data operations to a caller-managed transaction
+	// (see [SQLViewStore.InTx]). When nil, operations run against the
+	// connection pool ([DBHandle.DB], auto-commit). Schema migration methods
+	// (createTable/createIndexes) always use [DBHandle.DB] regardless of exec,
+	// because they run at construction before any transaction is opened.
+	exec sqlpkg.Executor
+}
+
+// executor returns the effective executor for data operations: the
+// transaction when one is scoped via [SQLViewStore.InTx], otherwise the
+// connection pool ([DBHandle.DB]).
+func (s *SQLViewStore[V, K]) executor() sqlpkg.Executor {
+	if s.exec != nil {
+		return s.exec
+	}
+
+	return s.DB
+}
+
+// InTx returns a shallow copy of the store scoped to tx. All data operations
+// (Set, Get, Delete, Query, Count, BatchSet, Scan) on the returned store
+// execute within tx — no auto-commit; commit/rollback is the caller's
+// responsibility. This lets a view store participate in a multi-statement
+// transaction alongside other writes (e.g. an event-sourced projection that
+// updates several read-model tables atomically).
+//
+// The returned store shares the mapper, dialect, and prepared column metadata
+// with the receiver. It must NOT outlive tx — use it only within the
+// transaction scope. The receiver itself is unaffected and continues to run
+// against the connection pool.
+func (s *SQLViewStore[V, K]) InTx(tx *sql.Tx) *SQLViewStore[V, K] {
+	cp := *s
+	cp.exec = tx
+	return &cp
 }
 
 // NewSQLiteViewStore creates a SQLViewStore for SQLite.
@@ -255,6 +296,9 @@ func (s *SQLViewStore[V, K]) createIndexes(ctx context.Context) error {
 	for _, idx := range s.mapper.Indexes {
 		stmt := fmt.Sprintf("CREATE INDEX IF NOT EXISTS %s ON %s (%s)",
 			idx.Name, s.mapper.Table, strings.Join(idx.Columns, ", "))
+		if idx.Where != "" {
+			stmt += " WHERE " + idx.Where
+		}
 		if _, err := s.DB.ExecContext(ctx, stmt); err != nil {
 			return errorfamily.WrapInfrastructure(err, "storage.view.create_index",
 				"create index "+idx.Name)

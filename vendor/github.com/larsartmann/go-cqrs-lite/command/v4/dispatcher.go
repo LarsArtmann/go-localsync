@@ -11,6 +11,18 @@ import (
 )
 
 // Dispatcher routes commands to their handlers.
+//
+// The struct + NewDispatcher + Use shape is duplicated in query.Dispatcher.
+// This is forced by Go's type system: command.Handler and query.Handler are
+// distinct function types, so each module needs its own Dispatcher instantiation
+// of the generic dispatcher.Dispatcher[H, M]. Embedding the inner dispatcher
+// would eliminate the Use wrapper but expose the inner *Dispatcher field,
+// breaking the encapsulation that the typed wrapper exists to provide.
+// Extracting a generic TypedWrapper[H, M] in the dispatcher package would
+// remove the struct duplication but at the cost of an extra public type and
+// the loss of the unexported `inner` field. The current 4-statement duplication
+// (struct/io.Closer/NewDispatcher/Use) is the minimum that preserves the typed,
+// encapsulated public API.
 type Dispatcher struct {
 	inner *dispatcher.Dispatcher[Handler, Middleware]
 }
@@ -36,22 +48,10 @@ func (d *Dispatcher) Register(cmdType Type, handler Handler) error {
 		return err
 	}
 
-	err = d.inner.Register(
-		string(cmdType),
-		handler,
-		func(m Middleware, h Handler) Handler {
-			return m(h)
-		},
+	return dispatcher.RegisterWithWrapping(
+		d.inner, string(cmdType), "command", handler,
+		dispatcher.ApplyMiddleware[Handler, Middleware],
 	)
-	if err != nil {
-		return errorfamily.WrapInfrastructure(
-			err,
-			"command.register_handler_failed",
-			"registering handler for command type "+string(cmdType),
-		)
-	}
-
-	return nil
 }
 
 // Dispatch sends a command to its registered handler.
@@ -83,21 +83,10 @@ func (d *Dispatcher) Dispatch(ctx context.Context, cmd Command) error {
 }
 
 func (d *Dispatcher) checkClosed(code, msg string) error {
-	err := d.inner.CheckClosed(ErrDispatcherClosed)
-	if err != nil {
-		return errorfamily.WrapInfrastructure(err, code, msg)
-	}
-
-	return nil
+	return d.inner.WrapCheckClosed(ErrDispatcherClosed, code, msg)
 }
 
 // Close marks the dispatcher as closed.
 func (d *Dispatcher) Close() error {
-	err := d.inner.Close()
-	if err != nil {
-		return errorfamily.WrapInfrastructure(err, "command.dispatcher_close",
-			"close command dispatcher")
-	}
-
-	return nil
+	return d.inner.WrapClose("command.dispatcher_close", "close command dispatcher")
 }

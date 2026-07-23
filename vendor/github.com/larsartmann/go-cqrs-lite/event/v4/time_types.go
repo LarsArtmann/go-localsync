@@ -57,6 +57,16 @@ func (i Instant) Before(other Instant) bool { return i.t.Before(other.t) }
 // After reports whether the Instant is after another.
 func (i Instant) After(other Instant) bool { return i.t.After(other.t) }
 
+// Sub returns the duration between this Instant and another.
+func (i Instant) Sub(other Instant) time.Duration { return i.t.Sub(other.t) }
+
+// Add returns a new Instant offset by the given duration, preserving UTC.
+func (i Instant) Add(d time.Duration) Instant { return Instant{t: i.t.Add(d)} }
+
+// Zero is the zero-value Instant (January 1, year 1).
+// Use IsZero() to check for it rather than comparing equality.
+var Zero = Instant{}
+
 // Format returns a textual representation of the Instant formatted according
 // to the layout defined by the argument.
 func (i Instant) Format(layout string) string { return i.t.Format(layout) }
@@ -89,6 +99,12 @@ func (i *Instant) UnmarshalJSON(data []byte) error {
 
 // MarshalCBOR implements cbor.Marshaler, encoding the Instant as int64 UnixNano.
 // This guarantees exact nanosecond precision regardless of the encoder's time mode.
+//
+// Design decision: we use bare int64 (UnixNano) instead of CBOR tag 1 (standard
+// time encoding). Tag 1 encodes as float64 seconds (lossy) or requires fractional
+// encoding. Our internal event storage format prioritizes exact precision over
+// standard CBOR time interop. This format is never exchanged with external CBOR
+// consumers.
 func (i Instant) MarshalCBOR() ([]byte, error) {
 	return cbor.Marshal(i.t.UnixNano())
 }
@@ -153,6 +169,36 @@ func NewWallTimeMust(hour, minute int, location string) WallTime {
 	return wt
 }
 
+// loadLocationSafe returns the WallTime's IANA location, falling back to UTC
+// if the location cannot be loaded. The location is validated at construction
+// time (NewWallTime), so this fallback only triggers for WallTimes built
+// directly from struct literals (e.g. decoded from JSON without validation).
+// We fall back rather than panic so that a corrupted Location does not crash
+// production callers.
+func (w WallTime) loadLocationSafe() *time.Location {
+	loc, err := time.LoadLocation(w.Location)
+	if err != nil {
+		return time.UTC
+	}
+
+	return loc
+}
+
+// todaysOccurrence returns the time.Time for today's date in ref's timezone
+// at this WallTime's hour and minute. Shared by NextOccurrence and
+// PreviousOccurrence; callers adjust the date forward or backward.
+func (w WallTime) todaysOccurrence(ref time.Time) time.Time {
+	loc := w.loadLocationSafe()
+
+	refLocal := ref.In(loc)
+
+	return time.Date(
+		refLocal.Year(), refLocal.Month(), refLocal.Day(),
+		w.Hour, w.Minute, 0, 0,
+		loc,
+	)
+}
+
 // NextOccurrence returns the next time this wall time occurs in its timezone,
 // at or after the given reference time. If the wall time has already passed
 // today in the target timezone, it returns tomorrow's occurrence.
@@ -161,22 +207,7 @@ func NewWallTimeMust(hour, minute int, location string) WallTime {
 // automatically. "9am America/New_York" will be 14:00Z in winter (EST, UTC-5)
 // and 13:00Z in summer (EDT, UTC-4).
 func (w WallTime) NextOccurrence(after time.Time) time.Time {
-	loc, err := time.LoadLocation(w.Location)
-	if err != nil {
-		// Should not happen — validated at construction. Fall back to UTC
-		// to avoid panicking in production.
-		loc = time.UTC
-	}
-
-	// Convert "after" to the target timezone to determine the local date.
-	afterLocal := after.In(loc)
-
-	// Construct today's occurrence.
-	next := time.Date(
-		afterLocal.Year(), afterLocal.Month(), afterLocal.Day(),
-		w.Hour, w.Minute, 0, 0,
-		loc,
-	)
+	next := w.todaysOccurrence(after)
 
 	// If it already passed today, advance to tomorrow.
 	if !next.After(after) {
@@ -197,4 +228,67 @@ func (w WallTime) Equal(other WallTime) bool {
 	return w.Hour == other.Hour &&
 		w.Minute == other.Minute &&
 		w.Location == other.Location
+}
+
+// IsValid reports whether the WallTime has valid hour, minute, and location.
+// Use this to check a WallTime that was not constructed via NewWallTime
+// (e.g., decoded from JSON without validation).
+func (w WallTime) IsValid() bool {
+	if w.Hour < 0 || w.Hour > 23 {
+		return false
+	}
+	if w.Minute < 0 || w.Minute > 59 {
+		return false
+	}
+	if w.Location == "" {
+		return false
+	}
+	_, err := time.LoadLocation(w.Location)
+	return err == nil
+}
+
+// PreviousOccurrence returns the most recent time this wall time occurred
+// in its timezone, before the given reference time. If the wall time has not
+// yet occurred today in the target timezone, it returns yesterday's occurrence.
+//
+// This method is DST-aware, just like NextOccurrence.
+func (w WallTime) PreviousOccurrence(before time.Time) time.Time {
+	prev := w.todaysOccurrence(before)
+
+	if !prev.Before(before) {
+		prev = prev.AddDate(0, 0, -1)
+	}
+
+	return prev
+}
+
+// MarshalCBOR implements cbor.Marshaler, encoding WallTime as a CBOR map
+// with hour, minute, and location fields. This preserves the wall-clock
+// semantics (no timezone information is lost).
+func (w WallTime) MarshalCBOR() ([]byte, error) {
+	return cbor.Marshal(struct {
+		Hour     int    `cbor:"hour"`
+		Minute   int    `cbor:"minute"`
+		Location string `cbor:"location"`
+	}{
+		Hour:     w.Hour,
+		Minute:   w.Minute,
+		Location: w.Location,
+	})
+}
+
+// UnmarshalCBOR implements cbor.Unmarshaler, decoding from a CBOR map.
+func (w *WallTime) UnmarshalCBOR(data []byte) error {
+	var raw struct {
+		Hour     int    `cbor:"hour"`
+		Minute   int    `cbor:"minute"`
+		Location string `cbor:"location"`
+	}
+	if err := cbor.Unmarshal(data, &raw); err != nil {
+		return fmt.Errorf("wall_time: failed to unmarshal CBOR: %w", err)
+	}
+	w.Hour = raw.Hour
+	w.Minute = raw.Minute
+	w.Location = raw.Location
+	return nil
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/ThreeDotsLabs/watermill"
 	"github.com/ThreeDotsLabs/watermill/message"
 	gochannel "github.com/ThreeDotsLabs/watermill/pubsub/gochannel"
-	errorfamily "github.com/larsartmann/go-error-family"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
 )
@@ -38,9 +37,7 @@ type EventBus struct {
 	allHandlers       []event.Handler
 	typeHandlers      map[event.Type][]event.Handler
 
-	subCtx     context.Context //nolint:containedctx // lifecycle context for the background subscriber goroutine; created from context.Background(), cancelled on Close
-	subCancel  context.CancelFunc
-	subStarted bool
+	subscriptionState
 }
 
 var (
@@ -104,8 +101,7 @@ func (b *EventBus) Publish(ctx context.Context, events ...event.Event) error {
 	if b.closed {
 		b.mu.Unlock()
 
-		return errorfamily.WrapInfrastructure(event.ErrBusClosed, "watermill.event_bus_publish",
-			"event bus is closed")
+		return errBusClosed("watermill.event_bus_publish", "event")
 	}
 
 	pub := b.cachedPublisher
@@ -120,59 +116,36 @@ func (b *EventBus) Publish(ctx context.Context, events ...event.Event) error {
 
 // Subscribe registers a handler for a specific event type.
 func (b *EventBus) Subscribe(eventType event.Type, handler event.Handler) error {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	if b.closed {
-		return errorfamily.WrapInfrastructure(event.ErrBusClosed, "watermill.event_bus_subscribe",
-			"event bus is closed")
-	}
-
-	b.typeHandlers[eventType] = append(b.typeHandlers[eventType], handler)
-	b.rebuildHandlerChain()
-	b.ensureSubscriptionLocked()
-
-	return nil
+	return registerTypedHandler(&b.mu, b.closed, b.typeHandlers, eventType, handler,
+		"watermill.event_bus_subscribe", "event",
+		b.rebuildHandlerChain, b.ensureSubscriptionLocked)
 }
 
 // SubscribeAll registers a catch-all handler that receives every event.
 func (b *EventBus) SubscribeAll(handler event.Handler) error {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	if b.closed {
-		return errorfamily.WrapInfrastructure(
-			event.ErrBusClosed,
-			"watermill.event_bus_subscribe_all",
-			"event bus is closed",
-		)
-	}
-
-	b.allHandlers = append(b.allHandlers, handler)
-	b.rebuildHandlerChain()
-	b.ensureSubscriptionLocked()
-
-	return nil
+	return registerAllHandler(&b.mu, b.closed, &b.allHandlers, handler,
+		"watermill.event_bus_subscribe_all", "event",
+		b.rebuildHandlerChain, b.ensureSubscriptionLocked)
 }
 
 // Use adds middleware that wraps all event handlers.
 func (b *EventBus) Use(mw ...event.Middleware) error {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	b.middleware = append(b.middleware, mw...)
-	b.rebuildHandlerChain()
+	withLockedModify(
+		&b.mu,
+		func() { b.middleware = append(b.middleware, mw...) },
+		b.rebuildHandlerChain,
+	)
 
 	return nil
 }
 
 // UsePublish adds middleware that wraps the Publish path.
 func (b *EventBus) UsePublish(mw ...event.PublishMiddleware) error {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-
-	b.publishMiddleware = append(b.publishMiddleware, mw...)
-	b.rebuildPublisherChain()
+	withLockedModify(
+		&b.mu,
+		func() { b.publishMiddleware = append(b.publishMiddleware, mw...) },
+		b.rebuildPublisherChain,
+	)
 
 	return nil
 }
@@ -189,9 +162,7 @@ func (b *EventBus) Close() error {
 
 	b.closed = true
 
-	if b.subCancel != nil {
-		b.subCancel()
-	}
+	b.shutdown()
 
 	backend := b.backend
 

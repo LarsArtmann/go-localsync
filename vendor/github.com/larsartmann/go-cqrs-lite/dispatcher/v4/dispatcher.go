@@ -99,6 +99,38 @@ func (d *Dispatcher[H, M]) Register(t string, handler H, wrap func(M, H) H) erro
 	return nil
 }
 
+// ApplyMiddleware is the standard wrap function for [Register] when middleware
+// has the form `func(H) H` — i.e., M itself is the wrapper. It just calls m(h).
+// Most callers (command.Dispatcher, query.Dispatcher) pass this as the wrap
+// argument instead of repeating the one-line closure inline.
+func ApplyMiddleware[H any, M ~func(H) H](m M, h H) H { return m(h) }
+
+// RegisterWithWrapping calls [Register] and wraps any error as an
+// Infrastructure error with a module-specific code. Shared by
+// command.Dispatcher.Register and query.Dispatcher.Register so the
+// register+wrap-error boilerplate is not duplicated across modules.
+//
+// module is used in the error code ("<module>.register_handler_failed") and
+// message, so callers pass "command" or "query" to keep error context
+// module-specific.
+func RegisterWithWrapping[H, M any](
+	d *Dispatcher[H, M],
+	typeStr, module string,
+	handler H,
+	wrap func(M, H) H,
+) error {
+	err := d.Register(typeStr, handler, wrap)
+	if err != nil {
+		return errorfamily.WrapInfrastructure(
+			err,
+			module+".register_handler_failed",
+			"registering handler for "+module+" type "+typeStr,
+		)
+	}
+
+	return nil
+}
+
 // getHandler returns the middleware-wrapped handler for a type and whether it exists.
 // Middleware is applied at dispatch time using the current chain.
 func (d *Dispatcher[H, M]) getHandler(t string) (H, bool) {
@@ -152,4 +184,27 @@ func (d *Dispatcher[H, M]) IsClosed() bool {
 // CheckClosed returns the provided error if the dispatcher is closed.
 func (d *Dispatcher[H, M]) CheckClosed(closedErr error) error {
 	return d.lifecycle.CheckClosed(closedErr)
+}
+
+// WrapClose closes the dispatcher and wraps any failure as an Infrastructure
+// error with the given code/msg. Used by typed wrappers (command.Dispatcher,
+// query.Dispatcher) to share the close-and-wrap idiom across CQRS message
+// kinds without re-implementing it in each package.
+func (d *Dispatcher[H, M]) WrapClose(code, msg string) error {
+	if err := d.Close(); err != nil {
+		return errorfamily.WrapInfrastructure(err, code, msg)
+	}
+
+	return nil
+}
+
+// WrapCheckClosed calls CheckClosed and wraps any failure as an Infrastructure
+// error with the given code/msg. Used by typed wrappers to share the
+// check-and-wrap idiom.
+func (d *Dispatcher[H, M]) WrapCheckClosed(closedErr error, code, msg string) error {
+	if err := d.CheckClosed(closedErr); err != nil {
+		return errorfamily.WrapInfrastructure(err, code, msg)
+	}
+
+	return nil
 }

@@ -1,32 +1,13 @@
 package event
 
-import (
-	"encoding/base64"
+import "github.com/larsartmann/go-cqrs-lite/codec/v4"
 
-	errorfamily "github.com/larsartmann/go-error-family"
-)
-
-// DecodeBase64String decodes a base64-encoded string, trying URL-safe
-// encoding first, then falling back to standard base64 for backward
-// compatibility with legacy consumers.
+// Backward-compatibility re-exports. The canonical implementations live in
+// [codec] — event re-exports them so existing callers that import event/
+// for base64 JSON helpers don't break.
 //
-// Exported so that downstream modules (signing, encryption) can share
-// a single implementation of the URL-safe→standard fallback pattern.
-func DecodeBase64String(encoded string) ([]byte, error) {
-	decoded, err := base64.URLEncoding.DecodeString(encoded)
-	if err != nil {
-		decoded, err = base64.StdEncoding.DecodeString(encoded)
-	}
-
-	if err != nil {
-		return decoded, errorfamily.Wrapf(
-			err,
-			Corruption,
-			"event.base64_decode",
-			"encoded=%v",
-			encoded,
-		)
-	}
-
-	return decoded, nil
-}
+// New code should import codec/ directly.
+var (
+	DecodeBase64String  = codec.DecodeBase64String
+	UnmarshalBase64JSON = codec.UnmarshalBase64JSON
+)

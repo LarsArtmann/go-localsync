@@ -24,6 +24,24 @@ func SQLiteSchema() string {
 	return sqlite.EventSchema()
 }
 
+// CloseRows closes *sql.Rows, suppressing the always-nil error. Intended for
+// use with defer: `defer sqlpkg.CloseRows(rows)`. Replaces the verbose
+// `defer func() { _ = rows.Close() }()` idiom.
+func CloseRows(rows *sql.Rows) {
+	_ = rows.Close()
+}
+
+// AppendLimit appends a " LIMIT <placeholder>" clause to the query and the
+// limit value to args when limit > 0. Returns the query and args unchanged
+// when limit is zero or negative.
+func AppendLimit(query string, args []any, limit int, placeholder string) (string, []any) {
+	if limit > 0 {
+		return query + " LIMIT " + placeholder, append(args, limit)
+	}
+
+	return query, args
+}
+
 // ScanSlice is a generic helper that deduplicates event scanning.
 func ScanSlice[T any](rows *sql.Rows, fn func(*sql.Rows) (T, error)) ([]T, error) {
 	result := make([]T, 0, 64)

@@ -115,6 +115,40 @@ func MarshalCOSEProtectedHeader(headers map[int64]any) ([]byte, error) {
 	return CBOREncMode().Marshal(headers) //nolint:wrapcheck // thin wrapper over CBOR mode
 }
 
+// COSEAlgHeader returns the CBOR-encoded protected header for a COSE message
+// that carries only the algorithm identifier (alg). This is the common case
+// for COSE_Encrypt0 and COSE_Sign1 messages where the protected header
+// contains no additional parameters.
+//
+// The returned error is already wrapped as an Infrastructure error so
+// callers (encryption, signing) don't need per-module error wrapping.
+func COSEAlgHeader(alg int64) ([]byte, error) {
+	data, err := MarshalCOSEProtectedHeader(map[int64]any{COSEHeaderAlg: alg})
+	if err != nil {
+		return nil, errorfamily.WrapInfrastructure(err,
+			"codec.cose_marshal_protected", "marshal COSE protected header")
+	}
+
+	return data, nil
+}
+
+// PrepareCOSESetup applies COSE options to cfg and returns the protected
+// header for the given algorithm. Shared by encryption.EncryptCOSE0 and
+// signing.SignCOSE1 to eliminate the duplicated apply-opts + alg-extraction +
+// header-build boilerplate that art-dupl flagged across those modules.
+//
+// The caller passes a pointer to its module-local config (e.g.
+// coseEncryptConfig or coseSignConfig); the options are applied in place.
+// The O type parameter has a ~func(*Cfg) constraint so module-local defined
+// option types (COSEEncryptOption, COSESignOption) satisfy it directly.
+func PrepareCOSESetup[Cfg any, O ~func(*Cfg)](cfg *Cfg, opts []O, alg int64) ([]byte, error) {
+	for _, o := range opts {
+		o(cfg)
+	}
+
+	return COSEAlgHeader(alg)
+}
+
 // UnmarshalCOSEProtectedHeader deserializes a COSE protected header map from its
 // CBOR-encoded form.
 func UnmarshalCOSEProtectedHeader(data []byte) (map[int64]any, error) {
@@ -122,13 +156,7 @@ func UnmarshalCOSEProtectedHeader(data []byte) (map[int64]any, error) {
 		return map[int64]any{}, nil
 	}
 
-	var headers map[int64]any
-
-	if err := CBORDecMode().Unmarshal(data, &headers); err != nil {
-		return nil, fmt.Errorf("codec: unmarshal COSE protected header: %w", err)
-	}
-
-	return headers, nil
+	return decodeCBORRaw[map[int64]any](data, "codec: unmarshal COSE protected header")
 }
 
 // MarshalCOSESign1 encodes a COSE_Sign1 structure to CBOR bytes.
@@ -279,13 +307,7 @@ func decodeBstr(r cbor.RawMessage) ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	var out []byte
-
-	if err := CBORDecMode().Unmarshal(r, &out); err != nil {
-		return nil, fmt.Errorf("decode bstr: %w", err)
-	}
-
-	return out, nil
+	return decodeCBORRaw[[]byte](r, "decode bstr")
 }
 
 // decodeOptionalBstr decodes a CBOR byte string or nil value into a byte slice.
@@ -296,13 +318,7 @@ func decodeOptionalBstr(r cbor.RawMessage) ([]byte, error) {
 		return nil, nil
 	}
 
-	var out []byte
-
-	if err := CBORDecMode().Unmarshal(r, &out); err != nil {
-		return nil, fmt.Errorf("decode optional bstr: %w", err)
-	}
-
-	return out, nil
+	return decodeCBORRaw[[]byte](r, "decode optional bstr")
 }
 
 // decodeIntMap decodes a CBOR map with integer keys.
@@ -311,13 +327,7 @@ func decodeIntMap(r cbor.RawMessage) (map[int64]any, error) {
 		return nil, nil //nolint:nilnil // nil represents absent optional header map
 	}
 
-	var out map[int64]any
-
-	if err := CBORDecMode().Unmarshal(r, &out); err != nil {
-		return nil, fmt.Errorf("decode int map: %w", err)
-	}
-
-	return out, nil
+	return decodeCBORRaw[map[int64]any](r, "decode int map")
 }
 
 // isNil reports whether r is a CBOR nil value.
@@ -325,10 +335,25 @@ func isNil(r cbor.RawMessage) bool {
 	return len(r) == 1 && r[0] == 0xf6
 }
 
-// COSESign1String returns a human-readable diagnostic notation of a COSE_Sign1
-// message for debugging. It panics only if CBOR diagnosis itself fails, which
-// cannot happen for valid CBOR data.
-func COSESign1String(data []byte) string {
+// decodeCBORRaw decodes r into a fresh T using CBORDecMode, wrapping any
+// failure with msg. Callers handle nil (isNil) before calling so this
+// helper is the pure decode-and-wrap tail shared by decodeBstr,
+// decodeOptionalBstr, decodeIntMap, and the COSE protected-header decode.
+func decodeCBORRaw[T any](r cbor.RawMessage, msg string) (T, error) {
+	var out T
+
+	if err := CBORDecMode().Unmarshal(r, &out); err != nil {
+		return out, fmt.Errorf("%s: %w", msg, err)
+	}
+
+	return out, nil
+}
+
+// diagnoseOrError returns the CBOR diagnostic notation of data, or a stable
+// "<diagnose failed: ...>" placeholder when the input cannot be diagnosed.
+// Shared by COSESign1String and COSEEncrypt0String — both render arbitrary
+// COSE messages identically.
+func diagnoseOrError(data []byte) string {
 	diag, err := cbor.Diagnose(data)
 	if err != nil {
 		return fmt.Sprintf("<diagnose failed: %v>", err)
@@ -337,13 +362,15 @@ func COSESign1String(data []byte) string {
 	return diag
 }
 
+// COSESign1String returns a human-readable diagnostic notation of a COSE_Sign1
+// message for debugging. It panics only if CBOR diagnosis itself fails, which
+// cannot happen for valid CBOR data.
+func COSESign1String(data []byte) string {
+	return diagnoseOrError(data)
+}
+
 // COSEEncrypt0String returns a human-readable diagnostic notation of a
 // COSE_Encrypt0 message for debugging.
 func COSEEncrypt0String(data []byte) string {
-	diag, err := cbor.Diagnose(data)
-	if err != nil {
-		return fmt.Sprintf("<diagnose failed: %v>", err)
-	}
-
-	return diag
+	return diagnoseOrError(data)
 }

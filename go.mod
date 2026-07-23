@@ -12,12 +12,17 @@ require (
 )
 
 require (
+	github.com/larsartmann/go-cqrs-lite/event/v4/eventtest v0.2.0 // indirect
+	github.com/larsartmann/go-cqrs-lite/retry/v4 v4.0.1 // indirect
+)
+
+require (
 	charm.land/lipgloss/v2 v2.0.5 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.2 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
-	github.com/charmbracelet/ultraviolet v0.0.0-20260713092251-4bee1914c0cf // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260720091822-7cc6674724ac // indirect
 	github.com/charmbracelet/x/ansi v0.11.7 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
@@ -28,31 +33,30 @@ require (
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.2 // indirect
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
+	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/codec/v4 v4.0.2
-	github.com/larsartmann/go-cqrs-lite/command/v4 v4.0.0
-	github.com/larsartmann/go-cqrs-lite/decider/v4 v4.0.1
+	github.com/larsartmann/go-cqrs-lite/codec/v4 v4.0.3
+	github.com/larsartmann/go-cqrs-lite/command/v4 v4.0.1
+	github.com/larsartmann/go-cqrs-lite/decider/v4 v4.0.2
 	github.com/larsartmann/go-cqrs-lite/dedup/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/dispatcher/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/event/v4 v4.0.2
-	github.com/larsartmann/go-cqrs-lite/id/v4 v4.0.1
-	github.com/larsartmann/go-cqrs-lite/idempotency/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/kv/v4 v4.0.1 // indirect
-	github.com/larsartmann/go-cqrs-lite/listing/v4 v4.0.1 // indirect
-	github.com/larsartmann/go-cqrs-lite/metadata/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/middleware/v4 v4.0.1
-	github.com/larsartmann/go-cqrs-lite/otel/v4 v4.0.1 // indirect
-	github.com/larsartmann/go-cqrs-lite/projection/v4 v4.0.0
-	github.com/larsartmann/go-cqrs-lite/projectionhost/v4 v4.0.1
-	github.com/larsartmann/go-cqrs-lite/query/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.0.1 // indirect
-	github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.0.1
-	github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.0.0
-	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.0.1
-	github.com/larsartmann/go-cqrs-lite/testutil/v4 v4.0.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.0.2
+	github.com/larsartmann/go-cqrs-lite/dispatcher/v4 v4.0.1 // indirect
+	github.com/larsartmann/go-cqrs-lite/event/v4 v4.0.3
+	github.com/larsartmann/go-cqrs-lite/id/v4 v4.0.2
+	github.com/larsartmann/go-cqrs-lite/idempotency/v4 v4.0.1 // indirect
+	github.com/larsartmann/go-cqrs-lite/kv/v4 v4.0.2 // indirect
+	github.com/larsartmann/go-cqrs-lite/listing/v4 v4.0.2 // indirect
+	github.com/larsartmann/go-cqrs-lite/metadata/v4 v4.0.1 // indirect
+	github.com/larsartmann/go-cqrs-lite/middleware/v4 v4.0.2
+	github.com/larsartmann/go-cqrs-lite/otel/v4 v4.0.2 // indirect
+	github.com/larsartmann/go-cqrs-lite/projection/v4 v4.0.1
+	github.com/larsartmann/go-cqrs-lite/projectionhost/v4 v4.0.2
+	github.com/larsartmann/go-cqrs-lite/query/v4 v4.0.1 // indirect
+	github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.0.2 // indirect
+	github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.0.2
+	github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.0.1
+	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.0.2
+	github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.0.3
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.23 // indirect
@@ -80,7 +84,7 @@ require (
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	modernc.org/libc v1.74.1 // indirect
+	modernc.org/libc v1.74.3 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )

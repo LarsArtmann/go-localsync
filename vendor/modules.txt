@@ -22,7 +22,7 @@ github.com/cespare/xxhash/v2
 # github.com/charmbracelet/colorprofile v0.4.3
 ## explicit; go 1.25.0
 github.com/charmbracelet/colorprofile
-# github.com/charmbracelet/ultraviolet v0.0.0-20260713092251-4bee1914c0cf
+# github.com/charmbracelet/ultraviolet v0.0.0-20260720091822-7cc6674724ac
 ## explicit; go 1.25.0
 github.com/charmbracelet/ultraviolet
 # github.com/charmbracelet/x/ansi v0.11.7
@@ -66,7 +66,7 @@ github.com/fxamacker/cbor/v2
 # github.com/go-logfmt/logfmt v0.6.1
 ## explicit; go 1.21
 github.com/go-logfmt/logfmt
-# github.com/go-logr/logr v1.4.3
+# github.com/go-logr/logr v1.4.4
 ## explicit; go 1.18
 github.com/go-logr/logr
 github.com/go-logr/logr/funcr
@@ -79,64 +79,69 @@ github.com/google/uuid
 # github.com/larsartmann/go-branded-id v0.3.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-branded-id
-# github.com/larsartmann/go-cqrs-lite/codec/v4 v4.0.2
+# github.com/larsartmann/go-cqrs-lite/codec/v4 v4.0.3
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/codec/v4
-# github.com/larsartmann/go-cqrs-lite/command/v4 v4.0.0
+# github.com/larsartmann/go-cqrs-lite/command/v4 v4.0.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/command/v4
-# github.com/larsartmann/go-cqrs-lite/decider/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/decider/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/decider/v4
 # github.com/larsartmann/go-cqrs-lite/dedup/v4 v4.0.0
 ## explicit; go 1.26.3
 github.com/larsartmann/go-cqrs-lite/dedup/v4
-# github.com/larsartmann/go-cqrs-lite/dispatcher/v4 v4.0.0
+# github.com/larsartmann/go-cqrs-lite/dispatcher/v4 v4.0.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/dispatcher/v4
-# github.com/larsartmann/go-cqrs-lite/event/v4 v4.0.2
+# github.com/larsartmann/go-cqrs-lite/event/v4 v4.0.3
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/event/v4
-# github.com/larsartmann/go-cqrs-lite/id/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/event/v4/eventtest v0.2.0
+## explicit; go 1.26.4
+# github.com/larsartmann/go-cqrs-lite/id/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/id/v4
-# github.com/larsartmann/go-cqrs-lite/idempotency/v4 v4.0.0
+# github.com/larsartmann/go-cqrs-lite/idempotency/v4 v4.0.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/idempotency/v4
-# github.com/larsartmann/go-cqrs-lite/kv/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/kv/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/kv/v4
-# github.com/larsartmann/go-cqrs-lite/listing/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/listing/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/listing/v4
-# github.com/larsartmann/go-cqrs-lite/metadata/v4 v4.0.0
+# github.com/larsartmann/go-cqrs-lite/metadata/v4 v4.0.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/metadata/v4
-# github.com/larsartmann/go-cqrs-lite/middleware/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/middleware/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/middleware/v4
-# github.com/larsartmann/go-cqrs-lite/otel/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/otel/v4 v4.0.2
 ## explicit; go 1.26.3
 github.com/larsartmann/go-cqrs-lite/otel/v4
-# github.com/larsartmann/go-cqrs-lite/projection/v4 v4.0.0
+# github.com/larsartmann/go-cqrs-lite/projection/v4 v4.0.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/projection/v4
-# github.com/larsartmann/go-cqrs-lite/projectionhost/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/projectionhost/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/projectionhost/v4
-# github.com/larsartmann/go-cqrs-lite/query/v4 v4.0.0
+# github.com/larsartmann/go-cqrs-lite/query/v4 v4.0.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/query/v4
-# github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/retry/v4 v4.0.1
+## explicit; go 1.26.4
+github.com/larsartmann/go-cqrs-lite/retry/v4
+# github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/scheduling/v4
-# github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/snapshot/v4
-# github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.0.0
+# github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.0.1
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/storage/memory/v4
-# github.com/larsartmann/go-cqrs-lite/storage/v4 v4.0.1
+# github.com/larsartmann/go-cqrs-lite/storage/v4 v4.0.2
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/storage/v4
 github.com/larsartmann/go-cqrs-lite/storage/v4/eventstore
@@ -144,9 +149,7 @@ github.com/larsartmann/go-cqrs-lite/storage/v4/readmodel
 github.com/larsartmann/go-cqrs-lite/storage/v4/relational
 github.com/larsartmann/go-cqrs-lite/storage/v4/sql
 github.com/larsartmann/go-cqrs-lite/storage/v4/view
-# github.com/larsartmann/go-cqrs-lite/testutil/v4 v4.0.0
-## explicit; go 1.26.4
-# github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.0.2
+# github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.0.3
 ## explicit; go 1.26.4
 github.com/larsartmann/go-cqrs-lite/watermill/v4
 # github.com/larsartmann/go-error-family v0.7.0
@@ -291,7 +294,7 @@ golang.org/x/sys/windows/registry
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# modernc.org/libc v1.74.1
+# modernc.org/libc v1.74.3
 ## explicit; go 1.25.0
 modernc.org/libc
 modernc.org/libc/errno
