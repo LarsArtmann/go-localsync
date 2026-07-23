@@ -64,7 +64,7 @@ func wireCommandDispatcher(
 
 	syncItemHandler := func(ctx context.Context, cmd *SyncItemCommand) error {
 		return repo.Execute(
-			ctx, cmd.AggregateID(), aggregateType,
+			ctx, cmd.StreamID(), aggregateType,
 			decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, cmd.outcome, cmd.Options...),
 		)
 	}
@@ -76,7 +76,7 @@ func wireCommandDispatcher(
 	tombstoneHandler := func(ctx context.Context, cmd *TombstoneItemCommand) error {
 		return repo.Execute(
 			ctx,
-			cmd.AggregateID(),
+			cmd.StreamID(),
 			aggregateType,
 			decideTombstone(cmd.Source, cmd.SourceID, cmd.Reason),
 		)

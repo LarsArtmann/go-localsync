@@ -46,7 +46,7 @@ func (p *Projector) Handle(ctx context.Context, evt event.Event) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	aggID := evt.AggregateID().String()
+	aggID := evt.StreamID().String()
 	version := evt.Version()
 
 	if last, ok := p.lastVersions[aggID]; ok && version <= last {
