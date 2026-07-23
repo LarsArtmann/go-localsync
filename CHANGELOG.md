@@ -3,19 +3,31 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.3.0`, `v0.4.0`).
+Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.3.0`, `v0.4.0`, `v0.4.1`).
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-07-23
+
+A maintenance release: go-cqrs-lite v4.1 dependency bump with full deprecation cleanup, build-system migration from committed `vendor/` to Nix `mkPreparedSource`, and internal refactoring.
+
 ### Changed
 
-- **Dependency refresh** — go-cqrs-lite modules bumped to latest patch releases (codec v4.0.3, event v4.0.3, watermill v4.0.3, id v4.0.2, decider v4.0.2, middleware v4.0.2, projectionhost v4.0.2, snapshot v4.0.2, storage v4.0.2); `golang.org/x/exp` refreshed; nix inputs updated to latest nixpkgs.
-- **cqrslint refactoring** — extracted `Finding` helper constructors applied consistently across all 10 checks; extracted `queryRows` helper; consolidated `AssertInt`→`AssertEqual`; shared per-source lock across sync entry points.
+- **go-cqrs-lite v4.1.0** — all modules bumped from v4.0.x to v4.1.0 (`codec`, `command`, `decider`, `dispatcher`, `event`, `id`, `middleware`, `projection`, `projectionhost`, `snapshot`, `storage`, `storage/memory`, `watermill`). Adopted the upstream `AggregateID`→`StreamID` and `AggregateType`→`StreamType` vocabulary: migrated every deprecated type reference (`cqrsid.AggregateID`→`cqrsid.StreamID`, `ParseAggregateID`→`ParseStreamID`, `NewAggregateID`→`NewStreamID`, `event.AggregateType`→`event.StreamType`). Source-compatible — the old names are retained as type aliases.
+- **go-error-family v0.8.0** — bumped from v0.7.0.
+- **Build system: `vendor/` → `mkPreparedSource`** — replaced the committed `vendor/` directory with Nix `mkPreparedSource` for hermetic builds. Eliminates the force-add workaround for private deps and shrinks the repository. CI configured with SSH agent for private repo access.
+- **cqrslint refactoring** — extracted `Finding` helper constructors applied consistently across all 10 checks; extracted `queryRows` helper; consolidated `AssertInt`→`AssertEqual`; shared per-source lock across sync entry points; simplified `isSelectorType` with `slices.Contains`.
+- **cqrs-lint C0001** — updated to recognize `event.StreamType` (the new canonical type name) while still accepting the legacy `event.AggregateType` alias.
+- **Dependency refresh** — `golang.org/x/exp` refreshed; nix inputs updated to latest nixpkgs; `huma/v2` bumped to v2.39.0.
 
 ### Fixed
 
 - **devShell `GOFLAGS` propagation** — `GOFLAGS=-tags=goexperiment.jsonv2` was not inherited by buildflow's native go subcommands (`test-race`, `go-fix`, `go-auto-upgrade`, `govalid-generate`), causing misleading partial-green results. Now documented and wired consistently.
 - **`slices.Contains` migration bug** — masked iterator-semantics regression from the Go 1.26 `slices` package migration.
+
+### Removed
+
+- **Unused `warningAt` helper** — dead code in `internal/cqrslint/finding.go`.
 
 ## [0.4.0] - 2026-07-18
 

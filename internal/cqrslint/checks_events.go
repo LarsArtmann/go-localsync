@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"slices"
 	"strings"
 )
 
@@ -18,18 +19,13 @@ type specHit struct {
 // (e.g. event.Type, event.StreamType).
 func isSelectorType(expr ast.Expr, pkgName string, selNames ...string) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
-	if !ok || sel.Sel == nil {
+	if !ok || sel.Sel == nil || !slices.Contains(selNames, sel.Sel.Name) {
 		return false
 	}
 
-	for _, name := range selNames {
-		if sel.Sel.Name == name {
-			ident, ok := sel.X.(*ast.Ident)
-			return ok && ident.Name == pkgName
-		}
-	}
+	ident, ok := sel.X.(*ast.Ident)
 
-	return false
+	return ok && ident.Name == pkgName
 }
 
 // collectConstSpecsByType returns every const ValueSpec whose declared type is
@@ -56,13 +52,14 @@ func collectConstSpecsByType(pkg *Package, pkgName string, selNames ...string) [
 }
 
 // checkAggregateTypeConst (C0001): there must be exactly one
-// event.AggregateType const and it must equal "sync_item" (ADR-0004).
+// event.StreamType (or legacy event.AggregateType) const and it must equal
+// "sync_item" (ADR-0004).
 func checkAggregateTypeConst(pkg *Package) []Finding {
-	hits := collectConstSpecsByType(pkg, "event", "AggregateType")
+	hits := collectConstSpecsByType(pkg, "event", "StreamType", "AggregateType")
 
 	if len(hits) == 0 {
 		return []Finding{errorMsg(ruleAggregateTypeConst, fmt.Sprintf(
-			"missing event.AggregateType const; ADR-0004 requires exactly one valued %q",
+			"missing event.StreamType const; ADR-0004 requires exactly one valued %q",
 			canonicalAggregateType,
 		))}
 	}
@@ -71,7 +68,7 @@ func checkAggregateTypeConst(pkg *Package) []Finding {
 
 	if len(hits) > 1 {
 		findings = append(findings, errorMsg(ruleAggregateTypeConst, fmt.Sprintf(
-			"only one event.AggregateType const is allowed (ADR-0004 single-aggregate); found %d",
+			"only one event.StreamType const is allowed (ADR-0004 single-aggregate); found %d",
 			len(hits),
 		)))
 	}

@@ -14,7 +14,7 @@ func compliantSource() string {
 
 import "github.com/larsartmann/go-cqrs-lite/event/v4"
 
-const aggregateType event.AggregateType = "sync_item"
+const aggregateType event.StreamType = "sync_item"
 
 const (
 	EventItemSynced        event.Type = "sync_item.synced"
@@ -125,7 +125,7 @@ func TestCompliantBase_HasZeroFindings(t *testing.T) {
 
 func TestC0001_AggregateTypeMissing(t *testing.T) {
 	runMutation(t, "missing-aggregate-type", mutation{
-		old:   `const aggregateType event.AggregateType = "sync_item"`,
+		old:   `const aggregateType event.StreamType = "sync_item"`,
 		new:   `const placeholder = 1`,
 		rules: []string{"C0001"},
 	})
@@ -133,8 +133,8 @@ func TestC0001_AggregateTypeMissing(t *testing.T) {
 
 func TestC0001_AggregateTypeWrongValue(t *testing.T) {
 	runMutation(t, "wrong-aggregate-value", mutation{
-		old:   `const aggregateType event.AggregateType = "sync_item"`,
-		new:   `const aggregateType event.AggregateType = "other_thing"`,
+		old:   `const aggregateType event.StreamType = "sync_item"`,
+		new:   `const aggregateType event.StreamType = "other_thing"`,
 		rules: []string{"C0001"},
 		count: 1,
 	})

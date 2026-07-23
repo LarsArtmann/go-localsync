@@ -57,7 +57,7 @@ func Rules() []Rule {
 		{
 			ID: ruleAggregateTypeConst, Severity: SeverityError,
 			Title:     "single aggregate type",
-			Rationale: "ADR-0004: exactly one event.AggregateType const valued \"sync_item\".",
+			Rationale: "ADR-0004: exactly one event.StreamType const valued \"sync_item\".",
 		},
 		{
 			ID: ruleEventTypeConsts, Severity: SeverityError,
