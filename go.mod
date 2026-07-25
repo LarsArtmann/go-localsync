@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-localsync
 
-go 1.26.4
+go 1.26.5
 
 require (
 	charm.land/log/v2 v2.0.0
@@ -11,12 +11,7 @@ require (
 	modernc.org/sqlite v1.54.0
 )
 
-require (
-	github.com/larsartmann/go-cqrs-lite/event/v4/eventtest v0.3.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/retry/v4 v4.1.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/schema/v4 v4.1.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/testutil/v4 v4.1.0 // indirect
-)
+require github.com/larsartmann/go-cqrs-lite/retry/v4 v4.1.0 // indirect
 
 require (
 	charm.land/lipgloss/v2 v2.0.5 // indirect
@@ -57,7 +52,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.1.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.1.0
 	github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.1.0
-	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.1.0
+	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.2.0
 	github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.1.0
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
