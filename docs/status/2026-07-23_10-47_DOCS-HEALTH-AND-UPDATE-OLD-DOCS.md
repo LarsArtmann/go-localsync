@@ -12,14 +12,14 @@
 
 All 6 living docs corrected against code as source of truth:
 
-| Doc | What was wrong | Fix applied | Verified? |
-| --- | -------------- | ----------- | --------- |
-| **CHANGELOG.md** | **Critical:** no `[0.4.0]` section — all v0.4.0 features (tombstones, projectionhost, cqrs-lint, error overhaul, de-githubify, v4+JSON v2) buried in `[Unreleased]` | Created `[0.4.0] - 2026-07-18` with full Added/Changed/Removed/Fixed; new minimal `[Unreleased]` for post-v0.4.0; removed v0.2.0 duplication | ✅ all versions match git tags |
-| **FEATURES.md** | Test count 214→216; date stale | Updated count + date | ✅ `grep -rc 'func Test'` = 216 |
-| **TODO_LIST.md** | `[x]` completed CI item (trophy); stale coverage % | Removed completed item; coverage 80.9%→82.5%; count 214→216 | ✅ 0 `[x]` items remain |
-| **ROADMAP.md** | `## ✅ COMPLETED` section (20+ shipped items); `TECHNICAL DEBT` duplicating TODO_LIST; per-sync override split-brain with TODO_LIST | Rebuilt from scratch: themes + non-goals + ADR table only; no completed/technical-debt sections; per-sync override lives only in TODO_LIST | ✅ 0 `[x]` items; 0 "completed" sections |
-| **README.md** | Projection described as "replayJournal (no checkpoint store)" — stale since ADR-0006; test counts/coverage wrong | Fixed to `projectionhost.Host`; updated counts | ✅ matches AGENTS.md |
-| **AGENTS.md** | 12 stale go-cqrs-lite dep versions (v4.0.0/v4.0.1); test counts/coverage wrong | All 12 updated to match `go.mod`; test table updated | ✅ verified against `go.mod` |
+| Doc              | What was wrong                                                                                                                                                      | Fix applied                                                                                                                                  | Verified?                                |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| **CHANGELOG.md** | **Critical:** no `[0.4.0]` section — all v0.4.0 features (tombstones, projectionhost, cqrs-lint, error overhaul, de-githubify, v4+JSON v2) buried in `[Unreleased]` | Created `[0.4.0] - 2026-07-18` with full Added/Changed/Removed/Fixed; new minimal `[Unreleased]` for post-v0.4.0; removed v0.2.0 duplication | ✅ all versions match git tags           |
+| **FEATURES.md**  | Test count 214→216; date stale                                                                                                                                      | Updated count + date                                                                                                                         | ✅ `grep -rc 'func Test'` = 216          |
+| **TODO_LIST.md** | `[x]` completed CI item (trophy); stale coverage %                                                                                                                  | Removed completed item; coverage 80.9%→82.5%; count 214→216                                                                                  | ✅ 0 `[x]` items remain                  |
+| **ROADMAP.md**   | `## ✅ COMPLETED` section (20+ shipped items); `TECHNICAL DEBT` duplicating TODO_LIST; per-sync override split-brain with TODO_LIST                                 | Rebuilt from scratch: themes + non-goals + ADR table only; no completed/technical-debt sections; per-sync override lives only in TODO_LIST   | ✅ 0 `[x]` items; 0 "completed" sections |
+| **README.md**    | Projection described as "replayJournal (no checkpoint store)" — stale since ADR-0006; test counts/coverage wrong                                                    | Fixed to `projectionhost.Host`; updated counts                                                                                               | ✅ matches AGENTS.md                     |
+| **AGENTS.md**    | 12 stale go-cqrs-lite dep versions (v4.0.0/v4.0.1); test counts/coverage wrong                                                                                      | All 12 updated to match `go.mod`; test table updated                                                                                         | ✅ verified against `go.mod`             |
 
 ### 2. Historical files annotated (update-old-docs)
 
@@ -27,28 +27,28 @@ Read all 66 `2026-0[67]-*` files via 4 sub-agents (full content extraction + cla
 
 **Classification breakdown:**
 
-| Decision | Count | Rationale |
-| -------- | ----- | --------- |
-| **ANNOTATE** | 12 | Recent reports (June 29–July 19) with stale "nothing committed" / "CI broken" / "190 tests" / "production-ready" claims that v0.4.0 resolved |
-| **SKIP** | 15 | Already have resolution/verdict sections (reviews with "Fixed on the spot", proposals with "do not split", strategy proposal with Resolution section) |
-| **LEAVE ALONE** | 39 | Early June sessions (10–19) superseded by later work; diagrams (.d2/.svg); adoption feedback (correctly describes a snapshot); reports describing rejected/deferred work |
+| Decision        | Count | Rationale                                                                                                                                                                |
+| --------------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **ANNOTATE**    | 12    | Recent reports (June 29–July 19) with stale "nothing committed" / "CI broken" / "190 tests" / "production-ready" claims that v0.4.0 resolved                             |
+| **SKIP**        | 15    | Already have resolution/verdict sections (reviews with "Fixed on the spot", proposals with "do not split", strategy proposal with Resolution section)                    |
+| **LEAVE ALONE** | 39    | Early June sessions (10–19) superseded by later work; diagrams (.d2/.svg); adoption feedback (correctly describes a snapshot); reports describing rejected/deferred work |
 
 **Annotations applied:**
 
-| File | What was stale | Annotation type |
-| ---- | -------------- | --------------- |
-| `2026-07-19_02-34_BUILDFLOW-JSONV2-DEVENV-AND-SLICES-MIGRATION-FIX.md` | "Committed: ❌ Nothing" | Inline strikethrough + appendix |
-| `2026-07-19_01-50_MULTI-SKILL-SESSION-BRUTAL-SELF-REVIEW.md` | "broke lint gate" (stale) | Blockquote update after TL;DR + appendix |
-| `2026-07-18_03-46_V4-JSONV2-ENABLEMENT-AND-VENDOR-FIX.md` | "Commits made: 0" | Inline strikethrough |
-| `2026-07-17_09-53_CQRS-LINT-STATIC-ARCHITECTURAL-LINTER.md` | "nix flake check blocked" (stale) | Appendix |
-| `2026-06-30_02-53_ERROR-HANDLING-OVERHAUL-COMPLETE.md` | CHANGELOG stale (was true) | Appendix |
-| `2026-06-29_15-47_COMPREHENSIVE_STATUS_REPORT.md` | go-cqrs-lite v3.3, CI broken, 190 tests | Resolution table mapping old claims → current state |
-| `2026-06-29_15-48_SESSION-23-STATUS-SNAPSHOT-AND-DOC-DRIFT.md` | Doc drift claims (now fixed) | Appendix |
-| `2026-06-29_18-01_session-24-comprehensive-status.md` | `go mod tidy` broken, otel dead, CI broken | Appendix mapping all to v0.4.0 resolutions |
-| `2026-06-29_18-41_session-25-post-projectionhost.md` | DLQ not wired (now fixed) | Appendix |
-| `2026-07-05_22-54_de-githubify-refactor-and-strategic-pivot.md` | Product question unresolved | Appendix |
-| `2026-07-06_02-07_strategic-pivot-proposal-and-module-audit.md` | ADR-0008 proposed (now dormant) | Appendix |
-| `2026-06-29_22-28_brutal-self-review.html` (Session 28) | "NOT DONE YET" verdict (all CRITICAL bugs now fixed) | Verdict card updated + resolution table |
+| File                                                                   | What was stale                                       | Annotation type                                     |
+| ---------------------------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------- |
+| `2026-07-19_02-34_BUILDFLOW-JSONV2-DEVENV-AND-SLICES-MIGRATION-FIX.md` | "Committed: ❌ Nothing"                              | Inline strikethrough + appendix                     |
+| `2026-07-19_01-50_MULTI-SKILL-SESSION-BRUTAL-SELF-REVIEW.md`           | "broke lint gate" (stale)                            | Blockquote update after TL;DR + appendix            |
+| `2026-07-18_03-46_V4-JSONV2-ENABLEMENT-AND-VENDOR-FIX.md`              | "Commits made: 0"                                    | Inline strikethrough                                |
+| `2026-07-17_09-53_CQRS-LINT-STATIC-ARCHITECTURAL-LINTER.md`            | "nix flake check blocked" (stale)                    | Appendix                                            |
+| `2026-06-30_02-53_ERROR-HANDLING-OVERHAUL-COMPLETE.md`                 | CHANGELOG stale (was true)                           | Appendix                                            |
+| `2026-06-29_15-47_COMPREHENSIVE_STATUS_REPORT.md`                      | go-cqrs-lite v3.3, CI broken, 190 tests              | Resolution table mapping old claims → current state |
+| `2026-06-29_15-48_SESSION-23-STATUS-SNAPSHOT-AND-DOC-DRIFT.md`         | Doc drift claims (now fixed)                         | Appendix                                            |
+| `2026-06-29_18-01_session-24-comprehensive-status.md`                  | `go mod tidy` broken, otel dead, CI broken           | Appendix mapping all to v0.4.0 resolutions          |
+| `2026-06-29_18-41_session-25-post-projectionhost.md`                   | DLQ not wired (now fixed)                            | Appendix                                            |
+| `2026-07-05_22-54_de-githubify-refactor-and-strategic-pivot.md`        | Product question unresolved                          | Appendix                                            |
+| `2026-07-06_02-07_strategic-pivot-proposal-and-module-audit.md`        | ADR-0008 proposed (now dormant)                      | Appendix                                            |
+| `2026-06-29_22-28_brutal-self-review.html` (Session 28)                | "NOT DONE YET" verdict (all CRITICAL bugs now fixed) | Verdict card updated + resolution table             |
 
 ### 3. Quality gate passed
 
