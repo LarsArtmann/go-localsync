@@ -1,12 +1,12 @@
 module github.com/larsartmann/go-localsync
 
-go 1.26.4
+go 1.26.5
 
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/danielgtaylor/huma/v2 v2.39.0
-	github.com/larsartmann/go-branded-id v0.3.2
-	github.com/larsartmann/go-error-family v0.9.0
+	github.com/larsartmann/go-branded-id v0.3.3
+	github.com/larsartmann/go-error-family v0.10.0
 	github.com/oklog/ulid/v2 v2.1.2
 	modernc.org/sqlite v1.54.0
 )
@@ -33,7 +33,7 @@ require (
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/larsartmann/go-cqrs-lite/codec/v4 v4.1.0
+	github.com/larsartmann/go-cqrs-lite/codec/v4 v4.1.1
 	github.com/larsartmann/go-cqrs-lite/command/v4 v4.1.0
 	github.com/larsartmann/go-cqrs-lite/decider/v4 v4.1.0
 	github.com/larsartmann/go-cqrs-lite/dedup/v4 v4.1.0 // indirect
@@ -52,7 +52,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.1.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.1.0
 	github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.1.0
-	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.2.0
+	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.3.1
 	github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.1.0
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.0 // indirect
