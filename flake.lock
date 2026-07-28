@@ -23,11 +23,11 @@
     "go-branded-id": {
       "flake": false,
       "locked": {
-        "lastModified": 1785053701,
-        "narHash": "sha256-+aC4ffzE+iRqDj4u4WwSaSAwbbW1GaCebVgCCaI2ZxY=",
+        "lastModified": 1785226887,
+        "narHash": "sha256-jlyFMR+8p/lCdHVajy6Q4zV+VIGRfOe3QR2wf5YcRbk=",
         "ref": "master",
-        "rev": "aff8d60af3cb909594b1f8d7878f31f12da963c4",
-        "revCount": 88,
+        "rev": "5c4f9955f369c90c92acd93685ffaf5a1031247c",
+        "revCount": 132,
         "type": "git",
         "url": "ssh://git@github.com/LarsArtmann/go-branded-id"
       },
@@ -40,11 +40,11 @@
     "go-cqrs-lite": {
       "flake": false,
       "locked": {
-        "lastModified": 1785109665,
-        "narHash": "sha256-b9iFRLuoGLvcBJLen3+OEY3M/Rav4b3Z/WB4KXEzyf8=",
+        "lastModified": 1785179964,
+        "narHash": "sha256-KFTI6KzO6ru7Zo9O+onw0bYm+ddQqh5mlBk8Pz+f3lE=",
         "ref": "master",
-        "rev": "e69547e38a64d0abb4909139fb0d19148a8b96c1",
-        "revCount": 3653,
+        "rev": "2bbe2a84e31eb1c4b35828ed36a51f49998149d2",
+        "revCount": 3716,
         "type": "git",
         "url": "ssh://git@github.com/LarsArtmann/go-cqrs-lite"
       },
@@ -90,11 +90,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1784796856,
-        "narHash": "sha256-wWFrV5/Qbm+lyt5x20E/bSbfJiGKMo4RCxZV8cl/WZI=",
+        "lastModified": 1785090369,
+        "narHash": "sha256-m0pDuRJG7EDo9ri+4Ksu83VsI+PlxNC9lNBfydejce4=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e2587caef70cea85dd97d7daab492899902dbf5d",
+        "rev": "624af665418d3c65d544145b4d34ad696439570e",
         "type": "github"
       },
       "original": {
