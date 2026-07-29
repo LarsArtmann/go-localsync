@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	charm.land/log/v2 v2.0.0
 	github.com/danielgtaylor/huma/v2 v2.39.0
-	github.com/larsartmann/go-branded-id v0.5.0
+	github.com/larsartmann/go-branded-id v0.5.1
 	github.com/larsartmann/go-error-family v0.10.0
 	github.com/oklog/ulid/v2 v2.1.2
 	modernc.org/sqlite v1.54.0
