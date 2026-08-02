@@ -65,7 +65,13 @@ func main() {
 		os.Exit(2)
 	}
 
-	emit(os.Stdout, os.Stderr, findings, opts, *target, len(pkg.Files), elapsed)
+	emit(os.Stdout, os.Stderr, report{
+		findings:  findings,
+		opts:      opts,
+		target:    *target,
+		fileCount: len(pkg.Files),
+		elapsed:   elapsed,
+	})
 
 	os.Exit(exitCode(findings, opts))
 }
@@ -77,6 +83,14 @@ type outputOptions struct {
 	jsonOut        bool
 }
 
+type report struct {
+	findings  []cqrslint.Finding
+	opts      outputOptions
+	target    string
+	fileCount int
+	elapsed   time.Duration
+}
+
 func analyze(target string) (*cqrslint.Package, []cqrslint.Finding, error) {
 	pkg, err := cqrslint.LoadPackage(target)
 	if err != nil {
@@ -86,16 +100,16 @@ func analyze(target string) (*cqrslint.Package, []cqrslint.Finding, error) {
 	return pkg, cqrslint.Run(pkg), nil
 }
 
-func emit(stdout, stderr io.Writer, findings []cqrslint.Finding, opts outputOptions, target string, fileCount int, elapsed time.Duration) {
-	counts := countFindings(findings)
+func emit(stdout, stderr io.Writer, r report) {
+	counts := countFindings(r.findings)
 
-	if opts.verbose {
-		emitVerboseHeader(stderr, target, fileCount)
-		emitRuleStatus(stderr, findings)
+	if r.opts.verbose {
+		emitVerboseHeader(stderr, r.target, r.fileCount)
+		emitRuleStatus(stderr, r.findings)
 	}
 
-	emitFindings(stdout, findings, opts)
-	emitSummary(stderr, counts, opts, elapsed)
+	emitFindings(stdout, r.findings, r.opts)
+	emitSummary(stderr, counts, r.opts, r.elapsed)
 }
 
 func countFindings(findings []cqrslint.Finding) findingCounts {
@@ -107,9 +121,10 @@ func countFindings(findings []cqrslint.Finding) findingCounts {
 			continue
 		}
 
-		if f.Severity == cqrslint.SeverityError {
+		switch f.Severity {
+		case cqrslint.SeverityError:
 			c.errors++
-		} else if f.Severity == cqrslint.SeverityWarning {
+		case cqrslint.SeverityWarning:
 			c.warnings++
 		}
 	}
@@ -197,7 +212,7 @@ func emitSummary(w io.Writer, counts findingCounts, opts outputOptions, elapsed 
 	}
 
 	if counts.suppressed > 0 {
-		parts = append(parts, fmt.Sprintf("%d %s", counts.suppressed, plural("suppressed", counts.suppressed)))
+		parts = append(parts, fmt.Sprintf("%d suppressed", counts.suppressed))
 	}
 
 	if opts.verbose {

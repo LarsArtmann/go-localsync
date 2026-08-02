@@ -18,7 +18,7 @@ Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based 
 | `pkg/data/`          | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2/V3 versioning for event upcasting; V3 = de-githubify per ADR-0007). Decider, read model, events, and conflict resolution all operate on `*model.Item`.                                                                       |
 | `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                                                                                                                          |
 | `pkg/errors/`        | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                                                                                                                                                                                                                    |
-| `internal/cqrslint/` | Static architectural-invariant linter for `pkg/cqrs` (ADR-0004 enforcer). 10 AST checks (C0001-C0010): single aggregate type, three fixed events, fold coverage, projector subscriptions, provider-agnostic `hasChanged`, no query dispatcher, `SyncAction` stays in `pkg/sync`, projection mutex guard, payload json tags, `NewEvents` uses `aggregateType` const. CLI: `cmd/cqrs-lint/`. Zero third-party deps (stdlib `go/parser` only). |
+| `internal/cqrslint/` | Static architectural-invariant linter for `pkg/cqrs` (ADR-0004 enforcer). 10 AST checks (C0001-C0010): single aggregate type, three fixed events, fold coverage, projector subscriptions, provider-agnostic `hasChanged`, no query dispatcher, `SyncAction` stays in `pkg/sync`, projection mutex guard, payload json tags, `NewEvents` uses `aggregateType` const. CLI: `cmd/cqrs-lint/`. Supports `//cqrs-lint:ignore`/`//cqrs-lint:ignore-file` suppression directives, `--strict` (warnings fail), `--verbose` (per-rule status + timing), `--show-suppressed`, `--json`. Zero third-party deps (stdlib `go/parser` only). |
 
 ### SyncStore Interface Seam
 
@@ -117,7 +117,7 @@ The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exporte
 3. Test: `go test ./... -count=1`
 4. Lint: `golangci-lint run ./... --timeout=5m`
 5. Format: `golangci-lint fmt ./...`
-6. CQRS gate: `go run ./cmd/cqrs-lint -pkg pkg/cqrs` (or `nix run .#cqrs-lint`)
+6. CQRS gate: `go run ./cmd/cqrs-lint --strict --verbose` (or `nix run .#cqrs-lint`). Suppression via `//cqrs-lint:ignore <rule>` directives; `--show-suppressed` to list silenced findings.
 7. Full pipeline: `buildflow --build-mode full` (requires the devShell active — see "Required first step" above; ensure go.work is removed first)
 
 ### CI (No go.work)
