@@ -15,23 +15,23 @@ The tool had **none** of these three flags. All three had to be designed, implem
 
 ## a) FULLY DONE
 
-| Item | Detail |
-|---|---|
-| `--strict` flag | Aliases `-fail-on-warning`. Warnings cause exit code 1. |
-| `--verbose` flag | Stderr output: header (target, file count, rule count), per-rule status table, elapsed time. |
-| `--show-suppressed` flag | Shows findings silenced by directives (hidden by default). |
-| Suppression directive system | `suppress.go`: `//cqrs-lint:ignore <rule>` (line-level), `//cqrs-lint:ignore-file <rule>` (file-level), `all` keyword, comma-separated rules, optional reason text. |
-| `Finding.Suppressed` field | New field on `Finding` struct; `String()` renders `[suppressed]` suffix; JSON output includes `suppressed` bool field. |
-| `Run()` integration | Suppressions applied in `analyzer.go:Run()` after all checks run, before sort. |
-| CLI rewrite | `main.go` fully rewritten: `report` struct for emit params, `countFindings`, `emitSummary`, `emitRuleStatus`, suppression directive help text. |
-| Suppression tests | 13 new tests in `suppress_test.go`: same-line, previous-line, wrong-rule, `all`, comma-separated, with-reason, file-level, file-level-all, no-directive, too-far-above, malformed, suppressed-string, not-suppressed-string. |
-| Existing tests | All 23 existing tests still pass (zero regressions). |
-| Lint clean | `golangci-lint run` on changed packages: 0 issues. |
-| gofumpt/goimports | Both clean on all changed files. |
-| Coverage | `internal/cqrslint` coverage: 88.5% → **90.0%**. |
-| Full project tests | `go test ./...` — all 11 packages pass, zero failures. |
-| AGENTS.md updated | Package description, CQRS gate command, test counts (216→229), suppression mention. |
-| E2E manual verification | Tested default, verbose, verbose+show-suppressed, json, json+show-suppressed, help, list modes. All behave correctly. |
+| Item                         | Detail                                                                                                                                                                                                                       |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--strict` flag              | Aliases `-fail-on-warning`. Warnings cause exit code 1.                                                                                                                                                                      |
+| `--verbose` flag             | Stderr output: header (target, file count, rule count), per-rule status table, elapsed time.                                                                                                                                 |
+| `--show-suppressed` flag     | Shows findings silenced by directives (hidden by default).                                                                                                                                                                   |
+| Suppression directive system | `suppress.go`: `//cqrs-lint:ignore <rule>` (line-level), `//cqrs-lint:ignore-file <rule>` (file-level), `all` keyword, comma-separated rules, optional reason text.                                                          |
+| `Finding.Suppressed` field   | New field on `Finding` struct; `String()` renders `[suppressed]` suffix; JSON output includes `suppressed` bool field.                                                                                                       |
+| `Run()` integration          | Suppressions applied in `analyzer.go:Run()` after all checks run, before sort.                                                                                                                                               |
+| CLI rewrite                  | `main.go` fully rewritten: `report` struct for emit params, `countFindings`, `emitSummary`, `emitRuleStatus`, suppression directive help text.                                                                               |
+| Suppression tests            | 13 new tests in `suppress_test.go`: same-line, previous-line, wrong-rule, `all`, comma-separated, with-reason, file-level, file-level-all, no-directive, too-far-above, malformed, suppressed-string, not-suppressed-string. |
+| Existing tests               | All 23 existing tests still pass (zero regressions).                                                                                                                                                                         |
+| Lint clean                   | `golangci-lint run` on changed packages: 0 issues.                                                                                                                                                                           |
+| gofumpt/goimports            | Both clean on all changed files.                                                                                                                                                                                             |
+| Coverage                     | `internal/cqrslint` coverage: 88.5% → **90.0%**.                                                                                                                                                                             |
+| Full project tests           | `go test ./...` — all 11 packages pass, zero failures.                                                                                                                                                                       |
+| AGENTS.md updated            | Package description, CQRS gate command, test counts (216→229), suppression mention.                                                                                                                                          |
+| E2E manual verification      | Tested default, verbose, verbose+show-suppressed, json, json+show-suppressed, help, list modes. All behave correctly.                                                                                                        |
 
 **Test count:** 23 → 36 test functions in `internal/cqrslint`.
 
@@ -39,24 +39,24 @@ The tool had **none** of these three flags. All three had to be designed, implem
 
 ## b) PARTIALLY DONE
 
-| Item | What's missing |
-|---|---|
-| CLI testing | `cmd/cqrs-lint/main.go` has **zero tests**. The suppression engine is tested via the library API, but the CLI flag parsing, exit codes, and output formatting are untested. An integration test that builds the binary and runs it against fixtures would close this. |
-| Suppressed finding detail | The verbose per-rule status table shows `ok` or `N findings` for active findings only. It does **not** show suppressed counts per-rule (e.g. "C0005: 1 finding, 2 suppressed"). The total suppressed count is in the summary, but not broken down by rule. |
-| Suppression provenance | When a finding is suppressed, the system records `Suppressed: true` but does **not** record *which* directive or *which file/line* silenced it. An audit field (`SuppressedBy string`) would make suppressions traceable in CI logs. |
+| Item                      | What's missing                                                                                                                                                                                                                                                        |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CLI testing               | `cmd/cqrs-lint/main.go` has **zero tests**. The suppression engine is tested via the library API, but the CLI flag parsing, exit codes, and output formatting are untested. An integration test that builds the binary and runs it against fixtures would close this. |
+| Suppressed finding detail | The verbose per-rule status table shows `ok` or `N findings` for active findings only. It does **not** show suppressed counts per-rule (e.g. "C0005: 1 finding, 2 suppressed"). The total suppressed count is in the summary, but not broken down by rule.            |
+| Suppression provenance    | When a finding is suppressed, the system records `Suppressed: true` but does **not** record _which_ directive or _which file/line_ silenced it. An audit field (`SuppressedBy string`) would make suppressions traceable in CI logs.                                  |
 
 ---
 
 ## c) NOT STARTED
 
-| Item | Why it matters |
-|---|---|
-| `nix build` / `nix flake check` | Did not verify the Nix build still passes with the new files. Should be fine (no new deps), but unverified. |
-| `buildflow --build-mode full` | Did not run the full pipeline. The jsonv2 build tag requires the devShell; I used `GOFLAGS` manually instead. |
-| Rule validation in directives | `//cqrs-lint:ignore C9999` silently succeeds even though C9999 doesn't exist. No warning for typos or unknown rule IDs. |
-| Block-comment directive support | Directives only parsed from `//` line comments, not `/* */` block comments. |
-| `--no-suppress` flag | A CI-hardened mode that errors if any suppression directive is present (forcing all suppressions to be justified/reviewed). |
-| Deprecation path for `-fail-on-warning` | `--strict` is the new canonical name but `-fail-on-warning` still exists with no deprecation notice. |
+| Item                                    | Why it matters                                                                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `nix build` / `nix flake check`         | Did not verify the Nix build still passes with the new files. Should be fine (no new deps), but unverified.                 |
+| `buildflow --build-mode full`           | Did not run the full pipeline. The jsonv2 build tag requires the devShell; I used `GOFLAGS` manually instead.               |
+| Rule validation in directives           | `//cqrs-lint:ignore C9999` silently succeeds even though C9999 doesn't exist. No warning for typos or unknown rule IDs.     |
+| Block-comment directive support         | Directives only parsed from `//` line comments, not `/* */` block comments.                                                 |
+| `--no-suppress` flag                    | A CI-hardened mode that errors if any suppression directive is present (forcing all suppressions to be justified/reviewed). |
+| Deprecation path for `-fail-on-warning` | `--strict` is the new canonical name but `-fail-on-warning` still exists with no deprecation notice.                        |
 
 ---
 
@@ -72,7 +72,7 @@ I wrote **markdown `#` headers inside a Go comment block**, producing `illegal c
 
 ### 2. Six-parameter function that violated golines
 
-The initial `emit()` function took 6 parameters (`stdout, stderr, findings, opts, target, fileCount, elapsed`), exceeding the 120-char line limit. I had to refactor to a `report` struct *after* the linter caught it.
+The initial `emit()` function took 6 parameters (`stdout, stderr, findings, opts, target, fileCount, elapsed`), exceeding the 120-char line limit. I had to refactor to a `report` struct _after_ the linter caught it.
 
 **Root cause:** I didn't plan the function signature before writing it. A moment of design thought would have led to the struct from the start.
 
@@ -82,7 +82,7 @@ Multiple times I saw LSP diagnostics (`unused`, `recvcheck`, `gci`, `predeclared
 
 ### 4. Grammar bug: "2 suppresseds"
 
-The summary line printed `2 suppresseds` (incorrect pluralization) because I used `plural("suppressed", n)` which appends "s". I only caught this because I ran an E2E test and *read the output*. If I hadn't done a manual E2E test, this would have shipped.
+The summary line printed `2 suppresseds` (incorrect pluralization) because I used `plural("suppressed", n)` which appends "s". I only caught this because I ran an E2E test and _read the output_. If I hadn't done a manual E2E test, this would have shipped.
 
 ---
 
@@ -94,7 +94,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 
 2. **`report` struct is a parameter bag** — It bundles 5 unrelated fields for a single function call. It works but feels like a workaround for the line-length rule, not a deliberate design choice.
 
-3. **Suppression has no audit trail** — When a finding is suppressed, there's no record of *why* or *which directive* did it. In a compliance-oriented codebase, this matters. The directive syntax supports an optional reason (`//cqrs-lint:ignore C0005 temporary`), but the reason is parsed and then discarded.
+3. **Suppression has no audit trail** — When a finding is suppressed, there's no record of _why_ or _which directive_ did it. In a compliance-oriented codebase, this matters. The directive syntax supports an optional reason (`//cqrs-lint:ignore C0005 temporary`), but the reason is parsed and then discarded.
 
 4. **Verbose mode doesn't show suppressed-per-rule** — The rule status table shows `ok` or `N findings` but doesn't distinguish `1 finding, 3 suppressed`. A CI operator running `--verbose --show-suppressed` can't quickly see which rules are being suppressed most.
 
@@ -104,7 +104,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 
 6. **Suppressor is rebuilt on every `Run()` call** — For a one-shot CLI this is fine, but if `cqrs-lint` were ever used as a library or daemonized, the directive parsing would repeat. Not a problem today, but the `Suppressor` could be cached.
 
-7. **No `--no-suppress` flag for CI hardening** — Production CI should optionally *reject* any suppression directives, forcing teams to justify them in PR review. This is a common pattern in serious linters (e.g. `golangci-lint` has `--nolintlint`).
+7. **No `--no-suppress` flag for CI hardening** — Production CI should optionally _reject_ any suppression directives, forcing teams to justify them in PR review. This is a common pattern in serious linters (e.g. `golangci-lint` has `--nolintlint`).
 
 ### Process
 
@@ -117,6 +117,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 ## f) Up to 50 Things to Get Done Next
 
 ### cqrs-lint improvements (immediate)
+
 1. Add CLI integration tests (build binary, run against fixtures, assert exit codes + output)
 2. Add `SuppressedBy` field to `Finding` (records which directive line silenced it)
 3. Add `SuppressedReason` field to `Finding` (captures the optional reason text)
@@ -139,6 +140,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 20. Add diff-aware mode: only lint files changed since a base commit (for fast PR checks)
 
 ### cqrs-lint deeper checks (new rules)
+
 21. Add C0011: verify `Reconcile` tombstones with `ReasonUpstreamGone` only
 22. Add C0012: verify `DecideSync` is the single conflict authority (no direct read-model writes)
 23. Add C0013: verify projection checkpoint is persisted (not in-memory only)
@@ -146,6 +148,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 25. Add C0015: verify no `errors.New` or `fmt.Errorf` without `%w` in `pkg/cqrs`
 
 ### Project-wide (observed during this session)
+
 26. Run `nix build` to verify the flake still builds with new files
 27. Run `nix flake check` for full flake validation
 28. Run `buildflow --build-mode full` inside the devShell (delete go.work first)
@@ -156,6 +159,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 33. Check if `.envrc` needs force-add after any changes
 
 ### Documentation
+
 34. Document suppression directives in a dedicated `docs/` page (not just help text + AGENTS.md)
 35. Add examples of valid vs invalid suppression directives to docs
 36. Document the exit code contract (0 clean, 1 findings, 2 usage error) in README
@@ -163,6 +167,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 38. Add a `CHANGELOG.md` entry for the new flags
 
 ### Testing infrastructure
+
 39. Add a table-driven CLI test harness that covers all flag combinations
 40. Add golden-file tests for verbose/JSON output (snapshots)
 41. Add fuzz tests for the directive parser (`parseDirectiveRules`)
@@ -171,6 +176,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 44. Add property-based test: any finding suppressed by `all` should also be suppressible by its rule ID
 
 ### Code polish
+
 45. Replace the `report` struct with a cleaner abstraction (or justify why it stays)
 46. Consider merging `emitVerboseHeader` + `emitRuleStatus` into a single `emitVerbose` function
 47. Extract `plural()` to a shared utility (or inline it — it's only used twice)
