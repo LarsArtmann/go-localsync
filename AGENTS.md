@@ -156,9 +156,9 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/crdt`          | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
 | `pkg/data/model`    | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
-| `internal/cqrslint` | 23    | 88.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog                           |
+| `internal/cqrslint` | 36    | 88.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives |
 
-**216 total test functions** across 10 test packages.
+**229 total test functions** across 10 test packages.
 
 Run: `go test ./... -count=1`
 
