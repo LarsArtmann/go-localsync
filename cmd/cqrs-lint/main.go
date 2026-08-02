@@ -174,39 +174,37 @@ func emitFindingJSON(w io.Writer, f cqrslint.Finding) {
 }
 
 func emitSummary(w io.Writer, counts findingCounts, opts outputOptions, elapsed time.Duration) {
-	var b strings.Builder
-
-	b.WriteString("cqrs-lint: ")
-
 	total := counts.errors + counts.warnings
 
 	if total == 0 && counts.suppressed == 0 {
-		b.WriteString("clean")
-	} else {
-		parts := make([]string, 0, 3)
-
-		if counts.errors > 0 {
-			parts = append(parts, fmt.Sprintf("%d %s", counts.errors, plural("error", counts.errors)))
+		if opts.verbose {
+			fmt.Fprintf(w, "cqrs-lint: clean (%s)\n", elapsed.Round(time.Microsecond))
+		} else {
+			fmt.Fprintln(w, "cqrs-lint: clean")
 		}
 
-		if counts.warnings > 0 {
-			parts = append(parts, fmt.Sprintf("%d %s", counts.warnings, plural("warning", counts.warnings)))
-		}
+		return
+	}
 
-		if counts.suppressed > 0 {
-			parts = append(parts, fmt.Sprintf("%d %s", counts.suppressed, plural("suppressed", counts.suppressed)))
-		}
+	parts := make([]string, 0, 3)
 
-		b.WriteString(strings.Join(parts, ", "))
+	if counts.errors > 0 {
+		parts = append(parts, fmt.Sprintf("%d %s", counts.errors, plural("error", counts.errors)))
+	}
+
+	if counts.warnings > 0 {
+		parts = append(parts, fmt.Sprintf("%d %s", counts.warnings, plural("warning", counts.warnings)))
+	}
+
+	if counts.suppressed > 0 {
+		parts = append(parts, fmt.Sprintf("%d %s", counts.suppressed, plural("suppressed", counts.suppressed)))
 	}
 
 	if opts.verbose {
-		b.WriteString(fmt.Sprintf(" (%s)", elapsed.Round(time.Microsecond)))
+		fmt.Fprintf(w, "cqrs-lint: %s (%s)\n", strings.Join(parts, ", "), elapsed.Round(time.Microsecond))
+	} else {
+		fmt.Fprintf(w, "cqrs-lint: %s\n", strings.Join(parts, ", "))
 	}
-
-	b.WriteByte('\n')
-
-	fmt.Fprint(w, b.String())
 }
 
 func exitCode(findings []cqrslint.Finding, opts outputOptions) int {
