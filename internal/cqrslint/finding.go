@@ -28,11 +28,12 @@ const (
 
 // Finding is a single rule violation reported by a check.
 type Finding struct {
-	Rule     string
-	Severity Severity
-	File     string
-	Line     int
-	Message  string
+	Rule       string
+	Severity   Severity
+	File       string
+	Line       int
+	Message    string
+	Suppressed bool // true when a //cqrs-lint:ignore directive silences this finding
 }
 
 // errorAt constructs a SeverityError Finding positioned at node. Centralizes the
@@ -59,6 +60,7 @@ func warningMsg(rule, message string) Finding {
 
 // String renders a finding in the "<file>:<line>: <rule> <severity>: <msg>" form
 // understood by editors and CI log parsers (same shape as compiler diagnostics).
+// Suppressed findings are suffixed with [suppressed].
 func (f Finding) String() string {
 	location := f.File
 
@@ -66,7 +68,12 @@ func (f Finding) String() string {
 		location = fmt.Sprintf("%s:%d", location, f.Line)
 	}
 
-	return fmt.Sprintf("%s: %s %s: %s", location, f.Rule, f.Severity, f.Message)
+	suffix := ""
+	if f.Suppressed {
+		suffix = " [suppressed]"
+	}
+
+	return fmt.Sprintf("%s: %s %s: %s%s", location, f.Rule, f.Severity, f.Message, suffix)
 }
 
 // SortFindings orders findings by file, then line, then rule for stable output.

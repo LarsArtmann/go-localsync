@@ -108,12 +108,18 @@ func Rules() []Rule {
 }
 
 // Run executes every registered check against pkg and returns the findings,
-// sorted by (file, line, rule) for stable, diff-friendly output.
+// sorted by (file, line, rule) for stable, diff-friendly output. Each finding
+// is annotated with whether a //cqrs-lint:ignore directive suppresses it.
 func Run(pkg *Package) []Finding {
 	findings := make([]Finding, 0, estimateFindings(pkg))
+	suppressor := newSuppressor(pkg)
 
 	for _, check := range allChecks {
 		findings = append(findings, check(pkg)...)
+	}
+
+	for i := range findings {
+		findings[i].Suppressed = suppressor.IsSuppressed(findings[i])
 	}
 
 	SortFindings(findings)
