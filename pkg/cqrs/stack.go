@@ -78,28 +78,26 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 	var drainDone <-chan struct{}
 
 	defer func() {
-		if err == nil {
-			return
-		}
+		if err != nil {
+			if cancelRunner != nil {
+				cancelRunner()
+			}
 
-		if cancelRunner != nil {
-			cancelRunner()
-		}
+			if drainDone != nil {
+				<-drainDone
+			}
 
-		if drainDone != nil {
-			<-drainDone
-		}
+			if rm != nil {
+				_ = rm.Close()
+			}
 
-		if rm != nil {
-			_ = rm.Close()
-		}
+			if c, ok := sr.store.(io.Closer); ok {
+				_ = c.Close()
+			}
 
-		if c, ok := sr.store.(io.Closer); ok {
-			_ = c.Close()
-		}
-
-		if c, ok := sr.bus.(io.Closer); ok {
-			_ = c.Close()
+			if c, ok := sr.bus.(io.Closer); ok {
+				_ = c.Close()
+			}
 		}
 	}()
 
