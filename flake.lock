@@ -61,11 +61,11 @@
     "go-cqrs-lite": {
       "flake": false,
       "locked": {
-        "lastModified": 1786075573,
-        "narHash": "sha256-x/+acDVTRBze559m2UvLWMhYtYU9d5I/jC75PmiuWZU=",
+        "lastModified": 1786426957,
+        "narHash": "sha256-i1EVprQCfqNbDWX03c7Mcf/ejAhky41SXwqIZUoIXbk=",
         "ref": "master",
-        "rev": "506318f531659469567c785463540baa6dfc16b3",
-        "revCount": 5016,
+        "rev": "98dccf6a6eeda55b59e25fb8aff744910a80dc73",
+        "revCount": 5497,
         "type": "git",
         "url": "ssh://git@github.com/LarsArtmann/go-cqrs-lite"
       },
@@ -102,11 +102,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1786358469,
-        "narHash": "sha256-Ls9QSTdWi7bwHyxQwBQ8ArPrT4OwYCjrI50q2K0eqdw=",
+        "lastModified": 1786374450,
+        "narHash": "sha256-xynqP898epL7hJQsOSPsxN+YpDBht4OAiam9fFFetrw=",
         "ref": "master",
-        "rev": "26b762006f95c2e26499fcc37ba49e3788bd6aca",
-        "revCount": 133,
+        "rev": "0122702048ca9b063b9001be0273ae3deba6cfda",
+        "revCount": 137,
         "type": "git",
         "url": "ssh://git@github.com/LarsArtmann/go-nix-helpers"
       },
@@ -118,11 +118,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1785967620,
-        "narHash": "sha256-IItrdb7Puk05RqOBWZYFC5X6Wl1sJmCfh5MWVHw5iMM=",
+        "lastModified": 1786247143,
+        "narHash": "sha256-8S3Kcxs7D4UtxJxSJZz0m14CGhuW0MxfrIwJxeGWGnQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b7c2ada94fe99c15b0dbcf4d11fd7850b957a436",
+        "rev": "279b4a8275f032c566576b3f181fa0f27197f588",
         "type": "github"
       },
       "original": {
