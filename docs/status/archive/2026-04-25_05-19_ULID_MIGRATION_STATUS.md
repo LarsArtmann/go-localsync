@@ -162,26 +162,26 @@ Context: The `replace` directive makes local development work but will break CI.
 ### go-composable-business-types
 
 ```
- id/id.go        |  8 ++++++++
- id/id_binary.go | 15 +++++++++++++++
- id/id_sql.go    | 33 +++++++++++++++++++++++++++++++++
- id/id_text.go   | 11 ++++++++++
- 4 files changed, 67 insertions(+)
+id/id.go        |  8 ++++++++
+id/id_binary.go | 15 +++++++++++++++
+id/id_sql.go    | 33 +++++++++++++++++++++++++++++++++
+id/id_text.go   | 11 ++++++++++
+4 files changed, 67 insertions(+)
 ```
 
 ### go-localsync
 
 ```
- README.md                          |  2 +-
- go.mod                             | 15 ++++++-----
- go.sum                             | 30 +++++++++++-----------
- internal/db/events.sql.go          |  8 ++++--
- internal/db/querier.go             |  3 ++-
- internal/database/migrations/003_ulid_pk.sql (NEW)
- pkg/storage/sqlite.go              |  1 +
- pkg/types/ids.go                   | 22 +++++++++++-----
- pkg/types/ids_test.go              | 64 +++++++++++++++++++++++++++++++-------
- sql/queries/events.sql             |  3 ++-
- sql/schema/001_events.sql          |  2 +-
- 10 files changed, 114 insertions(+), 36 deletions(-)
+README.md                          |  2 +-
+go.mod                             | 15 ++++++-----
+go.sum                             | 30 +++++++++++-----------
+internal/db/events.sql.go          |  8 ++++--
+internal/db/querier.go             |  3 ++-
+internal/database/migrations/003_ulid_pk.sql (NEW)
+pkg/storage/sqlite.go              |  1 +
+pkg/types/ids.go                   | 22 +++++++++++-----
+pkg/types/ids_test.go              | 64 +++++++++++++++++++++++++++++++-------
+sql/queries/events.sql             |  3 ++-
+sql/schema/001_events.sql          |  2 +-
+10 files changed, 114 insertions(+), 36 deletions(-)
 ```

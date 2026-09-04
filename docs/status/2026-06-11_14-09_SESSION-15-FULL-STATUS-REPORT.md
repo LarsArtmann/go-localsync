@@ -162,33 +162,33 @@ The self-review uncovered 3 issues that were immediately fixed: a gofmt violatio
 
 ## f) TOP 25 THINGS TO DO NEXT (ranked by impact/effort)
 
-| #   | Task                                                                  | Impact | Effort   | Category        |
-| --- | --------------------------------------------------------------------- | ------ | -------- | --------------- |
-| 1   | **Mark done TODOs in TODO_LIST.md** (ADRs, CONTRIBUTING, file splits) | Low    | 5min     | Docs cleanup    |
-| 2   | **Update TODO_LIST.md** — SQLite persistence test is done, mark it    | Low    | 5min     | Docs cleanup    |
-| 3   | **Extract shared `testItem` helpers to `pkg/testutil/`**              | Medium | 30min    | DRY             |
-| 4   | **Add tests for `pkg/testutil/`**                                     | Medium | 15min    | Testing         |
-| 5   | **CLI: extract `runSync` as testable function**                       | High   | 30min    | Testability     |
-| 6   | **CLI: extract `runAPIServer` as testable function**                  | High   | 15min    | Testability     |
-| 7   | **CLI: add `runSync` test**                                           | High   | 15min    | Coverage        |
-| 8   | **CLI: add `runAPIServer` test**                                      | High   | 15min    | Coverage        |
-| 9   | **CQRS: add stack lifecycle tests** (Close, double-Close)             | Medium | 20min    | Robustness      |
-| 10  | **GitHub provider: error classification edge cases**                  | Medium | 20min    | Coverage        |
-| 11  | **Structured logging fields** (username, page, event_id)              | Medium | 30min    | Debuggability   |
-| 12  | **API: add `X-Total-Count` pagination header**                        | Medium | 15min    | UX              |
-| 13  | **API: rate limiting middleware** (basic token bucket)                | High   | 30min    | Security        |
-| 14  | **API: authentication middleware** (API key)                          | High   | 45min    | Security        |
-| 15  | **OpenTelemetry: add spans for Syncer.Sync()**                        | High   | 45min    | Observability   |
-| 16  | **OpenTelemetry: add HTTP middleware spans**                          | High   | 30min    | Observability   |
-| 17  | **OpenTelemetry: add CQRS stack spans**                               | Medium | 30min    | Observability   |
-| 18  | **Event retention/TTL strategy** — design document                    | High   | 60min    | Architecture    |
-| 19  | **Real GitHub PAT smoke test**                                        | Medium | 30min    | Confidence      |
-| 20  | **Adopt `UpcasterRegistry` for schema evolution**                     | Medium | 45min    | Future-proofing |
-| 21  | **Adopt `catalog/` for AsyncAPI/D2 generation**                       | Low    | 60min    | Documentation   |
-| 22  | **`govalid` struct tags on config types**                             | Low    | 20min    | Validation      |
-| 23  | **Clean `nolint:ireturn` in store_factory**                           | Low    | 10min    | Code quality    |
-| 24  | **Resolve go-cqrs-lite upstream WIP**                                 | High   | External | Dependencies    |
-| 25  | **Multi-user sync design** — architecture decision record             | High   | 60min    | Architecture    |
+| #  | Task                                                                  | Impact | Effort   | Category        |
+| -- | --------------------------------------------------------------------- | ------ | -------- | --------------- |
+| 1  | **Mark done TODOs in TODO_LIST.md** (ADRs, CONTRIBUTING, file splits) | Low    | 5min     | Docs cleanup    |
+| 2  | **Update TODO_LIST.md** — SQLite persistence test is done, mark it    | Low    | 5min     | Docs cleanup    |
+| 3  | **Extract shared `testItem` helpers to `pkg/testutil/`**              | Medium | 30min    | DRY             |
+| 4  | **Add tests for `pkg/testutil/`**                                     | Medium | 15min    | Testing         |
+| 5  | **CLI: extract `runSync` as testable function**                       | High   | 30min    | Testability     |
+| 6  | **CLI: extract `runAPIServer` as testable function**                  | High   | 15min    | Testability     |
+| 7  | **CLI: add `runSync` test**                                           | High   | 15min    | Coverage        |
+| 8  | **CLI: add `runAPIServer` test**                                      | High   | 15min    | Coverage        |
+| 9  | **CQRS: add stack lifecycle tests** (Close, double-Close)             | Medium | 20min    | Robustness      |
+| 10 | **GitHub provider: error classification edge cases**                  | Medium | 20min    | Coverage        |
+| 11 | **Structured logging fields** (username, page, event_id)              | Medium | 30min    | Debuggability   |
+| 12 | **API: add `X-Total-Count` pagination header**                        | Medium | 15min    | UX              |
+| 13 | **API: rate limiting middleware** (basic token bucket)                | High   | 30min    | Security        |
+| 14 | **API: authentication middleware** (API key)                          | High   | 45min    | Security        |
+| 15 | **OpenTelemetry: add spans for Syncer.Sync()**                        | High   | 45min    | Observability   |
+| 16 | **OpenTelemetry: add HTTP middleware spans**                          | High   | 30min    | Observability   |
+| 17 | **OpenTelemetry: add CQRS stack spans**                               | Medium | 30min    | Observability   |
+| 18 | **Event retention/TTL strategy** — design document                    | High   | 60min    | Architecture    |
+| 19 | **Real GitHub PAT smoke test**                                        | Medium | 30min    | Confidence      |
+| 20 | **Adopt `UpcasterRegistry` for schema evolution**                     | Medium | 45min    | Future-proofing |
+| 21 | **Adopt `catalog/` for AsyncAPI/D2 generation**                       | Low    | 60min    | Documentation   |
+| 22 | **`govalid` struct tags on config types**                             | Low    | 20min    | Validation      |
+| 23 | **Clean `nolint:ireturn` in store_factory**                           | Low    | 10min    | Code quality    |
+| 24 | **Resolve go-cqrs-lite upstream WIP**                                 | High   | External | Dependencies    |
+| 25 | **Multi-user sync design** — architecture decision record             | High   | 60min    | Architecture    |
 
 ---
 
@@ -221,7 +221,7 @@ The right answer depends on whether `provider.Item` will ever diverge significan
 | `pkg/provider`             | **90.0%** | 2     | ✅ Good      |
 | `pkg/providers/github`     | **84.4%** | 32    | ✅ Good      |
 | `pkg/sync`                 | **91.0%** | 22    | ✅ Excellent |
-| `cmd/examples/github-sync` | **12.3%** | 14    | ⚠️ Low       |
+| `cmd/examples/github-sync` | **12.3%** | 14    | ⚠️ Low        |
 
 **283 total test functions** across 11 test packages. **50 production files, 43 test files.** ~4927 lines of production Go code.
 

@@ -1,7 +1,7 @@
 # Status Report: cqrs-lint — Static CQRS Architectural-Invariant Linter
 
-**Date:** 2026-07-17 09:53  
-**Session scope:** Build a `cqrs-lint` static analyzer from scratch (the command didn't exist).  
+**Date:** 2026-07-17 09:53\
+**Session scope:** Build a `cqrs-lint` static analyzer from scratch (the command didn't exist).\
 **Verdict:** Shipped and green, but with real gaps (see below).
 
 ---

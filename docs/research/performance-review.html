@@ -32,7 +32,9 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
         background: var(--bg);
         color: var(--text);
         line-height: 1.6;
@@ -49,7 +51,11 @@
       .hero {
         padding: 80px 0 60px;
         text-align: center;
-        background: radial-gradient(ellipse at 50% 0%, rgba(88, 166, 255, 0.08), transparent 60%);
+        background: radial-gradient(
+          ellipse at 50% 0%,
+          rgba(88, 166, 255, 0.08),
+          transparent 60%
+        );
         border-bottom: 1px solid var(--border);
       }
       .hero h1 {
@@ -453,22 +459,30 @@
       <div class="container">
         <h1>Performance Review</h1>
         <p class="subtitle">
-          Go-LocalSync — Event-Sourced Sync SDK with Pluggable CRDT Conflict Resolution
+          Go-LocalSync — Event-Sourced Sync SDK with Pluggable CRDT Conflict
+          Resolution
         </p>
         <div class="meta">
           <span
-            ><span class="dot" style="background: var(--accent)"></span> 4,536 lines production
-            Go</span
+            ><span class="dot" style="background: var(--accent)"></span> 4,536
+            lines production Go</span
           >
           <span
-            ><span class="dot" style="background: var(--green)"></span> 283+ tests · 100% pass</span
+            ><span class="dot" style="background: var(--green)"></span> 283+
+            tests · 100% pass</span
           >
-          <span><span class="dot" style="background: var(--purple)"></span> 16 MB binary</span>
           <span
-            ><span class="dot" style="background: var(--teal)"></span> AMD Ryzen AI MAX+ 395 · 32
-            threads</span
+            ><span class="dot" style="background: var(--purple)"></span> 16 MB
+            binary</span
           >
-          <span><span class="dot" style="background: var(--yellow)"></span> 2026-06-14</span>
+          <span
+            ><span class="dot" style="background: var(--teal)"></span> AMD Ryzen
+            AI MAX+ 395 · 32 threads</span
+          >
+          <span
+            ><span class="dot" style="background: var(--yellow)"></span>
+            2026-06-14</span
+          >
         </div>
       </div>
     </div>
@@ -484,7 +498,9 @@
         <div class="score-card">
           <div class="label">RAM</div>
           <div class="grade grade-b">B</div>
-          <div class="desc">Zero-alloc fast paths; GC pressure in SQLite scan</div>
+          <div class="desc">
+            Zero-alloc fast paths; GC pressure in SQLite scan
+          </div>
         </div>
         <div class="score-card">
           <div class="label">Disk / IO</div>
@@ -494,7 +510,9 @@
         <div class="score-card">
           <div class="label">Network</div>
           <div class="grade grade-c">C</div>
-          <div class="desc">Sequential pagination; redundant rate-limit calls</div>
+          <div class="desc">
+            Sequential pagination; redundant rate-limit calls
+          </div>
         </div>
         <div class="score-card">
           <div class="label">Concurrency</div>
@@ -512,11 +530,13 @@
       <section>
         <h2><span class="icon">📊</span> Executive Summary</h2>
         <p class="lead">
-          Go-LocalSync is computationally efficient — its in-memory fast paths are zero-allocation
-          and its CRDT primitives benchmark in the low-nanosecond range. The critical weaknesses are
-          all I/O-shaped: SQLite is configured without WAL mode and locked to a single connection,
-          the sync loop is fully sequential, and network pagination has no concurrency. These are
-          architectural decisions that are straightforward to fix without touching domain logic.
+          Go-LocalSync is computationally efficient — its in-memory fast paths
+          are zero-allocation and its CRDT primitives benchmark in the
+          low-nanosecond range. The critical weaknesses are all I/O-shaped:
+          SQLite is configured without WAL mode and locked to a single
+          connection, the sync loop is fully sequential, and network pagination
+          has no concurrency. These are architectural decisions that are
+          straightforward to fix without touching domain logic.
         </p>
 
         <div class="stat-grid">
@@ -547,12 +567,13 @@
         </div>
 
         <div class="callout warn">
-          <strong>Bottom line:</strong> For a local-first single-user tool, performance is more than
-          adequate. The system will handle <strong>~20,000 items/sec</strong> in memory mode and
+          <strong>Bottom line:</strong> For a local-first single-user tool,
+          performance is more than adequate. The system will handle
+          <strong>~20,000 items/sec</strong> in memory mode and
           <strong>~2,000 items/sec</strong>
-          with SQLite. The gaps become relevant only at scale (>50k items) or under concurrent load.
-          All issues identified are configuration and loop-level fixes — no fundamental redesign
-          needed.
+          with SQLite. The gaps become relevant only at scale (>50k items) or
+          under concurrent load. All issues identified are configuration and
+          loop-level fixes — no fundamental redesign needed.
         </div>
       </section>
 
@@ -560,10 +581,13 @@
       <section>
         <h2><span class="icon">⚡</span> Benchmark Results</h2>
         <p class="lead">
-          Real measurements from <code>go test -bench=. -benchmem</code> on the production codebase.
+          Real measurements from <code>go test -bench=. -benchmem</code> on the
+          production codebase.
         </p>
 
-        <h3>CRDT Primitives <span class="tag tag-good">zero-alloc hot paths</span></h3>
+        <h3>
+          CRDT Primitives <span class="tag tag-good">zero-alloc hot paths</span>
+        </h3>
         <div class="table-wrap">
           <table>
             <thead>
@@ -615,12 +639,16 @@
           </table>
         </div>
         <p style="margin-top: 12px; color: var(--text-dim); font-size: 0.88rem">
-          The <code>Cmp</code> method allocates a temporary <code>map[NodeID]bool</code> internally
-          but the allocator optimizes it away. Merge clones + iterates — both are O(n) in node
-          count, which is tiny (typically 2–5 nodes).
+          The <code>Cmp</code> method allocates a temporary
+          <code>map[NodeID]bool</code> internally but the allocator optimizes it
+          away. Merge clones + iterates — both are O(n) in node count, which is
+          tiny (typically 2–5 nodes).
         </p>
 
-        <h3>CQRS Adapter Layer <span class="tag tag-good">stack-only conversions</span></h3>
+        <h3>
+          CQRS Adapter Layer
+          <span class="tag tag-good">stack-only conversions</span>
+        </h3>
         <div class="table-wrap">
           <table>
             <thead>
@@ -673,29 +701,35 @@
         </div>
 
         <h3>
-          ReadModel List — Memory vs SQLite <span class="tag tag-ok">1,000 items · limit 100</span>
+          ReadModel List — Memory vs SQLite
+          <span class="tag tag-ok">1,000 items · limit 100</span>
         </h3>
 
         <div class="bar-chart">
           <div class="bar-row">
             <div class="bar-label">Memory RM</div>
             <div class="bar-track">
-              <div class="bar-fill mem" style="width: 25%">77,528 ns · 3 allocs</div>
+              <div class="bar-fill mem" style="width: 25%">
+                77,528 ns · 3 allocs
+              </div>
             </div>
           </div>
           <div class="bar-row">
             <div class="bar-label">SQLite RM</div>
             <div class="bar-track">
-              <div class="bar-fill sql" style="width: 72%">223,617 ns · 1,840 allocs</div>
+              <div class="bar-fill sql" style="width: 72%">
+                223,617 ns · 1,840 allocs
+              </div>
             </div>
           </div>
         </div>
 
         <div class="callout">
-          <strong>SQLite is 2.9× slower and allocates 613× more objects</strong> per query (1,840 vs
-          3 allocs). The 1,840 allocations come from modernc.org/sqlite row scanning — each of the
-          100 rows triggers ~18 intermediate allocations (string decoding, time parsing, ULID
-          parsing, struct construction). Switching to a prepared statement and a
+          <strong>SQLite is 2.9× slower and allocates 613× more objects</strong>
+          per query (1,840 vs 3 allocs). The 1,840 allocations come from
+          modernc.org/sqlite row scanning — each of the 100 rows triggers ~18
+          intermediate allocations (string decoding, time parsing, ULID parsing,
+          struct construction). Switching to a prepared statement and a
           <code>sql.RawBytes</code> scan target would cut this dramatically.
         </div>
       </section>
@@ -703,7 +737,9 @@
       <!-- ════════════════════ CPU ════════════════════ -->
       <section>
         <h2><span class="icon">🔥</span> CPU Analysis</h2>
-        <p class="lead">Where processor cycles are spent across the sync pipeline.</p>
+        <p class="lead">
+          Where processor cycles are spent across the sync pipeline.
+        </p>
 
         <h3>Hot Path: Per-Item Sync Flow</h3>
         <div class="table-wrap">
@@ -725,7 +761,9 @@
               </tr>
               <tr>
                 <td>2. Command dispatch</td>
-                <td class="mono">3-layer middleware chain (log → validate → retry)</td>
+                <td class="mono">
+                  3-layer middleware chain (log → validate → retry)
+                </td>
                 <td class="num">~500 ns</td>
                 <td>0–2</td>
               </tr>
@@ -737,7 +775,9 @@
               </tr>
               <tr>
                 <td>4. Decide</td>
-                <td class="mono">hasChanged() → resolveConflict() → syncEvents()</td>
+                <td class="mono">
+                  hasChanged() → resolveConflict() → syncEvents()
+                </td>
                 <td class="num">~300 ns</td>
                 <td>2–4</td>
               </tr>
@@ -771,27 +811,33 @@
         <div class="callout warn">
           <strong>Doc vs code mismatch:</strong> <code>AGENTS.md</code> claims a
           <code>sync.Map</code> cache exists for aggregate IDs, but
-          <code>pkg/cqrs/aggregate_id.go</code> has <strong>no cache</strong>. The SHA256 hash + hex
-          encoding + <code>ParseAggregateID</code> runs on <em>every</em>
-          <code>SyncItems</code> call for <em>every</em> item, even items that haven't changed. For
-          1,000 unchanged items this is ~200µs of pure recomputation that a cache would eliminate.
+          <code>pkg/cqrs/aggregate_id.go</code> has <strong>no cache</strong>.
+          The SHA256 hash + hex encoding + <code>ParseAggregateID</code> runs on
+          <em>every</em> <code>SyncItems</code> call for <em>every</em> item,
+          even items that haven't changed. For 1,000 unchanged items this is
+          ~200µs of pure recomputation that a cache would eliminate.
         </div>
 
         <h3>Logging Overhead in Hot Path</h3>
         <p style="color: var(--text-dim); font-size: 0.92rem">
           The <code>middleware.EventLogging</code> middleware logs
-          <strong>2 structured lines per event</strong> at INFO level (dispatching + succeeded),
-          plus the <code>commandLoggingMiddleware</code> adds a third. For a 1,000-item sync that's
-          <strong>3,000 log lines</strong>. Even with charm.land/log's efficient implementation,
-          this adds measurable overhead — the benchmark output above shows ~40µs per item with
-          logging vs ~5µs for unchanged items where the decider short-circuits before logging fires.
+          <strong>2 structured lines per event</strong> at INFO level
+          (dispatching + succeeded), plus the
+          <code>commandLoggingMiddleware</code> adds a third. For a 1,000-item
+          sync that's <strong>3,000 log lines</strong>. Even with
+          charm.land/log's efficient implementation, this adds measurable
+          overhead — the benchmark output above shows ~40µs per item with
+          logging vs ~5µs for unchanged items where the decider short-circuits
+          before logging fires.
         </p>
       </section>
 
       <!-- ════════════════════ RAM ════════════════════ -->
       <section>
         <h2><span class="icon">🧠</span> Memory / RAM Analysis</h2>
-        <p class="lead">Allocation patterns, GC pressure, and memory growth characteristics.</p>
+        <p class="lead">
+          Allocation patterns, GC pressure, and memory growth characteristics.
+        </p>
 
         <h3>Per-Item Memory Footprint</h3>
         <div class="table-wrap">
@@ -809,7 +855,9 @@
                 <td><code>model.Item</code> struct</td>
                 <td>~320 B</td>
                 <td>Persistent (read model)</td>
-                <td>10 fields: 6 branded strings + 2 time.Time + 2 plain strings</td>
+                <td>
+                  10 fields: 6 branded strings + 2 time.Time + 2 plain strings
+                </td>
               </tr>
               <tr>
                 <td><code>ItemSyncedPayload</code></td>
@@ -855,7 +903,9 @@
           </div>
           <div class="bar-row">
             <div class="bar-label">payload→item</div>
-            <div class="bar-track"><div class="bar-fill blue" style="width: 5%">1 alloc</div></div>
+            <div class="bar-track">
+              <div class="bar-fill blue" style="width: 5%">1 alloc</div>
+            </div>
           </div>
           <div class="bar-row">
             <div class="bar-label">item→payload</div>
@@ -911,17 +961,18 @@
           </table>
         </div>
         <p style="margin-top: 12px; color: var(--text-dim); font-size: 0.88rem">
-          Event store includes RawJSON (~1KB avg per GitHub event). Without RawJSON, the event store
-          would be ~60% smaller. Snapshots add ~10% overhead. No event compaction exists — the store
-          grows monotonically.
+          Event store includes RawJSON (~1KB avg per GitHub event). Without
+          RawJSON, the event store would be ~60% smaller. Snapshots add ~10%
+          overhead. No event compaction exists — the store grows monotonically.
         </p>
 
         <div class="callout">
-          <strong>No memory leak risk:</strong> The <code>MemoryReadModel</code> uses a simple
+          <strong>No memory leak risk:</strong> The
+          <code>MemoryReadModel</code> uses a simple
           <code>map[string]*model.Item</code>
-          with deterministic keys. Upserts replace, deletes remove. No unbounded slices or caches.
-          The only growth vector is the event store itself, which is expected for an event-sourced
-          system.
+          with deterministic keys. Upserts replace, deletes remove. No unbounded
+          slices or caches. The only growth vector is the event store itself,
+          which is expected for an event-sourced system.
         </div>
       </section>
 
@@ -929,15 +980,17 @@
       <section>
         <h2><span class="icon">💾</span> Disk / I/O Analysis</h2>
         <p class="lead">
-          SQLite configuration, write patterns, and persistence characteristics. This is the weakest
-          area.
+          SQLite configuration, write patterns, and persistence characteristics.
+          This is the weakest area.
         </p>
 
         <div class="scoreboard" style="margin-top: 24px">
           <div class="score-card">
             <div class="label">WAL Mode</div>
             <div class="grade grade-d">OFF</div>
-            <div class="desc">Default DELETE journal — exclusive write locks</div>
+            <div class="desc">
+              Default DELETE journal — exclusive write locks
+            </div>
           </div>
           <div class="score-card">
             <div class="label">Max Connections</div>
@@ -958,8 +1011,8 @@
 
         <h3>SQLite Configuration Gap</h3>
         <p style="color: var(--text-dim); font-size: 0.92rem">
-          The go-cqrs-lite storage module provides <code>SQLiteEnableWAL()</code> and documents it
-          in its README:
+          The go-cqrs-lite storage module provides
+          <code>SQLiteEnableWAL()</code> and documents it in its README:
         </p>
         <pre
           style="
@@ -977,13 +1030,25 @@
         <p style="color: var(--text-dim); font-size: 0.92rem">
           But <code>pkg/cqrs/store_factory.go</code> only calls
           <code>ConfigureTursoPool(db)</code> — which internally just does
-          <code>db.SetMaxOpenConns(1)</code>. <strong>WAL mode is never enabled.</strong> The
-          result:
+          <code>db.SetMaxOpenConns(1)</code>.
+          <strong>WAL mode is never enabled.</strong> The result:
         </p>
-        <ul style="color: var(--text-dim); font-size: 0.92rem; margin: 12px 0 12px 24px">
-          <li>Every write acquires an <strong>exclusive lock</strong> on the database file</li>
+        <ul
+          style="
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            margin: 12px 0 12px 24px;
+          "
+        >
+          <li>
+            Every write acquires an <strong>exclusive lock</strong> on the
+            database file
+          </li>
           <li>Reads are blocked during writes (no concurrent read/write)</li>
-          <li>Only <strong>1 connection</strong> exists — no parallel query execution at all</li>
+          <li>
+            Only <strong>1 connection</strong> exists — no parallel query
+            execution at all
+          </li>
           <li>fsync on every commit (no group commit)</li>
         </ul>
 
@@ -1015,7 +1080,9 @@
                 <td>Sync 100 unchanged</td>
                 <td>0 events + 0 snapshots + 0 RM writes</td>
                 <td>0</td>
-                <td>0 disk writes <span class="tag tag-good">idempotent</span></td>
+                <td>
+                  0 disk writes <span class="tag tag-good">idempotent</span>
+                </td>
               </tr>
               <tr>
                 <td>Delete 1 item</td>
@@ -1028,11 +1095,12 @@
         </div>
 
         <div class="callout warn">
-          <strong>Each item sync is a separate transaction.</strong> The <code>SyncItems</code> loop
-          dispatches commands one at a time through <code>CommandDispatcher.Dispatch()</code>. For
-          100 items, that's 100 separate <code>BEGIN…COMMIT</code> cycles on SQLite. A batch
-          transaction would reduce this to 1 fsync for the entire batch — typically a
-          <strong>10–50× improvement</strong> on disk-backed SQLite.
+          <strong>Each item sync is a separate transaction.</strong> The
+          <code>SyncItems</code> loop dispatches commands one at a time through
+          <code>CommandDispatcher.Dispatch()</code>. For 100 items, that's 100
+          separate <code>BEGIN…COMMIT</code> cycles on SQLite. A batch
+          transaction would reduce this to 1 fsync for the entire batch —
+          typically a <strong>10–50× improvement</strong> on disk-backed SQLite.
         </div>
 
         <h3>Index Strategy <span class="tag tag-good">well designed</span></h3>
@@ -1075,9 +1143,10 @@
           </table>
         </div>
         <p style="margin-top: 12px; color: var(--text-dim); font-size: 0.88rem">
-          Note: The <code>source</code> column has no dedicated index but is part of the composite
-          primary key <code>(source, source_id)</code>, so <code>WHERE source = ?</code> uses the PK
-          index. Good coverage overall.
+          Note: The <code>source</code> column has no dedicated index but is
+          part of the composite primary key <code>(source, source_id)</code>, so
+          <code>WHERE source = ?</code> uses the PK index. Good coverage
+          overall.
         </p>
       </section>
 
@@ -1085,7 +1154,8 @@
       <section>
         <h2><span class="icon">🌐</span> Network Analysis</h2>
         <p class="lead">
-          GitHub API interaction patterns, HTTP client configuration, and pagination strategy.
+          GitHub API interaction patterns, HTTP client configuration, and
+          pagination strategy.
         </p>
 
         <h3>Fetch Pipeline (per sync run)</h3>
@@ -1104,7 +1174,9 @@
                 <td>Rate limit check</td>
                 <td>1</td>
                 <td><span class="tag tag-bad">yes</span></td>
-                <td><code>GET /rate_limit</code> before <em>every</em> page fetch</td>
+                <td>
+                  <code>GET /rate_limit</code> before <em>every</em> page fetch
+                </td>
               </tr>
               <tr>
                 <td>Page 1 fetch</td>
@@ -1147,7 +1219,9 @@
           <div class="bar-row">
             <div class="bar-label">Optimal calls</div>
             <div class="bar-track">
-              <div class="bar-fill mem" style="width: 48%">10 calls (fetch only)</div>
+              <div class="bar-fill mem" style="width: 48%">
+                10 calls (fetch only)
+              </div>
             </div>
           </div>
         </div>
@@ -1163,25 +1237,27 @@
         >
           <li>
             <strong>Default transport MaxIdleConnsPerHost = 2.</strong> Go's
-            <code>http.DefaultTransport</code> limits idle connections to 2 per host. For sequential
-            requests this is fine, but if pages were fetched concurrently, this would bottleneck
-            connection reuse.
+            <code>http.DefaultTransport</code> limits idle connections to 2 per
+            host. For sequential requests this is fine, but if pages were
+            fetched concurrently, this would bottleneck connection reuse.
           </li>
           <li>
-            <strong>No timeout configured.</strong> <code>oauth2.NewClient()</code> uses the default
-            HTTP client with no explicit timeout. A hung GitHub API call blocks indefinitely (until
+            <strong>No timeout configured.</strong>
+            <code>oauth2.NewClient()</code> uses the default HTTP client with no
+            explicit timeout. A hung GitHub API call blocks indefinitely (until
             context cancellation).
           </li>
           <li>
             <strong>No ETag / conditional requests.</strong> GitHub supports
-            <code>If-None-Match</code> headers for conditional requests (returns 304, costs 0 rate
-            limit points). Not implemented.
+            <code>If-None-Match</code> headers for conditional requests (returns
+            304, costs 0 rate limit points). Not implemented.
           </li>
           <li>
-            <strong>Full JSON marshal on every event.</strong> <code>convertEvent()</code> calls
-            <code>json.Marshal(e)</code> for <em>every</em> GitHub event, storing the full JSON as
-            <code>RawJSON</code>. This adds ~1–2µs of CPU + ~1KB of memory per event, even if
-            RawJSON is never read back.
+            <strong>Full JSON marshal on every event.</strong>
+            <code>convertEvent()</code> calls <code>json.Marshal(e)</code> for
+            <em>every</em> GitHub event, storing the full JSON as
+            <code>RawJSON</code>. This adds ~1–2µs of CPU + ~1KB of memory per
+            event, even if RawJSON is never read back.
           </li>
         </ul>
 
@@ -1235,7 +1311,8 @@
       <section>
         <h2><span class="icon">🔀</span> Concurrency Analysis</h2>
         <p class="lead">
-          Locking strategy, parallelism opportunities, and thread-safety characteristics.
+          Locking strategy, parallelism opportunities, and thread-safety
+          characteristics.
         </p>
 
         <h3>Current Concurrency Model</h3>
@@ -1252,15 +1329,25 @@
             <tbody>
               <tr>
                 <td><code>MemoryReadModel</code></td>
-                <td><code>sync.RWMutex</code> — RLock for reads, Lock for writes</td>
+                <td>
+                  <code>sync.RWMutex</code> — RLock for reads, Lock for writes
+                </td>
                 <td><span class="tag tag-good">concurrent reads</span></td>
-                <td><span class="tag tag-ok">List/Count hold RLock during full O(n) scan</span></td>
+                <td>
+                  <span class="tag tag-ok"
+                    >List/Count hold RLock during full O(n) scan</span
+                  >
+                </td>
               </tr>
               <tr>
                 <td><code>SyncItems</code> loop</td>
                 <td>None — runs on caller's goroutine</td>
                 <td><span class="tag tag-bad">sequential</span></td>
-                <td><span class="tag tag-bad">100 items = 100 sequential dispatches</span></td>
+                <td>
+                  <span class="tag tag-bad"
+                    >100 items = 100 sequential dispatches</span
+                  >
+                </td>
               </tr>
               <tr>
                 <td><code>CommandDispatcher</code></td>
@@ -1290,15 +1377,20 @@
           </table>
         </div>
 
-        <h3>RWMutex Done Right <span class="tag tag-good">good pattern</span></h3>
+        <h3>
+          RWMutex Done Right <span class="tag tag-good">good pattern</span>
+        </h3>
         <p style="color: var(--text-dim); font-size: 0.92rem">
-          The <code>MemoryReadModel</code> correctly uses <code>sync.RWMutex</code> with
-          <code>RLock</code> for all read operations (<code>List</code>, <code>Count</code>,
-          <code>GetTypes</code>, <code>Get</code>) and <code>Lock</code> only for mutations
-          (<code>Upsert</code>, <code>Delete</code>). This allows unlimited concurrent readers. The
-          trade-off: <code>List</code> and <code>Count</code> hold the read lock for the
-          <strong>entire O(n) scan</strong>, which blocks writers for the scan duration. For 10,000
-          items this is ~800µs per scan — negligible for a local tool.
+          The <code>MemoryReadModel</code> correctly uses
+          <code>sync.RWMutex</code> with <code>RLock</code> for all read
+          operations (<code>List</code>, <code>Count</code>,
+          <code>GetTypes</code>, <code>Get</code>) and <code>Lock</code> only
+          for mutations (<code>Upsert</code>, <code>Delete</code>). This allows
+          unlimited concurrent readers. The trade-off: <code>List</code> and
+          <code>Count</code> hold the read lock for the
+          <strong>entire O(n) scan</strong>, which blocks writers for the scan
+          duration. For 10,000 items this is ~800µs per scan — negligible for a
+          local tool.
         </p>
 
         <h3>Missing Parallelism Opportunities</h3>
@@ -1311,50 +1403,60 @@
           "
         >
           <li>
-            <strong>SyncItems batch:</strong> Items are independent — each gets its own aggregate
-            ID. A worker pool with N goroutines could sync items in parallel (memory backend only —
-            SQLite's single connection would serialize anyway).
+            <strong>SyncItems batch:</strong> Items are independent — each gets
+            its own aggregate ID. A worker pool with N goroutines could sync
+            items in parallel (memory backend only — SQLite's single connection
+            would serialize anyway).
           </li>
           <li>
             <strong>FetchAll pages:</strong> GitHub pagination could use
-            <code>errgroup.Group</code> to fetch pages concurrently. Link headers provide
-            <code>next</code> URLs. This would cut network time by ~N× (N = maxPages).
+            <code>errgroup.Group</code> to fetch pages concurrently. Link
+            headers provide <code>next</code> URLs. This would cut network time
+            by ~N× (N = maxPages).
           </li>
           <li>
-            <strong>Projection:</strong> Could be decoupled from publish using a buffered channel +
-            worker goroutine. Trades consistency for throughput.
+            <strong>Projection:</strong> Could be decoupled from publish using a
+            buffered channel + worker goroutine. Trades consistency for
+            throughput.
           </li>
         </ul>
 
-        <h3>Race Condition Safety <span class="tag tag-good">verified</span></h3>
+        <h3>
+          Race Condition Safety <span class="tag tag-good">verified</span>
+        </h3>
         <p style="color: var(--text-dim); font-size: 0.92rem">
-          The <code>readmodel_concurrent_test.go</code> file includes 3 race-detector tests (<code
-            >-race</code
-          >
-          flag): 10 writers × 50 items, 20 readers × 100 reads, and contested key upsert/delete. All
-          pass cleanly. The memory backend is thread-safe.
+          The <code>readmodel_concurrent_test.go</code> file includes 3
+          race-detector tests (<code>-race</code>
+          flag): 10 writers × 50 items, 20 readers × 100 reads, and contested
+          key upsert/delete. All pass cleanly. The memory backend is
+          thread-safe.
         </p>
       </section>
 
       <!-- ════════════════════ GPU ════════════════════ -->
       <section>
         <h2><span class="icon">🎮</span> GPU Analysis</h2>
-        <p class="lead">Not applicable — no GPU-relevant workload exists in this codebase.</p>
+        <p class="lead">
+          Not applicable — no GPU-relevant workload exists in this codebase.
+        </p>
         <div class="callout">
-          Go-LocalSync is a data synchronization tool. Its compute profile is entirely CPU-bound:
-          SHA256 hashing, JSON marshaling, string comparison, and map operations. There are no
-          matrix operations, image processing, ML inference, or parallel numerical workloads that
-          would benefit from GPU offloading. The <strong>Radeon 8060S</strong> iGPU in the test
-          machine is idle during all operations.
+          Go-LocalSync is a data synchronization tool. Its compute profile is
+          entirely CPU-bound: SHA256 hashing, JSON marshaling, string
+          comparison, and map operations. There are no matrix operations, image
+          processing, ML inference, or parallel numerical workloads that would
+          benefit from GPU offloading. The <strong>Radeon 8060S</strong> iGPU in
+          the test machine is idle during all operations.
         </div>
       </section>
 
       <!-- ════════════════════ FINDINGS ════════════════════ -->
       <section>
-        <h2><span class="icon">🔍</span> Detailed Findings &amp; Recommendations</h2>
+        <h2>
+          <span class="icon">🔍</span> Detailed Findings &amp; Recommendations
+        </h2>
         <p class="lead">
-          Ranked by severity (P0 = critical, P3 = minor). Each finding includes root cause, impact,
-          and fix.
+          Ranked by severity (P0 = critical, P3 = minor). Each finding includes
+          root cause, impact, and fix.
         </p>
 
         <div class="findings">
@@ -1370,20 +1472,24 @@
               <code>createSQLiteStore()</code> calls
               <code>cqrsstorage.ConfigureTursoPool(db)</code> (which just sets
               <code>SetMaxOpenConns(1)</code>) but never calls
-              <code>cqrsstorage.SQLiteEnableWAL(ctx, db)</code>. The go-cqrs-lite storage module
-              <strong>provides</strong> this function and its README explicitly says to call it.
-              Without WAL, SQLite uses DELETE journal mode — every write takes an exclusive lock,
-              blocking all reads.
+              <code>cqrsstorage.SQLiteEnableWAL(ctx, db)</code>. The
+              go-cqrs-lite storage module <strong>provides</strong> this
+              function and its README explicitly says to call it. Without WAL,
+              SQLite uses DELETE journal mode — every write takes an exclusive
+              lock, blocking all reads.
             </div>
             <div class="finding-fix">
-              Add <code>cqrsstorage.SQLiteEnableWAL(ctx, db)</code> after <code>OpenSQLite</code> in
-              <code>store_factory.go:73</code>. WAL allows concurrent readers during writes and
-              reduces fsync overhead. Expected improvement:
-              <strong>3–10× faster SQLite writes</strong>, unblocked concurrent reads.
+              Add <code>cqrsstorage.SQLiteEnableWAL(ctx, db)</code> after
+              <code>OpenSQLite</code> in <code>store_factory.go:73</code>. WAL
+              allows concurrent readers during writes and reduces fsync
+              overhead. Expected improvement:
+              <strong>3–10× faster SQLite writes</strong>, unblocked concurrent
+              reads.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> All SQLite operations. <strong>Effort:</strong> 1 line.
-              <strong>Risk:</strong> None — WAL is strictly better for this use case.
+              <strong>Impact:</strong> All SQLite operations.
+              <strong>Effort:</strong> 1 line. <strong>Risk:</strong> None — WAL
+              is strictly better for this use case.
             </div>
           </div>
 
@@ -1391,46 +1497,52 @@
           <div class="finding p0">
             <div class="finding-header">
               <div class="finding-title">
-                No batch event writes — 1 transaction per item <code>stack.go:SyncItems</code>
+                No batch event writes — 1 transaction per item
+                <code>stack.go:SyncItems</code>
               </div>
               <span class="badge badge-p0">P0 · Disk/CPU</span>
             </div>
             <div class="finding-body">
               The <code>SyncItems</code> loop dispatches each item through
-              <code>CommandDispatcher.Dispatch()</code> individually. Each dispatch →
-              <code>repo.Execute()</code> → event store append → bus publish → projection. For 1,000
-              items with SQLite, this means 1,000 separate <code>BEGIN…COMMIT</code> cycles and
-              1,000 fsyncs.
+              <code>CommandDispatcher.Dispatch()</code> individually. Each
+              dispatch → <code>repo.Execute()</code> → event store append → bus
+              publish → projection. For 1,000 items with SQLite, this means
+              1,000 separate <code>BEGIN…COMMIT</code> cycles and 1,000 fsyncs.
             </div>
             <div class="finding-fix">
-              Wrap the <code>SyncItems</code> loop in a single transaction, or add a
-              <code>SyncItemsBatch</code> method that groups events. Alternatively, increase
-              <code>SetMaxOpenConns</code> to allow some parallelism (only safe with WAL). Expected
-              improvement: <strong>10–50× faster batch syncs</strong> on disk-backed SQLite.
+              Wrap the <code>SyncItems</code> loop in a single transaction, or
+              add a <code>SyncItemsBatch</code> method that groups events.
+              Alternatively, increase <code>SetMaxOpenConns</code> to allow some
+              parallelism (only safe with WAL). Expected improvement:
+              <strong>10–50× faster batch syncs</strong> on disk-backed SQLite.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Batch sync throughput. <strong>Effort:</strong> Medium
-              (transaction boundary in decider repo). <strong>Risk:</strong> Partial failure
-              semantics change.
+              <strong>Impact:</strong> Batch sync throughput.
+              <strong>Effort:</strong> Medium (transaction boundary in decider
+              repo). <strong>Risk:</strong> Partial failure semantics change.
             </div>
           </div>
 
           <!-- P0-3 -->
           <div class="finding p0">
             <div class="finding-header">
-              <div class="finding-title">N+1 query in GetStats <code>sync.go:GetStats</code></div>
+              <div class="finding-title">
+                N+1 query in GetStats <code>sync.go:GetStats</code>
+              </div>
               <span class="badge badge-p0">P0 · CPU/Disk</span>
             </div>
             <div class="finding-body">
-              <code>GetStats()</code> calls <code>Count()</code> for the total, then
-              <code>GetTypes()</code>, then <code>Count()</code>
-              <strong>again for each type</strong>. For 5 item types, that's 6 full-table scans. On
-              10,000 items this is 6 × O(n) scans = ~60,000 item comparisons.
+              <code>GetStats()</code> calls <code>Count()</code> for the total,
+              then <code>GetTypes()</code>, then <code>Count()</code>
+              <strong>again for each type</strong>. For 5 item types, that's 6
+              full-table scans. On 10,000 items this is 6 × O(n) scans = ~60,000
+              item comparisons.
             </div>
             <div class="finding-fix">
               Replace with a single
-              <code>SELECT type, COUNT(*) FROM sync_items GROUP BY type</code> query. Add a
-              <code>CountByType()</code> method to the ReadModel interface. Expected improvement:
+              <code>SELECT type, COUNT(*) FROM sync_items GROUP BY type</code>
+              query. Add a <code>CountByType()</code> method to the ReadModel
+              interface. Expected improvement:
               <strong>N× fewer queries</strong> (N = number of types).
             </div>
             <div class="finding-impact">
@@ -1443,25 +1555,29 @@
           <div class="finding p1">
             <div class="finding-header">
               <div class="finding-title">
-                Sequential pagination — no concurrent page fetch <code>client.go:FetchAll</code>
+                Sequential pagination — no concurrent page fetch
+                <code>client.go:FetchAll</code>
               </div>
               <span class="badge badge-p1">P1 · Network</span>
             </div>
             <div class="finding-body">
-              <code>FetchAll</code> loops <code>for page := 1; page <= maxPages</code> and calls
+              <code>FetchAll</code> loops
+              <code>for page := 1; page <= maxPages</code> and calls
               <code>Fetch()</code>
-              sequentially. Each page waits for the HTTP response of the previous page before
-              starting. For 10 pages at ~200ms/round-trip, total time is ~2 seconds (sequential) vs
-              ~200ms (concurrent).
+              sequentially. Each page waits for the HTTP response of the
+              previous page before starting. For 10 pages at ~200ms/round-trip,
+              total time is ~2 seconds (sequential) vs ~200ms (concurrent).
             </div>
             <div class="finding-fix">
-              Use <code>errgroup.WithContext</code> to fetch pages concurrently with a bounded
-              goroutine pool. Parse <code>Link</code> headers to discover total pages. Expected
-              improvement: <strong>~N× faster network fetch</strong> (N = pages).
+              Use <code>errgroup.WithContext</code> to fetch pages concurrently
+              with a bounded goroutine pool. Parse <code>Link</code> headers to
+              discover total pages. Expected improvement:
+              <strong>~N× faster network fetch</strong> (N = pages).
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Sync wall-clock time. <strong>Effort:</strong> Medium.
-              <strong>Risk:</strong> Rate limit exhaustion if not bounded.
+              <strong>Impact:</strong> Sync wall-clock time.
+              <strong>Effort:</strong> Medium. <strong>Risk:</strong> Rate limit
+              exhaustion if not bounded.
             </div>
           </div>
 
@@ -1475,20 +1591,22 @@
               <span class="badge badge-p1">P1 · Network</span>
             </div>
             <div class="finding-body">
-              <code>waitForRateLimit()</code> calls <code>c.client.RateLimit.Get(ctx)</code> — a
-              live API call to GitHub — before <strong>every single page fetch</strong>. For 10
-              pages, that's 10 extra API calls that each consume a rate-limit point. The rate limit
-              info is also available in the response headers of every API call
-              (<code>X-RateLimit-Remaining</code>).
+              <code>waitForRateLimit()</code> calls
+              <code>c.client.RateLimit.Get(ctx)</code> — a live API call to
+              GitHub — before <strong>every single page fetch</strong>. For 10
+              pages, that's 10 extra API calls that each consume a rate-limit
+              point. The rate limit info is also available in the response
+              headers of every API call (<code>X-RateLimit-Remaining</code>).
             </div>
             <div class="finding-fix">
-              Cache rate-limit info from the <code>Response</code> headers of the previous fetch
-              call. Only call <code>RateLimit.Get()</code> on the first fetch or when the cache is
-              stale. Expected improvement: <strong>50% fewer API calls</strong>.
+              Cache rate-limit info from the <code>Response</code> headers of
+              the previous fetch call. Only call <code>RateLimit.Get()</code> on
+              the first fetch or when the cache is stale. Expected improvement:
+              <strong>50% fewer API calls</strong>.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> API quota consumption. <strong>Effort:</strong> Low.
-              <strong>Risk:</strong> None.
+              <strong>Impact:</strong> API quota consumption.
+              <strong>Effort:</strong> Low. <strong>Risk:</strong> None.
             </div>
           </div>
 
@@ -1496,27 +1614,32 @@
           <div class="finding p1">
             <div class="finding-header">
               <div class="finding-title">
-                Excessive SQLite row-scan allocations <code>sqlite_scan.go</code>
+                Excessive SQLite row-scan allocations
+                <code>sqlite_scan.go</code>
               </div>
               <span class="badge badge-p1">P1 · RAM/CPU</span>
             </div>
             <div class="finding-body">
               <code>BenchmarkSQLiteReadModel_List</code> shows
-              <strong>1,840 allocations for 100 rows</strong> (18.4 allocs/row). Each row scan
-              creates a <code>scannedItem</code> struct, parses a ULID, creates 6 branded IDs via
+              <strong>1,840 allocations for 100 rows</strong> (18.4 allocs/row).
+              Each row scan creates a <code>scannedItem</code> struct, parses a
+              ULID, creates 6 branded IDs via
               <code>NewExternalID/NewProviderID/...</code>, and constructs a
-              <code>model.Item</code>. This generates significant GC pressure under load.
+              <code>model.Item</code>. This generates significant GC pressure
+              under load.
             </div>
             <div class="finding-fix">
-              Use <code>sql.RawBytes</code> for string columns to avoid copy allocations.
-              Pre-allocate the result slice with
+              Use <code>sql.RawBytes</code> for string columns to avoid copy
+              allocations. Pre-allocate the result slice with
               <code>make([]*model.Item, 0, estimatedCount)</code>. Consider
-              <code>sync.Pool</code> for the <code>scannedItem</code> scratch struct. Expected
-              improvement: <strong>~70% fewer allocations</strong>.
+              <code>sync.Pool</code> for the <code>scannedItem</code> scratch
+              struct. Expected improvement:
+              <strong>~70% fewer allocations</strong>.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> GC pressure on list queries. <strong>Effort:</strong> Medium.
-              <strong>Risk:</strong> Low — scan logic stays the same.
+              <strong>Impact:</strong> GC pressure on list queries.
+              <strong>Effort:</strong> Medium. <strong>Risk:</strong> Low — scan
+              logic stays the same.
             </div>
           </div>
 
@@ -1530,21 +1653,25 @@
               <span class="badge badge-p1">P1 · CPU</span>
             </div>
             <div class="finding-body">
-              <code>List</code>, <code>Count</code>, and <code>GetTypes</code> all iterate the
-              entire <code>items</code> map on every call. For 10,000 items, <code>List</code> takes
-              ~800µs and <code>Count</code> ~400µs. The memory backend has no index structures (by
-              type, by actor, by source).
+              <code>List</code>, <code>Count</code>, and
+              <code>GetTypes</code> all iterate the entire
+              <code>items</code> map on every call. For 10,000 items,
+              <code>List</code> takes ~800µs and <code>Count</code> ~400µs. The
+              memory backend has no index structures (by type, by actor, by
+              source).
             </div>
             <div class="finding-fix">
-              Add secondary maps (<code>map[id.EventTypeID]map[string]*model.Item</code>) maintained
-              on Upsert/Delete. Or accept O(n) for the memory backend (it's designed for
-              dev/testing) and focus optimization on SQLite.
-              <strong>Verdict:</strong> Acceptable for the memory backend's intended use case.
-              Document the scaling limit.
+              Add secondary maps
+              (<code>map[id.EventTypeID]map[string]*model.Item</code>)
+              maintained on Upsert/Delete. Or accept O(n) for the memory backend
+              (it's designed for dev/testing) and focus optimization on SQLite.
+              <strong>Verdict:</strong> Acceptable for the memory backend's
+              intended use case. Document the scaling limit.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Memory backend at scale. <strong>Effort:</strong> Medium.
-              <strong>Risk:</strong> Medium — index maintenance adds complexity.
+              <strong>Impact:</strong> Memory backend at scale.
+              <strong>Effort:</strong> Medium. <strong>Risk:</strong> Medium —
+              index maintenance adds complexity.
             </div>
           </div>
 
@@ -1552,25 +1679,28 @@
           <div class="finding p2">
             <div class="finding-header">
               <div class="finding-title">
-                SHA256 aggregate ID recomputed every call — no cache <code>aggregate_id.go</code>
+                SHA256 aggregate ID recomputed every call — no cache
+                <code>aggregate_id.go</code>
               </div>
               <span class="badge badge-p2">P2 · CPU</span>
             </div>
             <div class="finding-body">
               <code>AggregateID()</code> computes <code>sha256.Sum256</code> +
-              <code>hex.EncodeToString</code> + <code>ParseAggregateID</code> on every call. For
-              1,000 unchanged items, this is ~200µs of pure recomputation.
-              <code>AGENTS.md</code> claims a <code>sync.Map</code> cache exists but the code has
-              none.
+              <code>hex.EncodeToString</code> + <code>ParseAggregateID</code> on
+              every call. For 1,000 unchanged items, this is ~200µs of pure
+              recomputation. <code>AGENTS.md</code> claims a
+              <code>sync.Map</code> cache exists but the code has none.
             </div>
             <div class="finding-fix">
-              Add a <code>sync.Map</code> cache keyed by <code>source + ":" + externalID</code>.
-              Aggregate IDs are deterministic and immutable — the cache never invalidates. Expected
-              improvement: ~200µs saved per 1,000-item sync with unchanged items.
+              Add a <code>sync.Map</code> cache keyed by
+              <code>source + ":" + externalID</code>. Aggregate IDs are
+              deterministic and immutable — the cache never invalidates.
+              Expected improvement: ~200µs saved per 1,000-item sync with
+              unchanged items.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Minor CPU savings. <strong>Effort:</strong> 10 lines.
-              <strong>Risk:</strong> None.
+              <strong>Impact:</strong> Minor CPU savings.
+              <strong>Effort:</strong> 10 lines. <strong>Risk:</strong> None.
             </div>
           </div>
 
@@ -1578,25 +1708,29 @@
           <div class="finding p2">
             <div class="finding-header">
               <div class="finding-title">
-                Logging middleware fires on every event at INFO level <code>middleware.go</code>
+                Logging middleware fires on every event at INFO level
+                <code>middleware.go</code>
               </div>
               <span class="badge badge-p2">P2 · CPU/RAM</span>
             </div>
             <div class="finding-body">
-              <code>EventLogging</code> logs 2 lines per event (dispatching + succeeded/failed) plus
-              <code>commandLoggingMiddleware</code> logs 1 more. For 1,000 items: 3,000 log lines.
-              Even with charm.land/log's efficiency, structured logging involves string formatting,
-              field allocation, and I/O. The benchmark output demonstrates this clearly — logging
-              dominates the per-item timing.
+              <code>EventLogging</code> logs 2 lines per event (dispatching +
+              succeeded/failed) plus <code>commandLoggingMiddleware</code> logs
+              1 more. For 1,000 items: 3,000 log lines. Even with
+              charm.land/log's efficiency, structured logging involves string
+              formatting, field allocation, and I/O. The benchmark output
+              demonstrates this clearly — logging dominates the per-item timing.
             </div>
             <div class="finding-fix">
-              Default to <code>log.DebugLevel</code> for event/command middleware. Add a
-              <code>--verbose</code> flag to opt into INFO. Or sample logging (1 per N events).
-              Expected improvement: <strong>~40% faster SyncItems</strong> with logging suppressed.
+              Default to <code>log.DebugLevel</code> for event/command
+              middleware. Add a <code>--verbose</code> flag to opt into INFO. Or
+              sample logging (1 per N events). Expected improvement:
+              <strong>~40% faster SyncItems</strong> with logging suppressed.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Batch sync throughput. <strong>Effort:</strong> Low.
-              <strong>Risk:</strong> Reduced observability — mitigated by opt-in flag.
+              <strong>Impact:</strong> Batch sync throughput.
+              <strong>Effort:</strong> Low. <strong>Risk:</strong> Reduced
+              observability — mitigated by opt-in flag.
             </div>
           </div>
 
@@ -1604,23 +1738,24 @@
           <div class="finding p2">
             <div class="finding-header">
               <div class="finding-title">
-                No HTTP client timeout configured <code>client.go:NewClient</code>
+                No HTTP client timeout configured
+                <code>client.go:NewClient</code>
               </div>
               <span class="badge badge-p2">P2 · Network</span>
             </div>
             <div class="finding-body">
-              <code>oauth2.NewClient()</code> wraps Go's default HTTP client which has no timeout. A
-              stalled GitHub API connection will block the sync goroutine indefinitely (until
-              context cancellation).
+              <code>oauth2.NewClient()</code> wraps Go's default HTTP client
+              which has no timeout. A stalled GitHub API connection will block
+              the sync goroutine indefinitely (until context cancellation).
             </div>
             <div class="finding-fix">
               Create a custom <code>*http.Client</code> with
-              <code>Timeout: 30 * time.Second</code> and pass it to <code>oauth2.NewClient</code> or
-              <code>gh.NewClient</code>.
+              <code>Timeout: 30 * time.Second</code> and pass it to
+              <code>oauth2.NewClient</code> or <code>gh.NewClient</code>.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Hang resilience. <strong>Effort:</strong> 3 lines.
-              <strong>Risk:</strong> None.
+              <strong>Impact:</strong> Hang resilience.
+              <strong>Effort:</strong> 3 lines. <strong>Risk:</strong> None.
             </div>
           </div>
 
@@ -1634,13 +1769,16 @@
             </div>
             <div class="finding-body">
               GitHub API responses include <code>ETag</code> headers. Re-sending
-              <code>If-None-Match</code> returns <code>304 Not Modified</code> and costs
-              <strong>0 rate-limit points</strong>. For incremental syncs where most items haven't
-              changed, this would dramatically reduce API quota consumption.
+              <code>If-None-Match</code> returns
+              <code>304 Not Modified</code> and costs
+              <strong>0 rate-limit points</strong>. For incremental syncs where
+              most items haven't changed, this would dramatically reduce API
+              quota consumption.
             </div>
             <div class="finding-fix">
-              Cache ETag per URL. On re-fetch, send <code>If-None-Match</code> header. Handle 304
-              responses gracefully (skip item processing).
+              Cache ETag per URL. On re-fetch, send
+              <code>If-None-Match</code> header. Handle 304 responses gracefully
+              (skip item processing).
             </div>
             <div class="finding-impact">
               <strong>Impact:</strong> API quota for incremental syncs.
@@ -1652,24 +1790,27 @@
           <div class="finding p3">
             <div class="finding-header">
               <div class="finding-title">
-                Event store grows unbounded — no compaction <code>decider.Repository</code>
+                Event store grows unbounded — no compaction
+                <code>decider.Repository</code>
               </div>
               <span class="badge badge-p3">P3 · Disk</span>
             </div>
             <div class="finding-body">
-              Every state change creates events that are stored forever. Snapshots
-              (<code>EveryNEvents(10)</code>) cap replay cost but don't remove old events. Over
-              months of syncing, the event store can grow significantly (each event ~800B with
-              RawJSON).
+              Every state change creates events that are stored forever.
+              Snapshots (<code>EveryNEvents(10)</code>) cap replay cost but
+              don't remove old events. Over months of syncing, the event store
+              can grow significantly (each event ~800B with RawJSON).
             </div>
             <div class="finding-fix">
-              Add an event compaction/tombstone strategy: after snapshotting, mark old events as
-              archived or move to cold storage. This is a <strong>future concern</strong> — not
-              urgent for a local-first tool.
+              Add an event compaction/tombstone strategy: after snapshotting,
+              mark old events as archived or move to cold storage. This is a
+              <strong>future concern</strong> — not urgent for a local-first
+              tool.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Long-term disk usage. <strong>Effort:</strong> High.
-              <strong>Risk:</strong> Medium — compaction must preserve audit trail semantics.
+              <strong>Impact:</strong> Long-term disk usage.
+              <strong>Effort:</strong> High. <strong>Risk:</strong> Medium —
+              compaction must preserve audit trail semantics.
             </div>
           </div>
 
@@ -1677,23 +1818,26 @@
           <div class="finding p3">
             <div class="finding-header">
               <div class="finding-title">
-                Full JSON marshal on every GitHub event <code>client.go:convertEvent</code>
+                Full JSON marshal on every GitHub event
+                <code>client.go:convertEvent</code>
               </div>
               <span class="badge badge-p3">P3 · CPU/RAM</span>
             </div>
             <div class="finding-body">
-              <code>convertEvent()</code> calls <code>json.Marshal(e)</code> on every GitHub event
-              to store <code>RawJSON</code>. This adds ~1–2µs CPU + ~1KB allocation per event. If
-              RawJSON is rarely read back (e.g., only for debugging), this is wasted work.
+              <code>convertEvent()</code> calls <code>json.Marshal(e)</code> on
+              every GitHub event to store <code>RawJSON</code>. This adds ~1–2µs
+              CPU + ~1KB allocation per event. If RawJSON is rarely read back
+              (e.g., only for debugging), this is wasted work.
             </div>
             <div class="finding-fix">
-              Make RawJSON storage opt-in via a config flag. Or lazy-marshal on first access. For
-              now,
-              <strong>acceptable</strong> — the overhead is small and RawJSON provides audit value.
+              Make RawJSON storage opt-in via a config flag. Or lazy-marshal on
+              first access. For now,
+              <strong>acceptable</strong> — the overhead is small and RawJSON
+              provides audit value.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> Minor per-event overhead. <strong>Effort:</strong> Low.
-              <strong>Risk:</strong> None.
+              <strong>Impact:</strong> Minor per-event overhead.
+              <strong>Effort:</strong> Low. <strong>Risk:</strong> None.
             </div>
           </div>
 
@@ -1706,20 +1850,23 @@
               <span class="badge badge-p3">P3 · Disk/CPU</span>
             </div>
             <div class="finding-body">
-              modernc.org/sqlite is a transpiled C-to-Go SQLite. It avoids CGo (simpler builds,
-              cross-compilation) but is <strong>1.5–2× slower</strong> than mattn/go-sqlite3 for
-              I/O-heavy workloads. The tradeoff is intentional and correct for a local-first tool —
-              CGo adds cross-compilation complexity and build-time dependencies.
+              modernc.org/sqlite is a transpiled C-to-Go SQLite. It avoids CGo
+              (simpler builds, cross-compilation) but is
+              <strong>1.5–2× slower</strong> than mattn/go-sqlite3 for I/O-heavy
+              workloads. The tradeoff is intentional and correct for a
+              local-first tool — CGo adds cross-compilation complexity and
+              build-time dependencies.
             </div>
             <div class="finding-fix">
-              <strong>No action needed.</strong> The pure-Go tradeoff is the right call for this
-              project. If SQLite performance becomes critical, consider CGo as an opt-in build tag.
-              WAL mode + batching (see P0-1, P0-2) would provide more benefit than switching
+              <strong>No action needed.</strong> The pure-Go tradeoff is the
+              right call for this project. If SQLite performance becomes
+              critical, consider CGo as an opt-in build tag. WAL mode + batching
+              (see P0-1, P0-2) would provide more benefit than switching
               drivers.
             </div>
             <div class="finding-impact">
-              <strong>Impact:</strong> SQLite throughput ceiling. <strong>Effort:</strong> N/A.
-              <strong>Risk:</strong> N/A.
+              <strong>Impact:</strong> SQLite throughput ceiling.
+              <strong>Effort:</strong> N/A. <strong>Risk:</strong> N/A.
             </div>
           </div>
         </div>
@@ -1801,73 +1948,90 @@
             </div>
             <div class="finding-body">
               <code>toDataItem</code> and <code>fromDataItem</code> benchmark at
-              <strong>0.25 ns with 0 allocations</strong>. The boundary between provider DTOs and
-              domain entities is a pure struct copy — no boxing, no reflection, no interface
-              dispatch. This is textbook Go performance.
+              <strong>0.25 ns with 0 allocations</strong>. The boundary between
+              provider DTOs and domain entities is a pure struct copy — no
+              boxing, no reflection, no interface dispatch. This is textbook Go
+              performance.
             </div>
           </div>
 
           <div class="finding p3" style="border-left-color: var(--green)">
             <div class="finding-header">
-              <div class="finding-title">CRDT primitives are allocation-free</div>
+              <div class="finding-title">
+                CRDT primitives are allocation-free
+              </div>
               <span class="tag tag-good">strength</span>
             </div>
             <div class="finding-body">
               VectorClock operations (Increment, Merge, Cmp) all benchmark at
-              <strong>0 B/op, 0 allocs/op</strong>. The LWWResolver constructor is 0.6 ns. Conflict
-              resolution adds negligible overhead to the sync path.
+              <strong>0 B/op, 0 allocs/op</strong>. The LWWResolver constructor
+              is 0.6 ns. Conflict resolution adds negligible overhead to the
+              sync path.
             </div>
           </div>
 
           <div class="finding p3" style="border-left-color: var(--green)">
             <div class="finding-header">
-              <div class="finding-title">Idempotent sync — unchanged items are nearly free</div>
+              <div class="finding-title">
+                Idempotent sync — unchanged items are nearly free
+              </div>
               <span class="tag tag-good">strength</span>
             </div>
             <div class="finding-body">
-              <code>hasChanged()</code> short-circuits before any event creation. Unchanged items
-              skip event store writes, bus publication, projection, and read model updates. The
-              per-item cost drops from ~45µs to ~5µs (just the aggregate load + comparison). For
-              re-syncs where 90% of items are unchanged, this is <strong>9× faster</strong> than
-              naive upsert-all.
+              <code>hasChanged()</code> short-circuits before any event
+              creation. Unchanged items skip event store writes, bus
+              publication, projection, and read model updates. The per-item cost
+              drops from ~45µs to ~5µs (just the aggregate load + comparison).
+              For re-syncs where 90% of items are unchanged, this is
+              <strong>9× faster</strong> than naive upsert-all.
             </div>
           </div>
 
           <div class="finding p3" style="border-left-color: var(--green)">
             <div class="finding-header">
-              <div class="finding-title">Correct RWMutex usage with race-detector tests</div>
+              <div class="finding-title">
+                Correct RWMutex usage with race-detector tests
+              </div>
               <span class="tag tag-good">strength</span>
             </div>
             <div class="finding-body">
-              The MemoryReadModel uses <code>RLock</code> for all reads and <code>Lock</code> for
-              writes. Three dedicated concurrent-access tests run under <code>-race</code> with 10
-              writers and 20 readers. No data races detected.
+              The MemoryReadModel uses <code>RLock</code> for all reads and
+              <code>Lock</code> for writes. Three dedicated concurrent-access
+              tests run under <code>-race</code> with 10 writers and 20 readers.
+              No data races detected.
             </div>
           </div>
 
           <div class="finding p3" style="border-left-color: var(--green)">
             <div class="finding-header">
-              <div class="finding-title">Well-designed SQLite index strategy</div>
+              <div class="finding-title">
+                Well-designed SQLite index strategy
+              </div>
               <span class="tag tag-good">strength</span>
             </div>
             <div class="finding-body">
-              5 indexes cover all filter combinations: type, created_at (default sort), actor,
-              repo_name, and a composite (type, created_at DESC) for the common "filter by type +
-              sort by date" query. The composite primary key (source, source_id) doubles as an index
-              for source-based lookups.
+              5 indexes cover all filter combinations: type, created_at (default
+              sort), actor, repo_name, and a composite (type, created_at DESC)
+              for the common "filter by type + sort by date" query. The
+              composite primary key (source, source_id) doubles as an index for
+              source-based lookups.
             </div>
           </div>
 
           <div class="finding p3" style="border-left-color: var(--green)">
             <div class="finding-header">
-              <div class="finding-title">Branded IDs compile away to zero cost</div>
+              <div class="finding-title">
+                Branded IDs compile away to zero cost
+              </div>
               <span class="tag tag-good">strength</span>
             </div>
             <div class="finding-body">
-              The phantom-type branded IDs from <code>go-branded-id</code> provide compile-time type
-              safety with <strong>zero runtime overhead</strong>.
-              <code>id.ID[Brand, string]</code> is a struct wrapping a single value — the compiler
-              optimizes it to the underlying type. <code>.Get()</code> is an inlined field access.
+              The phantom-type branded IDs from
+              <code>go-branded-id</code> provide compile-time type safety with
+              <strong>zero runtime overhead</strong>.
+              <code>id.ID[Brand, string]</code> is a struct wrapping a single
+              value — the compiler optimizes it to the underlying type.
+              <code>.Get()</code> is an inlined field access.
             </div>
           </div>
         </div>
@@ -1877,7 +2041,8 @@
       <section>
         <h2><span class="icon">🎯</span> Prioritized Action Plan</h2>
         <p class="lead">
-          Ordered by impact-to-effort ratio (Pareto). Top 3 items deliver ~80% of total improvement.
+          Ordered by impact-to-effort ratio (Pareto). Top 3 items deliver ~80%
+          of total improvement.
         </p>
 
         <div class="table-wrap">
@@ -1972,8 +2137,8 @@
       <div class="container">
         <p>Go-LocalSync Performance Review · Generated 2026-06-14</p>
         <p style="margin-top: 8px">
-          Benchmarks run on AMD Ryzen AI MAX+ 395 (32 threads) · Go 1.26.3 · modernc.org/sqlite
-          v1.51.0
+          Benchmarks run on AMD Ryzen AI MAX+ 395 (32 threads) · Go 1.26.3 ·
+          modernc.org/sqlite v1.51.0
         </p>
       </div>
     </footer>

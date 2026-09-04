@@ -65,14 +65,14 @@
 
         /* --- Type stacks (system only — zero external fonts) --- */
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -289,15 +289,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       /* --- Issue cards --- */
@@ -310,15 +322,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -832,8 +856,9 @@
           <div class="hero-badge">Architecture Review</div>
           <h1>go-localsync Modularity &amp; Composability</h1>
           <p class="hero-subtitle">
-            Layered dependency analysis, coupling assessment, and a service-orientation review of a
-            single-aggregate, pull-only sync toolkit.
+            Layered dependency analysis, coupling assessment, and a
+            service-orientation review of a single-aggregate, pull-only sync
+            toolkit.
           </p>
         </div>
 
@@ -860,48 +885,54 @@
         <div class="card card-solution">
           <h4>Verdict: a deliberately-bounded, well-modularized toolkit</h4>
           <p>
-            The dependency graph is a clean 5-layer DAG with zero cycles. The architecture uses
-            dependency inversion at the <code>sync</code>/<code>cqrs</code> seam (<code
-              >SyncStore</code
-            >
+            The dependency graph is a clean 5-layer DAG with zero cycles. The
+            architecture uses dependency inversion at the
+            <code>sync</code>/<code>cqrs</code> seam (<code>SyncStore</code>
             interface defined in <code>pkg/sync</code>, implemented by
-            <code>*cqrs.CQRSStack</code>), a pure contract surface (no provider or CLI in-repo), and
-            a custom AST linter that makes scope drift a build failure. The scope is intentionally
-            bounded by
-            <a href="../../adr/0004-multi-aggregate-generalisation-deferred.md">ADR-0004</a>: one
-            aggregate, three events, one projection, pull-only. This is
-            <em>correct sizing for the domain</em> &mdash; the SDK is not a framework, and resisting
-            frameworkification is an architectural strength, not a gap.
+            <code>*cqrs.CQRSStack</code>), a pure contract surface (no provider
+            or CLI in-repo), and a custom AST linter that makes scope drift a
+            build failure. The scope is intentionally bounded by
+            <a href="../../adr/0004-multi-aggregate-generalisation-deferred.md"
+              >ADR-0004</a
+            >: one aggregate, three events, one projection, pull-only. This is
+            <em>correct sizing for the domain</em> &mdash; the SDK is not a
+            framework, and resisting frameworkification is an architectural
+            strength, not a gap.
           </p>
         </div>
 
         <h2 id="layers"><span class="num">01</span>Dependency Layers</h2>
         <p>
-          Verified by import scan (<code>go list</code> + grep over non-test files). Production code
-          never imports <code>pkg/testutil</code> &mdash; testutil is referenced only from
+          Verified by import scan (<code>go list</code> + grep over non-test
+          files). Production code never imports
+          <code>pkg/testutil</code> &mdash; testutil is referenced only from
           <code>_test.go</code> files.
         </p>
 
         <div class="dep-tree">
-          <span class="root">Layer 0 (leaves)</span> ├── <span class="ok">pkg/id</span>
-          <span class="root"></span> ├── <span class="ok">pkg/errors</span>
-          <span class="root"></span> ├── <span class="ok">pkg/data/schema</span>
-          <span class="root"></span> └── <span class="ok">internal/cqrslint</span> (zero internal
-          deps)
+          <span class="root">Layer 0 (leaves)</span> ├──
+          <span class="ok">pkg/id</span> <span class="root"></span> ├──
+          <span class="ok">pkg/errors</span> <span class="root"></span> ├──
+          <span class="ok">pkg/data/schema</span> <span class="root"></span> └──
+          <span class="ok">internal/cqrslint</span> (zero internal deps)
 
-          <span class="root">Layer 1</span> ├── <span class="ok">pkg/data/model</span> &rarr;
-          schema, errors, id <span class="root"></span> └──
+          <span class="root">Layer 1</span> ├──
+          <span class="ok">pkg/data/model</span> &rarr; schema, errors, id
+          <span class="root"></span> └──
           <span class="ok">pkg/provider</span> &rarr; errors, id
 
-          <span class="root">Layer 2</span> ├── <span class="ok">pkg/crdt</span> &rarr; data/model,
-          id <span class="root"></span> └── <span class="ok">pkg/testutil</span> &rarr; data/model,
-          provider
+          <span class="root">Layer 2</span> ├──
+          <span class="ok">pkg/crdt</span> &rarr; data/model, id
+          <span class="root"></span> └──
+          <span class="ok">pkg/testutil</span> &rarr; data/model, provider
 
-          <span class="root">Layer 3</span> └── <span class="ok">pkg/sync</span> &rarr; data/model,
-          data/schema, errors, id, provider
+          <span class="root">Layer 3</span> └──
+          <span class="ok">pkg/sync</span> &rarr; data/model, data/schema,
+          errors, id, provider
 
-          <span class="root">Layer 4</span> └── <span class="ok">pkg/cqrs</span> &rarr; crdt,
-          data/model, data/schema, errors, id, provider, <strong>sync</strong> (SyncStore interface)
+          <span class="root">Layer 4</span> └──
+          <span class="ok">pkg/cqrs</span> &rarr; crdt, data/model, data/schema,
+          errors, id, provider, <strong>sync</strong> (SyncStore interface)
 
           <span class="root">Layer 5 (composition root)</span> └──
           <span class="ok">pkg/api</span> &rarr; cqrs, sync, provider, &hellip;
@@ -910,18 +941,22 @@
         <div class="card card-solution">
           <h4>The sync/cqrs seam is dependency inversion done right</h4>
           <p>
-            The orchestrator (<code>pkg/sync</code>) defines <code>SyncStore</code> &mdash; a
-            minimal interface with <code>SyncItems</code>, <code>Reconcile</code>, the
-            <code>model.ItemReader</code> methods, and <code>Close</code>. The infrastructure
-            (<code>pkg/cqrs</code>) implements it via thin adapter methods
-            (<code>stack_adapters.go</code>). Because <code>pkg/sync</code> does not import
-            <code>pkg/cqrs</code>, you can swap the CQRS backend for anything else (a flat SQLite
-            table, a Postgres upsert, an in-memory map) without touching the sync engine. This is
-            the Hollywood Principle applied cleanly.
+            The orchestrator (<code>pkg/sync</code>) defines
+            <code>SyncStore</code> &mdash; a minimal interface with
+            <code>SyncItems</code>, <code>Reconcile</code>, the
+            <code>model.ItemReader</code> methods, and <code>Close</code>. The
+            infrastructure (<code>pkg/cqrs</code>) implements it via thin
+            adapter methods (<code>stack_adapters.go</code>). Because
+            <code>pkg/sync</code> does not import <code>pkg/cqrs</code>, you can
+            swap the CQRS backend for anything else (a flat SQLite table, a
+            Postgres upsert, an in-memory map) without touching the sync engine.
+            This is the Hollywood Principle applied cleanly.
           </p>
         </div>
 
-        <h2 id="scalability"><span class="num">02</span>Scalability Assessment</h2>
+        <h2 id="scalability">
+          <span class="num">02</span>Scalability Assessment
+        </h2>
         <table>
           <thead>
             <tr>
@@ -934,12 +969,18 @@
             <tr>
               <td>Item volume</td>
               <td>SQLite via modernc.org (WAL, indexed by type/created_at)</td>
-              <td><span class="badge badge-fixed">Scales to millions per source</span></td>
+              <td>
+                <span class="badge badge-fixed"
+                  >Scales to millions per source</span
+                >
+              </td>
             </tr>
             <tr>
               <td>Source fan-out</td>
               <td>Per-source mutex; sources run in parallel</td>
-              <td><span class="badge badge-fixed">CPU-bound, not lock-bound</span></td>
+              <td>
+                <span class="badge badge-fixed">CPU-bound, not lock-bound</span>
+              </td>
             </tr>
             <tr>
               <td>Horizontal scale</td>
@@ -948,13 +989,17 @@
             </tr>
             <tr>
               <td>Replay cost</td>
-              <td>Capped by snapshot strategy (EveryNEvents=10) + checkpoint-bounded catch-up</td>
+              <td>
+                Capped by snapshot strategy (EveryNEvents=10) +
+                checkpoint-bounded catch-up
+              </td>
               <td><span class="badge badge-fixed">Bounded</span></td>
             </tr>
             <tr>
               <td>Provider throughput</td>
               <td>
-                Concurrent <code>FetchAll</code> pages (default 3); honors rate limits + Retry-After
+                Concurrent <code>FetchAll</code> pages (default 3); honors rate
+                limits + Retry-After
               </td>
               <td><span class="badge badge-fixed">Provider-bound</span></td>
             </tr>
@@ -962,15 +1007,20 @@
         </table>
 
         <div class="card card-warning">
-          <h4>Scalability ceiling is the single-process boundary &mdash; accepted</h4>
+          <h4>
+            Scalability ceiling is the single-process boundary &mdash; accepted
+          </h4>
           <p>
-            The SDK is a single-writer pull mirror: one process owns the event store per aggregate.
-            Scaling out to multiple writers would require distributed CRDT machinery (vector clocks,
-            anti-entropy), which was <em>deliberately removed</em> (vector clocks /
-            <code>Operation[T]</code> / <code>SyncMessage</code> deleted; see FEATURES.md #24/#25).
-            For multi-node consumers, ADR-0004 directs sharing <code>go-cqrs-lite</code> directly
-            instead of forcing this SDK into a distributed role it was not designed for. This is the
-            right architectural call &mdash; do not &ldquo;fix&rdquo; it without revisiting the ADR.
+            The SDK is a single-writer pull mirror: one process owns the event
+            store per aggregate. Scaling out to multiple writers would require
+            distributed CRDT machinery (vector clocks, anti-entropy), which was
+            <em>deliberately removed</em> (vector clocks /
+            <code>Operation[T]</code> / <code>SyncMessage</code> deleted; see
+            FEATURES.md #24/#25). For multi-node consumers, ADR-0004 directs
+            sharing <code>go-cqrs-lite</code> directly instead of forcing this
+            SDK into a distributed role it was not designed for. This is the
+            right architectural call &mdash; do not &ldquo;fix&rdquo; it without
+            revisiting the ADR.
           </p>
         </div>
 
@@ -984,9 +1034,10 @@
               <strong>Provider is the service boundary</strong>
               <span
                 >The <code>provider.Provider</code> interface
-                (<code>Name/Fetch/FetchAll/GetRateLimit</code>) is the integration contract. Adding
-                a provider = implementing one interface in a consumer app. No SDK changes. Reference
-                impl: <code>github-local-sync</code>.</span
+                (<code>Name/Fetch/FetchAll/GetRateLimit</code>) is the
+                integration contract. Adding a provider = implementing one
+                interface in a consumer app. No SDK changes. Reference impl:
+                <code>github-local-sync</code>.</span
               >
             </div>
           </div>
@@ -996,9 +1047,9 @@
               <strong>Conflict strategy is pluggable</strong>
               <span
                 ><code>cqrs.CQRSConfig.ConflictResolver</code> accepts any
-                <code>crdt.ConflictResolver[*model.Item]</code>. Default nil = remote-wins.
-                <code>LWWResolver</code> ships in the box; custom merges compose without touching
-                the decider.</span
+                <code>crdt.ConflictResolver[*model.Item]</code>. Default nil =
+                remote-wins. <code>LWWResolver</code> ships in the box; custom
+                merges compose without touching the decider.</span
               >
             </div>
           </div>
@@ -1007,9 +1058,10 @@
             <div class="text">
               <strong>Backend is selectable</strong>
               <span
-                ><code>CQRSConfig.Backend</code> selects <code>"memory"</code> (testing) or
-                <code>"sqlite"</code> (local) at construction. Event store + read model + snapshots
-                use the same backend. Adding a Postgres backend is a
+                ><code>CQRSConfig.Backend</code> selects
+                <code>"memory"</code> (testing) or <code>"sqlite"</code> (local)
+                at construction. Event store + read model + snapshots use the
+                same backend. Adding a Postgres backend is a
                 <code>store_factory.go</code> branch, not a rewrite.</span
               >
             </div>
@@ -1017,11 +1069,14 @@
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
-              <strong>Read-side and write-side are independently evolvable</strong>
+              <strong
+                >Read-side and write-side are independently evolvable</strong
+              >
               <span
-                >The decider (write) and read model (read) communicate only via the projection
-                subscription. Reads scale independently; the projection is idempotent so live +
-                catch-up overlap is safe.</span
+                >The decider (write) and read model (read) communicate only via
+                the projection subscription. Reads scale independently; the
+                projection is idempotent so live + catch-up overlap is
+                safe.</span
               >
             </div>
           </div>
@@ -1030,9 +1085,11 @@
             <div class="text">
               <strong>Architectural invariants are compiled-in</strong>
               <span
-                ><code>internal/cqrslint</code> + <code>cmd/cqrs-lint</code> enforce 10 invariants
-                (single aggregate, 3 events, fold coverage, projection mutex, etc.) at CI time.
-                Future drift toward framework-hood becomes a red CI, not a slow rot.</span
+                ><code>internal/cqrslint</code> +
+                <code>cmd/cqrs-lint</code> enforce 10 invariants (single
+                aggregate, 3 events, fold coverage, projection mutex, etc.) at
+                CI time. Future drift toward framework-hood becomes a red CI,
+                not a slow rot.</span
               >
             </div>
           </div>
@@ -1041,26 +1098,32 @@
         <div class="card card-warning">
           <h4>One coupling note (low priority)</h4>
           <p>
-            <code>pkg/cqrs</code> imports <code>pkg/sync</code> to see <code>SyncStore</code> +
-            <code>SyncAction</code>. This is documented and intentional (the seam lives in the
-            orchestrator package), but it means the infrastructure package &ldquo;knows&rdquo; the
-            orchestrator's vocabulary at compile time. If <code>pkg/cqrs</code> ever needed to be
-            consumed by a different orchestrator, <code>SyncStore</code>/<code>SyncAction</code>
-            would belong in a neutral <code>pkg/contracts</code> package. Not worth doing today
-            &mdash; there is exactly one orchestrator and one infrastructure implementation.
+            <code>pkg/cqrs</code> imports <code>pkg/sync</code> to see
+            <code>SyncStore</code> + <code>SyncAction</code>. This is documented
+            and intentional (the seam lives in the orchestrator package), but it
+            means the infrastructure package &ldquo;knows&rdquo; the
+            orchestrator's vocabulary at compile time. If
+            <code>pkg/cqrs</code> ever needed to be consumed by a different
+            orchestrator, <code>SyncStore</code>/<code>SyncAction</code> would
+            belong in a neutral <code>pkg/contracts</code> package. Not worth
+            doing today &mdash; there is exactly one orchestrator and one
+            infrastructure implementation.
           </p>
         </div>
 
-        <h2 id="actions"><span class="num">04</span>Action Roadmap (Pareto-ordered)</h2>
+        <h2 id="actions">
+          <span class="num">04</span>Action Roadmap (Pareto-ordered)
+        </h2>
 
         <div class="migration-step">
           <div class="migration-num">1</div>
           <div class="migration-content">
             <h4>Do nothing structural (highest ROI)</h4>
             <p>
-              The architecture already meets the modularity, composability, and bounded-scope bars.
-              The most valuable architectural action is to keep resisting frameworkification: route
-              any multi-aggregate / push-ingestion / multi-writer request through ADR-0004 review
+              The architecture already meets the modularity, composability, and
+              bounded-scope bars. The most valuable architectural action is to
+              keep resisting frameworkification: route any multi-aggregate /
+              push-ingestion / multi-writer request through ADR-0004 review
               rather than expanding the SDK in place.
             </p>
           </div>
@@ -1070,37 +1133,44 @@
           <div class="migration-content">
             <h4>Optional: external event outflow hook</h4>
             <p>
-              Consumers that need to react to syncs externally (webhooks, downstream caches)
-              currently have no hook &mdash; the bus is internal. An optional
-              <code>CQRSConfig.OnEvent</code> or a documented <code>bus.SubscribeAll</code> entry
-              point would let consumers compose without forking. Non-breaking, additive. Defer
-              unless a consumer asks.
+              Consumers that need to react to syncs externally (webhooks,
+              downstream caches) currently have no hook &mdash; the bus is
+              internal. An optional
+              <code>CQRSConfig.OnEvent</code> or a documented
+              <code>bus.SubscribeAll</code> entry point would let consumers
+              compose without forking. Non-breaking, additive. Defer unless a
+              consumer asks.
             </p>
           </div>
         </div>
         <div class="migration-step">
           <div class="migration-num">3</div>
           <div class="migration-content">
-            <h4>Optional: neutral contracts package (if a 2nd orchestrator appears)</h4>
+            <h4>
+              Optional: neutral contracts package (if a 2nd orchestrator
+              appears)
+            </h4>
             <p>
-              Move <code>SyncStore</code> + <code>SyncAction</code> to <code>pkg/contracts</code> so
-              <code>cqrs</code> and <code>sync</code> both depend downward on it, removing the
-              upward edge. Only justified by actual demand &mdash; today it would add a package for
-              one consumer.
+              Move <code>SyncStore</code> + <code>SyncAction</code> to
+              <code>pkg/contracts</code> so <code>cqrs</code> and
+              <code>sync</code> both depend downward on it, removing the upward
+              edge. Only justified by actual demand &mdash; today it would add a
+              package for one consumer.
             </p>
           </div>
         </div>
 
         <div class="callout callout-solution">
           <strong>Bottom line</strong>
-          Layered, inverted, bounded, and invariant-enforced. The architecture is the kind you
-          preserve, not the kind you redesign. The only &ldquo;scalability ceiling&rdquo; is
-          single-process &mdash; and that is a deliberate, ADR-recorded decision, not a defect.
+          Layered, inverted, bounded, and invariant-enforced. The architecture
+          is the kind you preserve, not the kind you redesign. The only
+          &ldquo;scalability ceiling&rdquo; is single-process &mdash; and that
+          is a deliberate, ADR-recorded decision, not a defect.
         </div>
 
         <footer class="footer">
-          Generated 2026-07-19 &middot; Dependency graph verified by import scan over non-test
-          files. 0 cycles. testutil confined to _test.go.
+          Generated 2026-07-19 &middot; Dependency graph verified by import scan
+          over non-test files. 0 cycles. testutil confined to _test.go.
         </footer>
       </main>
     </div>

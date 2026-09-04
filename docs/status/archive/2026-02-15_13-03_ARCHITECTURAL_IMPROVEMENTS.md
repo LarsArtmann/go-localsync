@@ -105,7 +105,7 @@ type Stats struct {
 | Commit                                | Description                  |
 | ------------------------------------- | ---------------------------- |
 | `81879f4`                             | Sync tests with mock Fetcher |
-| Tests now exist for all core packages |
+| Tests now exist for all core packages |                              |
 
 **Coverage:**
 

@@ -1,7 +1,7 @@
 # Comprehensive Execution Plan — go-localsync
 
-**Date:** 2026-05-28 10:48 CEST  
-**Session:** Brutal Self-Review → Full Execution Sprint  
+**Date:** 2026-05-28 10:48 CEST\
+**Session:** Brutal Self-Review → Full Execution Sprint\
 **Principle:** Pareto — 1% → 51%, 4% → 64%, 20% → 80%
 
 ---
@@ -10,33 +10,33 @@
 
 ### 1% Tasks → 51% of Value
 
-| #   | Task                                               | Why 51%?                                                   |
-| --- | -------------------------------------------------- | ---------------------------------------------------------- |
-| 1   | Fix `exhaustruct` warnings (3 locations)           | Zero-lint build = immediate developer happiness + CI green |
-| 2   | HTTP API: `GET /items` with filtering              | The #1 customer request: "how do I query my data?"         |
-| 3   | HTTP API: `GET /stats`                             | Most-used endpoint after listing items                     |
-| 4   | Integrate `LWWResolver` into `ConflictAwareSyncer` | Makes the renamed `pkg/crdt` package actually useful       |
+| # | Task                                               | Why 51%?                                                   |
+| - | -------------------------------------------------- | ---------------------------------------------------------- |
+| 1 | Fix `exhaustruct` warnings (3 locations)           | Zero-lint build = immediate developer happiness + CI green |
+| 2 | HTTP API: `GET /items` with filtering              | The #1 customer request: "how do I query my data?"         |
+| 3 | HTTP API: `GET /stats`                             | Most-used endpoint after listing items                     |
+| 4 | Integrate `LWWResolver` into `ConflictAwareSyncer` | Makes the renamed `pkg/crdt` package actually useful       |
 
 ### 4% Tasks → 64% of Value
 
-| #   | Task                                                     | Why +13%?                                                |
-| --- | -------------------------------------------------------- | -------------------------------------------------------- |
-| 5   | OpenTelemetry: instrument `Syncer.Sync()`                | Production debugging without logs-only archaeology       |
-| 6   | Add `VectorClock` to `provider.Item` + persist in events | Foundation for multi-node conflict detection             |
-| 7   | HTTP API: `POST /sync` trigger                           | Customers want to trigger sync via HTTP, not just CLI    |
-| 8   | Write actual `docs/DOMAIN_LANGUAGE.md`                   | New contributors can't onboard without domain vocabulary |
+| # | Task                                                     | Why +13%?                                                |
+| - | -------------------------------------------------------- | -------------------------------------------------------- |
+| 5 | OpenTelemetry: instrument `Syncer.Sync()`                | Production debugging without logs-only archaeology       |
+| 6 | Add `VectorClock` to `provider.Item` + persist in events | Foundation for multi-node conflict detection             |
+| 7 | HTTP API: `POST /sync` trigger                           | Customers want to trigger sync via HTTP, not just CLI    |
+| 8 | Write actual `docs/DOMAIN_LANGUAGE.md`                   | New contributors can't onboard without domain vocabulary |
 
 ### 20% Tasks → 80% of Value
 
-| #   | Task                                                   | Why +16%?                                    |
-| --- | ------------------------------------------------------ | -------------------------------------------- |
-| 9   | HTTP API: `GET /health` + server tests                 | Production deployment requires health checks |
-| 10  | OpenTelemetry: HTTP middleware + trace propagation     | End-to-end request tracing                   |
-| 11  | Add `NodeID` to `ConflictAwareSyncer` constructor      | Enables multi-node vector clock incrementing |
-| 12  | `errorfamily.RegisterTemplate` for user-facing errors  | Currently errors have no What/Why/Fix/WayOut |
-| 13  | Add `coverage/` directory + `.gitignore`               | Clean repo root, proper artifact management  |
-| 14  | Add `reportProgress` test + `printSyncResultJSON` test | Close remaining coverage gaps in `pkg/sync`  |
-| 15  | Add ADR for CQRS adoption + branded ID migration       | Architecture decisions must be documented    |
+| #  | Task                                                   | Why +16%?                                    |
+| -- | ------------------------------------------------------ | -------------------------------------------- |
+| 9  | HTTP API: `GET /health` + server tests                 | Production deployment requires health checks |
+| 10 | OpenTelemetry: HTTP middleware + trace propagation     | End-to-end request tracing                   |
+| 11 | Add `NodeID` to `ConflictAwareSyncer` constructor      | Enables multi-node vector clock incrementing |
+| 12 | `errorfamily.RegisterTemplate` for user-facing errors  | Currently errors have no What/Why/Fix/WayOut |
+| 13 | Add `coverage/` directory + `.gitignore`               | Clean repo root, proper artifact management  |
+| 14 | Add `reportProgress` test + `printSyncResultJSON` test | Close remaining coverage gaps in `pkg/sync`  |
+| 15 | Add ADR for CQRS adoption + branded ID migration       | Architecture decisions must be documented    |
 
 ---
 
@@ -46,38 +46,38 @@ Sorted by **Impact / Effort** ratio (highest first), then by **Customer Value**,
 
 ### Phase 1: The 1% — Immediate Wins (51% value)
 
-| Rank | ID  | Task                                                                      | File(s)                      | Effort | Impact  | Cust. Value | Blocked By |
-| ---- | --- | ------------------------------------------------------------------------- | ---------------------------- | ------ | ------- | ----------- | ---------- |
-| 1    | E1  | Fix `exhaustruct`: `sync.go:144` use `ItemFilter{}.WithLimit(1)`          | `pkg/sync/sync.go`           | 5 min  | 🔥 High | Low         | —          |
-| 2    | E2  | Fix `exhaustruct`: `sync.go:181` use `ItemFilter{}.WithType()`            | `pkg/sync/sync.go`           | 5 min  | 🔥 High | Low         | —          |
-| 3    | E3  | Fix `exhaustruct`: `sync.go:198` use `ItemFilter{}` zero value explicitly | `pkg/sync/sync.go`           | 5 min  | 🔥 High | Low         | —          |
-| 4    | E4  | Fix `exhaustruct`: `stack.go:288` use `ItemFilter{}` builder              | `pkg/cqrs/stack.go`          | 5 min  | 🔥 High | Low         | —          |
-| 5    | C1  | Add `VectorClock` field to `provider.Item` struct                         | `pkg/provider/provider.go`   | 8 min  | 🔥 High | Medium      | —          |
-| 6    | C2  | Add `NodeID` field to `ConflictAwareSyncer` + constructor                 | `pkg/sync/conflict_aware.go` | 10 min | 🔥 High | Medium      | —          |
-| 7    | C3  | Persist `VectorClock` in `ItemSynced` event payload                       | `pkg/cqrs/events.go`         | 10 min | 🔥 High | Medium      | C1         |
-| 8    | C4  | Update `DecideSync` to include `VectorClock` in event metadata            | `pkg/cqrs/decider.go`        | 8 min  | 🔥 High | Medium      | C1         |
-| 9    | S1  | Wire `LWWResolver` into `ConflictAwareSyncer.SyncWithConflictDetection`   | `pkg/sync/conflict_aware.go` | 12 min | 🔥 High | High        | C2, C3     |
-| 10   | A1  | Add `github.com/danielgtaylor/huma/v2` dependency                         | `go.mod`                     | 3 min  | 🔥 High | High        | —          |
-| 11   | A2  | Create `pkg/api/server.go` with stdlib `net/http` router                  | `pkg/api/server.go`          | 10 min | 🔥 High | High        | A1         |
-| 12   | A3  | Implement `GET /items` with `ItemFilter` query params                     | `pkg/api/server.go`          | 12 min | 🔥 High | High        | A2         |
-| 13   | A4  | Implement `GET /stats` returning total/types/counts                       | `pkg/api/server.go`          | 8 min  | 🔥 High | High        | A2         |
+| Rank | ID | Task                                                                      | File(s)                      | Effort | Impact  | Cust. Value | Blocked By |
+| ---- | -- | ------------------------------------------------------------------------- | ---------------------------- | ------ | ------- | ----------- | ---------- |
+| 1    | E1 | Fix `exhaustruct`: `sync.go:144` use `ItemFilter{}.WithLimit(1)`          | `pkg/sync/sync.go`           | 5 min  | 🔥 High | Low         | —          |
+| 2    | E2 | Fix `exhaustruct`: `sync.go:181` use `ItemFilter{}.WithType()`            | `pkg/sync/sync.go`           | 5 min  | 🔥 High | Low         | —          |
+| 3    | E3 | Fix `exhaustruct`: `sync.go:198` use `ItemFilter{}` zero value explicitly | `pkg/sync/sync.go`           | 5 min  | 🔥 High | Low         | —          |
+| 4    | E4 | Fix `exhaustruct`: `stack.go:288` use `ItemFilter{}` builder              | `pkg/cqrs/stack.go`          | 5 min  | 🔥 High | Low         | —          |
+| 5    | C1 | Add `VectorClock` field to `provider.Item` struct                         | `pkg/provider/provider.go`   | 8 min  | 🔥 High | Medium      | —          |
+| 6    | C2 | Add `NodeID` field to `ConflictAwareSyncer` + constructor                 | `pkg/sync/conflict_aware.go` | 10 min | 🔥 High | Medium      | —          |
+| 7    | C3 | Persist `VectorClock` in `ItemSynced` event payload                       | `pkg/cqrs/events.go`         | 10 min | 🔥 High | Medium      | C1         |
+| 8    | C4 | Update `DecideSync` to include `VectorClock` in event metadata            | `pkg/cqrs/decider.go`        | 8 min  | 🔥 High | Medium      | C1         |
+| 9    | S1 | Wire `LWWResolver` into `ConflictAwareSyncer.SyncWithConflictDetection`   | `pkg/sync/conflict_aware.go` | 12 min | 🔥 High | High        | C2, C3     |
+| 10   | A1 | Add `github.com/danielgtaylor/huma/v2` dependency                         | `go.mod`                     | 3 min  | 🔥 High | High        | —          |
+| 11   | A2 | Create `pkg/api/server.go` with stdlib `net/http` router                  | `pkg/api/server.go`          | 10 min | 🔥 High | High        | A1         |
+| 12   | A3 | Implement `GET /items` with `ItemFilter` query params                     | `pkg/api/server.go`          | 12 min | 🔥 High | High        | A2         |
+| 13   | A4 | Implement `GET /stats` returning total/types/counts                       | `pkg/api/server.go`          | 8 min  | 🔥 High | High        | A2         |
 
 ### Phase 2: The 4% — Foundation Layer (64% value)
 
-| Rank | ID  | Task                                                       | File(s)                                 | Effort | Impact | Cust. Value | Blocked By |
-| ---- | --- | ---------------------------------------------------------- | --------------------------------------- | ------ | ------ | ----------- | ---------- |
-| 14   | O1  | Add `go.opentelemetry.io/otel` dependencies                | `go.mod`                                | 3 min  | High   | High        | —          |
-| 15   | O2  | Create `pkg/telemetry/tracer.go` with tracer provider init | `pkg/telemetry/tracer.go`               | 10 min | High   | Medium      | O1         |
-| 16   | O3  | Instrument `Syncer.Sync()` with span + attributes          | `pkg/sync/sync.go`                      | 8 min  | High   | Medium      | O2         |
-| 17   | O4  | Instrument `Syncer.SyncIncremental()` with span            | `pkg/sync/sync.go`                      | 8 min  | High   | Medium      | O2         |
-| 18   | O5  | Instrument `CQRSStack.SyncItems()` with span               | `pkg/cqrs/stack.go`                     | 8 min  | High   | Medium      | O2         |
-| 19   | O6  | Add OTel HTTP middleware to API server                     | `pkg/api/server.go`                     | 8 min  | High   | High        | A2, O2     |
-| 20   | A5  | Implement `POST /sync` trigger endpoint                    | `pkg/api/server.go`                     | 12 min | High   | High        | A2         |
-| 21   | A6  | Implement `GET /health` health check endpoint              | `pkg/api/server.go`                     | 5 min  | Medium | High        | A2         |
-| 22   | D1  | Write actual `docs/DOMAIN_LANGUAGE.md` with real terms     | `docs/DOMAIN_LANGUAGE.md`               | 12 min | Medium | Medium      | —          |
-| 23   | T1  | Add `reportProgress` callback test                         | `pkg/sync/sync_test.go`                 | 5 min  | Medium | Low         | —          |
-| 24   | T2  | Add `printSyncResultJSON` test                             | `cmd/examples/github-sync/main_test.go` | 5 min  | Medium | Low         | —          |
-| 25   | T3  | Add `printVersion` with `bytes.Buffer` test                | `cmd/examples/github-sync/main_test.go` | 5 min  | Medium | Low         | —          |
+| Rank | ID | Task                                                       | File(s)                                 | Effort | Impact | Cust. Value | Blocked By |
+| ---- | -- | ---------------------------------------------------------- | --------------------------------------- | ------ | ------ | ----------- | ---------- |
+| 14   | O1 | Add `go.opentelemetry.io/otel` dependencies                | `go.mod`                                | 3 min  | High   | High        | —          |
+| 15   | O2 | Create `pkg/telemetry/tracer.go` with tracer provider init | `pkg/telemetry/tracer.go`               | 10 min | High   | Medium      | O1         |
+| 16   | O3 | Instrument `Syncer.Sync()` with span + attributes          | `pkg/sync/sync.go`                      | 8 min  | High   | Medium      | O2         |
+| 17   | O4 | Instrument `Syncer.SyncIncremental()` with span            | `pkg/sync/sync.go`                      | 8 min  | High   | Medium      | O2         |
+| 18   | O5 | Instrument `CQRSStack.SyncItems()` with span               | `pkg/cqrs/stack.go`                     | 8 min  | High   | Medium      | O2         |
+| 19   | O6 | Add OTel HTTP middleware to API server                     | `pkg/api/server.go`                     | 8 min  | High   | High        | A2, O2     |
+| 20   | A5 | Implement `POST /sync` trigger endpoint                    | `pkg/api/server.go`                     | 12 min | High   | High        | A2         |
+| 21   | A6 | Implement `GET /health` health check endpoint              | `pkg/api/server.go`                     | 5 min  | Medium | High        | A2         |
+| 22   | D1 | Write actual `docs/DOMAIN_LANGUAGE.md` with real terms     | `docs/DOMAIN_LANGUAGE.md`               | 12 min | Medium | Medium      | —          |
+| 23   | T1 | Add `reportProgress` callback test                         | `pkg/sync/sync_test.go`                 | 5 min  | Medium | Low         | —          |
+| 24   | T2 | Add `printSyncResultJSON` test                             | `cmd/examples/github-sync/main_test.go` | 5 min  | Medium | Low         | —          |
+| 25   | T3 | Add `printVersion` with `bytes.Buffer` test                | `cmd/examples/github-sync/main_test.go` | 5 min  | Medium | Low         | —          |
 
 ### Phase 3: The 20% — Polish & Production (80% value)
 

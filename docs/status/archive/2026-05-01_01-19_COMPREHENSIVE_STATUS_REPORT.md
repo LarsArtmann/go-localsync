@@ -94,9 +94,9 @@ A detailed 4-phase migration plan exists (`CQRS_MIGRATION_PLAN.md`):
 | `pkg/providers/github`     | 21    | ✅ Thorough (client, fetch, retry, error handling, conversion) |
 | `pkg/storage`              | 70+   | ✅ Excellent (compliance suite runs against all 3 backends)    |
 | `pkg/sync`                 | 11    | ✅ Good (basic + conflict-aware sync)                          |
-| `pkg/errors`               | 4     | ⚠️ Missing `Wrapf()` test                                      |
-| `pkg/provider`             | 1     | ⚠️ Only `Item.Validate` — no Provider interface tests          |
-| `pkg/types`                | 8     | ⚠️ ID construction/roundtrip only — no edge case tests         |
+| `pkg/errors`               | 4     | ⚠️ Missing `Wrapf()` test                                       |
+| `pkg/provider`             | 1     | ⚠️ Only `Item.Validate` — no Provider interface tests           |
+| `pkg/types`                | 8     | ⚠️ ID construction/roundtrip only — no edge case tests          |
 | `cmd/examples/github-sync` | 0     | ❌ No tests at all                                             |
 
 ---
@@ -179,33 +179,33 @@ This blocks the entire CQRS migration.
 
 Sorted by impact × feasibility (highest first):
 
-| #   | Task                                                                                                       | Effort         | Impact      | Why                                                  |
-| --- | ---------------------------------------------------------------------------------------------------------- | -------------- | ----------- | ---------------------------------------------------- |
-| 1   | **Fix pre-commit hooks** — remove testify ban or configure properly                                        | 30min          | 🔴 Critical | Every commit is a workaround                         |
-| 2   | **Resolve ULID vs string-backed ID decision**                                                              | 1hr discussion | 🔴 Critical | Blocks entire CQRS migration                         |
-| 3   | **Create `flake.nix`** — replace deprecated justfile                                                       | 2hr            | 🟠 High     | Reproducible builds, aligns with project conventions |
-| 4   | **Add `go-cqrs-lite/core` as go.mod dependency**                                                           | 15min          | 🟠 High     | Start consuming its types in `pkg/types/`            |
-| 5   | **Write `TestLoadConfig` for cmd/examples**                                                                | 1hr            | 🟡 Medium   | Zero test coverage for config loading                |
-| 6   | **Add `errors.Wrapf()` test**                                                                              | 15min          | 🟡 Medium   | Only untested exported function in errors pkg        |
-| 7   | **End-to-end integration test** — Provider → Syncer → Storage                                              | 2hr            | 🟠 High     | No test exercises the full pipeline                  |
-| 8   | **CQRS Phase 1: Create `pkg/cqrs/aggregate.go`**                                                           | 4hr            | 🟠 High     | First real CQRS code; unblocks Phase 2-4             |
-| 9   | **CQRS Phase 1: Create commands/queries/events**                                                           | 4hr            | 🟠 High     | Core CQRS type definitions                           |
-| 10  | **Add benchmark tests for storage layer**                                                                  | 2hr            | 🟡 Medium   | Unknown performance characteristics                  |
-| 11  | **Add edge case tests for branded IDs**                                                                    | 1hr            | 🟡 Medium   | No tests for empty/long/special chars                |
-| 12  | **Production CLI in `cmd/localsync/`**                                                                     | 4hr            | 🟠 High     | Replace example CLI with real tool                   |
-| 13  | **Observability: structured logging with levels**                                                          | 2hr            | 🟡 Medium   | No log levels, no structured fields                  |
-| 14  | **Retry: extract to shared pkg, add jitter**                                                               | 1hr            | 🟡 Medium   | Hand-rolled retry without jitter                     |
-| 15  | **Storage interface narrowing** — Reader + Writer decomposition is done, but consider `ItemFilter` pattern | 3hr            | 🟡 Medium   | 16 methods is still too many                         |
-| 16  | **Second provider: GitLab**                                                                                | 8hr            | 🟠 High     | Tests provider abstraction actually works            |
-| 17  | **API reference generation** (godoc)                                                                       | 1hr            | 🟢 Low      | Public API has no documentation site                 |
-| 18  | **CI/CD: GitHub Actions**                                                                                  | 2hr            | 🟠 High     | No automated testing on push                         |
-| 19  | **Go toolchain alignment** (1.26.1 vs 1.26.2)                                                              | 5min           | 🟢 Low      | Blocks `go test -cover`                              |
-| 20  | **Fuzz targets for storage and event conversion**                                                          | 2hr            | 🟡 Medium   | No fuzz testing exists                               |
-| 21  | **Graceful shutdown in sync loops**                                                                        | 2hr            | 🟡 Medium   | No context cancellation handling                     |
-| 22  | **Config validation with schema**                                                                          | 1hr            | 🟡 Medium   | No validation for provider configs                   |
-| 23  | **Move from BDD (ginkgo/gomega) to stdlib testify**                                                        | 3hr            | 🟡 Medium   | Two test frameworks is unnecessary complexity        |
-| 24  | **Typed errors with structured context**                                                                   | 2hr            | 🟡 Medium   | Only sentinel errors exist                           |
-| 25  | **Remove deprecated `justfile`**                                                                           | 5min           | 🟢 Low      | Only after flake.nix exists                          |
+| #  | Task                                                                                                       | Effort         | Impact      | Why                                                  |
+| -- | ---------------------------------------------------------------------------------------------------------- | -------------- | ----------- | ---------------------------------------------------- |
+| 1  | **Fix pre-commit hooks** — remove testify ban or configure properly                                        | 30min          | 🔴 Critical | Every commit is a workaround                         |
+| 2  | **Resolve ULID vs string-backed ID decision**                                                              | 1hr discussion | 🔴 Critical | Blocks entire CQRS migration                         |
+| 3  | **Create `flake.nix`** — replace deprecated justfile                                                       | 2hr            | 🟠 High     | Reproducible builds, aligns with project conventions |
+| 4  | **Add `go-cqrs-lite/core` as go.mod dependency**                                                           | 15min          | 🟠 High     | Start consuming its types in `pkg/types/`            |
+| 5  | **Write `TestLoadConfig` for cmd/examples**                                                                | 1hr            | 🟡 Medium   | Zero test coverage for config loading                |
+| 6  | **Add `errors.Wrapf()` test**                                                                              | 15min          | 🟡 Medium   | Only untested exported function in errors pkg        |
+| 7  | **End-to-end integration test** — Provider → Syncer → Storage                                              | 2hr            | 🟠 High     | No test exercises the full pipeline                  |
+| 8  | **CQRS Phase 1: Create `pkg/cqrs/aggregate.go`**                                                           | 4hr            | 🟠 High     | First real CQRS code; unblocks Phase 2-4             |
+| 9  | **CQRS Phase 1: Create commands/queries/events**                                                           | 4hr            | 🟠 High     | Core CQRS type definitions                           |
+| 10 | **Add benchmark tests for storage layer**                                                                  | 2hr            | 🟡 Medium   | Unknown performance characteristics                  |
+| 11 | **Add edge case tests for branded IDs**                                                                    | 1hr            | 🟡 Medium   | No tests for empty/long/special chars                |
+| 12 | **Production CLI in `cmd/localsync/`**                                                                     | 4hr            | 🟠 High     | Replace example CLI with real tool                   |
+| 13 | **Observability: structured logging with levels**                                                          | 2hr            | 🟡 Medium   | No log levels, no structured fields                  |
+| 14 | **Retry: extract to shared pkg, add jitter**                                                               | 1hr            | 🟡 Medium   | Hand-rolled retry without jitter                     |
+| 15 | **Storage interface narrowing** — Reader + Writer decomposition is done, but consider `ItemFilter` pattern | 3hr            | 🟡 Medium   | 16 methods is still too many                         |
+| 16 | **Second provider: GitLab**                                                                                | 8hr            | 🟠 High     | Tests provider abstraction actually works            |
+| 17 | **API reference generation** (godoc)                                                                       | 1hr            | 🟢 Low      | Public API has no documentation site                 |
+| 18 | **CI/CD: GitHub Actions**                                                                                  | 2hr            | 🟠 High     | No automated testing on push                         |
+| 19 | **Go toolchain alignment** (1.26.1 vs 1.26.2)                                                              | 5min           | 🟢 Low      | Blocks `go test -cover`                              |
+| 20 | **Fuzz targets for storage and event conversion**                                                          | 2hr            | 🟡 Medium   | No fuzz testing exists                               |
+| 21 | **Graceful shutdown in sync loops**                                                                        | 2hr            | 🟡 Medium   | No context cancellation handling                     |
+| 22 | **Config validation with schema**                                                                          | 1hr            | 🟡 Medium   | No validation for provider configs                   |
+| 23 | **Move from BDD (ginkgo/gomega) to stdlib testify**                                                        | 3hr            | 🟡 Medium   | Two test frameworks is unnecessary complexity        |
+| 24 | **Typed errors with structured context**                                                                   | 2hr            | 🟡 Medium   | Only sentinel errors exist                           |
+| 25 | **Remove deprecated `justfile`**                                                                           | 5min           | 🟢 Low      | Only after flake.nix exists                          |
 
 ---
 
@@ -245,7 +245,7 @@ This decision blocks the entire CQRS migration plan. I cannot make progress on P
 | Build          | ✅     | `go build ./...` clean                                  |
 | Tests          | ✅     | 97/97 pass, 0 failures                                  |
 | Lint           | ✅     | 0 issues (golangci-lint v2.11.4)                        |
-| Coverage       | ⚠️     | Unknown (toolchain mismatch blocks `-cover`)            |
+| Coverage       | ⚠️      | Unknown (toolchain mismatch blocks `-cover`)            |
 | Technical Debt | 🟡     | Low — clean code, no TODOs, good patterns               |
 | Architecture   | 🟡     | Solid foundation but CQRS migration needed for maturity |
 | Documentation  | 🟡     | AGENTS.md excellent, code docs good, no API reference   |

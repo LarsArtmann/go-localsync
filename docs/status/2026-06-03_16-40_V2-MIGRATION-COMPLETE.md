@@ -139,48 +139,48 @@ ok  github.com/larsartmann/go-localsync/pkg/sync                  0.003s
 
 ### HIGH Impact, LOW Effort (Do First)
 
-| #   | Task                                                                                              | Effort | Impact   |
-| --- | ------------------------------------------------------------------------------------------------- | ------ | -------- |
-| 1   | Remove dead `CQRSConfig.RemoteURL`/`AuthToken` fields + CLI config                                | 30min  | Clean    |
-| 2   | Rename `createTursoStore` → `createSQLiteStore` in `store_factory.go`                             | 10min  | Clarity  |
-| 3   | Rename `TestCQRSStack_OutboxPoller_PublishesEvents` → `TestCQRSStack_Projection_SubscribesEvents` | 5min   | Clarity  |
-| 4   | Rename `turso_readmodel.go` → `sqlite_readmodel.go` (and TursoReadModel → SQLiteReadModel)        | 30min  | Honesty  |
-| 5   | Update README.md to remove Turso sync/outbox/Push-Pull references                                 | 30min  | Accuracy |
-| 6   | Update FEATURES.md to remove Outbox, Push/Pull, InMemoryRunner                                    | 15min  | Accuracy |
-| 7   | Install golangci-lint v2 and run full lint                                                        | 15min  | Quality  |
-| 8   | Update `flake.nix` if needed for modernc.org/sqlite                                               | 15min  | Build    |
+| # | Task                                                                                              | Effort | Impact   |
+| - | ------------------------------------------------------------------------------------------------- | ------ | -------- |
+| 1 | Remove dead `CQRSConfig.RemoteURL`/`AuthToken` fields + CLI config                                | 30min  | Clean    |
+| 2 | Rename `createTursoStore` → `createSQLiteStore` in `store_factory.go`                             | 10min  | Clarity  |
+| 3 | Rename `TestCQRSStack_OutboxPoller_PublishesEvents` → `TestCQRSStack_Projection_SubscribesEvents` | 5min   | Clarity  |
+| 4 | Rename `turso_readmodel.go` → `sqlite_readmodel.go` (and TursoReadModel → SQLiteReadModel)        | 30min  | Honesty  |
+| 5 | Update README.md to remove Turso sync/outbox/Push-Pull references                                 | 30min  | Accuracy |
+| 6 | Update FEATURES.md to remove Outbox, Push/Pull, InMemoryRunner                                    | 15min  | Accuracy |
+| 7 | Install golangci-lint v2 and run full lint                                                        | 15min  | Quality  |
+| 8 | Update `flake.nix` if needed for modernc.org/sqlite                                               | 15min  | Build    |
 
 ### HIGH Impact, MEDIUM Effort
 
-| #   | Task                                                                   | Effort | Impact        |
-| --- | ---------------------------------------------------------------------- | ------ | ------------- |
-| 9   | Adopt `go-cqrs-lite/otel/v2` for OpenTelemetry instrumentation         | 2-3h   | Observability |
-| 10  | Adopt `go-cqrs-lite/signing` for event integrity verification          | 2h     | Security      |
-| 11  | Review `pkg/errors/` for go-error-family v0.3 API improvements         | 1h     | Error quality |
-| 12  | Add integration test for projection replay on restart                  | 1h     | Reliability   |
-| 13  | Review `CQRSStack.Close()` — ensure all goroutines are stopped cleanly | 30min  | Correctness   |
+| #  | Task                                                                   | Effort | Impact        |
+| -- | ---------------------------------------------------------------------- | ------ | ------------- |
+| 9  | Adopt `go-cqrs-lite/otel/v2` for OpenTelemetry instrumentation         | 2-3h   | Observability |
+| 10 | Adopt `go-cqrs-lite/signing` for event integrity verification          | 2h     | Security      |
+| 11 | Review `pkg/errors/` for go-error-family v0.3 API improvements         | 1h     | Error quality |
+| 12 | Add integration test for projection replay on restart                  | 1h     | Reliability   |
+| 13 | Review `CQRSStack.Close()` — ensure all goroutines are stopped cleanly | 30min  | Correctness   |
 
 ### MEDIUM Impact, MEDIUM Effort
 
-| #   | Task                                                                              | Effort | Impact        |
-| --- | --------------------------------------------------------------------------------- | ------ | ------------- |
-| 14  | Adopt `go-cqrs-lite/schema/v2` for schema versioning of events                    | 2h     | Evolution     |
-| 15  | Adopt `middleware.CommandRetry` for provider retry (check v2 API)                 | 1h     | Reliability   |
-| 16  | Type model review — consider `event.AggregateRef` instead of separate type+id     | 1h     | Modernize     |
-| 17  | Review `SyncItemState` — could use `option.Option[*provider.Item]` instead of nil | 1h     | Type safety   |
-| 18  | Add structured logging to `SyncItems` (per-item results)                          | 30min  | Debugging     |
-| 19  | Review `store_factory.go` for error wrapping consistency                          | 30min  | Error quality |
+| #  | Task                                                                              | Effort | Impact        |
+| -- | --------------------------------------------------------------------------------- | ------ | ------------- |
+| 14 | Adopt `go-cqrs-lite/schema/v2` for schema versioning of events                    | 2h     | Evolution     |
+| 15 | Adopt `middleware.CommandRetry` for provider retry (check v2 API)                 | 1h     | Reliability   |
+| 16 | Type model review — consider `event.AggregateRef` instead of separate type+id     | 1h     | Modernize     |
+| 17 | Review `SyncItemState` — could use `option.Option[*provider.Item]` instead of nil | 1h     | Type safety   |
+| 18 | Add structured logging to `SyncItems` (per-item results)                          | 30min  | Debugging     |
+| 19 | Review `store_factory.go` for error wrapping consistency                          | 30min  | Error quality |
 
 ### LOWER Priority
 
-| #   | Task                                                                           | Effort | Impact        |
-| --- | ------------------------------------------------------------------------------ | ------ | ------------- |
-| 20  | Adopt `go-cqrs-lite/catalog` for AsyncAPI/OpenAPI/D2 docs generation           | 3h     | Documentation |
-| 21  | Add `pebble` storage backend option (go-cqrs-lite has it)                      | 4h     | Performance   |
-| 22  | Review `provider.Item` struct — consider protobuf or codegen for serialization | 2h     | Performance   |
-| 23  | Add `go-cqrs-lite/watermill` for message broker integration                    | 4h     | Integration   |
-| 24  | Update ROADMAP.md with v2 migration notes                                      | 30min  | Documentation |
-| 25  | Add `.goreleaser.yml` update for new binary dependencies                       | 30min  | Release       |
+| #  | Task                                                                           | Effort | Impact        |
+| -- | ------------------------------------------------------------------------------ | ------ | ------------- |
+| 20 | Adopt `go-cqrs-lite/catalog` for AsyncAPI/OpenAPI/D2 docs generation           | 3h     | Documentation |
+| 21 | Add `pebble` storage backend option (go-cqrs-lite has it)                      | 4h     | Performance   |
+| 22 | Review `provider.Item` struct — consider protobuf or codegen for serialization | 2h     | Performance   |
+| 23 | Add `go-cqrs-lite/watermill` for message broker integration                    | 4h     | Integration   |
+| 24 | Update ROADMAP.md with v2 migration notes                                      | 30min  | Documentation |
+| 25 | Add `.goreleaser.yml` update for new binary dependencies                       | 30min  | Release       |
 
 ---
 

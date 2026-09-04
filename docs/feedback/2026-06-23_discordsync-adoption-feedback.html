@@ -39,14 +39,14 @@
         --radius-sm: 0px;
 
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -452,12 +452,20 @@
       .callout-teal,
       .callout-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 10%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 10%,
+          var(--surface-raised)
+        );
       }
       .callout-amber,
       .callout-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 18%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 18%,
+          var(--surface-raised)
+        );
       }
 
       .strengths {
@@ -819,11 +827,15 @@
             <div class="tri"></div>
           </div>
           <div class="eyebrow">Adoption Feedback &middot; 2026-06-23</div>
-          <h1>What go-localsync would need to change before DiscordSync could consider it</h1>
+          <h1>
+            What go-localsync would need to change before DiscordSync could
+            consider it
+          </h1>
           <p class="subtitle">
-            An honest, grounded review of go-localsync's current architecture against DiscordSync's
-            actual domain. The goal is not to dismiss the SDK — it has improved meaningfully — but
-            to name precisely what blocks adoption, and what a generic multi-aggregate rewrite would
+            An honest, grounded review of go-localsync's current architecture
+            against DiscordSync's actual domain. The goal is not to dismiss the
+            SDK — it has improved meaningfully — but to name precisely what
+            blocks adoption, and what a generic multi-aggregate rewrite would
             look like.
           </p>
           <div class="meta">
@@ -855,64 +867,81 @@
         <section id="summary">
           <h2><span class="num">00</span>Summary</h2>
           <p>
-            go-localsync is now a genuinely well-engineered single-aggregate sync SDK. Its CQRS
-            stack, idempotent sync loop, deterministic IDs, and pluggable CRDT resolution are
-            excellent — for the domain it models:
+            go-localsync is now a genuinely well-engineered single-aggregate
+            sync SDK. Its CQRS stack, idempotent sync loop, deterministic IDs,
+            and pluggable CRDT resolution are excellent — for the domain it
+            models:
             <em
-              >paginated pull of flat items from one REST source into one event-sourced read
-              model.</em
+              >paginated pull of flat items from one REST source into one
+              event-sourced read model.</em
             >
-            DiscordSync's domain is structurally different: a <em>push-driven</em> stream (Discord
-            Gateway) producing <strong>six aggregate types</strong> with
-            <strong>thirteen typed events</strong> and <strong>four+ projections</strong>, each with
-            rich typed payloads (attachments, embeds, edit history, soft-delete).
+            DiscordSync's domain is structurally different: a
+            <em>push-driven</em> stream (Discord Gateway) producing
+            <strong>six aggregate types</strong> with
+            <strong>thirteen typed events</strong> and
+            <strong>four+ projections</strong>, each with rich typed payloads
+            (attachments, embeds, edit history, soft-delete).
           </p>
           <div class="callout callout-amber">
             <strong>The bottom line</strong>
-            go-localsync cannot host DiscordSync's domain without a fundamental rewrite of its core:
-            the single hard-coded aggregate type, the fixed three-event vocabulary, the flat single
-            projection, and the pull-only ingestion model. Tweaks won't close the gap. Both projects
-            already correctly share <em>go-cqrs-lite v3</em> — that is the right sharing boundary
-            today.
+            go-localsync cannot host DiscordSync's domain without a fundamental
+            rewrite of its core: the single hard-coded aggregate type, the fixed
+            three-event vocabulary, the flat single projection, and the
+            pull-only ingestion model. Tweaks won't close the gap. Both projects
+            already correctly share <em>go-cqrs-lite v3</em> — that is the right
+            sharing boundary today.
           </div>
           <p>
-            For adoption to become worth revisiting, go-localsync would need to generalise from a
+            For adoption to become worth revisiting, go-localsync would need to
+            generalise from a
             <em>single-aggregate Item sync engine</em> into a
-            <em>multi-aggregate event-sourcing framework</em> where consumers register their own
-            aggregates, events, projections, and ingestion sources. The six findings below name
-            exactly what that entails.
+            <em>multi-aggregate event-sourcing framework</em> where consumers
+            register their own aggregates, events, projections, and ingestion
+            sources. The six findings below name exactly what that entails.
           </p>
         </section>
 
         <section id="shared">
-          <h2><span class="num">&diams;</span>What's already shared (and correct)</h2>
+          <h2>
+            <span class="num">&diams;</span>What's already shared (and correct)
+          </h2>
           <p>
-            Before the gaps: both projects already sit on the right foundation. This is not
-            accidental — it is the correct sharing boundary, and it is the reason the gaps below are
-            about <em>what go-localsync adds on top</em>, not about the primitives.
+            Before the gaps: both projects already sit on the right foundation.
+            This is not accidental — it is the correct sharing boundary, and it
+            is the reason the gaps below are about
+            <em>what go-localsync adds on top</em>, not about the primitives.
           </p>
           <div class="dep-tree">
-            <span class="root">DiscordSync</span> &amp; <span class="root">go-localsync</span> ├──
-            <span class="ok">go-cqrs-lite/event/v3</span> Event types, Store, Bus, Journal,
-            Projection ├── <span class="ok">go-cqrs-lite/id/v3</span> AggregateID, CorrelationID,
-            branded IDs ├── <span class="ok">go-cqrs-lite/codec/v3</span> JSONCodec,
-            DecodePayload[T] ├── <span class="ok">go-cqrs-lite/storage/v3</span> SQLite event store
-            ├── <span class="ok">go-cqrs-lite/snapshot/v3</span> Snapshot store └──
-            <span class="ok">go-cqrs-lite/watermill/v3</span> In-process EventBus
+            <span class="root">DiscordSync</span> &amp;
+            <span class="root">go-localsync</span> ├──
+            <span class="ok">go-cqrs-lite/event/v3</span> Event types, Store,
+            Bus, Journal, Projection ├──
+            <span class="ok">go-cqrs-lite/id/v3</span> AggregateID,
+            CorrelationID, branded IDs ├──
+            <span class="ok">go-cqrs-lite/codec/v3</span> JSONCodec,
+            DecodePayload[T] ├──
+            <span class="ok">go-cqrs-lite/storage/v3</span> SQLite event store
+            ├── <span class="ok">go-cqrs-lite/snapshot/v3</span> Snapshot store
+            └── <span class="ok">go-cqrs-lite/watermill/v3</span> In-process
+            EventBus
           </div>
           <div class="callout callout-teal">
             <strong>Key insight</strong>
-            The shared layer already exists. The question is whether go-localsync's
-            <em>opinionated layer on top</em> (Item aggregate, Provider sync, CRDT) adds value for
-            DiscordSync or actively fights its domain.
+            The shared layer already exists. The question is whether
+            go-localsync's
+            <em>opinionated layer on top</em> (Item aggregate, Provider sync,
+            CRDT) adds value for DiscordSync or actively fights its domain.
           </div>
         </section>
 
         <section id="strengths">
-          <h2><span class="num">01</span>What's genuinely good in go-localsync now</h2>
+          <h2>
+            <span class="num">01</span>What's genuinely good in go-localsync now
+          </h2>
           <p>
-            These improvements are real and worth acknowledging — they are why the question is worth
-            revisiting at all rather than dismissing outright.
+            These improvements are real and worth acknowledging — they are why
+            the question is worth revisiting at all rather than dismissing
+            outright.
           </p>
           <div class="strengths">
             <div class="strength">
@@ -920,9 +949,9 @@
               <div class="text">
                 <strong>Clean CQRS layer on v3</strong>
                 <span
-                  >Decider, ReadModel, Projection, Stack — no legacy CRUD, idempotent sync,
-                  deterministic SHA256(source, sourceID) IDs. The v3 migration is done
-                  properly.</span
+                  >Decider, ReadModel, Projection, Stack — no legacy CRUD,
+                  idempotent sync, deterministic SHA256(source, sourceID) IDs.
+                  The v3 migration is done properly.</span
                 >
               </div>
             </div>
@@ -931,9 +960,10 @@
               <div class="text">
                 <strong>DTO / domain boundary</strong>
                 <span
-                  ><code>provider.Item</code> (DTO) &rarr; <code>model.Item</code> (domain) via
-                  <code>item_adapter.go</code>. Separation of wire format from domain entity is the
-                  right pattern.</span
+                  ><code>provider.Item</code> (DTO) &rarr;
+                  <code>model.Item</code> (domain) via
+                  <code>item_adapter.go</code>. Separation of wire format from
+                  domain entity is the right pattern.</span
                 >
               </div>
             </div>
@@ -942,8 +972,9 @@
               <div class="text">
                 <strong>Pluggable CRDT conflict resolution</strong>
                 <span
-                  >Inject any <code>ConflictResolver[*model.Item]</code>; LWW is default. Real
-                  composability for the single-aggregate case.</span
+                  >Inject any <code>ConflictResolver[*model.Item]</code>; LWW is
+                  default. Real composability for the single-aggregate
+                  case.</span
                 >
               </div>
             </div>
@@ -952,8 +983,8 @@
               <div class="text">
                 <strong>225 tests, strong coverage</strong>
                 <span
-                  >89 tests in <code>pkg/cqrs</code> alone (81.4%). Idempotency, concurrency,
-                  replay, correlation all covered.</span
+                  >89 tests in <code>pkg/cqrs</code> alone (81.4%). Idempotency,
+                  concurrency, replay, correlation all covered.</span
                 >
               </div>
             </div>
@@ -962,8 +993,9 @@
               <div class="text">
                 <strong>Synchronous projection + journal replay</strong>
                 <span
-                  >Live events via <code>bus.SubscribeAll</code>; SQLite catch-up via background
-                  journal replay with no checkpoint store. Read-your-writes preserved.</span
+                  >Live events via <code>bus.SubscribeAll</code>; SQLite
+                  catch-up via background journal replay with no checkpoint
+                  store. Read-your-writes preserved.</span
                 >
               </div>
             </div>
@@ -973,22 +1005,28 @@
         <section id="findings">
           <h2><span class="num">02</span>What must change for adoption</h2>
           <p>
-            Six structural gaps, ordered by how fundamentally they block adoption. Each names the
-            current state (with code references), why it fights DiscordSync's domain, and what would
-            need to change.
+            Six structural gaps, ordered by how fundamentally they block
+            adoption. Each names the current state (with code references), why
+            it fights DiscordSync's domain, and what would need to change.
           </p>
 
           <!-- Finding 1: single aggregate -->
           <div class="issue issue-critical" id="single-aggregate">
-            <span class="severity severity-critical">Blocking &middot; Architectural core</span>
+            <span class="severity severity-critical"
+              >Blocking &middot; Architectural core</span
+            >
             <h3>1. Single hard-coded aggregate type</h3>
-            <div class="where">pkg/cqrs/events.go:10 &middot; pkg/cqrs/decider.go:17-19</div>
+            <div class="where">
+              pkg/cqrs/events.go:10 &middot; pkg/cqrs/decider.go:17-19
+            </div>
             <p>
-              The SDK is built around exactly one aggregate. The aggregate type is a package-level
-              constant <code>const aggregateType = "sync_item"</code>, and the single decider state
-              is <code>SyncItemState{Item *model.Item, Deleted bool}</code>. Every synced entity
-              collapses into one flat Item. There is no mechanism to register a second aggregate
-              type.
+              The SDK is built around exactly one aggregate. The aggregate type
+              is a package-level constant
+              <code>const aggregateType = "sync_item"</code>, and the single
+              decider state is
+              <code>SyncItemState{Item *model.Item, Deleted bool}</code>. Every
+              synced entity collapses into one flat Item. There is no mechanism
+              to register a second aggregate type.
             </p>
             <pre><code><span class="tok-comment">// The single aggregate state — there is no other</span>
 <span class="tok-keyword">type</span> <span class="tok-type">SyncItemState</span> <span class="tok-keyword">struct</span> {
@@ -996,33 +1034,42 @@
     <span class="tok-attr">Deleted</span> <span class="tok-type">bool</span>
 }</code></pre>
             <p>
-              DiscordSync has <strong>six</strong> aggregates with distinct lifecycles: Message
-              (created &rarr; edited &rarr; soft-deleted), Thread (created &rarr; updated &rarr;
-              archived), Member (joined &rarr; updated &rarr; left), plus Channel, Guild, and User.
-              Collapsing them into one Item loses the type-level distinctions that make the domain
-              tractable.
+              DiscordSync has <strong>six</strong> aggregates with distinct
+              lifecycles: Message (created &rarr; edited &rarr; soft-deleted),
+              Thread (created &rarr; updated &rarr; archived), Member (joined
+              &rarr; updated &rarr; left), plus Channel, Guild, and User.
+              Collapsing them into one Item loses the type-level distinctions
+              that make the domain tractable.
             </p>
             <div class="callout callout-teal">
               <strong>What must change</strong>
-              The stack must become aggregate-pluggable: consumers register their own
-              <code>AggregateType</code> + <code>Decider[S]</code> pairs, and the store/indexing
-              must support multiple aggregate types simultaneously (it already does at the
-              go-cqrs-lite level — go-localsync just doesn't expose it).
+              The stack must become aggregate-pluggable: consumers register
+              their own
+              <code>AggregateType</code> + <code>Decider[S]</code> pairs, and
+              the store/indexing must support multiple aggregate types
+              simultaneously (it already does at the go-cqrs-lite level —
+              go-localsync just doesn't expose it).
             </div>
           </div>
 
           <!-- Finding 2: fixed event vocabulary -->
           <div class="issue issue-critical" id="fixed-events">
-            <span class="severity severity-critical">Blocking &middot; Domain expressiveness</span>
+            <span class="severity severity-critical"
+              >Blocking &middot; Domain expressiveness</span
+            >
             <h3>2. Fixed three-event vocabulary</h3>
-            <div class="where">pkg/cqrs/events.go:12-19 &middot; pkg/cqrs/projection.go:28-29</div>
+            <div class="where">
+              pkg/cqrs/events.go:12-19 &middot; pkg/cqrs/projection.go:28-29
+            </div>
             <p>
               The SDK defines exactly three event types —
-              <code>sync_item.synced</code>, <code>sync_item.conflict_found</code>,
-              <code>sync_item.deleted</code> — and the projector handles <em>only</em> those three
-              in a hard-coded switch. There is no way for a consumer to add
-              <code>discord.message.created</code>, <code>discord.reaction.added</code>, or any
-              domain-specific event without forking the projector.
+              <code>sync_item.synced</code>,
+              <code>sync_item.conflict_found</code>,
+              <code>sync_item.deleted</code> — and the projector handles
+              <em>only</em> those three in a hard-coded switch. There is no way
+              for a consumer to add <code>discord.message.created</code>,
+              <code>discord.reaction.added</code>, or any domain-specific event
+              without forking the projector.
             </p>
             <pre><code><span class="tok-comment">// Fixed — consumers cannot extend this</span>
 <span class="tok-keyword">const</span> (
@@ -1031,37 +1078,45 @@
     <span class="tok-attr">EventItemDeleted</span>       <span class="tok-type">event.Type</span> = <span class="tok-string">"sync_item.deleted"</span>
 )</code></pre>
             <p>
-              DiscordSync has <strong>thirteen</strong> typed events with distinct payloads:
-              <code>MessageCreated</code> (with <code>Attachments[]</code> and
-              <code>Embeds[]</code>), <code>MessageUpdated</code> (with <code>AfterContent</code>,
-              edit tracking), <code>ReactionAdded</code>, <code>MemberJoined</code>,
-              <code>ThreadArchived</code>, and so on. A flat <code>synced</code> event cannot
-              represent edit history or soft-delete semantics without losing the typed payload that
-              makes the projections correct.
+              DiscordSync has <strong>thirteen</strong> typed events with
+              distinct payloads: <code>MessageCreated</code> (with
+              <code>Attachments[]</code> and <code>Embeds[]</code>),
+              <code>MessageUpdated</code> (with <code>AfterContent</code>, edit
+              tracking), <code>ReactionAdded</code>, <code>MemberJoined</code>,
+              <code>ThreadArchived</code>, and so on. A flat
+              <code>synced</code> event cannot represent edit history or
+              soft-delete semantics without losing the typed payload that makes
+              the projections correct.
             </p>
             <div class="callout callout-teal">
               <strong>What must change</strong>
-              Event types and their payloads must be consumer-defined. The SDK should provide the
-              <em>machinery</em> (event construction helpers, codec, bus subscription) and let
-              consumers declare their own <code>event.Type</code> constants and typed payload
-              structs — exactly as DiscordSync already does directly against go-cqrs-lite.
+              Event types and their payloads must be consumer-defined. The SDK
+              should provide the
+              <em>machinery</em> (event construction helpers, codec, bus
+              subscription) and let consumers declare their own
+              <code>event.Type</code> constants and typed payload structs —
+              exactly as DiscordSync already does directly against go-cqrs-lite.
             </div>
           </div>
 
           <!-- Finding 3: single flat projection -->
           <div class="issue issue-critical" id="single-projection">
-            <span class="severity severity-critical">Blocking &middot; Read model</span>
+            <span class="severity severity-critical"
+              >Blocking &middot; Read model</span
+            >
             <h3>3. Single flat projection / read model</h3>
             <div class="where">
               pkg/cqrs/projection.go:24-44 &middot; pkg/data/model/item.go:17-29
             </div>
             <p>
-              One projector (<code>"sync_item_projection"</code>) upserts into one flat read model
-              keyed by <code>(source, source_id)</code> with columns like <code>actor_login</code>,
-              <code>repo_name</code>, <code>repo_url</code>. DiscordSync needs four+ projections
-              with rich relational shape: a messages table with edit history, soft-delete columns,
-              joined attachments and embeds; a reactions table; a members table; a threads table —
-              each driven by different event types.
+              One projector (<code>"sync_item_projection"</code>) upserts into
+              one flat read model keyed by <code>(source, source_id)</code> with
+              columns like <code>actor_login</code>, <code>repo_name</code>,
+              <code>repo_url</code>. DiscordSync needs four+ projections with
+              rich relational shape: a messages table with edit history,
+              soft-delete columns, joined attachments and embeds; a reactions
+              table; a members table; a threads table — each driven by different
+              event types.
             </p>
             <pre><code><span class="tok-comment">// DiscordSync's typed payloads — not representable in one flat Item</span>
 <span class="tok-keyword">type</span> <span class="tok-type">MessageCreatedPayload</span> <span class="tok-keyword">struct</span> {
@@ -1072,24 +1127,31 @@
 }</code></pre>
             <div class="callout callout-teal">
               <strong>What must change</strong>
-              Support multiple consumer-defined projections, each subscribing to its own subset of
-              event types and writing to its own typed schema. The SDK already uses go-cqrs-lite's
-              <code>event.Projection</code> interface — expose a registry so consumers can attach N
-              projections, not one.
+              Support multiple consumer-defined projections, each subscribing to
+              its own subset of event types and writing to its own typed schema.
+              The SDK already uses go-cqrs-lite's
+              <code>event.Projection</code> interface — expose a registry so
+              consumers can attach N projections, not one.
             </div>
           </div>
 
           <!-- Finding 4: pull-only ingestion -->
           <div class="issue issue-critical" id="pull-ingestion">
-            <span class="severity severity-critical">Blocking &middot; Ingestion model</span>
+            <span class="severity severity-critical"
+              >Blocking &middot; Ingestion model</span
+            >
             <h3>4. Pull-only ingestion (Provider.Fetch pagination)</h3>
-            <div class="where">pkg/provider/provider.go:128-141 &middot; pkg/sync/sync.go</div>
+            <div class="where">
+              pkg/provider/provider.go:128-141 &middot; pkg/sync/sync.go
+            </div>
             <p>
-              The entire sync engine is pull-based: a <code>Provider</code> implements
-              <code>Fetch()</code> / <code>FetchAll()</code> with pagination, and the
-              <code>Syncer</code> loops pages into the CQRS stack. DiscordSync's primary path is
-              <strong>push</strong>: a persistent Discord Gateway websocket that delivers events as
-              they happen. Backfill (REST pagination) is a secondary concern, and even it needs the
+              The entire sync engine is pull-based: a
+              <code>Provider</code> implements <code>Fetch()</code> /
+              <code>FetchAll()</code> with pagination, and the
+              <code>Syncer</code> loops pages into the CQRS stack. DiscordSync's
+              primary path is <strong>push</strong>: a persistent Discord
+              Gateway websocket that delivers events as they happen. Backfill
+              (REST pagination) is a secondary concern, and even it needs the
               fetched data routed into typed projections, not a flat Item table.
             </p>
             <div class="diagram">
@@ -1107,27 +1169,36 @@
             </div>
             <div class="callout callout-teal">
               <strong>What must change</strong>
-              Decouple ingestion from the CQRS write path. The SDK should accept events from
-              <em>any</em> source — a push handler, a webhook, a cron, or a paginated pull — and
-              route them through consumer-defined command/event paths. The <code>Provider</code> +
-              <code>Syncer</code> loop would become one optional ingestion adapter, not the only
-              entry point.
+              Decouple ingestion from the CQRS write path. The SDK should accept
+              events from
+              <em>any</em> source — a push handler, a webhook, a cron, or a
+              paginated pull — and route them through consumer-defined
+              command/event paths. The <code>Provider</code> +
+              <code>Syncer</code> loop would become one optional ingestion
+              adapter, not the only entry point.
             </div>
           </div>
 
           <!-- Finding 5: GitHub-shaped vocabulary -->
           <div class="issue issue-important" id="github-vocabulary">
-            <span class="severity severity-important">Important &middot; Domain leakage</span>
+            <span class="severity severity-important"
+              >Important &middot; Domain leakage</span
+            >
             <h3>5. The vocabulary is GitHub-shaped, not generic</h3>
-            <div class="where">pkg/data/model/item.go:17-29 &middot; pkg/id/ids.go:19-52</div>
+            <div class="where">
+              pkg/data/model/item.go:17-29 &middot; pkg/id/ids.go:19-52
+            </div>
             <p>
-              Despite the "any provider" framing, the core types bake in GitHub's domain.
-              <code>model.Item</code> carries <code>ActorLogin</code>, <code>RepoName</code>,
-              <code>RepoURL</code>. The branded IDs include <code>ActorLogin</code> and
-              <code>RepoID</code>. These fields have no Discord meaning — Discord has channels,
-              guilds, authors, attachments, not repos and actors. An SDK named "localsync" that
-              claims provider-agnosticism but ships repo-name columns signals the abstraction was
-              extracted from one consumer, not designed from the domain.
+              Despite the "any provider" framing, the core types bake in
+              GitHub's domain.
+              <code>model.Item</code> carries <code>ActorLogin</code>,
+              <code>RepoName</code>, <code>RepoURL</code>. The branded IDs
+              include <code>ActorLogin</code> and <code>RepoID</code>. These
+              fields have no Discord meaning — Discord has channels, guilds,
+              authors, attachments, not repos and actors. An SDK named
+              "localsync" that claims provider-agnosticism but ships repo-name
+              columns signals the abstraction was extracted from one consumer,
+              not designed from the domain.
             </p>
             <pre><code><span class="tok-comment">// model.Item — GitHub activity feed, not a generic sync entity</span>
 <span class="tok-keyword">type</span> <span class="tok-type">Item</span> <span class="tok-keyword">struct</span> {
@@ -1138,34 +1209,41 @@
 }</code></pre>
             <div class="callout callout-teal">
               <strong>What must change</strong>
-              The domain model must either be truly generic (identity + timestamps + opaque typed
-              payload, no provider-specific fields) or — better — consumer-defined entirely. The
-              reference consumer (github-local-sync) would define ActorLogin/RepoID in its own
+              The domain model must either be truly generic (identity +
+              timestamps + opaque typed payload, no provider-specific fields) or
+              — better — consumer-defined entirely. The reference consumer
+              (github-local-sync) would define ActorLogin/RepoID in its own
               package; the SDK ships only the sync/CQRS machinery.
             </div>
           </div>
 
           <!-- Finding 6: read model interface -->
           <div class="issue issue-important" id="read-model">
-            <span class="severity severity-important">Important &middot; Query surface</span>
+            <span class="severity severity-important"
+              >Important &middot; Query surface</span
+            >
             <h3>6. Read model query surface is too narrow</h3>
-            <div class="where">pkg/data/model/item.go:47-52 &middot; pkg/cqrs/readmodel.go</div>
+            <div class="where">
+              pkg/data/model/item.go:47-52 &middot; pkg/cqrs/readmodel.go
+            </div>
             <p>
               The read-side contract (<code>ItemReader</code>) exposes
               <code>List</code>, <code>Count</code>, <code>CountByType</code>,
               <code>GetTypes</code> — a flat-item query API. DiscordSync's
               <code>Database</code> interface has <strong>28 methods</strong>:
-              <code>GetMessagesByChannel</code>, paginated message search, attachment record updates
-              after download, edit-history queries, member lookups by guild, thread archive filters,
-              and stats aggregations. These are not variations on "list items"; they are genuinely
-              different query shapes against a relational schema.
+              <code>GetMessagesByChannel</code>, paginated message search,
+              attachment record updates after download, edit-history queries,
+              member lookups by guild, thread archive filters, and stats
+              aggregations. These are not variations on "list items"; they are
+              genuinely different query shapes against a relational schema.
             </p>
             <div class="callout callout-teal">
               <strong>What must change</strong>
-              The SDK cannot predefine the query surface. Consumers must own their read-model schema
-              and queries. The SDK's value would be in the <em>write-side</em> machinery (event
-              store, bus, projection wiring, idempotency) — not in a read-model contract that
-              assumes one flat table.
+              The SDK cannot predefine the query surface. Consumers must own
+              their read-model schema and queries. The SDK's value would be in
+              the <em>write-side</em> machinery (event store, bus, projection
+              wiring, idempotency) — not in a read-model contract that assumes
+              one flat table.
             </div>
           </div>
         </section>
@@ -1173,11 +1251,12 @@
         <section id="target">
           <h2><span class="num">03</span>The target shape</h2>
           <p>
-            If go-localsync were generalised to address all six findings, it would stop being an
-            "Item sync engine" and become a
-            <strong>multi-aggregate event-sourcing framework</strong>. The consumer (DiscordSync)
-            would bring its own aggregates, events, projections, and ingestion, and the framework
-            would provide the wiring.
+            If go-localsync were generalised to address all six findings, it
+            would stop being an "Item sync engine" and become a
+            <strong>multi-aggregate event-sourcing framework</strong>. The
+            consumer (DiscordSync) would bring its own aggregates, events,
+            projections, and ingestion, and the framework would provide the
+            wiring.
           </p>
           <div class="compare-header">
             <div class="compare-before">Today — go-localsync</div>
@@ -1213,19 +1292,22 @@
           </div>
           <div class="callout callout-teal">
             <strong>The honest tradeoff</strong>
-            At that point the framework's value-add over using go-cqrs-lite directly narrows to:
-            projection wiring helpers, idempotency patterns, the CRDT conflict layer, and the
-            optional <code>Provider</code>+<code>Syncer</code> pull adapter. That is still real
-            value — but it must justify itself against the simplicity of the direct go-cqrs-lite
-            path DiscordSync already uses successfully.
+            At that point the framework's value-add over using go-cqrs-lite
+            directly narrows to: projection wiring helpers, idempotency
+            patterns, the CRDT conflict layer, and the optional
+            <code>Provider</code>+<code>Syncer</code> pull adapter. That is
+            still real value — but it must justify itself against the simplicity
+            of the direct go-cqrs-lite path DiscordSync already uses
+            successfully.
           </div>
         </section>
 
         <section id="matrix">
           <h2><span class="num">04</span>Priority matrix</h2>
           <p>
-            If go-localsync wanted to make itself viable for DiscordSync-class consumers, here is
-            the order that unlocks the most per unit of effort.
+            If go-localsync wanted to make itself viable for DiscordSync-class
+            consumers, here is the order that unlocks the most per unit of
+            effort.
           </p>
           <table class="compare">
             <thead>
@@ -1277,15 +1359,18 @@
           </table>
           <div class="callout callout-amber">
             <strong>The compounding effect</strong>
-            Findings 1–4 are individually blocking and collectively reinforcing: fixing any one
-            without the others still leaves a single-aggregate or single-projection straitjacket.
-            They must be addressed together for the framework to cross the viability line — which is
-            why this is a "fundamental rewrite," not an incremental enhancement.
+            Findings 1–4 are individually blocking and collectively reinforcing:
+            fixing any one without the others still leaves a single-aggregate or
+            single-projection straitjacket. They must be addressed together for
+            the framework to cross the viability line — which is why this is a
+            "fundamental rewrite," not an incremental enhancement.
           </div>
         </section>
 
         <section id="appendix">
-          <h2><span class="num">05</span>Appendix: structural mismatch at a glance</h2>
+          <h2>
+            <span class="num">05</span>Appendix: structural mismatch at a glance
+          </h2>
           <table class="compare">
             <thead>
               <tr>
@@ -1340,11 +1425,14 @@
         </section>
 
         <section id="revisit">
-          <h2><span class="num">&diams;</span>Appendix B: 3-month revisit (2026-07-05)</h2>
+          <h2>
+            <span class="num">&diams;</span>Appendix B: 3-month revisit
+            (2026-07-05)
+          </h2>
           <p>
-            <strong>92 commits</strong> landed since the original report (v0.3.0 → HEAD
-            <code>5b887cf</code>). This appendix evaluates whether any of the six blocking gaps were
-            addressed.
+            <strong>92 commits</strong> landed since the original report (v0.3.0
+            → HEAD <code>5b887cf</code>). This appendix evaluates whether any of
+            the six blocking gaps were addressed.
           </p>
 
           <div class="scorecard" style="margin-top: 1.5rem">
@@ -1368,9 +1456,10 @@
 
           <h3>What the 92 commits actually fixed</h3>
           <p>
-            The work was exclusively <strong>correctness and hardening</strong> of the existing
-            single-aggregate sync engine. Serious bugs were found and fixed — but none of the
-            structural adoption barriers moved.
+            The work was exclusively
+            <strong>correctness and hardening</strong> of the existing
+            single-aggregate sync engine. Serious bugs were found and fixed —
+            but none of the structural adoption barriers moved.
           </p>
 
           <table class="compare" style="margin-top: 1rem">
@@ -1418,7 +1507,9 @@
                 <td><code>7e9e358</code></td>
               </tr>
               <tr>
-                <td>Error-handling overhaul (errorfamily taxonomy, HTTP mapping)</td>
+                <td>
+                  Error-handling overhaul (errorfamily taxonomy, HTTP mapping)
+                </td>
                 <td class="yes">Medium</td>
                 <td><code>aa7a439</code> + 10 more</td>
               </tr>
@@ -1439,11 +1530,12 @@
 
           <div class="callout callout-amber">
             <strong>Verdict</strong>
-            The original conclusion still holds. go-localsync got <em>better at what it does</em>
-            (sync GitHub-style activity feeds reliably), but did not move toward being a
-            general-purpose framework DiscordSync could consume. The adoption barriers are
-            structural, not quality issues — fixing bugs within the current architecture cannot
-            close them.
+            The original conclusion still holds. go-localsync got
+            <em>better at what it does</em>
+            (sync GitHub-style activity feeds reliably), but did not move toward
+            being a general-purpose framework DiscordSync could consume. The
+            adoption barriers are structural, not quality issues — fixing bugs
+            within the current architecture cannot close them.
           </div>
 
           <table class="compare" style="margin-top: 1rem">
@@ -1482,14 +1574,20 @@
               </tr>
               <tr>
                 <td>5. De-GitHubify vocabulary</td>
-                <td class="no"><code>ActorLogin</code>, <code>RepoName</code></td>
-                <td class="no"><code>ActorLogin</code>, <code>RepoName</code></td>
+                <td class="no">
+                  <code>ActorLogin</code>, <code>RepoName</code>
+                </td>
+                <td class="no">
+                  <code>ActorLogin</code>, <code>RepoName</code>
+                </td>
                 <td><span class="badge badge-critical">No</span></td>
               </tr>
               <tr>
                 <td>6. Consumer-owned query surface</td>
                 <td class="no">4 methods (List/Count/CountByType/GetTypes)</td>
-                <td class="no">3 methods (List/Count/CountByType) &mdash; GetTypes removed</td>
+                <td class="no">
+                  3 methods (List/Count/CountByType) &mdash; GetTypes removed
+                </td>
                 <td><span class="badge badge-critical">No</span></td>
               </tr>
             </tbody>
@@ -1497,15 +1595,18 @@
 
           <div class="callout callout-teal">
             <strong>A note on cosmetic drift (not structural)</strong>
-            Comparing the original findings above against HEAD reveals a few in-window renames that
-            do <em>not</em> alter any verdict: the hard-delete path became a soft-tombstone
+            Comparing the original findings above against HEAD reveals a few
+            in-window renames that do <em>not</em> alter any verdict: the
+            hard-delete path became a soft-tombstone
             (<code>EventItemDeleted</code>/<code>sync_item.deleted</code> &rarr;
-            <code>EventItemTombstoned</code>/<code>sync_item.tombstoned</code>, commit
-            <code>8c0847f</code>) and the unused <code>GetTypes</code> ghost method was removed from
-            <code>ItemReader</code> (commit <code>92f50f9</code>, 4 read methods &rarr; 3). The
-            projection also gained a checkpoint store + dead-letter queue via
-            <code>projectionhost/v3</code> (ADR-0006). None of these move any of the six structural
-            gaps &mdash; the counts in the table above reflect HEAD <code>5b887cf</code>.
+            <code>EventItemTombstoned</code>/<code>sync_item.tombstoned</code>,
+            commit <code>8c0847f</code>) and the unused
+            <code>GetTypes</code> ghost method was removed from
+            <code>ItemReader</code> (commit <code>92f50f9</code>, 4 read methods
+            &rarr; 3). The projection also gained a checkpoint store +
+            dead-letter queue via <code>projectionhost/v3</code> (ADR-0006).
+            None of these move any of the six structural gaps &mdash; the counts
+            in the table above reflect HEAD <code>5b887cf</code>.
           </div>
 
           <h3>Evidence (verified against HEAD <code>5b887cf</code>)</h3>
@@ -1530,33 +1631,39 @@ EventItemTombstoned    event.Type = <span class="tok-string">"sync_item.tombston
 
           <h3>What did improve (credit where due)</h3>
           <p>
-            The correctness work materially improved the SDK's reliability for its actual consumers
-            (github-local-sync). The projection race fix and content-hash data-loss fix were real
-            bugs that could have caused silent data corruption. The error-handling overhaul brought
-            structured error families to the entire codebase. The projectionhost adoption with
-            dead-letter queue made poison-message recovery production-grade.
+            The correctness work materially improved the SDK's reliability for
+            its actual consumers (github-local-sync). The projection race fix
+            and content-hash data-loss fix were real bugs that could have caused
+            silent data corruption. The error-handling overhaul brought
+            structured error families to the entire codebase. The projectionhost
+            adoption with dead-letter queue made poison-message recovery
+            production-grade.
           </p>
           <p>
-            This is good engineering — it just doesn't change the adoption calculus. The gaps are
-            architectural, and architecture doesn't shift from bug fixes.
+            This is good engineering — it just doesn't change the adoption
+            calculus. The gaps are architectural, and architecture doesn't shift
+            from bug fixes.
           </p>
 
           <div class="callout callout-teal">
             <strong>Updated recommendation</strong>
-            The original recommendation stands: both projects share <code>go-cqrs-lite v3</code>
-            as their common foundation, which is the correct level of reuse. DiscordSync's
-            push-first, multi-aggregate, multi-projection architecture is fundamentally different
-            from go-localsync's pull-only, single-aggregate, flat-read-model design. Convergence
-            would require a rewrite of go-localsync's core — which the commit history shows no
-            movement toward.
+            The original recommendation stands: both projects share
+            <code>go-cqrs-lite v3</code>
+            as their common foundation, which is the correct level of reuse.
+            DiscordSync's push-first, multi-aggregate, multi-projection
+            architecture is fundamentally different from go-localsync's
+            pull-only, single-aggregate, flat-read-model design. Convergence
+            would require a rewrite of go-localsync's core — which the commit
+            history shows no movement toward.
           </div>
         </section>
 
         <footer class="footer">
           <p>
-            Generated 2026-06-23 &middot; Appendix B added 2026-07-05 &middot; Reviewed against
-            go-localsync (HEAD <code>5b887cf</code>, post-v0.3.0) &amp; DiscordSync (master, commit
-            <code>d41d040</code>) &middot; All code references verified against source.
+            Generated 2026-06-23 &middot; Appendix B added 2026-07-05 &middot;
+            Reviewed against go-localsync (HEAD <code>5b887cf</code>,
+            post-v0.3.0) &amp; DiscordSync (master, commit <code>d41d040</code>)
+            &middot; All code references verified against source.
           </p>
         </footer>
       </main>

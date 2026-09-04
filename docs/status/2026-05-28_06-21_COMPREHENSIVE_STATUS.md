@@ -1,78 +1,78 @@
 # Comprehensive Status Report — go-localsync
 
-**Date:** 2026-05-28 06:21  
-**Branch:** master  
-**Commit:** 219f9a0  
+**Date:** 2026-05-28 06:21\
+**Branch:** master\
+**Commit:** 219f9a0\
 **Author:** Lars Artmann <git@lars.software>
 
 ---
 
 ## a) FULLY DONE
 
-| #   | Item                            | Evidence                                                                       |
-| --- | ------------------------------- | ------------------------------------------------------------------------------ |
-| 1   | **Zero lint issues**            | `golangci-lint run ./...` reports 0 issues                                     |
-| 2   | **All tests pass**              | `go test ./... -count=1` — 7 packages, all green                               |
-| 3   | **CQRS migration complete**     | Full event-sourced architecture, no legacy CRUD                                |
-| 4   | **Branded IDs**                 | 5 branded types (ItemID, ExternalID, ProviderID, ActorID, RepoID, EventTypeID) |
-| 5   | **Dual backend**                | Memory + Turso backends with identical ReadModel API                           |
-| 6   | **Conflict-aware sync**         | Decider emits ItemConflictFound + ItemSynced events                            |
-| 7   | **Provider abstraction**        | Generic Provider interface with GitHub implementation                          |
-| 8   | **Domain language documented**  | `docs/DOMAIN_LANGUAGE.md` with full glossary                                   |
-| 9   | **Dead code removed**           | `types.SourceID` eliminated, `AggregateID` cache removed                       |
-| 10  | **Error taxonomy**              | `go-error-family` with 3 families (Rejection, Transient, Infrastructure)       |
-| 11  | **Upstream doc**                | `docs/planning/2026-05-25_UPSTREAM-SUGGESTIONS.md` for go-cqrs-lite team       |
-| 12  | **CI/CD**                       | GitHub Actions with 4-job pipeline                                             |
-| 13  | **No CGO**                      | Pure Go build with `CGO_ENABLED=0`                                             |
-| 14  | **Outbox pattern**              | Turso backend uses `SQLTransactionalStore` for atomic save+publish             |
-| 15  | **Deterministic aggregate IDs** | SHA256→hex from (source, sourceID) with sync.Map cache removed                 |
+| #  | Item                            | Evidence                                                                       |
+| -- | ------------------------------- | ------------------------------------------------------------------------------ |
+| 1  | **Zero lint issues**            | `golangci-lint run ./...` reports 0 issues                                     |
+| 2  | **All tests pass**              | `go test ./... -count=1` — 7 packages, all green                               |
+| 3  | **CQRS migration complete**     | Full event-sourced architecture, no legacy CRUD                                |
+| 4  | **Branded IDs**                 | 5 branded types (ItemID, ExternalID, ProviderID, ActorID, RepoID, EventTypeID) |
+| 5  | **Dual backend**                | Memory + Turso backends with identical ReadModel API                           |
+| 6  | **Conflict-aware sync**         | Decider emits ItemConflictFound + ItemSynced events                            |
+| 7  | **Provider abstraction**        | Generic Provider interface with GitHub implementation                          |
+| 8  | **Domain language documented**  | `docs/DOMAIN_LANGUAGE.md` with full glossary                                   |
+| 9  | **Dead code removed**           | `types.SourceID` eliminated, `AggregateID` cache removed                       |
+| 10 | **Error taxonomy**              | `go-error-family` with 3 families (Rejection, Transient, Infrastructure)       |
+| 11 | **Upstream doc**                | `docs/planning/2026-05-25_UPSTREAM-SUGGESTIONS.md` for go-cqrs-lite team       |
+| 12 | **CI/CD**                       | GitHub Actions with 4-job pipeline                                             |
+| 13 | **No CGO**                      | Pure Go build with `CGO_ENABLED=0`                                             |
+| 14 | **Outbox pattern**              | Turso backend uses `SQLTransactionalStore` for atomic save+publish             |
+| 15 | **Deterministic aggregate IDs** | SHA256→hex from (source, sourceID) with sync.Map cache removed                 |
 
 ---
 
 ## b) PARTIALLY DONE
 
-| #   | Item                    | Status                  | Gap                                                      |
-| --- | ----------------------- | ----------------------- | -------------------------------------------------------- |
-| 1   | **Test coverage**       | 73.7% total             | `cmd/examples/github-sync` at 10.5%, `pkg/sync` at 77.8% |
-| 2   | **CLI**                 | Functional              | Missing: JSON output flag, daemon mode, multi-user sync  |
-| 3   | **Provider system**     | GitHub only             | No GitLab, Jira, or other providers                      |
-| 4   | **Conflict resolution** | Remote-wins only        | No configurable strategy (local-wins, manual, merge)     |
-| 5   | **pkg/localsync**       | Generic sync primitives | NOT integrated into main sync flow — isolated module     |
-| 6   | **Read model**          | Memory + Turso          | No PostgreSQL or other SQL backends                      |
-| 7   | **HTTP API**            | None                    | Must use Go SDK or CLI directly                          |
-| 8   | **Export**              | None                    | No JSON/CSV export of stored events                      |
-| 9   | **Domain language**     | Documented              | Terms defined but not yet used in code comments          |
-| 10  | **Logging**             | charm.land/log/v2       | Mixed with `log/slog` import in `stack.go` (unused?)     |
+| #  | Item                    | Status                  | Gap                                                      |
+| -- | ----------------------- | ----------------------- | -------------------------------------------------------- |
+| 1  | **Test coverage**       | 73.7% total             | `cmd/examples/github-sync` at 10.5%, `pkg/sync` at 77.8% |
+| 2  | **CLI**                 | Functional              | Missing: JSON output flag, daemon mode, multi-user sync  |
+| 3  | **Provider system**     | GitHub only             | No GitLab, Jira, or other providers                      |
+| 4  | **Conflict resolution** | Remote-wins only        | No configurable strategy (local-wins, manual, merge)     |
+| 5  | **pkg/localsync**       | Generic sync primitives | NOT integrated into main sync flow — isolated module     |
+| 6  | **Read model**          | Memory + Turso          | No PostgreSQL or other SQL backends                      |
+| 7  | **HTTP API**            | None                    | Must use Go SDK or CLI directly                          |
+| 8  | **Export**              | None                    | No JSON/CSV export of stored events                      |
+| 9  | **Domain language**     | Documented              | Terms defined but not yet used in code comments          |
+| 10 | **Logging**             | charm.land/log/v2       | Mixed with `log/slog` import in `stack.go` (unused?)     |
 
 ---
 
 ## c) NOT STARTED
 
-| #   | Item                           | Why Not Started                      |
-| --- | ------------------------------ | ------------------------------------ |
-| 1   | **HTTP API**                   | Out of scope for CLI-focused project |
-| 2   | **WebSocket/SSE**              | No real-time requirement             |
-| 3   | **Bubble Tea TUI**             | Listed in ROADMAP as low priority    |
-| 4   | **Multi-provider sync**        | Only GitHub exists                   |
-| 5   | **Event retention/TTL**        | No requirement yet                   |
-| 6   | **Schema evolution**           | Only 1 schema version                |
-| 7   | **OpenTelemetry tracing**      | Not requested                        |
-| 8   | **Metrics endpoint**           | Not requested                        |
-| 9   | **Structured JSON output**     | Listed in TODO but not implemented   |
-| 10  | **Real GitHub PAT smoke test** | Requires secrets management          |
+| #  | Item                           | Why Not Started                      |
+| -- | ------------------------------ | ------------------------------------ |
+| 1  | **HTTP API**                   | Out of scope for CLI-focused project |
+| 2  | **WebSocket/SSE**              | No real-time requirement             |
+| 3  | **Bubble Tea TUI**             | Listed in ROADMAP as low priority    |
+| 4  | **Multi-provider sync**        | Only GitHub exists                   |
+| 5  | **Event retention/TTL**        | No requirement yet                   |
+| 6  | **Schema evolution**           | Only 1 schema version                |
+| 7  | **OpenTelemetry tracing**      | Not requested                        |
+| 8  | **Metrics endpoint**           | Not requested                        |
+| 9  | **Structured JSON output**     | Listed in TODO but not implemented   |
+| 10 | **Real GitHub PAT smoke test** | Requires secrets management          |
 
 ---
 
 ## d) TOTALLY FUCKED UP
 
-| #   | Item                                | What Happened                                                                                             | Fix Needed                                           |
-| --- | ----------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| 1   | **LSP stale diagnostics**           | LSP cache shows deleted `aggregate_id_test.go` errors                                                     | Restart LSP or ignore (CLI is clean)                 |
-| 2   | **Log dependency inconsistency**    | `stack.go` imports `log/slog` alongside `charm.land/log/v2`                                               | Audit if slog is actually used or just imported      |
-| 3   | **pkg/localsync is an island**      | Generic sync primitives (VectorClock, LWWResolver) are NOT used by `pkg/sync`                             | Either integrate or delete                           |
-| 4   | **68 fmt.Errorf calls**             | Every error is hand-wrapped with `fmt.Errorf("...: %w", err)`                                             | Consider `errors.Wrap` or `go-error-family` wrappers |
-| 5   | **Exhaustruct config bloat**        | `ItemFilter` has 7 pointer fields, all must be specified                                                  | Consider builder pattern or functional options       |
-| 6   | **Store factory returns interface** | `createReadModel`, `createSnapshotStore`, `createCheckpointStore` return interfaces with `nolint:ireturn` | Design: should return concrete types                 |
+| # | Item                                | What Happened                                                                                             | Fix Needed                                           |
+| - | ----------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| 1 | **LSP stale diagnostics**           | LSP cache shows deleted `aggregate_id_test.go` errors                                                     | Restart LSP or ignore (CLI is clean)                 |
+| 2 | **Log dependency inconsistency**    | `stack.go` imports `log/slog` alongside `charm.land/log/v2`                                               | Audit if slog is actually used or just imported      |
+| 3 | **pkg/localsync is an island**      | Generic sync primitives (VectorClock, LWWResolver) are NOT used by `pkg/sync`                             | Either integrate or delete                           |
+| 4 | **68 fmt.Errorf calls**             | Every error is hand-wrapped with `fmt.Errorf("...: %w", err)`                                             | Consider `errors.Wrap` or `go-error-family` wrappers |
+| 5 | **Exhaustruct config bloat**        | `ItemFilter` has 7 pointer fields, all must be specified                                                  | Consider builder pattern or functional options       |
+| 6 | **Store factory returns interface** | `createReadModel`, `createSnapshotStore`, `createCheckpointStore` return interfaces with `nolint:ireturn` | Design: should return concrete types                 |
 
 ---
 
@@ -196,7 +196,7 @@ The decision affects ~584 LOC and the architectural direction of conflict resolu
 | `go-cqrs-lite/*`              | ✅ Healthy | Pseudo-version for storage (local replace) |
 | `go-branded-id`               | ✅ Healthy | v0.1.0                                     |
 | `go-error-family`             | ✅ Healthy | v0.1.1                                     |
-| `charm.land/log/v2`           | ⚠️ Concern | Heavy dependency, consider `log/slog`      |
+| `charm.land/log/v2`           | ⚠️ Concern  | Heavy dependency, consider `log/slog`      |
 | `go-github/v69`               | ✅ Healthy | v69.2.0                                    |
 | `turso.tech/database/tursogo` | ✅ Healthy | v0.6.0                                     |
 | `golang.org/x/oauth2`         | ✅ Healthy | v0.36.0                                    |

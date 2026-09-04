@@ -1,8 +1,8 @@
 # Go-LocalSync — Full Status Report
 
-**Date:** 2026-05-25 10:00  
-**Branch:** master (up to date with origin/master)  
-**Working tree:** Clean  
+**Date:** 2026-05-25 10:00\
+**Branch:** master (up to date with origin/master)\
+**Working tree:** Clean\
 **Last commit:** `f14ef32` — docs: update AGENTS.md with SyncStore interface and ItemFilter location
 
 ---
@@ -136,48 +136,48 @@ Nothing is truly broken. The codebase compiles, all 203 tests pass, lint is clea
 
 ### High Impact — Architecture
 
-| #   | Task                                                                               | Effort | Impact |
-| --- | ---------------------------------------------------------------------------------- | ------ | ------ |
-| 1   | Fix stale docs: FEATURES.md, AGENTS.md, CHANGELOG.md references                    | S      | M      |
-| 2   | Fix `errors_test.go` to test local `errors.IsRetryable` not `event.IsRetryable`    | S      | S      |
-| 3   | Fix intermittent outbox shutdown race (noisy test logs)                            | M      | M      |
-| 4   | Adopt or remove `sync.LWWResolver`/`sync.VectorClock` from `pkg/localsync/`        | M      | L      |
-| 5   | Wire `main.go` stats through `baseSyncer.GetStats()` instead of direct stack calls | S      | M      |
-| 6   | Add a second provider (GitLab or Jira) to validate the provider abstraction        | L      | L      |
-| 7   | Extract `pkg/cqrs` into `internal/cqrs` — non-public implementation detail         | M      | M      |
-| 8   | Move `coverage.out` to `coverage/` directory                                       | S      | S      |
-| 9   | Create `flake.nix` for reproducible builds                                         | M      | M      |
-| 10  | Add `internal/` package boundary for implementation packages                       | M      | M      |
+| #  | Task                                                                               | Effort | Impact |
+| -- | ---------------------------------------------------------------------------------- | ------ | ------ |
+| 1  | Fix stale docs: FEATURES.md, AGENTS.md, CHANGELOG.md references                    | S      | M      |
+| 2  | Fix `errors_test.go` to test local `errors.IsRetryable` not `event.IsRetryable`    | S      | S      |
+| 3  | Fix intermittent outbox shutdown race (noisy test logs)                            | M      | M      |
+| 4  | Adopt or remove `sync.LWWResolver`/`sync.VectorClock` from `pkg/localsync/`        | M      | L      |
+| 5  | Wire `main.go` stats through `baseSyncer.GetStats()` instead of direct stack calls | S      | M      |
+| 6  | Add a second provider (GitLab or Jira) to validate the provider abstraction        | L      | L      |
+| 7  | Extract `pkg/cqrs` into `internal/cqrs` — non-public implementation detail         | M      | M      |
+| 8  | Move `coverage.out` to `coverage/` directory                                       | S      | S      |
+| 9  | Create `flake.nix` for reproducible builds                                         | M      | M      |
+| 10 | Add `internal/` package boundary for implementation packages                       | M      | M      |
 
 ### High Impact — Code Quality
 
-| #   | Task                                                                         | Effort | Impact |
-| --- | ---------------------------------------------------------------------------- | ------ | ------ |
-| 11  | Split `client_test.go` (655 lines) into focused test files by concern        | S      | M      |
-| 12  | Split `sync_test.go` (460 lines) — separate unit from integration            | S      | M      |
-| 13  | Increase `pkg/sync` coverage from 77.8% to 85%+                              | S      | M      |
-| 14  | Increase `cmd/examples/github-sync` coverage from 10.5% to 50%+              | M      | M      |
-| 15  | Add integration test for full sync cycle (fetch → sync → read model → stats) | M      | L      |
-| 16  | Standardize test naming conventions across packages                          | S      | S      |
+| #  | Task                                                                         | Effort | Impact |
+| -- | ---------------------------------------------------------------------------- | ------ | ------ |
+| 11 | Split `client_test.go` (655 lines) into focused test files by concern        | S      | M      |
+| 12 | Split `sync_test.go` (460 lines) — separate unit from integration            | S      | M      |
+| 13 | Increase `pkg/sync` coverage from 77.8% to 85%+                              | S      | M      |
+| 14 | Increase `cmd/examples/github-sync` coverage from 10.5% to 50%+              | M      | M      |
+| 15 | Add integration test for full sync cycle (fetch → sync → read model → stats) | M      | L      |
+| 16 | Standardize test naming conventions across packages                          | S      | S      |
 
 ### Medium Impact — Dependencies & Ops
 
-| #   | Task                                                                        | Effort | Impact |
-| --- | --------------------------------------------------------------------------- | ------ | ------ |
-| 17  | Replace `prometheus/client_golang` with OpenTelemetry if metrics are needed | M      | M      |
-| 18  | Evaluate Turso client migration (legacy → unified)                          | M      | M      |
-| 19  | Document the `replace` directive strategy (CI vs local)                     | S      | S      |
-| 20  | Add `go.work.sum` sync to prevent LSP cache staleness                       | S      | S      |
+| #  | Task                                                                        | Effort | Impact |
+| -- | --------------------------------------------------------------------------- | ------ | ------ |
+| 17 | Replace `prometheus/client_golang` with OpenTelemetry if metrics are needed | M      | M      |
+| 18 | Evaluate Turso client migration (legacy → unified)                          | M      | M      |
+| 19 | Document the `replace` directive strategy (CI vs local)                     | S      | S      |
+| 20 | Add `go.work.sum` sync to prevent LSP cache staleness                       | S      | S      |
 
 ### Lower Impact — Nice to Have
 
-| #   | Task                                                        | Effort | Impact |
-| --- | ----------------------------------------------------------- | ------ | ------ |
-| 21  | Add CLI subcommand structure (cobra/ff) for better UX       | M      | M      |
-| 22  | Wire `UpcasterRegistry` for schema evolution readiness      | M      | S      |
-| 23  | Wire `middleware.CommandRetry` for automatic provider retry | S      | S      |
-| 24  | Add example in `cmd/examples/` for non-GitHub provider      | M      | M      |
-| 25  | Add README quickstart / "how to add a provider" guide       | S      | M      |
+| #  | Task                                                        | Effort | Impact |
+| -- | ----------------------------------------------------------- | ------ | ------ |
+| 21 | Add CLI subcommand structure (cobra/ff) for better UX       | M      | M      |
+| 22 | Wire `UpcasterRegistry` for schema evolution readiness      | M      | S      |
+| 23 | Wire `middleware.CommandRetry` for automatic provider retry | S      | S      |
+| 24 | Add example in `cmd/examples/` for non-GitHub provider      | M      | M      |
+| 25 | Add README quickstart / "how to add a provider" guide       | S      | M      |
 
 ---
 

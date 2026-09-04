@@ -207,33 +207,33 @@ gopls reports 7 persistent `go mod tidy` errors for `go-cqrs-lite/middleware`, `
 
 Sorted by impact × urgency:
 
-| #   | Task                                                                                         | Priority | Effort  | Impact                                         |
-| --- | -------------------------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------- |
-| 1   | Wire `decider.WithOutbox` for Turso backend (atomic save+publish)                            | CRITICAL | MEDIUM  | Prevents event loss on crash                   |
-| 2   | Wire `projection.Runner` with GlobalLoader for crash recovery                                | CRITICAL | MEDIUM  | Prevents stale read model on restart           |
-| 3   | Fix `ConflictAwareSyncer` silent error drop                                                  | HIGH     | LOW     | Correct error reporting                        |
-| 4   | Add CI pipeline (GitHub Actions: build + test + lint)                                        | HIGH     | LOW     | Prevent regressions                            |
-| 5   | Publish `go-cqrs-lite/storage` with version tag, remove replace directive                    | HIGH     | LOW     | Fixes CI compatibility                         |
-| 6   | Add test for `classifyAction` ActionConflictRemote + ActionError paths                       | MEDIUM   | LOW     | Coverage 55.6% → ~90%                          |
-| 7   | Add test for `Pull` error path                                                               | MEDIUM   | LOW     | Coverage 33.3% → ~80%                          |
-| 8   | Add tests for `appendFilterArgs` + `buildListQuery` SQL generation                           | MEDIUM   | LOW     | Coverage 52-60% → ~90%                         |
-| 9   | Test `WithDetail`/`Wrap`/`Wrapf` fallback paths (non-errorfamily errors)                     | MEDIUM   | LOW     | Coverage 75% → ~95%                            |
-| 10  | Replace hand-rolled retry with `middleware.CommandRetry`                                     | MEDIUM   | LOW     | Eliminates ~45 lines of duplicated logic       |
-| 11  | Wire `errorfamily.WithContext` in `WithDetail`/`WithUserDetail` instead of replacing message | MEDIUM   | LOW     | Preserves original error message               |
-| 12  | Add `go-error-family` to `go.work` workspace                                                 | LOW      | TRIVIAL | Fixes gopls workspace consistency              |
-| 13  | Add `flake.nix` for build automation                                                         | MEDIUM   | MEDIUM  | Fixes BuildFlow pre-commit, enables nix builds |
-| 14  | Fix BuildFlow pre-commit hook failures                                                       | MEDIUM   | MEDIUM  | Enables clean commits without `--no-verify`    |
-| 15  | Add second provider (GitLab or Jira) to validate abstraction                                 | MEDIUM   | HIGH    | Proves architecture is generic                 |
-| 16  | Wire `sync.LWWResolver[T]` for formalized conflict resolution                                | MEDIUM   | MEDIUM  | Replaces hand-rolled HasChanged+remote-wins    |
-| 17  | Add metrics/observability (Prometheus via middleware)                                        | MEDIUM   | MEDIUM  | Production visibility                          |
-| 18  | Add integration test for full sync pipeline (fetch → sync → read model → stats)              | MEDIUM   | MEDIUM  | End-to-end confidence                          |
-| 19  | Add `query.Pagination` consideration for read model API                                      | LOW      | LOW     | Standardized pagination semantics              |
-| 20  | Improve `main()` coverage (testable main pattern or integration test)                        | LOW      | MEDIUM  | CLI coverage 10.5% → ~60%                      |
-| 21  | Wire `command.Dispatcher` for typed command dispatch                                         | LOW      | MEDIUM  | Type-safe command routing                      |
-| 22  | Add `UpcasterRegistry` for schema evolution                                                  | LOW      | LOW     | Future-proofs event schemas                    |
-| 23  | Add `catalog/` for auto-generated API docs                                                   | LOW      | LOW     | Documentation automation                       |
-| 24  | Adopt go-cqrs-lite `testhelpers` module                                                      | LOW      | TRIVIAL | Slight test cleanup                            |
-| 25  | Add CONTRIBUTING.md with provider development guide                                          | LOW      | LOW     | Contributor onboarding                         |
+| #  | Task                                                                                         | Priority | Effort  | Impact                                         |
+| -- | -------------------------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------- |
+| 1  | Wire `decider.WithOutbox` for Turso backend (atomic save+publish)                            | CRITICAL | MEDIUM  | Prevents event loss on crash                   |
+| 2  | Wire `projection.Runner` with GlobalLoader for crash recovery                                | CRITICAL | MEDIUM  | Prevents stale read model on restart           |
+| 3  | Fix `ConflictAwareSyncer` silent error drop                                                  | HIGH     | LOW     | Correct error reporting                        |
+| 4  | Add CI pipeline (GitHub Actions: build + test + lint)                                        | HIGH     | LOW     | Prevent regressions                            |
+| 5  | Publish `go-cqrs-lite/storage` with version tag, remove replace directive                    | HIGH     | LOW     | Fixes CI compatibility                         |
+| 6  | Add test for `classifyAction` ActionConflictRemote + ActionError paths                       | MEDIUM   | LOW     | Coverage 55.6% → ~90%                          |
+| 7  | Add test for `Pull` error path                                                               | MEDIUM   | LOW     | Coverage 33.3% → ~80%                          |
+| 8  | Add tests for `appendFilterArgs` + `buildListQuery` SQL generation                           | MEDIUM   | LOW     | Coverage 52-60% → ~90%                         |
+| 9  | Test `WithDetail`/`Wrap`/`Wrapf` fallback paths (non-errorfamily errors)                     | MEDIUM   | LOW     | Coverage 75% → ~95%                            |
+| 10 | Replace hand-rolled retry with `middleware.CommandRetry`                                     | MEDIUM   | LOW     | Eliminates ~45 lines of duplicated logic       |
+| 11 | Wire `errorfamily.WithContext` in `WithDetail`/`WithUserDetail` instead of replacing message | MEDIUM   | LOW     | Preserves original error message               |
+| 12 | Add `go-error-family` to `go.work` workspace                                                 | LOW      | TRIVIAL | Fixes gopls workspace consistency              |
+| 13 | Add `flake.nix` for build automation                                                         | MEDIUM   | MEDIUM  | Fixes BuildFlow pre-commit, enables nix builds |
+| 14 | Fix BuildFlow pre-commit hook failures                                                       | MEDIUM   | MEDIUM  | Enables clean commits without `--no-verify`    |
+| 15 | Add second provider (GitLab or Jira) to validate abstraction                                 | MEDIUM   | HIGH    | Proves architecture is generic                 |
+| 16 | Wire `sync.LWWResolver[T]` for formalized conflict resolution                                | MEDIUM   | MEDIUM  | Replaces hand-rolled HasChanged+remote-wins    |
+| 17 | Add metrics/observability (Prometheus via middleware)                                        | MEDIUM   | MEDIUM  | Production visibility                          |
+| 18 | Add integration test for full sync pipeline (fetch → sync → read model → stats)              | MEDIUM   | MEDIUM  | End-to-end confidence                          |
+| 19 | Add `query.Pagination` consideration for read model API                                      | LOW      | LOW     | Standardized pagination semantics              |
+| 20 | Improve `main()` coverage (testable main pattern or integration test)                        | LOW      | MEDIUM  | CLI coverage 10.5% → ~60%                      |
+| 21 | Wire `command.Dispatcher` for typed command dispatch                                         | LOW      | MEDIUM  | Type-safe command routing                      |
+| 22 | Add `UpcasterRegistry` for schema evolution                                                  | LOW      | LOW     | Future-proofs event schemas                    |
+| 23 | Add `catalog/` for auto-generated API docs                                                   | LOW      | LOW     | Documentation automation                       |
+| 24 | Adopt go-cqrs-lite `testhelpers` module                                                      | LOW      | TRIVIAL | Slight test cleanup                            |
+| 25 | Add CONTRIBUTING.md with provider development guide                                          | LOW      | LOW     | Contributor onboarding                         |
 
 ---
 

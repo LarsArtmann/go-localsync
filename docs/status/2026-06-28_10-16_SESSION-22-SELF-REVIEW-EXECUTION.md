@@ -17,14 +17,14 @@
 Every issue found in the [brutal self-review](../reviews/2026-06-28_09-58_brutal-self-review.html)
 was investigated, fixed, tested, and committed — no item was hand-waved.
 
-| #   | Task                                 | Commit    | Detail                                                                                                                                                                                                                                                                                                                                  |
-| --- | ------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Reconcile data-loss guard**        | `c294ab3` | `reconcile()` now refuses to tombstone when `FetchResult.HasMore == true`. A partial (still-paginating) fetch with `Reconcile=true` would previously have silently tombstoned every not-yet-fetched item. Added `HasMore` field to `testutil.MockProvider` + a regression test. **This was the #1 finding — a real data-loss footgun.** |
-| 2   | **Configurable retry**               | `ca0844c` | Added functional-options constructor `sync.New(p, store, sync.WithRetry(cfg), sync.WithLogger(l))`. `NewSyncer` is a thin backwards-compatible wrapper (no SA1019 deprecation noise). Consumers can now tune backoff per deployment. `TestNew_WithRetry` proves injection lands.                                                        |
-| 3   | **lockSource documented**            | `56ccab6` | Investigated the "leak": it is a **bounded per-source cache** (source set = provider/user IDs), NOT a leak. Refcount cleanup was rejected because it would re-introduce the exact TOCTOU race the lock prevents. Comment now states this tradeoff so a future reader doesn't "fix" it into a race.                                      |
-| 4   | **ConflictResult split-brain fixed** | `3159d60` | Added `ItemErrors []ItemSyncResult` + `Tombstoned int` to `ConflictResult` so its surface mirrors `SyncResult`. The conflict path previously dropped per-item error detail and never ran reconciliation — now both are wired. Extracted `classify()` helper to stay under funlen. Added `TestConflictAwareSyncer_RetainsItemErrors`.    |
-| 5   | **Tombstone→resurrect example**      | `0f97b62` | Added `ExampleSyncer_tombstoneResurrect` demonstrating the full soft-delete lifecycle: sync (live) → `TombstoneItem` (hidden) → sync again (resurrected). The headline feature now has a runnable demo, not just an ADR.                                                                                                                |
-| —   | **Brutal self-review report**        | `9308843` | HTML report at `docs/reviews/2026-06-28_09-58_brutal-self-review.html`: 4 real issues, 0 ghost systems, 2 split-brain smells, prioritized plan.                                                                                                                                                                                         |
+| # | Task                                 | Commit    | Detail                                                                                                                                                                                                                                                                                                                                  |
+| - | ------------------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **Reconcile data-loss guard**        | `c294ab3` | `reconcile()` now refuses to tombstone when `FetchResult.HasMore == true`. A partial (still-paginating) fetch with `Reconcile=true` would previously have silently tombstoned every not-yet-fetched item. Added `HasMore` field to `testutil.MockProvider` + a regression test. **This was the #1 finding — a real data-loss footgun.** |
+| 2 | **Configurable retry**               | `ca0844c` | Added functional-options constructor `sync.New(p, store, sync.WithRetry(cfg), sync.WithLogger(l))`. `NewSyncer` is a thin backwards-compatible wrapper (no SA1019 deprecation noise). Consumers can now tune backoff per deployment. `TestNew_WithRetry` proves injection lands.                                                        |
+| 3 | **lockSource documented**            | `56ccab6` | Investigated the "leak": it is a **bounded per-source cache** (source set = provider/user IDs), NOT a leak. Refcount cleanup was rejected because it would re-introduce the exact TOCTOU race the lock prevents. Comment now states this tradeoff so a future reader doesn't "fix" it into a race.                                      |
+| 4 | **ConflictResult split-brain fixed** | `3159d60` | Added `ItemErrors []ItemSyncResult` + `Tombstoned int` to `ConflictResult` so its surface mirrors `SyncResult`. The conflict path previously dropped per-item error detail and never ran reconciliation — now both are wired. Extracted `classify()` helper to stay under funlen. Added `TestConflictAwareSyncer_RetainsItemErrors`.    |
+| 5 | **Tombstone→resurrect example**      | `0f97b62` | Added `ExampleSyncer_tombstoneResurrect` demonstrating the full soft-delete lifecycle: sync (live) → `TombstoneItem` (hidden) → sync again (resurrected). The headline feature now has a runnable demo, not just an ADR.                                                                                                                |
+| — | **Brutal self-review report**        | `9308843` | HTML report at `docs/reviews/2026-06-28_09-58_brutal-self-review.html`: 4 real issues, 0 ghost systems, 2 split-brain smells, prioritized plan.                                                                                                                                                                                         |
 
 ### Cumulatively DONE across sessions 20 → 21 → 22 (the whole "Superb SDK" arc)
 
@@ -94,33 +94,33 @@ was investigated, fixed, tested, and committed — no item was hand-waved.
 
 ## f) Top #25 things to do next (Pareto-ordered: impact ÷ effort)
 
-| #   | Task                                                                                       | Impact  | Effort          |
-| --- | ------------------------------------------------------------------------------------------ | ------- | --------------- |
-| 1   | **Decide & coordinate `pkg/sync` → `pkg/synclib` rename** (blocking architecture question) | 🔴 High | High (breaking) |
-| 2   | **Fix the stale LSP** (regenerate vendor manifest / clear cache)                           | 🔴 High | Low             |
-| 3   | **Refresh `TODO_LIST.md` + `FEATURES.md`** (use the skills)                                | 🟠 Med  | Low             |
-| 4   | **Add `ConflictResolver` example test**                                                    | 🟠 Med  | Low             |
-| 5   | **Bump `pkg/data/model` coverage** (tombstone paths → 90%+)                                | 🟠 Med  | Low             |
-| 6   | **Document retry is fetch-only** (doc comment on `fetchItems`)                             | 🟡 Low  | Low             |
-| 7   | **OpenTelemetry: spans for `Sync` + `SyncItems`**                                          | 🟠 Med  | Med             |
-| 8   | **Tombstone purge: `PurgeTombstonesBefore(t)`** on the read model                          | 🟠 Med  | Med             |
-| 9   | **Rework CI `build`/`release` jobs** for a pure-library flow                               | 🟠 Med  | Med             |
-| 10  | **Make `go-cqrs-lite` public** + drop committed `vendor/`                                  | 🟠 Med  | Med             |
-| 11  | **Schema upcasters** (ADR-0004 carry-over)                                                 | 🟡 Low  | Med             |
-| 12  | **`CompleteFetch` type** as an alternative reconcile guard (defense in depth)              | 🟡 Low  | Med             |
-| 13  | **Bump `pkg/cqrs` coverage** (resolver/error branches → 90%+)                              | 🟡 Low  | Med             |
-| 14  | **HTTP `/items` response: expose tombstone fields**                                        | 🟡 Low  | Low             |
-| 15  | **`flake.nix`: real `vendorHash`** once go-cqrs-lite is public                             | 🟡 Low  | Low             |
-| 16  | **CHANGELOG entry** for the tombstone pivot + self-review fixes                            | 🟡 Low  | Low             |
-| 17  | **Retry the store path** (or document why not)                                             | 🟡 Low  | Med             |
-| 18  | **Benchmark: projection replay cost at 10k events**                                        | 🟡 Low  | Med             |
-| 19  | **Fuzz `AggregateID` delimiter encoding**                                                  | 🟡 Low  | Med             |
-| 20  | **Structured logging consistency** (source/page/event_id fields)                           | 🟡 Low  | Low             |
-| 21  | **`ParseTombstoneReason` edge-case tests** (empty string)                                  | 🟡 Low  | Low             |
-| 22  | **Decide `Reconcile` semantics**: best-effort vs fail-loud                                 | 🟡 Low  | Low             |
-| 23  | **Cut v0.4.0** once purge + OTel land                                                      | 🟡 Low  | Low             |
-| 24  | **`CONTRIBUTING.md`**: add tombstone/reconcile guidance                                    | 🟡 Low  | Low             |
-| 25  | **`gosec` + `govulncheck`** wired into CI                                                  | 🟡 Low  | Low             |
+| #  | Task                                                                                       | Impact  | Effort          |
+| -- | ------------------------------------------------------------------------------------------ | ------- | --------------- |
+| 1  | **Decide & coordinate `pkg/sync` → `pkg/synclib` rename** (blocking architecture question) | 🔴 High | High (breaking) |
+| 2  | **Fix the stale LSP** (regenerate vendor manifest / clear cache)                           | 🔴 High | Low             |
+| 3  | **Refresh `TODO_LIST.md` + `FEATURES.md`** (use the skills)                                | 🟠 Med  | Low             |
+| 4  | **Add `ConflictResolver` example test**                                                    | 🟠 Med  | Low             |
+| 5  | **Bump `pkg/data/model` coverage** (tombstone paths → 90%+)                                | 🟠 Med  | Low             |
+| 6  | **Document retry is fetch-only** (doc comment on `fetchItems`)                             | 🟡 Low  | Low             |
+| 7  | **OpenTelemetry: spans for `Sync` + `SyncItems`**                                          | 🟠 Med  | Med             |
+| 8  | **Tombstone purge: `PurgeTombstonesBefore(t)`** on the read model                          | 🟠 Med  | Med             |
+| 9  | **Rework CI `build`/`release` jobs** for a pure-library flow                               | 🟠 Med  | Med             |
+| 10 | **Make `go-cqrs-lite` public** + drop committed `vendor/`                                  | 🟠 Med  | Med             |
+| 11 | **Schema upcasters** (ADR-0004 carry-over)                                                 | 🟡 Low  | Med             |
+| 12 | **`CompleteFetch` type** as an alternative reconcile guard (defense in depth)              | 🟡 Low  | Med             |
+| 13 | **Bump `pkg/cqrs` coverage** (resolver/error branches → 90%+)                              | 🟡 Low  | Med             |
+| 14 | **HTTP `/items` response: expose tombstone fields**                                        | 🟡 Low  | Low             |
+| 15 | **`flake.nix`: real `vendorHash`** once go-cqrs-lite is public                             | 🟡 Low  | Low             |
+| 16 | **CHANGELOG entry** for the tombstone pivot + self-review fixes                            | 🟡 Low  | Low             |
+| 17 | **Retry the store path** (or document why not)                                             | 🟡 Low  | Med             |
+| 18 | **Benchmark: projection replay cost at 10k events**                                        | 🟡 Low  | Med             |
+| 19 | **Fuzz `AggregateID` delimiter encoding**                                                  | 🟡 Low  | Med             |
+| 20 | **Structured logging consistency** (source/page/event_id fields)                           | 🟡 Low  | Low             |
+| 21 | **`ParseTombstoneReason` edge-case tests** (empty string)                                  | 🟡 Low  | Low             |
+| 22 | **Decide `Reconcile` semantics**: best-effort vs fail-loud                                 | 🟡 Low  | Low             |
+| 23 | **Cut v0.4.0** once purge + OTel land                                                      | 🟡 Low  | Low             |
+| 24 | **`CONTRIBUTING.md`**: add tombstone/reconcile guidance                                    | 🟡 Low  | Low             |
+| 25 | **`gosec` + `govulncheck`** wired into CI                                                  | 🟡 Low  | Low             |
 
 ---
 

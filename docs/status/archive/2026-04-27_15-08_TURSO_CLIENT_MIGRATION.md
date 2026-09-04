@@ -70,18 +70,18 @@ Key design decisions:
 
 ## C) NOT STARTED
 
-| #   | Item                           | Effort | Priority | Notes                                                                    |
-| --- | ------------------------------ | ------ | -------- | ------------------------------------------------------------------------ |
-| 1   | CQRS migration to go-cqrs-lite | Large  | HIGH     | Full plan in CQRS_MIGRATION_PLAN.md. Eliminates ~2000 lines of SQL infra |
-| 2   | Build TUI with Bubble Tea      | ~2h    | LOW      | Interactive terminal UI for browsing events                              |
-| 3   | HTTP API endpoint              | ~2h    | MEDIUM   | REST API for querying events                                             |
-| 4   | Multi-user sync support        | ~3h    | MEDIUM   | Multiple `-user` flags, DB schema update                                 |
-| 5   | Daemon/background mode         | ~3h    | LOW      | Cron/systemd service for periodic sync                                   |
-| 6   | Export to JSON/CSV             | ~1h    | LOW      | `-export json` / `-export csv` flag                                      |
-| 7   | CLI integration tests          | ~2h    | MEDIUM   | Zero coverage on flag parsing, signals, exit codes                       |
-| 8   | Storage error path tests       | ~2h    | MEDIUM   | Coverage at ~56%, target 80%+                                            |
-| 9   | Remote Turso E2E test          | ~1h    | HIGH     | Compliance test only covers local `file:` path; remote path untested     |
-| 10  | GitHub Actions CI pipeline     | ~3h    | HIGH     | No CI config exists at all                                               |
+| #  | Item                           | Effort | Priority | Notes                                                                    |
+| -- | ------------------------------ | ------ | -------- | ------------------------------------------------------------------------ |
+| 1  | CQRS migration to go-cqrs-lite | Large  | HIGH     | Full plan in CQRS_MIGRATION_PLAN.md. Eliminates ~2000 lines of SQL infra |
+| 2  | Build TUI with Bubble Tea      | ~2h    | LOW      | Interactive terminal UI for browsing events                              |
+| 3  | HTTP API endpoint              | ~2h    | MEDIUM   | REST API for querying events                                             |
+| 4  | Multi-user sync support        | ~3h    | MEDIUM   | Multiple `-user` flags, DB schema update                                 |
+| 5  | Daemon/background mode         | ~3h    | LOW      | Cron/systemd service for periodic sync                                   |
+| 6  | Export to JSON/CSV             | ~1h    | LOW      | `-export json` / `-export csv` flag                                      |
+| 7  | CLI integration tests          | ~2h    | MEDIUM   | Zero coverage on flag parsing, signals, exit codes                       |
+| 8  | Storage error path tests       | ~2h    | MEDIUM   | Coverage at ~56%, target 80%+                                            |
+| 9  | Remote Turso E2E test          | ~1h    | HIGH     | Compliance test only covers local `file:` path; remote path untested     |
+| 10 | GitHub Actions CI pipeline     | ~3h    | HIGH     | No CI config exists at all                                               |
 
 ---
 
@@ -137,43 +137,43 @@ Pre-commit hooks ban testify. Entire test suite (247 tests) uses testify. Workin
 
 ### Tier 1: Critical / High Impact (do first)
 
-| #   | Task                                                            | Est.     | Why                                                 |
-| --- | --------------------------------------------------------------- | -------- | --------------------------------------------------- |
-| 1   | **Rename LibSQL → Turso** (types, constants, errors, docs)      | 1h       | Current naming is misleading after migration        |
-| 2   | **Add remote Turso sync test** (even manual/scratch test)       | 1h       | Zero coverage on the remote code path               |
-| 3   | **Extract shared BatchGetByIDs helper**                         | 30m      | 60-line duplication between sqlite.go and libsql.go |
-| 4   | **Fix ROADMAP.md** — mark completed items, remove stale entries | 20m      | Document is actively misleading                     |
-| 5   | **Fix 13 lint warnings**                                        | 1h       | Technical debt accumulation; all are easy fixes     |
-| 6   | **Install golangci-lint v2**                                    | 5m       | One command, unblocks full lint gate                |
-| 7   | **Update Go toolchain to 1.26.1**                               | 5m       | Unblocks coverage reports                           |
-| 8   | **Add GitHub Actions CI**                                       | 2h       | No automated quality gate at all                    |
-| 9   | **Add local cache path for remote Turso sync**                  | 30m      | `:memory:` loses data on restart                    |
-| 10  | **Resolve testify vs pre-commit hooks**                         | Decision | Unblock `--no-verify` workaround                    |
+| #  | Task                                                            | Est.     | Why                                                 |
+| -- | --------------------------------------------------------------- | -------- | --------------------------------------------------- |
+| 1  | **Rename LibSQL → Turso** (types, constants, errors, docs)      | 1h       | Current naming is misleading after migration        |
+| 2  | **Add remote Turso sync test** (even manual/scratch test)       | 1h       | Zero coverage on the remote code path               |
+| 3  | **Extract shared BatchGetByIDs helper**                         | 30m      | 60-line duplication between sqlite.go and libsql.go |
+| 4  | **Fix ROADMAP.md** — mark completed items, remove stale entries | 20m      | Document is actively misleading                     |
+| 5  | **Fix 13 lint warnings**                                        | 1h       | Technical debt accumulation; all are easy fixes     |
+| 6  | **Install golangci-lint v2**                                    | 5m       | One command, unblocks full lint gate                |
+| 7  | **Update Go toolchain to 1.26.1**                               | 5m       | Unblocks coverage reports                           |
+| 8  | **Add GitHub Actions CI**                                       | 2h       | No automated quality gate at all                    |
+| 9  | **Add local cache path for remote Turso sync**                  | 30m      | `:memory:` loses data on restart                    |
+| 10 | **Resolve testify vs pre-commit hooks**                         | Decision | Unblock `--no-verify` workaround                    |
 
 ### Tier 2: Important / Medium Impact
 
-| #   | Task                                            | Est. | Why                                         |
-| --- | ----------------------------------------------- | ---- | ------------------------------------------- |
-| 11  | **CLI integration tests**                       | 2h   | Zero coverage on entry point                |
-| 12  | **Storage error path tests**                    | 2h   | Coverage at ~56%, target 80%+               |
-| 13  | **Start CQRS migration** (Phase 1: event store) | 4h   | Biggest architectural improvement available |
-| 14  | **Add HTTP API endpoint**                       | 2h   | Turns SDK into usable service               |
-| 15  | **Multi-user sync support**                     | 3h   | Real-world use case                         |
-| 16  | **Add export to JSON/CSV**                      | 1h   | Easy win for data analysis                  |
-| 17  | **Consolidate status docs** — add index.md      | 30m  | 18 reports, no navigation                   |
-| 18  | **Add second provider** (e.g., GitLab)          | 4h   | Validates provider abstraction              |
-| 19  | **Add OpenAPI spec for future HTTP API**        | 1h   | Contract-first design                       |
-| 20  | **Add Makefile/justfile**                       | 30m  | Standardize build/test/lint commands        |
+| #  | Task                                            | Est. | Why                                         |
+| -- | ----------------------------------------------- | ---- | ------------------------------------------- |
+| 11 | **CLI integration tests**                       | 2h   | Zero coverage on entry point                |
+| 12 | **Storage error path tests**                    | 2h   | Coverage at ~56%, target 80%+               |
+| 13 | **Start CQRS migration** (Phase 1: event store) | 4h   | Biggest architectural improvement available |
+| 14 | **Add HTTP API endpoint**                       | 2h   | Turns SDK into usable service               |
+| 15 | **Multi-user sync support**                     | 3h   | Real-world use case                         |
+| 16 | **Add export to JSON/CSV**                      | 1h   | Easy win for data analysis                  |
+| 17 | **Consolidate status docs** — add index.md      | 30m  | 18 reports, no navigation                   |
+| 18 | **Add second provider** (e.g., GitLab)          | 4h   | Validates provider abstraction              |
+| 19 | **Add OpenAPI spec for future HTTP API**        | 1h   | Contract-first design                       |
+| 20 | **Add Makefile/justfile**                       | 30m  | Standardize build/test/lint commands        |
 
 ### Tier 3: Nice to Have / Low Priority
 
-| #   | Task                                               | Est. | Why                         |
-| --- | -------------------------------------------------- | ---- | --------------------------- |
-| 21  | **Build TUI with Bubble Tea**                      | 2h   | Better UX for CLI users     |
-| 22  | **Daemon/background mode**                         | 3h   | Automated periodic sync     |
-| 23  | **Event retention/TTL**                            | 2h   | Prevent unbounded DB growth |
-| 24  | **Add structured logging to all storage backends** | 1h   | Observability               |
-| 25  | **Add README badges** (build, coverage, go report) | 30m  | Professional appearance     |
+| #  | Task                                               | Est. | Why                         |
+| -- | -------------------------------------------------- | ---- | --------------------------- |
+| 21 | **Build TUI with Bubble Tea**                      | 2h   | Better UX for CLI users     |
+| 22 | **Daemon/background mode**                         | 3h   | Automated periodic sync     |
+| 23 | **Event retention/TTL**                            | 2h   | Prevent unbounded DB growth |
+| 24 | **Add structured logging to all storage backends** | 1h   | Observability               |
+| 25 | **Add README badges** (build, coverage, go report) | 30m  | Professional appearance     |
 
 ---
 

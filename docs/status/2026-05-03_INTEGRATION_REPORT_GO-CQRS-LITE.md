@@ -117,14 +117,14 @@ Provider → SyncItemCommand → SyncItem Decider → event.Store (Pebble/Memory
 
 ## 5. Concrete Blockers
 
-| #   | Blocker                                                                  | Severity | Resolution                                                                              |
-| --- | ------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------- |
-| 1   | **go-localsync does not import go-cqrs-lite**                            | Critical | Add dependency to `go.mod`                                                              |
-| 2   | **ID brand conversion** — `ItemBrand` vs `AggregateMarker` phantom types | Low      | Simple `cbid.NewID[Brand](id.Get())` at boundaries (identical to go-localfirst pattern) |
-| 3   | **go-cqrs-lite v0.1.1 is 257 commits behind HEAD**                       | High     | Publish `v0.2.0` or use pseudo-version; local `go.work` handles dev                     |
-| 4   | **Pebble adapter in go-localfirst is in `pkg/` but not extracted**       | Medium   | Extract to shared package or copy into localsync                                        |
-| 5   | **`oklog/ulid` version drift** (v2.1.0 vs v2.1.1)                        | Low      | Align in go-cqrs-lite's `go.mod`                                                        |
-| 6   | **No `event.Store` implementation for SQLite**                           | Low      | Use Pebble (migration target) or memory for tests                                       |
+| # | Blocker                                                                  | Severity | Resolution                                                                              |
+| - | ------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------- |
+| 1 | **go-localsync does not import go-cqrs-lite**                            | Critical | Add dependency to `go.mod`                                                              |
+| 2 | **ID brand conversion** — `ItemBrand` vs `AggregateMarker` phantom types | Low      | Simple `cbid.NewID[Brand](id.Get())` at boundaries (identical to go-localfirst pattern) |
+| 3 | **go-cqrs-lite v0.1.1 is 257 commits behind HEAD**                       | High     | Publish `v0.2.0` or use pseudo-version; local `go.work` handles dev                     |
+| 4 | **Pebble adapter in go-localfirst is in `pkg/` but not extracted**       | Medium   | Extract to shared package or copy into localsync                                        |
+| 5 | **`oklog/ulid` version drift** (v2.1.0 vs v2.1.1)                        | Low      | Align in go-cqrs-lite's `go.mod`                                                        |
+| 6 | **No `event.Store` implementation for SQLite**                           | Low      | Use Pebble (migration target) or memory for tests                                       |
 
 ---
 

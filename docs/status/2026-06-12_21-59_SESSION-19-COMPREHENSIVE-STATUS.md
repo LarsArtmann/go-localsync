@@ -222,43 +222,43 @@ These are acceptable Go convention for "this should never happen" paths.
 
 ### Tier 1: High Impact, Low Effort (< 1 hour each)
 
-| #   | Task                                                  | Why                                                                                                    | Effort |
-| --- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------ |
-| 1   | **Smoke test with real GitHub PAT**                   | Never validated against real API. Mock-passing ≠ working.                                              | 30 min |
-| 2   | **Add full-stack integration test**                   | Provider→Syncer→CQRS→ReadModel→API in one test. Catches wiring bugs.                                   | 45 min |
-| 3   | **Extract testable logic from `main.go`**             | Move `runSync`/`runStats`/`runAPIServer` logic to testable functions. Don't call `os.Exit()` directly. | 45 min |
-| 4   | **Archive old sessions from AGENTS.md**               | Move sessions 4–16 to `docs/status/archive/`. Keep only architecture + current state.                  | 20 min |
-| 5   | **Archive old status reports**                        | Move pre-June reports to `docs/status/archive/`. Keep last 5.                                          | 10 min |
-| 6   | **Add `String()` to all branded IDs**                 | Consistent logging. Check `ExternalID`, `ProviderID`, `ActorID`, `RepoID`, `EventTypeID`.              | 15 min |
-| 7   | **Add API pagination headers**                        | `X-Total-Count` header on `GET /items`. Standard REST convention.                                      | 20 min |
-| 8   | **Clean up remaining `context.Background()` in cmd/** | Pass ctx from main through helpers instead of creating new backgrounds.                                | 30 min |
+| # | Task                                                  | Why                                                                                                    | Effort |
+| - | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------ |
+| 1 | **Smoke test with real GitHub PAT**                   | Never validated against real API. Mock-passing ≠ working.                                              | 30 min |
+| 2 | **Add full-stack integration test**                   | Provider→Syncer→CQRS→ReadModel→API in one test. Catches wiring bugs.                                   | 45 min |
+| 3 | **Extract testable logic from `main.go`**             | Move `runSync`/`runStats`/`runAPIServer` logic to testable functions. Don't call `os.Exit()` directly. | 45 min |
+| 4 | **Archive old sessions from AGENTS.md**               | Move sessions 4–16 to `docs/status/archive/`. Keep only architecture + current state.                  | 20 min |
+| 5 | **Archive old status reports**                        | Move pre-June reports to `docs/status/archive/`. Keep last 5.                                          | 10 min |
+| 6 | **Add `String()` to all branded IDs**                 | Consistent logging. Check `ExternalID`, `ProviderID`, `ActorID`, `RepoID`, `EventTypeID`.              | 15 min |
+| 7 | **Add API pagination headers**                        | `X-Total-Count` header on `GET /items`. Standard REST convention.                                      | 20 min |
+| 8 | **Clean up remaining `context.Background()` in cmd/** | Pass ctx from main through helpers instead of creating new backgrounds.                                | 30 min |
 
 ### Tier 2: High Impact, Medium Effort (1–4 hours each)
 
-| #   | Task                                                     | Why                                                                                        | Effort |
-| --- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------ |
-| 9   | **OpenTelemetry instrumentation**                        | No observability. Production debugging is blind. Start with sync + HTTP middleware spans.  | 3 h    |
-| 10  | **API authentication middleware**                        | API is unsafe on any network. API key middleware is minimal.                               | 2 h    |
-| 11  | **Build a second provider** (GitLab or Jira)             | Validates the provider abstraction isn't GitHub-specific. Forces interface clarity.        | 3 h    |
-| 12  | **Increase `cmd/examples/github-sync` coverage to 50%+** | Entry point is barely tested. Subprocess tests for `os.Exit()` paths.                      | 2 h    |
-| 13  | **Property-based tests for CRDT VectorClock**            | Verify CRDT mathematical properties (commutativity, associativity, idempotency).           | 2 h    |
-| 14  | **CONTRIBUTING.md architecture guide**                   | Layered architecture diagram, file naming conventions, testing requirements.               | 1.5 h  |
-| 15  | **Add structured logging fields consistently**           | Add source, user, page, event_id fields to all log statements for filterability.           | 2 h    |
-| 16  | **Resolve go-cqrs-lite upstream WIP**                    | `Sink→EventSink` rename + Source type collision blocks upgrades. Coordinate with upstream. | 2 h    |
+| #  | Task                                                     | Why                                                                                        | Effort |
+| -- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------ |
+| 9  | **OpenTelemetry instrumentation**                        | No observability. Production debugging is blind. Start with sync + HTTP middleware spans.  | 3 h    |
+| 10 | **API authentication middleware**                        | API is unsafe on any network. API key middleware is minimal.                               | 2 h    |
+| 11 | **Build a second provider** (GitLab or Jira)             | Validates the provider abstraction isn't GitHub-specific. Forces interface clarity.        | 3 h    |
+| 12 | **Increase `cmd/examples/github-sync` coverage to 50%+** | Entry point is barely tested. Subprocess tests for `os.Exit()` paths.                      | 2 h    |
+| 13 | **Property-based tests for CRDT VectorClock**            | Verify CRDT mathematical properties (commutativity, associativity, idempotency).           | 2 h    |
+| 14 | **CONTRIBUTING.md architecture guide**                   | Layered architecture diagram, file naming conventions, testing requirements.               | 1.5 h  |
+| 15 | **Add structured logging fields consistently**           | Add source, user, page, event_id fields to all log statements for filterability.           | 2 h    |
+| 16 | **Resolve go-cqrs-lite upstream WIP**                    | `Sink→EventSink` rename + Source type collision blocks upgrades. Coordinate with upstream. | 2 h    |
 
 ### Tier 3: Strategic, Higher Effort (4+ hours each)
 
-| #   | Task                                     | Why                                                                                      | Effort |
-| --- | ---------------------------------------- | ---------------------------------------------------------------------------------------- | ------ |
-| 17  | **Daemon/background mode**               | Periodic sync without manual execution. Cron or systemd integration.                     | 4 h    |
-| 18  | **Real-time multi-node sync protocol**   | Use the CRDT infrastructure that already exists. Wire `SyncMessage` over WebSocket/gRPC. | 8 h    |
-| 19  | **Extract `pkg/crdt` to own repository** | Generic data structures shouldn't be coupled to go-localsync releases.                   | 4 h    |
-| 20  | **Multi-user sync**                      | Accept multiple users, track which user each event belongs to in read model.             | 6 h    |
-| 21  | **Data export (JSON/CSV)**               | Export stored events for external analysis. Simple but useful.                           | 3 h    |
-| 22  | **Chaos/fault-injection test suite**     | Corrupted SQLite, partial writes, concurrent schema changes. Hardens the system.         | 4 h    |
-| 23  | **Build TUI with Bubble Tea**            | Interactive terminal UI for browsing events and real-time sync.                          | 4 h    |
-| 24  | **API rate limiting middleware**         | Protect POST /sync from abuse. Token bucket or sliding window.                           | 2 h    |
-| 25  | **Adopt `catalog/` from go-cqrs-lite**   | Auto-generate AsyncAPI/OpenAPI specs from event catalog.                                 | 3 h    |
+| #  | Task                                     | Why                                                                                      | Effort |
+| -- | ---------------------------------------- | ---------------------------------------------------------------------------------------- | ------ |
+| 17 | **Daemon/background mode**               | Periodic sync without manual execution. Cron or systemd integration.                     | 4 h    |
+| 18 | **Real-time multi-node sync protocol**   | Use the CRDT infrastructure that already exists. Wire `SyncMessage` over WebSocket/gRPC. | 8 h    |
+| 19 | **Extract `pkg/crdt` to own repository** | Generic data structures shouldn't be coupled to go-localsync releases.                   | 4 h    |
+| 20 | **Multi-user sync**                      | Accept multiple users, track which user each event belongs to in read model.             | 6 h    |
+| 21 | **Data export (JSON/CSV)**               | Export stored events for external analysis. Simple but useful.                           | 3 h    |
+| 22 | **Chaos/fault-injection test suite**     | Corrupted SQLite, partial writes, concurrent schema changes. Hardens the system.         | 4 h    |
+| 23 | **Build TUI with Bubble Tea**            | Interactive terminal UI for browsing events and real-time sync.                          | 4 h    |
+| 24 | **API rate limiting middleware**         | Protect POST /sync from abuse. Token bucket or sliding window.                           | 2 h    |
+| 25 | **Adopt `catalog/` from go-cqrs-lite**   | Auto-generate AsyncAPI/OpenAPI specs from event catalog.                                 | 3 h    |
 
 ---
 

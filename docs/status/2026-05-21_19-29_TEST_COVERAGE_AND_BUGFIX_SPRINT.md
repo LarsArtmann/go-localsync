@@ -196,33 +196,33 @@ gopls reports 7 persistent `go mod tidy` errors for `go-cqrs-lite/middleware`, `
 
 Sorted by impact × urgency:
 
-| #   | Task                                                                                    | Priority | Effort  | Impact                                         |
-| --- | --------------------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------- |
-| 1   | Wire `decider.WithOutbox` for Turso backend (atomic save+publish)                       | CRITICAL | MEDIUM  | Prevents event loss on crash                   |
-| 2   | Wire `projection.Runner` with GlobalLoader for crash recovery                           | CRITICAL | MEDIUM  | Prevents stale read model on restart           |
-| 3   | Extract `SyncDB` interface for `syncDB` field to enable error path testing              | HIGH     | LOW     | Unblocks Pull/Push coverage                    |
-| 4   | Add CI pipeline (GitHub Actions: build + test + lint)                                   | HIGH     | LOW     | Prevent regressions                            |
-| 5   | Publish `go-cqrs-lite/storage` with version tag, remove replace directive               | HIGH     | LOW     | Fixes CI compatibility                         |
-| 6   | Migrate `SyncItemState.Item` from `*provider.Item` to `provider.Item` (value semantics) | HIGH     | MEDIUM  | Impossible states unrepresentable              |
-| 7   | Add Pull/Push error path tests (requires SyncDB interface from #3)                      | HIGH     | LOW     | Coverage 33% → ~80%                            |
-| 8   | Add integration test: restart → events replayed → read model correct                    | HIGH     | MEDIUM  | Crash recovery confidence                      |
-| 9   | Replace hand-rolled retry with `middleware.CommandRetry`                                | MEDIUM   | LOW     | Eliminates ~45 lines of duplicated logic       |
-| 10  | Wire `errorfamily.WithContext` in `WithDetail`/`WithUserDetail`                         | MEDIUM   | LOW     | Preserves original error message               |
-| 11  | Wire `sync.LWWResolver[T]` for formalized conflict resolution                           | MEDIUM   | MEDIUM  | Replaces hand-rolled HasChanged+remote-wins    |
-| 12  | Add metrics/observability (Prometheus via middleware)                                   | MEDIUM   | MEDIUM  | Production visibility                          |
-| 13  | Add integration test for full sync pipeline (fetch → sync → read model → stats)         | MEDIUM   | MEDIUM  | End-to-end confidence                          |
-| 14  | Add second provider (GitLab or Jira) to validate abstraction                            | MEDIUM   | HIGH    | Proves architecture is generic                 |
-| 15  | Add `flake.nix` for build automation                                                    | MEDIUM   | MEDIUM  | Fixes BuildFlow pre-commit, enables nix builds |
-| 16  | Fix BuildFlow pre-commit hook failures                                                  | MEDIUM   | MEDIUM  | Enables clean commits without `--no-verify`    |
-| 17  | Improve `main()` coverage (testable main pattern or integration test)                   | LOW      | MEDIUM  | CLI coverage 10.5% → ~60%                      |
-| 18  | Add `decider.WithOutbox` integration test with Turso                                    | HIGH     | MEDIUM  | Validates atomic save+publish                  |
-| 19  | Wire `command.Dispatcher` for typed command dispatch                                    | LOW      | MEDIUM  | Type-safe command routing                      |
-| 20  | Add `UpcasterRegistry` for schema evolution                                             | LOW      | LOW     | Future-proofs event schemas                    |
-| 21  | Add `catalog/` for auto-generated API docs                                              | LOW      | LOW     | Documentation automation                       |
-| 22  | Adopt go-cqrs-lite `testhelpers` module                                                 | LOW      | TRIVIAL | Slight test cleanup                            |
-| 23  | Add CONTRIBUTING.md with provider development guide                                     | LOW      | LOW     | Contributor onboarding                         |
-| 24  | Add `query.Pagination` consideration for read model API                                 | LOW      | LOW     | Standardized pagination semantics              |
-| 25  | Fix gopls "go mod tidy" cosmetic errors                                                 | LOW      | TRIVIAL | IDE experience                                 |
+| #  | Task                                                                                    | Priority | Effort  | Impact                                         |
+| -- | --------------------------------------------------------------------------------------- | -------- | ------- | ---------------------------------------------- |
+| 1  | Wire `decider.WithOutbox` for Turso backend (atomic save+publish)                       | CRITICAL | MEDIUM  | Prevents event loss on crash                   |
+| 2  | Wire `projection.Runner` with GlobalLoader for crash recovery                           | CRITICAL | MEDIUM  | Prevents stale read model on restart           |
+| 3  | Extract `SyncDB` interface for `syncDB` field to enable error path testing              | HIGH     | LOW     | Unblocks Pull/Push coverage                    |
+| 4  | Add CI pipeline (GitHub Actions: build + test + lint)                                   | HIGH     | LOW     | Prevent regressions                            |
+| 5  | Publish `go-cqrs-lite/storage` with version tag, remove replace directive               | HIGH     | LOW     | Fixes CI compatibility                         |
+| 6  | Migrate `SyncItemState.Item` from `*provider.Item` to `provider.Item` (value semantics) | HIGH     | MEDIUM  | Impossible states unrepresentable              |
+| 7  | Add Pull/Push error path tests (requires SyncDB interface from #3)                      | HIGH     | LOW     | Coverage 33% → ~80%                            |
+| 8  | Add integration test: restart → events replayed → read model correct                    | HIGH     | MEDIUM  | Crash recovery confidence                      |
+| 9  | Replace hand-rolled retry with `middleware.CommandRetry`                                | MEDIUM   | LOW     | Eliminates ~45 lines of duplicated logic       |
+| 10 | Wire `errorfamily.WithContext` in `WithDetail`/`WithUserDetail`                         | MEDIUM   | LOW     | Preserves original error message               |
+| 11 | Wire `sync.LWWResolver[T]` for formalized conflict resolution                           | MEDIUM   | MEDIUM  | Replaces hand-rolled HasChanged+remote-wins    |
+| 12 | Add metrics/observability (Prometheus via middleware)                                   | MEDIUM   | MEDIUM  | Production visibility                          |
+| 13 | Add integration test for full sync pipeline (fetch → sync → read model → stats)         | MEDIUM   | MEDIUM  | End-to-end confidence                          |
+| 14 | Add second provider (GitLab or Jira) to validate abstraction                            | MEDIUM   | HIGH    | Proves architecture is generic                 |
+| 15 | Add `flake.nix` for build automation                                                    | MEDIUM   | MEDIUM  | Fixes BuildFlow pre-commit, enables nix builds |
+| 16 | Fix BuildFlow pre-commit hook failures                                                  | MEDIUM   | MEDIUM  | Enables clean commits without `--no-verify`    |
+| 17 | Improve `main()` coverage (testable main pattern or integration test)                   | LOW      | MEDIUM  | CLI coverage 10.5% → ~60%                      |
+| 18 | Add `decider.WithOutbox` integration test with Turso                                    | HIGH     | MEDIUM  | Validates atomic save+publish                  |
+| 19 | Wire `command.Dispatcher` for typed command dispatch                                    | LOW      | MEDIUM  | Type-safe command routing                      |
+| 20 | Add `UpcasterRegistry` for schema evolution                                             | LOW      | LOW     | Future-proofs event schemas                    |
+| 21 | Add `catalog/` for auto-generated API docs                                              | LOW      | LOW     | Documentation automation                       |
+| 22 | Adopt go-cqrs-lite `testhelpers` module                                                 | LOW      | TRIVIAL | Slight test cleanup                            |
+| 23 | Add CONTRIBUTING.md with provider development guide                                     | LOW      | LOW     | Contributor onboarding                         |
+| 24 | Add `query.Pagination` consideration for read model API                                 | LOW      | LOW     | Standardized pagination semantics              |
+| 25 | Fix gopls "go mod tidy" cosmetic errors                                                 | LOW      | TRIVIAL | IDE experience                                 |
 
 ---
 

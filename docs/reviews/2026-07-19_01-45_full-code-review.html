@@ -65,14 +65,14 @@
 
         /* --- Type stacks (system only — zero external fonts) --- */
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -289,15 +289,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       /* --- Issue cards --- */
@@ -310,15 +322,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -831,9 +855,9 @@
           <div class="hero-badge">Full Code Review</div>
           <h1>go-localsync Architectural Audit</h1>
           <p class="hero-subtitle">
-            Every production file visited (52 files, 5,449 LOC) as a Senior Software Architect: type
-            safety, concurrency, error handling, split brains, security. Findings prioritized by the
-            Pareto principle.
+            Every production file visited (52 files, 5,449 LOC) as a Senior
+            Software Architect: type safety, concurrency, error handling, split
+            brains, security. Findings prioritized by the Pareto principle.
           </p>
         </div>
 
@@ -858,77 +882,99 @@
         </div>
 
         <div class="card card-solution">
-          <h4>Verdict: production-grade. One latent security issue fixed on the spot.</h4>
+          <h4>
+            Verdict: production-grade. One latent security issue fixed on the
+            spot.
+          </h4>
           <p>
-            Visited every production file ranked by impact (<code>pkg/sync/sync.go</code>,
-            <code>pkg/cqrs/stack.go</code>, <code>decider.go</code>, <code>sqlite_*.go</code>,
-            <code>errors</code>, <code>api</code>, <code>cqrslint</code>). The architecture is
-            sound: CQRS with a single source of truth, branded IDs everywhere, centralized
-            error&rarr;HTTP mapping, named-return defer cleanup in <code>NewCQRSStack</code>, a
-            documented per-source serialization invariant, and a mutex-guarded projection
-            version-gate.
+            Visited every production file ranked by impact
+            (<code>pkg/sync/sync.go</code>,
+            <code>pkg/cqrs/stack.go</code>, <code>decider.go</code>,
+            <code>sqlite_*.go</code>, <code>errors</code>, <code>api</code>,
+            <code>cqrslint</code>). The architecture is sound: CQRS with a
+            single source of truth, branded IDs everywhere, centralized
+            error&rarr;HTTP mapping, named-return defer cleanup in
+            <code>NewCQRSStack</code>, a documented per-source serialization
+            invariant, and a mutex-guarded projection version-gate.
             <strong
-              >No split brains, no unchecked type assertions, no user-input-driven panics, no
-              goroutine leaks.</strong
+              >No split brains, no unchecked type assertions, no
+              user-input-driven panics, no goroutine leaks.</strong
             >
-            Exactly one issue crossed the &ldquo;fix it now&rdquo; bar &mdash; a latent
-            SQL-injection vector in the SQLite attribute filter &mdash; and it was fixed with a
-            validation guard + regression tests before this report was written.
+            Exactly one issue crossed the &ldquo;fix it now&rdquo; bar &mdash; a
+            latent SQL-injection vector in the SQLite attribute filter &mdash;
+            and it was fixed with a validation guard + regression tests before
+            this report was written.
           </p>
         </div>
 
         <h2 id="fixed"><span class="num">01</span>Fixed On The Spot</h2>
 
         <div class="issue issue-critical">
-          <span class="severity severity-critical">Security &middot; Fixed</span>
+          <span class="severity severity-critical"
+            >Security &middot; Fixed</span
+          >
           <h3>SQL-injection vector in SQLite attribute filter keys</h3>
-          <div class="where">pkg/cqrs/sqlite_query.go:57 (original) &mdash; appendFilterArgs</div>
+          <div class="where">
+            pkg/cqrs/sqlite_query.go:57 (original) &mdash; appendFilterArgs
+          </div>
           <p>
-            The attribute filter interpolated the map <strong>key</strong> directly into the SQL:
-            <code>" AND json_extract(attributes, '$." + key + "') = ?"</code>. The
-            <em>value</em> was parameterized (good), but the <em>key</em> was not &mdash; SQLite's
-            <code>json_extract</code> path does not accept a <code>?</code> placeholder. A key like
-            <code>evil') = 'x' OR 1=1 --</code> would break out of the JSON path.
+            The attribute filter interpolated the map
+            <strong>key</strong> directly into the SQL:
+            <code>" AND json_extract(attributes, '$." + key + "') = ?"</code>.
+            The <em>value</em> was parameterized (good), but the
+            <em>key</em> was not &mdash; SQLite's <code>json_extract</code> path
+            does not accept a <code>?</code> placeholder. A key like
+            <code>evil') = 'x' OR 1=1 --</code> would break out of the JSON
+            path.
           </p>
           <p>
-            <strong>Exploitability assessment:</strong> NOT currently reachable from HTTP &mdash;
-            the <code>GET /items</code> handler (<code>pkg/api/handlers.go:listItems</code>) only
-            sets <code>Type/Source/Since/Limit/Offset</code>, never <code>filter.Attributes</code>.
-            The map is only populated by consumers calling
+            <strong>Exploitability assessment:</strong> NOT currently reachable
+            from HTTP &mdash; the <code>GET /items</code> handler
+            (<code>pkg/api/handlers.go:listItems</code>) only sets
+            <code>Type/Source/Since/Limit/Offset</code>, never
+            <code>filter.Attributes</code>. The map is only populated by
+            consumers calling
             <code>ItemFilter.WithAttribute</code> programmatically. So this is a
-            <em>latent</em> vector that becomes live the day attribute filtering is exposed to
-            untrusted input. Defense-in-depth says: close it now, before the API grows.
+            <em>latent</em> vector that becomes live the day attribute filtering
+            is exposed to untrusted input. Defense-in-depth says: close it now,
+            before the API grows.
           </p>
           <div class="callout callout-solution">
             <strong>Fix applied (verified by tests)</strong>
-            Added <code>validateAttributeKey(key)</code> &mdash; a hand-rolled (dependency-free)
-            check that the key matches <code>[A-Za-z_][A-Za-z0-9_]*</code>. Changed
-            <code>appendFilterArgs</code> to return <code>([]any, error)</code> and
-            <code>buildListQuery</code> to return <code>(string, []any, error)</code>; all three
-            call sites (<code>List</code>, <code>Count</code>, <code>CountByType</code>) propagate
-            the error as <code>ErrInvalidInput</code>. Added
-            <code>TestSQLiteReadModel_List_RejectsUnsafeAttributeKey</code> (6 malicious keys) and
-            <code>..._AcceptsSafeAttributeKeys</code> (5 legitimate keys). Full suite (214 tests)
-            still green.
+            Added <code>validateAttributeKey(key)</code> &mdash; a hand-rolled
+            (dependency-free) check that the key matches
+            <code>[A-Za-z_][A-Za-z0-9_]*</code>. Changed
+            <code>appendFilterArgs</code> to return
+            <code>([]any, error)</code> and <code>buildListQuery</code> to
+            return <code>(string, []any, error)</code>; all three call sites
+            (<code>List</code>, <code>Count</code>, <code>CountByType</code>)
+            propagate the error as <code>ErrInvalidInput</code>. Added
+            <code>TestSQLiteReadModel_List_RejectsUnsafeAttributeKey</code> (6
+            malicious keys) and <code>..._AcceptsSafeAttributeKeys</code> (5
+            legitimate keys). Full suite (214 tests) still green.
           </div>
         </div>
 
-        <h2 id="findings"><span class="num">02</span>Findings (no action required)</h2>
+        <h2 id="findings">
+          <span class="num">02</span>Findings (no action required)
+        </h2>
 
         <div class="issue issue-nice">
           <span class="severity severity-nice">Low &middot; Accepted</span>
           <h3>&ldquo;Cannot happen&rdquo; panics are documented invariants</h3>
           <div class="where">
-            pkg/cqrs/aggregate_id.go:46 &middot; pkg/cqrs/commands.go:25 &middot;
-            pkg/testutil/testutil.go:121
+            pkg/cqrs/aggregate_id.go:46 &middot; pkg/cqrs/commands.go:25
+            &middot; pkg/testutil/testutil.go:121
           </div>
           <p>
-            Three <code>panic()</code> calls exist in non-test production code paths. Each fires
-            only after a precondition has been validated upstream (a hex string that already passed
-            <code>ParseAggregateID</code>; a command type constructed from a constant; an
-            even-argument count in a test builder). These are programmer-error guards, not
-            user-input-driven. Accepted &mdash; converting them to returned errors would add API
-            surface for states the type system already forbids.
+            Three <code>panic()</code> calls exist in non-test production code
+            paths. Each fires only after a precondition has been validated
+            upstream (a hex string that already passed
+            <code>ParseAggregateID</code>; a command type constructed from a
+            constant; an even-argument count in a test builder). These are
+            programmer-error guards, not user-input-driven. Accepted &mdash;
+            converting them to returned errors would add API surface for states
+            the type system already forbids.
           </p>
         </div>
 
@@ -936,25 +982,31 @@
           <span class="severity severity-nice">Low &middot; Accepted</span>
           <h3>Ignored <code>Close()</code> errors in cleanup paths</h3>
           <div class="where">
-            pkg/cqrs/store_factory.go:58,65,71,78 &middot; pkg/cqrs/stack.go:94,98,102 &middot;
+            pkg/cqrs/store_factory.go:58,65,71,78 &middot;
+            pkg/cqrs/stack.go:94,98,102 &middot;
             pkg/cqrs/sqlite_readmodel.go:134,169
           </div>
           <p>
-            Every <code>_ = x.Close()</code> occurs in a defer or error-cleanup path where the
-            resource is already being released because something else failed. Logging or surfacing
-            these would add noise without signal. Idiomatic Go. Accepted.
+            Every <code>_ = x.Close()</code> occurs in a defer or error-cleanup
+            path where the resource is already being released because something
+            else failed. Logging or surfacing these would add noise without
+            signal. Idiomatic Go. Accepted.
           </p>
         </div>
 
         <div class="issue issue-nice">
           <span class="severity severity-nice">Low &middot; Future</span>
-          <h3>Benchmarks use classic <code>for i := 0; i &lt; b.N; i++</code></h3>
+          <h3>
+            Benchmarks use classic <code>for i := 0; i &lt; b.N; i++</code>
+          </h3>
           <div class="where">
-            pkg/cqrs/adapter_bench_test.go:31,38,45 &middot; pkg/cqrs/stack_bench_test.go:61
+            pkg/cqrs/adapter_bench_test.go:31,38,45 &middot;
+            pkg/cqrs/stack_bench_test.go:61
           </div>
           <p>
-            gopls suggests modernizing to <code>b.Loop()</code> (Go 1.24+). Cosmetic; behavior is
-            identical. Non-blocking &mdash; opportunity for a tiny PR.
+            gopls suggests modernizing to <code>b.Loop()</code> (Go 1.24+).
+            Cosmetic; behavior is identical. Non-blocking &mdash; opportunity
+            for a tiny PR.
           </p>
         </div>
 
@@ -965,20 +1017,25 @@
             <div class="text">
               <strong>Resource cleanup is textbook</strong>
               <span
-                ><code>NewCQRSStack</code> uses named returns + a single defer that releases
-                store/bus/read-model/runner on <em>any</em> error path after creation. No
-                partial-init leak is possible. (<code>stack.go:80-104</code>)</span
+                ><code>NewCQRSStack</code> uses named returns + a single defer
+                that releases store/bus/read-model/runner on <em>any</em> error
+                path after creation. No partial-init leak is possible.
+                (<code>stack.go:80-104</code>)</span
               >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
-              <strong>Per-source serialization invariant is reasoned, not accidental</strong>
+              <strong
+                >Per-source serialization invariant is reasoned, not
+                accidental</strong
+              >
               <span
-                ><code>lockSource</code> caches one mutex per source for the Syncer's lifetime. A
-                documented comment explains why deleting entries on release would be unsafe (a
-                finishing goroutine removing the entry while another holds the old mutex would break
+                ><code>lockSource</code> caches one mutex per source for the
+                Syncer's lifetime. A documented comment explains why deleting
+                entries on release would be unsafe (a finishing goroutine
+                removing the entry while another holds the old mutex would break
                 serialization). (<code>sync.go:74-100</code>)</span
               >
             </div>
@@ -988,10 +1045,11 @@
             <div class="text">
               <strong>Retry honors context + Retry-After + retryability</strong>
               <span
-                ><code>fetchItems</code> checks <code>ctx.Err()</code> each attempt, consults
-                <code>pkgerrors.IsRetryable</code>, honors a server-advised
-                <code>RetryAfter()</code>, and caps wait at <code>MaxBackoff</code>. Permanent
-                failures surface immediately; unclassified errors fail-open as Transient.
+                ><code>fetchItems</code> checks <code>ctx.Err()</code> each
+                attempt, consults <code>pkgerrors.IsRetryable</code>, honors a
+                server-advised <code>RetryAfter()</code>, and caps wait at
+                <code>MaxBackoff</code>. Permanent failures surface immediately;
+                unclassified errors fail-open as Transient.
                 (<code>sync.go:414-489</code>)</span
               >
             </div>
@@ -1001,11 +1059,13 @@
             <div class="text">
               <strong>Partial-sync is surfaced, not swallowed</strong>
               <span
-                >A shared <code>partialSyncError</code> helper means the full-sync and
-                conflict-aware paths cannot diverge (the comment records that this is exactly how
-                the conflict-aware path previously dropped partial failures silently). The HTTP
-                layer maps <code>ErrPartialSync</code> to 200-with-result so successfully-synced
-                items are never discarded. (<code>sync.go:143-160</code>,
+                >A shared <code>partialSyncError</code> helper means the
+                full-sync and conflict-aware paths cannot diverge (the comment
+                records that this is exactly how the conflict-aware path
+                previously dropped partial failures silently). The HTTP layer
+                maps <code>ErrPartialSync</code> to 200-with-result so
+                successfully-synced items are never discarded.
+                (<code>sync.go:143-160</code>,
                 <code>handlers.go:82-95</code>)</span
               >
             </div>
@@ -1015,10 +1075,12 @@
             <div class="text">
               <strong>Projection runner goroutine has a clean lifecycle</strong>
               <span
-                ><code>drainHostOnCancel</code> waits on <code>ctx.Done()</code>, then calls
-                <code>host.Stop()</code> (which has its own internal timeout), then closes
-                <code>drainDone</code> so <code>Close</code> can wait for the drain before closing
-                the DB. No leak, no deadlock. (<code>runner.go:60-79</code>)</span
+                ><code>drainHostOnCancel</code> waits on
+                <code>ctx.Done()</code>, then calls
+                <code>host.Stop()</code> (which has its own internal timeout),
+                then closes <code>drainDone</code> so <code>Close</code> can
+                wait for the drain before closing the DB. No leak, no deadlock.
+                (<code>runner.go:60-79</code>)</span
               >
             </div>
           </div>
@@ -1027,23 +1089,27 @@
             <div class="text">
               <strong>Centralized error&rarr;HTTP translation</strong>
               <span
-                ><code>pkgerrors.HTTPStatus</code> is the single source of truth: per-sentinel
-                overrides, family fallback, <code>context.Canceled</code>&rarr;499,
-                <code>context.DeadlineExceeded</code>&rarr;504. New sentinels inherit their family
-                status automatically; no catch-all default to forget.
-                (<code>errors/http.go</code>)</span
+                ><code>pkgerrors.HTTPStatus</code> is the single source of
+                truth: per-sentinel overrides, family fallback,
+                <code>context.Canceled</code>&rarr;499,
+                <code>context.DeadlineExceeded</code>&rarr;504. New sentinels
+                inherit their family status automatically; no catch-all default
+                to forget. (<code>errors/http.go</code>)</span
               >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
-              <strong>Architectural invariants enforced by AST, not hope</strong>
+              <strong
+                >Architectural invariants enforced by AST, not hope</strong
+              >
               <span
-                ><code>internal/cqrslint</code> runs 10 checks (C0001&ndash;C0010) over
-                <code>pkg/cqrs</code>: single aggregate type, three fixed events, fold coverage,
-                projection mutex guard, <code>SyncAction</code> stays in <code>pkg/sync</code>. CI
-                gates on it. Scope drift becomes a build failure.</span
+                ><code>internal/cqrslint</code> runs 10 checks
+                (C0001&ndash;C0010) over <code>pkg/cqrs</code>: single aggregate
+                type, three fixed events, fold coverage, projection mutex guard,
+                <code>SyncAction</code> stays in <code>pkg/sync</code>. CI gates
+                on it. Scope drift becomes a build failure.</span
               >
             </div>
           </div>
@@ -1051,14 +1117,16 @@
 
         <div class="callout callout-solution">
           <strong>Bottom line</strong>
-          The codebase holds up to an architect-level read. The one security finding is fixed,
-          tested, and not HTTP-reachable today. Nothing else crosses the bar for immediate action.
-          The remaining notes are accepted tradeoffs with clear rationale in the code.
+          The codebase holds up to an architect-level read. The one security
+          finding is fixed, tested, and not HTTP-reachable today. Nothing else
+          crosses the bar for immediate action. The remaining notes are accepted
+          tradeoffs with clear rationale in the code.
         </div>
 
         <footer class="footer">
-          Generated 2026-07-19 &middot; 52 production files + key test files reviewed. Full suite
-          (214 tests) green after fix. Not committed &mdash; user to review and commit.
+          Generated 2026-07-19 &middot; 52 production files + key test files
+          reviewed. Full suite (214 tests) green after fix. Not committed
+          &mdash; user to review and commit.
         </footer>
       </main>
     </div>

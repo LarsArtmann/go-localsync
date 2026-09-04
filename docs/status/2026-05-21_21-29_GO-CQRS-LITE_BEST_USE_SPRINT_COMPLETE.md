@@ -65,18 +65,18 @@ Three-session sprint completed. The project went from 42% → 58% go-cqrs-lite m
 
 ## C) NOT STARTED ⬜
 
-| #   | Item                                                       | Priority | Effort | Impact                                                                  |
-| --- | ---------------------------------------------------------- | -------- | ------ | ----------------------------------------------------------------------- |
-| 1   | `command.Dispatcher` adoption                              | LOW      | 4h     | Typed command dispatch, enables `CommandRetry`                          |
-| 2   | `query.Dispatcher` adoption                                | LOW      | 2h     | Typed query dispatch — marginal benefit                                 |
-| 3   | `aggregate.Root` adoption                                  | LOW      | 3h     | We use `decider.Decider` directly — correct, no benefit                 |
-| 4   | `UpcasterRegistry` for schema evolution                    | LOW      | 3h     | Only 1 schema version exists — premature                                |
-| 5   | `catalog/` for AsyncAPI/OpenAPI/D2                         | LOW      | 4h     | Documentation automation — zero customer impact                         |
-| 6   | `testhelpers` module adoption                              | LOW      | 2h     | Our test helpers work fine                                              |
-| 7   | Second provider (GitLab, Bitbucket, etc.)                  | MEDIUM   | 8h+    | Multi-provider support — high customer value but large effort           |
-| 8   | `query.Pagination` adoption                                | LOW      | 1h     | Our `ItemFilter.Limit/Offset` works fine                                |
-| 9   | Flaky test hardening for Turso async tests                 | MEDIUM   | 2h     | Tests use `waitForCount` with 1s deadline — could be fragile under load |
-| 10  | `cmd/examples/github-sync/main.go` coverage (currently 0%) | LOW      | 1h     | `main()` is untestable without refactoring to accept deps               |
+| #  | Item                                                       | Priority | Effort | Impact                                                                  |
+| -- | ---------------------------------------------------------- | -------- | ------ | ----------------------------------------------------------------------- |
+| 1  | `command.Dispatcher` adoption                              | LOW      | 4h     | Typed command dispatch, enables `CommandRetry`                          |
+| 2  | `query.Dispatcher` adoption                                | LOW      | 2h     | Typed query dispatch — marginal benefit                                 |
+| 3  | `aggregate.Root` adoption                                  | LOW      | 3h     | We use `decider.Decider` directly — correct, no benefit                 |
+| 4  | `UpcasterRegistry` for schema evolution                    | LOW      | 3h     | Only 1 schema version exists — premature                                |
+| 5  | `catalog/` for AsyncAPI/OpenAPI/D2                         | LOW      | 4h     | Documentation automation — zero customer impact                         |
+| 6  | `testhelpers` module adoption                              | LOW      | 2h     | Our test helpers work fine                                              |
+| 7  | Second provider (GitLab, Bitbucket, etc.)                  | MEDIUM   | 8h+    | Multi-provider support — high customer value but large effort           |
+| 8  | `query.Pagination` adoption                                | LOW      | 1h     | Our `ItemFilter.Limit/Offset` works fine                                |
+| 9  | Flaky test hardening for Turso async tests                 | MEDIUM   | 2h     | Tests use `waitForCount` with 1s deadline — could be fragile under load |
+| 10 | `cmd/examples/github-sync/main.go` coverage (currently 0%) | LOW      | 1h     | `main()` is untestable without refactoring to accept deps               |
 
 ---
 
@@ -127,33 +127,33 @@ Three-session sprint completed. The project went from 42% → 58% go-cqrs-lite m
 
 Sorted by impact × urgency.
 
-| #   | Task                                                                 | Impact | Effort | Category       |
-| --- | -------------------------------------------------------------------- | ------ | ------ | -------------- |
-| 1   | Split `stack.go` into 3 focused files                                | HIGH   | 30min  | Architecture   |
-| 2   | Split `stack_test.go` into 3 focused files                           | HIGH   | 20min  | Code quality   |
-| 3   | Fix `startProjectionRunner` to propagate errors                      | HIGH   | 15min  | Bug fix        |
-| 4   | Add test for `Pull()` success path                                   | HIGH   | 15min  | Coverage       |
-| 5   | Add test for `charmLogAdapter.Error`                                 | MEDIUM | 10min  | Coverage       |
-| 6   | Test `createTursoRemoteStore` error paths                            | HIGH   | 45min  | Coverage       |
-| 7   | Wire `sync.LWWResolver[T]` for formal conflict resolution            | MEDIUM | 2h     | Feature        |
-| 8   | Add second provider (GitLab/Bitbucket)                               | HIGH   | 8h+    | Feature        |
-| 9   | Extract `cmd/examples/github-sync/main.go` logic for testability     | MEDIUM | 1h     | Coverage       |
-| 10  | Remove dead `testhelpers` or adopt across tests                      | LOW    | 2h     | Cleanup        |
-| 11  | Adopt `command.Dispatcher` + `CommandRetry`                          | MEDIUM | 4h     | Feature        |
-| 12  | Add `UpcasterRegistry` for schema v2 readiness                       | LOW    | 3h     | Infrastructure |
-| 13  | Replace deprecated Turso legacy client                               | MEDIUM | 2h     | Dependencies   |
-| 14  | Remove `pkg/errors` dependency on `github.com/pkg/errors`            | LOW    | 30min  | Dependencies   |
-| 15  | Adopt OpenTelemetry instead of direct Prometheus                     | LOW    | 3h     | Observability  |
-| 16  | Add `catalog/` for API docs generation                               | LOW    | 4h     | Documentation  |
-| 17  | Add flaky-test hardening (longer deadlines, retries)                 | MEDIUM | 2h     | Reliability    |
-| 18  | Add benchmark tests for `SyncItems` with large batches               | MEDIUM | 1h     | Performance    |
-| 19  | Add `Close()` integration test for Turso (verify resources released) | MEDIUM | 30min  | Coverage       |
-| 20  | Add integration test for outbox crash recovery                       | HIGH   | 2h     | Reliability    |
-| 21  | Wire `event.CausationID` for per-item tracing                        | LOW    | 30min  | Observability  |
-| 22  | Add Prometheus metrics endpoint to example CLI                       | LOW    | 2h     | Observability  |
-| 23  | Add context timeout to `SyncItems`                                   | MEDIUM | 15min  | Robustness     |
-| 24  | Add structured logging for sync summary                              | LOW    | 30min  | Observability  |
-| 25  | Create flake.nix for build automation                                | LOW    | 2h     | Infrastructure |
+| #  | Task                                                                 | Impact | Effort | Category       |
+| -- | -------------------------------------------------------------------- | ------ | ------ | -------------- |
+| 1  | Split `stack.go` into 3 focused files                                | HIGH   | 30min  | Architecture   |
+| 2  | Split `stack_test.go` into 3 focused files                           | HIGH   | 20min  | Code quality   |
+| 3  | Fix `startProjectionRunner` to propagate errors                      | HIGH   | 15min  | Bug fix        |
+| 4  | Add test for `Pull()` success path                                   | HIGH   | 15min  | Coverage       |
+| 5  | Add test for `charmLogAdapter.Error`                                 | MEDIUM | 10min  | Coverage       |
+| 6  | Test `createTursoRemoteStore` error paths                            | HIGH   | 45min  | Coverage       |
+| 7  | Wire `sync.LWWResolver[T]` for formal conflict resolution            | MEDIUM | 2h     | Feature        |
+| 8  | Add second provider (GitLab/Bitbucket)                               | HIGH   | 8h+    | Feature        |
+| 9  | Extract `cmd/examples/github-sync/main.go` logic for testability     | MEDIUM | 1h     | Coverage       |
+| 10 | Remove dead `testhelpers` or adopt across tests                      | LOW    | 2h     | Cleanup        |
+| 11 | Adopt `command.Dispatcher` + `CommandRetry`                          | MEDIUM | 4h     | Feature        |
+| 12 | Add `UpcasterRegistry` for schema v2 readiness                       | LOW    | 3h     | Infrastructure |
+| 13 | Replace deprecated Turso legacy client                               | MEDIUM | 2h     | Dependencies   |
+| 14 | Remove `pkg/errors` dependency on `github.com/pkg/errors`            | LOW    | 30min  | Dependencies   |
+| 15 | Adopt OpenTelemetry instead of direct Prometheus                     | LOW    | 3h     | Observability  |
+| 16 | Add `catalog/` for API docs generation                               | LOW    | 4h     | Documentation  |
+| 17 | Add flaky-test hardening (longer deadlines, retries)                 | MEDIUM | 2h     | Reliability    |
+| 18 | Add benchmark tests for `SyncItems` with large batches               | MEDIUM | 1h     | Performance    |
+| 19 | Add `Close()` integration test for Turso (verify resources released) | MEDIUM | 30min  | Coverage       |
+| 20 | Add integration test for outbox crash recovery                       | HIGH   | 2h     | Reliability    |
+| 21 | Wire `event.CausationID` for per-item tracing                        | LOW    | 30min  | Observability  |
+| 22 | Add Prometheus metrics endpoint to example CLI                       | LOW    | 2h     | Observability  |
+| 23 | Add context timeout to `SyncItems`                                   | MEDIUM | 15min  | Robustness     |
+| 24 | Add structured logging for sync summary                              | LOW    | 30min  | Observability  |
+| 25 | Create flake.nix for build automation                                | LOW    | 2h     | Infrastructure |
 
 ---
 

@@ -1,8 +1,8 @@
 # Comprehensive Status Report — go-localsync
 
-**Date:** 2026-06-05 06:49 CEST  
-**Session:** Resumed from interrupted SUPERB data module migration  
-**Branch:** master (clean, no uncommitted changes)  
+**Date:** 2026-06-05 06:49 CEST\
+**Session:** Resumed from interrupted SUPERB data module migration\
+**Branch:** master (clean, no uncommitted changes)\
 **Latest Commit:** `a542818` — test(cqrs,api): add integration tests + benchmarks for data layer migration
 
 ---
@@ -90,24 +90,24 @@
 
 ## c) NOT STARTED
 
-| #   | Item                                           | Why It Matters                                                                    |
-| --- | ---------------------------------------------- | --------------------------------------------------------------------------------- |
-| 1   | Cursor-based pagination (After + uint limit)   | Correct for append-only event stores; offset pagination is O(n) on large datasets |
-| 2   | `schema.Upcaster` + registry for event replay  | Forward-compatible event migration; currently SchemaVersion is write-only         |
-| 3   | `MetricsRecorder` middleware                   | Observability for command dispatch latency, event processing rates                |
-| 4   | OpenTelemetry instrumentation                  | Production debugging; spans for Sync, CQRS, HTTP handlers                         |
-| 5   | Graceful shutdown (`http.Server.Shutdown`)     | Current server hard-calls `http.ListenAndServe`; loses in-flight requests         |
-| 6   | API authentication middleware                  | Anyone can POST /sync without credentials                                         |
-| 7   | API rate limiting middleware                   | POST /sync is expensive; needs abuse protection                                   |
-| 8   | Concurrent read model access tests             | `sync.RWMutex` is used but never tested under concurrent load                     |
-| 9   | Real GitHub PAT smoke test                     | Zero end-to-end verification with real API                                        |
-| 10  | `BatchMapper` utility in `pkg/data/transform/` | Pre-allocated batch transformations for 10k+ item syncs                           |
-| 11  | `UnitOfWork` for atomic writes                 | Coordinate event store + read model writes atomically                             |
-| 12  | SQLite indexes for query optimization          | `repo_name`, `type_created` composites exist but no performance analysis          |
-| 13  | `govalid` struct tags on config structs        | Runtime validation of AppConfig, SyncOptions, CQRSConfig                          |
-| 14  | ADRs (Architecture Decision Records)           | No documented rationale for CQRS, branded IDs, CRDT choices                       |
-| 15  | `catalog/` from go-cqrs-lite                   | AsyncAPI/OpenAPI/D2 auto-generation from event types                              |
-| 16  | `middleware.CommandRetry` from go-cqrs-lite    | Currently no retry on command dispatch failures                                   |
+| #  | Item                                           | Why It Matters                                                                    |
+| -- | ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| 1  | Cursor-based pagination (After + uint limit)   | Correct for append-only event stores; offset pagination is O(n) on large datasets |
+| 2  | `schema.Upcaster` + registry for event replay  | Forward-compatible event migration; currently SchemaVersion is write-only         |
+| 3  | `MetricsRecorder` middleware                   | Observability for command dispatch latency, event processing rates                |
+| 4  | OpenTelemetry instrumentation                  | Production debugging; spans for Sync, CQRS, HTTP handlers                         |
+| 5  | Graceful shutdown (`http.Server.Shutdown`)     | Current server hard-calls `http.ListenAndServe`; loses in-flight requests         |
+| 6  | API authentication middleware                  | Anyone can POST /sync without credentials                                         |
+| 7  | API rate limiting middleware                   | POST /sync is expensive; needs abuse protection                                   |
+| 8  | Concurrent read model access tests             | `sync.RWMutex` is used but never tested under concurrent load                     |
+| 9  | Real GitHub PAT smoke test                     | Zero end-to-end verification with real API                                        |
+| 10 | `BatchMapper` utility in `pkg/data/transform/` | Pre-allocated batch transformations for 10k+ item syncs                           |
+| 11 | `UnitOfWork` for atomic writes                 | Coordinate event store + read model writes atomically                             |
+| 12 | SQLite indexes for query optimization          | `repo_name`, `type_created` composites exist but no performance analysis          |
+| 13 | `govalid` struct tags on config structs        | Runtime validation of AppConfig, SyncOptions, CQRSConfig                          |
+| 14 | ADRs (Architecture Decision Records)           | No documented rationale for CQRS, branded IDs, CRDT choices                       |
+| 15 | `catalog/` from go-cqrs-lite                   | AsyncAPI/OpenAPI/D2 auto-generation from event types                              |
+| 16 | `middleware.CommandRetry` from go-cqrs-lite    | Currently no retry on command dispatch failures                                   |
 
 ---
 
@@ -171,33 +171,33 @@ Wire `schema.Upcaster` into the projection replay path. Currently `SchemaVersion
 
 Sorted by **Impact / Effort** ratio (highest first):
 
-| #   | Task                                                                                | Impact | Effort | Package                                                                  |
-| --- | ----------------------------------------------------------------------------------- | ------ | ------ | ------------------------------------------------------------------------ |
-| 1   | **Backend branded type** — replace raw string in CQRSConfig/AppConfig/store_factory | High   | Low    | `pkg/cqrs/`, `cmd/examples/`                                             |
-| 2   | **SyncAction branded type** — prevent typos in switch statements                    | High   | Low    | `pkg/sync/`, `pkg/cqrs/`, `pkg/api/`                                     |
-| 3   | **Concurrent read model tests** — test RWMutex under load                           | High   | Low    | `pkg/cqrs/`                                                              |
-| 4   | **Move ItemFilter to data/query** — correct package boundary                        | High   | Medium | `pkg/provider/`, `pkg/data/query/`, `pkg/cqrs/`, `pkg/sync/`, `pkg/api/` |
-| 5   | **ConflictWinner branded type** — replace raw string                                | Medium | Low    | `pkg/cqrs/`                                                              |
-| 6   | **CLI conflict resolver flag** — make resolver configurable                         | Medium | Low    | `cmd/examples/`                                                          |
-| 7   | **Graceful shutdown** — drain in-flight requests                                    | Medium | Low    | `cmd/examples/`                                                          |
-| 8   | **mapSyncError() tests** — table-driven error→HTTP mapping                          | Medium | Low    | `pkg/api/`                                                               |
-| 9   | **HasChanged table-driven tests** — edge cases in field comparison                  | Medium | Low    | `pkg/cqrs/`                                                              |
-| 10  | **Extract shared testutil helpers** — DRY test item factories                       | Medium | Low    | `internal/testutil/`, multiple test files                                |
-| 11  | **Replace global Mapper vars with factory funcs** — remove gochecknoglobals         | Medium | Low    | `pkg/data/transform/`                                                    |
-| 12  | **Split sync.go** — extract interface, constants, types                             | Low    | Low    | `pkg/sync/`                                                              |
-| 13  | **Consolidate GetTypes/GetItemTypes** — remove duplicate                            | Low    | Low    | `pkg/cqrs/`                                                              |
-| 14  | **Rename ConfigureTursoPool** — remove misleading name                              | Low    | Low    | `pkg/cqrs/`                                                              |
-| 15  | **OpenTelemetry spans** — production observability                                  | Medium | Medium | `pkg/sync/`, `pkg/cqrs/`, `pkg/api/`                                     |
-| 16  | **API error path tests** — store failures, malformed requests                       | Medium | Medium | `pkg/api/`                                                               |
-| 17  | **Cursor pagination** — replace limit/offset with After+uint                        | High   | High   | `pkg/cqrs/`, `pkg/api/`, `pkg/data/query/`                               |
-| 18  | **Schema upcasters** — V1→V2 event replay migration                                 | Medium | High   | `pkg/data/schema/`, `pkg/cqrs/`                                          |
-| 19  | **MetricsRecorder middleware** — command/event metrics                              | Medium | Medium | `pkg/cqrs/`                                                              |
-| 20  | **Real GitHub smoke test** — end-to-end with PAT                                    | High   | High   | `cmd/examples/`                                                          |
-| 21  | **BatchMapper utility** — pre-allocated batch transforms                            | Low    | Low    | `pkg/data/transform/`                                                    |
-| 22  | **SQLite query optimization** — analyze slow queries, add indexes                   | Low    | Low    | `pkg/cqrs/`                                                              |
-| 23  | **API authentication middleware** — API key or JWT                                  | Medium | Medium | `pkg/api/`                                                               |
-| 24  | **API pagination headers** — X-Total-Count, Link header                             | Medium | Medium | `pkg/api/`                                                               |
-| 25  | **ADRs** — document CQRS, branded ID, CRDT decisions                                | Low    | Low    | `docs/adr/`                                                              |
+| #  | Task                                                                                | Impact | Effort | Package                                                                  |
+| -- | ----------------------------------------------------------------------------------- | ------ | ------ | ------------------------------------------------------------------------ |
+| 1  | **Backend branded type** — replace raw string in CQRSConfig/AppConfig/store_factory | High   | Low    | `pkg/cqrs/`, `cmd/examples/`                                             |
+| 2  | **SyncAction branded type** — prevent typos in switch statements                    | High   | Low    | `pkg/sync/`, `pkg/cqrs/`, `pkg/api/`                                     |
+| 3  | **Concurrent read model tests** — test RWMutex under load                           | High   | Low    | `pkg/cqrs/`                                                              |
+| 4  | **Move ItemFilter to data/query** — correct package boundary                        | High   | Medium | `pkg/provider/`, `pkg/data/query/`, `pkg/cqrs/`, `pkg/sync/`, `pkg/api/` |
+| 5  | **ConflictWinner branded type** — replace raw string                                | Medium | Low    | `pkg/cqrs/`                                                              |
+| 6  | **CLI conflict resolver flag** — make resolver configurable                         | Medium | Low    | `cmd/examples/`                                                          |
+| 7  | **Graceful shutdown** — drain in-flight requests                                    | Medium | Low    | `cmd/examples/`                                                          |
+| 8  | **mapSyncError() tests** — table-driven error→HTTP mapping                          | Medium | Low    | `pkg/api/`                                                               |
+| 9  | **HasChanged table-driven tests** — edge cases in field comparison                  | Medium | Low    | `pkg/cqrs/`                                                              |
+| 10 | **Extract shared testutil helpers** — DRY test item factories                       | Medium | Low    | `internal/testutil/`, multiple test files                                |
+| 11 | **Replace global Mapper vars with factory funcs** — remove gochecknoglobals         | Medium | Low    | `pkg/data/transform/`                                                    |
+| 12 | **Split sync.go** — extract interface, constants, types                             | Low    | Low    | `pkg/sync/`                                                              |
+| 13 | **Consolidate GetTypes/GetItemTypes** — remove duplicate                            | Low    | Low    | `pkg/cqrs/`                                                              |
+| 14 | **Rename ConfigureTursoPool** — remove misleading name                              | Low    | Low    | `pkg/cqrs/`                                                              |
+| 15 | **OpenTelemetry spans** — production observability                                  | Medium | Medium | `pkg/sync/`, `pkg/cqrs/`, `pkg/api/`                                     |
+| 16 | **API error path tests** — store failures, malformed requests                       | Medium | Medium | `pkg/api/`                                                               |
+| 17 | **Cursor pagination** — replace limit/offset with After+uint                        | High   | High   | `pkg/cqrs/`, `pkg/api/`, `pkg/data/query/`                               |
+| 18 | **Schema upcasters** — V1→V2 event replay migration                                 | Medium | High   | `pkg/data/schema/`, `pkg/cqrs/`                                          |
+| 19 | **MetricsRecorder middleware** — command/event metrics                              | Medium | Medium | `pkg/cqrs/`                                                              |
+| 20 | **Real GitHub smoke test** — end-to-end with PAT                                    | High   | High   | `cmd/examples/`                                                          |
+| 21 | **BatchMapper utility** — pre-allocated batch transforms                            | Low    | Low    | `pkg/data/transform/`                                                    |
+| 22 | **SQLite query optimization** — analyze slow queries, add indexes                   | Low    | Low    | `pkg/cqrs/`                                                              |
+| 23 | **API authentication middleware** — API key or JWT                                  | Medium | Medium | `pkg/api/`                                                               |
+| 24 | **API pagination headers** — X-Total-Count, Link header                             | Medium | Medium | `pkg/api/`                                                               |
+| 25 | **ADRs** — document CQRS, branded ID, CRDT decisions                                | Low    | Low    | `docs/adr/`                                                              |
 
 ---
 

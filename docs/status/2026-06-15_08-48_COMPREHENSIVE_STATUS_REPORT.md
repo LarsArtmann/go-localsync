@@ -1,13 +1,13 @@
 # Comprehensive Status Report — go-localsync
 
-**Date:** 2026-06-15 08:48 CEST  
-**Session:** 20 (deduplication sweep + status report)  
-**Branch:** master  
-**Go Version:** 1.26.3  
-**Total Files:** 96 Go files (45 test files)  
-**Total Tests:** 273 test functions + 14 benchmarks  
-**Build Status:** Compiles clean  
-**Test Status:** 11/11 packages PASS (0 failures)  
+**Date:** 2026-06-15 08:48 CEST\
+**Session:** 20 (deduplication sweep + status report)\
+**Branch:** master\
+**Go Version:** 1.26.3\
+**Total Files:** 96 Go files (45 test files)\
+**Total Tests:** 273 test functions + 14 benchmarks\
+**Build Status:** Compiles clean\
+**Test Status:** 11/11 packages PASS (0 failures)\
 **Lint Status:** 0 real issues (SA5012 crash = upstream golangci-lint v2 bug, not our code)
 
 ---
@@ -184,33 +184,33 @@
 
 ## f) Top #25 Things We Should Get Done Next
 
-| #   | Task                                                                   | Priority  | Effort | Blocker             |
-| --- | ---------------------------------------------------------------------- | --------- | ------ | ------------------- |
-| 1   | Extract `runSync`/`runStats` from `main.go` for testability            | 🔴 High   | 1h     | None                |
-| 2   | Add `assertResponseCount` helper + eliminate API test duplication      | 🔴 High   | 30m    | None                |
-| 3   | Document 5 intentional art-dupl groups with inline comments            | 🔴 High   | 15m    | None                |
-| 4   | Add OpenTelemetry spans to sync pipeline                               | 🔴 High   | 2h     | None                |
-| 5   | Add structured logging fields (correlation_id, user, page)             | 🟡 Medium | 1h     | None                |
-| 6   | Add SQLite size monitoring / retention strategy                        | 🟡 Medium | 2h     | None                |
-| 7   | Add real GitHub PAT smoke test script                                  | 🟡 Medium | 1h     | Needs PAT           |
-| 8   | Add `since` param validation API test                                  | 🟡 Medium | 15m    | None                |
-| 9   | Split `cmd/examples/github-sync` into `internal/cli/` + thin `main.go` | 🟡 Medium | 2h     | None                |
-| 10  | Materialized view for `CountByType` (eliminate N+1)                    | 🟡 Medium | 3h     | None                |
-| 11  | Add second provider (GitLab or RSS) to prove generic interface         | 🟢 Low    | 4h     | None                |
-| 12  | Expand benchmark suite (DecideSync, FetchAll, projection replay)       | 🟢 Low    | 2h     | None                |
-| 13  | API authentication middleware (API key)                                | 🟢 Low    | 3h     | None                |
-| 14  | API rate limiting middleware                                           | 🟢 Low    | 2h     | Needs auth first    |
-| 15  | TUI prototype with Bubble Tea                                          | 🟢 Low    | 4h     | None                |
-| 16  | Event schema versioning + UpcasterRegistry                             | 🟢 Low    | 4h     | go-cqrs-lite stable |
-| 17  | CQRS stack graceful shutdown (event drain)                             | 🟢 Low    | 2h     | None                |
-| 18  | SQLite connection pooling                                              | 🟢 Low    | 2h     | None                |
-| 19  | Adopt `middleware.CommandRetry` from go-cqrs-lite                      | 🟢 Low    | 2h     | go-cqrs-lite v2.4+  |
-| 20  | Adopt `catalog/` from go-cqrs-lite for AsyncAPI/D2                     | 🟢 Low    | 3h     | go-cqrs-lite stable |
-| 21  | Multi-user sync (multiple `-user` flags)                               | 🟢 Low    | 3h     | None                |
-| 22  | CONTRIBUTING.md architecture guide                                     | 🟢 Low    | 1h     | None                |
-| 23  | Add `govalid` struct tags to config structs                            | 🟢 Low    | 1h     | None                |
-| 24  | API pagination headers (`X-Total-Count`, cursor-based)                 | 🟢 Low    | 2h     | None                |
-| 25  | NixOS module for `github-sync` daemon                                  | 🟢 Low    | 4h     | None                |
+| #  | Task                                                                   | Priority  | Effort | Blocker             |
+| -- | ---------------------------------------------------------------------- | --------- | ------ | ------------------- |
+| 1  | Extract `runSync`/`runStats` from `main.go` for testability            | 🔴 High   | 1h     | None                |
+| 2  | Add `assertResponseCount` helper + eliminate API test duplication      | 🔴 High   | 30m    | None                |
+| 3  | Document 5 intentional art-dupl groups with inline comments            | 🔴 High   | 15m    | None                |
+| 4  | Add OpenTelemetry spans to sync pipeline                               | 🔴 High   | 2h     | None                |
+| 5  | Add structured logging fields (correlation_id, user, page)             | 🟡 Medium | 1h     | None                |
+| 6  | Add SQLite size monitoring / retention strategy                        | 🟡 Medium | 2h     | None                |
+| 7  | Add real GitHub PAT smoke test script                                  | 🟡 Medium | 1h     | Needs PAT           |
+| 8  | Add `since` param validation API test                                  | 🟡 Medium | 15m    | None                |
+| 9  | Split `cmd/examples/github-sync` into `internal/cli/` + thin `main.go` | 🟡 Medium | 2h     | None                |
+| 10 | Materialized view for `CountByType` (eliminate N+1)                    | 🟡 Medium | 3h     | None                |
+| 11 | Add second provider (GitLab or RSS) to prove generic interface         | 🟢 Low    | 4h     | None                |
+| 12 | Expand benchmark suite (DecideSync, FetchAll, projection replay)       | 🟢 Low    | 2h     | None                |
+| 13 | API authentication middleware (API key)                                | 🟢 Low    | 3h     | None                |
+| 14 | API rate limiting middleware                                           | 🟢 Low    | 2h     | Needs auth first    |
+| 15 | TUI prototype with Bubble Tea                                          | 🟢 Low    | 4h     | None                |
+| 16 | Event schema versioning + UpcasterRegistry                             | 🟢 Low    | 4h     | go-cqrs-lite stable |
+| 17 | CQRS stack graceful shutdown (event drain)                             | 🟢 Low    | 2h     | None                |
+| 18 | SQLite connection pooling                                              | 🟢 Low    | 2h     | None                |
+| 19 | Adopt `middleware.CommandRetry` from go-cqrs-lite                      | 🟢 Low    | 2h     | go-cqrs-lite v2.4+  |
+| 20 | Adopt `catalog/` from go-cqrs-lite for AsyncAPI/D2                     | 🟢 Low    | 3h     | go-cqrs-lite stable |
+| 21 | Multi-user sync (multiple `-user` flags)                               | 🟢 Low    | 3h     | None                |
+| 22 | CONTRIBUTING.md architecture guide                                     | 🟢 Low    | 1h     | None                |
+| 23 | Add `govalid` struct tags to config structs                            | 🟢 Low    | 1h     | None                |
+| 24 | API pagination headers (`X-Total-Count`, cursor-based)                 | 🟢 Low    | 2h     | None                |
+| 25 | NixOS module for `github-sync` daemon                                  | 🟢 Low    | 4h     | None                |
 
 ---
 

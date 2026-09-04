@@ -1,8 +1,8 @@
 # Session Status Report — 2026-04-19 05:08
 
-**Branch:** `master` (10 commits ahead of origin)  
-**Date:** Sunday, April 19, 2026 — 05:08 CEST  
-**Trigger:** Continuation of audit-driven improvement session  
+**Branch:** `master` (10 commits ahead of origin)\
+**Date:** Sunday, April 19, 2026 — 05:08 CEST\
+**Trigger:** Continuation of audit-driven improvement session\
 **Session started:** ~03:11 (comprehensive brutal audit)
 
 ---
@@ -19,12 +19,12 @@ The main risk right now is **tooling friction**: `go build ./...` and `go test .
 
 ### Committed this session (4 commits on master)
 
-| #   | Commit    | Description                                                             | Impact                 |
-| --- | --------- | ----------------------------------------------------------------------- | ---------------------- |
-| 1   | `f4ee9b9` | Full audit documentation + brutal status report                         | Baseline truth         |
-| 2   | `9d12704` | Remove dead `ErrStorage` sentinel, fix stale docs                       | Eliminates split brain |
-| 3   | `707dc89` | Replace `slog.Warn` → `charm.land/log/v2` in github/client.go           | Unifies logging        |
-| 4   | `8b47b48` | `Item.Validate()` returns `ErrInvalidInput` sentinel via `WithDetail()` | Structured errors      |
+| # | Commit    | Description                                                             | Impact                 |
+| - | --------- | ----------------------------------------------------------------------- | ---------------------- |
+| 1 | `f4ee9b9` | Full audit documentation + brutal status report                         | Baseline truth         |
+| 2 | `9d12704` | Remove dead `ErrStorage` sentinel, fix stale docs                       | Eliminates split brain |
+| 3 | `707dc89` | Replace `slog.Warn` → `charm.land/log/v2` in github/client.go           | Unifies logging        |
+| 4 | `8b47b48` | `Item.Validate()` returns `ErrInvalidInput` sentinel via `WithDetail()` | Structured errors      |
 
 ### Committed in previous sessions (6 commits on master, not yet pushed)
 
@@ -93,34 +93,34 @@ This wraps BOTH the sentinel AND the original error. `cockroachdb/errors.Wrapf` 
 
 ### High Priority
 
-| #   | Task                                                                                                                                           | Effort | Impact                          |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------- |
-| 6   | Migrate `fmt.Errorf` in `conflict_aware.go` (3 sites)                                                                                          | Small  | Consistency                     |
-| 7   | Migrate `fmt.Errorf` in `github/client.go` (9 sites)                                                                                           | Small  | Consistency                     |
-| 8   | Migrate `fmt.Errorf` in `database/` (8 sites)                                                                                                  | Small  | Consistency                     |
-| 9   | Consolidate duplicate mocks (sync_test.go uses unexported `mockStorage`/`mockProvider`, testhelpers has exported `MockStorage`/`MockProvider`) | Medium | DRY, maintainability            |
-| 10  | Remove vector clock ghost system from `conflict_aware.go`                                                                                      | Medium | Removes ~50 lines of dead logic |
-| 11  | Add storage tests for 6 untested methods: `GetItemsBySource`, `GetItemsSince`, `Delete`, `DeleteAll`, `GetByID` not-found, `UpsertBatch`       | Medium | Coverage                        |
+| #  | Task                                                                                                                                           | Effort | Impact                          |
+| -- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------- |
+| 6  | Migrate `fmt.Errorf` in `conflict_aware.go` (3 sites)                                                                                          | Small  | Consistency                     |
+| 7  | Migrate `fmt.Errorf` in `github/client.go` (9 sites)                                                                                           | Small  | Consistency                     |
+| 8  | Migrate `fmt.Errorf` in `database/` (8 sites)                                                                                                  | Small  | Consistency                     |
+| 9  | Consolidate duplicate mocks (sync_test.go uses unexported `mockStorage`/`mockProvider`, testhelpers has exported `MockStorage`/`MockProvider`) | Medium | DRY, maintainability            |
+| 10 | Remove vector clock ghost system from `conflict_aware.go`                                                                                      | Medium | Removes ~50 lines of dead logic |
+| 11 | Add storage tests for 6 untested methods: `GetItemsBySource`, `GetItemsSince`, `Delete`, `DeleteAll`, `GetByID` not-found, `UpsertBatch`       | Medium | Coverage                        |
 
 ### Medium Priority
 
-| #   | Task                                                                                                                                                                                                                                 | Effort | Impact          |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | --------------- |
-| 12  | Storage interface: `string` → branded types (7 methods: `GetByID(id string)`, `Delete(id string)`, `CountByType(string)`, `GetItemsByType(string)`, `GetItemsByActor(string)`, `GetItemsByRepo(string)`, `GetItemsBySource(string)`) | Medium | Type safety     |
-| 13  | Fix `Source` field type consistency: `FetchOptions.Source` and `SyncOptions.Source` are `string`                                                                                                                                     | Small  | Type safety     |
-| 14  | Add sqlc column overrides for branded type columns                                                                                                                                                                                   | Small  | Type safety     |
-| 15  | Embed migration SQL via `embed.FS` instead of Go string constants                                                                                                                                                                    | Small  | Maintainability |
-| 16  | Add error-path tests (closed DB, nil inputs, edge cases)                                                                                                                                                                             | Medium | Reliability     |
+| #  | Task                                                                                                                                                                                                                                 | Effort | Impact          |
+| -- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------ | --------------- |
+| 12 | Storage interface: `string` → branded types (7 methods: `GetByID(id string)`, `Delete(id string)`, `CountByType(string)`, `GetItemsByType(string)`, `GetItemsByActor(string)`, `GetItemsByRepo(string)`, `GetItemsBySource(string)`) | Medium | Type safety     |
+| 13 | Fix `Source` field type consistency: `FetchOptions.Source` and `SyncOptions.Source` are `string`                                                                                                                                     | Small  | Type safety     |
+| 14 | Add sqlc column overrides for branded type columns                                                                                                                                                                                   | Small  | Type safety     |
+| 15 | Embed migration SQL via `embed.FS` instead of Go string constants                                                                                                                                                                    | Small  | Maintainability |
+| 16 | Add error-path tests (closed DB, nil inputs, edge cases)                                                                                                                                                                             | Medium | Reliability     |
 
 ### Lower Priority
 
-| #   | Task                                                               | Effort | Impact        |
-| --- | ------------------------------------------------------------------ | ------ | ------------- |
-| 17  | Add godoc to exported symbols in `sqlite.go`                       | Small  | Documentation |
-| 18  | Migrate `sqlite.go` `fmt.Errorf` (17 sites, double-wrap pattern)   | Medium | Consistency   |
-| 19  | Review `pkg/types/` for missing branded types (e.g., `SourceType`) | Small  | Architecture  |
-| 20  | Add integration test for full sync pipeline                        | Medium | Confidence    |
-| 21  | Review error message consistency across packages                   | Small  | Polish        |
+| #  | Task                                                               | Effort | Impact        |
+| -- | ------------------------------------------------------------------ | ------ | ------------- |
+| 17 | Add godoc to exported symbols in `sqlite.go`                       | Small  | Documentation |
+| 18 | Migrate `sqlite.go` `fmt.Errorf` (17 sites, double-wrap pattern)   | Medium | Consistency   |
+| 19 | Review `pkg/types/` for missing branded types (e.g., `SourceType`) | Small  | Architecture  |
+| 20 | Add integration test for full sync pipeline                        | Medium | Confidence    |
+| 21 | Review error message consistency across packages                   | Small  | Polish        |
 
 ---
 

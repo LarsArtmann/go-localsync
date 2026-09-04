@@ -82,23 +82,23 @@
 
 ## C) NOT STARTED
 
-| #   | Item                                                 | Effort | Priority | Blocker                   |
-| --- | ---------------------------------------------------- | ------ | -------- | ------------------------- |
-| 1   | **CQRS migration** (go-cqrs-lite + Pebble)           | 8h+    | HIGH     | Strategic decision needed |
-| 2   | **Consolidate ItemID + SourceItemID**                | 1h     | HIGH     | sqlc regeneration risk    |
-| 3   | **GitHub Actions CI**                                | 2h     | HIGH     | None                      |
-| 4   | **Add `Metadata` field to `Item`**                   | 2h     | MEDIUM   | Breaking change decision  |
-| 5   | **Add second provider** (GitLab)                     | 4h     | MEDIUM   | Type model decision       |
-| 6   | **HTTP API** (chi/v5)                                | 2h     | MEDIUM   | None                      |
-| 7   | **Daemon mode** (cron/v3)                            | 1h     | LOW      | None                      |
-| 8   | **Streaming fetch** (channel-based)                  | 1h     | MEDIUM   | None                      |
-| 9   | **ConflictAwareSyncer composition** (stop embedding) | 20m    | LOW      | None                      |
-| 10  | **Extract retry/ratelimit to standalone packages**   | 1h     | LOW      | None                      |
-| 11  | **CLI integration tests**                            | 2h     | MEDIUM   | None                      |
-| 12  | **Event retention/TTL**                              | 1h     | LOW      | None                      |
-| 13  | **Build TUI with Bubble Tea**                        | 2h     | LOW      | None                      |
-| 14  | **Add export to JSON/CSV**                           | 1h     | LOW      | None                      |
-| 15  | **Remote Turso E2E test**                            | 1h     | HIGH     | Needs live Turso instance |
+| #  | Item                                                 | Effort | Priority | Blocker                   |
+| -- | ---------------------------------------------------- | ------ | -------- | ------------------------- |
+| 1  | **CQRS migration** (go-cqrs-lite + Pebble)           | 8h+    | HIGH     | Strategic decision needed |
+| 2  | **Consolidate ItemID + SourceItemID**                | 1h     | HIGH     | sqlc regeneration risk    |
+| 3  | **GitHub Actions CI**                                | 2h     | HIGH     | None                      |
+| 4  | **Add `Metadata` field to `Item`**                   | 2h     | MEDIUM   | Breaking change decision  |
+| 5  | **Add second provider** (GitLab)                     | 4h     | MEDIUM   | Type model decision       |
+| 6  | **HTTP API** (chi/v5)                                | 2h     | MEDIUM   | None                      |
+| 7  | **Daemon mode** (cron/v3)                            | 1h     | LOW      | None                      |
+| 8  | **Streaming fetch** (channel-based)                  | 1h     | MEDIUM   | None                      |
+| 9  | **ConflictAwareSyncer composition** (stop embedding) | 20m    | LOW      | None                      |
+| 10 | **Extract retry/ratelimit to standalone packages**   | 1h     | LOW      | None                      |
+| 11 | **CLI integration tests**                            | 2h     | MEDIUM   | None                      |
+| 12 | **Event retention/TTL**                              | 1h     | LOW      | None                      |
+| 13 | **Build TUI with Bubble Tea**                        | 2h     | LOW      | None                      |
+| 14 | **Add export to JSON/CSV**                           | 1h     | LOW      | None                      |
+| 15 | **Remote Turso E2E test**                            | 1h     | HIGH     | Needs live Turso instance |
 
 ---
 
@@ -158,48 +158,48 @@
 
 ### Tier 1: Critical (Minutes to 1 Hour)
 
-| #   | Task                                                                             | Est. | Impact                      |
-| --- | -------------------------------------------------------------------------------- | ---- | --------------------------- |
-| 1   | Fix `internal/database/migration.go` lint (noinlineerr ×3, noctx, varnamelen ×3) | 15m  | 12 issues → 0               |
-| 2   | Fix `internal/database/migration_test.go` lint (errcheck ×6, noctx ×4)           | 10m  | 11 issues → 0               |
-| 3   | Install golangci-lint v2                                                         | 2m   | Removes version mismatch    |
-| 4   | Consolidate `ItemID` + `SourceItemID`                                            | 1h   | Removes conversion friction |
-| 5   | Add `config_test.go` for env parsing                                             | 30m  | Tests new config code       |
-| 6   | Fix `pkg/testhelpers/helpers.go` mnd (5000 → const)                              | 2m   | 1 issue                     |
-| 7   | Fix `pkg/providers/github/client.go` funlen                                      | 5m   | 1 issue                     |
+| # | Task                                                                             | Est. | Impact                      |
+| - | -------------------------------------------------------------------------------- | ---- | --------------------------- |
+| 1 | Fix `internal/database/migration.go` lint (noinlineerr ×3, noctx, varnamelen ×3) | 15m  | 12 issues → 0               |
+| 2 | Fix `internal/database/migration_test.go` lint (errcheck ×6, noctx ×4)           | 10m  | 11 issues → 0               |
+| 3 | Install golangci-lint v2                                                         | 2m   | Removes version mismatch    |
+| 4 | Consolidate `ItemID` + `SourceItemID`                                            | 1h   | Removes conversion friction |
+| 5 | Add `config_test.go` for env parsing                                             | 30m  | Tests new config code       |
+| 6 | Fix `pkg/testhelpers/helpers.go` mnd (5000 → const)                              | 2m   | 1 issue                     |
+| 7 | Fix `pkg/providers/github/client.go` funlen                                      | 5m   | 1 issue                     |
 
 ### Tier 2: High Impact (1-4 Hours)
 
-| #   | Task                                              | Est. | Impact                           |
-| --- | ------------------------------------------------- | ---- | -------------------------------- |
-| 8   | Add GitHub Actions CI                             | 2h   | Automated quality gate           |
-| 9   | Resolve Metadata question + implement             | 2h   | Unblocks multi-provider          |
-| 10  | Add GitLab provider                               | 4h   | Validates provider abstraction   |
-| 11  | Add streaming fetch (`FetchStream`)               | 1h   | Memory safety for large datasets |
-| 12  | Fix `ConflictAwareSyncer` embedding → composition | 20m  | Idiomatic Go                     |
-| 13  | Add remote Turso E2E test                         | 1h   | Coverage for sync path           |
-| 14  | Extract retry logic to `pkg/retry`                | 30m  | Reusability                      |
-| 15  | Extract rate limit logic to `pkg/ratelimit`       | 30m  | Reusability                      |
+| #  | Task                                              | Est. | Impact                           |
+| -- | ------------------------------------------------- | ---- | -------------------------------- |
+| 8  | Add GitHub Actions CI                             | 2h   | Automated quality gate           |
+| 9  | Resolve Metadata question + implement             | 2h   | Unblocks multi-provider          |
+| 10 | Add GitLab provider                               | 4h   | Validates provider abstraction   |
+| 11 | Add streaming fetch (`FetchStream`)               | 1h   | Memory safety for large datasets |
+| 12 | Fix `ConflictAwareSyncer` embedding → composition | 20m  | Idiomatic Go                     |
+| 13 | Add remote Turso E2E test                         | 1h   | Coverage for sync path           |
+| 14 | Extract retry logic to `pkg/retry`                | 30m  | Reusability                      |
+| 15 | Extract rate limit logic to `pkg/ratelimit`       | 30m  | Reusability                      |
 
 ### Tier 3: Medium Impact (2-8 Hours)
 
-| #   | Task                                         | Est. | Impact                   |
-| --- | -------------------------------------------- | ---- | ------------------------ |
-| 16  | Add HTTP API (chi/v5)                        | 2h   | Turns SDK into service   |
-| 17  | Add daemon mode (cron/v3)                    | 1h   | Automation               |
-| 18  | CLI integration tests                        | 2h   | Coverage for entry point |
-| 19  | Add event retention/TTL                      | 1h   | Operations               |
-| 20  | Update `CQRS_MIGRATION_PLAN.md` (stale refs) | 15m  | Accuracy                 |
+| #  | Task                                         | Est. | Impact                   |
+| -- | -------------------------------------------- | ---- | ------------------------ |
+| 16 | Add HTTP API (chi/v5)                        | 2h   | Turns SDK into service   |
+| 17 | Add daemon mode (cron/v3)                    | 1h   | Automation               |
+| 18 | CLI integration tests                        | 2h   | Coverage for entry point |
+| 19 | Add event retention/TTL                      | 1h   | Operations               |
+| 20 | Update `CQRS_MIGRATION_PLAN.md` (stale refs) | 15m  | Accuracy                 |
 
 ### Tier 4: Strategic (8+ Hours)
 
-| #   | Task                                                 | Est. | Impact         |
-| --- | ---------------------------------------------------- | ---- | -------------- |
-| 21  | CQRS migration Phase 1 (events, aggregate, commands) | 4h   | Architecture   |
-| 22  | CQRS migration Phase 2 (projection, queries)         | 4h   | Architecture   |
-| 23  | CQRS migration Phase 3 (wire sync, update tests)     | 4h   | Architecture   |
-| 24  | Build TUI with Bubble Tea                            | 2h   | UX             |
-| 25  | Resolve testify vs pre-commit hooks                  | 4h   | Unblocks hooks |
+| #  | Task                                                 | Est. | Impact         |
+| -- | ---------------------------------------------------- | ---- | -------------- |
+| 21 | CQRS migration Phase 1 (events, aggregate, commands) | 4h   | Architecture   |
+| 22 | CQRS migration Phase 2 (projection, queries)         | 4h   | Architecture   |
+| 23 | CQRS migration Phase 3 (wire sync, update tests)     | 4h   | Architecture   |
+| 24 | Build TUI with Bubble Tea                            | 2h   | UX             |
+| 25 | Resolve testify vs pre-commit hooks                  | 4h   | Unblocks hooks |
 
 ---
 

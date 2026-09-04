@@ -172,33 +172,33 @@ The entire `otel/v3` module (~11 files) is vendored but produces zero spans/metr
 
 Sorted by **impact ↑ / effort ↓** (Pareto).
 
-| #   | Task                                                                           | Impact      | Effort        | Why                                                                           |
-| --- | ------------------------------------------------------------------------------ | ----------- | ------------- | ----------------------------------------------------------------------------- |
-| 1   | **Wire OpenTelemetry instrumentation** (`otel/v3` is vendored, unused)         | 🔴 Critical | 4-8h          | Biggest feature gap. Production debugging needs spans.                        |
-| 2   | **Make `go-cqrs-lite` public**                                                 | 🔴 Critical | 1h (external) | Eliminates entire vendor-pollution class of bugs + enables real `vendorHash`. |
-| 3   | **Add API authentication middleware** (API key / JWT)                          | 🔴 High     | 4h            | API is unauthenticated — not safe to expose.                                  |
-| 4   | **Add `gosec` + `govulncheck` to CI**                                          | 🔴 High     | 2h            | Supply-chain scanning for a pure library SDK.                                 |
-| 5   | **Fix pre-commit hook OOM** (exclude vendor from buildflow formatters)         | 🟠 High     | 1h            | Removes `--no-verify` workaround fragility.                                   |
-| 6   | **API rate limiting middleware** (`golang.org/x/time/rate`)                    | 🟠 High     | 3h            | Protect `POST /sync` from abuse.                                              |
-| 7   | **API pagination headers** (`X-Total-Count`, cursor)                           | 🟠 High     | 3h            | Standard API ergonomics.                                                      |
-| 8   | **Decide + implement observability strategy** (SDK-built-in vs consumer-wraps) | 🟠 High     | 1h design     | Blocks #1. Architectural fork.                                                |
-| 9   | **`encoding/json` v1 → v2 migration** (10 files, once v2 stable)               | 🟡 Medium   | 4h            | Policy compliance, perf.                                                      |
-| 10  | **Improve `pkg/cqrs` coverage** (82% → 90%+)                                   | 🟡 Medium   | 4h            | Lowest-coverage core package.                                                 |
-| 11  | **Adopt `UpcasterRegistry`** for schema evolution                              | 🟡 Medium   | 3h            | Foundation exists; no actual upcasting.                                       |
-| 12  | **Structured logging fields consistency** (source, page, event_id)             | 🟡 Medium   | 2h            | Log spelunking is hard without consistent fields.                             |
-| 13  | **Conflict resolution per-sync override** (`SyncOptions.ConflictResolver`)     | 🟡 Medium   | 2h            | Currently only `CQRSConfig`-level.                                            |
-| 14  | **Add `govalid` struct tags** to `SyncOptions`, `CQRSConfig`                   | 🟡 Medium   | 1h            | Zero-alloc validation at boundaries.                                          |
-| 15  | **Evaluate `projectionhost/v3`** to replace hand-rolled `replayJournal`        | 🟡 Medium   | 4-8h          | Adds crash-restart, checkpoint, DLQ. Needs ADR.                               |
-| 16  | **Fix/remove `gopkg.in/yaml.v3` transitive dep**                               | 🟡 Medium   | 2h            | Banned lib in dep graph.                                                      |
-| 17  | **Test `pkg/testutil`** (currently 0% coverage)                                | 🟢 Low      | 2h            | Test helpers should be tested.                                                |
-| 18  | **API OpenAPI spec enhancement** (error response schemas per endpoint)         | 🟢 Low      | 2h            | Better consumer DX.                                                           |
-| 19  | **Data export** (JSON/CSV of stored events)                                    | 🟢 Low      | 4h            | Analysis in external tools.                                                   |
-| 20  | **Improve `CONTRIBUTING.md`** (architecture guide, conventions)                | 🟢 Low      | 2h            | Onboarding.                                                                   |
-| 21  | **Fix `go mod tidy` (nested eventtest module) or upstream**                    | 🟢 Low      | 3h            | Vendor management friction.                                                   |
-| 22  | **Write ADR for observability decision**                                       | 🟢 Low      | 1h            | Records the fork decision for #8.                                             |
-| 23  | **Add `Scenario/v3` BDD tests** if compatible                                  | 🟢 Low      | 4h            | DecideFunc DSL may not fit curried pattern.                                   |
-| 24  | **Event retention/TTL**                                                        | 🟢 Low      | 6h            | Auto-cleanup of old events.                                                   |
-| 25  | **Multi-user sync support**                                                    | 🟢 Low      | 8h+           | Out of current scope; revisit if needed.                                      |
+| #  | Task                                                                           | Impact      | Effort        | Why                                                                           |
+| -- | ------------------------------------------------------------------------------ | ----------- | ------------- | ----------------------------------------------------------------------------- |
+| 1  | **Wire OpenTelemetry instrumentation** (`otel/v3` is vendored, unused)         | 🔴 Critical | 4-8h          | Biggest feature gap. Production debugging needs spans.                        |
+| 2  | **Make `go-cqrs-lite` public**                                                 | 🔴 Critical | 1h (external) | Eliminates entire vendor-pollution class of bugs + enables real `vendorHash`. |
+| 3  | **Add API authentication middleware** (API key / JWT)                          | 🔴 High     | 4h            | API is unauthenticated — not safe to expose.                                  |
+| 4  | **Add `gosec` + `govulncheck` to CI**                                          | 🔴 High     | 2h            | Supply-chain scanning for a pure library SDK.                                 |
+| 5  | **Fix pre-commit hook OOM** (exclude vendor from buildflow formatters)         | 🟠 High     | 1h            | Removes `--no-verify` workaround fragility.                                   |
+| 6  | **API rate limiting middleware** (`golang.org/x/time/rate`)                    | 🟠 High     | 3h            | Protect `POST /sync` from abuse.                                              |
+| 7  | **API pagination headers** (`X-Total-Count`, cursor)                           | 🟠 High     | 3h            | Standard API ergonomics.                                                      |
+| 8  | **Decide + implement observability strategy** (SDK-built-in vs consumer-wraps) | 🟠 High     | 1h design     | Blocks #1. Architectural fork.                                                |
+| 9  | **`encoding/json` v1 → v2 migration** (10 files, once v2 stable)               | 🟡 Medium   | 4h            | Policy compliance, perf.                                                      |
+| 10 | **Improve `pkg/cqrs` coverage** (82% → 90%+)                                   | 🟡 Medium   | 4h            | Lowest-coverage core package.                                                 |
+| 11 | **Adopt `UpcasterRegistry`** for schema evolution                              | 🟡 Medium   | 3h            | Foundation exists; no actual upcasting.                                       |
+| 12 | **Structured logging fields consistency** (source, page, event_id)             | 🟡 Medium   | 2h            | Log spelunking is hard without consistent fields.                             |
+| 13 | **Conflict resolution per-sync override** (`SyncOptions.ConflictResolver`)     | 🟡 Medium   | 2h            | Currently only `CQRSConfig`-level.                                            |
+| 14 | **Add `govalid` struct tags** to `SyncOptions`, `CQRSConfig`                   | 🟡 Medium   | 1h            | Zero-alloc validation at boundaries.                                          |
+| 15 | **Evaluate `projectionhost/v3`** to replace hand-rolled `replayJournal`        | 🟡 Medium   | 4-8h          | Adds crash-restart, checkpoint, DLQ. Needs ADR.                               |
+| 16 | **Fix/remove `gopkg.in/yaml.v3` transitive dep**                               | 🟡 Medium   | 2h            | Banned lib in dep graph.                                                      |
+| 17 | **Test `pkg/testutil`** (currently 0% coverage)                                | 🟢 Low      | 2h            | Test helpers should be tested.                                                |
+| 18 | **API OpenAPI spec enhancement** (error response schemas per endpoint)         | 🟢 Low      | 2h            | Better consumer DX.                                                           |
+| 19 | **Data export** (JSON/CSV of stored events)                                    | 🟢 Low      | 4h            | Analysis in external tools.                                                   |
+| 20 | **Improve `CONTRIBUTING.md`** (architecture guide, conventions)                | 🟢 Low      | 2h            | Onboarding.                                                                   |
+| 21 | **Fix `go mod tidy` (nested eventtest module) or upstream**                    | 🟢 Low      | 3h            | Vendor management friction.                                                   |
+| 22 | **Write ADR for observability decision**                                       | 🟢 Low      | 1h            | Records the fork decision for #8.                                             |
+| 23 | **Add `Scenario/v3` BDD tests** if compatible                                  | 🟢 Low      | 4h            | DecideFunc DSL may not fit curried pattern.                                   |
+| 24 | **Event retention/TTL**                                                        | 🟢 Low      | 6h            | Auto-cleanup of old events.                                                   |
+| 25 | **Multi-user sync support**                                                    | 🟢 Low      | 8h+           | Out of current scope; revisit if needed.                                      |
 
 ---
 

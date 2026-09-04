@@ -126,53 +126,53 @@ The project is in **strong shape**: 86.9% overall coverage, 0 lint issues, clean
 
 ### Priority 1 — Quick Wins (under 30 min each)
 
-| #   | Item                                                                                     | Impact       | Effort | Risk |
-| --- | ---------------------------------------------------------------------------------------- | ------------ | ------ | ---- |
-| 1   | Remove `CQRSStack.GetTypes` duplicate method                                             | Clean        | 5 min  | None |
-| 2   | Add doc comments to `pkg/id/ids.go` exports                                              | Docs         | 10 min | None |
-| 3   | Add doc comments to `pkg/errors/errors.go` sentinels                                     | Docs         | 10 min | None |
-| 4   | Test `mapSyncError()` — table-driven, all 6 mappings                                     | Coverage     | 15 min | None |
-| 5   | Test SyncIncremental source filter in mock                                               | Verification | 15 min | None |
-| 6   | Add `NewItemFilter()` constructor with sensible defaults                                 | DX           | 10 min | None |
-| 7   | Verify `ConflictAwareSyncer` handles `ActionConflictLocal` correctly in integration test | Coverage     | 15 min | None |
+| # | Item                                                                                     | Impact       | Effort | Risk |
+| - | ---------------------------------------------------------------------------------------- | ------------ | ------ | ---- |
+| 1 | Remove `CQRSStack.GetTypes` duplicate method                                             | Clean        | 5 min  | None |
+| 2 | Add doc comments to `pkg/id/ids.go` exports                                              | Docs         | 10 min | None |
+| 3 | Add doc comments to `pkg/errors/errors.go` sentinels                                     | Docs         | 10 min | None |
+| 4 | Test `mapSyncError()` — table-driven, all 6 mappings                                     | Coverage     | 15 min | None |
+| 5 | Test SyncIncremental source filter in mock                                               | Verification | 15 min | None |
+| 6 | Add `NewItemFilter()` constructor with sensible defaults                                 | DX           | 10 min | None |
+| 7 | Verify `ConflictAwareSyncer` handles `ActionConflictLocal` correctly in integration test | Coverage     | 15 min | None |
 
 ### Priority 2 — Code Quality (1-2 hours each)
 
-| #   | Item                                                                | Impact          | Effort | Risk |
-| --- | ------------------------------------------------------------------- | --------------- | ------ | ---- |
-| 8   | Split `pkg/cqrs/stack.go` (396→~150 lines per file)                 | Maintainability | 1 hr   | Low  |
-| 9   | Split `pkg/providers/github/client.go` (387→~80 lines per file)     | Maintainability | 1 hr   | Low  |
-| 10  | Extract shared `testutil` package with `TestItem()`                 | DRY             | 45 min | Low  |
-| 11  | Add `--conflict-strategy` CLI flag to `github-sync`                 | UX              | 1 hr   | Low  |
-| 12  | Add integration test: stack with custom resolver → read model state | Confidence      | 30 min | None |
+| #  | Item                                                                | Impact          | Effort | Risk |
+| -- | ------------------------------------------------------------------- | --------------- | ------ | ---- |
+| 8  | Split `pkg/cqrs/stack.go` (396→~150 lines per file)                 | Maintainability | 1 hr   | Low  |
+| 9  | Split `pkg/providers/github/client.go` (387→~80 lines per file)     | Maintainability | 1 hr   | Low  |
+| 10 | Extract shared `testutil` package with `TestItem()`                 | DRY             | 45 min | Low  |
+| 11 | Add `--conflict-strategy` CLI flag to `github-sync`                 | UX              | 1 hr   | Low  |
+| 12 | Add integration test: stack with custom resolver → read model state | Confidence      | 30 min | None |
 
 ### Priority 3 — Strategic Unblocking (2-4 hours)
 
-| #   | Item                                                                     | Impact                  | Effort | Risk   |
-| --- | ------------------------------------------------------------------------ | ----------------------- | ------ | ------ |
-| 13  | Resolve go-cqrs-lite upstream WIP (commit or stash)                      | **Unblocks everything** | 2-4 hr | Medium |
-| 14  | Wire vector clocks into `Conflict` from aggregate state                  | Correctness             | 3 hr   | Medium |
-| 15  | Add `ConflictResolver` to `SyncOptions` (per-sync override)              | Flexibility             | 2 hr   | Low    |
-| 16  | Document CRDT integration in `doc.go` with usage examples                | DX                      | 1 hr   | None   |
-| 17  | Add `pkg/crdt/example_test.go` showing LWWResolver with `*provider.Item` | DX                      | 30 min | None   |
+| #  | Item                                                                     | Impact                  | Effort | Risk   |
+| -- | ------------------------------------------------------------------------ | ----------------------- | ------ | ------ |
+| 13 | Resolve go-cqrs-lite upstream WIP (commit or stash)                      | **Unblocks everything** | 2-4 hr | Medium |
+| 14 | Wire vector clocks into `Conflict` from aggregate state                  | Correctness             | 3 hr   | Medium |
+| 15 | Add `ConflictResolver` to `SyncOptions` (per-sync override)              | Flexibility             | 2 hr   | Low    |
+| 16 | Document CRDT integration in `doc.go` with usage examples                | DX                      | 1 hr   | None   |
+| 17 | Add `pkg/crdt/example_test.go` showing LWWResolver with `*provider.Item` | DX                      | 30 min | None   |
 
 ### Priority 4 — Feature Development (1+ days)
 
-| #   | Item                                                                        | Impact        | Effort   | Risk   |
-| --- | --------------------------------------------------------------------------- | ------------- | -------- | ------ |
-| 18  | Implement second provider (GitLab or file-system) to validate interface     | Architecture  | 2-3 days | Medium |
-| 19  | Branch lifecycle projection (`event.Projection` from `ItemSynced`)          | Integration   | 1-2 days | Low    |
-| 20  | github-local-sync Phase 2 migration to CQRS                                 | Product       | 3-5 days | High   |
-| 21  | OpenTelemetry instrumentation (Syncer, CQRSStack, HTTP middleware)          | Observability | 2-3 days | Low    |
-| 22  | Real-time sync protocol using `SyncRequest`/`SyncResponse` from `pkg/crdt/` | Feature       | 3-5 days | High   |
+| #  | Item                                                                        | Impact        | Effort   | Risk   |
+| -- | --------------------------------------------------------------------------- | ------------- | -------- | ------ |
+| 18 | Implement second provider (GitLab or file-system) to validate interface     | Architecture  | 2-3 days | Medium |
+| 19 | Branch lifecycle projection (`event.Projection` from `ItemSynced`)          | Integration   | 1-2 days | Low    |
+| 20 | github-local-sync Phase 2 migration to CQRS                                 | Product       | 3-5 days | High   |
+| 21 | OpenTelemetry instrumentation (Syncer, CQRSStack, HTTP middleware)          | Observability | 2-3 days | Low    |
+| 22 | Real-time sync protocol using `SyncRequest`/`SyncResponse` from `pkg/crdt/` | Feature       | 3-5 days | High   |
 
 ### Priority 5 — Polish & Production
 
-| #   | Item                                             | Impact     | Effort | Risk |
-| --- | ------------------------------------------------ | ---------- | ------ | ---- |
-| 23  | CI pipeline: build + test + lint + coverage gate | Quality    | 4 hr   | Low  |
-| 24  | Performance benchmarks for sync with 10k+ items  | Confidence | 2 hr   | None |
-| 25  | API authentication middleware (API key or JWT)   | Security   | 1 day  | Low  |
+| #  | Item                                             | Impact     | Effort | Risk |
+| -- | ------------------------------------------------ | ---------- | ------ | ---- |
+| 23 | CI pipeline: build + test + lint + coverage gate | Quality    | 4 hr   | Low  |
+| 24 | Performance benchmarks for sync with 10k+ items  | Confidence | 2 hr   | None |
+| 25 | API authentication middleware (API key or JWT)   | Security   | 1 day  | Low  |
 
 ---
 
@@ -192,39 +192,39 @@ This matters because it determines whether we invest in the projection-based bra
 
 ## Test Coverage Summary
 
-| Package                | Tests   | Coverage  | Status                 |
-| ---------------------- | ------- | --------- | ---------------------- |
-| `pkg/errors`           | 11      | 100.0%    | ✅                     |
-| `pkg/id`               | 10      | 100.0%    | ✅                     |
-| `pkg/provider`         | 2       | 100.0%    | ✅                     |
-| `pkg/crdt`             | 52      | 97.6%     | ✅                     |
-| `pkg/sync`             | 22      | 91.7%     | ✅                     |
-| `pkg/providers/github` | 32      | 84.6%     | ✅                     |
-| `pkg/cqrs`             | 92      | 83.8%     | ✅                     |
-| `pkg/api`              | 8       | 76.3%     | ✅                     |
+| Package                | Tests   | Coverage  | Status                |
+| ---------------------- | ------- | --------- | --------------------- |
+| `pkg/errors`           | 11      | 100.0%    | ✅                    |
+| `pkg/id`               | 10      | 100.0%    | ✅                    |
+| `pkg/provider`         | 2       | 100.0%    | ✅                    |
+| `pkg/crdt`             | 52      | 97.6%     | ✅                    |
+| `pkg/sync`             | 22      | 91.7%     | ✅                    |
+| `pkg/providers/github` | 32      | 84.6%     | ✅                    |
+| `pkg/cqrs`             | 92      | 83.8%     | ✅                    |
+| `pkg/api`              | 8       | 76.3%     | ✅                    |
 | `cmd/examples`         | 14      | ~10%      | ⚠️ Blocked by upstream |
-| **Total**              | **235** | **86.9%** | ✅                     |
+| **Total**              | **235** | **86.9%** | ✅                    |
 
 ## File Size Watch
 
-| File                             | Lines | Status            |
-| -------------------------------- | ----- | ----------------- |
+| File                             | Lines | Status           |
+| -------------------------------- | ----- | ---------------- |
 | `pkg/cqrs/stack.go`              | 396   | ⚠️ Over 350 limit |
 | `pkg/providers/github/client.go` | 387   | ⚠️ Over 350 limit |
-| `pkg/sync/sync.go`               | 348   | ✅ Under limit    |
-| `pkg/api/server.go`              | 280   | ✅                |
-| `pkg/cqrs/decider.go`            | 262   | ✅                |
+| `pkg/sync/sync.go`               | 348   | ✅ Under limit   |
+| `pkg/api/server.go`              | 280   | ✅               |
+| `pkg/cqrs/decider.go`            | 262   | ✅               |
 
 ## Dependency Health
 
-| Dependency                | Version | Status                               |
-| ------------------------- | ------- | ------------------------------------ |
-| `go-cqrs-lite/core`       | v1.4.0  | ✅ (but local WIP is dirty)          |
-| `go-cqrs-lite/memory`     | v1.2.0  | ✅                                   |
+| Dependency                | Version | Status                              |
+| ------------------------- | ------- | ----------------------------------- |
+| `go-cqrs-lite/core`       | v1.4.0  | ✅ (but local WIP is dirty)         |
+| `go-cqrs-lite/memory`     | v1.2.0  | ✅                                  |
 | `go-cqrs-lite/storage`    | pseudo  | ⚠️ Uncommitted WIP blocks cmd/ build |
-| `go-cqrs-lite/middleware` | v1.0.0  | ✅                                   |
-| `go-cqrs-lite/projection` | v1.1.0  | ✅                                   |
-| `go-branded-id`           | v0.1.0  | ✅                                   |
-| `go-error-family`         | v0.2.0  | ✅                                   |
-| `go-github/v69`           | v69.2.0 | ✅                                   |
-| `huma/v2`                 | v2.38.0 | ✅                                   |
+| `go-cqrs-lite/middleware` | v1.0.0  | ✅                                  |
+| `go-cqrs-lite/projection` | v1.1.0  | ✅                                  |
+| `go-branded-id`           | v0.1.0  | ✅                                  |
+| `go-error-family`         | v0.2.0  | ✅                                  |
+| `go-github/v69`           | v69.2.0 | ✅                                  |
+| `huma/v2`                 | v2.38.0 | ✅                                  |

@@ -1,8 +1,8 @@
 # SUPERB Data Module — Pareto Execution Plan
 
-**Project:** go-localsync  
-**Date:** 2026-06-05  
-**Goal:** Transform `pkg/data/` from a "good first draft" into a superb, production-grade data layer.  
+**Project:** go-localsync\
+**Date:** 2026-06-05\
+**Goal:** Transform `pkg/data/` from a "good first draft" into a superb, production-grade data layer.\
 **Status:** pkg/data/ exists (11 files, ~800 lines) but has compilation errors, no tests, and doesn't integrate with CQRS.
 
 ---
@@ -26,12 +26,12 @@ This plan applies the Pareto principle to deliver maximum impact in minimum time
 
 Without these, nothing else matters. The module doesn't compile, so it can't be used.
 
-| #   | Task                                       | Impact   | Why It's 1%                                                                                                                   |
-| --- | ------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Fix pkg/data/model/ compilation errors** | BLOCKING | Key type not visible across files, schema package import fails, error references undefined. Module is literally broken.       |
-| 2   | **Add comprehensive tests for pkg/data/**  | CRITICAL | Zero tests = zero confidence. Generics are easy to get wrong. Need tests for Criterion, Query, Mapper, Page, Key, Item, View. |
+| # | Task                                       | Impact   | Why It's 1%                                                                                                                   |
+| - | ------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **Fix pkg/data/model/ compilation errors** | BLOCKING | Key type not visible across files, schema package import fails, error references undefined. Module is literally broken.       |
+| 2 | **Add comprehensive tests for pkg/data/**  | CRITICAL | Zero tests = zero confidence. Generics are easy to get wrong. Need tests for Criterion, Query, Mapper, Page, Key, Item, View. |
 
-**Time estimate:** 90 minutes  
+**Time estimate:** 90 minutes\
 **Result:** Module compiles. Tests pass. We can iterate.
 
 ---
@@ -40,15 +40,15 @@ Without these, nothing else matters. The module doesn't compile, so it can't be 
 
 These make the module actually usable within the system. Without integration, it's dead code.
 
-| #   | Task                                         | Impact | Why It's in the 4%                                                                                                                              |
-| --- | -------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 3   | **Wire data.Item into CQRS decider**         | HIGH   | Replace `provider.Item` with `data.Item` in `SyncItemState`, `Fold`, `DecideSync`, events. This is the single most important integration point. |
-| 4   | **Update event payloads with SchemaVersion** | HIGH   | Add `SchemaVersion` field to `ItemSyncedPayload`. Enable forward-compatible event replay.                                                       |
-| 5   | **Update read models to return data types**  | HIGH   | `MemoryReadModel` and `SQLiteReadModel` return `*data.ItemView` instead of `*provider.Item`.                                                    |
-| 6   | **Update API to use data DTOs**              | MEDIUM | `api.Server` returns API-specific DTOs instead of exposing `*provider.Item` directly.                                                           |
-| 7   | **Update sync engine to use data types**     | MEDIUM | `SyncStore` interface and `Syncer` work with `data.Item` and `data.ItemFilter` (or `data.Query`).                                               |
+| # | Task                                         | Impact | Why It's in the 4%                                                                                                                              |
+| - | -------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 3 | **Wire data.Item into CQRS decider**         | HIGH   | Replace `provider.Item` with `data.Item` in `SyncItemState`, `Fold`, `DecideSync`, events. This is the single most important integration point. |
+| 4 | **Update event payloads with SchemaVersion** | HIGH   | Add `SchemaVersion` field to `ItemSyncedPayload`. Enable forward-compatible event replay.                                                       |
+| 5 | **Update read models to return data types**  | HIGH   | `MemoryReadModel` and `SQLiteReadModel` return `*data.ItemView` instead of `*provider.Item`.                                                    |
+| 6 | **Update API to use data DTOs**              | MEDIUM | `api.Server` returns API-specific DTOs instead of exposing `*provider.Item` directly.                                                           |
+| 7 | **Update sync engine to use data types**     | MEDIUM | `SyncStore` interface and `Syncer` work with `data.Item` and `data.ItemFilter` (or `data.Query`).                                               |
 
-**Time estimate:** 180 minutes  
+**Time estimate:** 180 minutes\
 **Result:** Data module is fully wired. CQRS, API, sync engine all use it.
 
 ---
@@ -57,31 +57,31 @@ These make the module actually usable within the system. Without integration, it
 
 These elevate from "works" to "superb" by adopting proven patterns from go-cqrs-lite instead of reinventing them.
 
-| #   | Task                                                  | Impact | Why It's in the 20%                                                                                              |
-| --- | ----------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
-| 8   | **Adopt go-cqrs-lite/sql.Dialect for queries**        | HIGH   | Replace SQL string concat with type-safe dialect-aware compilation. Enables PostgreSQL support.                  |
-| 9   | **Adopt cursor-based pagination**                     | HIGH   | Replace limit/offset with `After` cursor + `uint` limit. Correct for append-only stores.                         |
-| 10  | **Adopt go-cqrs-lite/schema.Upcaster**                | HIGH   | Wire upcasters into event replay pipeline. Forward-compatible event migration.                                   |
-| 11  | **Replace Observable with MetricsRecorder decorator** | MEDIUM | Use go-cqrs-lite's `middleware.MetricsRecorder` interface. Real observability.                                   |
-| 12  | **Add BatchMapper for sync performance**              | MEDIUM | Pre-allocated batch transformations. 10,000 items without 10,000 allocations.                                    |
-| 13  | **Add UnitOfWork for atomic writes**                  | MEDIUM | Coordinate event store + read model writes atomically. Prevents inconsistency on crash.                          |
-| 14  | **Eliminate getter methods with struct tags**         | LOW    | 14 accessor methods (`GetSource`, `GetType`, etc.) are pure boilerplate. Replace with struct tags + go:generate. |
+| #  | Task                                                  | Impact | Why It's in the 20%                                                                                              |
+| -- | ----------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| 8  | **Adopt go-cqrs-lite/sql.Dialect for queries**        | HIGH   | Replace SQL string concat with type-safe dialect-aware compilation. Enables PostgreSQL support.                  |
+| 9  | **Adopt cursor-based pagination**                     | HIGH   | Replace limit/offset with `After` cursor + `uint` limit. Correct for append-only stores.                         |
+| 10 | **Adopt go-cqrs-lite/schema.Upcaster**                | HIGH   | Wire upcasters into event replay pipeline. Forward-compatible event migration.                                   |
+| 11 | **Replace Observable with MetricsRecorder decorator** | MEDIUM | Use go-cqrs-lite's `middleware.MetricsRecorder` interface. Real observability.                                   |
+| 12 | **Add BatchMapper for sync performance**              | MEDIUM | Pre-allocated batch transformations. 10,000 items without 10,000 allocations.                                    |
+| 13 | **Add UnitOfWork for atomic writes**                  | MEDIUM | Coordinate event store + read model writes atomically. Prevents inconsistency on crash.                          |
+| 14 | **Eliminate getter methods with struct tags**         | LOW    | 14 accessor methods (`GetSource`, `GetType`, etc.) are pure boilerplate. Replace with struct tags + go:generate. |
 
-**Time estimate:** 300 minutes  
+**Time estimate:** 300 minutes\
 **Result:** Module matches go-cqrs-lite quality standards. Production-ready.
 
 ---
 
 ### The Remaining 80% → 100% (Polish)
 
-| #   | Task                                                            | Impact |
-| --- | --------------------------------------------------------------- | ------ |
-| 15  | **Performance benchmarks for query DSL**                        | LOW    |
-| 16  | **Property-based tests (fuzzing) for Criterion combinators**    | LOW    |
-| 17  | **Query plan optimization (reorder criteria by selectivity)**   | LOW    |
-| 18  | **Soft-delete / tombstone support matching go-cqrs-lite/event** | LOW    |
-| 19  | **Cache decorator with TTL**                                    | LOW    |
-| 20  | **Multi-tenant query isolation**                                | LOW    |
+| #  | Task                                                            | Impact |
+| -- | --------------------------------------------------------------- | ------ |
+| 15 | **Performance benchmarks for query DSL**                        | LOW    |
+| 16 | **Property-based tests (fuzzing) for Criterion combinators**    | LOW    |
+| 17 | **Query plan optimization (reorder criteria by selectivity)**   | LOW    |
+| 18 | **Soft-delete / tombstone support matching go-cqrs-lite/event** | LOW    |
+| 19 | **Cache decorator with TTL**                                    | LOW    |
+| 20 | **Multi-tenant query isolation**                                | LOW    |
 
 ---
 
@@ -115,14 +115,14 @@ These elevate from "works" to "superb" by adopting proven patterns from go-cqrs-
 
 ### Phase 1: Fix Compilation (Foundation)
 
-| #   | Task                                                                                | Est.  | Parent |
-| --- | ----------------------------------------------------------------------------------- | ----- | ------ |
-| F1  | Move Key type definition before Item in item.go (or into key.go with proper export) | 10min | M1     |
-| F2  | Fix schema.Version import in model/item.go — ensure pkg/data/schema compiles first  | 10min | M1     |
-| F3  | Fix error reference in model/item.go (errMissingExternalID etc. from errors.go)     | 10min | M1     |
-| F4  | Fix model/view.go id import and embedded field access                               | 10min | M1     |
-| F5  | Verify `go build ./pkg/data/...` compiles cleanly                                   | 10min | M1     |
-| F6  | Run `go test ./pkg/data/...` — should compile but have no test files yet            | 5min  | M1     |
+| #  | Task                                                                                | Est.  | Parent |
+| -- | ----------------------------------------------------------------------------------- | ----- | ------ |
+| F1 | Move Key type definition before Item in item.go (or into key.go with proper export) | 10min | M1     |
+| F2 | Fix schema.Version import in model/item.go — ensure pkg/data/schema compiles first  | 10min | M1     |
+| F3 | Fix error reference in model/item.go (errMissingExternalID etc. from errors.go)     | 10min | M1     |
+| F4 | Fix model/view.go id import and embedded field access                               | 10min | M1     |
+| F5 | Verify `go build ./pkg/data/...` compiles cleanly                                   | 10min | M1     |
+| F6 | Run `go test ./pkg/data/...` — should compile but have no test files yet            | 5min  | M1     |
 
 ### Phase 2: Model Tests (Validation)
 

@@ -1,69 +1,69 @@
 # Comprehensive Session Status Report
 
-**Date:** 2026-05-28 09:59 CEST  
-**Session:** Brutal Self-Review + Execution Sprint  
-**Branch:** master (8 commits ahead of origin)  
-**Total LOC:** ~9,735  
-**Total Tests:** 222 test functions across 8 packages  
-**Overall Coverage:** 74.5% statements  
+**Date:** 2026-05-28 09:59 CEST\
+**Session:** Brutal Self-Review + Execution Sprint\
+**Branch:** master (8 commits ahead of origin)\
+**Total LOC:** ~9,735\
+**Total Tests:** 222 test functions across 8 packages\
+**Overall Coverage:** 74.5% statements\
 **Lint:** golangci-lint 0 issues (project-level); pre-commit hooks pass
 
 ---
 
 ## a) FULLY DONE ✅
 
-| #   | Task                                                    | Commit    | Details                                                                                                                             |
-| --- | ------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Comprehensive test coverage sprint**                  | 640d17b   | +24 tests: SyncIncremental, GetStats error paths, ConflictAwareSyncer edge cases, Syncer.Close, provider.Item validation edge cases |
-| 2   | **`-json` CLI flag**                                    | 640d17b   | Structured JSON output for `-stats`, `-conflict-aware`, and regular sync results                                                    |
-| 3   | **ItemFilter builder pattern**                          | 640d17b   | `WithType`, `WithActorLogin`, `WithRepoName`, `WithSource`, `WithSince`, `WithLimit`, `WithOffset`                                  |
-| 4   | **`IsRetryable` test coverage**                         | (amended) | `pkg/errors` now at **100%** coverage (was 94.4%)                                                                                   |
-| 5   | **Rename `pkg/localsync` → `pkg/crdt`**                 | c66e4b1   | Honest naming: the package contains CRDT primitives (VectorClock, Operation, LWWResolver, ConflictResolver)                         |
-| 6   | **Merge `pkg/crdt` sub-module into main module**        | 2069d60   | Eliminated `go-error-family v0.1.0` vs `v0.2.0` split-brain                                                                         |
-| 7   | **Fix stale `pkg/types` → `pkg/id` references in docs** | 2069d60   | FEATURES.md, README.md, AGENTS.md, TODO_LIST.md, DOMAIN_LANGUAGE.md                                                                 |
-| 8   | **Migrate `event.GlobalLoader` → `event.Journal`**      | 6fe29b4   | Updated for upstream go-cqrs-lite/core API change                                                                                   |
-| 9   | **Fix `noinlineerr` lint in crdt tests**                | fe71413   | `operation_test.go:145`                                                                                                             |
-| 10  | **Document `newSlogLogger` purpose**                    | 640d17b   | Added doc comment in `pkg/cqrs/stack.go`                                                                                            |
-| 11  | **`printVersion` helper + test**                        | 640d17b   | Extracted version printing for testability                                                                                          |
+| #  | Task                                                    | Commit    | Details                                                                                                                             |
+| -- | ------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1  | **Comprehensive test coverage sprint**                  | 640d17b   | +24 tests: SyncIncremental, GetStats error paths, ConflictAwareSyncer edge cases, Syncer.Close, provider.Item validation edge cases |
+| 2  | **`-json` CLI flag**                                    | 640d17b   | Structured JSON output for `-stats`, `-conflict-aware`, and regular sync results                                                    |
+| 3  | **ItemFilter builder pattern**                          | 640d17b   | `WithType`, `WithActorLogin`, `WithRepoName`, `WithSource`, `WithSince`, `WithLimit`, `WithOffset`                                  |
+| 4  | **`IsRetryable` test coverage**                         | (amended) | `pkg/errors` now at **100%** coverage (was 94.4%)                                                                                   |
+| 5  | **Rename `pkg/localsync` → `pkg/crdt`**                 | c66e4b1   | Honest naming: the package contains CRDT primitives (VectorClock, Operation, LWWResolver, ConflictResolver)                         |
+| 6  | **Merge `pkg/crdt` sub-module into main module**        | 2069d60   | Eliminated `go-error-family v0.1.0` vs `v0.2.0` split-brain                                                                         |
+| 7  | **Fix stale `pkg/types` → `pkg/id` references in docs** | 2069d60   | FEATURES.md, README.md, AGENTS.md, TODO_LIST.md, DOMAIN_LANGUAGE.md                                                                 |
+| 8  | **Migrate `event.GlobalLoader` → `event.Journal`**      | 6fe29b4   | Updated for upstream go-cqrs-lite/core API change                                                                                   |
+| 9  | **Fix `noinlineerr` lint in crdt tests**                | fe71413   | `operation_test.go:145`                                                                                                             |
+| 10 | **Document `newSlogLogger` purpose**                    | 640d17b   | Added doc comment in `pkg/cqrs/stack.go`                                                                                            |
+| 11 | **`printVersion` helper + test**                        | 640d17b   | Extracted version printing for testability                                                                                          |
 
 ---
 
 ## b) PARTIALLY DONE 🟡
 
-| #   | Task                          | Status      | Blocker                                                                                                                                                |
-| --- | ----------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | **Exhaustruct warnings**      | PARTIAL     | `ItemFilter{}` bare struct literals still used in `pkg/sync/sync.go:144` and `pkg/cqrs/stack.go:288`. Builder pattern exists but old code not migrated |
-| 2   | **CRDT integration**          | NOT STARTED | `pkg/crdt` renamed but still **zero imports** from other packages. `ConflictAwareSyncer` doesn't use `LWWResolver` or vector clocks                    |
-| 3   | **HTTP API**                  | NOT STARTED | No REST/gRPC endpoint exists. Huma + stdlib is the recommended stack per `how-to-golang` skill                                                         |
-| 4   | **OpenTelemetry tracing**     | NOT STARTED | `how-to-golang` says "from day one" but no instrumentation exists                                                                                      |
-| 5   | **`docs/DOMAIN_LANGUAGE.md`** | TEMPLATE    | File exists but contains only placeholder terms. No actual domain vocabulary defined                                                                   |
+| # | Task                          | Status      | Blocker                                                                                                                                                |
+| - | ----------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1 | **Exhaustruct warnings**      | PARTIAL     | `ItemFilter{}` bare struct literals still used in `pkg/sync/sync.go:144` and `pkg/cqrs/stack.go:288`. Builder pattern exists but old code not migrated |
+| 2 | **CRDT integration**          | NOT STARTED | `pkg/crdt` renamed but still **zero imports** from other packages. `ConflictAwareSyncer` doesn't use `LWWResolver` or vector clocks                    |
+| 3 | **HTTP API**                  | NOT STARTED | No REST/gRPC endpoint exists. Huma + stdlib is the recommended stack per `how-to-golang` skill                                                         |
+| 4 | **OpenTelemetry tracing**     | NOT STARTED | `how-to-golang` says "from day one" but no instrumentation exists                                                                                      |
+| 5 | **`docs/DOMAIN_LANGUAGE.md`** | TEMPLATE    | File exists but contains only placeholder terms. No actual domain vocabulary defined                                                                   |
 
 ---
 
 ## c) NOT STARTED ⬜
 
-| #   | Task                                                        | Priority | Estimate |
-| --- | ----------------------------------------------------------- | -------- | -------- |
-| 1   | **Wire `LWWResolver` into `ConflictAwareSyncer`**           | HIGH     | 30 min   |
-| 2   | **Add `NodeID` to `ConflictAwareSyncer` constructor**       | HIGH     | 15 min   |
-| 3   | **Persist vector clock in CQRS events**                     | HIGH     | 30 min   |
-| 4   | **Add `VectorClock` field to `provider.Item`**              | MEDIUM   | 10 min   |
-| 5   | **HTTP API (`pkg/api/`) with stdlib + Huma**                | HIGH     | 45 min   |
-| 6   | **OpenTelemetry traces on `Syncer.Sync()` and `CQRSStack`** | MEDIUM   | 30 min   |
-| 7   | **govalid struct validation**                               | MEDIUM   | 20 min   |
-| 8   | **`flake.nix` build system**                                | LOW      | 1h       |
-| 9   | **`coverage/` directory + `.gitignore`**                    | LOW      | 5 min    |
-| 10  | **`errorfamily.RegisterTemplate` for user-facing errors**   | LOW      | 30 min   |
+| #  | Task                                                        | Priority | Estimate |
+| -- | ----------------------------------------------------------- | -------- | -------- |
+| 1  | **Wire `LWWResolver` into `ConflictAwareSyncer`**           | HIGH     | 30 min   |
+| 2  | **Add `NodeID` to `ConflictAwareSyncer` constructor**       | HIGH     | 15 min   |
+| 3  | **Persist vector clock in CQRS events**                     | HIGH     | 30 min   |
+| 4  | **Add `VectorClock` field to `provider.Item`**              | MEDIUM   | 10 min   |
+| 5  | **HTTP API (`pkg/api/`) with stdlib + Huma**                | HIGH     | 45 min   |
+| 6  | **OpenTelemetry traces on `Syncer.Sync()` and `CQRSStack`** | MEDIUM   | 30 min   |
+| 7  | **govalid struct validation**                               | MEDIUM   | 20 min   |
+| 8  | **`flake.nix` build system**                                | LOW      | 1h       |
+| 9  | **`coverage/` directory + `.gitignore`**                    | LOW      | 5 min    |
+| 10 | **`errorfamily.RegisterTemplate` for user-facing errors**   | LOW      | 30 min   |
 
 ---
 
 ## d) TOTALLY FUCKED UP 💀
 
-| #   | What                          | Why                                                                                    | Recovery                                                                              |
-| --- | ----------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| 1   | **Deleted `pkg/localsync`**   | Misjudged it as a "ghost system" without confirming with user                          | Restored from git in commit `fcfaf51`, then properly renamed to `pkg/crdt`            |
-| 2   | **LSP cache is destroyed**    | Deletion/rename of `pkg/localsync` left stale references everywhere                    | Restart gopls or ignore — `go build` and `go test` are source of truth                |
-| 3   | **Go module cache confusion** | `go-cqrs-lite/core` local workspace has `event.Journal` but published `v1.6.0` doesn't | Works locally via `go.work`; CI will break unless core is published or version bumped |
+| # | What                          | Why                                                                                    | Recovery                                                                              |
+| - | ----------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| 1 | **Deleted `pkg/localsync`**   | Misjudged it as a "ghost system" without confirming with user                          | Restored from git in commit `fcfaf51`, then properly renamed to `pkg/crdt`            |
+| 2 | **LSP cache is destroyed**    | Deletion/rename of `pkg/localsync` left stale references everywhere                    | Restart gopls or ignore — `go build` and `go test` are source of truth                |
+| 3 | **Go module cache confusion** | `go-cqrs-lite/core` local workspace has `event.Journal` but published `v1.6.0` doesn't | Works locally via `go.work`; CI will break unless core is published or version bumped |
 
 ---
 

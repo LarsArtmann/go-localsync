@@ -196,33 +196,33 @@ The SSE handler was receiving zero events because command handlers never called 
 
 Sorted by **impact × effort** (high impact + low effort first):
 
-| #   | Task                                                                | Project                    | Impact | Effort  | Status      |
-| --- | ------------------------------------------------------------------- | -------------------------- | ------ | ------- | ----------- |
-| 1   | Add SSE end-to-end integration test                                 | go-localfirst              | High   | Low     | Not started |
-| 2   | Fix `convertTodoStatusChanged` event type mapping                   | go-localfirst              | High   | Low     | Not started |
-| 3   | Remove dead `const _ = "*"` in sse_cqrs_bridge.go                   | go-localfirst              | Low    | Trivial | Not started |
-| 4   | Clarify `Storage.Delete` NotFound contract in interface             | go-localsync               | High   | Low     | Not started |
-| 5   | Add go-cqrs-lite `event.Store` compliance suite                     | go-cqrs-lite               | High   | Medium  | Not started |
-| 6   | Migrate TodoService tests to CQRS handlers, then delete TodoService | go-localfirst              | High   | Medium  | Partial     |
-| 7   | Delete `SyncService` stub (or implement it)                         | go-localfirst              | Medium | Trivial | Not started |
-| 8   | Standardize ID types across projects                                | all                        | High   | Medium  | Not started |
-| 9   | Standardize error handling (pick cockroachdb/errors everywhere)     | all                        | Medium | Medium  | Not started |
-| 10  | Add NATS JetStream event store backend                              | go-localfirst/go-cqrs-lite | High   | High    | Not started |
-| 11  | Add concurrent write safety tests for both backends                 | go-localfirst              | Medium | Low     | Not started |
-| 12  | Add concurrent write safety tests for both backends                 | go-localsync               | Medium | Low     | Not started |
-| 13  | Replace PebbleMixin embedding with explicit composition             | go-localfirst              | Medium | Low     | Not started |
-| 14  | Migrate Prometheus → OpenTelemetry                                  | go-localfirst              | Medium | High    | Deprecated  |
-| 15  | Add PostgreSQL storage backend for go-localsync                     | go-localsync               | High   | High    | Not started |
-| 16  | Implement real CRDT sync in SyncService                             | go-localfirst              | High   | High    | Stub        |
-| 17  | Document interface contracts (delete, upsert idempotency, etc.)     | all                        | Medium | Low     | Not started |
-| 18  | Add versioned API migration path (v1 → v2)                          | go-localfirst              | Medium | Medium  | Not started |
-| 19  | Fix go-localsync CI blockers (lint, toolchain)                      | go-localsync               | Medium | Medium  | Known       |
-| 20  | Add shared CI config across projects                                | all                        | Medium | Medium  | Not started |
-| 21  | Generalize `github_id` → `source_id` in SQLite schema               | go-localsync               | High   | Medium  | Not started |
-| 22  | Add health check that verifies event bus is working                 | go-localfirst              | Medium | Low     | Not started |
-| 23  | Add request tracing (correlation IDs through CQRS pipeline)         | go-localfirst              | Medium | Medium  | Not started |
-| 24  | Extract shared test helpers across projects                         | all                        | Low    | Medium  | Not started |
-| 25  | Add benchmark tests for storage backends                            | go-localfirst/go-localsync | Medium | Medium  | Not started |
+| #  | Task                                                                | Project                    | Impact | Effort  | Status      |
+| -- | ------------------------------------------------------------------- | -------------------------- | ------ | ------- | ----------- |
+| 1  | Add SSE end-to-end integration test                                 | go-localfirst              | High   | Low     | Not started |
+| 2  | Fix `convertTodoStatusChanged` event type mapping                   | go-localfirst              | High   | Low     | Not started |
+| 3  | Remove dead `const _ = "*"` in sse_cqrs_bridge.go                   | go-localfirst              | Low    | Trivial | Not started |
+| 4  | Clarify `Storage.Delete` NotFound contract in interface             | go-localsync               | High   | Low     | Not started |
+| 5  | Add go-cqrs-lite `event.Store` compliance suite                     | go-cqrs-lite               | High   | Medium  | Not started |
+| 6  | Migrate TodoService tests to CQRS handlers, then delete TodoService | go-localfirst              | High   | Medium  | Partial     |
+| 7  | Delete `SyncService` stub (or implement it)                         | go-localfirst              | Medium | Trivial | Not started |
+| 8  | Standardize ID types across projects                                | all                        | High   | Medium  | Not started |
+| 9  | Standardize error handling (pick cockroachdb/errors everywhere)     | all                        | Medium | Medium  | Not started |
+| 10 | Add NATS JetStream event store backend                              | go-localfirst/go-cqrs-lite | High   | High    | Not started |
+| 11 | Add concurrent write safety tests for both backends                 | go-localfirst              | Medium | Low     | Not started |
+| 12 | Add concurrent write safety tests for both backends                 | go-localsync               | Medium | Low     | Not started |
+| 13 | Replace PebbleMixin embedding with explicit composition             | go-localfirst              | Medium | Low     | Not started |
+| 14 | Migrate Prometheus → OpenTelemetry                                  | go-localfirst              | Medium | High    | Deprecated  |
+| 15 | Add PostgreSQL storage backend for go-localsync                     | go-localsync               | High   | High    | Not started |
+| 16 | Implement real CRDT sync in SyncService                             | go-localfirst              | High   | High    | Stub        |
+| 17 | Document interface contracts (delete, upsert idempotency, etc.)     | all                        | Medium | Low     | Not started |
+| 18 | Add versioned API migration path (v1 → v2)                          | go-localfirst              | Medium | Medium  | Not started |
+| 19 | Fix go-localsync CI blockers (lint, toolchain)                      | go-localsync               | Medium | Medium  | Known       |
+| 20 | Add shared CI config across projects                                | all                        | Medium | Medium  | Not started |
+| 21 | Generalize `github_id` → `source_id` in SQLite schema               | go-localsync               | High   | Medium  | Not started |
+| 22 | Add health check that verifies event bus is working                 | go-localfirst              | Medium | Low     | Not started |
+| 23 | Add request tracing (correlation IDs through CQRS pipeline)         | go-localfirst              | Medium | Medium  | Not started |
+| 24 | Extract shared test helpers across projects                         | all                        | Low    | Medium  | Not started |
+| 25 | Add benchmark tests for storage backends                            | go-localfirst/go-localsync | Medium | Medium  | Not started |
 
 ---
 
@@ -256,14 +256,14 @@ It's marked `Deprecated: Use CQRS command and query handlers instead` but still 
 
 ## Commits This Session (6 total)
 
-| #   | Commit    | Project       | Description                                            |
-| --- | --------- | ------------- | ------------------------------------------------------ |
-| 1   | `029a9db` | go-localfirst | Remove dead domain.EventStore + PebbleEventStore       |
-| 2   | `c12c738` | go-localfirst | Wire eventBus.Publish() in command handlers to fix SSE |
-| 3   | `d6a355f` | go-localfirst | Add TodoRepository compliance test suite               |
-| 4   | `76dae61` | go-localfirst | Update AGENTS.md with pluggable backend docs           |
-| 5   | `1c2a18f` | go-localsync  | Add Storage compliance test suite                      |
-| 6   | `d6414db` | go-localsync  | Update AGENTS.md with pluggable storage docs           |
+| # | Commit    | Project       | Description                                            |
+| - | --------- | ------------- | ------------------------------------------------------ |
+| 1 | `029a9db` | go-localfirst | Remove dead domain.EventStore + PebbleEventStore       |
+| 2 | `c12c738` | go-localfirst | Wire eventBus.Publish() in command handlers to fix SSE |
+| 3 | `d6a355f` | go-localfirst | Add TodoRepository compliance test suite               |
+| 4 | `76dae61` | go-localfirst | Update AGENTS.md with pluggable backend docs           |
+| 5 | `1c2a18f` | go-localsync  | Add Storage compliance test suite                      |
+| 6 | `d6414db` | go-localsync  | Update AGENTS.md with pluggable storage docs           |
 
 ## Git Status
 

@@ -10,21 +10,21 @@
 
 ### go-localsync (SDK)
 
-| #   | What                                                                                                                                       | Commit    | Impact                              |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ----------------------------------- |
-| 1   | **Fixed SyncIncremental source filter bug** — was fetching globally latest item instead of per-source                                      | `bab08e6` | HIGH — data correctness             |
-| 2   | **Consolidated duplicate Turso store creation** — merged `createTursoRemoteStore` + `createTursoLocalStore` into single `createTursoStore` | `5c5c137` | MED — removed ~50 lines duplication |
-| 3   | **Replaced errors.As with errors.AsType** — 4 call sites modernized to Go 1.26                                                             | `7d4838f` | LOW — code modernization            |
-| 4   | **Wired ErrDatabase into turso_readmodel** — all DB errors now classified as infrastructure                                                | `33d3ccf` | MED — error taxonomy completeness   |
-| 5   | **HTTP error mapping in API triggerSync** — ErrRateLimited→429, ErrInvalidToken→401, etc.                                                  | `da43130` | HIGH — proper REST API behavior     |
-| 6   | **Added ~60 doc comments** — all exported symbols in pkg/cqrs, pkg/sync, pkg/provider                                                      | `ae9a32b` | MED — SDK usability                 |
+| # | What                                                                                                                                       | Commit    | Impact                              |
+| - | ------------------------------------------------------------------------------------------------------------------------------------------ | --------- | ----------------------------------- |
+| 1 | **Fixed SyncIncremental source filter bug** — was fetching globally latest item instead of per-source                                      | `bab08e6` | HIGH — data correctness             |
+| 2 | **Consolidated duplicate Turso store creation** — merged `createTursoRemoteStore` + `createTursoLocalStore` into single `createTursoStore` | `5c5c137` | MED — removed ~50 lines duplication |
+| 3 | **Replaced errors.As with errors.AsType** — 4 call sites modernized to Go 1.26                                                             | `7d4838f` | LOW — code modernization            |
+| 4 | **Wired ErrDatabase into turso_readmodel** — all DB errors now classified as infrastructure                                                | `33d3ccf` | MED — error taxonomy completeness   |
+| 5 | **HTTP error mapping in API triggerSync** — ErrRateLimited→429, ErrInvalidToken→401, etc.                                                  | `da43130` | HIGH — proper REST API behavior     |
+| 6 | **Added ~60 doc comments** — all exported symbols in pkg/cqrs, pkg/sync, pkg/provider                                                      | `ae9a32b` | MED — SDK usability                 |
 
 ### github-local-sync (CLI)
 
-| #   | What                                                                                          | Commit    | Impact                       |
-| --- | --------------------------------------------------------------------------------------------- | --------- | ---------------------------- |
-| 7   | **Removed redundant rate limit check** — saved 1 API call per sync                            | `57e7a43` | LOW — API quota savings      |
-| 8   | **Fixed stale README** — v56→v69, Cobra→flag, correct CLI flags, updated relationship section | `d1f61b1` | MED — documentation accuracy |
+| # | What                                                                                          | Commit    | Impact                       |
+| - | --------------------------------------------------------------------------------------------- | --------- | ---------------------------- |
+| 7 | **Removed redundant rate limit check** — saved 1 API call per sync                            | `57e7a43` | LOW — API quota savings      |
+| 8 | **Fixed stale README** — v56→v69, Cobra→flag, correct CLI flags, updated relationship section | `d1f61b1` | MED — documentation accuracy |
 
 ### Test Results
 
@@ -125,32 +125,32 @@ Options:
 
 ### High-Impact, Low-Effort
 
-| #   | What                                            | Effort | Impact                          |
-| --- | ----------------------------------------------- | ------ | ------------------------------- |
-| 1   | Add test for `mapSyncError()` in API            | 30min  | Proves HTTP error mapping works |
-| 2   | Add test for SyncIncremental with source filter | 30min  | Proves the bug fix works        |
-| 3   | Remove duplicate `GetTypes`/`GetItemTypes`      | 15min  | Eliminates dead method          |
-| 4   | Add doc comments to `pkg/id/` exports           | 15min  | SDK completeness                |
-| 5   | Add doc comments to `pkg/errors/` sentinels     | 10min  | SDK completeness                |
+| # | What                                            | Effort | Impact                          |
+| - | ----------------------------------------------- | ------ | ------------------------------- |
+| 1 | Add test for `mapSyncError()` in API            | 30min  | Proves HTTP error mapping works |
+| 2 | Add test for SyncIncremental with source filter | 30min  | Proves the bug fix works        |
+| 3 | Remove duplicate `GetTypes`/`GetItemTypes`      | 15min  | Eliminates dead method          |
+| 4 | Add doc comments to `pkg/id/` exports           | 15min  | SDK completeness                |
+| 5 | Add doc comments to `pkg/errors/` sentinels     | 10min  | SDK completeness                |
 
 ### High-Impact, Medium-Effort
 
-| #   | What                                        | Effort | Impact                            |
-| --- | ------------------------------------------- | ------ | --------------------------------- |
-| 6   | Split `stack.go` into focused files         | 45min  | File size compliance, readability |
-| 7   | Split `github/client.go` into focused files | 45min  | File size compliance, readability |
-| 8   | Extract shared `testutil` package           | 60min  | DRY across test packages          |
-| 9   | Add `NewItemFilter()` default constructor   | 15min  | Better DX, exhaustruct-compatible |
-| 10  | Graceful shutdown for API server            | 30min  | Production readiness              |
+| #  | What                                        | Effort | Impact                            |
+| -- | ------------------------------------------- | ------ | --------------------------------- |
+| 6  | Split `stack.go` into focused files         | 45min  | File size compliance, readability |
+| 7  | Split `github/client.go` into focused files | 45min  | File size compliance, readability |
+| 8  | Extract shared `testutil` package           | 60min  | DRY across test packages          |
+| 9  | Add `NewItemFilter()` default constructor   | 15min  | Better DX, exhaustruct-compatible |
+| 10 | Graceful shutdown for API server            | 30min  | Production readiness              |
 
 ### High-Impact, High-Effort
 
-| #   | What                                                           | Effort | Impact                           |
-| --- | -------------------------------------------------------------- | ------ | -------------------------------- |
-| 11  | Resolve go-cqrs-lite upstream WIP                              | 2-4hr  | Unblocks future development      |
-| 12  | OpenTelemetry instrumentation                                  | 4-6hr  | Observability                    |
-| 13  | Decide CRDT package fate                                       | 2-3hr  | Architecture clarity             |
-| 14  | github-local-sync CQRS migration (Phase 2 from migration plan) | 8-12hr | Eliminates duplicated sync logic |
+| #  | What                                                           | Effort | Impact                           |
+| -- | -------------------------------------------------------------- | ------ | -------------------------------- |
+| 11 | Resolve go-cqrs-lite upstream WIP                              | 2-4hr  | Unblocks future development      |
+| 12 | OpenTelemetry instrumentation                                  | 4-6hr  | Observability                    |
+| 13 | Decide CRDT package fate                                       | 2-3hr  | Architecture clarity             |
+| 14 | github-local-sync CQRS migration (Phase 2 from migration plan) | 8-12hr | Eliminates duplicated sync logic |
 
 ---
 

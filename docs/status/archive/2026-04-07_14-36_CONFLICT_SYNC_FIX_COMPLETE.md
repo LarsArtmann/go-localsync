@@ -1,9 +1,9 @@
 # Full Status Report — go-localsync
 
-**Date:** 2026-04-07 14:36 CEST  
-**Session:** Session 3 (following Session 2 audit + Session 1 initial integration)  
-**Branch:** master  
-**Commits This Session:** 8 (`2fb5109..58f50c4`)  
+**Date:** 2026-04-07 14:36 CEST\
+**Session:** Session 3 (following Session 2 audit + Session 1 initial integration)\
+**Branch:** master\
+**Commits This Session:** 8 (`2fb5109..58f50c4`)\
 **Verification:** `go test ./...` PASS · `golangci-lint run ./...` 0 issues
 
 ---
@@ -101,36 +101,36 @@ The `[Unreleased]` section is empty. All 8 commits from this session plus the pr
 
 ### From ROADMAP.md (No Priority Set)
 
-| #   | Item                             | Effort | Impact                 |
-| --- | -------------------------------- | ------ | ---------------------- |
-| 1   | Build TUI with Bubble Tea        | ~2h    | Low (cosmetic)         |
-| 2   | Support multiple user sync       | ~3h    | Medium (real use case) |
-| 3   | Implement daemon/background mode | ~4h    | High (production)      |
-| 4   | Add Turso/LibSQL backend support | ~3h    | Medium (scaling)       |
-| 5   | Create HTTP API endpoint         | ~2h    | Medium (integration)   |
-| 6   | Add export to JSON/CSV           | ~1h    | Low (nice-to-have)     |
+| # | Item                             | Effort | Impact                 |
+| - | -------------------------------- | ------ | ---------------------- |
+| 1 | Build TUI with Bubble Tea        | ~2h    | Low (cosmetic)         |
+| 2 | Support multiple user sync       | ~3h    | Medium (real use case) |
+| 3 | Implement daemon/background mode | ~4h    | High (production)      |
+| 4 | Add Turso/LibSQL backend support | ~3h    | Medium (scaling)       |
+| 5 | Create HTTP API endpoint         | ~2h    | Medium (integration)   |
+| 6 | Add export to JSON/CSV           | ~1h    | Low (nice-to-have)     |
 
 ### From TODO_LIST.md (HIGH/MEDIUM Priority, Not Started)
 
-| #   | Item                                  | Priority | Effort |
-| --- | ------------------------------------- | -------- | ------ |
-| 1   | Add CLI integration tests             | HIGH     | ~2h    |
-| 2   | Implement rate limit handling         | HIGH     | ~3h    |
-| 3   | Add real-time progress display        | MEDIUM   | ~1h    |
-| 4   | Add JSON output flag                  | MEDIUM   | ~30min |
-| 5   | Support configuration file            | MEDIUM   | ~2h    |
-| 6   | Implement retry logic with backoff    | MEDIUM   | ~2h    |
-| 7   | Add structured logging fields         | MEDIUM   | ~1h    |
-| 8   | Handle edge cases in incremental sync | MEDIUM   | ~1h    |
+| # | Item                                  | Priority | Effort |
+| - | ------------------------------------- | -------- | ------ |
+| 1 | Add CLI integration tests             | HIGH     | ~2h    |
+| 2 | Implement rate limit handling         | HIGH     | ~3h    |
+| 3 | Add real-time progress display        | MEDIUM   | ~1h    |
+| 4 | Add JSON output flag                  | MEDIUM   | ~30min |
+| 5 | Support configuration file            | MEDIUM   | ~2h    |
+| 6 | Implement retry logic with backoff    | MEDIUM   | ~2h    |
+| 7 | Add structured logging fields         | MEDIUM   | ~1h    |
+| 8 | Handle edge cases in incremental sync | MEDIUM   | ~1h    |
 
 ### Technical Debt (Not Started)
 
-| #   | Item                                                       | Effort                                                 |
-| --- | ---------------------------------------------------------- | ------------------------------------------------------ |
-| 1   | Rename `github_id` column to `source_id`                   | ~2h (schema migration + sqlc regenerate + all callers) |
-| 2   | Standardize NullString conversion (generics/codegen)       | ~1h                                                    |
-| 3   | Add database migration system (versioned migrations)       | ~3h                                                    |
-| 4   | Add `internal/db/events.sql.go` mixin embedding automation | ~2h                                                    |
+| # | Item                                                       | Effort                                                 |
+| - | ---------------------------------------------------------- | ------------------------------------------------------ |
+| 1 | Rename `github_id` column to `source_id`                   | ~2h (schema migration + sqlc regenerate + all callers) |
+| 2 | Standardize NullString conversion (generics/codegen)       | ~1h                                                    |
+| 3 | Add database migration system (versioned migrations)       | ~3h                                                    |
+| 4 | Add `internal/db/events.sql.go` mixin embedding automation | ~2h                                                    |
 
 ---
 
@@ -222,48 +222,48 @@ This was the exact bug we fixed. But it highlights that the ROADMAP was written 
 
 ### Tier 1: Blocking / Critical (Do First)
 
-| #   | Item                                                                                                                                | Effort | Impact   | Why                                         |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------------------------------------- |
-| 1   | **Fix go.mod replace directives** — publish `go-localfirst` and `go-composable-business-types` as proper modules (or add `go.work`) | 1h     | Critical | CI/CD is broken for anyone but you          |
-| 2   | **Add database migration system** — use `goose` or `golang-migrate`, create migration for `source` + `updated_at` columns           | 3h     | Critical | Existing DBs will crash on new schema       |
-| 3   | **Rename `github_id` column to `source_id`** — schema, sqlc queries, all callers, migration script                                  | 2h     | High     | Confusing naming blocks multi-provider work |
-| 4   | **Update CHANGELOG.md** — document all changes from sessions 1-3                                                                    | 30min  | High     | Release documentation is empty              |
-| 5   | **Update ROADMAP.md + TODO_LIST.md** — remove stale items, add new ones discovered                                                  | 30min  | Medium   | Team coordination requires accurate docs    |
+| # | Item                                                                                                                                | Effort | Impact   | Why                                         |
+| - | ----------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------------------------------------- |
+| 1 | **Fix go.mod replace directives** — publish `go-localfirst` and `go-composable-business-types` as proper modules (or add `go.work`) | 1h     | Critical | CI/CD is broken for anyone but you          |
+| 2 | **Add database migration system** — use `goose` or `golang-migrate`, create migration for `source` + `updated_at` columns           | 3h     | Critical | Existing DBs will crash on new schema       |
+| 3 | **Rename `github_id` column to `source_id`** — schema, sqlc queries, all callers, migration script                                  | 2h     | High     | Confusing naming blocks multi-provider work |
+| 4 | **Update CHANGELOG.md** — document all changes from sessions 1-3                                                                    | 30min  | High     | Release documentation is empty              |
+| 5 | **Update ROADMAP.md + TODO_LIST.md** — remove stale items, add new ones discovered                                                  | 30min  | Medium   | Team coordination requires accurate docs    |
 
 ### Tier 2: High Impact (Do Next)
 
-| #   | Item                                                                                                   | Effort | Impact | Why                                            |
-| --- | ------------------------------------------------------------------------------------------------------ | ------ | ------ | ---------------------------------------------- |
-| 6   | **E2E integration test with real SQLite** — test fetch → store → GetByID → conflict detection pipeline | 2h     | High   | First real proof the whole system works        |
-| 7   | **Implement rate limit handling** — use `GetRateLimit()` in sync loop, exponential backoff             | 3h     | High   | Large syncs (>10 pages) will hit rate limits   |
-| 8   | **Implement retry logic with backoff** — retry 5xx, timeouts, network errors                           | 2h     | High   | Network resilience for production use          |
-| 9   | **Add `just lint` using golangci-lint** — replace the `go vet` + `go fmt` in justfile                  | 15min  | Medium | Current lint command doesn't catch real issues |
-| 10  | **Fix pre-commit hook** — resolve library-policy warnings, file-size warnings                          | 1h     | Medium | Currently forced to use `--no-verify`          |
+| #  | Item                                                                                                   | Effort | Impact | Why                                            |
+| -- | ------------------------------------------------------------------------------------------------------ | ------ | ------ | ---------------------------------------------- |
+| 6  | **E2E integration test with real SQLite** — test fetch → store → GetByID → conflict detection pipeline | 2h     | High   | First real proof the whole system works        |
+| 7  | **Implement rate limit handling** — use `GetRateLimit()` in sync loop, exponential backoff             | 3h     | High   | Large syncs (>10 pages) will hit rate limits   |
+| 8  | **Implement retry logic with backoff** — retry 5xx, timeouts, network errors                           | 2h     | High   | Network resilience for production use          |
+| 9  | **Add `just lint` using golangci-lint** — replace the `go vet` + `go fmt` in justfile                  | 15min  | Medium | Current lint command doesn't catch real issues |
+| 10 | **Fix pre-commit hook** — resolve library-policy warnings, file-size warnings                          | 1h     | Medium | Currently forced to use `--no-verify`          |
 
 ### Tier 3: Quality of Life (Do Soon)
 
-| #   | Item                                                                                 | Effort | Impact | Why                                      |
-| --- | ------------------------------------------------------------------------------------ | ------ | ------ | ---------------------------------------- |
-| 11  | **Add JSON output flag** (`-json`)                                                   | 30min  | Medium | Enables scripting and jq integration     |
-| 12  | **Standardize NullString conversion** — generic helper or codegen                    | 1h     | Medium | DRY up `toNullString`/`fromNullString`   |
-| 13  | **Add structured logging fields** — username, page, event_id consistently            | 1h     | Medium | Debuggability in production              |
-| 14  | **Add real-time progress display** — charmbracelet/bubbles progress bar              | 1h     | Medium | UX for long syncs                        |
-| 15  | **Update AGENTS.md** — remove stale PaginationMixin reference, update schema section | 15min  | Medium | Future sessions start with wrong context |
+| #  | Item                                                                                 | Effort | Impact | Why                                      |
+| -- | ------------------------------------------------------------------------------------ | ------ | ------ | ---------------------------------------- |
+| 11 | **Add JSON output flag** (`-json`)                                                   | 30min  | Medium | Enables scripting and jq integration     |
+| 12 | **Standardize NullString conversion** — generic helper or codegen                    | 1h     | Medium | DRY up `toNullString`/`fromNullString`   |
+| 13 | **Add structured logging fields** — username, page, event_id consistently            | 1h     | Medium | Debuggability in production              |
+| 14 | **Add real-time progress display** — charmbracelet/bubbles progress bar              | 1h     | Medium | UX for long syncs                        |
+| 15 | **Update AGENTS.md** — remove stale PaginationMixin reference, update schema section | 15min  | Medium | Future sessions start with wrong context |
 
 ### Tier 4: Feature Development (Do Later)
 
-| #   | Item                                                                                  | Effort | Impact | Why                          |
-| --- | ------------------------------------------------------------------------------------- | ------ | ------ | ---------------------------- |
-| 16  | **Support multiple user sync** — accept list of users, track per-user state           | 3h     | High   | Real-world use case          |
-| 17  | **Add second provider** (GitLab or Bitbucket) — proves the provider abstraction works | 4h     | High   | Validates architecture       |
-| 18  | **Implement daemon/background mode** — cron or systemd, lockfile handling             | 4h     | High   | Production deployment        |
-| 19  | **Create HTTP API endpoint** — REST API for querying events                           | 2h     | Medium | Integration with other tools |
-| 20  | **Add Turso/LibSQL backend** — remote SQLite via libsql driver                        | 3h     | Medium | Scaling beyond local machine |
-| 21  | **Build TUI with Bubble Tea** — interactive event browser                             | 2h     | Low    | Nice demo, not critical      |
-| 22  | **Add export to JSON/CSV**                                                            | 1h     | Low    | Data analysis integration    |
-| 23  | **Add configuration file support** — YAML/TOML defaults                               | 2h     | Medium | Usability for non-CLI users  |
-| 24  | **Record/replay HTTP tests** — go-vcr for GitHub provider                             | 2h     | High   | Confidence without live API  |
-| 25  | **Event retention/TTL** — automatic cleanup of old events                             | 2h     | Low    | Database size management     |
+| #  | Item                                                                                  | Effort | Impact | Why                          |
+| -- | ------------------------------------------------------------------------------------- | ------ | ------ | ---------------------------- |
+| 16 | **Support multiple user sync** — accept list of users, track per-user state           | 3h     | High   | Real-world use case          |
+| 17 | **Add second provider** (GitLab or Bitbucket) — proves the provider abstraction works | 4h     | High   | Validates architecture       |
+| 18 | **Implement daemon/background mode** — cron or systemd, lockfile handling             | 4h     | High   | Production deployment        |
+| 19 | **Create HTTP API endpoint** — REST API for querying events                           | 2h     | Medium | Integration with other tools |
+| 20 | **Add Turso/LibSQL backend** — remote SQLite via libsql driver                        | 3h     | Medium | Scaling beyond local machine |
+| 21 | **Build TUI with Bubble Tea** — interactive event browser                             | 2h     | Low    | Nice demo, not critical      |
+| 22 | **Add export to JSON/CSV**                                                            | 1h     | Low    | Data analysis integration    |
+| 23 | **Add configuration file support** — YAML/TOML defaults                               | 2h     | Medium | Usability for non-CLI users  |
+| 24 | **Record/replay HTTP tests** — go-vcr for GitHub provider                             | 2h     | High   | Confidence without live API  |
+| 25 | **Event retention/TTL** — automatic cleanup of old events                             | 2h     | Low    | Database size management     |
 
 ---
 

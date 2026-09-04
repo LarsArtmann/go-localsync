@@ -65,14 +65,14 @@
 
         /* --- Type stacks (system only — zero external fonts) --- */
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -289,15 +289,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       /* --- Issue cards --- */
@@ -310,15 +322,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -831,8 +855,9 @@
           <div class="hero-badge">Nix Flake Migration</div>
           <h1>go-localsync Flake Standardization Audit</h1>
           <p class="hero-subtitle">
-            Migration type: &ldquo;Raw flake.nix &rarr; flake-parts + treefmt-nix&rdquo;. Assessment
-            of current state against the ecosystem standard stack.
+            Migration type: &ldquo;Raw flake.nix &rarr; flake-parts +
+            treefmt-nix&rdquo;. Assessment of current state against the
+            ecosystem standard stack.
           </p>
         </div>
 
@@ -859,23 +884,31 @@
         <div class="card card-solution">
           <h4>Verdict: already migrated. No structural change needed.</h4>
           <p>
-            The project has <strong>no <code>justfile</code> and no <code>Makefile</code></strong
-            >, and the existing <code>flake.nix</code> already uses the full ecosystem standard
-            stack: <code>flake-parts</code> (not <code>flake-utils</code>),
-            <code>treefmt-nix</code> (gofumpt + goimports + nixfmt), the <code>systems</code> input
-            (not hardcoded lists), <code>nixos-unstable</code>, both
-            <code>devShells.default</code> and <code>devShells.ci</code> (the CI shell uses
-            <code>mkShellNoCC</code>), <code>checks.format</code> + <code>checks.build</code> +
-            <code>checks.test</code> + a custom <code>checks.cqrs-lint</code>, and an exported
-            <code>overlays.default</code> with <code>meta.maintainers</code> populated.
-            <code>nix flake check --no-build</code> passes. The migration this skill exists to
-            perform has <strong>already been done</strong>. The single remaining standard-stack
-            element is <code>git-hooks.nix</code> for managed pre-commit hooks, documented below as
-            an optional add-on.
+            The project has
+            <strong
+              >no <code>justfile</code> and no <code>Makefile</code></strong
+            >, and the existing <code>flake.nix</code> already uses the full
+            ecosystem standard stack: <code>flake-parts</code> (not
+            <code>flake-utils</code>), <code>treefmt-nix</code> (gofumpt +
+            goimports + nixfmt), the <code>systems</code> input (not hardcoded
+            lists), <code>nixos-unstable</code>, both
+            <code>devShells.default</code> and <code>devShells.ci</code> (the CI
+            shell uses <code>mkShellNoCC</code>), <code>checks.format</code> +
+            <code>checks.build</code> + <code>checks.test</code> + a custom
+            <code>checks.cqrs-lint</code>, and an exported
+            <code>overlays.default</code> with
+            <code>meta.maintainers</code> populated.
+            <code>nix flake check --no-build</code> passes. The migration this
+            skill exists to perform has <strong>already been done</strong>. The
+            single remaining standard-stack element is
+            <code>git-hooks.nix</code> for managed pre-commit hooks, documented
+            below as an optional add-on.
           </p>
         </div>
 
-        <h2 id="checklist"><span class="num">01</span>Post-Migration Checklist</h2>
+        <h2 id="checklist">
+          <span class="num">01</span>Post-Migration Checklist
+        </h2>
         <table>
           <thead>
             <tr>
@@ -893,12 +926,17 @@
             <tr>
               <td><code>nix build</code> produces output</td>
               <td><span class="badge badge-fixed">Yes</span></td>
-              <td><code>result</code> symlink &rarr; <code>go-localsync-0.3.0</code></td>
+              <td>
+                <code>result</code> symlink &rarr;
+                <code>go-localsync-0.3.0</code>
+              </td>
             </tr>
             <tr>
               <td><code>nix develop</code> enters devShell</td>
               <td><span class="badge badge-fixed">Yes</span></td>
-              <td><code>devShells.default</code> with go_1_26 + golangci-lint</td>
+              <td>
+                <code>devShells.default</code> with go_1_26 + golangci-lint
+              </td>
             </tr>
             <tr>
               <td><code>nix fmt</code> formats files</td>
@@ -908,7 +946,9 @@
             <tr>
               <td><code>just</code> removed from devShell</td>
               <td><span class="badge badge-fixed">N/A</span></td>
-              <td>No justfile ever existed; <code>just</code> not in any shell</td>
+              <td>
+                No justfile ever existed; <code>just</code> not in any shell
+              </td>
             </tr>
             <tr>
               <td><code>go_1_26</code> pinned</td>
@@ -923,7 +963,9 @@
             <tr>
               <td><code>checks.format</code> + <code>checks.build</code></td>
               <td><span class="badge badge-fixed">Yes</span></td>
-              <td>+ bonus <code>checks.test</code> + <code>checks.cqrs-lint</code></td>
+              <td>
+                + bonus <code>checks.test</code> + <code>checks.cqrs-lint</code>
+              </td>
             </tr>
             <tr>
               <td><code>overlays.default</code> exported</td>
@@ -947,10 +989,14 @@
         <div class="card card-warning">
           <h4>Current pre-commit state</h4>
           <p>
-            AGENTS.md records: &ldquo;Pre-commit hooks use <code>buildflow</code>. Hooks are not set
-            as executable and are skipped.&rdquo; So pre-commit is
-            <strong>effectively non-functional</strong> today. The standard stack recommends
-            <a href="https://github.com/cachix/git-hooks.nix"><code>cachix/git-hooks.nix</code></a>
+            AGENTS.md records: &ldquo;Pre-commit hooks use
+            <code>buildflow</code>. Hooks are not set as executable and are
+            skipped.&rdquo; So pre-commit is
+            <strong>effectively non-functional</strong> today. The standard
+            stack recommends
+            <a href="https://github.com/cachix/git-hooks.nix"
+              ><code>cachix/git-hooks.nix</code></a
+            >
             for declarative, nix-managed hooks that actually run.
           </p>
         </div>
@@ -958,16 +1004,19 @@
         <div class="callout callout-solution">
           <strong>Recommended addition (optional, non-breaking)</strong>
           Add <code>git-hooks.nix</code> as an input and wire it into
-          <code>devShells.default</code> via <code>config.pre-commit.installationScript</code>.
-          Suggested hooks: <code>treefmt</code> (auto-format on commit), <code>gofumpt</code>,
+          <code>devShells.default</code> via
+          <code>config.pre-commit.installationScript</code>. Suggested hooks:
+          <code>treefmt</code> (auto-format on commit), <code>gofumpt</code>,
           <code>end-of-file-fixer</code>, and a <code>cqrs-lint</code> wrapper.
-          <strong>Caveat already documented in AGENTS.md</strong>: the formatter steps must exclude
-          <code>vendor/</code> or they OOM on the modernc.org/sqlite sources within the 2-minute
-          hook budget &mdash; the treefmt <code>vendor/**</code> exclusion is already set.
+          <strong>Caveat already documented in AGENTS.md</strong>: the formatter
+          steps must exclude <code>vendor/</code> or they OOM on the
+          modernc.org/sqlite sources within the 2-minute hook budget &mdash; the
+          treefmt <code>vendor/**</code> exclusion is already set.
         </div>
 
         <h2 id="plan">
-          <span class="num">03</span>Optional Plan (if the user wants git-hooks.nix)
+          <span class="num">03</span>Optional Plan (if the user wants
+          git-hooks.nix)
         </h2>
 
         <div class="migration-step">
@@ -977,11 +1026,13 @@
             <p>
               Add
               <code
-                >git-hooks = { url = "github:cachix/git-hooks.nix"; inputs.nixpkgs.follows =
-                "nixpkgs"; };</code
+                >git-hooks = { url = "github:cachix/git-hooks.nix";
+                inputs.nixpkgs.follows = "nixpkgs"; };</code
               >
               to <code>inputs</code>, and
-              <code>imports = [ inputs.treefmt-nix.flakeModule inputs.git-hooks.flakeModule ];</code
+              <code
+                >imports = [ inputs.treefmt-nix.flakeModule
+                inputs.git-hooks.flakeModule ];</code
               >.
             </p>
           </div>
@@ -992,9 +1043,10 @@
             <h4>Configure hooks</h4>
             <p>
               Enable <code>treefmt</code>, <code>end-of-file-fixer</code>,
-              <code>trim-trailing-whitespace</code>, and a custom <code>cqrs-lint</code> hook in
-              <code>pre-commit.settings</code>. Reuse the existing treefmt config so formatting
-              stays single-source.
+              <code>trim-trailing-whitespace</code>, and a custom
+              <code>cqrs-lint</code> hook in <code>pre-commit.settings</code>.
+              Reuse the existing treefmt config so formatting stays
+              single-source.
             </p>
           </div>
         </div>
@@ -1005,8 +1057,9 @@
             <p>
               Add <code>config.pre-commit.installationScript</code> to
               <code>devShells.default</code>. Run <code>nix develop</code> then
-              <code>pre-commit install</code>. Confirm <code>nix flake check --no-build</code> still
-              passes. Vendor exclusion is already handled by treefmt settings.
+              <code>pre-commit install</code>. Confirm
+              <code>nix flake check --no-build</code> still passes. Vendor
+              exclusion is already handled by treefmt settings.
             </p>
           </div>
         </div>
@@ -1015,34 +1068,39 @@
         <div class="card">
           <ul>
             <li>
-              <strong><code>vendorHash = null</code> + committed <code>vendor/</code></strong>
+              <strong
+                ><code>vendorHash = null</code> + committed
+                <code>vendor/</code></strong
+              >
               &mdash; forced by <code>go-cqrs-lite</code> being private.
-              <strong>Not a flake-migration issue.</strong> Tracked in <code>TODO_LIST.md</code>;
-              the clean fix is to make <code>go-cqrs-lite</code> public, then switch to a real
+              <strong>Not a flake-migration issue.</strong> Tracked in
+              <code>TODO_LIST.md</code>; the clean fix is to make
+              <code>go-cqrs-lite</code> public, then switch to a real
               <code>vendorHash</code> and drop <code>vendor/</code>.
             </li>
             <li>
-              <strong><code>GOEXPERIMENT=jsonv2</code> wiring</strong> &mdash; required by
-              go-cqrs-lite v4 in Go 1.26. Already correctly wired in three places (<code
-                >preBuild</code
-              >
-              export, <code>GOFLAGS</code> in devShells, <code>.golangci.yml</code> build-tags). Not
-              a migration concern.
+              <strong><code>GOEXPERIMENT=jsonv2</code> wiring</strong> &mdash;
+              required by go-cqrs-lite v4 in Go 1.26. Already correctly wired in
+              three places (<code>preBuild</code> export,
+              <code>GOFLAGS</code> in devShells,
+              <code>.golangci.yml</code> build-tags). Not a migration concern.
             </li>
           </ul>
         </div>
 
         <div class="callout callout-solution">
           <strong>Bottom line</strong>
-          No migration required &mdash; the flake is already on the standard stack and passes
-          <code>nix flake check --no-build</code>. The only optional improvement is adopting
-          <code>git-hooks.nix</code> to make pre-commit hooks actually run (today they are skipped).
-          That is a small additive change, not a migration.
+          No migration required &mdash; the flake is already on the standard
+          stack and passes
+          <code>nix flake check --no-build</code>. The only optional improvement
+          is adopting <code>git-hooks.nix</code> to make pre-commit hooks
+          actually run (today they are skipped). That is a small additive
+          change, not a migration.
         </div>
 
         <footer class="footer">
-          Generated 2026-07-19 &middot; flake.nix audited against the ecosystem standard stack. 9/10
-          items present. No structural change proposed.
+          Generated 2026-07-19 &middot; flake.nix audited against the ecosystem
+          standard stack. 9/10 items present. No structural change proposed.
         </footer>
       </main>
     </div>

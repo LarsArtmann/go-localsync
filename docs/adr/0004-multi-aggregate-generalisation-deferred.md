@@ -17,14 +17,14 @@ An adoption review ([`docs/feedback/2026-06-23_discordsync-adoption-feedback.htm
 
 The review found go-localsync is a **well-engineered single-aggregate sync SDK** for its actual domain (paginated pull of flat items from one REST source into one event-sourced read model), but is **not viable for DiscordSync as-is**. Six structural gaps were identified, all verified against current source:
 
-| #   | Gap                                                                                                                                   | Severity            | Verified at                                       |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------- |
-| 1   | Single hard-coded aggregate type (`aggregateType = "sync_item"`, `SyncItemState{Item, Deleted}`)                                      | Blocking · Core     | `pkg/cqrs/events.go:10`, `pkg/cqrs/decider.go:17` |
-| 2   | Fixed three-event vocabulary (`sync_item.synced/conflict_found/deleted`)                                                              | Blocking · Core     | `pkg/cqrs/events.go:12-19`                        |
-| 3   | Single flat projection (`"sync_item_projection"`, hard-coded 3-event switch)                                                          | Blocking · Core     | `pkg/cqrs/projection.go:24-44`                    |
-| 4   | Pull-only ingestion (`Provider.Fetch`/`FetchAll` pagination, no push path)                                                            | Blocking · Core     | `pkg/provider/provider.go`, `pkg/sync/sync.go`    |
-| 5   | GitHub-shaped vocabulary baked into the core (`ActorLogin`, `RepoName`, `RepoURL` in `model.Item`; `ActorLogin`/`RepoID` branded IDs) | Important · Surface | `pkg/data/model/item.go:17-29`, `pkg/id/ids.go`   |
-| 6   | Narrow read query surface (`ItemReader` = 4 methods: `List`/`Count`/`CountByType`/`GetTypes`) vs DiscordSync's 28-method `Database`   | Important · Surface | `pkg/data/model/item.go:47-52`                    |
+| # | Gap                                                                                                                                   | Severity            | Verified at                                       |
+| - | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------------------- |
+| 1 | Single hard-coded aggregate type (`aggregateType = "sync_item"`, `SyncItemState{Item, Deleted}`)                                      | Blocking · Core     | `pkg/cqrs/events.go:10`, `pkg/cqrs/decider.go:17` |
+| 2 | Fixed three-event vocabulary (`sync_item.synced/conflict_found/deleted`)                                                              | Blocking · Core     | `pkg/cqrs/events.go:12-19`                        |
+| 3 | Single flat projection (`"sync_item_projection"`, hard-coded 3-event switch)                                                          | Blocking · Core     | `pkg/cqrs/projection.go:24-44`                    |
+| 4 | Pull-only ingestion (`Provider.Fetch`/`FetchAll` pagination, no push path)                                                            | Blocking · Core     | `pkg/provider/provider.go`, `pkg/sync/sync.go`    |
+| 5 | GitHub-shaped vocabulary baked into the core (`ActorLogin`, `RepoName`, `RepoURL` in `model.Item`; `ActorLogin`/`RepoID` branded IDs) | Important · Surface | `pkg/data/model/item.go:17-29`, `pkg/id/ids.go`   |
+| 6 | Narrow read query surface (`ItemReader` = 4 methods: `List`/`Count`/`CountByType`/`GetTypes`) vs DiscordSync's 28-method `Database`   | Important · Surface | `pkg/data/model/item.go:47-52`                    |
 
 Findings 1–4 are individually blocking and collectively reinforcing: fixing any one without the others still leaves a single-aggregate or single-projection straitjacket. The review's own conclusion is that closing the gap is a **fundamental rewrite** of the SDK's core, and that **`go-cqrs-lite v3` is the correct sharing boundary today** — both consumers already use it directly and successfully.
 

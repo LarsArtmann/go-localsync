@@ -30,22 +30,22 @@ Work that is complete, tested, and shipped this session:
 
 ### Error-Handling Overhaul (session 29)
 
-| #   | Commit    | What                                                                                                                       | Impact                                                                                                      |
-| --- | --------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| 1   | `21f3acc` | Wire error templates into production via `sync.Once`, called from `api.NewServer`                                          | **Zero → full value:** all 9 user-facing message templates were dead at runtime (only ever called in tests) |
-| 2   | `bcff39a` | `ErrPartialSync` (Transient family + template) replaces ghost `ErrSyncFailed` and package-private `errCompletedWithErrors` | Taxonomy split-brain closed; partial failures are now `errors.Is`-checkable and retryable                   |
-| 3   | `12cd17a` | Fix `ConflictAwareSyncer` silent partial-failure drop via shared `partialSyncError` helper                                 | **Correctness bug fixed** — 4 tests had encoded the buggy contract                                          |
-| 4   | `408cfa4` | `pkgerrors.HTTPStatus(err)`: per-sentinel overrides + `Family.HTTPStatus()` fallback                                       | Reuses `go-error-family`; mapping is now exhaustive-by-construction                                         |
-| 5   | `aa7a439` | Data-driven `mapSyncError`; route all handlers through it; partial-sync → 200-with-result                                  | Removes brittle 503 catch-all; fixes `ErrDBNil` gap; partial syncs no longer discard data                   |
-| 6   | `e3a461b` | `context.Canceled` → 499, `context.DeadlineExceeded` → 504                                                                 | Client-gone no longer misclassified as server-down                                                          |
-| 7   | `393d8bd` | Delete dead `WithUserDetail`                                                                                               | Shrink public surface                                                                                       |
-| 8   | `314bb0b` | Template for `crdt.ErrNilTimestampFunc`                                                                                    | Last template gap closed                                                                                    |
-| 9   | `028df69` | Fix misleading `Count` error detail (`count=0` always zero on error path)                                                  | Stops lying in error messages                                                                               |
-| 10  | `14cc0d5` | `errors.As` → `errors.AsType[retryAfterer]`                                                                                | Go 1.26 stdlib idiom; `retryAfterer` now embeds `error` (honest shape)                                      |
-| 11  | `a1404cf` | `WithCtx`/`WithCtxf` structured-context helpers                                                                            | Uses `errorfamily.Error.WithContext` (immutable clone); fixes message-mashing problem                       |
-| 12  | `1999262` | `InvalidField(field, reason)` + migrate both `Validate` functions                                                          | Validation errors now carry structured `field` context for programmatic handling                            |
-| 13  | `cdf9bd5` | Stop swallowing errors in concurrent read-model tests                                                                      | Could previously mask races as silent passes; verified `-race` clean                                        |
-| 14  | `bab6daa` | AGENTS.md documentation update                                                                                             | —                                                                                                           |
+| #  | Commit    | What                                                                                                                       | Impact                                                                                                      |
+| -- | --------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 1  | `21f3acc` | Wire error templates into production via `sync.Once`, called from `api.NewServer`                                          | **Zero → full value:** all 9 user-facing message templates were dead at runtime (only ever called in tests) |
+| 2  | `bcff39a` | `ErrPartialSync` (Transient family + template) replaces ghost `ErrSyncFailed` and package-private `errCompletedWithErrors` | Taxonomy split-brain closed; partial failures are now `errors.Is`-checkable and retryable                   |
+| 3  | `12cd17a` | Fix `ConflictAwareSyncer` silent partial-failure drop via shared `partialSyncError` helper                                 | **Correctness bug fixed** — 4 tests had encoded the buggy contract                                          |
+| 4  | `408cfa4` | `pkgerrors.HTTPStatus(err)`: per-sentinel overrides + `Family.HTTPStatus()` fallback                                       | Reuses `go-error-family`; mapping is now exhaustive-by-construction                                         |
+| 5  | `aa7a439` | Data-driven `mapSyncError`; route all handlers through it; partial-sync → 200-with-result                                  | Removes brittle 503 catch-all; fixes `ErrDBNil` gap; partial syncs no longer discard data                   |
+| 6  | `e3a461b` | `context.Canceled` → 499, `context.DeadlineExceeded` → 504                                                                 | Client-gone no longer misclassified as server-down                                                          |
+| 7  | `393d8bd` | Delete dead `WithUserDetail`                                                                                               | Shrink public surface                                                                                       |
+| 8  | `314bb0b` | Template for `crdt.ErrNilTimestampFunc`                                                                                    | Last template gap closed                                                                                    |
+| 9  | `028df69` | Fix misleading `Count` error detail (`count=0` always zero on error path)                                                  | Stops lying in error messages                                                                               |
+| 10 | `14cc0d5` | `errors.As` → `errors.AsType[retryAfterer]`                                                                                | Go 1.26 stdlib idiom; `retryAfterer` now embeds `error` (honest shape)                                      |
+| 11 | `a1404cf` | `WithCtx`/`WithCtxf` structured-context helpers                                                                            | Uses `errorfamily.Error.WithContext` (immutable clone); fixes message-mashing problem                       |
+| 12 | `1999262` | `InvalidField(field, reason)` + migrate both `Validate` functions                                                          | Validation errors now carry structured `field` context for programmatic handling                            |
+| 13 | `cdf9bd5` | Stop swallowing errors in concurrent read-model tests                                                                      | Could previously mask races as silent passes; verified `-race` clean                                        |
+| 14 | `bab6daa` | AGENTS.md documentation update                                                                                             | —                                                                                                           |
 
 ### Pre-existing solid foundation (verified still green)
 
@@ -160,33 +160,33 @@ Strategic improvements, prioritized by impact:
 
 Sorted by **impact × (1/effort) × customer-value**:
 
-| #   | Task                                                                       | Impact | Effort   | Category       |
-| --- | -------------------------------------------------------------------------- | ------ | -------- | -------------- |
-| 1   | **Fix doc drift: reconcile test counts across all docs to 177**            | 🔴     | 🟢 5min  | Debt           |
-| 2   | **Update `CHANGELOG.md` [Unreleased] with error-handling overhaul**        | 🔴     | 🟢 10min | Debt           |
-| 3   | **Make `go-cqrs-lite` public** → drop `vendor/`, real `vendorHash`         | 🔴     | 🟡 1h    | Debt           |
-| 4   | **Adopt `encoding/json/v2`** (Go 1.26 policy)                              | 🟡     | 🟡 30min | Policy         |
-| 5   | **Unify `SyncResult`/`ConflictResult`** via shared embedded struct         | 🔴     | 🟡 1h    | Architecture   |
-| 6   | **OpenTelemetry instrumentation** (spans for `Sync`, `SyncItems`, HTTP)    | 🔴     | 🟡 2h    | Observability  |
-| 7   | **API authentication middleware** (API key)                                | 🔴     | 🟡 1h    | Security       |
-| 8   | **API rate limiting middleware**                                           | 🟡     | 🟡 1h    | Security       |
-| 9   | **Integration test: real error-taxonomy provider**                         | 🟡     | 🟡 1h    | Testing        |
-| 10  | **Adopt `UpcasterRegistry`** for schema evolution                          | 🟡     | 🟡 1h    | Architecture   |
-| 11  | **Delete or implement `retryAfterer`** (YAGNI decision)                    | 🟢     | 🟢 15min | Debt           |
-| 12  | **API pagination headers** (`X-Total-Count`, cursor)                       | 🟡     | 🟡 1h    | Feature        |
-| 13  | **Conflict resolution per-sync override** (`SyncOptions.ConflictResolver`) | 🟡     | 🟡 45min | Feature        |
-| 14  | **OpenAPI error response schemas** per endpoint                            | 🟡     | 🟡 45min | Docs           |
-| 15  | **Improve `pkg/cqrs` coverage** (81.2% → 85%+)                             | 🟡     | 🟡 1h    | Quality        |
-| 16  | **`govalid` struct tags** for `SyncOptions`, `CQRSConfig`                  | 🟢     | 🟡 30min | Policy         |
-| 17  | **Document `SyncStore` error-wrapping contract** in the interface          | 🟡     | 🟢 10min | Architecture   |
-| 18  | **RFC 7807 problem details** in API error responses (use `field` context)  | 🟢     | 🟡 45min | Feature        |
-| 19  | **Property-based test for `HTTPStatus`**                                   | 🟢     | 🟡 30min | Testing        |
-| 20  | **Export to JSON/CSV**                                                     | 🟢     | 🟡 1h    | Feature        |
-| 21  | **Structured logging fields** consistency (source, page, event_id)         | 🟢     | 🟡 30min | Observability  |
-| 22  | **CONTRIBUTING.md** architecture guide                                     | 🟢     | 🟡 45min | Docs           |
-| 23  | **`ErrContextCancelled` sentinel** for non-HTTP consumers                  | 🟢     | 🟢 15min | Error handling |
-| 24  | **Snapshot test** for `mapSyncError` HTTP responses (go-snaps)             | 🟢     | 🟡 30min | Testing        |
-| 25  | **Benchmark `HTTPStatus`** hot path (called on every API error)            | 🟢     | 🟢 15min | Performance    |
+| #  | Task                                                                       | Impact | Effort   | Category       |
+| -- | -------------------------------------------------------------------------- | ------ | -------- | -------------- |
+| 1  | **Fix doc drift: reconcile test counts across all docs to 177**            | 🔴     | 🟢 5min  | Debt           |
+| 2  | **Update `CHANGELOG.md` [Unreleased] with error-handling overhaul**        | 🔴     | 🟢 10min | Debt           |
+| 3  | **Make `go-cqrs-lite` public** → drop `vendor/`, real `vendorHash`         | 🔴     | 🟡 1h    | Debt           |
+| 4  | **Adopt `encoding/json/v2`** (Go 1.26 policy)                              | 🟡     | 🟡 30min | Policy         |
+| 5  | **Unify `SyncResult`/`ConflictResult`** via shared embedded struct         | 🔴     | 🟡 1h    | Architecture   |
+| 6  | **OpenTelemetry instrumentation** (spans for `Sync`, `SyncItems`, HTTP)    | 🔴     | 🟡 2h    | Observability  |
+| 7  | **API authentication middleware** (API key)                                | 🔴     | 🟡 1h    | Security       |
+| 8  | **API rate limiting middleware**                                           | 🟡     | 🟡 1h    | Security       |
+| 9  | **Integration test: real error-taxonomy provider**                         | 🟡     | 🟡 1h    | Testing        |
+| 10 | **Adopt `UpcasterRegistry`** for schema evolution                          | 🟡     | 🟡 1h    | Architecture   |
+| 11 | **Delete or implement `retryAfterer`** (YAGNI decision)                    | 🟢     | 🟢 15min | Debt           |
+| 12 | **API pagination headers** (`X-Total-Count`, cursor)                       | 🟡     | 🟡 1h    | Feature        |
+| 13 | **Conflict resolution per-sync override** (`SyncOptions.ConflictResolver`) | 🟡     | 🟡 45min | Feature        |
+| 14 | **OpenAPI error response schemas** per endpoint                            | 🟡     | 🟡 45min | Docs           |
+| 15 | **Improve `pkg/cqrs` coverage** (81.2% → 85%+)                             | 🟡     | 🟡 1h    | Quality        |
+| 16 | **`govalid` struct tags** for `SyncOptions`, `CQRSConfig`                  | 🟢     | 🟡 30min | Policy         |
+| 17 | **Document `SyncStore` error-wrapping contract** in the interface          | 🟡     | 🟢 10min | Architecture   |
+| 18 | **RFC 7807 problem details** in API error responses (use `field` context)  | 🟢     | 🟡 45min | Feature        |
+| 19 | **Property-based test for `HTTPStatus`**                                   | 🟢     | 🟡 30min | Testing        |
+| 20 | **Export to JSON/CSV**                                                     | 🟢     | 🟡 1h    | Feature        |
+| 21 | **Structured logging fields** consistency (source, page, event_id)         | 🟢     | 🟡 30min | Observability  |
+| 22 | **CONTRIBUTING.md** architecture guide                                     | 🟢     | 🟡 45min | Docs           |
+| 23 | **`ErrContextCancelled` sentinel** for non-HTTP consumers                  | 🟢     | 🟢 15min | Error handling |
+| 24 | **Snapshot test** for `mapSyncError` HTTP responses (go-snaps)             | 🟢     | 🟡 30min | Testing        |
+| 25 | **Benchmark `HTTPStatus`** hot path (called on every API error)            | 🟢     | 🟢 15min | Performance    |
 
 ---
 

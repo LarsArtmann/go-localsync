@@ -1,7 +1,7 @@
 # Post-Consolidation Status Report
 
-**Date:** 2026-05-17 19:28  
-**Session:** Consolidation cleanup + conflict detection fix  
+**Date:** 2026-05-17 19:28\
+**Session:** Consolidation cleanup + conflict detection fix\
 **Projects:** go-localsync, go-cqrs-lite
 
 ---
@@ -132,33 +132,33 @@ No remaining critical issues.
 
 ## f) TOP 25 THINGS TO DO NEXT
 
-| #   | Priority | Project      | Task                                                                     | Impact | Effort |
-| --- | -------- | ------------ | ------------------------------------------------------------------------ | ------ | ------ |
-| 1   | 🔴 P0    | go-localsync | **Update README.md** — Remove deleted code refs, justfile, sqlc          | HIGH   | 30min  |
-| 2   | 🔴 P0    | go-localsync | **Update FEATURES.md** — Remove legacy storage references                | MEDIUM | 15min  |
-| 3   | 🔴 P0    | go-localsync | **Update TODO_LIST.md** — Remove completed/stale items                   | LOW    | 15min  |
-| 4   | 🔴 P0    | go-cqrs-lite | **Tag v0.1.0-alpha** — First public release, storage experimental        | HIGH   | 30min  |
-| 5   | 🟡 P1    | go-localsync | **Add CLI tests** — Test exitCodeForError, flag parsing, signal handling | HIGH   | 2h     |
-| 6   | 🟡 P1    | go-localsync | **Add Push/Pull tests** — Test Turso remote sync methods                 | MEDIUM | 1h     |
-| 7   | 🟡 P1    | go-localsync | **Wire error taxonomy** — go-cqrs-lite error classification → exit codes | MEDIUM | 1h     |
-| 8   | 🟡 P1    | go-localsync | **Adopt projection.Runner** — Replace custom Projector                   | MEDIUM | 2h     |
-| 9   | 🟡 P1    | go-localsync | **Migrate testify → stdlib** — 6 test files                              | LOW    | 3h     |
-| 10  | 🟡 P1    | go-localsync | **Archive old status docs** — 23 stale files in docs/status/             | LOW    | 5min   |
-| 11  | 🟡 P1    | go-cqrs-lite | **CONTRIBUTING.md** — Referenced in README but missing                   | LOW    | 1h     |
-| 12  | 🟢 P2    | go-localsync | **Use time.Time in event payloads** — Replace int64 unix nanoseconds     | MEDIUM | 1h     |
-| 13  | 🟢 P2    | go-localsync | **Make SyncAction a typed enum** — Better type safety                    | LOW    | 30min  |
-| 14  | 🟢 P2    | go-localsync | **Real GitHub PAT smoke test** — End-to-end verification                 | MEDIUM | 1h     |
-| 15  | 🟢 P2    | go-localsync | **Add JSON output flag** — Structured output for CLI                     | LOW    | 1h     |
-| 16  | 🟢 P2    | go-localsync | **Add structured logging fields** — Consistent context                   | LOW    | 1h     |
-| 17  | 🟢 P2    | go-cqrs-lite | **PostgreSQL integration tests** — Real PG, not just mocks               | MEDIUM | 4h     |
-| 18  | 🟢 P2    | go-cqrs-lite | **Implement Saga/Process Manager** — Design done, 18h estimate           | HIGH   | 18h    |
-| 19  | 🟢 P2    | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox               | HIGH   | 4h     |
-| 20  | 🟢 P2    | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md                 | LOW    | 30min  |
-| 21  | 🟢 P2    | go-cqrs-lite | **Consolidate CatalogMeta** — Share between event/command/query          | LOW    | 2h     |
-| 22  | 🟢 P2    | cqrs-htmx    | **Add DecodeRequest[T]** — Access body + \*http.Request                  | HIGH   | 4h     |
-| 23  | 🟢 P2    | go-localsync | **Build TUI with Bubble Tea** — Interactive event browser                | LOW    | 2h     |
-| 24  | 🟢 P2    | go-localsync | **Daemon/background mode** — Periodic sync as service                    | MEDIUM | 2h     |
-| 25  | 🟢 P2    | go-localsync | **HTTP API endpoint** — REST via cqrs-htmx                               | MEDIUM | 4h     |
+| #  | Priority | Project      | Task                                                                     | Impact | Effort |
+| -- | -------- | ------------ | ------------------------------------------------------------------------ | ------ | ------ |
+| 1  | 🔴 P0    | go-localsync | **Update README.md** — Remove deleted code refs, justfile, sqlc          | HIGH   | 30min  |
+| 2  | 🔴 P0    | go-localsync | **Update FEATURES.md** — Remove legacy storage references                | MEDIUM | 15min  |
+| 3  | 🔴 P0    | go-localsync | **Update TODO_LIST.md** — Remove completed/stale items                   | LOW    | 15min  |
+| 4  | 🔴 P0    | go-cqrs-lite | **Tag v0.1.0-alpha** — First public release, storage experimental        | HIGH   | 30min  |
+| 5  | 🟡 P1    | go-localsync | **Add CLI tests** — Test exitCodeForError, flag parsing, signal handling | HIGH   | 2h     |
+| 6  | 🟡 P1    | go-localsync | **Add Push/Pull tests** — Test Turso remote sync methods                 | MEDIUM | 1h     |
+| 7  | 🟡 P1    | go-localsync | **Wire error taxonomy** — go-cqrs-lite error classification → exit codes | MEDIUM | 1h     |
+| 8  | 🟡 P1    | go-localsync | **Adopt projection.Runner** — Replace custom Projector                   | MEDIUM | 2h     |
+| 9  | 🟡 P1    | go-localsync | **Migrate testify → stdlib** — 6 test files                              | LOW    | 3h     |
+| 10 | 🟡 P1    | go-localsync | **Archive old status docs** — 23 stale files in docs/status/             | LOW    | 5min   |
+| 11 | 🟡 P1    | go-cqrs-lite | **CONTRIBUTING.md** — Referenced in README but missing                   | LOW    | 1h     |
+| 12 | 🟢 P2    | go-localsync | **Use time.Time in event payloads** — Replace int64 unix nanoseconds     | MEDIUM | 1h     |
+| 13 | 🟢 P2    | go-localsync | **Make SyncAction a typed enum** — Better type safety                    | LOW    | 30min  |
+| 14 | 🟢 P2    | go-localsync | **Real GitHub PAT smoke test** — End-to-end verification                 | MEDIUM | 1h     |
+| 15 | 🟢 P2    | go-localsync | **Add JSON output flag** — Structured output for CLI                     | LOW    | 1h     |
+| 16 | 🟢 P2    | go-localsync | **Add structured logging fields** — Consistent context                   | LOW    | 1h     |
+| 17 | 🟢 P2    | go-cqrs-lite | **PostgreSQL integration tests** — Real PG, not just mocks               | MEDIUM | 4h     |
+| 18 | 🟢 P2    | go-cqrs-lite | **Implement Saga/Process Manager** — Design done, 18h estimate           | HIGH   | 18h    |
+| 19 | 🟢 P2    | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox               | HIGH   | 4h     |
+| 20 | 🟢 P2    | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md                 | LOW    | 30min  |
+| 21 | 🟢 P2    | go-cqrs-lite | **Consolidate CatalogMeta** — Share between event/command/query          | LOW    | 2h     |
+| 22 | 🟢 P2    | cqrs-htmx    | **Add DecodeRequest[T]** — Access body + \*http.Request                  | HIGH   | 4h     |
+| 23 | 🟢 P2    | go-localsync | **Build TUI with Bubble Tea** — Interactive event browser                | LOW    | 2h     |
+| 24 | 🟢 P2    | go-localsync | **Daemon/background mode** — Periodic sync as service                    | MEDIUM | 2h     |
+| 25 | 🟢 P2    | go-localsync | **HTTP API endpoint** — REST via cqrs-htmx                               | MEDIUM | 4h     |
 
 ---
 

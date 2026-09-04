@@ -1,7 +1,7 @@
 # Comprehensive Status Report — Semantic Code Deduplication Sprint
 
-**Date:** 2026-05-21 21:48 UTC  
-**Branch:** master  
+**Date:** 2026-05-21 21:48 UTC\
+**Branch:** master\
 **Trigger:** `art-dupl -t 20 . --semantic --sort total-tokens`
 
 ---
@@ -75,18 +75,18 @@ Added to `pkg/providers/github/client_test.go`:
 
 ### Remaining 10 Clone Groups (from 30 original)
 
-| #   | Count | Description                                                           | Why Partial                                                       |
-| --- | ----- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 1   | 4     | `mustNoError + if len(result.Items) != X` in client_test              | Different expected values per test — not extractable              |
-| 2   | 3     | `testhelpers.NewTestEvent(...)` calls across bdd_test/client_test     | Cross-package test data construction                              |
-| 3   | 4     | ExternalID assertions in client_bdd_test.go                           | External test package (`github_test`) cannot use internal helpers |
-| 4   | 4     | Cross-package `ExternalID.Get()` checks                               | Same — different packages                                         |
-| 5   | 2     | `mustNoError` + `assertEqual` in cqrs vs github packages              | Go requires separate test helpers per package                     |
-| 6   | 2     | `newRateLimitCoreServer` + `&gh.Rate{...}` with different reset times | Values differ semantically                                        |
-| 7   | 2     | `decider.go:90,110` — identical function signatures                   | **Production code** — intentional API design                      |
-| 8   | 2     | `testItem` slice construction in stack_test                           | Test data with different values                                   |
-| 9   | 2     | Push/Pull error check in pushpull_test                                | Already differentiated with format strings                        |
-| 10  | 2     | `assertExternalID` / `assertType` cross-package                       | Same helper in different packages                                 |
+| #  | Count | Description                                                           | Why Partial                                                       |
+| -- | ----- | --------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 1  | 4     | `mustNoError + if len(result.Items) != X` in client_test              | Different expected values per test — not extractable              |
+| 2  | 3     | `testhelpers.NewTestEvent(...)` calls across bdd_test/client_test     | Cross-package test data construction                              |
+| 3  | 4     | ExternalID assertions in client_bdd_test.go                           | External test package (`github_test`) cannot use internal helpers |
+| 4  | 4     | Cross-package `ExternalID.Get()` checks                               | Same — different packages                                         |
+| 5  | 2     | `mustNoError` + `assertEqual` in cqrs vs github packages              | Go requires separate test helpers per package                     |
+| 6  | 2     | `newRateLimitCoreServer` + `&gh.Rate{...}` with different reset times | Values differ semantically                                        |
+| 7  | 2     | `decider.go:90,110` — identical function signatures                   | **Production code** — intentional API design                      |
+| 8  | 2     | `testItem` slice construction in stack_test                           | Test data with different values                                   |
+| 9  | 2     | Push/Pull error check in pushpull_test                                | Already differentiated with format strings                        |
+| 10 | 2     | `assertExternalID` / `assertType` cross-package                       | Same helper in different packages                                 |
 
 **All 10 remaining groups are unavoidable** due to Go's test package architecture or intentional API design.
 
@@ -124,33 +124,33 @@ Added to `pkg/providers/github/client_test.go`:
 
 ## f) Top 25 Things We Should Get Done Next
 
-| #   | Priority | Task                                                                                                            | Impact          |
-| --- | -------- | --------------------------------------------------------------------------------------------------------------- | --------------- |
-| 1   | P0       | Reconcile test count (144 vs 197) — update AGENTS.md with accurate count                                        | Accuracy        |
-| 2   | P0       | Update AGENTS.md with deduplication sprint results and new test helpers                                         | Docs            |
-| 3   | P1       | Add integration tests for `cmd/examples/github-sync/main.go` (10.5% → 50%+)                                     | Coverage        |
-| 4   | P1       | Add `pkg/testhelpers/assertions.go` with exported `MustNoError`, `AssertEqual` to eliminate cross-package clone | DRY             |
-| 5   | P1       | Adopt `sync.LWWResolver[T]` + `sync.VectorClock` from go-cqrs-lite for formal conflict resolution               | Quality         |
-| 6   | P1       | Add a second provider (e.g., GitLab) to validate the pluggable architecture                                     | Architecture    |
-| 7   | P2       | Add E2E test that exercises full stack: fetch → sync → read model → query                                       | Confidence      |
-| 8   | P2       | Add `SyncOptions.OnProgress` callback tests in sync package                                                     | Coverage        |
-| 9   | P2       | Add concurrent sync stress test (multiple goroutines syncing simultaneously)                                    | Reliability     |
-| 10  | P2       | Add snapshot restoration test for Turso backend (verify state after crash+restart)                              | Reliability     |
-| 11  | P2       | Add Turso remote sync integration test (requires test infrastructure)                                           | Coverage        |
-| 12  | P2       | Add property-based testing for `AggregateID` determinism (fuzz inputs)                                          | Correctness     |
-| 13  | P2       | Add `go-cmp` or `diff` output for test assertion failures (better DX)                                           | DX              |
-| 14  | P3       | Add Prometheus/OpenTelemetry metrics to CQRS stack                                                              | Observability   |
-| 15  | P3       | Add structured logging correlation (trace IDs through full sync pipeline)                                       | Observability   |
-| 16  | P3       | Add graceful shutdown with in-flight sync completion                                                            | Reliability     |
-| 17  | P3       | Add CLI `--watch` mode for continuous sync                                                                      | Feature         |
-| 18  | P3       | Add config file support (YAML/TOML) in addition to env vars                                                     | DX              |
-| 19  | P3       | Extract `pkg/cqrs` into standalone `go-localsync-cqrs` module                                                   | Architecture    |
-| 20  | P3       | Add schema migration support for Turso read model                                                               | Maintainability |
-| 21  | P3       | Add `SyncResult` diff summary (what changed between syncs)                                                      | Feature         |
-| 22  | P4       | Add WebSocket/SSE endpoint for real-time sync status                                                            | Feature         |
-| 23  | P4       | Add `go-cqrs-lite/catalog` integration for AsyncAPI/D2 docs generation                                          | Docs            |
-| 24  | P4       | Add `middleware.CommandRetry` from go-cqrs-lite for provider retry                                              | Resilience      |
-| 25  | P4       | Add `UpcasterRegistry` for schema evolution support                                                             | Evolution       |
+| #  | Priority | Task                                                                                                            | Impact          |
+| -- | -------- | --------------------------------------------------------------------------------------------------------------- | --------------- |
+| 1  | P0       | Reconcile test count (144 vs 197) — update AGENTS.md with accurate count                                        | Accuracy        |
+| 2  | P0       | Update AGENTS.md with deduplication sprint results and new test helpers                                         | Docs            |
+| 3  | P1       | Add integration tests for `cmd/examples/github-sync/main.go` (10.5% → 50%+)                                     | Coverage        |
+| 4  | P1       | Add `pkg/testhelpers/assertions.go` with exported `MustNoError`, `AssertEqual` to eliminate cross-package clone | DRY             |
+| 5  | P1       | Adopt `sync.LWWResolver[T]` + `sync.VectorClock` from go-cqrs-lite for formal conflict resolution               | Quality         |
+| 6  | P1       | Add a second provider (e.g., GitLab) to validate the pluggable architecture                                     | Architecture    |
+| 7  | P2       | Add E2E test that exercises full stack: fetch → sync → read model → query                                       | Confidence      |
+| 8  | P2       | Add `SyncOptions.OnProgress` callback tests in sync package                                                     | Coverage        |
+| 9  | P2       | Add concurrent sync stress test (multiple goroutines syncing simultaneously)                                    | Reliability     |
+| 10 | P2       | Add snapshot restoration test for Turso backend (verify state after crash+restart)                              | Reliability     |
+| 11 | P2       | Add Turso remote sync integration test (requires test infrastructure)                                           | Coverage        |
+| 12 | P2       | Add property-based testing for `AggregateID` determinism (fuzz inputs)                                          | Correctness     |
+| 13 | P2       | Add `go-cmp` or `diff` output for test assertion failures (better DX)                                           | DX              |
+| 14 | P3       | Add Prometheus/OpenTelemetry metrics to CQRS stack                                                              | Observability   |
+| 15 | P3       | Add structured logging correlation (trace IDs through full sync pipeline)                                       | Observability   |
+| 16 | P3       | Add graceful shutdown with in-flight sync completion                                                            | Reliability     |
+| 17 | P3       | Add CLI `--watch` mode for continuous sync                                                                      | Feature         |
+| 18 | P3       | Add config file support (YAML/TOML) in addition to env vars                                                     | DX              |
+| 19 | P3       | Extract `pkg/cqrs` into standalone `go-localsync-cqrs` module                                                   | Architecture    |
+| 20 | P3       | Add schema migration support for Turso read model                                                               | Maintainability |
+| 21 | P3       | Add `SyncResult` diff summary (what changed between syncs)                                                      | Feature         |
+| 22 | P4       | Add WebSocket/SSE endpoint for real-time sync status                                                            | Feature         |
+| 23 | P4       | Add `go-cqrs-lite/catalog` integration for AsyncAPI/D2 docs generation                                          | Docs            |
+| 24 | P4       | Add `middleware.CommandRetry` from go-cqrs-lite for provider retry                                              | Resilience      |
+| 25 | P4       | Add `UpcasterRegistry` for schema evolution support                                                             | Evolution       |
 
 ---
 

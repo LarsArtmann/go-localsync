@@ -14,11 +14,11 @@ Reviewed the full 1588-line feedback document and its 2026-07-05 revisit appendi
 
 **3 corrections applied to the appendix's current-tense claims:**
 
-| #   | What                          | Before                         | After                                                                                                      |
-| --- | ----------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| 1   | Test-count self-contradiction | "191 tests (was ~120)"         | "194 tests (was 225)" — measured: 225 at v0.3.0 → 194 now                                                  |
-| 2   | Gap-6 current cell            | "4 methods (List/Count/Types)" | "3 methods (List/Count/CountByType) — GetTypes removed"                                                    |
-| 3   | Cosmetic-drift reconciliation | (missing)                      | Added callout naming deleted→tombstone `8c0847f`, GetTypes removal `92f50f9`, +checkpoint/DLQ via ADR-0006 |
+| # | What                          | Before                         | After                                                                                                      |
+| - | ----------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| 1 | Test-count self-contradiction | "191 tests (was ~120)"         | "194 tests (was 225)" — measured: 225 at v0.3.0 → 194 now                                                  |
+| 2 | Gap-6 current cell            | "4 methods (List/Count/Types)" | "3 methods (List/Count/CountByType) — GetTypes removed"                                                    |
+| 3 | Cosmetic-drift reconciliation | (missing)                      | Added callout naming deleted→tombstone `8c0847f`, GetTypes removal `92f50f9`, +checkpoint/DLQ via ADR-0006 |
 
 HTML tag balance re-verified (div 82/82, table 4/4, section 9/9).
 

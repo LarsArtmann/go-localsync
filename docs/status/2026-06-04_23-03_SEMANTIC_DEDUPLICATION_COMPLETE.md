@@ -17,16 +17,16 @@ Reduced code duplication from **9 clone groups** to **0 clone groups** at thresh
 
 ### Session 10 Work (This Session)
 
-| #   | What                                                                | Files Changed                                           | Impact                                                                                                                                               |
-| --- | ------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Created `pkg/testutil/` package**                                 | `testutil.go`, `syncstore.go`                           | Shared `MustNoError`, `AssertEqual[T]`, `AssertExternalID`, `AssertType`, `SyncStoreListBehavior` — eliminates cross-package test helper duplication |
-| 2   | **Extracted `testStateWithTimestamp` helper**                       | `pkg/cqrs/testing_test.go`                              | Replaces 4 inline `SyncItemState{Item: &provider.Item{...}}` blocks in decider tests                                                                 |
-| 3   | **Extracted `newUpdatedAtLWWResolver` helper**                      | `pkg/cqrs/testing_test.go`                              | Replaces 4 duplicated `crdt.NewLWWResolver[*provider.Item](...)` + error check blocks                                                                |
-| 4   | **Extracted `newVCTestConflict` + `newTiedVCTestConflict` helpers** | `pkg/crdt/conflict_test.go`                             | Replaces 4 duplicated `&Conflict[testItem]{Local/Remote/LocalVC/RemoteVC}` blocks                                                                    |
-| 5   | **Refactored BDD field assertions to table-driven**                 | `pkg/providers/github/client_bdd_test.go`               | Eliminated 4 identical assertion clones with different data                                                                                          |
-| 6   | **Migrated all test helpers to `testutil` package**                 | 11 test files across `pkg/cqrs`, `pkg/providers/github` | All calls now use `testutil.MustNoError`, `testutil.AssertEqual`, etc.                                                                               |
-| 7   | **Embedded `SyncStoreListBehavior` in mock stores**                 | `pkg/api/server_test.go`, `pkg/sync/sync_test.go`       | Shared `ListItems()` implementation, eliminated identical error-check pattern                                                                        |
-| 8   | **Removed unused imports**                                          | `decider_resolver_test.go`, `stack_classify_test.go`    | Removed `pkg/id`, `pkg/crdt` imports after delegating to helpers                                                                                     |
+| # | What                                                                | Files Changed                                           | Impact                                                                                                                                               |
+| - | ------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **Created `pkg/testutil/` package**                                 | `testutil.go`, `syncstore.go`                           | Shared `MustNoError`, `AssertEqual[T]`, `AssertExternalID`, `AssertType`, `SyncStoreListBehavior` — eliminates cross-package test helper duplication |
+| 2 | **Extracted `testStateWithTimestamp` helper**                       | `pkg/cqrs/testing_test.go`                              | Replaces 4 inline `SyncItemState{Item: &provider.Item{...}}` blocks in decider tests                                                                 |
+| 3 | **Extracted `newUpdatedAtLWWResolver` helper**                      | `pkg/cqrs/testing_test.go`                              | Replaces 4 duplicated `crdt.NewLWWResolver[*provider.Item](...)` + error check blocks                                                                |
+| 4 | **Extracted `newVCTestConflict` + `newTiedVCTestConflict` helpers** | `pkg/crdt/conflict_test.go`                             | Replaces 4 duplicated `&Conflict[testItem]{Local/Remote/LocalVC/RemoteVC}` blocks                                                                    |
+| 5 | **Refactored BDD field assertions to table-driven**                 | `pkg/providers/github/client_bdd_test.go`               | Eliminated 4 identical assertion clones with different data                                                                                          |
+| 6 | **Migrated all test helpers to `testutil` package**                 | 11 test files across `pkg/cqrs`, `pkg/providers/github` | All calls now use `testutil.MustNoError`, `testutil.AssertEqual`, etc.                                                                               |
+| 7 | **Embedded `SyncStoreListBehavior` in mock stores**                 | `pkg/api/server_test.go`, `pkg/sync/sync_test.go`       | Shared `ListItems()` implementation, eliminated identical error-check pattern                                                                        |
+| 8 | **Removed unused imports**                                          | `decider_resolver_test.go`, `stack_classify_test.go`    | Removed `pkg/id`, `pkg/crdt` imports after delegating to helpers                                                                                     |
 
 ### Pre-existing (Sessions 1–9)
 
@@ -118,43 +118,43 @@ From TODO_LIST.md — items with no code:
 
 ### High Priority (Blocking / Quality)
 
-| #   | Task                                                        | Package                 | Effort | Impact                                                    |
-| --- | ----------------------------------------------------------- | ----------------------- | ------ | --------------------------------------------------------- |
-| 1   | Add E2E integration test (Provider → CQRS → RM → API)       | cross-cutting           | ~2h    | High — first test that verifies everything works together |
-| 2   | Add concurrent read model access test with `-race`          | `pkg/cqrs`              | ~30min | High — catch data races before production                 |
-| 3   | Fix `nilnil` lint: `runner.go:22` sentinel error            | `pkg/cqrs`              | ~5min  | Low — but keeps lint at 0                                 |
-| 4   | Fix `noinlineerr` lint: `provider_test.go:151`              | `pkg/provider`          | ~5min  | Low — but keeps lint at 0                                 |
-| 5   | Resolve go-cqrs-lite upstream WIP (Sink→EventSink rename)   | `go.mod`                | ~2h    | High — unblocks future dep upgrades                       |
-| 6   | Add `HasChanged` table-driven edge case tests               | `pkg/cqrs`              | ~30min | Medium — subtle bugs hide in field comparison             |
-| 7   | Verify `ConflictAwareSyncer` local-wins path in integration | `pkg/sync` + `pkg/cqrs` | ~30min | Medium — new code path never tested end-to-end            |
+| # | Task                                                        | Package                 | Effort | Impact                                                    |
+| - | ----------------------------------------------------------- | ----------------------- | ------ | --------------------------------------------------------- |
+| 1 | Add E2E integration test (Provider → CQRS → RM → API)       | cross-cutting           | ~2h    | High — first test that verifies everything works together |
+| 2 | Add concurrent read model access test with `-race`          | `pkg/cqrs`              | ~30min | High — catch data races before production                 |
+| 3 | Fix `nilnil` lint: `runner.go:22` sentinel error            | `pkg/cqrs`              | ~5min  | Low — but keeps lint at 0                                 |
+| 4 | Fix `noinlineerr` lint: `provider_test.go:151`              | `pkg/provider`          | ~5min  | Low — but keeps lint at 0                                 |
+| 5 | Resolve go-cqrs-lite upstream WIP (Sink→EventSink rename)   | `go.mod`                | ~2h    | High — unblocks future dep upgrades                       |
+| 6 | Add `HasChanged` table-driven edge case tests               | `pkg/cqrs`              | ~30min | Medium — subtle bugs hide in field comparison             |
+| 7 | Verify `ConflictAwareSyncer` local-wins path in integration | `pkg/sync` + `pkg/cqrs` | ~30min | Medium — new code path never tested end-to-end            |
 
 ### Medium Priority (Architecture / DRY)
 
-| #   | Task                                                          | Package        | Effort | Impact                                            |
-| --- | ------------------------------------------------------------- | -------------- | ------ | ------------------------------------------------- |
-| 8   | Consolidate test item factories into `testutil.NewTestItem()` | cross-cutting  | ~1h    | Medium — 3 different test item constructors exist |
-| 9   | Add `pkg/testutil` tests (MustNoError, AssertEqual)           | `pkg/testutil` | ~20min | Low — trivial but good hygiene                    |
-| 10  | Split `pkg/sync/sync.go` (348 lines) into focused files       | `pkg/sync`     | ~30min | Medium — approaching soft limit                   |
-| 11  | Remove `CQRSStack.GetTypes` duplicate, keep `GetItemTypes`    | `pkg/cqrs`     | ~15min | Low — two names for same method                   |
-| 12  | Extract full `MockSyncStore` to `pkg/testutil`                | cross-cutting  | ~1h    | Medium — 3 packages have their own mock           |
-| 13  | Add CLI flag `--conflict-strategy` for resolver selection     | `cmd/examples` | ~1h    | Medium — CRDT resolver wired but no CLI flag      |
-| 14  | Add `mapSyncError()` table-driven tests                       | `pkg/api`      | ~20min | Medium — error→HTTP mapping is critical for API   |
+| #  | Task                                                          | Package        | Effort | Impact                                            |
+| -- | ------------------------------------------------------------- | -------------- | ------ | ------------------------------------------------- |
+| 8  | Consolidate test item factories into `testutil.NewTestItem()` | cross-cutting  | ~1h    | Medium — 3 different test item constructors exist |
+| 9  | Add `pkg/testutil` tests (MustNoError, AssertEqual)           | `pkg/testutil` | ~20min | Low — trivial but good hygiene                    |
+| 10 | Split `pkg/sync/sync.go` (348 lines) into focused files       | `pkg/sync`     | ~30min | Medium — approaching soft limit                   |
+| 11 | Remove `CQRSStack.GetTypes` duplicate, keep `GetItemTypes`    | `pkg/cqrs`     | ~15min | Low — two names for same method                   |
+| 12 | Extract full `MockSyncStore` to `pkg/testutil`                | cross-cutting  | ~1h    | Medium — 3 packages have their own mock           |
+| 13 | Add CLI flag `--conflict-strategy` for resolver selection     | `cmd/examples` | ~1h    | Medium — CRDT resolver wired but no CLI flag      |
+| 14 | Add `mapSyncError()` table-driven tests                       | `pkg/api`      | ~20min | Medium — error→HTTP mapping is critical for API   |
 
 ### Lower Priority (Features / Nice-to-Have)
 
-| #   | Task                                                                   | Package                            | Effort | Impact                                   |
-| --- | ---------------------------------------------------------------------- | ---------------------------------- | ------ | ---------------------------------------- |
-| 15  | Improve `cmd/examples/github-sync` coverage (13.7%)                    | `cmd/examples`                     | ~2h    | Medium — lowest coverage in project      |
-| 16  | Improve `pkg/api` coverage to 85%+                                     | `pkg/api`                          | ~1h    | Medium — error path gaps                 |
-| 17  | Performance benchmarks for SyncItems (1k/10k/100k)                     | `pkg/cqrs` + `pkg/sync`            | ~1h    | Medium — unknown scaling characteristics |
-| 18  | OpenTelemetry instrumentation (spans for sync, API)                    | cross-cutting                      | ~3h    | High — no observability today            |
-| 19  | Real GitHub PAT smoke test                                             | `cmd/examples`                     | ~30min | Medium — never tested with real API      |
-| 20  | Doc comments for ~18 exported types                                    | `pkg/id`, `pkg/errors`, `pkg/crdt` | ~30min | Low — `go doc` returns empty             |
-| 21  | File-based SQLite persistence test across restarts                     | `pkg/cqrs`                         | ~1h    | Medium — only `:memory:` tested          |
-| 22  | Export to JSON/CSV (`-export json`)                                    | `cmd/examples`                     | ~1h    | Low — user request                       |
-| 23  | Unify test framework (remove remaining testify patterns)               | cross-cutting                      | ~2h    | Low — consistency                        |
-| 24  | Conflict resolution per-sync override (`SyncOptions.ConflictResolver`) | `pkg/sync`                         | ~1h    | Medium — flexibility                     |
-| 25  | Real-time sync protocol (`SyncRequest`/`SyncResponse` from CRDT)       | `pkg/crdt`                         | ~4h    | High — multi-node sync foundation        |
+| #  | Task                                                                   | Package                            | Effort | Impact                                   |
+| -- | ---------------------------------------------------------------------- | ---------------------------------- | ------ | ---------------------------------------- |
+| 15 | Improve `cmd/examples/github-sync` coverage (13.7%)                    | `cmd/examples`                     | ~2h    | Medium — lowest coverage in project      |
+| 16 | Improve `pkg/api` coverage to 85%+                                     | `pkg/api`                          | ~1h    | Medium — error path gaps                 |
+| 17 | Performance benchmarks for SyncItems (1k/10k/100k)                     | `pkg/cqrs` + `pkg/sync`            | ~1h    | Medium — unknown scaling characteristics |
+| 18 | OpenTelemetry instrumentation (spans for sync, API)                    | cross-cutting                      | ~3h    | High — no observability today            |
+| 19 | Real GitHub PAT smoke test                                             | `cmd/examples`                     | ~30min | Medium — never tested with real API      |
+| 20 | Doc comments for ~18 exported types                                    | `pkg/id`, `pkg/errors`, `pkg/crdt` | ~30min | Low — `go doc` returns empty             |
+| 21 | File-based SQLite persistence test across restarts                     | `pkg/cqrs`                         | ~1h    | Medium — only `:memory:` tested          |
+| 22 | Export to JSON/CSV (`-export json`)                                    | `cmd/examples`                     | ~1h    | Low — user request                       |
+| 23 | Unify test framework (remove remaining testify patterns)               | cross-cutting                      | ~2h    | Low — consistency                        |
+| 24 | Conflict resolution per-sync override (`SyncOptions.ConflictResolver`) | `pkg/sync`                         | ~1h    | Medium — flexibility                     |
+| 25 | Real-time sync protocol (`SyncRequest`/`SyncResponse` from CRDT)       | `pkg/crdt`                         | ~4h    | High — multi-node sync foundation        |
 
 ---
 

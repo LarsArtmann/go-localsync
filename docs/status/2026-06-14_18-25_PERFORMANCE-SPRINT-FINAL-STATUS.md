@@ -10,15 +10,15 @@
 
 ### Performance Optimizations (Committed & Pushed)
 
-| ID  | Optimization                                                   | Impact                                              | Commit    |
-| --- | -------------------------------------------------------------- | --------------------------------------------------- | --------- |
-| T1  | SQLite WAL mode enabled in `store_factory.go`                  | Concurrent read-during-write                        | `2df72e7` |
-| T3  | Aggregate ID `sync.Map` cache in `aggregate_id.go`             | Eliminates SHA256 on repeat keys                    | `2df72e7` |
-| T4  | HTTP client 30s timeout + transport pool tuning                | Prevents hung connections                           | `2df72e7` |
-| T5  | Rate limit cache from API response headers                     | Eliminates `/rate_limit` API call after first fetch | `38e954b` |
-| T6  | Middleware logging moved to Debug level                        | ~3 fewer log lines per synced item                  | `2df72e7` |
-| T7  | SQLite scanItems pre-allocation + struct reuse                 | Eliminates per-row struct allocation                | `38e954b` |
-| T9  | Concurrent FetchAll via `errgroup` + bounded semaphore (cap=3) | ~3x faster multi-page fetches                       | `38e954b` |
+| ID | Optimization                                                   | Impact                                              | Commit    |
+| -- | -------------------------------------------------------------- | --------------------------------------------------- | --------- |
+| T1 | SQLite WAL mode enabled in `store_factory.go`                  | Concurrent read-during-write                        | `2df72e7` |
+| T3 | Aggregate ID `sync.Map` cache in `aggregate_id.go`             | Eliminates SHA256 on repeat keys                    | `2df72e7` |
+| T4 | HTTP client 30s timeout + transport pool tuning                | Prevents hung connections                           | `2df72e7` |
+| T5 | Rate limit cache from API response headers                     | Eliminates `/rate_limit` API call after first fetch | `38e954b` |
+| T6 | Middleware logging moved to Debug level                        | ~3 fewer log lines per synced item                  | `2df72e7` |
+| T7 | SQLite scanItems pre-allocation + struct reuse                 | Eliminates per-row struct allocation                | `38e954b` |
+| T9 | Concurrent FetchAll via `errgroup` + bounded semaphore (cap=3) | ~3x faster multi-page fetches                       | `38e954b` |
 
 ### Architecture Quality Fixes
 

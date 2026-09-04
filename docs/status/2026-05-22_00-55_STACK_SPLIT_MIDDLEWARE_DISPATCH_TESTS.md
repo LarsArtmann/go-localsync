@@ -98,33 +98,33 @@ Added `*.db-wal` and `*.db-shm` — SQLite WAL mode artifacts that appeared duri
 
 ## C) NOT STARTED ⬜
 
-| #   | Item                                                 | Priority | Effort | Impact                                                  |
-| --- | ---------------------------------------------------- | -------- | ------ | ------------------------------------------------------- |
-| 1   | Add query metrics middleware                         | MEDIUM   | 1h     | Histograms for query latency, counters for query types  |
-| 2   | `sync.LWWResolver[T]` for formal conflict resolution | MEDIUM   | 2h     | Formalize conflict resolution                           |
-| 3   | Second provider (GitLab, Bitbucket, etc.)            | MEDIUM   | 8h+    | Multi-provider support                                  |
-| 4   | `UpcasterRegistry` for schema evolution              | LOW      | 3h     | Only 1 schema version exists                            |
-| 5   | `catalog/` for AsyncAPI/OpenAPI/D2                   | LOW      | 4h     | Documentation automation                                |
-| 6   | Flaky test hardening for Turso async tests           | MEDIUM   | 2h     | Tests use `waitForCount` with 5s deadline               |
-| 7   | `cmd/examples/github-sync/main.go` coverage (10.5%)  | LOW      | 1h     | Extract logic into testable function                    |
-| 8   | `core/aggregate` adoption                            | LOW      | 3h     | We use `decider.Decider` directly — correct, no benefit |
-| 9   | Return domain result from `DecideFunc`               | MEDIUM   | 2h     | Requires go-cqrs-lite API change                        |
-| 10  | Benchmark tests for `SyncItems` with large batches   | LOW      | 1h     | Performance baseline                                    |
-| 11  | Integration test for outbox crash recovery           | HIGH     | 2h     | Verify events survive process crash                     |
-| 12  | Context timeout on `SyncItems`                       | MEDIUM   | 15min  | Prevent runaway sync operations                         |
-| 13  | `query.Pagination` adoption for `ItemFilter`         | LOW      | 1h     | Our `ItemFilter.Limit/Offset` works fine                |
-| 14  | `event.CausationID` for per-item tracing             | LOW      | 30min  | Granular causation tracking                             |
-| 15  | Structured logging for sync summary                  | LOW      | 30min  | Post-sync log with counts                               |
-| 16  | Test `Pull()` success path                           | HIGH     | 15min  | Only error path tested                                  |
-| 17  | Test `createTursoRemoteStore` error paths            | HIGH     | 45min  | 19% coverage, production risk                           |
-| 18  | Replace deprecated Turso legacy client               | MEDIUM   | 2h     | `go-structure-linter` flags it                          |
-| 19  | Create `flake.nix` for build automation              | LOW      | 2h     | LarsArtmann standard                                    |
-| 20  | Adopt `go.opentelemetry.io/otel`                     | LOW      | 3h     | Flagged by library policy                               |
-| 21  | Add `Close()` integration test for Turso             | MEDIUM   | 30min  | Coverage                                                |
-| 22  | Add context timeout to `SyncItems`                   | MEDIUM   | 15min  | Robustness                                              |
-| 23  | Wire `event.CausationID` for per-item tracing        | LOW      | 30min  | Observability                                           |
-| 24  | Create `flake.nix` for build automation              | LOW      | 2h     | Infrastructure                                          |
-| 25  | Adopt OpenTelemetry instead of direct Prometheus     | LOW      | 3h     | Observability                                           |
+| #  | Item                                                 | Priority | Effort | Impact                                                  |
+| -- | ---------------------------------------------------- | -------- | ------ | ------------------------------------------------------- |
+| 1  | Add query metrics middleware                         | MEDIUM   | 1h     | Histograms for query latency, counters for query types  |
+| 2  | `sync.LWWResolver[T]` for formal conflict resolution | MEDIUM   | 2h     | Formalize conflict resolution                           |
+| 3  | Second provider (GitLab, Bitbucket, etc.)            | MEDIUM   | 8h+    | Multi-provider support                                  |
+| 4  | `UpcasterRegistry` for schema evolution              | LOW      | 3h     | Only 1 schema version exists                            |
+| 5  | `catalog/` for AsyncAPI/OpenAPI/D2                   | LOW      | 4h     | Documentation automation                                |
+| 6  | Flaky test hardening for Turso async tests           | MEDIUM   | 2h     | Tests use `waitForCount` with 5s deadline               |
+| 7  | `cmd/examples/github-sync/main.go` coverage (10.5%)  | LOW      | 1h     | Extract logic into testable function                    |
+| 8  | `core/aggregate` adoption                            | LOW      | 3h     | We use `decider.Decider` directly — correct, no benefit |
+| 9  | Return domain result from `DecideFunc`               | MEDIUM   | 2h     | Requires go-cqrs-lite API change                        |
+| 10 | Benchmark tests for `SyncItems` with large batches   | LOW      | 1h     | Performance baseline                                    |
+| 11 | Integration test for outbox crash recovery           | HIGH     | 2h     | Verify events survive process crash                     |
+| 12 | Context timeout on `SyncItems`                       | MEDIUM   | 15min  | Prevent runaway sync operations                         |
+| 13 | `query.Pagination` adoption for `ItemFilter`         | LOW      | 1h     | Our `ItemFilter.Limit/Offset` works fine                |
+| 14 | `event.CausationID` for per-item tracing             | LOW      | 30min  | Granular causation tracking                             |
+| 15 | Structured logging for sync summary                  | LOW      | 30min  | Post-sync log with counts                               |
+| 16 | Test `Pull()` success path                           | HIGH     | 15min  | Only error path tested                                  |
+| 17 | Test `createTursoRemoteStore` error paths            | HIGH     | 45min  | 19% coverage, production risk                           |
+| 18 | Replace deprecated Turso legacy client               | MEDIUM   | 2h     | `go-structure-linter` flags it                          |
+| 19 | Create `flake.nix` for build automation              | LOW      | 2h     | LarsArtmann standard                                    |
+| 20 | Adopt `go.opentelemetry.io/otel`                     | LOW      | 3h     | Flagged by library policy                               |
+| 21 | Add `Close()` integration test for Turso             | MEDIUM   | 30min  | Coverage                                                |
+| 22 | Add context timeout to `SyncItems`                   | MEDIUM   | 15min  | Robustness                                              |
+| 23 | Wire `event.CausationID` for per-item tracing        | LOW      | 30min  | Observability                                           |
+| 24 | Create `flake.nix` for build automation              | LOW      | 2h     | Infrastructure                                          |
+| 25 | Adopt OpenTelemetry instead of direct Prometheus     | LOW      | 3h     | Observability                                           |
 
 ---
 
@@ -169,33 +169,33 @@ Added `*.db-wal` and `*.db-shm` — SQLite WAL mode artifacts that appeared duri
 
 Sorted by impact × urgency.
 
-| #   | Task                                                             | Impact | Effort | Category       |
-| --- | ---------------------------------------------------------------- | ------ | ------ | -------------- |
-| 1   | Test `createTursoRemoteStore` error paths                        | HIGH   | 45min  | Coverage       |
-| 2   | Test `Pull()` success path                                       | HIGH   | 15min  | Coverage       |
-| 3   | Commit and tag go-cqrs-lite exports                              | HIGH   | 30min  | Dependencies   |
-| 4   | Integration test for outbox crash recovery                       | HIGH   | 2h     | Reliability    |
-| 5   | Add query metrics middleware                                     | MEDIUM | 1h     | Architecture   |
-| 6   | Wire `sync.LWWResolver[T]` for formal conflict resolution        | MEDIUM | 2h     | Feature        |
-| 7   | Add second provider (GitLab/Bitbucket)                           | HIGH   | 8h+    | Feature        |
-| 8   | Extract `cmd/examples/github-sync/main.go` logic for testability | MEDIUM | 1h     | Coverage       |
-| 9   | Replace deprecated Turso legacy client                           | MEDIUM | 2h     | Dependencies   |
-| 10  | Return domain result from `DecideFunc`                           | MEDIUM | 2h     | Architecture   |
-| 11  | Flaky test hardening (longer deadlines, retries)                 | MEDIUM | 2h     | Reliability    |
-| 12  | Benchmark tests for `SyncItems` with large batches               | MEDIUM | 1h     | Performance    |
-| 13  | Add `Close()` integration test for Turso                         | MEDIUM | 30min  | Coverage       |
-| 14  | Add context timeout to `SyncItems`                               | MEDIUM | 15min  | Robustness     |
-| 15  | Wire `event.CausationID` for per-item tracing                    | LOW    | 30min  | Observability  |
-| 16  | Create `flake.nix` for build automation                          | LOW    | 2h     | Infrastructure |
-| 17  | Adopt OpenTelemetry instead of direct Prometheus                 | LOW    | 3h     | Observability  |
-| 18  | Add structured logging for sync summary                          | LOW    | 30min  | Observability  |
-| 19  | `query.Pagination` adoption for `ItemFilter`                     | LOW    | 1h     | Architecture   |
-| 20  | `UpcasterRegistry` for schema evolution                          | LOW    | 3h     | Feature        |
-| 21  | `catalog/` for AsyncAPI/OpenAPI/D2 generation                    | LOW    | 4h     | Documentation  |
-| 22  | Remove dead `testhelpers` or adopt across tests                  | LOW    | 2h     | Cleanup        |
-| 23  | Migrate Turso tests to use `t.TempDir()` for file DBs            | LOW    | 30min  | Test hygiene   |
-| 24  | Add provider interface compliance test (table-driven)            | LOW    | 1h     | Test coverage  |
-| 25  | Document middleware usage in README/architecture docs            | LOW    | 1h     | Documentation  |
+| #  | Task                                                             | Impact | Effort | Category       |
+| -- | ---------------------------------------------------------------- | ------ | ------ | -------------- |
+| 1  | Test `createTursoRemoteStore` error paths                        | HIGH   | 45min  | Coverage       |
+| 2  | Test `Pull()` success path                                       | HIGH   | 15min  | Coverage       |
+| 3  | Commit and tag go-cqrs-lite exports                              | HIGH   | 30min  | Dependencies   |
+| 4  | Integration test for outbox crash recovery                       | HIGH   | 2h     | Reliability    |
+| 5  | Add query metrics middleware                                     | MEDIUM | 1h     | Architecture   |
+| 6  | Wire `sync.LWWResolver[T]` for formal conflict resolution        | MEDIUM | 2h     | Feature        |
+| 7  | Add second provider (GitLab/Bitbucket)                           | HIGH   | 8h+    | Feature        |
+| 8  | Extract `cmd/examples/github-sync/main.go` logic for testability | MEDIUM | 1h     | Coverage       |
+| 9  | Replace deprecated Turso legacy client                           | MEDIUM | 2h     | Dependencies   |
+| 10 | Return domain result from `DecideFunc`                           | MEDIUM | 2h     | Architecture   |
+| 11 | Flaky test hardening (longer deadlines, retries)                 | MEDIUM | 2h     | Reliability    |
+| 12 | Benchmark tests for `SyncItems` with large batches               | MEDIUM | 1h     | Performance    |
+| 13 | Add `Close()` integration test for Turso                         | MEDIUM | 30min  | Coverage       |
+| 14 | Add context timeout to `SyncItems`                               | MEDIUM | 15min  | Robustness     |
+| 15 | Wire `event.CausationID` for per-item tracing                    | LOW    | 30min  | Observability  |
+| 16 | Create `flake.nix` for build automation                          | LOW    | 2h     | Infrastructure |
+| 17 | Adopt OpenTelemetry instead of direct Prometheus                 | LOW    | 3h     | Observability  |
+| 18 | Add structured logging for sync summary                          | LOW    | 30min  | Observability  |
+| 19 | `query.Pagination` adoption for `ItemFilter`                     | LOW    | 1h     | Architecture   |
+| 20 | `UpcasterRegistry` for schema evolution                          | LOW    | 3h     | Feature        |
+| 21 | `catalog/` for AsyncAPI/OpenAPI/D2 generation                    | LOW    | 4h     | Documentation  |
+| 22 | Remove dead `testhelpers` or adopt across tests                  | LOW    | 2h     | Cleanup        |
+| 23 | Migrate Turso tests to use `t.TempDir()` for file DBs            | LOW    | 30min  | Test hygiene   |
+| 24 | Add provider interface compliance test (table-driven)            | LOW    | 1h     | Test coverage  |
+| 25 | Document middleware usage in README/architecture docs            | LOW    | 1h     | Documentation  |
 
 ---
 

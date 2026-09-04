@@ -155,48 +155,48 @@ Sorted by **Impact × Effort** (highest ROI first):
 
 ### Tier 1: Quick Wins (< 30 min each, high impact)
 
-| #   | Item                                                                 | Effort | Impact       | Why                                                                   |
-| --- | -------------------------------------------------------------------- | ------ | ------------ | --------------------------------------------------------------------- |
-| 1   | Fix README.md "Turso-backed" → "SQLite-backed"                       | 5 min  | Correctness  | Misleading docs                                                       |
-| 2   | Rename `ConfigureTursoPool` → `ConfigureSQLitePool` in store_factory | 5 min  | Clarity      | Last turso remnant in code                                            |
-| 3   | Fix `nlreturn` lint in `sync_outcome.go`                             | 2 min  | Lint hygiene | One blank line                                                        |
-| 4   | Add `HasChanged` doc comment about fields NOT compared               | 5 min  | Clarity      | Silent data loss potential                                            |
-| 5   | Update TODO_LIST.md stale references (test count, file names)        | 10 min | Accuracy     | Outdated metrics                                                      |
-| 6   | Add compile-time `ReadModel` assertions for both implementations     | 5 min  | Type safety  | `var _ ReadModel = (*MemoryReadModel)(nil)` already exists for SQLite |
-| 7   | Restart LSP to clear stale diagnostics                               | 1 min  | DX           | False errors distracting                                              |
+| # | Item                                                                 | Effort | Impact       | Why                                                                   |
+| - | -------------------------------------------------------------------- | ------ | ------------ | --------------------------------------------------------------------- |
+| 1 | Fix README.md "Turso-backed" → "SQLite-backed"                       | 5 min  | Correctness  | Misleading docs                                                       |
+| 2 | Rename `ConfigureTursoPool` → `ConfigureSQLitePool` in store_factory | 5 min  | Clarity      | Last turso remnant in code                                            |
+| 3 | Fix `nlreturn` lint in `sync_outcome.go`                             | 2 min  | Lint hygiene | One blank line                                                        |
+| 4 | Add `HasChanged` doc comment about fields NOT compared               | 5 min  | Clarity      | Silent data loss potential                                            |
+| 5 | Update TODO_LIST.md stale references (test count, file names)        | 10 min | Accuracy     | Outdated metrics                                                      |
+| 6 | Add compile-time `ReadModel` assertions for both implementations     | 5 min  | Type safety  | `var _ ReadModel = (*MemoryReadModel)(nil)` already exists for SQLite |
+| 7 | Restart LSP to clear stale diagnostics                               | 1 min  | DX           | False errors distracting                                              |
 
 ### Tier 2: Medium Effort (1-3 hours each, high impact)
 
-| #   | Item                                                      | Effort | Impact       | Why                           |
-| --- | --------------------------------------------------------- | ------ | ------------ | ----------------------------- |
-| 8   | Add focused tests for `SyncOutcome` + `decideWithOutcome` | 30 min | Coverage     | New code has no direct tests  |
-| 9   | Delete or wire `data/repo/` package                       | 1 hr   | Clarity      | Zero prod implementations     |
-| 10  | Delete or wire `data/transform/` package                  | 1 hr   | Clarity      | Never wired into pipeline     |
-| 11  | Delete `model.ProviderItem` or wire it                    | 30 min | Clarity      | Dead type with tests          |
-| 12  | Add `ActorAvatarURL` to `HasChanged` comparison           | 15 min | Correctness  | Silent data loss              |
-| 13  | Extract `provider.ItemFilter` → use `data/query` criteria | 2 hr   | Architecture | Unify query layer             |
-| 14  | Add structured API error responses via Huma               | 1 hr   | API quality  | Currently returns bare errors |
+| #  | Item                                                      | Effort | Impact       | Why                           |
+| -- | --------------------------------------------------------- | ------ | ------------ | ----------------------------- |
+| 8  | Add focused tests for `SyncOutcome` + `decideWithOutcome` | 30 min | Coverage     | New code has no direct tests  |
+| 9  | Delete or wire `data/repo/` package                       | 1 hr   | Clarity      | Zero prod implementations     |
+| 10 | Delete or wire `data/transform/` package                  | 1 hr   | Clarity      | Never wired into pipeline     |
+| 11 | Delete `model.ProviderItem` or wire it                    | 30 min | Clarity      | Dead type with tests          |
+| 12 | Add `ActorAvatarURL` to `HasChanged` comparison           | 15 min | Correctness  | Silent data loss              |
+| 13 | Extract `provider.ItemFilter` → use `data/query` criteria | 2 hr   | Architecture | Unify query layer             |
+| 14 | Add structured API error responses via Huma               | 1 hr   | API quality  | Currently returns bare errors |
 
 ### Tier 3: Larger Efforts (3+ hours each, strategic impact)
 
-| #   | Item                                                    | Effort | Impact                  | Why                                   |
-| --- | ------------------------------------------------------- | ------ | ----------------------- | ------------------------------------- |
-| 15  | Second provider (GitLab) to validate Provider interface | 4 hr   | Architecture validation | Only GitHub exists                    |
-| 16  | Wire `data/query` into CQRS read model                  | 3 hr   | Architecture            | Replace hand-rolled filter/pagination |
-| 17  | OpenTelemetry tracing for sync pipeline                 | 3 hr   | Observability           | Production readiness                  |
-| 18  | CI pipeline (GitHub Actions)                            | 2 hr   | Quality                 | No automated CI exists                |
-| 19  | Benchmark suite with baselines                          | 2 hr   | Performance             | No perf regression detection          |
-| 20  | Schema migration tooling for SQLite                     | 4 hr   | Operations              | No DDL evolution strategy             |
+| #  | Item                                                    | Effort | Impact                  | Why                                   |
+| -- | ------------------------------------------------------- | ------ | ----------------------- | ------------------------------------- |
+| 15 | Second provider (GitLab) to validate Provider interface | 4 hr   | Architecture validation | Only GitHub exists                    |
+| 16 | Wire `data/query` into CQRS read model                  | 3 hr   | Architecture            | Replace hand-rolled filter/pagination |
+| 17 | OpenTelemetry tracing for sync pipeline                 | 3 hr   | Observability           | Production readiness                  |
+| 18 | CI pipeline (GitHub Actions)                            | 2 hr   | Quality                 | No automated CI exists                |
+| 19 | Benchmark suite with baselines                          | 2 hr   | Performance             | No perf regression detection          |
+| 20 | Schema migration tooling for SQLite                     | 4 hr   | Operations              | No DDL evolution strategy             |
 
 ### Tier 4: Long-term Strategic
 
-| #   | Item                                                         | Effort  | Impact           | Why          |
-| --- | ------------------------------------------------------------ | ------- | ---------------- | ------------ |
-| 21  | TUI with Bubble Tea                                          | 1 week  | UX               | Roadmap goal |
-| 22  | Multi-node sync protocol (CRDT `SyncRequest`/`SyncResponse`) | 2 weeks | Architecture     | Roadmap goal |
-| 23  | Daemon/background mode                                       | 1 week  | Operations       | Roadmap goal |
-| 24  | JSON/CSV export endpoints                                    | 4 hr    | API completeness | Roadmap goal |
-| 25  | Multi-user sync (parallel `-user` flags)                     | 1 week  | Scale            | Roadmap goal |
+| #  | Item                                                         | Effort  | Impact           | Why          |
+| -- | ------------------------------------------------------------ | ------- | ---------------- | ------------ |
+| 21 | TUI with Bubble Tea                                          | 1 week  | UX               | Roadmap goal |
+| 22 | Multi-node sync protocol (CRDT `SyncRequest`/`SyncResponse`) | 2 weeks | Architecture     | Roadmap goal |
+| 23 | Daemon/background mode                                       | 1 week  | Operations       | Roadmap goal |
+| 24 | JSON/CSV export endpoints                                    | 4 hr    | API completeness | Roadmap goal |
+| 25 | Multi-user sync (parallel `-user` flags)                     | 1 week  | Scale            | Roadmap goal |
 
 ---
 

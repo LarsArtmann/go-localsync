@@ -1,8 +1,8 @@
 # Session Status Report — 2026-04-19 07:04
 
-**Session Type:** Comprehensive Audit-Driven Improvement (Session 3)  
-**Start:** 2026-04-19 ~06:00  
-**Status:** IN PROGRESS — Uncommitted changes in working tree  
+**Session Type:** Comprehensive Audit-Driven Improvement (Session 3)\
+**Start:** 2026-04-19 ~06:00\
+**Status:** IN PROGRESS — Uncommitted changes in working tree\
 **Build:** REBUILDING (cache was corrupted, clean + rebuild in progress)
 
 ---
@@ -15,8 +15,8 @@ This session continues the audit-driven improvement of `go-localsync`. A fresh d
 
 ## Git State
 
-**Branch:** `master`  
-**Ahead of origin:** 2 commits (not pushed)  
+**Branch:** `master`\
+**Ahead of origin:** 2 commits (not pushed)\
 **Uncommitted changes:** 4 files modified
 
 ### Committed This Session (2 new commits)
@@ -28,8 +28,8 @@ This session continues the audit-driven improvement of `go-localsync`. A fresh d
 
 ### Uncommitted Changes (4 files, 25 insertions)
 
-| File                              | Change                                                                        | Status                                |
-| --------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------- |
+| File                              | Change                                                                        | Status                               |
+| --------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------ |
 | `pkg/sync/conflict_aware.go`      | Added `item.Validate()` call in `processItem`; skip no-op write on local-wins | ⚠️ TESTS PASSING (before cache issue) |
 | `pkg/sync/conflict_aware_test.go` | Updated "local wins" test: `Upserted=0, Skipped=1`                            | ⚠️ Same                               |
 | `pkg/sync/sync.go`                | Added `item.Validate()` call in `processIncrementalItems`                     | ⚠️ Same                               |
@@ -54,16 +54,16 @@ This session continues the audit-driven improvement of `go-localsync`. A fresh d
 
 ## A) FULLY DONE ✅
 
-| #   | Task                                                    | Commit         | Verified                                                                |
-| --- | ------------------------------------------------------- | -------------- | ----------------------------------------------------------------------- |
-| 1   | **Comprehensive third audit completed**                 | N/A (analysis) | ✅ All source files re-read                                             |
-| 2   | **Planning document written**                           | `b83a318`      | ✅ At `docs/planning/2026-04-19_0628-COMPREHENSIVE_THIRD_AUDIT_PLAN.md` |
-| 3   | **CRITICAL BUG: BDD tests hitting real GitHub API**     | `27e9772`      | ✅ Added `WithBaseURL` method, wired in `newGitHubTestClient`           |
-| 4   | **Item.Validate() integrated into conflict-aware sync** | (uncommitted)  | ✅ Added in `processItem` before `findExistingItem`                     |
-| 5   | **Item.Validate() integrated into incremental sync**    | (uncommitted)  | ✅ Added in `processIncrementalItems` before `toUpsert` append          |
-| 6   | **No-op write eliminated on local-wins**                | (uncommitted)  | ✅ `resolveConflict` now skips write when `resolved == local`           |
-| 7   | **NewMinimalTestItem fixed**                            | (uncommitted)  | ✅ Added `Source` and `UpdatedAt` fields for Validate compatibility     |
-| 8   | **Test updated for local-wins behavior**                | (uncommitted)  | ✅ `Upserted=0, Skipped=1` for local-wins case                          |
+| # | Task                                                    | Commit         | Verified                                                                |
+| - | ------------------------------------------------------- | -------------- | ----------------------------------------------------------------------- |
+| 1 | **Comprehensive third audit completed**                 | N/A (analysis) | ✅ All source files re-read                                             |
+| 2 | **Planning document written**                           | `b83a318`      | ✅ At `docs/planning/2026-04-19_0628-COMPREHENSIVE_THIRD_AUDIT_PLAN.md` |
+| 3 | **CRITICAL BUG: BDD tests hitting real GitHub API**     | `27e9772`      | ✅ Added `WithBaseURL` method, wired in `newGitHubTestClient`           |
+| 4 | **Item.Validate() integrated into conflict-aware sync** | (uncommitted)  | ✅ Added in `processItem` before `findExistingItem`                     |
+| 5 | **Item.Validate() integrated into incremental sync**    | (uncommitted)  | ✅ Added in `processIncrementalItems` before `toUpsert` append          |
+| 6 | **No-op write eliminated on local-wins**                | (uncommitted)  | ✅ `resolveConflict` now skips write when `resolved == local`           |
+| 7 | **NewMinimalTestItem fixed**                            | (uncommitted)  | ✅ Added `Source` and `UpdatedAt` fields for Validate compatibility     |
+| 8 | **Test updated for local-wins behavior**                | (uncommitted)  | ✅ `Upserted=0, Skipped=1` for local-wins case                          |
 
 **Prior session completions (already pushed):**
 
@@ -77,9 +77,9 @@ This session continues the audit-driven improvement of `go-localsync`. A fresh d
 
 ## B) PARTIALLY DONE ⚠️
 
-| #   | Task                            | What's Done                                          | What Remains                                                                                                                                                   |
-| --- | ------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Item.Validate() integration** | Added to `processItem` and `processIncrementalItems` | NOT added to `Syncer.Sync` (uses `UpsertBatch` — need pre-batch validation loop). Tests were passing before cache corruption. Need to rebuild, verify, commit. |
+| # | Task                            | What's Done                                          | What Remains                                                                                                                                                   |
+| - | ------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **Item.Validate() integration** | Added to `processItem` and `processIncrementalItems` | NOT added to `Syncer.Sync` (uses `UpsertBatch` — need pre-batch validation loop). Tests were passing before cache corruption. Need to rebuild, verify, commit. |
 
 ---
 
@@ -87,29 +87,29 @@ This session continues the audit-driven improvement of `go-localsync`. A fresh d
 
 Sorted by priority (from audit plan):
 
-| #   | Task                                                       | Priority | Effort | Impact                    |
-| --- | ---------------------------------------------------------- | -------- | ------ | ------------------------- |
-| 1   | **Consolidate NewStorageItem + NewTestItem** (split brain) | 🟠 P2    | 20min  | Eliminates confusion      |
-| 2   | **Fix MockProvider.GetRateLimit sharing FetchErr**         | 🟠 P2    | 15min  | Independent mock control  |
-| 3   | **Unify not-found convention** (GetByID vs GetLatest)      | 🟠 P1    | 45min  | Consistent error handling |
-| 4   | **Storage interface: string → types.ItemID**               | 🟠 P1    | 60min  | Type safety at boundary   |
-| 5   | **Fix formatting** (sync.go:138-142, main.go:163-166)      | 🔵 P3    | 10min  | Code quality              |
-| 6   | **Reorder token validation before DB open**                | 🟡 P2    | 15min  | Resource efficiency       |
-| 7   | **N+1 optimization: BatchGetByIDs**                        | 🟡 P3    | 90min  | Performance at scale      |
-| 8   | **RawJSON type: []byte → json.RawMessage**                 | 🟡 P2    | 20min  | Idiomatic Go              |
-| 9   | **Remove trailing blank line in storage.go**               | 🔵 P4    | 2min   | Nit                       |
-| 10  | **Fix misleading test name** (sqlite_test.go)              | 🔵 P4    | 3min   | Test clarity              |
-| 11  | **Make storage tests parallel-safe**                       | 🟡 P3    | 30min  | CI speed                  |
-| 12  | **Verify sqlc-generated code**                             | 🟡 P3    | 15min  | Codegen integrity         |
+| #  | Task                                                       | Priority | Effort | Impact                    |
+| -- | ---------------------------------------------------------- | -------- | ------ | ------------------------- |
+| 1  | **Consolidate NewStorageItem + NewTestItem** (split brain) | 🟠 P2    | 20min  | Eliminates confusion      |
+| 2  | **Fix MockProvider.GetRateLimit sharing FetchErr**         | 🟠 P2    | 15min  | Independent mock control  |
+| 3  | **Unify not-found convention** (GetByID vs GetLatest)      | 🟠 P1    | 45min  | Consistent error handling |
+| 4  | **Storage interface: string → types.ItemID**               | 🟠 P1    | 60min  | Type safety at boundary   |
+| 5  | **Fix formatting** (sync.go:138-142, main.go:163-166)      | 🔵 P3    | 10min  | Code quality              |
+| 6  | **Reorder token validation before DB open**                | 🟡 P2    | 15min  | Resource efficiency       |
+| 7  | **N+1 optimization: BatchGetByIDs**                        | 🟡 P3    | 90min  | Performance at scale      |
+| 8  | **RawJSON type: []byte → json.RawMessage**                 | 🟡 P2    | 20min  | Idiomatic Go              |
+| 9  | **Remove trailing blank line in storage.go**               | 🔵 P4    | 2min   | Nit                       |
+| 10 | **Fix misleading test name** (sqlite_test.go)              | 🔵 P4    | 3min   | Test clarity              |
+| 11 | **Make storage tests parallel-safe**                       | 🟡 P3    | 30min  | CI speed                  |
+| 12 | **Verify sqlc-generated code**                             | 🟡 P3    | 15min  | Codegen integrity         |
 
 ---
 
 ## D) TOTALLY FUCKED UP 💥
 
-| #   | Issue                                                | Severity    | Details                                                                                                                                              |
-| --- | ---------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Go build cache corruption**                        | 🔴 BLOCKING | `go clean -cache` → rebuild in progress. Cache got corrupted mid-session. Full rebuild takes ~3-5 minutes. Background rebuild running (shell `0DA`). |
-| 2   | **Uncommitted working changes during cache rebuild** | 🟠 RISKY    | 4 files with 25 insertions are uncommitted. If rebuild fails, changes could be lost. Should commit ASAP once tests pass.                             |
+| # | Issue                                                | Severity    | Details                                                                                                                                              |
+| - | ---------------------------------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **Go build cache corruption**                        | 🔴 BLOCKING | `go clean -cache` → rebuild in progress. Cache got corrupted mid-session. Full rebuild takes ~3-5 minutes. Background rebuild running (shell `0DA`). |
+| 2 | **Uncommitted working changes during cache rebuild** | 🟠 RISKY    | 4 files with 25 insertions are uncommitted. If rebuild fails, changes could be lost. Should commit ASAP once tests pass.                             |
 
 ---
 
@@ -142,33 +142,33 @@ Sorted by priority (from audit plan):
 
 Sorted by importance × urgency ÷ effort:
 
-| #   | Task                                                        | Effort | Impact | Why                                   |
-| --- | ----------------------------------------------------------- | ------ | ------ | ------------------------------------- |
-| 1   | **Commit uncommitted changes** (after rebuild passes)       | 5min   | 🔴     | Risk of losing work                   |
-| 2   | **Push all commits to origin**                              | 2min   | 🔴     | 2 commits ahead, uncommitted changes  |
-| 3   | **Add Validate to Syncer.Sync** (pre-batch validation loop) | 15min  | 🟠     | Ghost system still partially bypassed |
-| 4   | **Consolidate NewStorageItem into NewTestItem**             | 20min  | 🟠     | Split brain fix                       |
-| 5   | **Add RateLimitErr to MockProvider**                        | 15min  | 🟠     | Independent error control             |
-| 6   | **Unify not-found: GetByID → return nil, ErrNotFound**      | 45min  | 🟠     | Consistency                           |
-| 7   | **Update all GetByID callers for ErrNotFound**              | 15min  | 🟠     | Follows from #6                       |
-| 8   | **Storage interface: string → types.ItemID**                | 60min  | 🟠     | Type safety                           |
-| 9   | **Update all callers/tests for ItemID signatures**          | 20min  | 🟠     | Follows from #8                       |
-| 10  | **RawJSON: []byte → json.RawMessage**                       | 20min  | 🟡     | Idiomatic Go                          |
-| 11  | **Fix sync.go:138-142 indentation** (3→2 tabs)              | 5min   | 🔵     | Code style                            |
-| 12  | **Fix main.go:163-166 indentation**                         | 5min   | 🔵     | Code style                            |
-| 13  | **Reorder token validation before DB open**                 | 15min  | 🟡     | Resource waste                        |
-| 14  | **Remove trailing blank line in storage.go**                | 2min   | 🔵     | Nit                                   |
-| 15  | **Fix misleading test name in sqlite_test.go**              | 3min   | 🔵     | Clarity                               |
-| 16  | **Add BatchGetByIDs to storage interface**                  | 15min  | 🟡     | N+1 optimization prep                 |
-| 17  | **Implement BatchGetByIDs in sqlite.go**                    | 30min  | 🟡     | N+1 optimization                      |
-| 18  | **Replace N+1 loop with BatchGetByIDs**                     | 15min  | 🟡     | Performance fix                       |
-| 19  | **Add test for BatchGetByIDs**                              | 15min  | 🟡     | Coverage                              |
-| 20  | **Make storage tests parallel-safe**                        | 30min  | 🟡     | CI speed                              |
-| 21  | **Verify sqlc-generated code freshness**                    | 15min  | 🟡     | Codegen integrity                     |
-| 22  | **Add since-parameter to Provider.FetchAll**                | 30min  | 🟡     | Incremental sync efficiency           |
-| 23  | **Consider merging ItemID and GithubEventID**               | 45min  | 🟡     | Type simplification                   |
-| 24  | **Add test: Validate rejects invalid items in Sync**        | 10min  | 🟡     | Coverage for new validation           |
-| 25  | **Add context timeout configuration to SyncOptions**        | 20min  | 🟡     | Production safety                     |
+| #  | Task                                                        | Effort | Impact | Why                                   |
+| -- | ----------------------------------------------------------- | ------ | ------ | ------------------------------------- |
+| 1  | **Commit uncommitted changes** (after rebuild passes)       | 5min   | 🔴     | Risk of losing work                   |
+| 2  | **Push all commits to origin**                              | 2min   | 🔴     | 2 commits ahead, uncommitted changes  |
+| 3  | **Add Validate to Syncer.Sync** (pre-batch validation loop) | 15min  | 🟠     | Ghost system still partially bypassed |
+| 4  | **Consolidate NewStorageItem into NewTestItem**             | 20min  | 🟠     | Split brain fix                       |
+| 5  | **Add RateLimitErr to MockProvider**                        | 15min  | 🟠     | Independent error control             |
+| 6  | **Unify not-found: GetByID → return nil, ErrNotFound**      | 45min  | 🟠     | Consistency                           |
+| 7  | **Update all GetByID callers for ErrNotFound**              | 15min  | 🟠     | Follows from #6                       |
+| 8  | **Storage interface: string → types.ItemID**                | 60min  | 🟠     | Type safety                           |
+| 9  | **Update all callers/tests for ItemID signatures**          | 20min  | 🟠     | Follows from #8                       |
+| 10 | **RawJSON: []byte → json.RawMessage**                       | 20min  | 🟡     | Idiomatic Go                          |
+| 11 | **Fix sync.go:138-142 indentation** (3→2 tabs)              | 5min   | 🔵     | Code style                            |
+| 12 | **Fix main.go:163-166 indentation**                         | 5min   | 🔵     | Code style                            |
+| 13 | **Reorder token validation before DB open**                 | 15min  | 🟡     | Resource waste                        |
+| 14 | **Remove trailing blank line in storage.go**                | 2min   | 🔵     | Nit                                   |
+| 15 | **Fix misleading test name in sqlite_test.go**              | 3min   | 🔵     | Clarity                               |
+| 16 | **Add BatchGetByIDs to storage interface**                  | 15min  | 🟡     | N+1 optimization prep                 |
+| 17 | **Implement BatchGetByIDs in sqlite.go**                    | 30min  | 🟡     | N+1 optimization                      |
+| 18 | **Replace N+1 loop with BatchGetByIDs**                     | 15min  | 🟡     | Performance fix                       |
+| 19 | **Add test for BatchGetByIDs**                              | 15min  | 🟡     | Coverage                              |
+| 20 | **Make storage tests parallel-safe**                        | 30min  | 🟡     | CI speed                              |
+| 21 | **Verify sqlc-generated code freshness**                    | 15min  | 🟡     | Codegen integrity                     |
+| 22 | **Add since-parameter to Provider.FetchAll**                | 30min  | 🟡     | Incremental sync efficiency           |
+| 23 | **Consider merging ItemID and GithubEventID**               | 45min  | 🟡     | Type simplification                   |
+| 24 | **Add test: Validate rejects invalid items in Sync**        | 10min  | 🟡     | Coverage for new validation           |
+| 25 | **Add context timeout configuration to SyncOptions**        | 20min  | 🟡     | Production safety                     |
 
 ---
 

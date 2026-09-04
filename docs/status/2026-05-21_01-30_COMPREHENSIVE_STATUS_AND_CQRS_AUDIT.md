@@ -90,10 +90,10 @@ go-localsync is a **production-viable SDK** for provider-based local sync with C
 | ---------------------------------- | ------------------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Split-brain conflict detection** | `decider.go:90-106` vs `conflict_aware.go:49-69` | 💀 CRITICAL | `DecideSync` and `ConflictAwareSyncer` both independently detect conflicts using `HasChanged()` but from different truth sources. The decider is event-sourced state; the syncer reads the read model. They CAN disagree. The decider should be the single authority. |
 | **No projection replay**           | `stack.go:50`                                    | 💀 CRITICAL | `bus.SubscribeAll(proj.HandleEvent)` means: if the process restarts, all events published before startup are SILENTLY LOST from the read model. The read model becomes stale/empty until items are re-synced. No checkpoint, no recovery.                             |
-| **Dependency version chaos**       | `go.mod`                                         | ⚠️ HIGH     | CI runs core v1.3.0 + memory v1.1.0 while local dev is on HEAD. New APIs (LoadToVersion, Version arithmetic, TypedProjection, etc.) are available locally but not in CI. Storage uses a pseudo-version that's already outdated.                                       |
-| **Turso remote path untested**     | `stack.go:242-267`                               | ⚠️ HIGH     | `createTursoRemoteStore` has 0% coverage. `initTursoSyncDB` has 0% coverage. `Pull()` has 33.3% coverage. The remote sync path — the killer feature — is essentially untested.                                                                                        |
-| **Rate limiter barely tested**     | `client.go:274`                                  | ⚠️ HIGH     | `waitForRateLimit` has 10.5% coverage. This is the function that prevents GitHub API abuse. If it has a bug, you'll hit rate limits in production with no test safety net.                                                                                            |
-| **SyncIncremental undertested**    | `sync.go:106`                                    | ⚠️ MEDIUM   | `SyncIncremental` at 37.5%, `processIncrementalItems` at 0%. Incremental sync is the production path for recurring syncs.                                                                                                                                             |
+| **Dependency version chaos**       | `go.mod`                                         | ⚠️ HIGH      | CI runs core v1.3.0 + memory v1.1.0 while local dev is on HEAD. New APIs (LoadToVersion, Version arithmetic, TypedProjection, etc.) are available locally but not in CI. Storage uses a pseudo-version that's already outdated.                                       |
+| **Turso remote path untested**     | `stack.go:242-267`                               | ⚠️ HIGH      | `createTursoRemoteStore` has 0% coverage. `initTursoSyncDB` has 0% coverage. `Pull()` has 33.3% coverage. The remote sync path — the killer feature — is essentially untested.                                                                                        |
+| **Rate limiter barely tested**     | `client.go:274`                                  | ⚠️ HIGH      | `waitForRateLimit` has 10.5% coverage. This is the function that prevents GitHub API abuse. If it has a bug, you'll hit rate limits in production with no test safety net.                                                                                            |
+| **SyncIncremental undertested**    | `sync.go:106`                                    | ⚠️ MEDIUM    | `SyncIncremental` at 37.5%, `processIncrementalItems` at 0%. Incremental sync is the production path for recurring syncs.                                                                                                                                             |
 
 ---
 
@@ -130,33 +130,33 @@ go-localsync is a **production-viable SDK** for provider-based local sync with C
 
 ## F) TOP #25 THINGS TO DO NEXT
 
-| #   | Task                                                                                                          | Priority | Effort | Impact                                        |
-| --- | ------------------------------------------------------------------------------------------------------------- | -------- | ------ | --------------------------------------------- |
-| 1   | **Bump go-cqrs-lite deps to latest tags** (core v1.4.0, memory v1.2.0, storage v0.2.0)                        | 🔴       | 30min  | Unlocks all features below                    |
-| 2   | **Adopt `projection.Runner`** for crash-safe projection with replay + checkpoint                              | 🔴       | 2h     | Prevents silent data loss on restart          |
-| 3   | **Consolidate conflict detection** — make `DecideSync` THE authority, `ConflictAwareSyncer` reads events only | 🔴       | 3h     | Eliminates split-brain                        |
-| 4   | **Wire `decider.WithOutbox`** for Turso backend                                                               | 🔴       | 1h     | Guarantees atomic save+publish                |
-| 5   | **Adopt error taxonomy** (`event.Classify`, `event.IsRetryable`) in sync loop + CLI                           | 🔴       | 2h     | Smart retry + proper exit codes               |
-| 6   | **Replace `int()` casts** with `Version.Increment()` / `Version.Add()`                                        | 🟡       | 30min  | Type safety                                   |
-| 7   | **Adopt `event.JSONCodec` + `DecodePayload[T]`** across decider + projection                                  | 🟡       | 1h     | DRY + centralized serialization               |
-| 8   | **Adopt `event.NewEvents`** in `syncEvents()` to eliminate manual version math                                | 🟡       | 30min  | Boilerplate elimination                       |
-| 9   | **Evaluate `sync.LWWResolver[T]`** to replace hand-rolled conflict logic                                      | 🟡       | 2h     | Formal conflict resolution                    |
-| 10  | **Add tests for `waitForRateLimit`** (currently 10.5% coverage)                                               | 🟡       | 1h     | Critical path safety                          |
-| 11  | **Add tests for `SyncIncremental` + `processIncrementalItems`** (37.5% + 0%)                                  | 🟡       | 1h     | Production path coverage                      |
-| 12  | **Add tests for `createTursoRemoteStore` + `Pull`** (0% + 33.3%)                                              | 🟡       | 2h     | Remote sync is the killer feature             |
-| 13  | **Simplify `aggregate_id.go`** — remove ULID round-trip                                                       | 🟢       | 15min  | Code clarity                                  |
-| 14  | **Collapse `Handle`/`HandleEvent`** on Projector                                                              | 🟢       | 15min  | Remove indirection                            |
-| 15  | **Wire `middleware.CommandRetry`** for provider retry                                                         | 🟢       | 1h     | Replace hand-rolled retry in github/client.go |
-| 16  | **Wire `middleware.EventLogging`** for structured event logging                                               | 🟢       | 30min  | Observability                                 |
-| 17  | **Add snapshot support** (`decider.WithSnapshotStore` + `EveryNEvents`)                                       | 🟢       | 1h     | Performance for frequently-synced items       |
-| 18  | **Add schema upcasting** (`UpcasterRegistry`) for event evolution                                             | 🟢       | 1h     | Future-proofing                               |
-| 19  | **Create a second provider** (e.g., GitLab, Jira, or stub)                                                    | 🟢       | 3h     | Validates Provider interface                  |
-| 20  | **Adopt `catalog/` module** for AsyncAPI/OpenAPI schema generation                                            | 🟢       | 2h     | Documentation + API discoverability           |
-| 21  | **Add integration test with real Turso** (even ephemeral local SQLite)                                        | 🟢       | 1h     | End-to-end confidence                         |
-| 22  | **Migrate build to `flake.nix`** (consistent with LarsArtmann projects)                                       | 🟢       | 2h     | Build reproducibility                         |
-| 23  | **Add `SyncSummary` JSON output** for CLI consumers                                                           | 🟢       | 30min  | Machine-readable output                       |
-| 24  | **Wire `command.Dispatcher` + `query.Dispatcher`** for typed sync commands                                    | 🟢       | 2h     | Type-safe dispatch                            |
-| 25  | **Review README test count** (says 110, actual is ~110 but varies)                                            | 🟢       | 5min   | Documentation accuracy                        |
+| #  | Task                                                                                                          | Priority | Effort | Impact                                        |
+| -- | ------------------------------------------------------------------------------------------------------------- | -------- | ------ | --------------------------------------------- |
+| 1  | **Bump go-cqrs-lite deps to latest tags** (core v1.4.0, memory v1.2.0, storage v0.2.0)                        | 🔴       | 30min  | Unlocks all features below                    |
+| 2  | **Adopt `projection.Runner`** for crash-safe projection with replay + checkpoint                              | 🔴       | 2h     | Prevents silent data loss on restart          |
+| 3  | **Consolidate conflict detection** — make `DecideSync` THE authority, `ConflictAwareSyncer` reads events only | 🔴       | 3h     | Eliminates split-brain                        |
+| 4  | **Wire `decider.WithOutbox`** for Turso backend                                                               | 🔴       | 1h     | Guarantees atomic save+publish                |
+| 5  | **Adopt error taxonomy** (`event.Classify`, `event.IsRetryable`) in sync loop + CLI                           | 🔴       | 2h     | Smart retry + proper exit codes               |
+| 6  | **Replace `int()` casts** with `Version.Increment()` / `Version.Add()`                                        | 🟡       | 30min  | Type safety                                   |
+| 7  | **Adopt `event.JSONCodec` + `DecodePayload[T]`** across decider + projection                                  | 🟡       | 1h     | DRY + centralized serialization               |
+| 8  | **Adopt `event.NewEvents`** in `syncEvents()` to eliminate manual version math                                | 🟡       | 30min  | Boilerplate elimination                       |
+| 9  | **Evaluate `sync.LWWResolver[T]`** to replace hand-rolled conflict logic                                      | 🟡       | 2h     | Formal conflict resolution                    |
+| 10 | **Add tests for `waitForRateLimit`** (currently 10.5% coverage)                                               | 🟡       | 1h     | Critical path safety                          |
+| 11 | **Add tests for `SyncIncremental` + `processIncrementalItems`** (37.5% + 0%)                                  | 🟡       | 1h     | Production path coverage                      |
+| 12 | **Add tests for `createTursoRemoteStore` + `Pull`** (0% + 33.3%)                                              | 🟡       | 2h     | Remote sync is the killer feature             |
+| 13 | **Simplify `aggregate_id.go`** — remove ULID round-trip                                                       | 🟢       | 15min  | Code clarity                                  |
+| 14 | **Collapse `Handle`/`HandleEvent`** on Projector                                                              | 🟢       | 15min  | Remove indirection                            |
+| 15 | **Wire `middleware.CommandRetry`** for provider retry                                                         | 🟢       | 1h     | Replace hand-rolled retry in github/client.go |
+| 16 | **Wire `middleware.EventLogging`** for structured event logging                                               | 🟢       | 30min  | Observability                                 |
+| 17 | **Add snapshot support** (`decider.WithSnapshotStore` + `EveryNEvents`)                                       | 🟢       | 1h     | Performance for frequently-synced items       |
+| 18 | **Add schema upcasting** (`UpcasterRegistry`) for event evolution                                             | 🟢       | 1h     | Future-proofing                               |
+| 19 | **Create a second provider** (e.g., GitLab, Jira, or stub)                                                    | 🟢       | 3h     | Validates Provider interface                  |
+| 20 | **Adopt `catalog/` module** for AsyncAPI/OpenAPI schema generation                                            | 🟢       | 2h     | Documentation + API discoverability           |
+| 21 | **Add integration test with real Turso** (even ephemeral local SQLite)                                        | 🟢       | 1h     | End-to-end confidence                         |
+| 22 | **Migrate build to `flake.nix`** (consistent with LarsArtmann projects)                                       | 🟢       | 2h     | Build reproducibility                         |
+| 23 | **Add `SyncSummary` JSON output** for CLI consumers                                                           | 🟢       | 30min  | Machine-readable output                       |
+| 24 | **Wire `command.Dispatcher` + `query.Dispatcher`** for typed sync commands                                    | 🟢       | 2h     | Type-safe dispatch                            |
+| 25 | **Review README test count** (says 110, actual is ~110 but varies)                                            | 🟢       | 5min   | Documentation accuracy                        |
 
 ---
 

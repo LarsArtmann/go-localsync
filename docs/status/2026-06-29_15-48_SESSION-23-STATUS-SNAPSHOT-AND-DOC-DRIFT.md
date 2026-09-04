@@ -102,33 +102,33 @@ No code defects. The fucked-up things are **documentation that lies** and **envi
 
 ## f) Top #25 things to do next (Pareto: impact ÷ effort)
 
-| #   | Task                                                                                                                   | Impact  | Effort          |
-| --- | ---------------------------------------------------------------------------------------------------------------------- | ------- | --------------- |
-| 1   | **Fix `CHANGELOG.md`** — add v0.2/v0.3 + tombstone pivot + CRDT removal entries (it currently advertises deleted code) | 🔴 High | Low             |
-| 2   | **Fix the 224→190 test-count lie** in `TODO_LIST.md` + `FEATURES.md`                                                   | 🔴 High | Low             |
-| 3   | **Investigate & silence the stale LSP** (regenerate vendor manifest / clear cache)                                     | 🔴 High | Low             |
-| 4   | **Add `ConflictResolver` example test** (third headline feature, no demo)                                              | 🟠 Med  | Low             |
-| 5   | **Bump `pkg/data/model` coverage** (tombstone paths → 90%+)                                                            | 🟠 Med  | Low             |
-| 6   | **Document retry is fetch-only** (comment on `fetchItems` / store path)                                                | 🟡 Low  | Low             |
-| 7   | **Expose tombstone fields on HTTP `/items`**                                                                           | 🟡 Low  | Low             |
-| 8   | **`ParseTombstoneReason` edge-case tests** (empty string)                                                              | 🟡 Low  | Low             |
-| 9   | **Structured logging fields** (source/page/event_id)                                                                   | 🟡 Low  | Low             |
-| 10  | **Bump `pkg/cqrs` coverage** (resolver/error branches → 90%+)                                                          | 🟡 Low  | Med             |
-| 11  | **OpenTelemetry: spans for `Sync` + `SyncItems` + HTTP middleware**                                                    | 🟠 Med  | Med             |
-| 12  | **Rework CI `build`/`release` jobs** for a pure-library flow                                                           | 🟠 Med  | Med             |
-| 13  | **Tombstone purge: `PurgeTombstonesBefore(t)`** on the read model                                                      | 🟠 Med  | Med             |
-| 14  | **Make `go-cqrs-lite` public** + drop committed `vendor/`                                                              | 🟠 Med  | Med             |
-| 15  | **`flake.nix`: real `vendorHash`** (unblocked by #14)                                                                  | 🟡 Low  | Low             |
-| 16  | **Schema upcasters** (ADR-0004 carry-over; `UpcasterRegistry`)                                                         | 🟡 Low  | Med             |
-| 17  | **`CompleteFetch` type** as defense-in-depth reconcile guard                                                           | 🟡 Low  | Med             |
-| 18  | **Decide `Reconcile` semantics**: best-effort vs fail-loud                                                             | 🟡 Low  | Low             |
-| 19  | **Retry the store path** (or document why not)                                                                         | 🟡 Low  | Med             |
-| 20  | **Benchmark: projection replay cost at 10k events**                                                                    | 🟡 Low  | Med             |
-| 21  | **Fuzz `AggregateID` delimiter encoding**                                                                              | 🟡 Low  | Med             |
-| 22  | **`govalid` struct tags** on `SyncOptions`, `CQRSConfig`                                                               | 🟡 Low  | Low             |
-| 23  | **Improve `CONTRIBUTING.md`** (architecture guide, conventions)                                                        | 🟡 Low  | Low             |
-| 24  | **`SyncOptions.ConflictResolver`** per-sync override                                                                   | 🟡 Low  | Med             |
-| 25  | **Decide & coordinate `pkg/sync` → `pkg/synclib` rename**                                                              | 🔴 High | High (breaking) |
+| #  | Task                                                                                                                   | Impact  | Effort          |
+| -- | ---------------------------------------------------------------------------------------------------------------------- | ------- | --------------- |
+| 1  | **Fix `CHANGELOG.md`** — add v0.2/v0.3 + tombstone pivot + CRDT removal entries (it currently advertises deleted code) | 🔴 High | Low             |
+| 2  | **Fix the 224→190 test-count lie** in `TODO_LIST.md` + `FEATURES.md`                                                   | 🔴 High | Low             |
+| 3  | **Investigate & silence the stale LSP** (regenerate vendor manifest / clear cache)                                     | 🔴 High | Low             |
+| 4  | **Add `ConflictResolver` example test** (third headline feature, no demo)                                              | 🟠 Med  | Low             |
+| 5  | **Bump `pkg/data/model` coverage** (tombstone paths → 90%+)                                                            | 🟠 Med  | Low             |
+| 6  | **Document retry is fetch-only** (comment on `fetchItems` / store path)                                                | 🟡 Low  | Low             |
+| 7  | **Expose tombstone fields on HTTP `/items`**                                                                           | 🟡 Low  | Low             |
+| 8  | **`ParseTombstoneReason` edge-case tests** (empty string)                                                              | 🟡 Low  | Low             |
+| 9  | **Structured logging fields** (source/page/event_id)                                                                   | 🟡 Low  | Low             |
+| 10 | **Bump `pkg/cqrs` coverage** (resolver/error branches → 90%+)                                                          | 🟡 Low  | Med             |
+| 11 | **OpenTelemetry: spans for `Sync` + `SyncItems` + HTTP middleware**                                                    | 🟠 Med  | Med             |
+| 12 | **Rework CI `build`/`release` jobs** for a pure-library flow                                                           | 🟠 Med  | Med             |
+| 13 | **Tombstone purge: `PurgeTombstonesBefore(t)`** on the read model                                                      | 🟠 Med  | Med             |
+| 14 | **Make `go-cqrs-lite` public** + drop committed `vendor/`                                                              | 🟠 Med  | Med             |
+| 15 | **`flake.nix`: real `vendorHash`** (unblocked by #14)                                                                  | 🟡 Low  | Low             |
+| 16 | **Schema upcasters** (ADR-0004 carry-over; `UpcasterRegistry`)                                                         | 🟡 Low  | Med             |
+| 17 | **`CompleteFetch` type** as defense-in-depth reconcile guard                                                           | 🟡 Low  | Med             |
+| 18 | **Decide `Reconcile` semantics**: best-effort vs fail-loud                                                             | 🟡 Low  | Low             |
+| 19 | **Retry the store path** (or document why not)                                                                         | 🟡 Low  | Med             |
+| 20 | **Benchmark: projection replay cost at 10k events**                                                                    | 🟡 Low  | Med             |
+| 21 | **Fuzz `AggregateID` delimiter encoding**                                                                              | 🟡 Low  | Med             |
+| 22 | **`govalid` struct tags** on `SyncOptions`, `CQRSConfig`                                                               | 🟡 Low  | Low             |
+| 23 | **Improve `CONTRIBUTING.md`** (architecture guide, conventions)                                                        | 🟡 Low  | Low             |
+| 24 | **`SyncOptions.ConflictResolver`** per-sync override                                                                   | 🟡 Low  | Med             |
+| 25 | **Decide & coordinate `pkg/sync` → `pkg/synclib` rename**                                                              | 🔴 High | High (breaking) |
 
 > Note: #1, #2, #3 are the **"stop lying"** cluster — lowest effort, highest trust payoff. They should go first, before any new feature work.
 

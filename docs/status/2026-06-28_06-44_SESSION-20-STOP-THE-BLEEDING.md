@@ -143,33 +143,33 @@
 
 ## f) Top 25 Things to Get Done Next (sorted by impact)
 
-| #   | Task                                                               | Impact      | Effort |
-| --- | ------------------------------------------------------------------ | ----------- | ------ |
-| 1   | **P2.1** — Add tombstone fields to `model.Item` + payload          | 🔴 Critical | M      |
-| 2   | **P2.2** — Replace hard DELETE with tombstone in read models       | 🔴 Critical | M      |
-| 3   | **P2.3** — Rename `DeleteItem` → `TombstoneItem(reason)`           | 🔴 Critical | S      |
-| 4   | **P2.4** — Implement reconciliation pass (upstream-gone detection) | 🔴 Critical | L      |
-| 5   | **P2.5** — Filter tombstoned items from default queries            | 🟠 High     | S      |
-| 6   | **P3.2** — Delete dead CRDT cluster B files                        | 🟠 High     | S      |
-| 7   | **P3.3** — Fold `EventItemDeleted` into tombstone semantics        | 🟠 High     | S      |
-| 8   | **P4.1** — Wire retry + backoff into fetch path                    | 🟠 High     | M      |
-| 9   | **P4.2** — Wire rate-limit / `Retry-After` respect                 | 🟠 High     | M      |
-| 10  | **P5.3** — Update README + AGENTS honestly                         | 🟠 High     | S      |
-| 11  | **P5.1** — Write `example_test.go`                                 | 🟠 High     | S      |
-| 12  | **P5.2** — Implement `pkg/provider/memory`                         | 🔵 Medium   | M      |
-| 13  | **P4.3** — Streaming progress callback                             | 🔵 Medium   | S      |
-| 14  | **P4.4** — Consult `IsRetryable` in retry loop                     | 🔵 Medium   | S      |
-| 15  | **P4.5** — Per-source mutex (fix TOCTOU)                           | 🔵 Medium   | S      |
-| 16  | **Test** — Aggregate-ID collision regression test                  | 🟠 High     | S      |
-| 17  | **Test** — hasChanged avatar/RawJSON regression test               | 🟠 High     | S      |
-| 18  | **Test** — Sync() error propagation test                           | 🟠 High     | S      |
-| 19  | **Test** — Projection version-gate resurrect prevention test       | 🟠 High     | S      |
-| 20  | **P5.4** — Update ADR-0003 + new tombstone ADR                     | 🔵 Medium   | S      |
-| 21  | **P6.2** — Real schema upcasting chain                             | 🔵 Medium   | M      |
-| 22  | **P6.3** — Expected-version assertion in decider                   | 🔵 Medium   | S      |
-| 23  | **P6.1** — Migrate ConflictResolver → go-cqrs-lite/conflict/v3     | 🔵 Medium   | L      |
-| 24  | **Docs** — Update FEATURES.md with tombstone/reconciliation status | 🟢 Low      | S      |
-| 25  | **Docs** — Update TODO_LIST.md to reflect plan progress            | 🟢 Low      | S      |
+| #  | Task                                                               | Impact      | Effort |
+| -- | ------------------------------------------------------------------ | ----------- | ------ |
+| 1  | **P2.1** — Add tombstone fields to `model.Item` + payload          | 🔴 Critical | M      |
+| 2  | **P2.2** — Replace hard DELETE with tombstone in read models       | 🔴 Critical | M      |
+| 3  | **P2.3** — Rename `DeleteItem` → `TombstoneItem(reason)`           | 🔴 Critical | S      |
+| 4  | **P2.4** — Implement reconciliation pass (upstream-gone detection) | 🔴 Critical | L      |
+| 5  | **P2.5** — Filter tombstoned items from default queries            | 🟠 High     | S      |
+| 6  | **P3.2** — Delete dead CRDT cluster B files                        | 🟠 High     | S      |
+| 7  | **P3.3** — Fold `EventItemDeleted` into tombstone semantics        | 🟠 High     | S      |
+| 8  | **P4.1** — Wire retry + backoff into fetch path                    | 🟠 High     | M      |
+| 9  | **P4.2** — Wire rate-limit / `Retry-After` respect                 | 🟠 High     | M      |
+| 10 | **P5.3** — Update README + AGENTS honestly                         | 🟠 High     | S      |
+| 11 | **P5.1** — Write `example_test.go`                                 | 🟠 High     | S      |
+| 12 | **P5.2** — Implement `pkg/provider/memory`                         | 🔵 Medium   | M      |
+| 13 | **P4.3** — Streaming progress callback                             | 🔵 Medium   | S      |
+| 14 | **P4.4** — Consult `IsRetryable` in retry loop                     | 🔵 Medium   | S      |
+| 15 | **P4.5** — Per-source mutex (fix TOCTOU)                           | 🔵 Medium   | S      |
+| 16 | **Test** — Aggregate-ID collision regression test                  | 🟠 High     | S      |
+| 17 | **Test** — hasChanged avatar/RawJSON regression test               | 🟠 High     | S      |
+| 18 | **Test** — Sync() error propagation test                           | 🟠 High     | S      |
+| 19 | **Test** — Projection version-gate resurrect prevention test       | 🟠 High     | S      |
+| 20 | **P5.4** — Update ADR-0003 + new tombstone ADR                     | 🔵 Medium   | S      |
+| 21 | **P6.2** — Real schema upcasting chain                             | 🔵 Medium   | M      |
+| 22 | **P6.3** — Expected-version assertion in decider                   | 🔵 Medium   | S      |
+| 23 | **P6.1** — Migrate ConflictResolver → go-cqrs-lite/conflict/v3     | 🔵 Medium   | L      |
+| 24 | **Docs** — Update FEATURES.md with tombstone/reconciliation status | 🟢 Low      | S      |
+| 25 | **Docs** — Update TODO_LIST.md to reflect plan progress            | 🟢 Low      | S      |
 
 ---
 

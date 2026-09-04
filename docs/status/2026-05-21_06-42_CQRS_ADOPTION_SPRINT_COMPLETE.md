@@ -146,33 +146,33 @@ The only "issue" encountered during execution was the `event.IsRetryable()` fail
 
 ## F) Top 25 Things We Should Get Done Next
 
-| #   | Task                                                                                    | Impact   | Effort | Priority |
-| --- | --------------------------------------------------------------------------------------- | -------- | ------ | -------- |
-| 1   | Wire `decider.WithOutbox` for Turso backend (atomic save+publish)                       | CRITICAL | 2h     | P0       |
-| 2   | Add `projection.Runner` (separate module) with GlobalLoader replay                      | CRITICAL | 3h     | P0       |
-| 3   | Tag go-cqrs-lite/storage v0.2.0 and update go.mod                                       | HIGH     | 15m    | P0       |
-| 4   | Add integration test: restart → events replayed → read model correct                    | HIGH     | 1h     | P1       |
-| 5   | Add `decider.WithOutbox` integration test with Turso                                    | HIGH     | 1h     | P1       |
-| 6   | Migrate `SyncItemState.Item` from `*provider.Item` to `provider.Item` (value semantics) | HIGH     | 1h     | P1       |
-| 7   | Wire `middleware.CommandRetry` for GitHub provider retry                                | MEDIUM   | 30m    | P1       |
-| 8   | Add `command.Dispatcher` for typed `SyncItem`/`DeleteItem` commands                     | MEDIUM   | 2h     | P2       |
-| 9   | Evaluate `sync.LWWResolver[T]` to replace `HasChanged()`                                | MEDIUM   | 1h     | P2       |
-| 10  | Remove `encoding/json` import from `events.go` (use `[]byte` for RawJSON)               | LOW      | 30m    | P2       |
-| 11  | Add `UpcasterRegistry` with identity upcaster for current schema                        | LOW      | 30m    | P3       |
-| 12  | Add `SchemaVersion` constants to payload structs                                        | LOW      | 30m    | P3       |
-| 13  | Wire `event.ExitCode` in CLI example for proper exit codes                              | MEDIUM   | 30m    | P2       |
-| 14  | Add E2E test: full sync → conflict → delete → resurrect cycle                           | MEDIUM   | 1h     | P2       |
-| 15  | Add Turso remote store integration test with embedded server                            | MEDIUM   | 2h     | P2       |
-| 16  | Add `context.Context` propagation to `AggregateID()` cache                              | LOW      | 15m    | P3       |
-| 17  | Add metrics middleware (`middleware.EventMetrics`) for production observability         | MEDIUM   | 1h     | P2       |
-| 18  | Add `catalog/` D2 diagram generation                                                    | LOW      | 1h     | P3       |
-| 19  | Add `testhelpers` module from go-cqrs-lite (`FakeStore`, `FakeBus`)                     | LOW      | 30m    | P3       |
-| 20  | Add GitHub provider BDD tests using ginkgo                                              | MEDIUM   | 2h     | P2       |
-| 21  | Add `Provider` interface `FetchIncremental` method for delta sync                       | HIGH     | 3h     | P1       |
-| 22  | Add `SyncOptions.Since` for time-based incremental sync                                 | MEDIUM   | 1h     | P2       |
-| 23  | Add `ReadModel.Watch` for real-time change notifications                                | LOW      | 2h     | P3       |
-| 24  | Add structured logging throughout sync loop (not just start/end)                        | LOW      | 30m    | P3       |
-| 25  | Add CI pipeline (GitHub Actions) with build + lint + test                               | HIGH     | 1h     | P1       |
+| #  | Task                                                                                    | Impact   | Effort | Priority |
+| -- | --------------------------------------------------------------------------------------- | -------- | ------ | -------- |
+| 1  | Wire `decider.WithOutbox` for Turso backend (atomic save+publish)                       | CRITICAL | 2h     | P0       |
+| 2  | Add `projection.Runner` (separate module) with GlobalLoader replay                      | CRITICAL | 3h     | P0       |
+| 3  | Tag go-cqrs-lite/storage v0.2.0 and update go.mod                                       | HIGH     | 15m    | P0       |
+| 4  | Add integration test: restart → events replayed → read model correct                    | HIGH     | 1h     | P1       |
+| 5  | Add `decider.WithOutbox` integration test with Turso                                    | HIGH     | 1h     | P1       |
+| 6  | Migrate `SyncItemState.Item` from `*provider.Item` to `provider.Item` (value semantics) | HIGH     | 1h     | P1       |
+| 7  | Wire `middleware.CommandRetry` for GitHub provider retry                                | MEDIUM   | 30m    | P1       |
+| 8  | Add `command.Dispatcher` for typed `SyncItem`/`DeleteItem` commands                     | MEDIUM   | 2h     | P2       |
+| 9  | Evaluate `sync.LWWResolver[T]` to replace `HasChanged()`                                | MEDIUM   | 1h     | P2       |
+| 10 | Remove `encoding/json` import from `events.go` (use `[]byte` for RawJSON)               | LOW      | 30m    | P2       |
+| 11 | Add `UpcasterRegistry` with identity upcaster for current schema                        | LOW      | 30m    | P3       |
+| 12 | Add `SchemaVersion` constants to payload structs                                        | LOW      | 30m    | P3       |
+| 13 | Wire `event.ExitCode` in CLI example for proper exit codes                              | MEDIUM   | 30m    | P2       |
+| 14 | Add E2E test: full sync → conflict → delete → resurrect cycle                           | MEDIUM   | 1h     | P2       |
+| 15 | Add Turso remote store integration test with embedded server                            | MEDIUM   | 2h     | P2       |
+| 16 | Add `context.Context` propagation to `AggregateID()` cache                              | LOW      | 15m    | P3       |
+| 17 | Add metrics middleware (`middleware.EventMetrics`) for production observability         | MEDIUM   | 1h     | P2       |
+| 18 | Add `catalog/` D2 diagram generation                                                    | LOW      | 1h     | P3       |
+| 19 | Add `testhelpers` module from go-cqrs-lite (`FakeStore`, `FakeBus`)                     | LOW      | 30m    | P3       |
+| 20 | Add GitHub provider BDD tests using ginkgo                                              | MEDIUM   | 2h     | P2       |
+| 21 | Add `Provider` interface `FetchIncremental` method for delta sync                       | HIGH     | 3h     | P1       |
+| 22 | Add `SyncOptions.Since` for time-based incremental sync                                 | MEDIUM   | 1h     | P2       |
+| 23 | Add `ReadModel.Watch` for real-time change notifications                                | LOW      | 2h     | P3       |
+| 24 | Add structured logging throughout sync loop (not just start/end)                        | LOW      | 30m    | P3       |
+| 25 | Add CI pipeline (GitHub Actions) with build + lint + test                               | HIGH     | 1h     | P1       |
 
 ---
 

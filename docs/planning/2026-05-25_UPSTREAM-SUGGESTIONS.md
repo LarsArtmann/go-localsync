@@ -1,7 +1,7 @@
 # Upstream Suggestions for go-cqrs-lite
 
-**Date:** 2026-05-25  
-**From:** go-localsync team (primary consumer)  
+**Date:** 2026-05-25\
+**From:** go-localsync team (primary consumer)\
 **To:** go-cqrs-lite maintainers
 
 ---
@@ -146,10 +146,10 @@ func createReadModel(cfg Config, sr storeResult) (ReadModel, error) {
 
 ## Summary
 
-| #   | Suggestion                 | Priority | Effort        |
-| --- | -------------------------- | -------- | ------------- |
-| 1   | `StorageStack` factory     | HIGH     | Medium        |
-| 2   | Runner wiring helpers      | HIGH     | Low           |
-| 3   | `TimestampNano` helpers    | LOW      | Trivial       |
-| 4   | `CharmLogAdapter`          | LOW      | Low           |
-| 5   | `ireturn` factory guidance | LOW      | Documentation |
+| # | Suggestion                 | Priority | Effort        |
+| - | -------------------------- | -------- | ------------- |
+| 1 | `StorageStack` factory     | HIGH     | Medium        |
+| 2 | Runner wiring helpers      | HIGH     | Low           |
+| 3 | `TimestampNano` helpers    | LOW      | Trivial       |
+| 4 | `CharmLogAdapter`          | LOW      | Low           |
+| 5 | `ireturn` factory guidance | LOW      | Documentation |

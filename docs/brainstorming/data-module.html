@@ -17,8 +17,10 @@
         --warning: #d29922;
         --danger: #f85149;
         --code-bg: #0d1117;
-        --font-mono: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
-        --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        --font-mono:
+          "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       }
 
       * {
@@ -448,7 +450,9 @@
   <body>
     <div class="container">
       <h1>go-localsync Data Module</h1>
-      <p class="subtitle">Current State & Path to Perfection — A Brutally Honest Audit</p>
+      <p class="subtitle">
+        Current State & Path to Perfection — A Brutally Honest Audit
+      </p>
 
       <div
         style="
@@ -472,28 +476,33 @@
         </div>
         <p style="margin: 0; color: #c9d1d9">
           This audit (2026-06-05) describes a proposed
-          <code>pkg/data/{query,transform,repo}</code> layer that was <strong>never built</strong>.
-          The live codebase only contains <code>pkg/data/model/</code> and
-          <code>pkg/data/schema/</code> — there are no getter methods, SQL string combinators,
-          <code>Observable</code> decorator, or <code>ItemRepository</code> to refactor. The
-          "problems" critiqued here do not exist in the current source.
+          <code>pkg/data/{query,transform,repo}</code> layer that was
+          <strong>never built</strong>. The live codebase only contains
+          <code>pkg/data/model/</code> and <code>pkg/data/schema/</code> — there
+          are no getter methods, SQL string combinators,
+          <code>Observable</code> decorator, or <code>ItemRepository</code> to
+          refactor. The "problems" critiqued here do not exist in the current
+          source.
         </p>
         <p style="margin: 12px 0 0; color: #c9d1d9">
           The only recommendations that survived are already tracked:
           <strong>observability</strong> (OpenTelemetry) and
-          <strong>schema upcasters</strong> (<code>UpcasterRegistry</code>), both in
-          <code>TODO_LIST.md</code>. The strategic question of whether go-localsync should
-          generalise beyond a single-aggregate Item engine is settled (deferred) in
+          <strong>schema upcasters</strong> (<code>UpcasterRegistry</code>),
+          both in <code>TODO_LIST.md</code>. The strategic question of whether
+          go-localsync should generalise beyond a single-aggregate Item engine
+          is settled (deferred) in
           <strong>ADR-0004</strong>
-          (<code>docs/adr/0004-multi-aggregate-generalisation-deferred.md</code>). This document is
-          retained only as historical context.
+          (<code>docs/adr/0004-multi-aggregate-generalisation-deferred.md</code>).
+          This document is retained only as historical context.
         </p>
       </div>
 
       <div class="meta">
         <div class="meta-badge">Package: <strong>pkg/data/</strong></div>
         <div class="meta-badge">Language: <strong>Go 1.26</strong></div>
-        <div class="meta-badge">Pattern: <strong>CQRS + Generic Repository</strong></div>
+        <div class="meta-badge">
+          Pattern: <strong>CQRS + Generic Repository</strong>
+        </div>
         <div class="meta-badge">Lines: <strong>~700</strong></div>
       </div>
 
@@ -504,7 +513,11 @@
           <li><a href="#structure">2. Current Structure</a></li>
           <li><a href="#scores">3. Quality Scores</a></li>
           <li><a href="#deep-dive">4. Deep Dive: What's Right & Wrong</a></li>
-          <li><a href="#upstream-comparison">5. Comparison: go-cqrs-lite v2.1.0</a></li>
+          <li>
+            <a href="#upstream-comparison"
+              >5. Comparison: go-cqrs-lite v2.1.0</a
+            >
+          </li>
           <li><a href="#path-to-perfect">6. Path to Perfection</a></li>
           <li><a href="#architecture">7. Target Architecture</a></li>
         </ul>
@@ -513,26 +526,35 @@
       <h2 id="overview">1. Executive Overview</h2>
 
       <p class="lead">
-        The <code>pkg/data/</code> module is a newly-built data layer that attempts to separate
-        concerns between providers, domain, views, and APIs using Go generics. It introduces layered
-        data types (<code>ProviderItem</code> → <code>Item</code> → <code>ItemView</code>), a
-        generic query DSL, composable transformers, and schema versioning.
-        <strong>The intent is excellent. The execution is solid but not superb.</strong> A detailed
-        comparison against <code>go-cqrs-lite</code> v2.1.0 (the upstream CQRS framework this
-        project already depends on) reveals that several "innovations" in this module are actually
-        inferior reinventions of patterns go-cqrs-lite solved more robustly — with real dialect
-        abstraction, working schema upcasters, and production-grade observability hooks.
+        The <code>pkg/data/</code> module is a newly-built data layer that
+        attempts to separate concerns between providers, domain, views, and APIs
+        using Go generics. It introduces layered data types (<code
+          >ProviderItem</code
+        >
+        → <code>Item</code> → <code>ItemView</code>), a generic query DSL,
+        composable transformers, and schema versioning.
+        <strong
+          >The intent is excellent. The execution is solid but not
+          superb.</strong
+        >
+        A detailed comparison against <code>go-cqrs-lite</code> v2.1.0 (the
+        upstream CQRS framework this project already depends on) reveals that
+        several "innovations" in this module are actually inferior reinventions
+        of patterns go-cqrs-lite solved more robustly — with real dialect
+        abstraction, working schema upcasters, and production-grade
+        observability hooks.
       </p>
 
       <div class="insight-box">
         <h4>Core Insight</h4>
         <p>
-          This module correctly identifies the fundamental problem: <code>provider.Item</code> was
-          doing four jobs (DTO, domain entity, read model, API response). The solution introduces
-          explicit types per layer with transformations between them. But several design decisions
-          reveal inexperience with Go's type system — missed opportunities for structural typing,
-          over-reliance on getter methods for generics, and SQL generation that undermines type
-          safety.
+          This module correctly identifies the fundamental problem:
+          <code>provider.Item</code> was doing four jobs (DTO, domain entity,
+          read model, API response). The solution introduces explicit types per
+          layer with transformations between them. But several design decisions
+          reveal inexperience with Go's type system — missed opportunities for
+          structural typing, over-reliance on getter methods for generics, and
+          SQL generation that undermines type safety.
         </p>
       </div>
 
@@ -540,20 +562,24 @@
 
       <div class="file-tree">
         <span class="dir">pkg/data/</span>
-        ├── <span class="dir">model/</span> │ ├── <span class="file">item.go</span> — Item (domain),
-        ProviderItem (DTO), accessor methods │ ├── <span class="file">key.go</span> — Key composite
-        identifier with branded IDs │ ├── <span class="file">view.go</span> — ItemView (read model),
-        StatsView (aggregation) │ └── <span class="file">errors.go</span> — Unexported sentinel
-        errors ├── <span class="dir">query/</span> │ ├── <span class="file">query.go</span> —
-        Query[T], QueryBuilder[T], Order[T] │ ├── <span class="file">criterion.go</span> —
-        Criterion[T] interface, And/Or/Not combinators │ └── <span class="file">page.go</span> —
+        ├── <span class="dir">model/</span> │ ├──
+        <span class="file">item.go</span> — Item (domain), ProviderItem (DTO),
+        accessor methods │ ├── <span class="file">key.go</span> — Key composite
+        identifier with branded IDs │ ├── <span class="file">view.go</span> —
+        ItemView (read model), StatsView (aggregation) │ └──
+        <span class="file">errors.go</span> — Unexported sentinel errors ├──
+        <span class="dir">query/</span> │ ├──
+        <span class="file">query.go</span> — Query[T], QueryBuilder[T], Order[T]
+        │ ├── <span class="file">criterion.go</span> — Criterion[T] interface,
+        And/Or/Not combinators │ └── <span class="file">page.go</span> —
         Page[T], MapPage[T,U] ├── <span class="dir">schema/</span> │ └──
         <span class="file">version.go</span> — Version type, V1/V2 constants ├──
-        <span class="dir">transform/</span> │ ├── <span class="file">transform.go</span> —
-        Mapper[From,To] interface, Compose, domain mappers │ └──
-        <span class="file">errors.go</span> — errNilInput sentinel └──
-        <span class="dir">repo/</span> └── <span class="file">repo.go</span> — Reader[T], Writer[T],
-        Repository[T], ItemRepository
+        <span class="dir">transform/</span> │ ├──
+        <span class="file">transform.go</span> — Mapper[From,To] interface,
+        Compose, domain mappers │ └── <span class="file">errors.go</span> —
+        errNilInput sentinel └── <span class="dir">repo/</span> └──
+        <span class="file">repo.go</span> — Reader[T], Writer[T], Repository[T],
+        ItemRepository
       </div>
 
       <h2 id="scores">3. Quality Scores</h2>
@@ -595,9 +621,11 @@
           Composite Key Type
         </div>
         <p>
-          The <code>Key</code> struct with <code>Source</code> and <code>ExternalID</code> branded
-          IDs is exactly right. It makes the composite identity explicit and type-safe. You cannot
-          accidentally pass an <code>ExternalID</code> where a <code>Source</code> is expected.
+          The <code>Key</code> struct with <code>Source</code> and
+          <code>ExternalID</code> branded IDs is exactly right. It makes the
+          composite identity explicit and type-safe. You cannot accidentally
+          pass an <code>ExternalID</code> where a <code>Source</code> is
+          expected.
         </p>
         <pre><code><span class="keyword">type</span> <span class="type">Key</span> <span class="keyword">struct</span> {
     <span class="highlight">Source</span>     id.ProviderID
@@ -611,9 +639,10 @@
           Layered Types
         </div>
         <p>
-          Separating <code>ProviderItem</code> (has <code>RawPayload</code>) from
-          <code>Item</code> (clean domain) from <code>ItemView</code> (has computed fields) is
-          architecturally sound. The dependency graph is one-way: Provider → Domain → View → API.
+          Separating <code>ProviderItem</code> (has <code>RawPayload</code>)
+          from <code>Item</code> (clean domain) from <code>ItemView</code> (has
+          computed fields) is architecturally sound. The dependency graph is
+          one-way: Provider → Domain → View → API.
         </p>
       </div>
 
@@ -622,28 +651,31 @@
       <div class="problem-box">
         <h4>Getter Method Proliferation</h4>
         <p>
-          Every field on <code>Item</code> has a corresponding <code>Get*()</code> method. These
-          exist solely to satisfy the interface constraints in <code>query.HasSource[T]</code> etc.
-          This is 14 methods of pure boilerplate that accomplish nothing.
+          Every field on <code>Item</code> has a corresponding
+          <code>Get*()</code> method. These exist solely to satisfy the
+          interface constraints in <code>query.HasSource[T]</code> etc. This is
+          14 methods of pure boilerplate that accomplish nothing.
         </p>
         <pre><code><span class="comment">// 7 accessor methods on Item...</span>
 <span class="keyword">func</span> (item <span class="type">Item</span>) <span class="func">GetSource</span>() id.ProviderID { <span class="keyword">return</span> item.Source }
 <span class="keyword">func</span> (item <span class="type">Item</span>) <span class="func">GetType</span>() id.EventTypeID   { <span class="keyword">return</span> item.Type }
 <span class="comment">// ...and 7 more on ItemView. Total: 14 lines of noise.</span></code></pre>
         <p>
-          <strong>Why this hurts:</strong> Go's structural typing means these methods are
-          discoverable only by reading the source. They're not part of any named interface. A better
-          approach uses field tags + reflection, or — preferably — makes criteria closure-based
-          without interface constraints.
+          <strong>Why this hurts:</strong> Go's structural typing means these
+          methods are discoverable only by reading the source. They're not part
+          of any named interface. A better approach uses field tags +
+          reflection, or — preferably — makes criteria closure-based without
+          interface constraints.
         </p>
       </div>
 
       <div class="problem-box">
         <h4>Schema Versioning Is a Stub</h4>
         <p>
-          The <code>schema.Version</code> type has constants and a <code>Valid()</code> method, but
-          no actual migration logic. The event store's <code>ItemSyncedPayload</code> doesn't carry
-          a schema version, so old events cannot actually be migrated.
+          The <code>schema.Version</code> type has constants and a
+          <code>Valid()</code> method, but no actual migration logic. The event
+          store's <code>ItemSyncedPayload</code> doesn't carry a schema version,
+          so old events cannot actually be migrated.
         </p>
         <pre><code><span class="comment">// What exists: version constants</span>
 <span class="keyword">const</span> (
@@ -662,9 +694,10 @@
           Generic Criterion Interface
         </div>
         <p>
-          <code>Criterion[T]</code> with both <code>Match(T) bool</code> and <code>ToSQL()</code>
-          is a powerful abstraction. It lets the same query run in-memory (for tests) and in SQL
-          (for production) without code duplication.
+          <code>Criterion[T]</code> with both <code>Match(T) bool</code> and
+          <code>ToSQL()</code>
+          is a powerful abstraction. It lets the same query run in-memory (for
+          tests) and in SQL (for production) without code duplication.
         </p>
         <pre><code><span class="keyword">type</span> <span class="type">Criterion</span>[T <span class="keyword">any</span>] <span class="keyword">interface</span> {
     <span class="func">Match</span>(value T) <span class="type">bool</span>
@@ -678,9 +711,9 @@
           Logical Combinators
         </div>
         <p>
-          <code>And[T]</code>, <code>Or[T]</code>, and <code>Not[T]</code> are generic logical
-          combinators. They compose criteria cleanly and produce valid SQL. This is a genuinely
-          useful generic pattern.
+          <code>And[T]</code>, <code>Or[T]</code>, and <code>Not[T]</code> are
+          generic logical combinators. They compose criteria cleanly and produce
+          valid SQL. This is a genuinely useful generic pattern.
         </p>
       </div>
 
@@ -689,10 +722,12 @@
       <div class="problem-box">
         <h4>SQL String Concatenation Is Dangerous</h4>
         <p>
-          The <code>And</code> and <code>Or</code> combinators build SQL by string concatenation.
-          While the individual criteria use <code>?</code> placeholders, the combinator wraps
-          clauses in parentheses using <code>fmt.Sprintf("(%s)", clause)</code>. This is safe for
-          the current implementation but <strong>fundamentally fragile</strong>.
+          The <code>And</code> and <code>Or</code> combinators build SQL by
+          string concatenation. While the individual criteria use
+          <code>?</code> placeholders, the combinator wraps clauses in
+          parentheses using <code>fmt.Sprintf("(%s)", clause)</code>. This is
+          safe for the current implementation but
+          <strong>fundamentally fragile</strong>.
         </p>
         <pre><code><span class="keyword">func</span> <span class="func">And</span>[T <span class="keyword">any</span>](criteria ...<span class="type">Criterion</span>[T]) <span class="type">Criterion</span>[T] {
     <span class="comment">// ...match logic is fine...</span>
@@ -703,17 +738,19 @@
     })
 }</code></pre>
         <p>
-          <strong>Better approach:</strong> Separate query compilation from execution. Introduce a
-          <code>QueryCompiler</code> interface with dialect-specific implementations. Or better yet:
-          use a proper query builder like <code>squirrel</code> or <code>sqlc</code>.
+          <strong>Better approach:</strong> Separate query compilation from
+          execution. Introduce a <code>QueryCompiler</code> interface with
+          dialect-specific implementations. Or better yet: use a proper query
+          builder like <code>squirrel</code> or <code>sqlc</code>.
         </p>
       </div>
 
       <div class="problem-box">
         <h4>No Query Plan or Optimization</h4>
         <p>
-          The <code>Query[T]</code> type carries no metadata about which fields are indexed. A query
-          on <code>actor_login</code> (which has an index) and <code>repo_url</code>
+          The <code>Query[T]</code> type carries no metadata about which fields
+          are indexed. A query on <code>actor_login</code> (which has an index)
+          and <code>repo_url</code>
           (which does not) are treated identically. There's no way to:
         </p>
         <ul>
@@ -726,9 +763,11 @@
       <div class="problem-box">
         <h4>Query.Sort Mutates In-Place</h4>
         <p>
-          The <code>Query.Sort()</code> method calls <code>slices.SortFunc(items, ...)</code> which
-          mutates the input slice. But the <code>Query</code> is documented as "immutable." This is
-          inconsistent. Either make Sort return a new slice, or don't claim immutability.
+          The <code>Query.Sort()</code> method calls
+          <code>slices.SortFunc(items, ...)</code> which mutates the input
+          slice. But the <code>Query</code> is documented as "immutable." This
+          is inconsistent. Either make Sort return a new slice, or don't claim
+          immutability.
         </p>
       </div>
 
@@ -740,9 +779,9 @@
           Generic Mapper with Composition
         </div>
         <p>
-          The <code>Mapper[From, To]</code> interface with <code>Compose[A,B,C]</code> is the single
-          best piece of code in this module. It enables type-safe, testable, composable
-          transformations.
+          The <code>Mapper[From, To]</code> interface with
+          <code>Compose[A,B,C]</code> is the single best piece of code in this
+          module. It enables type-safe, testable, composable transformations.
         </p>
         <pre><code><span class="comment">// Compose two mappers into a pipeline</span>
 <span class="keyword">var</span> <span class="type">ProviderToView</span> = <span class="func">Compose</span>(
@@ -756,17 +795,19 @@
       <div class="problem-box">
         <h4>Context Is Unused in Most Mappers</h4>
         <p>
-          Every mapper takes <code>context.Context</code> but none of the current implementations
-          use it. This is premature abstraction — add context when you need it (e.g., for tracing or
-          cancellation), not before. The unused parameter is a code smell.
+          Every mapper takes <code>context.Context</code> but none of the
+          current implementations use it. This is premature abstraction — add
+          context when you need it (e.g., for tracing or cancellation), not
+          before. The unused parameter is a code smell.
         </p>
       </div>
 
       <div class="problem-box">
         <h4>No Batch Mapping</h4>
         <p>
-          The <code>Mapper</code> interface only maps one item at a time. For a sync operation that
-          processes 10,000 items, this means 10,000 individual allocations. A batch mapper:
+          The <code>Mapper</code> interface only maps one item at a time. For a
+          sync operation that processes 10,000 items, this means 10,000
+          individual allocations. A batch mapper:
         </p>
         <pre><code><span class="comment">// What's missing: batch transformation</span>
 <span class="keyword">type</span> <span class="type">BatchMapper</span>[From, To <span class="keyword">any</span>] <span class="keyword">interface</span> {
@@ -777,9 +818,10 @@
       <div class="problem-box">
         <h4>Error Context Is Lost in Composition</h4>
         <p>
-          The <code>Compose</code> function wraps errors with generic messages like
-          <code>"compose A→B"</code>. When a pipeline of 5 mappers fails, you get a nested error
-          that doesn't tell you which field was invalid or which item caused the problem.
+          The <code>Compose</code> function wraps errors with generic messages
+          like <code>"compose A→B"</code>. When a pipeline of 5 mappers fails,
+          you get a nested error that doesn't tell you which field was invalid
+          or which item caused the problem.
         </p>
       </div>
 
@@ -788,9 +830,10 @@
       <div class="problem-box">
         <h4>Observable Is a No-Op Decorator</h4>
         <p>
-          The <code>Observable[T]</code> struct claims to "add metrics/logging" but implements
-          nothing. It just delegates every call to the base reader. This is dead code dressed up as
-          a decorator pattern. Either implement it properly or delete it.
+          The <code>Observable[T]</code> struct claims to "add metrics/logging"
+          but implements nothing. It just delegates every call to the base
+          reader. This is dead code dressed up as a decorator pattern. Either
+          implement it properly or delete it.
         </p>
         <pre><code><span class="keyword">func</span> (o *<span class="type">Observable</span>[T]) <span class="func">Get</span>(ctx context.Context, key model.Key) (T, <span class="type">error</span>) {
     <span class="comment">// TODO: actually log/measure something</span>
@@ -801,19 +844,20 @@
       <div class="problem-box">
         <h4>No Transaction Support</h4>
         <p>
-          The repository interfaces have no concept of transactions. You cannot atomically upsert
-          multiple items or ensure that a sync operation is all-or-nothing. For CQRS with event
-          sourcing, this is a critical gap.
+          The repository interfaces have no concept of transactions. You cannot
+          atomically upsert multiple items or ensure that a sync operation is
+          all-or-nothing. For CQRS with event sourcing, this is a critical gap.
         </p>
       </div>
 
       <div class="problem-box">
         <h4>ItemRepository Interface Is Awkward</h4>
         <p>
-          <code>ItemRepository</code> embeds <code>Repository[*model.ItemView]</code> but adds two
-          methods (<code>GetTypes</code>, <code>GetStats</code>). The stats method returns
-          <code>model.StatsView</code> by value — if stats are large, this copies maps. And there's
-          no way to get stats with a filter.
+          <code>ItemRepository</code> embeds
+          <code>Repository[*model.ItemView]</code> but adds two methods
+          (<code>GetTypes</code>, <code>GetStats</code>). The stats method
+          returns <code>model.StatsView</code> by value — if stats are large,
+          this copies maps. And there's no way to get stats with a filter.
         </p>
       </div>
 
@@ -822,9 +866,10 @@
       <h2 id="upstream-comparison">5. Comparison: go-cqrs-lite v2.1.0</h2>
 
       <p class="lead">
-        This project already depends on <code>go-cqrs-lite</code> v2.1.0 for its CQRS stack. A
-        side-by-side comparison reveals that several weaknesses in <code>pkg/data/</code> are
-        problems that go-cqrs-lite solved more robustly. Rather than reinvent, we should adopt.
+        This project already depends on <code>go-cqrs-lite</code> v2.1.0 for its
+        CQRS stack. A side-by-side comparison reveals that several weaknesses in
+        <code>pkg/data/</code> are problems that go-cqrs-lite solved more
+        robustly. Rather than reinvent, we should adopt.
       </p>
 
       <h3>5.1 Pagination: Cursor-Based vs Limit/Offset</h3>
@@ -859,10 +904,12 @@
       <div class="solution-box">
         <h4>Why Cursor Pagination Wins for Event Sourcing</h4>
         <p>
-          In an append-only event store, <code>COUNT(*)</code> is expensive and the result is stale
-          the moment it's computed. Cursor pagination (<code>After</code>) is O(1) regardless of
-          page depth. <code>uint</code> for <code>Limit</code> makes negative values impossible at
-          the type level. This is the correct design for CQRS read models.
+          In an append-only event store, <code>COUNT(*)</code> is expensive and
+          the result is stale the moment it's computed. Cursor pagination
+          (<code>After</code>) is O(1) regardless of page depth.
+          <code>uint</code> for <code>Limit</code> makes negative values
+          impossible at the type level. This is the correct design for CQRS read
+          models.
         </p>
       </div>
 
@@ -896,10 +943,12 @@
       <div class="solution-box">
         <h4>Why Upcasters Are Non-Negotiable</h4>
         <p>
-          Every event in go-cqrs-lite carries <code>SchemaVersion</code>. On replay, an
-          <code>Upcaster</code> transforms old payloads forward before the projection applies them.
-          This makes the event store forward-compatible without rewriting history. go-localsync's
-          <code>Version</code> type is decorative — it doesn't plug into the event pipeline.
+          Every event in go-cqrs-lite carries <code>SchemaVersion</code>. On
+          replay, an <code>Upcaster</code> transforms old payloads forward
+          before the projection applies them. This makes the event store
+          forward-compatible without rewriting history. go-localsync's
+          <code>Version</code> type is decorative — it doesn't plug into the
+          event pipeline.
         </p>
       </div>
 
@@ -931,11 +980,13 @@
       <div class="solution-box">
         <h4>Why Dialect Abstraction Matters</h4>
         <p>
-          go-cqrs-lite's <code>Dialect</code> interface handles placeholder syntax, time
-          serialization, and schema DDL differences. The same store implementation works with SQLite
-          (local dev), PostgreSQL (production), and any future backend. go-localsync hardcodes
+          go-cqrs-lite's <code>Dialect</code> interface handles placeholder
+          syntax, time serialization, and schema DDL differences. The same store
+          implementation works with SQLite (local dev), PostgreSQL (production),
+          and any future backend. go-localsync hardcodes
           <code>?</code> placeholders and <code>RFC3339Nano</code>
-          time formatting — it cannot run on PostgreSQL without rewriting every query.
+          time formatting — it cannot run on PostgreSQL without rewriting every
+          query.
         </p>
       </div>
 
@@ -966,10 +1017,11 @@
       <div class="solution-box">
         <h4>Adopt the Interface, Implement the Decorator</h4>
         <p>
-          go-cqrs-lite defines <code>MetricsRecorder</code> but doesn't force a metrics backend —
-          you bring your own (Prometheus, Datadog, etc.). go-localsync should replace its no-op
-          <code>Observable</code> with a real decorator that accepts a
-          <code>MetricsRecorder</code> and wraps every <code>Reader[T]</code> method.
+          go-cqrs-lite defines <code>MetricsRecorder</code> but doesn't force a
+          metrics backend — you bring your own (Prometheus, Datadog, etc.).
+          go-localsync should replace its no-op <code>Observable</code> with a
+          real decorator that accepts a <code>MetricsRecorder</code> and wraps
+          every <code>Reader[T]</code> method.
         </p>
       </div>
 
@@ -981,10 +1033,11 @@
           Domain-Specific Types
         </div>
         <p>
-          go-cqrs-lite's <code>AggregateRef</code> is generic — it has no domain meaning.
-          go-localsync's <code>Item</code>, <code>ProviderItem</code>, and <code>ItemView</code> are
-          purpose-built for the sync domain. The composite <code>Key</code> type with branded IDs is
-          genuinely novel — go-cqrs-lite uses a bare string for <code>AggregateID</code>.
+          go-cqrs-lite's <code>AggregateRef</code> is generic — it has no domain
+          meaning. go-localsync's <code>Item</code>, <code>ProviderItem</code>,
+          and <code>ItemView</code> are purpose-built for the sync domain. The
+          composite <code>Key</code> type with branded IDs is genuinely novel —
+          go-cqrs-lite uses a bare string for <code>AggregateID</code>.
         </p>
       </div>
 
@@ -994,10 +1047,11 @@
           Generic Criterion Combinators
         </div>
         <p>
-          go-cqrs-lite has no equivalent to <code>And[T]</code>, <code>Or[T]</code>,
-          <code>Not[T]</code>. Its <code>InMemoryAggregateReader</code> filters ad-hoc with
-          hardcoded predicates. go-localsync's dual-dispatch criteria (Match + ToSQL) are a real
-          innovation for backend-agnostic queries.
+          go-cqrs-lite has no equivalent to <code>And[T]</code>,
+          <code>Or[T]</code>, <code>Not[T]</code>. Its
+          <code>InMemoryAggregateReader</code> filters ad-hoc with hardcoded
+          predicates. go-localsync's dual-dispatch criteria (Match + ToSQL) are
+          a real innovation for backend-agnostic queries.
         </p>
       </div>
 
@@ -1009,21 +1063,22 @@
         <p>
           go-cqrs-lite has no <code>Mapper[From,To]</code> abstraction or
           <code>Compose[A,B,C]</code>
-          combinator. go-localsync's transform layer is genuinely useful for any layered
-          architecture — it could be extracted into a standalone module.
+          combinator. go-localsync's transform layer is genuinely useful for any
+          layered architecture — it could be extracted into a standalone module.
         </p>
       </div>
 
       <div class="insight-box">
         <h4>The Honest Summary</h4>
         <p>
-          Where problems overlap (pagination, schema migration, SQL dialects, observability),
-          go-cqrs-lite's solutions are strictly better. Where go-localsync innovates
-          (domain-specific types, composite keys, generic criteria, mapper pipelines), it adds real
-          value that go-cqrs-lite doesn't provide. The path forward is clear:
+          Where problems overlap (pagination, schema migration, SQL dialects,
+          observability), go-cqrs-lite's solutions are strictly better. Where
+          go-localsync innovates (domain-specific types, composite keys, generic
+          criteria, mapper pipelines), it adds real value that go-cqrs-lite
+          doesn't provide. The path forward is clear:
           <strong
-            >adopt go-cqrs-lite's proven patterns where they exist, and keep the domain-specific
-            innovations where they don't.</strong
+            >adopt go-cqrs-lite's proven patterns where they exist, and keep the
+            domain-specific innovations where they don't.</strong
           >
         </p>
       </div>
@@ -1034,9 +1089,10 @@
 
       <div class="section-intro">
         <p class="lead">
-          To get from "solid" to "superb," we need to address five areas: eliminate getter
-          boilerplate, make SQL generation safe, add real observability, support transactions, and
-          implement actual schema migration. Here's how.
+          To get from "solid" to "superb," we need to address five areas:
+          eliminate getter boilerplate, make SQL generation safe, add real
+          observability, support transactions, and implement actual schema
+          migration. Here's how.
         </p>
       </div>
 
@@ -1065,12 +1121,14 @@
       <div class="solution-box">
         <h4>Why This Is Better</h4>
         <p>
-          Struct tags let us generate criteria, SQL, and indexes from reflection — once. The
-          <code>data</code> tag carries: column name, whether it's indexed, whether it supports
-          sorting, and the SQL type. A single <code>go generate</code> pass produces the criteria
-          constructors that currently require 7 generic functions with interface constraints. The
-          generated code is as fast as hand-written, but the source of truth is the struct
-          definition.
+          Struct tags let us generate criteria, SQL, and indexes from reflection
+          — once. The
+          <code>data</code> tag carries: column name, whether it's indexed,
+          whether it supports sorting, and the SQL type. A single
+          <code>go generate</code> pass produces the criteria constructors that
+          currently require 7 generic functions with interface constraints. The
+          generated code is as fast as hand-written, but the source of truth is
+          the struct definition.
         </p>
       </div>
 
@@ -1101,11 +1159,17 @@
 
       <div class="solution-box">
         <h4>Why This Is Better</h4>
-        <p>An AST makes SQL generation <strong>structural</strong>, not textual. You can:</p>
+        <p>
+          An AST makes SQL generation <strong>structural</strong>, not textual.
+          You can:
+        </p>
         <ul>
           <li>Validate the tree before generating SQL (no injection)</li>
           <li>Optimize: reorder AND clauses to put indexed fields first</li>
-          <li>Support dialects: SQLite uses <code>?</code>, PostgreSQL uses <code>$1</code></li>
+          <li>
+            Support dialects: SQLite uses <code>?</code>, PostgreSQL uses
+            <code>$1</code>
+          </li>
           <li>Generate EXPLAIN output for debugging slow queries</li>
           <li>Test the AST without a database</li>
         </ul>
@@ -1127,10 +1191,11 @@
     <span class="keyword">return</span> page, err
 }</code></pre>
         <p>
-          Replace the no-op <code>Observable</code> with a proper decorator chain:
-          <code>LoggingDecorator</code> → <code>MetricsDecorator</code> →
-          <code>CacheDecorator</code> → <code>BaseRepo</code>. Each decorator implements
-          <code>Reader[T]</code> and adds one concern. Compose them with a builder, not by hand.
+          Replace the no-op <code>Observable</code> with a proper decorator
+          chain: <code>LoggingDecorator</code> → <code>MetricsDecorator</code> →
+          <code>CacheDecorator</code> → <code>BaseRepo</code>. Each decorator
+          implements <code>Reader[T]</code> and adds one concern. Compose them
+          with a builder, not by hand.
         </p>
       </div>
 
@@ -1146,10 +1211,11 @@
     <span class="func">Events</span>() event.Store
 }</code></pre>
         <p>
-          A Unit of Work coordinates writes across the read model and event store. In CQRS, a sync
-          operation should: (1) write events to the event store, (2) project them to the read model,
-          (3) commit both atomically. Without transactions, a crash after step 1 but before step 2
-          leaves the system inconsistent.
+          A Unit of Work coordinates writes across the read model and event
+          store. In CQRS, a sync operation should: (1) write events to the event
+          store, (2) project them to the read model, (3) commit both atomically.
+          Without transactions, a crash after step 1 but before step 2 leaves
+          the system inconsistent.
         </p>
       </div>
 
@@ -1174,9 +1240,9 @@
     SchemaVersion <span class="type">int</span> <span class="string">`json:"schemaVersion"`</span>
 }</code></pre>
         <p>
-          Every event payload must carry its schema version. On replay, the projection migrates the
-          payload forward before applying it. This makes old events forward-compatible without
-          rewriting the event store.
+          Every event payload must carry its schema version. On replay, the
+          projection migrates the payload forward before applying it. This makes
+          old events forward-compatible without rewriting the event store.
         </p>
       </div>
 
@@ -1201,9 +1267,9 @@
     <span class="keyword">return</span> result, <span class="keyword">nil</span>
 }</code></pre>
         <p>
-          Batch operations pre-allocate capacity and collect errors with context (which item
-          failed). For a 10,000-item sync, this avoids 10,000 small allocations and gives actionable
-          error messages.
+          Batch operations pre-allocate capacity and collect errors with context
+          (which item failed). For a 10,000-item sync, this avoids 10,000 small
+          allocations and gives actionable error messages.
         </p>
       </div>
 
@@ -1223,9 +1289,10 @@
     <span class="func">Limit</span>(limit, offset <span class="type">int</span>) <span class="type">string</span>
 }</code></pre>
         <p>
-          Abstracting the database handle lets the same repository implementation work with SQLite
-          (local), PostgreSQL (production), and even in-memory stores. The dialect handles
-          placeholder syntax, identifier quoting, and LIMIT/OFFSET syntax differences.
+          Abstracting the database handle lets the same repository
+          implementation work with SQLite (local), PostgreSQL (production), and
+          even in-memory stores. The dialect handles placeholder syntax,
+          identifier quoting, and LIMIT/OFFSET syntax differences.
         </p>
       </div>
 
@@ -1233,33 +1300,42 @@
 
       <h2 id="architecture">7. Target Architecture</h2>
 
-      <p class="lead">After all improvements, the data module would look like this:</p>
+      <p class="lead">
+        After all improvements, the data module would look like this:
+      </p>
 
       <div class="file-tree">
         <span class="dir">pkg/data/</span>
-        ├── <span class="dir">model/</span> │ ├── <span class="file">item.go</span> — Item,
-        ProviderItem (with struct tags, no getters) │ ├── <span class="file">key.go</span> — Key
-        composite ID │ ├── <span class="file">view.go</span> — ItemView, StatsView │ └──
-        <span class="file">generated.go</span> — go:generate criteria, SQL builders from tags ├──
-        <span class="dir">query/</span> │ ├── <span class="file">ast.go</span> — Expr, Eq, And, Or
-        (SQL AST) │ ├── <span class="file">query.go</span> — Query[T], QueryBuilder[T] │ ├──
+        ├── <span class="dir">model/</span> │ ├──
+        <span class="file">item.go</span> — Item, ProviderItem (with struct
+        tags, no getters) │ ├── <span class="file">key.go</span> — Key composite
+        ID │ ├── <span class="file">view.go</span> — ItemView, StatsView │ └──
+        <span class="file">generated.go</span> — go:generate criteria, SQL
+        builders from tags ├── <span class="dir">query/</span> │ ├──
+        <span class="file">ast.go</span> — Expr, Eq, And, Or (SQL AST) │ ├──
+        <span class="file">query.go</span> — Query[T], QueryBuilder[T] │ ├──
         <span class="file">page.go</span> — Page[T], MapPage │ └──
-        <span class="file">compiler.go</span> — QueryCompiler using go-cqrs-lite/sql.Dialect ├──
-        <span class="dir">schema/</span> │ ├── <span class="file">version.go</span> — Version type,
-        registry │ ├── <span class="file">migrate.go</span> — Migration runner (wraps
-        go-cqrs-lite/schema.Upcaster) │ └── <span class="file">migrations.go</span> — Concrete
-        migrations V1→V2, V2→V3 ├── <span class="dir">transform/</span> │ ├──
+        <span class="file">compiler.go</span> — QueryCompiler using
+        go-cqrs-lite/sql.Dialect ├── <span class="dir">schema/</span> │ ├──
+        <span class="file">version.go</span> — Version type, registry │ ├──
+        <span class="file">migrate.go</span> — Migration runner (wraps
+        go-cqrs-lite/schema.Upcaster) │ └──
+        <span class="file">migrations.go</span> — Concrete migrations V1→V2,
+        V2→V3 ├── <span class="dir">transform/</span> │ ├──
         <span class="file">mapper.go</span> — Mapper[From,To], Compose │ ├──
         <span class="file">batch.go</span> — BatchMapper[From,To] │ ├──
         <span class="file">provider.go</span> — ProviderItem → Item │ ├──
-        <span class="file">view.go</span> — Item → ItemView │ └── <span class="file">api.go</span> —
-        ItemView → API DTO ├── <span class="dir">repo/</span> │ ├──
-        <span class="file">repo.go</span> — Reader[T], Writer[T], Repository[T] │ ├──
-        <span class="file">decorator.go</span> — Logging, Metrics, Cache decorators │ ├──
-        <span class="file">uow.go</span> — UnitOfWork for transactions │ └──
-        <span class="file">dialect.go</span> — go-cqrs-lite/sql.Dialect adapter └──
-        <span class="dir">internal/</span> └── <span class="file">gentags/</span> — go:generate tool
-        for struct tag codegen
+        <span class="file">view.go</span> — Item → ItemView │ └──
+        <span class="file">api.go</span> — ItemView → API DTO ├──
+        <span class="dir">repo/</span> │ ├── <span class="file">repo.go</span> —
+        Reader[T], Writer[T], Repository[T] │ ├──
+        <span class="file">decorator.go</span> — Logging, Metrics, Cache
+        decorators │ ├── <span class="file">uow.go</span> — UnitOfWork for
+        transactions │ └── <span class="file">dialect.go</span> —
+        go-cqrs-lite/sql.Dialect adapter └──
+        <span class="dir">internal/</span> └──
+        <span class="file">gentags/</span> — go:generate tool for struct tag
+        codegen
       </div>
 
       <h3>7.1 Dependency Graph</h3>
@@ -1354,27 +1430,32 @@
       <div class="insight-box">
         <h4>Bottom Line</h4>
         <p>
-          The current data module is a <strong>good first draft</strong>. It correctly identifies
-          the architectural problem (one struct for all layers) and applies the right solution
-          (explicit types with transformations). But it falls short on execution: SQL generation is
-          string-based, observability is a stub, and the generic constraints force boilerplate
-          getter methods.
+          The current data module is a <strong>good first draft</strong>. It
+          correctly identifies the architectural problem (one struct for all
+          layers) and applies the right solution (explicit types with
+          transformations). But it falls short on execution: SQL generation is
+          string-based, observability is a stub, and the generic constraints
+          force boilerplate getter methods.
         </p>
         <p>
-          The path to superb requires <strong>four big moves</strong>: (1) struct tags + code
-          generation to eliminate getters, (2) adopt go-cqrs-lite's <code>Dialect</code> interface
-          and cursor pagination instead of reinventing SQL string generation, (3) wire
-          go-cqrs-lite's <code>Upcaster</code> pattern for real schema migration on event replay,
-          and (4) replace the no-op <code>Observable</code> with a decorator chain using
-          go-cqrs-lite's <code>MetricsRecorder</code> interface. Where go-localsync innovates
-          (composite keys, generic criteria, mapper pipelines), keep it. Where go-cqrs-lite already
-          solved the problem (dialects, upcasters, metrics), adopt it. Don't reinvent what your
-          upstream dependency already does better.
+          The path to superb requires <strong>four big moves</strong>: (1)
+          struct tags + code generation to eliminate getters, (2) adopt
+          go-cqrs-lite's <code>Dialect</code> interface and cursor pagination
+          instead of reinventing SQL string generation, (3) wire go-cqrs-lite's
+          <code>Upcaster</code> pattern for real schema migration on event
+          replay, and (4) replace the no-op <code>Observable</code> with a
+          decorator chain using go-cqrs-lite's
+          <code>MetricsRecorder</code> interface. Where go-localsync innovates
+          (composite keys, generic criteria, mapper pipelines), keep it. Where
+          go-cqrs-lite already solved the problem (dialects, upcasters,
+          metrics), adopt it. Don't reinvent what your upstream dependency
+          already does better.
         </p>
       </div>
 
       <p style="color: var(--text-muted); margin-top: 40px; font-size: 0.9rem">
-        Document generated 2026-06-05. Updated 2026-06-05 with go-cqrs-lite v2.1.0 comparison.
+        Document generated 2026-06-05. Updated 2026-06-05 with go-cqrs-lite
+        v2.1.0 comparison.
       </p>
     </div>
   </body>

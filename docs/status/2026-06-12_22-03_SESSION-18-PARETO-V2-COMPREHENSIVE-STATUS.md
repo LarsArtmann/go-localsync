@@ -189,48 +189,48 @@ The LSP reports 4 compiler errors in github provider test files about `ProviderI
 
 ### Tier 1: High Impact, Low Effort (Do First)
 
-| #   | Item                                                | Package                      | Effort | Impact                              |
-| --- | --------------------------------------------------- | ---------------------------- | ------ | ----------------------------------- |
-| 1   | Brand `GetTypes()` return as `[]id.EventTypeID`     | `data/model`, `cqrs`, `sync` | 30min  | Type safety at read boundary        |
-| 2   | Brand `Stats.ItemTypes` / `TypeCounts`              | `pkg/sync`                   | 20min  | Type safety at stats boundary       |
-| 3   | Fix gopls stale diagnostics (reindex)               | IDE                          | 5min   | Developer experience                |
-| 4   | Add API authentication middleware (`RequireAPIKey`) | `pkg/api`                    | 1h     | Security — critical gap             |
-| 5   | Add `X-Total-Count` pagination header               | `pkg/api`                    | 30min  | API usability                       |
-| 6   | Add `--conflict-strategy` CLI flag                  | `cmd/examples/github-sync`   | 30min  | Runtime conflict control            |
-| 7   | Add `--watch` daemon mode                           | `cmd/examples/github-sync`   | 1h     | Operational — enables periodic sync |
+| # | Item                                                | Package                      | Effort | Impact                              |
+| - | --------------------------------------------------- | ---------------------------- | ------ | ----------------------------------- |
+| 1 | Brand `GetTypes()` return as `[]id.EventTypeID`     | `data/model`, `cqrs`, `sync` | 30min  | Type safety at read boundary        |
+| 2 | Brand `Stats.ItemTypes` / `TypeCounts`              | `pkg/sync`                   | 20min  | Type safety at stats boundary       |
+| 3 | Fix gopls stale diagnostics (reindex)               | IDE                          | 5min   | Developer experience                |
+| 4 | Add API authentication middleware (`RequireAPIKey`) | `pkg/api`                    | 1h     | Security — critical gap             |
+| 5 | Add `X-Total-Count` pagination header               | `pkg/api`                    | 30min  | API usability                       |
+| 6 | Add `--conflict-strategy` CLI flag                  | `cmd/examples/github-sync`   | 30min  | Runtime conflict control            |
+| 7 | Add `--watch` daemon mode                           | `cmd/examples/github-sync`   | 1h     | Operational — enables periodic sync |
 
 ### Tier 2: High Impact, Medium Effort
 
-| #   | Item                                                | Package                            | Effort | Impact                                     |
-| --- | --------------------------------------------------- | ---------------------------------- | ------ | ------------------------------------------ |
-| 8   | Improve CLI test coverage (12.3% → 50%+)            | `cmd/examples/github-sync`         | 2h     | Confidence in main flows                   |
-| 9   | Add OpenTelemetry spans for sync operations         | `pkg/sync`, `pkg/cqrs`             | 2h     | Production observability                   |
-| 10  | Disable SA5012 in `.golangci.yml` to fix pre-commit | project root                       | 15min  | Restore `git commit` without `--no-verify` |
-| 11  | API rate limiting middleware                        | `pkg/api`                          | 1h     | Prevent `POST /sync` abuse                 |
-| 12  | Structured logging fields (user, page, event_id)    | `pkg/sync`, `pkg/providers/github` | 1h     | Debuggability                              |
-| 13  | Type `CQRSConfig.Backend` as enum                   | `pkg/cqrs`                         | 30min  | Eliminate invalid backend strings          |
-| 14  | Real GitHub PAT smoke test                          | `cmd/examples/github-sync`         | 30min  | End-to-end confidence                      |
+| #  | Item                                                | Package                            | Effort | Impact                                     |
+| -- | --------------------------------------------------- | ---------------------------------- | ------ | ------------------------------------------ |
+| 8  | Improve CLI test coverage (12.3% → 50%+)            | `cmd/examples/github-sync`         | 2h     | Confidence in main flows                   |
+| 9  | Add OpenTelemetry spans for sync operations         | `pkg/sync`, `pkg/cqrs`             | 2h     | Production observability                   |
+| 10 | Disable SA5012 in `.golangci.yml` to fix pre-commit | project root                       | 15min  | Restore `git commit` without `--no-verify` |
+| 11 | API rate limiting middleware                        | `pkg/api`                          | 1h     | Prevent `POST /sync` abuse                 |
+| 12 | Structured logging fields (user, page, event_id)    | `pkg/sync`, `pkg/providers/github` | 1h     | Debuggability                              |
+| 13 | Type `CQRSConfig.Backend` as enum                   | `pkg/cqrs`                         | 30min  | Eliminate invalid backend strings          |
+| 14 | Real GitHub PAT smoke test                          | `cmd/examples/github-sync`         | 30min  | End-to-end confidence                      |
 
 ### Tier 3: Medium Impact, Medium Effort
 
-| #   | Item                                        | Package            | Effort | Impact                     |
-| --- | ------------------------------------------- | ------------------ | ------ | -------------------------- |
-| 15  | OpenAPI error response schemas per endpoint | `pkg/api`          | 1h     | API documentation quality  |
-| 16  | Improve CONTRIBUTING.md                     | docs               | 1h     | Onboarding                 |
-| 17  | Add `govalid` struct tags to config types   | `cmd/`, `pkg/cqrs` | 30min  | Input validation           |
-| 18  | Clean `nolint:ireturn` in store_factory     | `pkg/cqrs`         | 30min  | Code quality               |
-| 19  | Adopt `UpcasterRegistry` from go-cqrs-lite  | `pkg/cqrs`         | 2h     | Schema evolution readiness |
-| 20  | Multi-user sync support                     | `pkg/sync`, `cmd/` | 3h     | Feature completeness       |
+| #  | Item                                        | Package            | Effort | Impact                     |
+| -- | ------------------------------------------- | ------------------ | ------ | -------------------------- |
+| 15 | OpenAPI error response schemas per endpoint | `pkg/api`          | 1h     | API documentation quality  |
+| 16 | Improve CONTRIBUTING.md                     | docs               | 1h     | Onboarding                 |
+| 17 | Add `govalid` struct tags to config types   | `cmd/`, `pkg/cqrs` | 30min  | Input validation           |
+| 18 | Clean `nolint:ireturn` in store_factory     | `pkg/cqrs`         | 30min  | Code quality               |
+| 19 | Adopt `UpcasterRegistry` from go-cqrs-lite  | `pkg/cqrs`         | 2h     | Schema evolution readiness |
+| 20 | Multi-user sync support                     | `pkg/sync`, `cmd/` | 3h     | Feature completeness       |
 
 ### Tier 4: Future
 
-| #   | Item                                        | Package        | Effort | Impact                   |
-| --- | ------------------------------------------- | -------------- | ------ | ------------------------ |
-| 21  | Data export (JSON/CSV)                      | `cmd/`         | 2h     | Data portability         |
-| 22  | Adopt `catalog/` for AsyncAPI/D2 generation | `pkg/cqrs`     | 2h     | Documentation automation |
-| 23  | Resolve go-cqrs-lite upstream WIP           | `go.mod`       | varies | Dependency stability     |
-| 24  | Unify test framework (stdlib)               | all test files | 3h     | Consistency              |
-| 25  | TUI with Bubble Tea                         | `cmd/`         | 4h     | User experience          |
+| #  | Item                                        | Package        | Effort | Impact                   |
+| -- | ------------------------------------------- | -------------- | ------ | ------------------------ |
+| 21 | Data export (JSON/CSV)                      | `cmd/`         | 2h     | Data portability         |
+| 22 | Adopt `catalog/` for AsyncAPI/D2 generation | `pkg/cqrs`     | 2h     | Documentation automation |
+| 23 | Resolve go-cqrs-lite upstream WIP           | `go.mod`       | varies | Dependency stability     |
+| 24 | Unify test framework (stdlib)               | all test files | 3h     | Consistency              |
+| 25 | TUI with Bubble Tea                         | `cmd/`         | 4h     | User experience          |
 
 ---
 

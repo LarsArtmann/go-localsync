@@ -27,18 +27,18 @@ Go-LocalSync is in **strong shape**. The codebase is clean, well-tested (260 tes
 
 ### Coverage by Package
 
-| Package                    | Coverage | Tests | Status                                  |
-| -------------------------- | -------- | ----- | --------------------------------------- |
-| `pkg/cqrs`                 | 85.9%    | ~80   | ✅ Core CQRS engine                     |
-| `pkg/crdt`                 | 97.6%    | 52    | ✅ CRDT primitives                      |
-| `pkg/data/schema`          | 100.0%   | —     | ✅                                      |
+| Package                    | Coverage | Tests | Status                                 |
+| -------------------------- | -------- | ----- | -------------------------------------- |
+| `pkg/cqrs`                 | 85.9%    | ~80   | ✅ Core CQRS engine                    |
+| `pkg/crdt`                 | 97.6%    | 52    | ✅ CRDT primitives                     |
+| `pkg/data/schema`          | 100.0%   | —     | ✅                                     |
 | `pkg/data/model`           | 68.4%    | —     | ⚠️ Dropped (removed ProviderItem tests) |
-| `pkg/errors`               | 100.0%   | 11    | ✅                                      |
-| `pkg/id`                   | 100.0%   | 10    | ✅                                      |
-| `pkg/provider`             | 95.8%    | 2     | ✅                                      |
-| `pkg/providers/github`     | 84.4%    | 32    | ✅                                      |
-| `pkg/sync`                 | 91.0%    | 22    | ✅                                      |
-| `pkg/api`                  | 76.6%    | 8     | ✅                                      |
+| `pkg/errors`               | 100.0%   | 11    | ✅                                     |
+| `pkg/id`                   | 100.0%   | 10    | ✅                                     |
+| `pkg/provider`             | 95.8%    | 2     | ✅                                     |
+| `pkg/providers/github`     | 84.4%    | 32    | ✅                                     |
+| `pkg/sync`                 | 91.0%    | 22    | ✅                                     |
+| `pkg/api`                  | 76.6%    | 8     | ✅                                     |
 | `cmd/examples/github-sync` | 12.3%    | 14    | ⚠️ CLI flow untested                    |
 
 ---
@@ -47,54 +47,54 @@ Go-LocalSync is in **strong shape**. The codebase is clean, well-tested (260 tes
 
 ### Session 13 (this session, 2026-06-11 11:00–12:25)
 
-| #   | Item                         | Description                                                                                                                          | Commit    |
-| --- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------- |
-| 14  | Delete orphaned packages     | Removed `pkg/data/query/`, `pkg/data/repo/`, `pkg/data/transform/` — zero production consumers                                       | `75dd395` |
-| 13  | Kill ProviderItem            | Removed `model.ProviderItem`, `model.ItemView`, `model.StatsView`, `EmptyStatsView()`                                                | `75dd395` |
-| 10  | ConflictStrategy CLI flag    | Wired `-conflict-strategy` flag + `CONFLICT_STRATEGY` env var to CQRS stack (remote-wins default, lww option)                        | `75dd395` |
-| 11  | ActionConflictLocal test     | Stack-level integration test with LWW resolver where local is newer → `ActionConflictLocal`                                          | `75dd395` |
-| 12  | HasChanged edge case tests   | 7 table-driven subtests: identical, UpdatedAt, Type, ActorLogin, RepoName, RepoURL, ID-only fields                                   | `75dd395` |
-| 15  | Doc comments                 | All 9 error sentinels, 4 `ClockOrder` constants, 3 `String()` methods documented                                                     | `75dd395` |
-| 16  | E2E sync pipeline test       | API filter/pagination round-trip: type filter + limit/offset with correct totals                                                     | `75dd395` |
-| 17  | SyncItems benchmarks         | `BenchmarkSyncItems` (1/10/100 items fresh), `BenchmarkSyncItems_ExistingItems` (100 items unchanged)                                | `75dd395` |
-| 21  | ConflictAwareSyncer coupling | Replaced struct embedding `*Syncer` with named field `syncer` + explicit `Close()` delegation                                        | `75dd395` |
-| 24  | Graceful shutdown            | Signal-based `http.Server.Shutdown(ctx)` with 10s timeout in `runAPIServer`                                                          | `75dd395` |
-| 18  | Unify Item types             | Evaluated: `provider.Item` vs `model.Item` split is intentional architecture (different lifecycles, RawJSON vs SchemaVersion). Kept. | —         |
+| #  | Item                         | Description                                                                                                                          | Commit    |
+| -- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| 14 | Delete orphaned packages     | Removed `pkg/data/query/`, `pkg/data/repo/`, `pkg/data/transform/` — zero production consumers                                       | `75dd395` |
+| 13 | Kill ProviderItem            | Removed `model.ProviderItem`, `model.ItemView`, `model.StatsView`, `EmptyStatsView()`                                                | `75dd395` |
+| 10 | ConflictStrategy CLI flag    | Wired `-conflict-strategy` flag + `CONFLICT_STRATEGY` env var to CQRS stack (remote-wins default, lww option)                        | `75dd395` |
+| 11 | ActionConflictLocal test     | Stack-level integration test with LWW resolver where local is newer → `ActionConflictLocal`                                          | `75dd395` |
+| 12 | HasChanged edge case tests   | 7 table-driven subtests: identical, UpdatedAt, Type, ActorLogin, RepoName, RepoURL, ID-only fields                                   | `75dd395` |
+| 15 | Doc comments                 | All 9 error sentinels, 4 `ClockOrder` constants, 3 `String()` methods documented                                                     | `75dd395` |
+| 16 | E2E sync pipeline test       | API filter/pagination round-trip: type filter + limit/offset with correct totals                                                     | `75dd395` |
+| 17 | SyncItems benchmarks         | `BenchmarkSyncItems` (1/10/100 items fresh), `BenchmarkSyncItems_ExistingItems` (100 items unchanged)                                | `75dd395` |
+| 21 | ConflictAwareSyncer coupling | Replaced struct embedding `*Syncer` with named field `syncer` + explicit `Close()` delegation                                        | `75dd395` |
+| 24 | Graceful shutdown            | Signal-based `http.Server.Shutdown(ctx)` with 10s timeout in `runAPIServer`                                                          | `75dd395` |
+| 18 | Unify Item types             | Evaluated: `provider.Item` vs `model.Item` split is intentional architecture (different lifecycles, RawJSON vs SchemaVersion). Kept. | —         |
 
 ### Session 12 (2026-06-11 02:00–06:35)
 
-| #   | Item                     | Description                                                                                       | Commit               |
-| --- | ------------------------ | ------------------------------------------------------------------------------------------------- | -------------------- |
-| —   | Aggressive deduplication | `art-dupl t=15` (96→73 groups). Error wrappers, JSON assertions, CRDT winner checks consolidated. | `2d2d9ff`, `699cc49` |
-| —   | Session 12 status report | Comprehensive deduplication status                                                                | `00984ee`            |
+| # | Item                     | Description                                                                                       | Commit               |
+| - | ------------------------ | ------------------------------------------------------------------------------------------------- | -------------------- |
+| — | Aggressive deduplication | `art-dupl t=15` (96→73 groups). Error wrappers, JSON assertions, CRDT winner checks consolidated. | `2d2d9ff`, `699cc49` |
+| — | Session 12 status report | Comprehensive deduplication status                                                                | `00984ee`            |
 
 ### Session 11 (2026-06-11 00:00–02:55)
 
-| #   | Item                       | Description                                                                       | Commit    |
-| --- | -------------------------- | --------------------------------------------------------------------------------- | --------- |
-| —   | Foundational components    | Added `model.Item`, `model.Key`, `schema.Version`, data module types              | `0fce49c` |
-| —   | Test helper DRY            | Extracted `testItem`, `testItems`, `syncTestItem(s)` helpers to `testing_test.go` | `fc83185` |
-| —   | Read-side interface        | Unified into `model.ItemReader`, flattened `SyncStore`                            | `7e6b14d` |
-| —   | Type alias cleanup         | Consolidated generic constraints                                                  | `ec6fd83` |
-| —   | MockProvider consolidation | Single shared `testutil.MockProvider`                                             | `8728fa9` |
+| # | Item                       | Description                                                                       | Commit    |
+| - | -------------------------- | --------------------------------------------------------------------------------- | --------- |
+| — | Foundational components    | Added `model.Item`, `model.Key`, `schema.Version`, data module types              | `0fce49c` |
+| — | Test helper DRY            | Extracted `testItem`, `testItems`, `syncTestItem(s)` helpers to `testing_test.go` | `fc83185` |
+| — | Read-side interface        | Unified into `model.ItemReader`, flattened `SyncStore`                            | `7e6b14d` |
+| — | Type alias cleanup         | Consolidated generic constraints                                                  | `ec6fd83` |
+| — | MockProvider consolidation | Single shared `testutil.MockProvider`                                             | `8728fa9` |
 
 ### Sessions 8–10 (2026-06-03 to 2026-06-10) — Previously Committed
 
-| #   | Item                               | Description                                                          |
-| --- | ---------------------------------- | -------------------------------------------------------------------- |
-| —   | go-cqrs-lite v2 migration          | All 11 module imports updated from v1 to v2                          |
-| —   | Turso→SQLite rename                | All internal references renamed across 11 files                      |
-| —   | Dead config removed                | `RemoteURL`/`AuthToken` fields, `--push`/`--pull` flags              |
-| —   | SyncItems through command pipeline | Per-item dispatch via `CommandDispatcher`                            |
-| —   | Compile-time SyncStore assertion   | `var _ synclib.SyncStore = (*CQRSStack)(nil)`                        |
-| —   | Consistent not-found semantics     | `MemoryReadModel.Get()` returns `(nil, ErrNotFound)`                 |
-| —   | NewServer simplified               | No longer takes redundant `SyncStore` param                          |
-| —   | Runner errors logged               | `runner.Run(ctx)` errors via `slog.Error`                            |
-| —   | Buildflow lint fixes               | `errors.As` → `errors.AsType`, table-driven tests, doc consolidation |
-| —   | ConflictWinner typed enum          | `type ConflictWinner string` with constants                          |
-| —   | decodeItemFromEvent helper         | Eliminates decode duplication between decider and projection         |
-| —   | fromUnixNano UTC fix               | `.UTC()` added to prevent timezone loss                              |
-| —   | sync_outcome error propagation     | JSON unmarshal error no longer discarded                             |
+| # | Item                               | Description                                                          |
+| - | ---------------------------------- | -------------------------------------------------------------------- |
+| — | go-cqrs-lite v2 migration          | All 11 module imports updated from v1 to v2                          |
+| — | Turso→SQLite rename                | All internal references renamed across 11 files                      |
+| — | Dead config removed                | `RemoteURL`/`AuthToken` fields, `--push`/`--pull` flags              |
+| — | SyncItems through command pipeline | Per-item dispatch via `CommandDispatcher`                            |
+| — | Compile-time SyncStore assertion   | `var _ synclib.SyncStore = (*CQRSStack)(nil)`                        |
+| — | Consistent not-found semantics     | `MemoryReadModel.Get()` returns `(nil, ErrNotFound)`                 |
+| — | NewServer simplified               | No longer takes redundant `SyncStore` param                          |
+| — | Runner errors logged               | `runner.Run(ctx)` errors via `slog.Error`                            |
+| — | Buildflow lint fixes               | `errors.As` → `errors.AsType`, table-driven tests, doc consolidation |
+| — | ConflictWinner typed enum          | `type ConflictWinner string` with constants                          |
+| — | decodeItemFromEvent helper         | Eliminates decode duplication between decider and projection         |
+| — | fromUnixNano UTC fix               | `.UTC()` added to prevent timezone loss                              |
+| — | sync_outcome error propagation     | JSON unmarshal error no longer discarded                             |
 
 ---
 
@@ -211,33 +211,33 @@ The codebase is in a **healthy state**. No build failures, no test failures, no 
 
 Ranked by (impact × urgency) / effort:
 
-| #   | Priority | Item                                                                    | Effort | Impact        | Rationale                                                                                   |
-| --- | -------- | ----------------------------------------------------------------------- | ------ | ------------- | ------------------------------------------------------------------------------------------- |
-| 1   | 🔴 HIGH  | Delete dead `Get*()` methods on `model.Item`                            | 5min   | Cleanup       | Zero production consumers. Dead code confuses readers.                                      |
-| 2   | 🔴 HIGH  | Move `ItemFilter` from `provider` to `model`                            | 30min  | Architecture  | Fixes `model→provider` circular dependency risk. `ItemFilter` is read-side, not write-side. |
-| 3   | 🔴 HIGH  | Add concurrent access tests for `MemoryReadModel`                       | 30min  | Correctness   | Race conditions are invisible until production load.                                        |
-| 4   | 🔴 HIGH  | Update `AGENTS.md` for sessions 11–13                                   | 20min  | Documentation | AI sessions start with stale context.                                                       |
-| 5   | 🔴 HIGH  | Update `TODO_LIST.md` — mark done items complete                        | 15min  | Housekeeping  | 7 items are done but still listed as TODO.                                                  |
-| 6   | 🔴 HIGH  | Update `FEATURES.md` — reflect orphaned package deletion                | 15min  | Documentation | Features list references deleted packages.                                                  |
-| 7   | 🟡 MED   | Remove misleading `ID` field from `provider.Item`                       | 20min  | Cleanup       | Providers don't generate IDs. Field only used for error messages.                           |
-| 8   | 🟡 MED   | Add error path tests for `pkg/api` (store failures, bad requests)       | 1hr    | Coverage      | API at 76.6%. Error handling gaps are real.                                                 |
-| 9   | 🟡 MED   | Test `mapSyncError()` with table-driven tests                           | 15min  | Coverage      | 6 error→HTTP mappings, none tested.                                                         |
-| 10  | 🟡 MED   | Remove `provider.Item.ID` or make it explicitly unused                  | 20min  | API clarity   | Field exists but is never read by CQRS.                                                     |
-| 11  | 🟡 MED   | Standardize test framework — remove testify + Ginkgo                    | 2hr    | Consistency   | 7 files still use non-stdlib frameworks.                                                    |
-| 12  | 🟡 MED   | Add file-based SQLite persistence test                                  | 30min  | Correctness   | In-memory tests miss file I/O bugs.                                                         |
-| 13  | 🟡 MED   | Add OpenTelemetry spans for `Syncer.Sync()` and `CQRSStack.SyncItems()` | 2hr    | Observability | Zero production debuggability today.                                                        |
-| 14  | 🟡 MED   | Write ADR-001: CQRS adoption decision                                   | 30min  | Documentation | Most significant architectural choice, no record.                                           |
-| 15  | 🟡 MED   | Write ADR-002: Branded ID migration                                     | 20min  | Documentation | Important type safety decision.                                                             |
-| 16  | 🟡 MED   | Write ADR-003: CRDT integration strategy                                | 20min  | Documentation | Pluggable conflict resolution is novel.                                                     |
-| 17  | 🟡 MED   | Add `pkg/crdt/example_test.go` showing LWWResolver                      | 15min  | Documentation | API discoverability for CRDT package.                                                       |
-| 18  | 🟢 LOW   | Add API authentication middleware (API key)                             | 2hr    | Security      | API is not safe to expose publicly.                                                         |
-| 19  | 🟢 LOW   | Add API pagination headers (`X-Total-Count`)                            | 30min  | UX            | Current pagination is opaque to clients.                                                    |
-| 20  | 🟢 LOW   | Add API rate limiting middleware                                        | 1hr    | Security      | Prevent POST /sync abuse.                                                                   |
-| 21  | 🟢 LOW   | Add CLI cron/daemon mode                                                | 2hr    | UX            | Remove need for external scheduler wrapper.                                                 |
-| 22  | 🟢 LOW   | Add data export (JSON/CSV)                                              | 1hr    | UX            | No way to export stored events for analysis.                                                |
-| 23  | 🟢 LOW   | Add multi-user sync support                                             | 4hr    | Feature       | CLI only accepts one `-user` flag.                                                          |
-| 24  | 🟢 LOW   | Adopt `middleware.CommandRetry` from go-cqrs-lite                       | 1hr    | Reliability   | API mismatch currently blocks adoption.                                                     |
-| 25  | 🟢 LOW   | Adopt `catalog/` from go-cqrs-lite for AsyncAPI/D2                      | 2hr    | Documentation | Auto-generate architecture diagrams.                                                        |
+| #  | Priority | Item                                                                    | Effort | Impact        | Rationale                                                                                   |
+| -- | -------- | ----------------------------------------------------------------------- | ------ | ------------- | ------------------------------------------------------------------------------------------- |
+| 1  | 🔴 HIGH  | Delete dead `Get*()` methods on `model.Item`                            | 5min   | Cleanup       | Zero production consumers. Dead code confuses readers.                                      |
+| 2  | 🔴 HIGH  | Move `ItemFilter` from `provider` to `model`                            | 30min  | Architecture  | Fixes `model→provider` circular dependency risk. `ItemFilter` is read-side, not write-side. |
+| 3  | 🔴 HIGH  | Add concurrent access tests for `MemoryReadModel`                       | 30min  | Correctness   | Race conditions are invisible until production load.                                        |
+| 4  | 🔴 HIGH  | Update `AGENTS.md` for sessions 11–13                                   | 20min  | Documentation | AI sessions start with stale context.                                                       |
+| 5  | 🔴 HIGH  | Update `TODO_LIST.md` — mark done items complete                        | 15min  | Housekeeping  | 7 items are done but still listed as TODO.                                                  |
+| 6  | 🔴 HIGH  | Update `FEATURES.md` — reflect orphaned package deletion                | 15min  | Documentation | Features list references deleted packages.                                                  |
+| 7  | 🟡 MED   | Remove misleading `ID` field from `provider.Item`                       | 20min  | Cleanup       | Providers don't generate IDs. Field only used for error messages.                           |
+| 8  | 🟡 MED   | Add error path tests for `pkg/api` (store failures, bad requests)       | 1hr    | Coverage      | API at 76.6%. Error handling gaps are real.                                                 |
+| 9  | 🟡 MED   | Test `mapSyncError()` with table-driven tests                           | 15min  | Coverage      | 6 error→HTTP mappings, none tested.                                                         |
+| 10 | 🟡 MED   | Remove `provider.Item.ID` or make it explicitly unused                  | 20min  | API clarity   | Field exists but is never read by CQRS.                                                     |
+| 11 | 🟡 MED   | Standardize test framework — remove testify + Ginkgo                    | 2hr    | Consistency   | 7 files still use non-stdlib frameworks.                                                    |
+| 12 | 🟡 MED   | Add file-based SQLite persistence test                                  | 30min  | Correctness   | In-memory tests miss file I/O bugs.                                                         |
+| 13 | 🟡 MED   | Add OpenTelemetry spans for `Syncer.Sync()` and `CQRSStack.SyncItems()` | 2hr    | Observability | Zero production debuggability today.                                                        |
+| 14 | 🟡 MED   | Write ADR-001: CQRS adoption decision                                   | 30min  | Documentation | Most significant architectural choice, no record.                                           |
+| 15 | 🟡 MED   | Write ADR-002: Branded ID migration                                     | 20min  | Documentation | Important type safety decision.                                                             |
+| 16 | 🟡 MED   | Write ADR-003: CRDT integration strategy                                | 20min  | Documentation | Pluggable conflict resolution is novel.                                                     |
+| 17 | 🟡 MED   | Add `pkg/crdt/example_test.go` showing LWWResolver                      | 15min  | Documentation | API discoverability for CRDT package.                                                       |
+| 18 | 🟢 LOW   | Add API authentication middleware (API key)                             | 2hr    | Security      | API is not safe to expose publicly.                                                         |
+| 19 | 🟢 LOW   | Add API pagination headers (`X-Total-Count`)                            | 30min  | UX            | Current pagination is opaque to clients.                                                    |
+| 20 | 🟢 LOW   | Add API rate limiting middleware                                        | 1hr    | Security      | Prevent POST /sync abuse.                                                                   |
+| 21 | 🟢 LOW   | Add CLI cron/daemon mode                                                | 2hr    | UX            | Remove need for external scheduler wrapper.                                                 |
+| 22 | 🟢 LOW   | Add data export (JSON/CSV)                                              | 1hr    | UX            | No way to export stored events for analysis.                                                |
+| 23 | 🟢 LOW   | Add multi-user sync support                                             | 4hr    | Feature       | CLI only accepts one `-user` flag.                                                          |
+| 24 | 🟢 LOW   | Adopt `middleware.CommandRetry` from go-cqrs-lite                       | 1hr    | Reliability   | API mismatch currently blocks adoption.                                                     |
+| 25 | 🟢 LOW   | Adopt `catalog/` from go-cqrs-lite for AsyncAPI/D2                      | 2hr    | Documentation | Auto-generate architecture diagrams.                                                        |
 
 ---
 

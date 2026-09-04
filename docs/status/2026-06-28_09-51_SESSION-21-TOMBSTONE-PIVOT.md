@@ -109,33 +109,33 @@ Committed in `8c0847f`. The aggregate no longer nils out the item on delete — 
 
 ## f) Top 25 next tasks (Pareto-ordered)
 
-| #   | Task                                                                      | Impact  |
-| --- | ------------------------------------------------------------------------- | ------- |
-| 1   | Public retry-config API (`NewSyncer` options)                             | 🔴 High |
-| 2   | Tombstone purge/TTL (`PurgeTombstonesBefore`)                             | 🔴 High |
-| 3   | Investigate + fix LSP vendoring false positive                            | 🟠 Med  |
-| 4   | `CompleteFetch` marker to harden reconcile                                | 🟠 Med  |
-| 5   | Example: tombstone→resurrect round-trip                                   | 🟠 Med  |
-| 6   | Example: plug in a `ConflictResolver`                                     | 🟠 Med  |
-| 7   | Retry the per-item store path, not just fetch                             | 🟠 Med  |
-| 8   | Rename `pkg/sync` → `pkg/synclib` (breaking)                              | 🟠 Med  |
-| 9   | Bump coverage on `pkg/data/model` (80.5%) and `pkg/cqrs` (81.9%)          | 🟡 Low  |
-| 10  | Add metrics/observability to the sync loop                                | 🟡 Low  |
-| 11  | Schema upcasters (ADR-0004 carry-over)                                    | 🟡 Low  |
-| 12  | `GetRateLimit` nilnil — decide sentinel vs keep contract                  | 🟡 Low  |
-| 13  | Document that retry is fetch-only                                         | 🟡 Low  |
-| 14  | Integration test: SQLite reconcile round-trip                             | 🟡 Low  |
-| 15  | Make `lockSource` map cleanup-safe (currently grows unbounded per source) | 🟡 Low  |
-| 16  | CONTRIBUTING.md: add the tombstone/reconcile guidance                     | 🟡 Low  |
-| 17  | OpenAPI: expose tombstone fields in `/items` response                     | 🟡 Low  |
-| 18  | `ParseTombstoneReason` test for empty string                              | 🟡 Low  |
-| 19  | Bench: projection replay cost at 10k events                               | 🟡 Low  |
-| 20  | Decide whether `Reconcile` should be best-effort or fail-loud             | 🟡 Low  |
-| 21  | `flake.nix`: vendor offline-build path still needs `go-cqrs-lite` public  | 🟡 Low  |
-| 22  | Add a CHANGELOG entry for the tombstone pivot                             | 🟡 Low  |
-| 23  | Reconsider `ActionTombstoned` counting in `SyncResult`                    | 🟡 Low  |
-| 24  | Fuzz `AggregateID` delimiter encoding                                     | 🟡 Low  |
-| 25  | Cut v0.4.0 once retry-config + purge land                                 | 🟡 Low  |
+| #  | Task                                                                      | Impact  |
+| -- | ------------------------------------------------------------------------- | ------- |
+| 1  | Public retry-config API (`NewSyncer` options)                             | 🔴 High |
+| 2  | Tombstone purge/TTL (`PurgeTombstonesBefore`)                             | 🔴 High |
+| 3  | Investigate + fix LSP vendoring false positive                            | 🟠 Med  |
+| 4  | `CompleteFetch` marker to harden reconcile                                | 🟠 Med  |
+| 5  | Example: tombstone→resurrect round-trip                                   | 🟠 Med  |
+| 6  | Example: plug in a `ConflictResolver`                                     | 🟠 Med  |
+| 7  | Retry the per-item store path, not just fetch                             | 🟠 Med  |
+| 8  | Rename `pkg/sync` → `pkg/synclib` (breaking)                              | 🟠 Med  |
+| 9  | Bump coverage on `pkg/data/model` (80.5%) and `pkg/cqrs` (81.9%)          | 🟡 Low  |
+| 10 | Add metrics/observability to the sync loop                                | 🟡 Low  |
+| 11 | Schema upcasters (ADR-0004 carry-over)                                    | 🟡 Low  |
+| 12 | `GetRateLimit` nilnil — decide sentinel vs keep contract                  | 🟡 Low  |
+| 13 | Document that retry is fetch-only                                         | 🟡 Low  |
+| 14 | Integration test: SQLite reconcile round-trip                             | 🟡 Low  |
+| 15 | Make `lockSource` map cleanup-safe (currently grows unbounded per source) | 🟡 Low  |
+| 16 | CONTRIBUTING.md: add the tombstone/reconcile guidance                     | 🟡 Low  |
+| 17 | OpenAPI: expose tombstone fields in `/items` response                     | 🟡 Low  |
+| 18 | `ParseTombstoneReason` test for empty string                              | 🟡 Low  |
+| 19 | Bench: projection replay cost at 10k events                               | 🟡 Low  |
+| 20 | Decide whether `Reconcile` should be best-effort or fail-loud             | 🟡 Low  |
+| 21 | `flake.nix`: vendor offline-build path still needs `go-cqrs-lite` public  | 🟡 Low  |
+| 22 | Add a CHANGELOG entry for the tombstone pivot                             | 🟡 Low  |
+| 23 | Reconsider `ActionTombstoned` counting in `SyncResult`                    | 🟡 Low  |
+| 24 | Fuzz `AggregateID` delimiter encoding                                     | 🟡 Low  |
+| 25 | Cut v0.4.0 once retry-config + purge land                                 | 🟡 Low  |
 
 ---
 

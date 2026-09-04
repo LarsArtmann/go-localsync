@@ -1,8 +1,8 @@
 # Comprehensive Status Report — go-localsync Naming Rename Progress
 
-**Date:** 2026-05-28 07:38  
-**Branch:** master  
-**Commit:** 394725b  
+**Date:** 2026-05-28 07:38\
+**Branch:** master\
+**Commit:** 394725b\
 **Author:** Lars Artmann <git@lars.software>
 
 ---
@@ -19,12 +19,12 @@
 
 ## What Was Done (Since Last Report)
 
-| #   | Task                                             | Status  | Files                                                                                      |
-| --- | ------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------ |
-| 1   | `pkg/types` → `pkg/id` rename                    | ✅ DONE | 25 files changed, 526 insertions, 194 deletions                                            |
-| 2   | Fixed `go-cqrs-lite/core/pkg/id` alias conflicts | ✅ DONE | `pkg/cqrs/aggregate_id.go`, `decider.go`, `stack.go`, `testing_test.go`, `decider_test.go` |
-| 3   | Fixed import ordering (gci)                      | ✅ DONE | All affected files via `goimports`                                                         |
-| 4   | Verified build + tests + lint                    | ✅ DONE | 0 lint issues, all 7 packages pass                                                         |
+| # | Task                                             | Status  | Files                                                                                      |
+| - | ------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------ |
+| 1 | `pkg/types` → `pkg/id` rename                    | ✅ DONE | 25 files changed, 526 insertions, 194 deletions                                            |
+| 2 | Fixed `go-cqrs-lite/core/pkg/id` alias conflicts | ✅ DONE | `pkg/cqrs/aggregate_id.go`, `decider.go`, `stack.go`, `testing_test.go`, `decider_test.go` |
+| 3 | Fixed import ordering (gci)                      | ✅ DONE | All affected files via `goimports`                                                         |
+| 4 | Verified build + tests + lint                    | ✅ DONE | 0 lint issues, all 7 packages pass                                                         |
 
 ---
 
@@ -59,13 +59,13 @@
 
 ## What's Totally Fucked Up
 
-| #   | Issue                                 | Severity                                                                                                                                        |
-| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Uncommitted test additions**        | `main_test.go` has new tests but they're not committed                                                                                          |
-| 2   | **Doc formatting-only changes**       | DOMAIN_LANGUAGE.md, UPSTREAM-SUGGESTIONS.md have whitespace changes sitting uncommitted                                                         |
-| 3   | **LSP stale cache**                   | Still shows errors for deleted `aggregate_id_test.go` and old `pkg/types` paths                                                                 |
-| 4   | **Planning doc bloat**                | `2026-05-28_06-25_COMPREHENSIVE-EXECUTION-PLAN.md` is 221 lines but hasn't been updated since the rename decision changed (pkg/localsync stays) |
-| 5   | **go-mod-tidy failure in pre-commit** | Saga module version mismatch — pre-existing, not my fault                                                                                       |
+| # | Issue                                 | Severity                                                                                                                                        |
+| - | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | **Uncommitted test additions**        | `main_test.go` has new tests but they're not committed                                                                                          |
+| 2 | **Doc formatting-only changes**       | DOMAIN_LANGUAGE.md, UPSTREAM-SUGGESTIONS.md have whitespace changes sitting uncommitted                                                         |
+| 3 | **LSP stale cache**                   | Still shows errors for deleted `aggregate_id_test.go` and old `pkg/types` paths                                                                 |
+| 4 | **Planning doc bloat**                | `2026-05-28_06-25_COMPREHENSIVE-EXECUTION-PLAN.md` is 221 lines but hasn't been updated since the rename decision changed (pkg/localsync stays) |
+| 5 | **go-mod-tidy failure in pre-commit** | Saga module version mismatch — pre-existing, not my fault                                                                                       |
 
 ---
 

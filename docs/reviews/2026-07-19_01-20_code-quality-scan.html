@@ -65,14 +65,14 @@
 
         /* --- Type stacks (system only — zero external fonts) --- */
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -289,15 +289,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       /* --- Issue cards --- */
@@ -310,15 +322,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -830,8 +854,8 @@
           <div class="hero-badge">Code Quality Scan</div>
           <h1>go-localsync Quality Dashboard</h1>
           <p class="hero-subtitle">
-            Build, lint, and code-duplication analysis across 52 production files and 5,449 lines of
-            Go.
+            Build, lint, and code-duplication analysis across 52 production
+            files and 5,449 lines of Go.
           </p>
         </div>
 
@@ -859,14 +883,15 @@
         <div class="card card-solution">
           <h4>Verdict: clean build, clean lint, one cosmetic clone</h4>
           <p>
-            <code>go build ./...</code> exits 0. <code>golangci-lint run ./...</code> (v2.12.2, 114
-            enabled linters including <code>dupl</code>, <code>dupword</code>, <code>gocyclo</code>,
-            <code>gocognit</code>, <code>funlen</code>, <code>govet</code>,
-            <code>staticcheck</code>) reports 0 issues. A dedicated deep duplication pass (<code
-              >dupl</code
-            >
-            threshold lowered from 150&rarr;80 tokens) surfaces exactly one structural clone in the
-            internal linter &mdash; low severity, no action required.
+            <code>go build ./...</code> exits 0.
+            <code>golangci-lint run ./...</code> (v2.12.2, 114 enabled linters
+            including <code>dupl</code>, <code>dupword</code>,
+            <code>gocyclo</code>, <code>gocognit</code>, <code>funlen</code>,
+            <code>govet</code>, <code>staticcheck</code>) reports 0 issues. A
+            dedicated deep duplication pass (<code>dupl</code>
+            threshold lowered from 150&rarr;80 tokens) surfaces exactly one
+            structural clone in the internal linter &mdash; low severity, no
+            action required.
           </p>
         </div>
 
@@ -937,13 +962,17 @@
         <div class="issue issue-nice">
           <span class="severity severity-nice">Low</span>
           <h3>Structural clone between two cqrslint runtime checks</h3>
-          <div class="where">internal/cqrslint/checks_runtime.go:19-42 &harr; :46-69</div>
+          <div class="where">
+            internal/cqrslint/checks_runtime.go:19-42 &harr; :46-69
+          </div>
           <p>
-            <code>checkFoldSwitchCoverage</code> and <code>checkProjectorEventTypes</code> share the
-            same skeleton: locate a function by name &rarr; nil-guard with a warning Finding &rarr;
-            collect identifiers from its body &rarr; loop over <code>canonicalEventConsts</code> and
-            emit an error Finding for any missing. The bodies are structurally near-identical (dupl
-            threshold 80) but semantically distinct &mdash; one verifies
+            <code>checkFoldSwitchCoverage</code> and
+            <code>checkProjectorEventTypes</code> share the same skeleton:
+            locate a function by name &rarr; nil-guard with a warning Finding
+            &rarr; collect identifiers from its body &rarr; loop over
+            <code>canonicalEventConsts</code> and emit an error Finding for any
+            missing. The bodies are structurally near-identical (dupl threshold
+            80) but semantically distinct &mdash; one verifies
             <em>event coverage in the fold switch</em>, the other verifies
             <em>event subscriptions in the projector</em>.
           </p>
@@ -951,12 +980,14 @@
             <strong>Fix (optional, judgment call)</strong>
             Extract a shared helper
             <code
-              >checkFuncReferencesAllEvents(pkg, funcName, collect func(*ast.Body) map[string]bool,
-              rule, missingMsg string) []Finding</code
-            >. Both checks become 2-line wrappers. Net LOC drops ~20, and the two distinct intents
-            stay readable. <em>Not required</em> &mdash; the duplication is contained to one file in
-            an internal tool and the threshold (80) is below golangci-lint's default (150), so it
-            ships clean today.
+              >checkFuncReferencesAllEvents(pkg, funcName, collect
+              func(*ast.Body) map[string]bool, rule, missingMsg string)
+              []Finding</code
+            >. Both checks become 2-line wrappers. Net LOC drops ~20, and the
+            two distinct intents stay readable. <em>Not required</em> &mdash;
+            the duplication is contained to one file in an internal tool and the
+            threshold (80) is below golangci-lint's default (150), so it ships
+            clean today.
           </div>
         </div>
 
@@ -968,9 +999,9 @@
             <div class="text">
               <strong>Zero lint debt at the strictest setting</strong>
               <span
-                >114 linters with <code>enable-all</code> and targeted exclusions only for test
-                files and known false positives. <code>dupl</code> is active on production
-                code.</span
+                >114 linters with <code>enable-all</code> and targeted
+                exclusions only for test files and known false positives.
+                <code>dupl</code> is active on production code.</span
               >
             </div>
           </div>
@@ -979,9 +1010,11 @@
             <div class="text">
               <strong>Custom architectural linter backs the rules</strong>
               <span
-                ><code>cmd/cqrs-lint</code> enforces 10 invariants (C0001&ndash;C0010) on
-                <code>pkg/cqrs</code> &mdash; single-aggregate scope, three fixed events, fold
-                coverage, projection mutex guard. Quality is enforced by AST, not hope.</span
+                ><code>cmd/cqrs-lint</code> enforces 10 invariants
+                (C0001&ndash;C0010) on <code>pkg/cqrs</code> &mdash;
+                single-aggregate scope, three fixed events, fold coverage,
+                projection mutex guard. Quality is enforced by AST, not
+                hope.</span
               >
             </div>
           </div>
@@ -990,9 +1023,9 @@
             <div class="text">
               <strong>Healthy test-to-code ratio</strong>
               <span
-                >6,777 test LOC vs 5,449 production LOC (1.24&times;). 214 tests cover 10 packages
-                with 100% coverage on <code>pkg/id</code>, <code>pkg/crdt</code>,
-                <code>pkg/data/schema</code>.</span
+                >6,777 test LOC vs 5,449 production LOC (1.24&times;). 214 tests
+                cover 10 packages with 100% coverage on <code>pkg/id</code>,
+                <code>pkg/crdt</code>, <code>pkg/data/schema</code>.</span
               >
             </div>
           </div>
@@ -1001,9 +1034,10 @@
             <div class="text">
               <strong>No CGo, single build tag</strong>
               <span
-                >Pure-Go SQLite (<code>modernc.org/sqlite</code>). The only build tag is
-                <code>goexperiment.jsonv2</code>, inherited from go-cqrs-lite v4 &mdash; documented
-                in three places in <code>flake.nix</code> + <code>.golangci.yml</code>.</span
+                >Pure-Go SQLite (<code>modernc.org/sqlite</code>). The only
+                build tag is <code>goexperiment.jsonv2</code>, inherited from
+                go-cqrs-lite v4 &mdash; documented in three places in
+                <code>flake.nix</code> + <code>.golangci.yml</code>.</span
               >
             </div>
           </div>
@@ -1030,7 +1064,8 @@
               <td>19&harr;46</td>
               <td>
                 Structural clone (dupl, 80-tok threshold) between
-                <code>checkFoldSwitchCoverage</code> and <code>checkProjectorEventTypes</code>
+                <code>checkFoldSwitchCoverage</code> and
+                <code>checkProjectorEventTypes</code>
               </td>
               <td>Optional: extract shared event-reference checker helper</td>
             </tr>
@@ -1039,14 +1074,14 @@
 
         <div class="callout callout-solution">
           <strong>Bottom line</strong>
-          No critical, high, or medium issues. The single low-severity finding is contained to an
-          internal developer tool and is below the project's enforced duplication threshold.
-          Ship-ready.
+          No critical, high, or medium issues. The single low-severity finding
+          is contained to an internal developer tool and is below the project's
+          enforced duplication threshold. Ship-ready.
         </div>
 
         <footer class="footer">
-          Generated 2026-07-19 &middot; Build/lint/dupl verified live against go-cqrs-lite v4 @
-          commit 0316010
+          Generated 2026-07-19 &middot; Build/lint/dupl verified live against
+          go-cqrs-lite v4 @ commit 0316010
         </footer>
       </main>
     </div>

@@ -30,14 +30,14 @@
         --warning: var(--color-yellow);
         --radius: 0px;
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
       * {
         box-sizing: border-box;
@@ -325,18 +325,23 @@
       <main class="main">
         <h1>Brutal Self-Review — Session 24</h1>
         <p class="subtitle">
-          2026-06-29 · Post v3.4 upgrade follow-up · 12 fixes applied, 5 deferred
+          2026-06-29 · Post v3.4 upgrade follow-up · 12 fixes applied, 5
+          deferred
         </p>
 
         <section id="overview">
           <h2>Overview</h2>
           <p>
-            This session picked up after a dependency upgrade (go-cqrs-lite v3.1 → v3.4, sqlite
-            v1.53) and a prior self-review. The question was:
-            <strong>what did we forget, what's still stupid, what can be improved?</strong> The
-            answer was brutal — the previous session claimed a clean pushed state, but the working
-            tree was dirty with ~140 reformatted vendored files and uncommitted doc formatter noise.
-            That was the single biggest miss.
+            This session picked up after a dependency upgrade (go-cqrs-lite v3.1
+            → v3.4, sqlite v1.53) and a prior self-review. The question was:
+            <strong
+              >what did we forget, what's still stupid, what can be
+              improved?</strong
+            >
+            The answer was brutal — the previous session claimed a clean pushed
+            state, but the working tree was dirty with ~140 reformatted vendored
+            files and uncommitted doc formatter noise. That was the single
+            biggest miss.
           </p>
           <div class="stats">
             <div class="stat">
@@ -365,18 +370,21 @@
           <div class="card card-problem">
             <span class="tag fixed">FIXED</span>
             <p>
-              <strong>The working tree was dirty.</strong> The previous session's handoff claimed
-              "all commits pushed, clean state." In reality: ~140 vendored files had been
-              reformatted by <code>golangci-lint fmt</code> (gofumpt/golines applied to third-party
-              code), plus two doc HTML files had staged-but-uncommitted formatter noise (compressed
-              CSS expanded to multi-line). This was missed because no <code>git status</code> was
-              run in the handoff verification.
+              <strong>The working tree was dirty.</strong> The previous
+              session's handoff claimed "all commits pushed, clean state." In
+              reality: ~140 vendored files had been reformatted by
+              <code>golangci-lint fmt</code> (gofumpt/golines applied to
+              third-party code), plus two doc HTML files had
+              staged-but-uncommitted formatter noise (compressed CSS expanded to
+              multi-line). This was missed because no
+              <code>git status</code> was run in the handoff verification.
             </p>
             <p>
               <strong>Root cause:</strong> <code>.golangci.yml</code>
-              <code>formatters.exclusions.paths</code> was missing <code>vendor/</code>. The
-              <code>issues.paths</code> list already excluded it, but formatters had a separate,
-              incomplete exclusion list. Fixed by adding <code>vendor/</code> to both.
+              <code>formatters.exclusions.paths</code> was missing
+              <code>vendor/</code>. The <code>issues.paths</code> list already
+              excluded it, but formatters had a separate, incomplete exclusion
+              list. Fixed by adding <code>vendor/</code> to both.
             </p>
           </div>
 
@@ -384,11 +392,17 @@
           <div class="card card-problem">
             <span class="tag fixed">FIXED</span>
             <p>
-              <strong>Smuggling mutable state through <code>context.Value</code>.</strong>
+              <strong
+                >Smuggling mutable state through
+                <code>context.Value</code>.</strong
+              >
               <code>sync_outcome.go</code> used
-              <code>context.WithValue(ctx, syncOutcomeKey{}, &amp;outcome)</code> to ferry a mutable
-              <code>*SyncOutcome</code> out of the decider. This is a textbook request-scoped-value
-              anti-pattern for mutable-state transport — context values are for request-scoped
+              <code
+                >context.WithValue(ctx, syncOutcomeKey{}, &amp;outcome)</code
+              >
+              to ferry a mutable <code>*SyncOutcome</code> out of the decider.
+              This is a textbook request-scoped-value anti-pattern for
+              mutable-state transport — context values are for request-scoped
               <em>immutable</em> data. Replaced with a plain struct field on
               <code>SyncItemCommand.outcome</code>.
             </p>
@@ -399,11 +413,13 @@
             <span class="tag fixed">FIXED</span>
             <p>
               <strong>Inferring conflicts from event count.</strong>
-              <code>classifyAction</code> used <code>eventCount &gt; 1</code> to detect conflicts —
-              a fragile coupling that would silently break if a non-conflict event were ever added
-              to the sync path. Replaced with an explicit <code>ConflictDetected</code> flag set by
-              inspecting the emitted event <em>type</em> (<code>EventItemConflictFound</code>), the
-              decider's actual signal.
+              <code>classifyAction</code> used <code>eventCount &gt; 1</code> to
+              detect conflicts — a fragile coupling that would silently break if
+              a non-conflict event were ever added to the sync path. Replaced
+              with an explicit <code>ConflictDetected</code> flag set by
+              inspecting the emitted event
+              <em>type</em> (<code>EventItemConflictFound</code>), the decider's
+              actual signal.
             </p>
           </div>
 
@@ -412,35 +428,49 @@
             <span class="tag deferred">DEFERRED</span>
             <p>
               See <a href="#deferred">Deferred Items</a> below. Headline items:
-              <code>encoding/json</code> v1 → v2 migration (10 files), OpenTelemetry instrumentation
-              (the <code>otel/v3</code> module is vendored but unused), and the pre-commit hook OOM
-              on vendor.
+              <code>encoding/json</code> v1 → v2 migration (10 files),
+              OpenTelemetry instrumentation (the <code>otel/v3</code> module is
+              vendored but unused), and the pre-commit hook OOM on vendor.
             </p>
           </div>
 
           <h3>5. Did we lie to you?</h3>
           <p>
-            <strong>Yes — implicitly.</strong> The handoff said "all pushed, clean state." It
-            wasn't. The vendor reformats and doc noise were uncommitted. Not a deliberate lie, but a
-            verification failure — <code>git status</code> was not run as a final check. This is
-            corrected: every commit in this session verified clean before and after.
+            <strong>Yes — implicitly.</strong> The handoff said "all pushed,
+            clean state." It wasn't. The vendor reformats and doc noise were
+            uncommitted. Not a deliberate lie, but a verification failure —
+            <code>git status</code> was not run as a final check. This is
+            corrected: every commit in this session verified clean before and
+            after.
           </p>
 
           <h3>6. How can we be less stupid?</h3>
           <ul>
             <li>
-              <strong>Always run <code>git status</code> before claiming "done."</strong>
+              <strong
+                >Always run <code>git status</code> before claiming
+                "done."</strong
+              >
             </li>
             <li>
-              <strong>Run <code>git status</code> after <code>golangci-lint fmt</code></strong> to
-              catch formatter pollution immediately.
+              <strong
+                >Run <code>git status</code> after
+                <code>golangci-lint fmt</code></strong
+              >
+              to catch formatter pollution immediately.
             </li>
             <li>
-              <strong>Don't use <code>context.Value</code> for mutable state transport.</strong> Use
-              command fields or return values.
+              <strong
+                >Don't use <code>context.Value</code> for mutable state
+                transport.</strong
+              >
+              Use command fields or return values.
             </li>
             <li>
-              <strong>Detect domain facts by explicit signal, not inference from counts.</strong>
+              <strong
+                >Detect domain facts by explicit signal, not inference from
+                counts.</strong
+              >
             </li>
           </ul>
 
@@ -448,10 +478,11 @@
           <div class="card card-solution">
             <span class="tag fixed">RESOLVED WITH DATA</span>
             <p>
-              <strong>The QueryDispatcher was a documented ghost</strong> — wired with 4 handlers,
-              tested, but bypassed at runtime (production reads go direct to ReadModel). The
-              previous comment justified this with "reflection / middleware overhead" — a
-              speculative claim. New benchmarks measured the real cost:
+              <strong>The QueryDispatcher was a documented ghost</strong> —
+              wired with 4 handlers, tested, but bypassed at runtime (production
+              reads go direct to ReadModel). The previous comment justified this
+              with "reflection / middleware overhead" — a speculative claim. New
+              benchmarks measured the real cost:
             </p>
             <table>
               <tr>
@@ -474,17 +505,18 @@
               </tr>
             </table>
             <p>
-              The bypass is now <strong>data-proven</strong>, not speculative. The QueryDispatcher
-              is documented as an optional observability path (kept for backward compat +
-              query-contract test coverage).
+              The bypass is now <strong>data-proven</strong>, not speculative.
+              The QueryDispatcher is documented as an optional observability
+              path (kept for backward compat + query-contract test coverage).
             </p>
           </div>
 
           <h3>8. Scope creep trap?</h3>
           <p>
-            <strong>No.</strong> This session stayed within scope: fixing real bugs (dirty tree,
-            context smuggling, fragile conflict inference) and paying down documented debt (CI, doc
-            drift). No new features were added. The single-aggregate scope (ADR-0004) was respected.
+            <strong>No.</strong> This session stayed within scope: fixing real
+            bugs (dirty tree, context smuggling, fragile conflict inference) and
+            paying down documented debt (CI, doc drift). No new features were
+            added. The single-aggregate scope (ADR-0004) was respected.
           </p>
 
           <h3>9. Did we remove something useful?</h3>
@@ -492,28 +524,32 @@
             <strong>No.</strong> The <code>contextWithSyncOutcome</code>/<code
               >syncOutcomeFromContext</code
             >
-            helpers were removed, but they were anti-pattern infrastructure replaced by a cleaner
-            mechanism (struct field). Nothing of value was lost.
+            helpers were removed, but they were anti-pattern infrastructure
+            replaced by a cleaner mechanism (struct field). Nothing of value was
+            lost.
           </p>
 
           <h3>10. Split brains?</h3>
           <p>
-            <strong>One found, now fixed:</strong> <code>SyncOutcome</code> carried
-            <code>ConflictWinner</code> but <code>classifyAction</code> inferred conflict separately
-            from <code>eventCount</code>. These were two independent sources of "was this a
-            conflict?" that could theoretically disagree. Now unified:
-            <code>ConflictDetected</code> is the single source, and <code>ConflictWinner</code> is
-            only meaningful when it's true.
+            <strong>One found, now fixed:</strong>
+            <code>SyncOutcome</code> carried <code>ConflictWinner</code> but
+            <code>classifyAction</code> inferred conflict separately from
+            <code>eventCount</code>. These were two independent sources of "was
+            this a conflict?" that could theoretically disagree. Now unified:
+            <code>ConflictDetected</code> is the single source, and
+            <code>ConflictWinner</code> is only meaningful when it's true.
           </p>
 
           <h3>11. How are we doing on tests?</h3>
           <div class="card card-solution">
             <span class="tag fixed">STRONG</span>
             <p>
-              <strong>190 tests, all passing.</strong> The <code>classifyAction</code> refactor
-              updated the table test to the new struct signature. New benchmark file
-              (<code>query_dispatch_bench_test.go</code>) added data-driven evidence for the
-              ghost-system resolution. Coverage: cqrs 81.9%, sync 84.5%, id/errors/crdt/schema 100%.
+              <strong>190 tests, all passing.</strong> The
+              <code>classifyAction</code> refactor updated the table test to the
+              new struct signature. New benchmark file
+              (<code>query_dispatch_bench_test.go</code>) added data-driven
+              evidence for the ghost-system resolution. Coverage: cqrs 81.9%,
+              sync 84.5%, id/errors/crdt/schema 100%.
             </p>
           </div>
         </section>
@@ -523,11 +559,13 @@
           <div class="card card-solution">
             <h3>QueryDispatcher — Resolved</h3>
             <p>
-              Status: <strong>kept, documented, benchmark-justified.</strong> Not a ghost anymore —
-              it's an explicitly optional observability path. The production read path goes direct
-              to ReadModel for performance (measured: 1.6×–5.5× faster). Consumers who want
-              <code>QueryLogging</code> on a specific read can dispatch a typed query through
-              <code>stack.QueryDispatcher</code>.
+              Status:
+              <strong>kept, documented, benchmark-justified.</strong> Not a
+              ghost anymore — it's an explicitly optional observability path.
+              The production read path goes direct to ReadModel for performance
+              (measured: 1.6×–5.5× faster). Consumers who want
+              <code>QueryLogging</code> on a specific read can dispatch a typed
+              query through <code>stack.QueryDispatcher</code>.
             </p>
           </div>
         </section>
@@ -538,8 +576,9 @@
             <h3>Conflict detection dual-path — Fixed</h3>
             <p>
               <code>classifyAction</code> (eventCount-based) and
-              <code>SyncOutcome.ConflictWinner</code> (payload-based) were two independent conflict
-              signals. Unified into a single <code>ConflictDetected</code> flag.
+              <code>SyncOutcome.ConflictWinner</code> (payload-based) were two
+              independent conflict signals. Unified into a single
+              <code>ConflictDetected</code> flag.
             </p>
           </div>
         </section>
@@ -550,20 +589,21 @@
           <ul>
             <li>
               <strong><code>SyncOutcome</code></strong> now carries
-              <code>ConflictDetected bool</code> — making the conflict signal explicit in the type,
-              not inferred downstream.
+              <code>ConflictDetected bool</code> — making the conflict signal
+              explicit in the type, not inferred downstream.
             </li>
             <li>
-              <strong><code>SyncItemCommand.outcome</code></strong> — outcome rides on the command
-              as a typed field, not an untyped context value. The type system now enforces the
-              relationship.
+              <strong><code>SyncItemCommand.outcome</code></strong> — outcome
+              rides on the command as a typed field, not an untyped context
+              value. The type system now enforces the relationship.
             </li>
           </ul>
           <h3>Libraries Leveraged</h3>
           <p>
-            The project already uses go-cqrs-lite v3.4 well. The <code>otel/v3</code> module is
-            vendored but <strong>not wired</strong> — this is the biggest underutilization. See
-            deferred items.
+            The project already uses go-cqrs-lite v3.4 well. The
+            <code>otel/v3</code> module is vendored but
+            <strong>not wired</strong> — this is the biggest underutilization.
+            See deferred items.
           </p>
         </section>
 
@@ -671,42 +711,49 @@
             <h3>1. encoding/json v1 → v2 migration</h3>
             <p>
               10 files use <code>encoding/json</code> (v1). Go 1.26 policy wants
-              <code>encoding/json/v2</code>. However, v2 is still experiment-gated
-              (<code>GOEXPERIMENT=jsonv2</code>) and the API differs. Migrating now risks breakage.
-              <strong>Recommendation:</strong> wait for v2 to stabilize as default, then migrate in
-              one pass. Low risk of deferral — v1 still works.
+              <code>encoding/json/v2</code>. However, v2 is still
+              experiment-gated (<code>GOEXPERIMENT=jsonv2</code>) and the API
+              differs. Migrating now risks breakage.
+              <strong>Recommendation:</strong> wait for v2 to stabilize as
+              default, then migrate in one pass. Low risk of deferral — v1 still
+              works.
             </p>
           </div>
           <div class="card card-warning">
             <span class="tag deferred">DEFERRED</span>
             <h3>2. OpenTelemetry instrumentation (otel/v3)</h3>
             <p>
-              The <code>otel/v3</code> module is vendored but completely unwired. This is the
-              biggest feature gap. Adding spans for <code>Syncer.Sync()</code>,
-              <code>CQRSStack.SyncItems()</code>, and HTTP middleware would give production
-              observability. <strong>Blocker:</strong> needs a design decision on whether
-              observability is SDK-level (built in) or consumer-level (consumer wraps). ~4-8 hours.
+              The <code>otel/v3</code> module is vendored but completely
+              unwired. This is the biggest feature gap. Adding spans for
+              <code>Syncer.Sync()</code>, <code>CQRSStack.SyncItems()</code>,
+              and HTTP middleware would give production observability.
+              <strong>Blocker:</strong> needs a design decision on whether
+              observability is SDK-level (built in) or consumer-level (consumer
+              wraps). ~4-8 hours.
             </p>
           </div>
           <div class="card card-warning">
             <span class="tag deferred">DEFERRED</span>
             <h3>3. Pre-commit hook OOM on vendor</h3>
             <p>
-              The buildflow pre-commit hook runs gofumpt/goimports across the entire tree (including
-              vendor/). With ~400 modernc.org/sqlite generated files, these tools OOM within the 60s
-              budget. Workaround: the formatter exclusion (fixed this session) prevents the
-              pollution, but the hook itself still scans vendor. <strong>Fix:</strong> exclude
-              vendor/ in buildflow config or increase the budget. ~1 hour.
+              The buildflow pre-commit hook runs gofumpt/goimports across the
+              entire tree (including vendor/). With ~400 modernc.org/sqlite
+              generated files, these tools OOM within the 60s budget.
+              Workaround: the formatter exclusion (fixed this session) prevents
+              the pollution, but the hook itself still scans vendor.
+              <strong>Fix:</strong> exclude vendor/ in buildflow config or
+              increase the budget. ~1 hour.
             </p>
           </div>
           <div class="card card-warning">
             <span class="tag deferred">DEFERRED</span>
             <h3>4. projectionhost/v3 evaluation</h3>
             <p>
-              go-cqrs-lite ships a <code>projectionhost/v3</code> module (not vendored) that could
-              replace the hand-rolled <code>replayJournal</code> in <code>runner.go</code>, adding
-              crash-restart, checkpoint persistence, and DLQ. Requires proving it works with the
-              custom ReadModel. ~4-8 hours, needs ADR.
+              go-cqrs-lite ships a <code>projectionhost/v3</code> module (not
+              vendored) that could replace the hand-rolled
+              <code>replayJournal</code> in <code>runner.go</code>, adding
+              crash-restart, checkpoint persistence, and DLQ. Requires proving
+              it works with the custom ReadModel. ~4-8 hours, needs ADR.
             </p>
           </div>
           <div class="card card-warning">
@@ -714,9 +761,10 @@
             <h3>5. Make go-cqrs-lite public</h3>
             <p>
               The private dependency forces a committed vendor/ dir +
-              <code>vendorHash = null</code>. Making it public enables a real vendorHash and drops
-              vendor/ entirely — eliminating the entire class of formatter-pollution bugs. External
-              decision (repo visibility).
+              <code>vendorHash = null</code>. Making it public enables a real
+              vendorHash and drops vendor/ entirely — eliminating the entire
+              class of formatter-pollution bugs. External decision (repo
+              visibility).
             </p>
           </div>
         </section>
@@ -724,11 +772,12 @@
         <section id="verdict">
           <h2>Verdict</h2>
           <div class="verdict">
-            The codebase is now measurably better than at session start: the dirty-tree miss is
-            fixed at the root cause, the context.Value anti-pattern is eliminated, conflict
-            detection is explicit, the ghost system is justified with data, and the broken CI is
-            repaired. 190 tests pass, 0 lint issues, buildflow 27/27. The deferred items are genuine
-            design decisions, not procrastination.
+            The codebase is now measurably better than at session start: the
+            dirty-tree miss is fixed at the root cause, the context.Value
+            anti-pattern is eliminated, conflict detection is explicit, the
+            ghost system is justified with data, and the broken CI is repaired.
+            190 tests pass, 0 lint issues, buildflow 27/27. The deferred items
+            are genuine design decisions, not procrastination.
           </div>
         </section>
       </main>

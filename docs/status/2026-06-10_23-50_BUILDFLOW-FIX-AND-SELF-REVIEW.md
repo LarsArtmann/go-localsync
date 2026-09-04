@@ -152,33 +152,33 @@ The conversion happens in `cqrs/item_adapter.go` (`ToDataItem`/`FromDataItem`). 
 
 Sorted by **(Impact × Urgency) / Effort** — highest value first:
 
-| #   | Task                                                                            | Impact | Effort | Category      |
-| --- | ------------------------------------------------------------------------------- | ------ | ------ | ------------- |
-| 1   | Fix `SyncItem` missing `Options` field (exhaustruct)                            | HIGH   | 5min   | Bug           |
-| 2   | Remove dead `Count(ctx)` from `stack_adapters.go`                               | LOW    | 5min   | Dead code     |
-| 3   | Fix `store_factory.go` no-op `fmt.Errorf("%w", err)`                            | LOW    | 5min   | Code quality  |
-| 4   | Fix `fromUnixNano` timezone loss in `events.go`                                 | MEDIUM | 5min   | Correctness   |
-| 5   | Fix `SyncOutcome` silent JSON unmarshal error                                   | MEDIUM | 10min  | Correctness   |
-| 6   | Typed `ConflictWinner` enum (replace string constants)                          | MEDIUM | 15min  | Type safety   |
-| 7   | Extract duplicate payload decode helper (decider + projection)                  | MEDIUM | 15min  | DRY           |
-| 8   | Fix API `getStats` to use `syncer.GetStats()` instead of raw store              | MEDIUM | 15min  | Architecture  |
-| 9   | Remove dead `FromDataItem` export (only used in bench test)                     | LOW    | 5min   | Dead code     |
-| 10  | Add CLI flag for conflict resolver (`--conflict-strategy`)                      | HIGH   | 1h     | Feature       |
-| 11  | Integration test for `ActionConflictLocal` with real CQRS stack                 | HIGH   | 1h     | Testing       |
-| 12  | Table-driven tests for `HasChanged` edge cases                                  | HIGH   | 30min  | Testing       |
-| 13  | Kill `model.ProviderItem` + `transform.NewFromProviderItem`                     | MEDIUM | 30min  | Dead code     |
-| 14  | Decide fate of orphaned `data/query`, `data/repo`, `data/transform`             | HIGH   | 30min  | Architecture  |
-| 15  | Doc comments for ~18 exported types                                             | LOW    | 1h     | Docs          |
-| 16  | Integration test for full sync pipeline (E2E)                                   | HIGH   | 2h     | Testing       |
-| 17  | Performance benchmarks (1k/10k/100k items)                                      | MEDIUM | 2h     | Quality       |
-| 18  | Unify `provider.Item` and `model.Item` (eliminate split brain)                  | HIGH   | 4h     | Architecture  |
-| 19  | Wire `data/query` criteria into CQRS read model (replace `provider.ItemFilter`) | HIGH   | 4h     | Architecture  |
-| 20  | OpenTelemetry instrumentation                                                   | MEDIUM | 4h     | Observability |
-| 21  | Fix `ConflictAwareSyncer` tight coupling to concrete `*Syncer`                  | MEDIUM | 2h     | Architecture  |
-| 22  | Add `govalid` struct tags to config types                                       | LOW    | 1h     | Validation    |
-| 23  | API auth middleware                                                             | HIGH   | 2h     | Security      |
-| 24  | Graceful shutdown for API server                                                | MEDIUM | 1h     | Reliability   |
-| 25  | ADR documents for CQRS, branded IDs, CRDT decisions                             | LOW    | 2h     | Docs          |
+| #  | Task                                                                            | Impact | Effort | Category      |
+| -- | ------------------------------------------------------------------------------- | ------ | ------ | ------------- |
+| 1  | Fix `SyncItem` missing `Options` field (exhaustruct)                            | HIGH   | 5min   | Bug           |
+| 2  | Remove dead `Count(ctx)` from `stack_adapters.go`                               | LOW    | 5min   | Dead code     |
+| 3  | Fix `store_factory.go` no-op `fmt.Errorf("%w", err)`                            | LOW    | 5min   | Code quality  |
+| 4  | Fix `fromUnixNano` timezone loss in `events.go`                                 | MEDIUM | 5min   | Correctness   |
+| 5  | Fix `SyncOutcome` silent JSON unmarshal error                                   | MEDIUM | 10min  | Correctness   |
+| 6  | Typed `ConflictWinner` enum (replace string constants)                          | MEDIUM | 15min  | Type safety   |
+| 7  | Extract duplicate payload decode helper (decider + projection)                  | MEDIUM | 15min  | DRY           |
+| 8  | Fix API `getStats` to use `syncer.GetStats()` instead of raw store              | MEDIUM | 15min  | Architecture  |
+| 9  | Remove dead `FromDataItem` export (only used in bench test)                     | LOW    | 5min   | Dead code     |
+| 10 | Add CLI flag for conflict resolver (`--conflict-strategy`)                      | HIGH   | 1h     | Feature       |
+| 11 | Integration test for `ActionConflictLocal` with real CQRS stack                 | HIGH   | 1h     | Testing       |
+| 12 | Table-driven tests for `HasChanged` edge cases                                  | HIGH   | 30min  | Testing       |
+| 13 | Kill `model.ProviderItem` + `transform.NewFromProviderItem`                     | MEDIUM | 30min  | Dead code     |
+| 14 | Decide fate of orphaned `data/query`, `data/repo`, `data/transform`             | HIGH   | 30min  | Architecture  |
+| 15 | Doc comments for ~18 exported types                                             | LOW    | 1h     | Docs          |
+| 16 | Integration test for full sync pipeline (E2E)                                   | HIGH   | 2h     | Testing       |
+| 17 | Performance benchmarks (1k/10k/100k items)                                      | MEDIUM | 2h     | Quality       |
+| 18 | Unify `provider.Item` and `model.Item` (eliminate split brain)                  | HIGH   | 4h     | Architecture  |
+| 19 | Wire `data/query` criteria into CQRS read model (replace `provider.ItemFilter`) | HIGH   | 4h     | Architecture  |
+| 20 | OpenTelemetry instrumentation                                                   | MEDIUM | 4h     | Observability |
+| 21 | Fix `ConflictAwareSyncer` tight coupling to concrete `*Syncer`                  | MEDIUM | 2h     | Architecture  |
+| 22 | Add `govalid` struct tags to config types                                       | LOW    | 1h     | Validation    |
+| 23 | API auth middleware                                                             | HIGH   | 2h     | Security      |
+| 24 | Graceful shutdown for API server                                                | MEDIUM | 1h     | Reliability   |
+| 25 | ADR documents for CQRS, branded IDs, CRDT decisions                             | LOW    | 2h     | Docs          |
 
 ---
 

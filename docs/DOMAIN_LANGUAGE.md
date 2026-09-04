@@ -1,6 +1,6 @@
 # Domain Language — go-localsync
 
-**Project:** go-localsync  
+**Project:** go-localsync\
 **Last Updated:** 2026-07-18
 
 A Unified Language for the local-sync domain — shared across users, developers, and AI.

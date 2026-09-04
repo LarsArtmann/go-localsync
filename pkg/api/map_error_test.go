@@ -39,8 +39,8 @@ func TestMapSyncError(t *testing.T) {
 
 			humaErr := mapSyncError(tt.err)
 
-			var httpErr interface{ GetStatus() int }
-			if !errors.As(humaErr, &httpErr) {
+			httpErr, ok := errors.AsType[interface{GetStatus() int}](humaErr)
+			if !ok {
 				t.Fatalf("expected huma error, got %T: %v", humaErr, humaErr)
 			}
 

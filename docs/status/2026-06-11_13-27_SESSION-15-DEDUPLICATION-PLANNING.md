@@ -125,18 +125,18 @@
 
 ## c) NOT STARTED
 
-| #   | Item                                                                              | Priority | Effort | Impact                   |
-| --- | --------------------------------------------------------------------------------- | -------- | ------ | ------------------------ |
-| 1   | Resolve go-cqrs-lite upstream WIP (Sink→EventSink rename + Source type collision) | HIGH     | Medium | Blocks dep upgrades      |
-| 2   | Real GitHub PAT smoke test                                                        | MEDIUM   | Low    | Verifies E2E works       |
-| 3   | OpenTelemetry instrumentation                                                     | MEDIUM   | High   | Production observability |
-| 4   | API authentication                                                                | MEDIUM   | Medium | Production security      |
-| 5   | Event retention/TTL                                                               | LOW      | Medium | Storage management       |
-| 6   | Multi-user sync tracking                                                          | LOW      | High   | Multi-tenancy            |
-| 7   | Structured logging fields (consistent context: username, page, event_id)          | MEDIUM   | Low    | Debuggability            |
-| 8   | File-based SQLite persistence test (cross-restart)                                | HIGH     | Low    | Correctness verification |
-| 9   | Test Turso read model with real database file                                     | HIGH     | Low    | I/O & locking validation |
-| 10  | Decide CRDT package fate (keep/extract/wire deeper)                               | LOW      | —      | Strategic decision       |
+| #  | Item                                                                              | Priority | Effort | Impact                   |
+| -- | --------------------------------------------------------------------------------- | -------- | ------ | ------------------------ |
+| 1  | Resolve go-cqrs-lite upstream WIP (Sink→EventSink rename + Source type collision) | HIGH     | Medium | Blocks dep upgrades      |
+| 2  | Real GitHub PAT smoke test                                                        | MEDIUM   | Low    | Verifies E2E works       |
+| 3  | OpenTelemetry instrumentation                                                     | MEDIUM   | High   | Production observability |
+| 4  | API authentication                                                                | MEDIUM   | Medium | Production security      |
+| 5  | Event retention/TTL                                                               | LOW      | Medium | Storage management       |
+| 6  | Multi-user sync tracking                                                          | LOW      | High   | Multi-tenancy            |
+| 7  | Structured logging fields (consistent context: username, page, event_id)          | MEDIUM   | Low    | Debuggability            |
+| 8  | File-based SQLite persistence test (cross-restart)                                | HIGH     | Low    | Correctness verification |
+| 9  | Test Turso read model with real database file                                     | HIGH     | Low    | I/O & locking validation |
+| 10 | Decide CRDT package fate (keep/extract/wire deeper)                               | LOW      | —      | Strategic decision       |
 
 ---
 

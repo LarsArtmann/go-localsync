@@ -30,14 +30,14 @@
         --warning: var(--color-yellow);
         --radius: 0px;
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
       * {
         box-sizing: border-box;
@@ -222,7 +222,8 @@
     <main class="main">
       <h1>Execution Plan — Session 24</h1>
       <p class="subtitle">
-        2026-06-29 · Post v3.4 upgrade follow-up · Pareto-sorted by impact ↑ / effort ↓
+        2026-06-29 · Post v3.4 upgrade follow-up · Pareto-sorted by impact ↑ /
+        effort ↓
       </p>
 
       <div class="stats">
@@ -242,11 +243,13 @@
 
       <h2>Approach</h2>
       <p>
-        The plan was built by answering the brutal-self-review's 11 questions, then sorting every
-        item by <strong>impact-to-effort ratio</strong> (Pareto). The 1% that delivers 51%: fixing
-        the dirty tree + root cause (vendor formatter exclusion). The 20% that delivers 80%: the
-        three architectural fixes (context smuggling, explicit conflict, ghost resolution).
-        Everything else is medium-impact documentation and CI.
+        The plan was built by answering the brutal-self-review's 11 questions,
+        then sorting every item by
+        <strong>impact-to-effort ratio</strong> (Pareto). The 1% that delivers
+        51%: fixing the dirty tree + root cause (vendor formatter exclusion).
+        The 20% that delivers 80%: the three architectural fixes (context
+        smuggling, explicit conflict, ghost resolution). Everything else is
+        medium-impact documentation and CI.
       </p>
 
       <h2>Phase A — Stop the Bleeding (Critical)</h2>
@@ -262,7 +265,10 @@
           </tr>
           <tr>
             <td>1</td>
-            <td>Restore pristine vendored code (re-vendor to undo ~140 reformatted files)</td>
+            <td>
+              Restore pristine vendored code (re-vendor to undo ~140 reformatted
+              files)
+            </td>
             <td><span class="badge badge-critical">Critical</span></td>
             <td>6m</td>
             <td><span class="badge badge-done">DONE</span></td>
@@ -280,7 +286,8 @@
           <tr>
             <td>3</td>
             <td>
-              Verify <code>golangci-lint fmt</code> no longer touches vendor; commit clean tree
+              Verify <code>golangci-lint fmt</code> no longer touches vendor;
+              commit clean tree
             </td>
             <td><span class="badge badge-critical">Critical</span></td>
             <td>3m</td>
@@ -303,7 +310,8 @@
           <tr>
             <td>4</td>
             <td>
-              Add <code>outcome</code> field to <code>SyncItemCommand</code> (replace
+              Add <code>outcome</code> field to
+              <code>SyncItemCommand</code> (replace
               <code>context.Value</code> smuggling)
             </td>
             <td><span class="badge badge-high">High</span></td>
@@ -313,8 +321,8 @@
           <tr>
             <td>5</td>
             <td>
-              Wire <code>cmd.outcome</code> in <code>SyncItems</code> + handler; delete
-              context-value helpers
+              Wire <code>cmd.outcome</code> in <code>SyncItems</code> + handler;
+              delete context-value helpers
             </td>
             <td><span class="badge badge-high">High</span></td>
             <td>5m</td>
@@ -323,8 +331,8 @@
           <tr>
             <td>6</td>
             <td>
-              Add explicit <code>ConflictDetected</code> to <code>SyncOutcome</code>; set by event
-              type, not count
+              Add explicit <code>ConflictDetected</code> to
+              <code>SyncOutcome</code>; set by event type, not count
             </td>
             <td><span class="badge badge-high">High</span></td>
             <td>5m</td>
@@ -343,8 +351,8 @@
           <tr>
             <td>8</td>
             <td>
-              Update <code>TestClassifyAction</code> table test to new struct signature; run full
-              suite + lint
+              Update <code>TestClassifyAction</code> table test to new struct
+              signature; run full suite + lint
             </td>
             <td><span class="badge badge-high">High</span></td>
             <td>6m</td>
@@ -366,7 +374,10 @@
           </tr>
           <tr>
             <td>9</td>
-            <td>Benchmark <code>QueryDispatcher</code> vs direct ReadModel (List + Count)</td>
+            <td>
+              Benchmark <code>QueryDispatcher</code> vs direct ReadModel (List +
+              Count)
+            </td>
             <td><span class="badge badge-medium">Medium</span></td>
             <td>6m</td>
             <td><span class="badge badge-done">DONE</span></td>
@@ -374,7 +385,8 @@
           <tr>
             <td>10</td>
             <td>
-              Document the bypass with measured data; reframe ghost as optional observability path
+              Document the bypass with measured data; reframe ghost as optional
+              observability path
             </td>
             <td><span class="badge badge-medium">Medium</span></td>
             <td>8m</td>
@@ -382,8 +394,8 @@
           </tr>
         </table>
         <p>
-          <strong>Result:</strong> Direct path is 1.6× faster on List, 5.5× faster on Count (0 vs
-          127 allocs). The bypass is data-proven.
+          <strong>Result:</strong> Direct path is 1.6× faster on List, 5.5×
+          faster on Count (0 vs 127 allocs). The bypass is data-proven.
         </p>
       </div>
 
@@ -401,7 +413,8 @@
           <tr>
             <td>11</td>
             <td>
-              Fix FEATURES.md doc-drift (<code>ItemDeleted</code>→<code>ItemTombstoned</code>,
+              Fix FEATURES.md doc-drift
+              (<code>ItemDeleted</code>→<code>ItemTombstoned</code>,
               <code>DecideDelete</code>→<code>DecideTombstone</code>,
               <code>event.Projection</code>→<code>projection.Projection</code>)
             </td>
@@ -411,7 +424,10 @@
           </tr>
           <tr>
             <td>11b</td>
-            <td>Fix DOMAIN_LANGUAGE.md (tombstone names, remove stale Turso/Outbox refs)</td>
+            <td>
+              Fix DOMAIN_LANGUAGE.md (tombstone names, remove stale Turso/Outbox
+              refs)
+            </td>
             <td><span class="badge badge-medium">Medium</span></td>
             <td>4m</td>
             <td><span class="badge badge-done">DONE</span></td>
@@ -433,8 +449,8 @@
           <tr>
             <td>12</td>
             <td>
-              Rework broken CI build/release jobs (library has no binary → cross-platform compile
-              verify + binary-free release)
+              Rework broken CI build/release jobs (library has no binary →
+              cross-platform compile verify + binary-free release)
             </td>
             <td><span class="badge badge-medium">Medium</span></td>
             <td>8m</td>
@@ -443,8 +459,8 @@
           <tr>
             <td>12b</td>
             <td>
-              Update FEATURES.md CI rows (BROKEN → FULLY_FUNCTIONAL), TODO_LIST.md + ROADMAP.md
-              (mark done)
+              Update FEATURES.md CI rows (BROKEN → FULLY_FUNCTIONAL),
+              TODO_LIST.md + ROADMAP.md (mark done)
             </td>
             <td><span class="badge badge-medium">Medium</span></td>
             <td>4m</td>
@@ -470,39 +486,49 @@
           <td>4h</td>
           <td><span class="badge badge-deferred">DEFERRED</span></td>
           <td>
-            v2 is experiment-gated (GOEXPERIMENT=jsonv2); migrating now risks breakage. Wait for
-            stable default.
+            v2 is experiment-gated (GOEXPERIMENT=jsonv2); migrating now risks
+            breakage. Wait for stable default.
           </td>
         </tr>
         <tr>
           <td>D2</td>
-          <td>OpenTelemetry instrumentation (<code>otel/v3</code> is vendored but unwired)</td>
+          <td>
+            OpenTelemetry instrumentation (<code>otel/v3</code> is vendored but
+            unwired)
+          </td>
           <td><span class="badge badge-high">High</span></td>
           <td>4-8h</td>
           <td><span class="badge badge-deferred">DEFERRED</span></td>
           <td>
-            Needs design decision: SDK-level vs consumer-level observability. Biggest feature gap.
+            Needs design decision: SDK-level vs consumer-level observability.
+            Biggest feature gap.
           </td>
         </tr>
         <tr>
           <td>D3</td>
-          <td>Pre-commit hook OOM on vendor (buildflow scans ~400 sqlite files)</td>
+          <td>
+            Pre-commit hook OOM on vendor (buildflow scans ~400 sqlite files)
+          </td>
           <td><span class="badge badge-low">Low</span></td>
           <td>1h</td>
           <td><span class="badge badge-deferred">DEFERRED</span></td>
           <td>
-            Formatter exclusion (this session) prevents pollution, but hook still scans vendor. Fix
-            buildflow config.
+            Formatter exclusion (this session) prevents pollution, but hook
+            still scans vendor. Fix buildflow config.
           </td>
         </tr>
         <tr>
           <td>D4</td>
-          <td><code>projectionhost/v3</code> evaluation (replace hand-rolled replayJournal)</td>
+          <td>
+            <code>projectionhost/v3</code> evaluation (replace hand-rolled
+            replayJournal)
+          </td>
           <td><span class="badge badge-low">Low</span></td>
           <td>4-8h</td>
           <td><span class="badge badge-deferred">DEFERRED</span></td>
           <td>
-            Would add crash-restart + checkpoint + DLQ. Needs ADR + proving custom ReadModel compat.
+            Would add crash-restart + checkpoint + DLQ. Needs ADR + proving
+            custom ReadModel compat.
           </td>
         </tr>
         <tr>
@@ -512,8 +538,8 @@
           <td>1h</td>
           <td><span class="badge badge-deferred">DEFERRED</span></td>
           <td>
-            External decision (repo visibility). Eliminates the entire vendor-pollution class of
-            bugs.
+            External decision (repo visibility). Eliminates the entire
+            vendor-pollution class of bugs.
           </td>
         </tr>
       </table>
@@ -521,10 +547,16 @@
       <h2>Verification Summary</h2>
       <ul>
         <li><strong>Build:</strong> <code>go build ./...</code> — clean</li>
-        <li><strong>Tests:</strong> 190 test functions, 9 packages — all pass</li>
-        <li><strong>Lint:</strong> <code>golangci-lint run ./...</code> — 0 issues</li>
+        <li>
+          <strong>Tests:</strong> 190 test functions, 9 packages — all pass
+        </li>
+        <li>
+          <strong>Lint:</strong> <code>golangci-lint run ./...</code> — 0 issues
+        </li>
         <li><strong>BuildFlow:</strong> 27/27 steps pass on every commit</li>
-        <li><strong>Working tree:</strong> clean after every commit (verified)</li>
+        <li>
+          <strong>Working tree:</strong> clean after every commit (verified)
+        </li>
       </ul>
 
       <h2>Git Log (This Session)</h2>
@@ -535,15 +567,22 @@
         </tr>
         <tr>
           <td><code>5114e4f</code></td>
-          <td>Stop golangci-lint fmt from reformatting vendored third-party code</td>
+          <td>
+            Stop golangci-lint fmt from reformatting vendored third-party code
+          </td>
         </tr>
         <tr>
           <td><code>2f8c270</code></td>
-          <td>Remove context.Value outcome smuggling and make conflict detection explicit</td>
+          <td>
+            Remove context.Value outcome smuggling and make conflict detection
+            explicit
+          </td>
         </tr>
         <tr>
           <td><code>019f7b0</code></td>
-          <td>Justify QueryDispatcher bypass with benchmark data, not speculation</td>
+          <td>
+            Justify QueryDispatcher bypass with benchmark data, not speculation
+          </td>
         </tr>
         <tr>
           <td><code>babe493</code></td>
@@ -560,9 +599,10 @@
       </table>
 
       <div class="verdict">
-        12/12 planned tasks complete. 5 items deferred with clear rationale (not procrastination).
-        The codebase is cleaner, the CI works, the docs are accurate, and the architecture has less
-        implicit coupling. Build is green, lint is zero, tree is clean.
+        12/12 planned tasks complete. 5 items deferred with clear rationale (not
+        procrastination). The codebase is cleaner, the CI works, the docs are
+        accurate, and the architecture has less implicit coupling. Build is
+        green, lint is zero, tree is clean.
       </div>
     </main>
   </body>

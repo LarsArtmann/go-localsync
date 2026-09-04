@@ -78,7 +78,11 @@
         right: -200px;
         width: 600px;
         height: 600px;
-        background: radial-gradient(circle, rgba(59, 158, 255, 0.06) 0%, transparent 70%);
+        background: radial-gradient(
+          circle,
+          rgba(59, 158, 255, 0.06) 0%,
+          transparent 70%
+        );
         pointer-events: none;
       }
       .hero-badge {
@@ -651,9 +655,9 @@
         <div class="hero-badge">Architecture Review · June 2026</div>
         <h1>go-localsync<br /><em>Improvement Plan</em></h1>
         <p class="hero-desc">
-          Actionable fixes for the 4 structural issues and 6 placement concerns identified in the
-          architecture review. Each item includes the exact file location, the root cause, and a
-          concrete fix plan.
+          Actionable fixes for the 4 structural issues and 6 placement concerns
+          identified in the architecture review. Each item includes the exact
+          file location, the root cause, and a concrete fix plan.
         </p>
         <div class="hero-meta">
           <div class="hero-meta-item">
@@ -680,10 +684,18 @@
     <nav class="nav">
       <div class="container">
         <div class="nav-inner">
-          <a href="#critical" class="critical"><span class="count">2</span> Critical</a>
-          <a href="#structural" class="warning"><span class="count">2</span> Structural</a>
-          <a href="#placement" class="info"><span class="count">4</span> Placement</a>
-          <a href="#summary" class="info"><span class="count">✦</span> Summary</a>
+          <a href="#critical" class="critical"
+            ><span class="count">2</span> Critical</a
+          >
+          <a href="#structural" class="warning"
+            ><span class="count">2</span> Structural</a
+          >
+          <a href="#placement" class="info"
+            ><span class="count">4</span> Placement</a
+          >
+          <a href="#summary" class="info"
+            ><span class="count">✦</span> Summary</a
+          >
           <a href="#appendix-generics" class="warning"
             ><span class="count">A</span> Appendix: Generics</a
           >
@@ -697,8 +709,8 @@
         <div class="section-header">
           <h2>Critical Fixes</h2>
           <p>
-            Correctness issues that can cause silent data loss or inconsistent behavior in
-            production.
+            Correctness issues that can cause silent data loss or inconsistent
+            behavior in production.
           </p>
         </div>
 
@@ -712,31 +724,40 @@
             <span class="severity critical">Correctness</span>
           </div>
           <p class="card-desc">
-            <strong><code>SyncItems</code></strong> (the primary write path for batch syncs) calls
+            <strong><code>SyncItems</code></strong> (the primary write path for
+            batch syncs) calls
             <strong><code>Repo.Execute()</code></strong> directly with a
             <code>countingDecide</code> closure — completely bypassing the
-            <code>CommandDispatcher</code>. This means no logging, no validation, no retry, and no
-            idempotency protection for the most important code path. Meanwhile,
-            <code>DeleteItem</code> correctly dispatches through <code>CommandDispatcher</code>.
-            This is an inconsistency that also loses observability.
+            <code>CommandDispatcher</code>. This means no logging, no
+            validation, no retry, and no idempotency protection for the most
+            important code path. Meanwhile, <code>DeleteItem</code> correctly
+            dispatches through <code>CommandDispatcher</code>. This is an
+            inconsistency that also loses observability.
           </p>
           <div class="file-refs">
-            <span class="file-ref">pkg/cqrs/stack.go <span class="line">:165–243</span></span>
             <span class="file-ref"
-              >pkg/cqrs/stack.go <span class="line">:189</span> (countingDecide)</span
+              >pkg/cqrs/stack.go <span class="line">:165–243</span></span
             >
             <span class="file-ref"
-              >pkg/cqrs/stack.go <span class="line">:214</span> (Repo.Execute)</span
+              >pkg/cqrs/stack.go
+              <span class="line">:189</span> (countingDecide)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/stack.go <span class="line">:157</span> (DeleteItem — correct path)</span
+              >pkg/cqrs/stack.go
+              <span class="line">:214</span> (Repo.Execute)</span
+            >
+            <span class="file-ref"
+              >pkg/cqrs/stack.go <span class="line">:157</span> (DeleteItem —
+              correct path)</span
             >
           </div>
           <div class="dep-flow">
             <span class="node bad">SyncItems()</span>
             <span class="arrow">→</span>
             <span class="node bad">Repo.Execute()</span>
-            <span class="arrow" style="color: var(--text-muted)">— no middleware —</span>
+            <span class="arrow" style="color: var(--text-muted)"
+              >— no middleware —</span
+            >
             <br />
             <span class="node good">DeleteItem()</span>
             <span class="arrow">→</span>
@@ -751,14 +772,17 @@
               <div class="step-num">1</div>
               <div class="step-content">
                 <p>
-                  <strong>Add <code>SyncItemCommand</code> dispatch for single items.</strong>
-                  Refactor <code>SyncItem()</code> to construct a <code>SyncItemCommand</code> with
-                  the deterministic aggregate ID pre-computed from
-                  <code>AggregateID(source, externalID)</code>, then dispatch through
-                  <code>CommandDispatcher</code>. The handler already exists (<code
-                    >handleSyncItem</code
+                  <strong
+                    >Add <code>SyncItemCommand</code> dispatch for single
+                    items.</strong
                   >
-                  at <code>commands_queries.go:185</code>).
+                  Refactor <code>SyncItem()</code> to construct a
+                  <code>SyncItemCommand</code> with the deterministic aggregate
+                  ID pre-computed from
+                  <code>AggregateID(source, externalID)</code>, then dispatch
+                  through <code>CommandDispatcher</code>. The handler already
+                  exists (<code>handleSyncItem</code> at
+                  <code>commands_queries.go:185</code>).
                 </p>
               </div>
             </div>
@@ -766,12 +790,16 @@
               <div class="step-num">2</div>
               <div class="step-content">
                 <p>
-                  <strong>Refactor <code>SyncItems</code> to dispatch per-item.</strong> Loop over
-                  items, construct <code>SyncItemCommand</code> for each, dispatch through the
-                  pipeline. Capture results in a slice. The <code>countingDecide</code> hack goes
-                  away — domain semantics (created/updated/conflict) are determined from the
-                  decider's event output, which can be inspected via a post-commit hook or a result
-                  channel on the repository.
+                  <strong
+                    >Refactor <code>SyncItems</code> to dispatch
+                    per-item.</strong
+                  >
+                  Loop over items, construct <code>SyncItemCommand</code> for
+                  each, dispatch through the pipeline. Capture results in a
+                  slice. The <code>countingDecide</code> hack goes away — domain
+                  semantics (created/updated/conflict) are determined from the
+                  decider's event output, which can be inspected via a
+                  post-commit hook or a result channel on the repository.
                 </p>
               </div>
             </div>
@@ -780,13 +808,15 @@
               <div class="step-content">
                 <p>
                   <strong
-                    >Resolve the <code>DecideFunc</code> return-type limitation upstream.</strong
+                    >Resolve the <code>DecideFunc</code> return-type limitation
+                    upstream.</strong
                   >
                   The root cause is that <code>DecideFunc</code> returns
-                  <code>([]Event, error)</code> with no way to carry domain metadata. File an issue
-                  / PR on go-cqrs-lite to extend the return type to a
-                  <code>DecideResult</code> struct that carries events + annotations. This
-                  eliminates reverse-engineering intent from event counts.
+                  <code>([]Event, error)</code> with no way to carry domain
+                  metadata. File an issue / PR on go-cqrs-lite to extend the
+                  return type to a <code>DecideResult</code> struct that carries
+                  events + annotations. This eliminates reverse-engineering
+                  intent from event counts.
                 </p>
               </div>
             </div>
@@ -820,19 +850,23 @@
             <strong><code>CQRSStack</code></strong> implements
             <code>sync.SyncStore</code> implicitly through adapter methods in
             <code>stack_adapters.go</code>, but there is no
-            <code>var _ sync.SyncStore = (*CQRSStack)(nil)</code> assertion. If the
-            <code>SyncStore</code> interface gains or changes a method, compilation succeeds but
-            runtime fails at call sites — a silent contract break.
+            <code>var _ sync.SyncStore = (*CQRSStack)(nil)</code> assertion. If
+            the <code>SyncStore</code> interface gains or changes a method,
+            compilation succeeds but runtime fails at call sites — a silent
+            contract break.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/cqrs/stack.go <span class="line">:48</span> (CQRSStack struct)</span
+              >pkg/cqrs/stack.go <span class="line">:48</span> (CQRSStack
+              struct)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/stack_adapters.go <span class="line">:52–70</span> (adapter methods)</span
+              >pkg/cqrs/stack_adapters.go
+              <span class="line">:52–70</span> (adapter methods)</span
             >
             <span class="file-ref"
-              >pkg/sync/sync.go <span class="line">:SyncStore</span> (interface)</span
+              >pkg/sync/sync.go
+              <span class="line">:SyncStore</span> (interface)</span
             >
           </div>
           <div class="code-block">
@@ -844,9 +878,10 @@
               <div class="step-num">1</div>
               <div class="step-content">
                 <p>
-                  <strong>Add the compile-time assertion.</strong> One line after the
-                  <code>CQRSStack</code> struct definition. This follows the same pattern already
-                  used in <code>projection.go:69</code> (<code
+                  <strong>Add the compile-time assertion.</strong> One line
+                  after the <code>CQRSStack</code> struct definition. This
+                  follows the same pattern already used in
+                  <code>projection.go:69</code> (<code
                     >var _ event.Projection = (*Projector)(nil)</code
                   >).
                 </p>
@@ -856,11 +891,16 @@
               <div class="step-num">2</div>
               <div class="step-content">
                 <p>
-                  <strong>Verify all <code>SyncStore</code> methods are present.</strong> Check that
-                  <code>SyncItems</code>, <code>ListItems</code>, <code>CountItems</code>,
-                  <code>GetItemTypes</code>, <code>Count</code>, <code>Close</code> all match the
-                  interface. The duplicate <code>GetTypes</code> / <code>GetItemTypes</code> methods
-                  (see LS-6) should be resolved first.
+                  <strong
+                    >Verify all <code>SyncStore</code> methods are
+                    present.</strong
+                  >
+                  Check that <code>SyncItems</code>, <code>ListItems</code>,
+                  <code>CountItems</code>, <code>GetItemTypes</code>,
+                  <code>Count</code>, <code>Close</code> all match the
+                  interface. The duplicate <code>GetTypes</code> /
+                  <code>GetItemTypes</code> methods (see LS-6) should be
+                  resolved first.
                 </p>
               </div>
             </div>
@@ -889,8 +929,8 @@
         <div class="section-header">
           <h2>Structural Improvements</h2>
           <p>
-            Architectural patterns that are correct in spirit but have implementation gaps worth
-            closing.
+            Architectural patterns that are correct in spirit but have
+            implementation gaps worth closing.
           </p>
         </div>
 
@@ -904,26 +944,33 @@
             <span class="severity high">YAGNI</span>
           </div>
           <p class="card-desc">
-            <strong><code>pkg/crdt/</code></strong> defines a full distributed sync protocol:
-            <code>VectorClock</code>, <code>Operation[T]</code>, <code>SyncMessage</code>,
-            <code>SyncRequest</code>, <code>SyncResponse[T]</code>, <code>NodeID</code>,
-            <code>OperationID</code>. However, only <code>ConflictResolver[T]</code> and
-            <code>LWWResolver[T]</code> are actually used. Vector clocks are always empty (created
-            via <code>crdt.NewVectorClock()</code> and never populated). The remaining types are
-            dead code adding cognitive overhead and maintenance surface.
+            <strong><code>pkg/crdt/</code></strong> defines a full distributed
+            sync protocol: <code>VectorClock</code>, <code>Operation[T]</code>,
+            <code>SyncMessage</code>, <code>SyncRequest</code>,
+            <code>SyncResponse[T]</code>, <code>NodeID</code>,
+            <code>OperationID</code>. However, only
+            <code>ConflictResolver[T]</code> and <code>LWWResolver[T]</code> are
+            actually used. Vector clocks are always empty (created via
+            <code>crdt.NewVectorClock()</code> and never populated). The
+            remaining types are dead code adding cognitive overhead and
+            maintenance surface.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/crdt/conflict.go <span class="line">:ConflictResolver</span></span
+              >pkg/crdt/conflict.go
+              <span class="line">:ConflictResolver</span></span
             >
             <span class="file-ref"
-              >pkg/cqrs/decider.go <span class="line">:164–165</span> (empty vector clocks)</span
+              >pkg/cqrs/decider.go <span class="line">:164–165</span> (empty
+              vector clocks)</span
             >
             <span class="file-ref"
-              >pkg/crdt/operation.go <span class="line">:Operation[T]</span> (unused)</span
+              >pkg/crdt/operation.go
+              <span class="line">:Operation[T]</span> (unused)</span
             >
             <span class="file-ref"
-              >pkg/crdt/vectorclock.go <span class="line">:VectorClock</span> (always empty)</span
+              >pkg/crdt/vectorclock.go
+              <span class="line">:VectorClock</span> (always empty)</span
             >
           </div>
           <div class="steps">
@@ -931,9 +978,10 @@
               <div class="step-num">1</div>
               <div class="step-content">
                 <p>
-                  <strong>Keep the conflict resolution types.</strong> <code>Conflict[T]</code>,
-                  <code>ConflictResolver[T]</code>, <code>LWWResolver[T]</code> are actively used
-                  and well-designed. Leave them in <code>pkg/crdt/</code>.
+                  <strong>Keep the conflict resolution types.</strong>
+                  <code>Conflict[T]</code>, <code>ConflictResolver[T]</code>,
+                  <code>LWWResolver[T]</code> are actively used and
+                  well-designed. Leave them in <code>pkg/crdt/</code>.
                 </p>
               </div>
             </div>
@@ -941,10 +989,11 @@
               <div class="step-num">2</div>
               <div class="step-content">
                 <p>
-                  <strong>Document the unused types as future API.</strong> Add a
-                  <code>doc.go</code> to <code>pkg/crdt/</code> explaining which types are active
-                  vs. planned-for-later. This avoids confusion for new contributors without deleting
-                  code that has a clear future purpose.
+                  <strong>Document the unused types as future API.</strong> Add
+                  a <code>doc.go</code> to <code>pkg/crdt/</code> explaining
+                  which types are active vs. planned-for-later. This avoids
+                  confusion for new contributors without deleting code that has
+                  a clear future purpose.
                 </p>
               </div>
             </div>
@@ -952,9 +1001,10 @@
               <div class="step-num">3</div>
               <div class="step-content">
                 <p>
-                  <strong>Add tests for empty-vector-clock behavior.</strong> If the contract is
-                  "empty clocks mean LWW falls through to timestamp," encode that in a test. This
-                  documents the behavior and catches regressions.
+                  <strong>Add tests for empty-vector-clock behavior.</strong> If
+                  the contract is "empty clocks mean LWW falls through to
+                  timestamp," encode that in a test. This documents the behavior
+                  and catches regressions.
                 </p>
               </div>
             </div>
@@ -962,9 +1012,10 @@
           <div class="callout">
             <span class="callut-icon">ℹ</span>
             <span
-              >The types aren't wrong — they're well-designed for a future multi-node sync story.
-              The issue is that they're undocumented dead weight right now. A doc comment + test is
-              cheaper than deletion + re-creation later.</span
+              >The types aren't wrong — they're well-designed for a future
+              multi-node sync story. The issue is that they're undocumented dead
+              weight right now. A doc comment + test is cheaper than deletion +
+              re-creation later.</span
             >
           </div>
           <div class="impact-grid">
@@ -988,32 +1039,41 @@
           <div class="card-top">
             <div>
               <div class="card-id">LS-4</div>
-              <h3>Inconsistent not-found semantics across ReadModel implementations</h3>
+              <h3>
+                Inconsistent not-found semantics across ReadModel
+                implementations
+              </h3>
             </div>
             <span class="severity high">Correctness</span>
           </div>
           <p class="card-desc">
-            <strong><code>MemoryReadModel.Get()</code></strong> returns <code>(nil, nil)</code> for
-            missing items. <strong><code>SQLiteReadModel.Get()</code></strong> returns
-            <code>(nil, ErrNotFound)</code>. This semantic mismatch means code that works in
-            development (memory backend) breaks in production (SQLite backend) or vice versa.
-            Callers can't write consistent error-handling code.
+            <strong><code>MemoryReadModel.Get()</code></strong> returns
+            <code>(nil, nil)</code> for missing items.
+            <strong><code>SQLiteReadModel.Get()</code></strong> returns
+            <code>(nil, ErrNotFound)</code>. This semantic mismatch means code
+            that works in development (memory backend) breaks in production
+            (SQLite backend) or vice versa. Callers can't write consistent
+            error-handling code.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/cqrs/memory_readmodel.go <span class="line">:27</span> (returns nil, nil)</span
+              >pkg/cqrs/memory_readmodel.go
+              <span class="line">:27</span> (returns nil, nil)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/sqlite_readmodel.go <span class="line">:64</span> (returns nil,
-              ErrNotFound)</span
+              >pkg/cqrs/sqlite_readmodel.go
+              <span class="line">:64</span> (returns nil, ErrNotFound)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/readmodel.go <span class="line">:13</span> (interface)</span
+              >pkg/cqrs/readmodel.go
+              <span class="line">:13</span> (interface)</span
             >
           </div>
           <div class="diff-grid">
             <div>
-              <div class="diff-label before"><span class="dot"></span> Before</div>
+              <div class="diff-label before">
+                <span class="dot"></span> Before
+              </div>
               <div class="code-block">
                 <pre><span class="cmt">// MemoryReadModel — silent nil</span>
 <span class="kw">func</span> (m *<span class="type">MemoryReadModel</span>) <span class="fn">Get</span>(...) (*model.<span class="type">Item</span>, <span class="type">error</span>) {
@@ -1022,7 +1082,9 @@
               </div>
             </div>
             <div>
-              <div class="diff-label after"><span class="dot"></span> After</div>
+              <div class="diff-label after">
+                <span class="dot"></span> After
+              </div>
               <div class="code-block">
                 <pre><span class="cmt">// MemoryReadModel — explicit ErrNotFound</span>
 <span class="kw">func</span> (m *<span class="type">MemoryReadModel</span>) <span class="fn">Get</span>(...) (*model.<span class="type">Item</span>, <span class="type">error</span>) {
@@ -1058,7 +1120,10 @@
       <div class="container">
         <div class="section-header">
           <h2>Placement Concerns</h2>
-          <p>Things in the right place conceptually but with friction points worth smoothing.</p>
+          <p>
+            Things in the right place conceptually but with friction points
+            worth smoothing.
+          </p>
         </div>
 
         <!-- LS-5 -->
@@ -1072,22 +1137,28 @@
           </div>
           <p class="card-desc">
             <strong><code>NewServer()</code></strong> accepts both a concrete
-            <code>*synclib.Syncer</code> and an interface <code>synclib.SyncStore</code>. The
-            <code>Syncer</code> already holds a <code>SyncStore</code> internally. Passing both
-            creates a dual-dependency where they could diverge — in practice they're always the same
-            <code>*CQRSStack</code>, but the API surface invites misuse.
+            <code>*synclib.Syncer</code> and an interface
+            <code>synclib.SyncStore</code>. The <code>Syncer</code> already
+            holds a <code>SyncStore</code> internally. Passing both creates a
+            dual-dependency where they could diverge — in practice they're
+            always the same <code>*CQRSStack</code>, but the API surface invites
+            misuse.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/api/server.go <span class="line">:29</span> (NewServer signature)</span
+              >pkg/api/server.go <span class="line">:29</span> (NewServer
+              signature)</span
             >
             <span class="file-ref"
-              >pkg/sync/sync.go <span class="line">:Syncer</span> (struct holds SyncStore)</span
+              >pkg/sync/sync.go <span class="line">:Syncer</span> (struct holds
+              SyncStore)</span
             >
           </div>
           <div class="diff-grid">
             <div>
-              <div class="diff-label before"><span class="dot"></span> Before</div>
+              <div class="diff-label before">
+                <span class="dot"></span> Before
+              </div>
               <div class="code-block">
                 <pre><span class="kw">func</span> <span class="fn">NewServer</span>(
   syncer *synclib.<span class="type">Syncer</span>,
@@ -1097,7 +1168,9 @@
               </div>
             </div>
             <div>
-              <div class="diff-label after"><span class="dot"></span> After</div>
+              <div class="diff-label after">
+                <span class="dot"></span> After
+              </div>
               <div class="code-block">
                 <pre><span class="kw">func</span> <span class="fn">NewServer</span>(
   syncer *synclib.<span class="type">Syncer</span>,
@@ -1134,17 +1207,20 @@
           </div>
           <p class="card-desc">
             <strong><code>CQRSStack.GetTypes()</code></strong> and
-            <strong><code>CQRSStack.GetItemTypes()</code></strong> are identical methods — both
-            delegate to <code>ReadModel.GetTypes()</code>. One exists for the
-            <code>SyncStore</code> interface, the other is a convenience method. This is confusing
-            for consumers and doubles the API surface for no benefit.
+            <strong><code>CQRSStack.GetItemTypes()</code></strong> are identical
+            methods — both delegate to <code>ReadModel.GetTypes()</code>. One
+            exists for the <code>SyncStore</code> interface, the other is a
+            convenience method. This is confusing for consumers and doubles the
+            API surface for no benefit.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/cqrs/stack_adapters.go <span class="line">:48–50</span> (GetTypes)</span
+              >pkg/cqrs/stack_adapters.go
+              <span class="line">:48–50</span> (GetTypes)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/stack_adapters.go <span class="line">:66–68</span> (GetItemTypes)</span
+              >pkg/cqrs/stack_adapters.go
+              <span class="line">:66–68</span> (GetItemTypes)</span
             >
           </div>
           <div class="steps">
@@ -1153,10 +1229,11 @@
               <div class="step-content">
                 <p>
                   <strong>Remove <code>GetTypes()</code></strong> and keep
-                  <code>GetItemTypes()</code> (which matches the <code>SyncStore</code> interface).
-                  Update any callers. This is a minor breaking change to the
-                  <code>CQRSStack</code> API, but since <code>GetTypes</code> is not part of any
-                  interface, callers should be few.
+                  <code>GetItemTypes()</code> (which matches the
+                  <code>SyncStore</code> interface). Update any callers. This is
+                  a minor breaking change to the <code>CQRSStack</code> API, but
+                  since <code>GetTypes</code> is not part of any interface,
+                  callers should be few.
                 </p>
               </div>
             </div>
@@ -1188,21 +1265,24 @@
           </div>
           <p class="card-desc">
             <strong><code>SQLiteReadModel.Upsert()</code></strong> always stores
-            <code>[]byte{}</code> for the <code>raw_json</code> column. The actual raw JSON lives
-            only in the event payload. The <code>scannedItem.rawJSON</code> field is scanned from
-            the column but never used. This is a dead column + dead field — wasted storage and
-            confusing code.
+            <code>[]byte{}</code> for the <code>raw_json</code> column. The
+            actual raw JSON lives only in the event payload. The
+            <code>scannedItem.rawJSON</code> field is scanned from the column
+            but never used. This is a dead column + dead field — wasted storage
+            and confusing code.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/cqrs/sqlite_readmodel.go <span class="line">:157</span> (empty raw_json)</span
+              >pkg/cqrs/sqlite_readmodel.go
+              <span class="line">:157</span> (empty raw_json)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/sqlite_readmodel.go <span class="line">:247–288</span> (scannedItem dead
-              field)</span
+              >pkg/cqrs/sqlite_readmodel.go
+              <span class="line">:247–288</span> (scannedItem dead field)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/item_adapter.go <span class="line">:57</span> (ToItemView unused rawJSON
+              >pkg/cqrs/item_adapter.go
+              <span class="line">:57</span> (ToItemView unused rawJSON
               param)</span
             >
           </div>
@@ -1216,8 +1296,8 @@
                     >handleItemSynced</code
                   >
                   → <code>ReadModel.Upsert</code>). Requires extending
-                  <code>ReadModel.Upsert</code> signature or adding the raw JSON to
-                  <code>model.Item</code>.
+                  <code>ReadModel.Upsert</code> signature or adding the raw JSON
+                  to <code>model.Item</code>.
                 </p>
               </div>
             </div>
@@ -1225,11 +1305,12 @@
               <div class="step-num">2</div>
               <div class="step-content">
                 <p>
-                  <strong>Option B: Remove the column.</strong> If raw JSON is only needed from
-                  events (replayable), drop the <code>raw_json</code> column from the DDL, the
+                  <strong>Option B: Remove the column.</strong> If raw JSON is
+                  only needed from events (replayable), drop the
+                  <code>raw_json</code> column from the DDL, the
                   <code>scannedItem.rawJSON</code> field, and the unused
-                  <code>ToItemView</code> parameter. Cleaner — raw JSON is an event-store concern,
-                  not a read-model concern.
+                  <code>ToItemView</code> parameter. Cleaner — raw JSON is an
+                  event-store concern, not a read-model concern.
                 </p>
               </div>
             </div>
@@ -1237,9 +1318,10 @@
           <div class="callout">
             <span class="callut-icon">ℹ</span>
             <span
-              ><strong>Recommendation: Option B.</strong> The read model should contain the
-              denormalized query fields, not the raw provider payload. Raw JSON belongs in the event
-              store. If consumers need it, they can replay events.</span
+              ><strong>Recommendation: Option B.</strong> The read model should
+              contain the denormalized query fields, not the raw provider
+              payload. Raw JSON belongs in the event store. If consumers need
+              it, they can replay events.</span
             >
           </div>
           <div class="impact-grid">
@@ -1269,18 +1351,23 @@
           </div>
           <p class="card-desc">
             In <strong><code>runner.go:40</code></strong
-            >, the projection runner's error is discarded: <code>_ = runner.Run(ctx)</code>. If the
-            runner fails (e.g., replay error, journal unavailable), there's no logging, no error
-            propagation, and no retry. The system continues with a stale or empty read model.
+            >, the projection runner's error is discarded:
+            <code>_ = runner.Run(ctx)</code>. If the runner fails (e.g., replay
+            error, journal unavailable), there's no logging, no error
+            propagation, and no retry. The system continues with a stale or
+            empty read model.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/cqrs/runner.go <span class="line">:40</span> (_ = runner.Run(ctx))</span
+              >pkg/cqrs/runner.go <span class="line">:40</span> (_ =
+              runner.Run(ctx))</span
             >
           </div>
           <div class="diff-grid">
             <div>
-              <div class="diff-label before"><span class="dot"></span> Before</div>
+              <div class="diff-label before">
+                <span class="dot"></span> Before
+              </div>
               <div class="code-block">
                 <pre><span class="kw">go func</span>() {
   _ = runner.<span class="fn">Run</span>(ctx)  <span class="cmt">// ← silent</span>
@@ -1288,7 +1375,9 @@
               </div>
             </div>
             <div>
-              <div class="diff-label after"><span class="dot"></span> After</div>
+              <div class="diff-label after">
+                <span class="dot"></span> After
+              </div>
               <div class="code-block">
                 <pre><span class="kw">go func</span>() {
   <span class="kw">if</span> err := runner.<span class="fn">Run</span>(ctx); err != <span class="kw">nil</span> {
@@ -1344,14 +1433,28 @@
           </div>
         </div>
 
-        <h3 style="font-size: 17px; font-weight: 600; margin-top: 40px; margin-bottom: 20px">
+        <h3
+          style="
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 40px;
+            margin-bottom: 20px;
+          "
+        >
           Recommended Execution Order
         </h3>
 
         <div class="card" style="padding: 0; overflow: hidden">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px">
+          <table
+            style="width: 100%; border-collapse: collapse; font-size: 13px"
+          >
             <thead>
-              <tr style="background: var(--bg-code); border-bottom: 1px solid var(--border-subtle)">
+              <tr
+                style="
+                  background: var(--bg-code);
+                  border-bottom: 1px solid var(--border-subtle);
+                "
+              >
                 <th
                   style="
                     padding: 12px 20px;
@@ -1442,7 +1545,9 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   Compile-time SyncStore assertion
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">5 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  5 min
+                </td>
                 <td style="padding: 14px 20px; color: var(--text-secondary)">
                   Zero-risk guard; do first
                 </td>
@@ -1469,7 +1574,9 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   Consistent not-found semantics
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">15 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  15 min
+                </td>
                 <td style="padding: 14px 20px; color: var(--text-secondary)">
                   Blocks on dev/prod parity
                 </td>
@@ -1496,7 +1603,9 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   SyncItems through command pipeline
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">2–3 hr</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  2–3 hr
+                </td>
                 <td style="padding: 14px 20px; color: var(--text-secondary)">
                   Biggest correctness win
                 </td>
@@ -1523,7 +1632,9 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   Log runner.Run() errors
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">5 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  5 min
+                </td>
                 <td style="padding: 14px 20px; color: var(--text-secondary)">
                   Quick observability win
                 </td>
@@ -1550,7 +1661,9 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   Remove duplicate GetTypes
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">10 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  10 min
+                </td>
                 <td style="padding: 14px 20px; color: var(--text-secondary)">
                   Must resolve before LS-2 assertion
                 </td>
@@ -1577,8 +1690,12 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   Remove dead raw_json column/field
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">30 min</td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">Schema cleanup</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  30 min
+                </td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  Schema cleanup
+                </td>
               </tr>
               <tr style="border-bottom: 1px solid var(--border-subtle)">
                 <td
@@ -1602,7 +1719,9 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   Simplify NewServer signature
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">30 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  30 min
+                </td>
                 <td style="padding: 14px 20px; color: var(--text-secondary)">
                   API surface cleanup
                 </td>
@@ -1629,7 +1748,9 @@
                 <td style="padding: 14px 16px; color: var(--text-primary)">
                   Document CRDT future API
                 </td>
-                <td style="padding: 14px 20px; color: var(--text-secondary)">30 min</td>
+                <td style="padding: 14px 20px; color: var(--text-secondary)">
+                  30 min
+                </td>
                 <td style="padding: 14px 20px; color: var(--text-secondary)">
                   Non-blocking documentation
                 </td>
@@ -1640,9 +1761,12 @@
 
         <ul class="checklist" style="margin-top: 32px">
           <li>Run <code>go test ./... -count=1</code> after each fix</li>
-          <li>Run <code>golangci-lint run ./... --timeout=5m</code> after each fix</li>
           <li>
-            Verify dev/prod parity: test with both <code>--backend memory</code> and
+            Run <code>golangci-lint run ./... --timeout=5m</code> after each fix
+          </li>
+          <li>
+            Verify dev/prod parity: test with both
+            <code>--backend memory</code> and
             <code>--backend turso</code>
           </li>
           <li>Update AGENTS.md with any changed patterns or gotchas</li>
@@ -1656,8 +1780,9 @@
         <div class="section-header">
           <h2>Appendix A: Generics Opportunities</h2>
           <p>
-            Where Go generics can eliminate boilerplate, replace runtime assertions with
-            compile-time checks, and make the codebase more robust. Ordered by impact.
+            Where Go generics can eliminate boilerplate, replace runtime
+            assertions with compile-time checks, and make the codebase more
+            robust. Ordered by impact.
           </p>
         </div>
 
@@ -1666,39 +1791,50 @@
           <div class="card-top">
             <div>
               <div class="card-id">G-1</div>
-              <h3>Adopt <code>command.RegisterTyped[C]</code> for all command handlers</h3>
+              <h3>
+                Adopt <code>command.RegisterTyped[C]</code> for all command
+                handlers
+              </h3>
             </div>
             <span class="severity critical">Boilerplate</span>
           </div>
           <p class="card-desc">
-            The <code>query</code> package already has <code>RegisterTyped[Q, R]</code> and
-            <code>DispatchTyped[T]</code> — the "typed bookend" pattern that eliminates runtime type
-            assertions. But <code>command</code> has no equivalent. Meanwhile,
-            <strong>go-localsync doesn't use <code>query.RegisterTyped</code> either</strong> — all
-            6 handlers (2 command + 4 query) use raw <code>Register</code> with manual type
-            assertions. This creates 6 identical blocks of assertion + error-wrapping boilerplate.
+            The <code>query</code> package already has
+            <code>RegisterTyped[Q, R]</code> and <code>DispatchTyped[T]</code> —
+            the "typed bookend" pattern that eliminates runtime type assertions.
+            But <code>command</code> has no equivalent. Meanwhile,
+            <strong
+              >go-localsync doesn't use
+              <code>query.RegisterTyped</code> either</strong
+            >
+            — all 6 handlers (2 command + 4 query) use raw
+            <code>Register</code> with manual type assertions. This creates 6
+            identical blocks of assertion + error-wrapping boilerplate.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/cqrs/commands_queries.go <span class="line">:189–213</span> (command
-              handlers)</span
+              >pkg/cqrs/commands_queries.go
+              <span class="line">:189–213</span> (command handlers)</span
             >
             <span class="file-ref"
-              >pkg/cqrs/commands_queries.go <span class="line">:239–281</span> (query
-              handlers)</span
+              >pkg/cqrs/commands_queries.go
+              <span class="line">:239–281</span> (query handlers)</span
             >
             <span class="file-ref"
-              >go-cqrs-lite/query/dispatcher.go <span class="line">:77</span> (RegisterTyped —
-              exists but unused)</span
+              >go-cqrs-lite/query/dispatcher.go
+              <span class="line">:77</span> (RegisterTyped — exists but
+              unused)</span
             >
             <span class="file-ref"
-              >go-cqrs-lite/command/dispatcher.go <span class="line">:—</span> (no
-              RegisterTyped)</span
+              >go-cqrs-lite/command/dispatcher.go
+              <span class="line">:—</span> (no RegisterTyped)</span
             >
           </div>
           <div class="diff-grid">
             <div>
-              <div class="diff-label before"><span class="dot"></span> Current — 6× repeated</div>
+              <div class="diff-label before">
+                <span class="dot"></span> Current — 6× repeated
+              </div>
               <div class="code-block">
                 <pre><span class="kw">func</span> <span class="fn">handleSyncItem</span>(repo, resolver) command.<span class="type">Handler</span> {
   <span class="kw">return func</span>(ctx context.<span class="type">Context</span>, cmd command.<span class="type">Command</span>) <span class="type">error</span> {
@@ -1741,10 +1877,13 @@ command.<span class="fn">RegisterTyped</span>[*<span class="type">SyncItemComman
               <div class="step-num">1</div>
               <div class="step-content">
                 <p>
-                  <strong>Upstream: add <code>command.RegisterTyped[C]</code></strong> to
-                  go-cqrs-lite. Mirrors the existing <code>query.RegisterTyped[Q, R]</code> pattern.
-                  The assertion moves inside the library where it's tested once, not repeated in
-                  every consumer.
+                  <strong
+                    >Upstream: add <code>command.RegisterTyped[C]</code></strong
+                  >
+                  to go-cqrs-lite. Mirrors the existing
+                  <code>query.RegisterTyped[Q, R]</code> pattern. The assertion
+                  moves inside the library where it's tested once, not repeated
+                  in every consumer.
                 </p>
               </div>
             </div>
@@ -1753,10 +1892,12 @@ command.<span class="fn">RegisterTyped</span>[*<span class="type">SyncItemComman
               <div class="step-content">
                 <p>
                   <strong
-                    >Consumer: adopt <code>RegisterTyped</code> for all 4 query handlers.</strong
+                    >Consumer: adopt <code>RegisterTyped</code> for all 4 query
+                    handlers.</strong
                   >
-                  This requires no upstream changes — <code>query.RegisterTyped</code> already
-                  exists. Just not used. Deletes ~40 lines of assertion boilerplate immediately.
+                  This requires no upstream changes —
+                  <code>query.RegisterTyped</code> already exists. Just not
+                  used. Deletes ~40 lines of assertion boilerplate immediately.
                 </p>
               </div>
             </div>
@@ -1765,22 +1906,23 @@ command.<span class="fn">RegisterTyped</span>[*<span class="type">SyncItemComman
               <div class="step-content">
                 <p>
                   <strong
-                    >Consumer: adopt <code>command.RegisterTyped</code> for both command
-                    handlers</strong
+                    >Consumer: adopt <code>command.RegisterTyped</code> for both
+                    command handlers</strong
                   >
                   once upstream ships it. Deletes ~20 more lines. The
-                  <code>errCommandTypeMismatch</code> sentinel error and all <code>ok</code> checks
-                  disappear entirely.
+                  <code>errCommandTypeMismatch</code> sentinel error and all
+                  <code>ok</code> checks disappear entirely.
                 </p>
               </div>
             </div>
           </div>
           <div class="callout">
             <span
-              ><strong>Quick win:</strong> Step 2 requires zero upstream changes. The
-              <code>query.RegisterTyped</code> function already exists in go-cqrs-lite v2.2.0 —
-              go-localsync just doesn't use it. Adopting it for all 4 query handlers is a pure
-              refactor that deletes ~40 lines today.</span
+              ><strong>Quick win:</strong> Step 2 requires zero upstream
+              changes. The <code>query.RegisterTyped</code> function already
+              exists in go-cqrs-lite v2.2.0 — go-localsync just doesn't use it.
+              Adopting it for all 4 query handlers is a pure refactor that
+              deletes ~40 lines today.</span
             >
           </div>
           <div class="impact-grid">
@@ -1804,16 +1946,21 @@ command.<span class="fn">RegisterTyped</span>[*<span class="type">SyncItemComman
           <div class="card-top">
             <div>
               <div class="card-id">G-2</div>
-              <h3>Typed <code>DecideResult[R]</code> instead of <code>map[string]any</code></h3>
+              <h3>
+                Typed <code>DecideResult[R]</code> instead of
+                <code>map[string]any</code>
+              </h3>
             </div>
             <span class="severity warning">Type Safety</span>
           </div>
           <p class="card-desc">
             The CQ-1 proposal in the go-cqrs-lite plan suggests
-            <code>Annotations map[string]any</code> for domain metadata. That's stringly-typed —
-            consumers must assert annotation values at runtime. Generics give a better answer:
-            <strong>a second type parameter on <code>DecideFunc</code></strong> that carries a typed
-            domain result through the library's own type system.
+            <code>Annotations map[string]any</code> for domain metadata. That's
+            stringly-typed — consumers must assert annotation values at runtime.
+            Generics give a better answer:
+            <strong>a second type parameter on <code>DecideFunc</code></strong>
+            that carries a typed domain result through the library's own type
+            system.
           </p>
           <div class="diff-grid">
             <div>
@@ -1870,12 +2017,14 @@ result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></
               <div class="step-content">
                 <p>
                   <strong
-                    >Upstream: parameterize <code>DecideFunc</code> with a result type.</strong
+                    >Upstream: parameterize <code>DecideFunc</code> with a
+                    result type.</strong
                   >
-                  <code>DecideFunc[S, R]</code> where <code>S</code> is aggregate state and
-                  <code>R</code> is the domain result. Provide <code>DecideFunc[S]</code> as an
-                  alias for <code>DecideFunc[S, struct{}]</code> for consumers who don't need domain
-                  results.
+                  <code>DecideFunc[S, R]</code> where <code>S</code> is
+                  aggregate state and <code>R</code> is the domain result.
+                  Provide <code>DecideFunc[S]</code> as an alias for
+                  <code>DecideFunc[S, struct{}]</code> for consumers who don't
+                  need domain results.
                 </p>
               </div>
             </div>
@@ -1883,10 +2032,12 @@ result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></
               <div class="step-num">2</div>
               <div class="step-content">
                 <p>
-                  <strong>Consumer: define <code>SyncDecision</code></strong> and return it from
-                  <code>DecideSync</code>. The <code>countingDecide</code> closure in
-                  <code>SyncItems</code> is replaced by reading <code>result.Action</code>,
-                  <code>result.WasNew</code>, <code>result.Conflict</code> directly. No more
+                  <strong>Consumer: define <code>SyncDecision</code></strong>
+                  and return it from <code>DecideSync</code>. The
+                  <code>countingDecide</code> closure in
+                  <code>SyncItems</code> is replaced by reading
+                  <code>result.Action</code>, <code>result.WasNew</code>,
+                  <code>result.Conflict</code> directly. No more
                   reverse-engineering intent from event counts.
                 </p>
               </div>
@@ -1894,11 +2045,12 @@ result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></
           </div>
           <div class="callout">
             <span
-              ><strong>Tradeoff:</strong> Two-parameter generics (<code>DecideFunc[S, R]</code>)
-              increase library complexity. For consumers who don't need domain results, the
-              <code>DecideFunc[S]</code> alias keeps the simple case simple. The benefit is
-              eliminating an entire class of bugs where domain semantics are guessed from event
-              counts.</span
+              ><strong>Tradeoff:</strong> Two-parameter generics (<code
+                >DecideFunc[S, R]</code
+              >) increase library complexity. For consumers who don't need
+              domain results, the <code>DecideFunc[S]</code> alias keeps the
+              simple case simple. The benefit is eliminating an entire class of
+              bugs where domain semantics are guessed from event counts.</span
             >
           </div>
           <div class="impact-grid">
@@ -1922,25 +2074,30 @@ result.Action  <span class="cmt">// synclib.SyncAction — no assertion</span></
           <div class="card-top">
             <div>
               <div class="card-id">G-3</div>
-              <h3>Rewrite <code>Projector</code> using <code>projection.On[T]</code> builder</h3>
+              <h3>
+                Rewrite <code>Projector</code> using
+                <code>projection.On[T]</code> builder
+              </h3>
             </div>
             <span class="severity info">Zero Library Changes</span>
           </div>
           <p class="card-desc">
-            go-cqrs-lite's <strong><code>projection.On[T]</code></strong> already does typed payload
-            decoding inside a wrapper — the exact pattern that go-localsync's
-            <code>Projector</code> reimplements manually. Three <code>handleXxx</code> methods in
-            <code>projection.go</code> each call <code>event.DecodePayload[T]</code> and then
-            delegate to the read model. The builder eliminates all of this.
+            go-cqrs-lite's
+            <strong><code>projection.On[T]</code></strong> already does typed
+            payload decoding inside a wrapper — the exact pattern that
+            go-localsync's <code>Projector</code> reimplements manually. Three
+            <code>handleXxx</code> methods in <code>projection.go</code> each
+            call <code>event.DecodePayload[T]</code> and then delegate to the
+            read model. The builder eliminates all of this.
           </p>
           <div class="file-refs">
             <span class="file-ref"
-              >pkg/cqrs/projection.go <span class="line">:33–69</span> (3 manual handler
-              methods)</span
+              >pkg/cqrs/projection.go <span class="line">:33–69</span> (3 manual
+              handler methods)</span
             >
             <span class="file-ref"
-              >go-cqrs-lite/projection/builder.go <span class="line">:30</span> (On[T] — already
-              exists)</span
+              >go-cqrs-lite/projection/builder.go
+              <span class="line">:30</span> (On[T] — already exists)</span
             >
           </div>
           <div class="diff-grid">
@@ -1999,11 +2156,13 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
           </div>
           <div class="callout">
             <span
-              ><strong>No upstream changes needed.</strong> <code>projection.On[T]</code> ships in
-              go-cqrs-lite v2.2.0. This is a pure consumer-side refactor. The
-              <code>Projector</code> struct and its 3 handler methods collapse into a builder call.
-              The <code>EventItemConflictFound</code> no-op handler is simply omitted — the builder
-              only registers event types that have handlers.</span
+              ><strong>No upstream changes needed.</strong>
+              <code>projection.On[T]</code> ships in go-cqrs-lite v2.2.0. This
+              is a pure consumer-side refactor. The
+              <code>Projector</code> struct and its 3 handler methods collapse
+              into a builder call. The <code>EventItemConflictFound</code> no-op
+              handler is simply omitted — the builder only registers event types
+              that have handlers.</span
             >
           </div>
           <div class="impact-grid">
@@ -2032,11 +2191,13 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
             <span class="severity info">Future · If Needed</span>
           </div>
           <p class="card-desc">
-            The current <code>ReadModel</code> interface is hardcoded to <code>*model.Item</code>.
-            If go-localsync adds a second aggregate type (notifications, webhook deliveries, audit
-            logs), every read model implementation must be rewritten from scratch. A generic
-            <code>ReadModel[T]</code> would allow the <code>MemoryReadModel</code> and
-            <code>SQLiteReadModel</code> to be reused across domains.
+            The current <code>ReadModel</code> interface is hardcoded to
+            <code>*model.Item</code>. If go-localsync adds a second aggregate
+            type (notifications, webhook deliveries, audit logs), every read
+            model implementation must be rewritten from scratch. A generic
+            <code>ReadModel[T]</code> would allow the
+            <code>MemoryReadModel</code> and <code>SQLiteReadModel</code> to be
+            reused across domains.
           </p>
           <div class="code-block">
             <pre><span class="kw">type</span> <span class="type">ReadModel</span>[T <span class="kw">any</span>] <span class="kw">interface</span> {
@@ -2050,11 +2211,12 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
           </div>
           <div class="callout">
             <span
-              ><strong>Only worth doing when there's a second consumer.</strong> Right now the
-              <code>provider.ItemFilter</code> has specific fields (Type, Actor, Repo, Source,
-              Since) that don't generalize. Genericizing the filter would force <code>any</code> —
-              which is worse than the current domain-specific interface. Revisit when a second
-              aggregate type is added.</span
+              ><strong>Only worth doing when there's a second consumer.</strong>
+              Right now the <code>provider.ItemFilter</code> has specific fields
+              (Type, Actor, Repo, Source, Since) that don't generalize.
+              Genericizing the filter would force <code>any</code> — which is
+              worse than the current domain-specific interface. Revisit when a
+              second aggregate type is added.</span
             >
           </div>
           <div class="impact-grid">
@@ -2083,7 +2245,12 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
           </div>
           <div style="font-size: 14px; color: var(--text-secondary)">
             <div
-              style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px 20px; margin-top: 8px"
+              style="
+                display: grid;
+                grid-template-columns: 1fr 2fr;
+                gap: 8px 20px;
+                margin-top: 8px;
+              "
             >
               <span
                 style="
@@ -2115,7 +2282,8 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
                 ><code>Event[T]</code> typed payloads</span
               >
               <span
-                >Go can't express union types — the codec decode pattern is the right tradeoff</span
+                >Go can't express union types — the codec decode pattern is the
+                right tradeoff</span
               >
 
               <span
@@ -2127,8 +2295,8 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
                 ><code>SyncStore[I]</code></span
               >
               <span
-                >The filter/query interface carries domain-specific fields; genericizing forces
-                <code>any</code> filters</span
+                >The filter/query interface carries domain-specific fields;
+                genericizing forces <code>any</code> filters</span
               >
 
               <span
@@ -2140,8 +2308,8 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
                 ><code>EventSink[AggType]</code></span
               >
               <span
-                >Aggregates handle multiple event types — a type param would be rigid and
-                restrictive</span
+                >Aggregates handle multiple event types — a type param would be
+                rigid and restrictive</span
               >
 
               <span
@@ -2152,7 +2320,10 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
                 "
                 >Error types</span
               >
-              <span>Go's <code>error</code> interface is already the right abstraction</span>
+              <span
+                >Go's <code>error</code> interface is already the right
+                abstraction</span
+              >
 
               <span
                 style="
@@ -2163,8 +2334,8 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
                 ><code>dispatcher[H, M]</code></span
               >
               <span
-                >Already generic — this is the foundation that both <code>command</code> and
-                <code>query</code> build on</span
+                >Already generic — this is the foundation that both
+                <code>command</code> and <code>query</code> build on</span
               >
             </div>
           </div>
@@ -2175,7 +2346,8 @@ proj := builder.<span class="fn">Build</span>() <span class="cmt">// event.Proje
     <footer class="footer">
       <div class="container">
         Generated from architecture review ·
-        <a href="https://github.com/larsartmann/go-localsync">go-localsync</a> · June 2026
+        <a href="https://github.com/larsartmann/go-localsync">go-localsync</a> ·
+        June 2026
       </div>
     </footer>
   </body>

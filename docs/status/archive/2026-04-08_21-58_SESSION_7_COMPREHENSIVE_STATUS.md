@@ -1,10 +1,10 @@
 # Go-LocalSync — Session 7 Comprehensive Status Report
 
-**Date:** 2026-04-08 21:58  
-**Generated:** Automatically  
-**Sessions Covered:** 1–7 (full project history)  
-**Codebase:** 26 Go files, ~5,606 lines | 39 tests across 4 suites  
-**Build:** PASSING | **Tests:** PASSING (via go.work) | **Lint:** BLOCKED (v1/v2 mismatch)  
+**Date:** 2026-04-08 21:58\
+**Generated:** Automatically\
+**Sessions Covered:** 1–7 (full project history)\
+**Codebase:** 26 Go files, ~5,606 lines | 39 tests across 4 suites\
+**Build:** PASSING | **Tests:** PASSING (via go.work) | **Lint:** BLOCKED (v1/v2 mismatch)\
 **Git:** 14 commits ahead of origin → PUSHED (eb6d633)
 
 ---
@@ -15,56 +15,56 @@ These items are complete, committed, and verified.
 
 ### Architecture & Core (Sessions 1–3)
 
-| #   | Item                          | Commit    | Details                                                                                                                           |
-| --- | ----------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Provider-based architecture   | `e308dd1` | Refactored from GitHub-specific CLI to pluggable SDK                                                                              |
-| 2   | `provider.Provider` interface | `e308dd1` | `Name()`, `Fetch()`, `FetchAll()`, `GetRateLimit()`                                                                               |
-| 3   | `storage.Storage` interface   | `e308dd1` | 11 methods including `GetByID`, `GetItemsByType`, `GetItemsByActor`                                                               |
-| 4   | SQLite storage backend        | `5c4530e` | Full CRUD with sqlc-generated queries, `storage.Open(path)`                                                                       |
-| 5   | Branded phantom-type IDs      | `0ecbf4d` | 7 branded types via go-composable-business-types (`ItemID`, `ProviderID`, etc.)                                                   |
-| 6   | Sentinel error types          | `a092910` | 7 errors: `ErrNotFound`, `ErrRateLimited`, `ErrInvalidToken`, `ErrUserNotFound`, `ErrSyncFailed`, `ErrStorage`, `ErrInvalidInput` |
-| 7   | Sync engine (`Syncer`)        | `81879f4` | Full sync + incremental sync with pagination                                                                                      |
-| 8   | Conflict-aware syncer         | `2fb5109` | `ConflictAwareSyncer` with vector clocks + LWW via go-localfirst                                                                  |
+| # | Item                          | Commit    | Details                                                                                                                           |
+| - | ----------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | Provider-based architecture   | `e308dd1` | Refactored from GitHub-specific CLI to pluggable SDK                                                                              |
+| 2 | `provider.Provider` interface | `e308dd1` | `Name()`, `Fetch()`, `FetchAll()`, `GetRateLimit()`                                                                               |
+| 3 | `storage.Storage` interface   | `e308dd1` | 11 methods including `GetByID`, `GetItemsByType`, `GetItemsByActor`                                                               |
+| 4 | SQLite storage backend        | `5c4530e` | Full CRUD with sqlc-generated queries, `storage.Open(path)`                                                                       |
+| 5 | Branded phantom-type IDs      | `0ecbf4d` | 7 branded types via go-composable-business-types (`ItemID`, `ProviderID`, etc.)                                                   |
+| 6 | Sentinel error types          | `a092910` | 7 errors: `ErrNotFound`, `ErrRateLimited`, `ErrInvalidToken`, `ErrUserNotFound`, `ErrSyncFailed`, `ErrStorage`, `ErrInvalidInput` |
+| 7 | Sync engine (`Syncer`)        | `81879f4` | Full sync + incremental sync with pagination                                                                                      |
+| 8 | Conflict-aware syncer         | `2fb5109` | `ConflictAwareSyncer` with vector clocks + LWW via go-localfirst                                                                  |
 
 ### Bug Fixes (Session 3)
 
-| #   | Bug                                      | Commit    | Severity                                                   |
-| --- | ---------------------------------------- | --------- | ---------------------------------------------------------- |
-| 9   | `findExistingItem` never found items     | `1c42845` | CRITICAL — conflict resolution was entirely non-functional |
-| 10  | LWW compared wrong field                 | `1c42845` | CRITICAL — used `CreatedAt` instead of `UpdatedAt`         |
-| 11  | `UpdatedAt` always `CURRENT_TIMESTAMP`   | `d230654` | HIGH — ignored provider data                               |
-| 12  | Missing `GetByID` in Storage interface   | `e94b765` | HIGH — interface incompletable                             |
-| 13  | `UpdatedAt` not set on Item construction | `6719986` | HIGH — multiple sites missing                              |
+| #  | Bug                                      | Commit    | Severity                                                   |
+| -- | ---------------------------------------- | --------- | ---------------------------------------------------------- |
+| 9  | `findExistingItem` never found items     | `1c42845` | CRITICAL — conflict resolution was entirely non-functional |
+| 10 | LWW compared wrong field                 | `1c42845` | CRITICAL — used `CreatedAt` instead of `UpdatedAt`         |
+| 11 | `UpdatedAt` always `CURRENT_TIMESTAMP`   | `d230654` | HIGH — ignored provider data                               |
+| 12 | Missing `GetByID` in Storage interface   | `e94b765` | HIGH — interface incompletable                             |
+| 13 | `UpdatedAt` not set on Item construction | `6719986` | HIGH — multiple sites missing                              |
 
 ### Session 5 Deliverables
 
-| #   | Item                              | Commit    | Details                                                        |
-| --- | --------------------------------- | --------- | -------------------------------------------------------------- |
-| 14  | Comprehensive execution plan      | `99c341d` | 80/20 analysis, 27 macro tasks, 139 micro-tasks, mermaid graph |
-| 15  | just lint fix                     | `e39121a` | Changed from `go vet + go fmt` to `golangci-lint`              |
-| 16  | UpdatedAt bug fix                 | `d230654` | Pass UpdatedAt from provider data                              |
-| 17  | go.mod replace directives removed | `fa0c5de` | Now uses GitHub pseudo-versions                                |
-| 18  | `interface{}` → `any` cleanup     | `88f2caa` | sqlc-generated db.go modernized                                |
+| #  | Item                              | Commit    | Details                                                        |
+| -- | --------------------------------- | --------- | -------------------------------------------------------------- |
+| 14 | Comprehensive execution plan      | `99c341d` | 80/20 analysis, 27 macro tasks, 139 micro-tasks, mermaid graph |
+| 15 | just lint fix                     | `e39121a` | Changed from `go vet + go fmt` to `golangci-lint`              |
+| 16 | UpdatedAt bug fix                 | `d230654` | Pass UpdatedAt from provider data                              |
+| 17 | go.mod replace directives removed | `fa0c5de` | Now uses GitHub pseudo-versions                                |
+| 18 | `interface{}` → `any` cleanup     | `88f2caa` | sqlc-generated db.go modernized                                |
 
 ### Session 6 Deliverables
 
-| #   | Item                                         | Commit    | Details                                                                                   |
-| --- | -------------------------------------------- | --------- | ----------------------------------------------------------------------------------------- |
-| 19  | Migration system                             | `53a3dad` | `RunMigrations()`, `schema_migrations` table, 2 embedded migrations                       |
-| 20  | Source indexes                               | `53a3dad` | `idx_events_source`, `idx_events_source_github_id`                                        |
-| 21  | Migration tests (6)                          | `71b4e70` | FreshDB, Idempotent, CreatesEventsTable, CreatesIndexes, Open_CreatesAndMigrates, Ordered |
-| 22  | Unused mixin cleanup                         | `0a1d20d` | Deleted `PaginationMixin` and `EventCoreMixin` (never embedded)                           |
-| 23  | Justfile `ci` + `verify` targets             | `68cf42e` | Composite build+test+lint gates                                                           |
-| 24  | CHANGELOG, ROADMAP, TODO_LIST, AGENTS v0.3.0 | `8ddae5c` | Full documentation update                                                                 |
-| 25  | Status report (sessions 1–6)                 | `2d5e929` | Comprehensive 293-line report                                                             |
+| #  | Item                                         | Commit    | Details                                                                                   |
+| -- | -------------------------------------------- | --------- | ----------------------------------------------------------------------------------------- |
+| 19 | Migration system                             | `53a3dad` | `RunMigrations()`, `schema_migrations` table, 2 embedded migrations                       |
+| 20 | Source indexes                               | `53a3dad` | `idx_events_source`, `idx_events_source_github_id`                                        |
+| 21 | Migration tests (6)                          | `71b4e70` | FreshDB, Idempotent, CreatesEventsTable, CreatesIndexes, Open_CreatesAndMigrates, Ordered |
+| 22 | Unused mixin cleanup                         | `0a1d20d` | Deleted `PaginationMixin` and `EventCoreMixin` (never embedded)                           |
+| 23 | Justfile `ci` + `verify` targets             | `68cf42e` | Composite build+test+lint gates                                                           |
+| 24 | CHANGELOG, ROADMAP, TODO_LIST, AGENTS v0.3.0 | `8ddae5c` | Full documentation update                                                                 |
+| 25 | Status report (sessions 1–6)                 | `2d5e929` | Comprehensive 293-line report                                                             |
 
 ### Session 7 Deliverables
 
-| #   | Item                                      | Commit    | Details                                                                                                                    |
-| --- | ----------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 26  | TODO_LIST, ROADMAP, AGENTS accuracy fixes | `c68ecbf` | Removed stale items, added blockers, testing matrix, dependency table                                                      |
-| 27  | README.md rewrite                         | `eb6d633` | Fixed 8 inaccuracies: branded types, storage.Open API, honest features, conflict-aware sync, migrations, architecture tree |
-| 28  | All commits pushed to origin              | —         | 14 commits pushed to `master`                                                                                              |
+| #  | Item                                      | Commit    | Details                                                                                                                    |
+| -- | ----------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 26 | TODO_LIST, ROADMAP, AGENTS accuracy fixes | `c68ecbf` | Removed stale items, added blockers, testing matrix, dependency table                                                      |
+| 27 | README.md rewrite                         | `eb6d633` | Fixed 8 inaccuracies: branded types, storage.Open API, honest features, conflict-aware sync, migrations, architecture tree |
+| 28 | All commits pushed to origin              | —         | 14 commits pushed to `master`                                                                                              |
 
 ### Documentation (All Current & Accurate)
 
@@ -121,38 +121,38 @@ These items are complete, committed, and verified.
 
 ### Features
 
-| #   | Item                                | Est. Effort | Priority | Notes                                      |
-| --- | ----------------------------------- | ----------- | -------- | ------------------------------------------ |
-| 1   | Wire rate limiting into sync flow   | ~2h         | HIGH     | Config exists, just needs integration      |
-| 2   | Wire retry logic into sync flow     | ~2h         | HIGH     | Config exists, just needs integration      |
-| 3   | JSON output flag for CLI            | ~1h         | MEDIUM   | Add `-json` flag to main.go                |
-| 4   | Configuration file support          | ~3h         | MEDIUM   | YAML/TOML config for tokens, paths, limits |
-| 5   | Real-time progress display          | ~2h         | MEDIUM   | Bubble Tea or log-based progress           |
-| 6   | TUI with Bubble Tea                 | ~2h         | LOW      | Listed in ROADMAP future phases            |
-| 7   | HTTP API endpoint                   | ~2h         | LOW      | Listed in ROADMAP future phases            |
-| 8   | Multi-user sync                     | ~4h         | LOW      | Architecture: parallel sync per user       |
-| 9   | Daemon/background mode              | ~4h         | LOW      | Long-running sync service                  |
-| 10  | Turso/LibSQL backend                | ~3h         | LOW      | Alternative storage backend                |
-| 11  | Export to JSON/CSV                  | ~1h         | LOW      | Data portability feature                   |
-| 12  | Event retention/TTL                 | ~2h         | LOW      | Prune old events                           |
-| 13  | Update strategy for existing events | ~3h         | LOW      | How to handle event mutation               |
+| #  | Item                                | Est. Effort | Priority | Notes                                      |
+| -- | ----------------------------------- | ----------- | -------- | ------------------------------------------ |
+| 1  | Wire rate limiting into sync flow   | ~2h         | HIGH     | Config exists, just needs integration      |
+| 2  | Wire retry logic into sync flow     | ~2h         | HIGH     | Config exists, just needs integration      |
+| 3  | JSON output flag for CLI            | ~1h         | MEDIUM   | Add `-json` flag to main.go                |
+| 4  | Configuration file support          | ~3h         | MEDIUM   | YAML/TOML config for tokens, paths, limits |
+| 5  | Real-time progress display          | ~2h         | MEDIUM   | Bubble Tea or log-based progress           |
+| 6  | TUI with Bubble Tea                 | ~2h         | LOW      | Listed in ROADMAP future phases            |
+| 7  | HTTP API endpoint                   | ~2h         | LOW      | Listed in ROADMAP future phases            |
+| 8  | Multi-user sync                     | ~4h         | LOW      | Architecture: parallel sync per user       |
+| 9  | Daemon/background mode              | ~4h         | LOW      | Long-running sync service                  |
+| 10 | Turso/LibSQL backend                | ~3h         | LOW      | Alternative storage backend                |
+| 11 | Export to JSON/CSV                  | ~1h         | LOW      | Data portability feature                   |
+| 12 | Event retention/TTL                 | ~2h         | LOW      | Prune old events                           |
+| 13 | Update strategy for existing events | ~3h         | LOW      | How to handle event mutation               |
 
 ### Testing
 
-| #   | Item                       | Est. Effort | Priority | Notes                                        |
-| --- | -------------------------- | ----------- | -------- | -------------------------------------------- |
-| 14  | CLI integration tests      | ~2h         | HIGH     | Zero coverage on cmd/examples                |
-| 15  | `pkg/errors` tests         | ~30min      | MEDIUM   | Quick win — test sentinel errors and helpers |
-| 16  | `pkg/types` tests          | ~30min      | MEDIUM   | Quick win — test ID constructors             |
-| 17  | Real GitHub PAT smoke test | ~1h         | MEDIUM   | Never tested with real API                   |
-| 18  | Storage error path tests   | ~2h         | MEDIUM   | Increase coverage from 56% to 80%+           |
+| #  | Item                       | Est. Effort | Priority | Notes                                        |
+| -- | -------------------------- | ----------- | -------- | -------------------------------------------- |
+| 14 | CLI integration tests      | ~2h         | HIGH     | Zero coverage on cmd/examples                |
+| 15 | `pkg/errors` tests         | ~30min      | MEDIUM   | Quick win — test sentinel errors and helpers |
+| 16 | `pkg/types` tests          | ~30min      | MEDIUM   | Quick win — test ID constructors             |
+| 17 | Real GitHub PAT smoke test | ~1h         | MEDIUM   | Never tested with real API                   |
+| 18 | Storage error path tests   | ~2h         | MEDIUM   | Increase coverage from 56% to 80%+           |
 
 ### Infrastructure
 
-| #   | Item                              | Est. Effort | Priority | Notes                         |
-| --- | --------------------------------- | ----------- | -------- | ----------------------------- |
-| 19  | Pre-commit hooks remediation      | ~3h         | MEDIUM   | 4 categories of failures      |
-| 20  | Add third provider (e.g., GitLab) | ~4h         | LOW      | Validate provider abstraction |
+| #  | Item                              | Est. Effort | Priority | Notes                         |
+| -- | --------------------------------- | ----------- | -------- | ----------------------------- |
+| 19 | Pre-commit hooks remediation      | ~3h         | MEDIUM   | 4 categories of failures      |
+| 20 | Add third provider (e.g., GitLab) | ~4h         | LOW      | Validate provider abstraction |
 
 ---
 

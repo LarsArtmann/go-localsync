@@ -1,6 +1,6 @@
 # SUPERB Data Module Sprint — Execution Plan
 
-**Date:** 2026-06-05 05:28  
+**Date:** 2026-06-05 05:28\
 **Goal:** Transform `pkg/data/` from "good first draft" into a production-grade data layer fully integrated with the CQRS stack.
 
 ---
@@ -50,33 +50,33 @@
 
 ## Comprehensive Plan (25 Tasks, 15–60 min each)
 
-| #   | Task                                                                              | Phase | Est. | Impact   | Effort |
-| --- | --------------------------------------------------------------------------------- | ----- | ---- | -------- | ------ |
-| 1   | Update `SyncItemState`, `Fold`, `foldItemSynced` to use `*model.Item`             | A     | 45m  | Critical | Medium |
-| 2   | Update `DecideSync`, `HasChanged`, `resolveConflict` to use `*model.Item`         | A     | 45m  | Critical | Medium |
-| 3   | Migrate `syncEvents`, delete old `itemToPayload`/`itemFromPayload`, wire adapter  | A     | 30m  | Critical | Low    |
-| 4   | Update `SyncItemCommand`, validation, `handleSyncItem`                            | A     | 30m  | Critical | Low    |
-| 5   | Update `CQRSStack.SyncItems` to map `provider.Item` → `data.Item` before dispatch | A     | 30m  | Critical | Low    |
-| 6   | Update `CQRSConfig.ConflictResolver` type to `*model.Item`                        | A     | 15m  | Critical | Low    |
-| 7   | Update all `pkg/cqrs/` tests for `*model.Item`                                    | A     | 60m  | High     | High   |
-| 8   | Update `ReadModel` interface to `*model.Item`                                     | B     | 15m  | High     | Low    |
-| 9   | Update `MemoryReadModel` + `matchesFilter` + `paginate` to `*model.Item`          | B     | 45m  | High     | Medium |
-| 10  | Update `SQLiteReadModel` scan/upsert methods to `*model.Item`                     | B     | 45m  | High     | Medium |
-| 11  | Update `Projector` to use `DataItemFromPayload` adapter                           | B     | 30m  | High     | Low    |
-| 12  | Update `stack_adapters.go` (`ListItems`, `CountItems`, etc.)                      | B     | 30m  | High     | Low    |
-| 13  | Update read model tests                                                           | B     | 45m  | High     | Medium |
-| 14  | Create API DTO types (`ItemResponse`)                                             | C     | 30m  | Medium   | Low    |
-| 15  | Update API handlers to use DTOs                                                   | C     | 45m  | Medium   | Medium |
-| 16  | Update `SyncStore` interface to use data types                                    | C     | 30m  | Medium   | Low    |
-| 17  | Update `Syncer` to map `provider.Item` → `data.Item`                              | C     | 30m  | Medium   | Low    |
-| 18  | Update `sync/` and `api/` tests                                                   | C     | 45m  | Medium   | Medium |
-| 19  | Add `Item.Validate()` to model + use in adapter                                   | D     | 30m  | Medium   | Low    |
-| 20  | Implement `schema.Upcaster` for V1→V2 payload migration                           | D     | 45m  | Low-Med  | Medium |
-| 21  | Add cursor pagination to read models                                              | D     | 60m  | Low      | High   |
-| 22  | Add `MetricsRecorder` middleware                                                  | D     | 30m  | Low      | Low    |
-| 23  | Integration tests for end-to-end data→CQRS flow                                   | E     | 60m  | Medium   | High   |
-| 24  | Benchmarks for read models                                                        | E     | 30m  | Low      | Low    |
-| 25  | Full test suite + lint + race verification                                        | E     | 30m  | Critical | Low    |
+| #  | Task                                                                              | Phase | Est. | Impact   | Effort |
+| -- | --------------------------------------------------------------------------------- | ----- | ---- | -------- | ------ |
+| 1  | Update `SyncItemState`, `Fold`, `foldItemSynced` to use `*model.Item`             | A     | 45m  | Critical | Medium |
+| 2  | Update `DecideSync`, `HasChanged`, `resolveConflict` to use `*model.Item`         | A     | 45m  | Critical | Medium |
+| 3  | Migrate `syncEvents`, delete old `itemToPayload`/`itemFromPayload`, wire adapter  | A     | 30m  | Critical | Low    |
+| 4  | Update `SyncItemCommand`, validation, `handleSyncItem`                            | A     | 30m  | Critical | Low    |
+| 5  | Update `CQRSStack.SyncItems` to map `provider.Item` → `data.Item` before dispatch | A     | 30m  | Critical | Low    |
+| 6  | Update `CQRSConfig.ConflictResolver` type to `*model.Item`                        | A     | 15m  | Critical | Low    |
+| 7  | Update all `pkg/cqrs/` tests for `*model.Item`                                    | A     | 60m  | High     | High   |
+| 8  | Update `ReadModel` interface to `*model.Item`                                     | B     | 15m  | High     | Low    |
+| 9  | Update `MemoryReadModel` + `matchesFilter` + `paginate` to `*model.Item`          | B     | 45m  | High     | Medium |
+| 10 | Update `SQLiteReadModel` scan/upsert methods to `*model.Item`                     | B     | 45m  | High     | Medium |
+| 11 | Update `Projector` to use `DataItemFromPayload` adapter                           | B     | 30m  | High     | Low    |
+| 12 | Update `stack_adapters.go` (`ListItems`, `CountItems`, etc.)                      | B     | 30m  | High     | Low    |
+| 13 | Update read model tests                                                           | B     | 45m  | High     | Medium |
+| 14 | Create API DTO types (`ItemResponse`)                                             | C     | 30m  | Medium   | Low    |
+| 15 | Update API handlers to use DTOs                                                   | C     | 45m  | Medium   | Medium |
+| 16 | Update `SyncStore` interface to use data types                                    | C     | 30m  | Medium   | Low    |
+| 17 | Update `Syncer` to map `provider.Item` → `data.Item`                              | C     | 30m  | Medium   | Low    |
+| 18 | Update `sync/` and `api/` tests                                                   | C     | 45m  | Medium   | Medium |
+| 19 | Add `Item.Validate()` to model + use in adapter                                   | D     | 30m  | Medium   | Low    |
+| 20 | Implement `schema.Upcaster` for V1→V2 payload migration                           | D     | 45m  | Low-Med  | Medium |
+| 21 | Add cursor pagination to read models                                              | D     | 60m  | Low      | High   |
+| 22 | Add `MetricsRecorder` middleware                                                  | D     | 30m  | Low      | Low    |
+| 23 | Integration tests for end-to-end data→CQRS flow                                   | E     | 60m  | Medium   | High   |
+| 24 | Benchmarks for read models                                                        | E     | 30m  | Low      | Low    |
+| 25 | Full test suite + lint + race verification                                        | E     | 30m  | Critical | Low    |
 
 **Total estimated time:** ~16 hours
 

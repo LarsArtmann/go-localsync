@@ -33,14 +33,14 @@
 
 ### What Could Still Improve
 
-| #   | Issue                                                                                          | Why It Matters                                                   |
-| --- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| 1   | `provider.Item.Validate()` uses individual returns, `model.Item.Validate()` uses `errors.Join` | Inconsistent DX — `provider.Item` should also collect all errors |
-| 2   | `Stats.ItemTypes` is `[]string` not `[]id.EventTypeID`                                         | Loses type info at read boundary                                 |
-| 3   | `GetTypes()` returns `[]string`                                                                | Same issue — forces re-wrapping                                  |
-| 4   | API DTO layer is all raw strings                                                               | Acceptable for HTTP boundaries but validation could be typed     |
-| 5   | No `Backend` type enum for `CQRSConfig.Backend`                                                | Magic string "memory"/"sqlite"                                   |
-| 6   | Linter warnings in `item.go` (wsl_v5, nlreturn)                                                | Cosmetic but fixable                                             |
+| # | Issue                                                                                          | Why It Matters                                                   |
+| - | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 1 | `provider.Item.Validate()` uses individual returns, `model.Item.Validate()` uses `errors.Join` | Inconsistent DX — `provider.Item` should also collect all errors |
+| 2 | `Stats.ItemTypes` is `[]string` not `[]id.EventTypeID`                                         | Loses type info at read boundary                                 |
+| 3 | `GetTypes()` returns `[]string`                                                                | Same issue — forces re-wrapping                                  |
+| 4 | API DTO layer is all raw strings                                                               | Acceptable for HTTP boundaries but validation could be typed     |
+| 5 | No `Backend` type enum for `CQRSConfig.Backend`                                                | Magic string "memory"/"sqlite"                                   |
+| 6 | Linter warnings in `item.go` (wsl_v5, nlreturn)                                                | Cosmetic but fixable                                             |
 
 ---
 

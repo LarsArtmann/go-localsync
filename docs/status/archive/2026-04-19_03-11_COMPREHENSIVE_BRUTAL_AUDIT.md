@@ -1,10 +1,10 @@
 # Comprehensive Status Report — 2026-04-19 03:11
 
-**Project:** go-localsync  
-**Branch:** master (6 commits ahead of origin)  
-**Build:** Clean — `go build ./...` passes  
-**Tests:** 121 tests across 8 suites — ALL PASS (0 failures)  
-**Code:** ~2,159 lines production, ~2,823 lines test  
+**Project:** go-localsync\
+**Branch:** master (6 commits ahead of origin)\
+**Build:** Clean — `go build ./...` passes\
+**Tests:** 121 tests across 8 suites — ALL PASS (0 failures)\
+**Code:** ~2,159 lines production, ~2,823 lines test\
 **Uncommitted:** 3 documentation files (README.md, ROADMAP.md, TODO_LIST.md)
 
 ---
@@ -178,8 +178,8 @@
 
 | Library               | Verdict         | Rationale                                                                                                                                                                          |
 | --------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `samber/lo`           | ⚠️ Marginal     | We have ~5 slice operations total. `lo.Map`, `lo.Filter` would save ~10 lines. Not worth a dependency for this small codebase.                                                     |
-| `samber/mo`           | ⚠️ Marginal     | `mo.Result[T]` would clean up error handling patterns. `mo.Option[T]` could replace nil returns. But would require changing all return signatures. High churn for unclear benefit. |
+| `samber/lo`           | ⚠️ Marginal      | We have ~5 slice operations total. `lo.Map`, `lo.Filter` would save ~10 lines. Not worth a dependency for this small codebase.                                                     |
+| `samber/mo`           | ⚠️ Marginal      | `mo.Result[T]` would clean up error handling patterns. `mo.Option[T]` could replace nil returns. But would require changing all return signatures. High churn for unclear benefit. |
 | `samber/do`           | ❌ No           | We have 3 structs total. DI framework is massive over-engineering.                                                                                                                 |
 | `cockroachdb/errors`  | ✅ Already here | Just need to USE it consistently instead of `fmt.Errorf`                                                                                                                           |
 | `ginkgo/v2`           | ⏳ Planned      | Required by pre-commit hooks. 3h migration.                                                                                                                                        |
@@ -193,11 +193,11 @@
 | DDD                          | ❌ Not followed   | No aggregates, no value objects, no domain events. Just Provider→Syncer→Storage with anemic models. |
 | CQRS                         | ❌ Not applicable | Single data path. No command/query separation needed at this scale.                                 |
 | Event-Sourcing               | ❌ Not followed   | Raw JSON stored but no event replay, no projections, no event versioning.                           |
-| BDD                          | ⚠️ Partial        | Storage tests use BDD-style. Everything else uses standard testify.                                 |
-| TDD                          | ⚠️ Partial        | Some tests written first, some after. Not consistent.                                               |
+| BDD                          | ⚠️ Partial         | Storage tests use BDD-style. Everything else uses standard testify.                                 |
+| TDD                          | ⚠️ Partial         | Some tests written first, some after. Not consistent.                                               |
 | Railway Oriented             | ❌ Not followed   | Standard Go error handling everywhere.                                                              |
 | Composition over Inheritance | ✅ Followed       | `ConflictAwareSyncer` embeds `*Syncer`. Good.                                                       |
-| DRY                          | ⚠️ Partial        | Duplicate mocks still exist. `toNullString`/`fromNullString` are repetitive.                        |
+| DRY                          | ⚠️ Partial         | Duplicate mocks still exist. `toNullString`/`fromNullString` are repetitive.                        |
 | Separation of Concerns       | ✅ Good           | Clean package boundaries. Provider/Storage/Sync properly separated.                                 |
 
 ---
@@ -206,33 +206,33 @@
 
 Sorted by: Impact × Urgency ÷ Effort
 
-| #   | Task                                                                                        | Impact | Effort | Status         | Why                                                |
-| --- | ------------------------------------------------------------------------------------------- | ------ | ------ | -------------- | -------------------------------------------------- |
-| 1   | **Commit Phase 3 doc changes**                                                              | Medium | 5min   | Uncommitted    | Low-hanging fruit. Just commit it.                 |
-| 2   | **Fix stale TODO_LIST entries** (lines 56-59)                                               | Low    | 2min   | Partially done | Docs should reflect reality                        |
-| 3   | **Remove `ErrStorage` sentinel** — never returned                                           | Medium | 10min  | Not started    | Dead code. Delete it. Remove check in example CLI. |
-| 4   | **Replace `slog.Warn` → `charm.land/log/v2`** in client.go:126                              | Low    | 5min   | Not started    | Eliminates split brain                             |
-| 5   | **`Item.Validate()` → return `pkgerrors.ErrInvalidInput`**                                  | Medium | 15min  | Not started    | Validation errors should use sentinels             |
-| 6   | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in sync.go (5 sites)                        | Medium | 30min  | Not started    | Consistent error handling in core                  |
-| 7   | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in conflict_aware.go (3 sites)              | Medium | 20min  | Not started    | Same                                               |
-| 8   | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in github/client.go (10 sites)              | Medium | 30min  | Not started    | Same                                               |
-| 9   | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in sqlite.go (17 sites)                     | Medium | 45min  | Not started    | Same — largest file                                |
-| 10  | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in database/ (8 sites)                      | Medium | 20min  | Not started    | Same                                               |
-| 11  | **Add storage tests for untested methods** (6 methods)                                      | High   | 90min  | Not started    | Critical coverage gap                              |
-| 12  | **Consolidate duplicate mocks** — remove from sync_test.go, use testhelpers                 | Medium | 45min  | Not started    | DRY violation                                      |
-| 13  | **Remove vector clock dead code** — `buildClockForItem`, `GetVectorClock`, `SyncOperations` | Medium | 60min  | Not started    | Ghost system removal                               |
-| 14  | **Simplify `isConflict()` to pure LWW** — remove vector clock dependency                    | Medium | 30min  | Not started    | After #13, conflict detection becomes honest       |
-| 15  | **Storage interface: string → branded types** (7 methods)                                   | High   | 120min | Not started    | Biggest type-safety win                            |
-| 16  | **Update all Storage callers** for branded types                                            | High   | 60min  | Not started    | Depends on #15                                     |
-| 17  | **`FetchOptions.Source` and `SyncOptions.Source` → `types.ProviderID`**                     | Medium | 30min  | Not started    | Split brain #3 fix                                 |
-| 18  | **sqlc column overrides** for source, type, actor_login, repo_name                          | Medium | 60min  | Not started    | Propagates branded types through generated code    |
-| 19  | **Embed migration SQL via `embed.FS`** instead of string constants                          | Low    | 30min  | Not started    | Drift prevention                                   |
-| 20  | **testify → Ginkgo/GOmega migration** (8 files, 48 tests)                                   | High   | 180min | Not started    | Unblocks pre-commit hooks                          |
-| 21  | **Add godoc to 19 exported symbols** in sqlite.go                                           | Low    | 30min  | Not started    | Documentation quality                              |
-| 22  | **Add error-path tests** (closed DB, nil context)                                           | Medium | 60min  | Not started    | Robustness                                         |
-| 23  | **Install golangci-lint v2** binary                                                         | Medium | 5min   | External       | Requires user action                               |
-| 24  | **Align Go toolchain to 1.26.1**                                                            | Low    | 5min   | External       | Requires user action                               |
-| 25  | **CLI integration tests** for github-sync example                                           | Medium | 90min  | Not started    | Zero coverage on user-facing code                  |
+| #  | Task                                                                                        | Impact | Effort | Status         | Why                                                |
+| -- | ------------------------------------------------------------------------------------------- | ------ | ------ | -------------- | -------------------------------------------------- |
+| 1  | **Commit Phase 3 doc changes**                                                              | Medium | 5min   | Uncommitted    | Low-hanging fruit. Just commit it.                 |
+| 2  | **Fix stale TODO_LIST entries** (lines 56-59)                                               | Low    | 2min   | Partially done | Docs should reflect reality                        |
+| 3  | **Remove `ErrStorage` sentinel** — never returned                                           | Medium | 10min  | Not started    | Dead code. Delete it. Remove check in example CLI. |
+| 4  | **Replace `slog.Warn` → `charm.land/log/v2`** in client.go:126                              | Low    | 5min   | Not started    | Eliminates split brain                             |
+| 5  | **`Item.Validate()` → return `pkgerrors.ErrInvalidInput`**                                  | Medium | 15min  | Not started    | Validation errors should use sentinels             |
+| 6  | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in sync.go (5 sites)                        | Medium | 30min  | Not started    | Consistent error handling in core                  |
+| 7  | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in conflict_aware.go (3 sites)              | Medium | 20min  | Not started    | Same                                               |
+| 8  | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in github/client.go (10 sites)              | Medium | 30min  | Not started    | Same                                               |
+| 9  | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in sqlite.go (17 sites)                     | Medium | 45min  | Not started    | Same — largest file                                |
+| 10 | **Migrate `fmt.Errorf` → `cockroachdb/errors`** in database/ (8 sites)                      | Medium | 20min  | Not started    | Same                                               |
+| 11 | **Add storage tests for untested methods** (6 methods)                                      | High   | 90min  | Not started    | Critical coverage gap                              |
+| 12 | **Consolidate duplicate mocks** — remove from sync_test.go, use testhelpers                 | Medium | 45min  | Not started    | DRY violation                                      |
+| 13 | **Remove vector clock dead code** — `buildClockForItem`, `GetVectorClock`, `SyncOperations` | Medium | 60min  | Not started    | Ghost system removal                               |
+| 14 | **Simplify `isConflict()` to pure LWW** — remove vector clock dependency                    | Medium | 30min  | Not started    | After #13, conflict detection becomes honest       |
+| 15 | **Storage interface: string → branded types** (7 methods)                                   | High   | 120min | Not started    | Biggest type-safety win                            |
+| 16 | **Update all Storage callers** for branded types                                            | High   | 60min  | Not started    | Depends on #15                                     |
+| 17 | **`FetchOptions.Source` and `SyncOptions.Source` → `types.ProviderID`**                     | Medium | 30min  | Not started    | Split brain #3 fix                                 |
+| 18 | **sqlc column overrides** for source, type, actor_login, repo_name                          | Medium | 60min  | Not started    | Propagates branded types through generated code    |
+| 19 | **Embed migration SQL via `embed.FS`** instead of string constants                          | Low    | 30min  | Not started    | Drift prevention                                   |
+| 20 | **testify → Ginkgo/GOmega migration** (8 files, 48 tests)                                   | High   | 180min | Not started    | Unblocks pre-commit hooks                          |
+| 21 | **Add godoc to 19 exported symbols** in sqlite.go                                           | Low    | 30min  | Not started    | Documentation quality                              |
+| 22 | **Add error-path tests** (closed DB, nil context)                                           | Medium | 60min  | Not started    | Robustness                                         |
+| 23 | **Install golangci-lint v2** binary                                                         | Medium | 5min   | External       | Requires user action                               |
+| 24 | **Align Go toolchain to 1.26.1**                                                            | Low    | 5min   | External       | Requires user action                               |
+| 25 | **CLI integration tests** for github-sync example                                           | Medium | 90min  | Not started    | Zero coverage on user-facing code                  |
 
 ---
 
@@ -257,10 +257,10 @@ The audit revealed that vector clocks in `ConflictAwareSyncer` are **decorative*
 ## Uncommitted Changes Detail
 
 ```
- README.md    | 21 ++++++++++++++------
- ROADMAP.md   |  9 ++++++---
- TODO_LIST.md | 14 ++++++++------
- 3 files changed, 27 insertions(+), 17 deletions(-)
+README.md    | 21 ++++++++++++++------
+ROADMAP.md   |  9 ++++++---
+TODO_LIST.md | 14 ++++++++------
+3 files changed, 27 insertions(+), 17 deletions(-)
 ```
 
 ### README.md changes:

@@ -65,14 +65,14 @@
 
         /* --- Type stacks (system only — zero external fonts) --- */
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -289,15 +289,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       /* --- Issue cards --- */
@@ -310,15 +322,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -832,9 +856,10 @@
           <div class="hero-badge">Data Model Review</div>
           <h1>go-localsync Domain Model Audit</h1>
           <p class="hero-subtitle">
-            First-principles review of <code>pkg/data/model</code>, <code>pkg/data/schema</code>,
-            <code>pkg/cqrs</code> decider state, and <code>pkg/crdt</code> conflict types &mdash;
-            against the &ldquo;make impossible states unrepresentable&rdquo; bar.
+            First-principles review of <code>pkg/data/model</code>,
+            <code>pkg/data/schema</code>, <code>pkg/cqrs</code> decider state,
+            and <code>pkg/crdt</code> conflict types &mdash; against the
+            &ldquo;make impossible states unrepresentable&rdquo; bar.
           </p>
         </div>
 
@@ -859,18 +884,23 @@
         </div>
 
         <div class="card card-solution">
-          <h4>Verdict: the model is already well-designed; no redesign required</h4>
+          <h4>
+            Verdict: the model is already well-designed; no redesign required
+          </h4>
           <p>
-            This model did <em>not</em> grow organically into the minefield the skill is built to
-            fix. It has <strong>zero P1/P2/P3 critical problems</strong>: identifiers are branded
-            (no stringly-typed IDs), the composite identity is an explicit <code>Key</code> type,
-            tombstone state uses zero-value discipline with a documented discriminant, and
-            <code>schema.Version</code> is a typed enum with upcasting readiness. The single
-            substantive concern &mdash; <code>Attributes map[string]string</code> &mdash; is a
-            deliberate architectural tradeoff accepted in
-            <a href="../../adr/0007-de-githubify-domain-model.md">ADR-0007</a>, not rot. This review
-            documents the tradeoff and two minor hardening suggestions; it does
-            <strong>not</strong> propose a rewrite.
+            This model did <em>not</em> grow organically into the minefield the
+            skill is built to fix. It has
+            <strong>zero P1/P2/P3 critical problems</strong>: identifiers are
+            branded (no stringly-typed IDs), the composite identity is an
+            explicit <code>Key</code> type, tombstone state uses zero-value
+            discipline with a documented discriminant, and
+            <code>schema.Version</code> is a typed enum with upcasting
+            readiness. The single substantive concern &mdash;
+            <code>Attributes map[string]string</code> &mdash; is a deliberate
+            architectural tradeoff accepted in
+            <a href="../../adr/0007-de-githubify-domain-model.md">ADR-0007</a>,
+            not rot. This review documents the tradeoff and two minor hardening
+            suggestions; it does <strong>not</strong> propose a rewrite.
           </p>
         </div>
 
@@ -894,13 +924,18 @@
             <tr>
               <td><code>model.Key</code></td>
               <td>Composite identity value object</td>
-              <td><code>{Source, ExternalID}</code>, <code>IsZero/Equals/String</code></td>
+              <td>
+                <code>{Source, ExternalID}</code>,
+                <code>IsZero/Equals/String</code>
+              </td>
               <td><span class="badge badge-fixed">Explicit</span></td>
             </tr>
             <tr>
               <td><code>model.Tombstone</code></td>
               <td>Soft-delete value object</td>
-              <td>Zero value = live; <code>Reason == ""</code> is discriminant</td>
+              <td>
+                Zero value = live; <code>Reason == ""</code> is discriminant
+              </td>
               <td><span class="badge badge-fixed">Zero-value safe</span></td>
             </tr>
             <tr>
@@ -912,14 +947,17 @@
             <tr>
               <td><code>schema.Version</code></td>
               <td>Schema-version enum</td>
-              <td>V1/V2/V3, <code>CurrentVersion()</code>, <code>Valid()</code></td>
+              <td>
+                V1/V2/V3, <code>CurrentVersion()</code>, <code>Valid()</code>
+              </td>
               <td><span class="badge badge-fixed">Typed enum</span></td>
             </tr>
             <tr>
               <td><code>cqrs.SyncItemState</code></td>
               <td>Decider aggregate state</td>
               <td>
-                <code>Item *model.Item</code>; <code>IsNew/IsTombstoned/ShouldResurrect</code>
+                <code>Item *model.Item</code>;
+                <code>IsNew/IsTombstoned/ShouldResurrect</code>
               </td>
               <td><span class="badge badge-fixed">Guarded</span></td>
             </tr>
@@ -941,30 +979,42 @@
         <h2 id="problems"><span class="num">02</span>Problem Catalog</h2>
 
         <div class="issue issue-important">
-          <span class="severity severity-important">Medium &mdash; accepted tradeoff</span>
+          <span class="severity severity-important"
+            >Medium &mdash; accepted tradeoff</span
+          >
           <h3>Attributes map[string]string is stringly-keyed (ADR-0007)</h3>
           <div class="where">
-            pkg/data/model/item.go (Attributes) &middot; pkg/data/model/item_filter.go
-            (WithAttribute) &middot; pkg/api/dto.go
+            pkg/data/model/item.go (Attributes) &middot;
+            pkg/data/model/item_filter.go (WithAttribute) &middot;
+            pkg/api/dto.go
           </div>
           <p>
-            The provider-agnostic <code>Attributes map[string]string</code> loses compile-time
-            distinction between <code>"actor_login"</code>, <code>"repo_name"</code>,
-            <code>"channel_id"</code>, etc. A typo in an attribute key (<code>"actorlogin"</code> vs
-            <code>"actor_login"</code>) compiles and silently matches nothing at query time.
-            <code>hasChanged</code> sidesteps this via <code>ContentHash</code>, but the
-            <strong>read/filter path</strong> (<code>ItemFilter.WithAttribute</code>, SQL
+            The provider-agnostic
+            <code>Attributes map[string]string</code> loses compile-time
+            distinction between <code>"actor_login"</code>,
+            <code>"repo_name"</code>, <code>"channel_id"</code>, etc. A typo in
+            an attribute key (<code>"actorlogin"</code> vs
+            <code>"actor_login"</code>) compiles and silently matches nothing at
+            query time. <code>hasChanged</code> sidesteps this via
+            <code>ContentHash</code>, but the
+            <strong>read/filter path</strong>
+            (<code>ItemFilter.WithAttribute</code>, SQL
             <code>json_extract</code>) is exposed to it.
           </p>
           <div class="callout callout-solution">
-            <strong>Accepted &mdash; this is the cost of provider-agnosticism</strong>
-            Hardcoding <code>ActorLogin</code> as a struct field (the V2 model) re-couples the SDK
-            to GitHub. The current map is the right call for a sync <em>toolkit</em>.
-            <strong>Mitigation options</strong> (optional, not urgent): (1) export typed accessor
-            helpers in a <code>pkg/data/model/attrs</code> subpackage &mdash;
+            <strong
+              >Accepted &mdash; this is the cost of provider-agnosticism</strong
+            >
+            Hardcoding <code>ActorLogin</code> as a struct field (the V2 model)
+            re-couples the SDK to GitHub. The current map is the right call for
+            a sync <em>toolkit</em>.
+            <strong>Mitigation options</strong> (optional, not urgent): (1)
+            export typed accessor helpers in a
+            <code>pkg/data/model/attrs</code> subpackage &mdash;
             <code>attrs.ActorLogin(item) string</code>,
-            <code>attrs.RepoName(item) string</code> &mdash; so consumers avoid raw-key typos; (2)
-            export string key constants <code>AttrActorLogin = "actor_login"</code> etc. Option 1 is
+            <code>attrs.RepoName(item) string</code> &mdash; so consumers avoid
+            raw-key typos; (2) export string key constants
+            <code>AttrActorLogin = "actor_login"</code> etc. Option 1 is
             preferred (the value is typed, not just the key).
           </div>
         </div>
@@ -974,14 +1024,16 @@
           <h3>ItemFilter.Limit / Offset accept negatives</h3>
           <div class="where">pkg/data/model/item_filter.go:18-19</div>
           <p>
-            <code>Limit: -5</code> and <code>Offset: -10</code> compile. The SQLite and memory
-            backends will behave oddly or error at query time. There is no
-            <code>ItemFilter.Validate()</code> to fail fast at the boundary.
+            <code>Limit: -5</code> and <code>Offset: -10</code> compile. The
+            SQLite and memory backends will behave oddly or error at query time.
+            There is no <code>ItemFilter.Validate()</code> to fail fast at the
+            boundary.
           </p>
           <div class="callout callout-solution">
             <strong>Fix</strong>
-            Add <code>func (f ItemFilter) Validate() error</code> that rejects negatives, and call
-            it once at the read-model entry points (<code>MemoryReadModel.List</code>,
+            Add <code>func (f ItemFilter) Validate() error</code> that rejects
+            negatives, and call it once at the read-model entry points
+            (<code>MemoryReadModel.List</code>,
             <code>SQLiteReadModel.List</code>). Matches the existing
             <code>SyncOptions.Validate()</code> pattern.
           </div>
@@ -992,25 +1044,31 @@
           <h3>ContentHash is a bare string</h3>
           <div class="where">pkg/data/model/item.go (ContentHash field)</div>
           <p>
-            A SHA-256 hex digest lives in an untyped <code>string</code>. A consumer could pass
-            <code>"not-a-hash"</code> or a truncated digest. Internally consistent today (computed
-            by the adapter, never user-supplied), but a branded
-            <code>type ContentHash string</code> with a <code>ParseContentHash</code> constructor
-            would make the contract explicit.
+            A SHA-256 hex digest lives in an untyped <code>string</code>. A
+            consumer could pass <code>"not-a-hash"</code> or a truncated digest.
+            Internally consistent today (computed by the adapter, never
+            user-supplied), but a branded
+            <code>type ContentHash string</code> with a
+            <code>ParseContentHash</code> constructor would make the contract
+            explicit.
           </p>
         </div>
 
-        <h2 id="vision"><span class="num">03</span>The Vision (already largely met)</h2>
+        <h2 id="vision">
+          <span class="num">03</span>The Vision (already largely met)
+        </h2>
         <div class="card">
           <p>
-            The &ldquo;perfect&rdquo; version of this model would: (1) keep every identifier branded
-            (done), (2) make composite identity explicit (done &mdash; <code>Key</code>), (3) make
-            tombstone state a zero-value-safe value object (done), (4) version the schema for
-            upcasting (done &mdash; V1/V2/V3), (5) resolve conflicts via a generic strategy
-            interface (done &mdash; <code>ConflictResolver[T]</code>), (6) offer typed attribute
-            accessors so consumers never type raw keys (the one gap). The model is closer to this
-            vision than most production codebases get. The remaining work is accessor convenience,
-            not structural repair.
+            The &ldquo;perfect&rdquo; version of this model would: (1) keep
+            every identifier branded (done), (2) make composite identity
+            explicit (done &mdash; <code>Key</code>), (3) make tombstone state a
+            zero-value-safe value object (done), (4) version the schema for
+            upcasting (done &mdash; V1/V2/V3), (5) resolve conflicts via a
+            generic strategy interface (done &mdash;
+            <code>ConflictResolver[T]</code>), (6) offer typed attribute
+            accessors so consumers never type raw keys (the one gap). The model
+            is closer to this vision than most production codebases get. The
+            remaining work is accessor convenience, not structural repair.
           </p>
         </div>
 
@@ -1021,9 +1079,10 @@
             <div class="text">
               <strong>Branded phantom-type IDs</strong>
               <span
-                ><code>id.ID[Brand, V]</code> for ItemID (ULID), ExternalID, ProviderID,
-                EventTypeID, ActorLogin, RepoID. Compile-time protection against swapping a Source
-                for an ExternalID. <code>IsZero</code>/<code>Get</code> on every type.</span
+                ><code>id.ID[Brand, V]</code> for ItemID (ULID), ExternalID,
+                ProviderID, EventTypeID, ActorLogin, RepoID. Compile-time
+                protection against swapping a Source for an ExternalID.
+                <code>IsZero</code>/<code>Get</code> on every type.</span
               >
             </div>
           </div>
@@ -1032,9 +1091,13 @@
             <div class="text">
               <strong>Key makes partial lookups impossible</strong>
               <span
-                ><code>type Key struct { Source id.ProviderID; ExternalID id.ExternalID }</code>
+                ><code
+                  >type Key struct { Source id.ProviderID; ExternalID
+                  id.ExternalID }</code
+                >
                 &mdash; you cannot construct one without both branded fields.
-                <code>IsZero</code>/<code>Equals</code>/<code>String</code>/<code>ItemKey</code>.
+                <code>IsZero</code
+                >/<code>Equals</code>/<code>String</code>/<code>ItemKey</code>.
                 Textbook value-object design.</span
               >
             </div>
@@ -1042,12 +1105,17 @@
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
-              <strong>Tombstone uses the discriminant pattern, not pointer-state</strong>
+              <strong
+                >Tombstone uses the discriminant pattern, not
+                pointer-state</strong
+              >
               <span
-                ><code>Tombstone.Reason == ""</code> means live; non-empty means hidden with a
-                documented reason. <code>NewTombstone(reason)</code> sets the timestamp.
+                ><code>Tombstone.Reason == ""</code> means live; non-empty means
+                hidden with a documented reason.
+                <code>NewTombstone(reason)</code> sets the timestamp.
                 <code>IsZero()</code> checks the discriminant. No
-                <code>*Tombstone</code> nil-checking, no P2 pointer-state-encoding.</span
+                <code>*Tombstone</code> nil-checking, no P2
+                pointer-state-encoding.</span
               >
             </div>
           </div>
@@ -1056,10 +1124,12 @@
             <div class="text">
               <strong>Schema versioning is a typed enum, not a raw int</strong>
               <span
-                ><code>type Version int</code> with named <code>V1/V2/V3</code> constants,
-                <code>CurrentVersion()</code>, <code>Valid()</code>, <code>String()</code>. Carried
-                on every <code>model.Item</code>. Ready for an <code>UpcasterRegistry</code> when
-                the next field change lands.</span
+                ><code>type Version int</code> with named
+                <code>V1/V2/V3</code> constants, <code>CurrentVersion()</code>,
+                <code>Valid()</code>, <code>String()</code>. Carried on every
+                <code>model.Item</code>. Ready for an
+                <code>UpcasterRegistry</code> when the next field change
+                lands.</span
               >
             </div>
           </div>
@@ -1068,10 +1138,12 @@
             <div class="text">
               <strong>Conflict[T] and ConflictResolver[T] are generic</strong>
               <span
-                >Resolution works for <code>*model.Item</code> today and any entity tomorrow.
-                <code>LWWResolver[T]</code> takes an injected <code>TimestampFunc</code> + optional
-                <code>Tiebreaker</code>; <code>NewLWWResolver</code> rejects a nil extractor
-                (<code>ErrNilTimestampFunc</code>). Impossible-to-misconstruct.</span
+                >Resolution works for <code>*model.Item</code> today and any
+                entity tomorrow. <code>LWWResolver[T]</code> takes an injected
+                <code>TimestampFunc</code> + optional <code>Tiebreaker</code>;
+                <code>NewLWWResolver</code> rejects a nil extractor
+                (<code>ErrNilTimestampFunc</code>).
+                Impossible-to-misconstruct.</span
               >
             </div>
           </div>
@@ -1080,17 +1152,19 @@
             <div class="text">
               <strong>DTO/entity boundary is explicit</strong>
               <span
-                ><code>provider.Item</code> (DTO, has <code>RawJSON</code>) &rarr;
-                <code>model.Item</code> (domain, no RawJSON) via one <code>item_adapter.go</code>.
-                The domain never sees API concerns; the decider, read model, and events all operate
-                on the pure entity.</span
+                ><code>provider.Item</code> (DTO, has <code>RawJSON</code>)
+                &rarr; <code>model.Item</code> (domain, no RawJSON) via one
+                <code>item_adapter.go</code>. The domain never sees API
+                concerns; the decider, read model, and events all operate on the
+                pure entity.</span
               >
             </div>
           </div>
         </div>
 
         <h2 id="migration">
-          <span class="num">05</span>Recommended Hardening (optional, non-breaking)
+          <span class="num">05</span>Recommended Hardening (optional,
+          non-breaking)
         </h2>
 
         <div class="migration-step">
@@ -1098,10 +1172,11 @@
           <div class="migration-content">
             <h4>Typed attribute accessors (optional)</h4>
             <p>
-              Add a <code>pkg/data/model/attrs</code> subpackage with typed helpers for the
-              conventional keys (<code>ActorLogin</code>, <code>RepoName</code>,
-              <code>AvatarURL</code>, &hellip;). Consumers opt in; the raw map stays for
-              provider-specific keys. Non-breaking, additive.
+              Add a <code>pkg/data/model/attrs</code> subpackage with typed
+              helpers for the conventional keys (<code>ActorLogin</code>,
+              <code>RepoName</code>, <code>AvatarURL</code>, &hellip;).
+              Consumers opt in; the raw map stays for provider-specific keys.
+              Non-breaking, additive.
             </p>
           </div>
         </div>
@@ -1110,9 +1185,10 @@
           <div class="migration-content">
             <h4>ItemFilter.Validate() (small, recommended)</h4>
             <p>
-              Reject negative <code>Limit</code>/<code>Offset</code> at the boundary. Mirror the
-              existing <code>SyncOptions.Validate()</code> pattern. Wire into both read models'
-              <code>List</code> entry points.
+              Reject negative <code>Limit</code>/<code>Offset</code> at the
+              boundary. Mirror the existing
+              <code>SyncOptions.Validate()</code> pattern. Wire into both read
+              models' <code>List</code> entry points.
             </p>
           </div>
         </div>
@@ -1122,24 +1198,27 @@
             <h4>Branded ContentHash (cosmetic)</h4>
             <p>
               <code>type ContentHash string</code> +
-              <code>ParseContentHash(s string) (ContentHash, error)</code> enforcing 64-hex-char
-              SHA-256. Pure hardening; the field is internally computed today so this only matters
-              if the type leaks to consumers.
+              <code>ParseContentHash(s string) (ContentHash, error)</code>
+              enforcing 64-hex-char SHA-256. Pure hardening; the field is
+              internally computed today so this only matters if the type leaks
+              to consumers.
             </p>
           </div>
         </div>
 
         <div class="callout callout-solution">
           <strong>Bottom line</strong>
-          Do not redesign. The model already enforces invariants at the type level (branded IDs,
-          Key, zero-value tombstone, typed Version, generic Conflict). The ADR-0007 attribute-map
-          tradeoff is the right call for a provider-agnostic toolkit; the three hardening steps
-          above are optional polish, not debt.
+          Do not redesign. The model already enforces invariants at the type
+          level (branded IDs, Key, zero-value tombstone, typed Version, generic
+          Conflict). The ADR-0007 attribute-map tradeoff is the right call for a
+          provider-agnostic toolkit; the three hardening steps above are
+          optional polish, not debt.
         </div>
 
         <footer class="footer">
-          Generated 2026-07-19 &middot; Reviewed pkg/data/model + pkg/data/schema + pkg/cqrs decider
-          state + pkg/crdt. 0 critical problems.
+          Generated 2026-07-19 &middot; Reviewed pkg/data/model +
+          pkg/data/schema + pkg/cqrs decider state + pkg/crdt. 0 critical
+          problems.
         </footer>
       </main>
     </div>

@@ -1,8 +1,8 @@
 # Go-LocalSync Comprehensive Execution Plan
 
-**Created:** 2026-04-08 05:02  
-**Status:** Active  
-**Scope:** Full project audit, prioritization, and execution  
+**Created:** 2026-04-08 05:02\
+**Status:** Active\
+**Scope:** Full project audit, prioritization, and execution\
 **Baseline:** Build passes, all tests pass, 0 lint errors, git clean
 
 ---
@@ -26,31 +26,31 @@ Go-LocalSync is a generic synchronization SDK with a GitHub provider, SQLite sto
 
 These 3 tasks make the project **buildable by anyone other than the owner** and **CI/CD functional**:
 
-| #   | Task                                                                                      | Why 51%                                                                                    |
-| --- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| 1   | Remove `go.mod` replace directives — publish go-localfirst + go-composable-business-types | Without this: CI fails, no collaboration, no go module proxy. BLOCKS EVERYTHING.           |
-| 2   | Update stale docs (ROADMAP.md, TODO_LIST.md, CHANGELOG.md, AGENTS.md)                     | Without this: any contributor is working from wrong information. Trust is zero.            |
-| 3   | Fix `just lint` to use golangci-lint instead of `go vet` + `go fmt`                       | Without this: the lint command gives false confidence. 90+ configured linters are ignored. |
+| # | Task                                                                                      | Why 51%                                                                                    |
+| - | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| 1 | Remove `go.mod` replace directives — publish go-localfirst + go-composable-business-types | Without this: CI fails, no collaboration, no go module proxy. BLOCKS EVERYTHING.           |
+| 2 | Update stale docs (ROADMAP.md, TODO_LIST.md, CHANGELOG.md, AGENTS.md)                     | Without this: any contributor is working from wrong information. Trust is zero.            |
+| 3 | Fix `just lint` to use golangci-lint instead of `go vet` + `go fmt`                       | Without this: the lint command gives false confidence. 90+ configured linters are ignored. |
 
 ### The 4% That Delivers 64% of the Result
 
 Add 2 more tasks for stability and correctness:
 
-| #   | Task                                                              | Why 64%                                                                                                           |
-| --- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 4   | Add database migration system (existing DBs crash on new columns) | Without this: any existing user's database is destroyed on upgrade. Data loss.                                    |
-| 5   | Fix `toDBParams` — missing `UpdatedAt` in upsert params           | The `updated_at` column always gets `CURRENT_TIMESTAMP` instead of the provider's value. LWW is partially broken. |
+| # | Task                                                              | Why 64%                                                                                                           |
+| - | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| 4 | Add database migration system (existing DBs crash on new columns) | Without this: any existing user's database is destroyed on upgrade. Data loss.                                    |
+| 5 | Fix `toDBParams` — missing `UpdatedAt` in upsert params           | The `updated_at` column always gets `CURRENT_TIMESTAMP` instead of the provider's value. LWW is partially broken. |
 
 ### The 20% That Delivers 80% of the Result
 
 Add 4 more tasks for quality and developer experience:
 
-| #   | Task                                                                      | Why 80%                                                                                  |
-| --- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| 6   | Add `ErrDatabase` sentinel error and proper DB error wrapping             | Storage errors are raw SQLite errors — no way to distinguish DB failures from not-found. |
-| 7   | Add index on `source` column and composite index on `(source, github_id)` | Multi-provider queries will be full table scans without it.                              |
-| 8   | Add integration test skeleton (build + smoke test)                        | Zero E2E coverage means regressions are invisible.                                       |
-| 9   | Clean up `internal/db/db.go` — replace `interface{}` with `any`           | 20+ gopls hints, looks unprofessional, trivial to fix.                                   |
+| # | Task                                                                      | Why 80%                                                                                  |
+| - | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| 6 | Add `ErrDatabase` sentinel error and proper DB error wrapping             | Storage errors are raw SQLite errors — no way to distinguish DB failures from not-found. |
+| 7 | Add index on `source` column and composite index on `(source, github_id)` | Multi-provider queries will be full table scans without it.                              |
+| 8 | Add integration test skeleton (build + smoke test)                        | Zero E2E coverage means regressions are invisible.                                       |
+| 9 | Clean up `internal/db/db.go` — replace `interface{}` with `any`           | 20+ gopls hints, looks unprofessional, trivial to fix.                                   |
 
 ---
 
@@ -60,16 +60,16 @@ Sorted by importance/impact/effort/customer-value. Each task is 30-100 minutes.
 
 ### Phase 1: Foundation (Unblock CI/CD + Fix Data Integrity)
 
-| #   | Task                                                                | Impact   | Effort | Files                                                |
-| --- | ------------------------------------------------------------------- | -------- | ------ | ---------------------------------------------------- |
-| T1  | Remove go.mod replace directives (publish deps or use Go workspace) | CRITICAL | 45min  | `go.mod`, `go.sum`                                   |
-| T2  | Fix `just lint` to use golangci-lint                                | HIGH     | 15min  | `justfile`                                           |
-| T3  | Fix `toDBParams` missing `UpdatedAt` field                          | HIGH     | 15min  | `pkg/storage/interface.go`, `sql/queries/events.sql` |
-| T4  | Add database migration system                                       | HIGH     | 90min  | `internal/database/` new files                       |
-| T5  | Update CHANGELOG.md with all session 1-3 changes                    | MEDIUM   | 30min  | `CHANGELOG.md`                                       |
-| T6  | Update ROADMAP.md — remove stale references                         | MEDIUM   | 20min  | `ROADMAP.md`                                         |
-| T7  | Update TODO_LIST.md — reflect current state                         | MEDIUM   | 20min  | `TODO_LIST.md`                                       |
-| T8  | Update AGENTS.md — remove PaginationMixin, fix regeneration warning | MEDIUM   | 15min  | `AGENTS.md`                                          |
+| #  | Task                                                                | Impact   | Effort | Files                                                |
+| -- | ------------------------------------------------------------------- | -------- | ------ | ---------------------------------------------------- |
+| T1 | Remove go.mod replace directives (publish deps or use Go workspace) | CRITICAL | 45min  | `go.mod`, `go.sum`                                   |
+| T2 | Fix `just lint` to use golangci-lint                                | HIGH     | 15min  | `justfile`                                           |
+| T3 | Fix `toDBParams` missing `UpdatedAt` field                          | HIGH     | 15min  | `pkg/storage/interface.go`, `sql/queries/events.sql` |
+| T4 | Add database migration system                                       | HIGH     | 90min  | `internal/database/` new files                       |
+| T5 | Update CHANGELOG.md with all session 1-3 changes                    | MEDIUM   | 30min  | `CHANGELOG.md`                                       |
+| T6 | Update ROADMAP.md — remove stale references                         | MEDIUM   | 20min  | `ROADMAP.md`                                         |
+| T7 | Update TODO_LIST.md — reflect current state                         | MEDIUM   | 20min  | `TODO_LIST.md`                                       |
+| T8 | Update AGENTS.md — remove PaginationMixin, fix regeneration warning | MEDIUM   | 15min  | `AGENTS.md`                                          |
 
 ### Phase 2: Code Quality & Correctness
 
@@ -113,15 +113,15 @@ Each task max 15 minutes. Sorted by importance/impact/effort.
 
 ### Phase 1A: go.mod Replace Directives (T1 breakdown) — CRITICAL
 
-| µ#  | Micro-Task                                                                      | Est   | Priority |
-| --- | ------------------------------------------------------------------------------- | ----- | -------- |
-| M1  | Tag go-localfirst `pkg/sync/` as v0.1.0 and push to GitHub                      | 10min | P0       |
-| M2  | Tag go-composable-business-types as v0.1.0 and push to GitHub                   | 10min | P0       |
-| M3  | Remove replace directives from go.mod, add proper versioned requires            | 10min | P0       |
-| M4  | Run `go mod tidy` and verify build                                              | 5min  | P0       |
-| M5  | Run `go test ./...` and verify all tests pass                                   | 5min  | P0       |
-| M6  | Verify gopls no longer reports "not in go.mod" errors                           | 2min  | P0       |
-| M7  | Commit and push: "fix: remove local replace directives for CI/CD compatibility" | 3min  | P0       |
+| µ# | Micro-Task                                                                      | Est   | Priority |
+| -- | ------------------------------------------------------------------------------- | ----- | -------- |
+| M1 | Tag go-localfirst `pkg/sync/` as v0.1.0 and push to GitHub                      | 10min | P0       |
+| M2 | Tag go-composable-business-types as v0.1.0 and push to GitHub                   | 10min | P0       |
+| M3 | Remove replace directives from go.mod, add proper versioned requires            | 10min | P0       |
+| M4 | Run `go mod tidy` and verify build                                              | 5min  | P0       |
+| M5 | Run `go test ./...` and verify all tests pass                                   | 5min  | P0       |
+| M6 | Verify gopls no longer reports "not in go.mod" errors                           | 2min  | P0       |
+| M7 | Commit and push: "fix: remove local replace directives for CI/CD compatibility" | 3min  | P0       |
 
 ### Phase 1B: justfile Lint Fix (T2 breakdown) — HIGH
 

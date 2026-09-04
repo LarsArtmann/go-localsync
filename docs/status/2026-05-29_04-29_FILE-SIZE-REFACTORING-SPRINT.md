@@ -22,12 +22,12 @@ All 10 files that exceeded the 350-line limit have been split into focused, sing
 | `pkg/providers/github/client_test.go` | 655 🚨 | `client_test.go` + `client_convert_test.go` + `client_ratelimit_test.go` | 333 + 95 + 250  |
 | `pkg/cqrs/decider_test.go`            | 551 🚨 | `decider_test.go` + `decider_resolver_test.go`                           | 310 + 248       |
 | `pkg/cqrs/stack_test.go`              | 528 🚨 | `stack_test.go` + `stack_classify_test.go`                               | 255 + 283       |
-| `pkg/crdt/conflict_test.go`           | 404 ⚠️ | `conflict_test.go` + `conflict_sync_test.go`                             | 280 + 131       |
-| `pkg/crdt/vectorclock_test.go`        | 404 ⚠️ | `vectorclock_test.go` + `vectorclock_compare_test.go`                    | 168 + 241       |
-| `pkg/cqrs/stack.go`                   | 402 ℹ️ | `stack.go` + `stack_adapters.go`                                         | 293 + 109       |
-| `pkg/cqrs/turso_readmodel_test.go`    | 383 ℹ️ | `turso_readmodel_test.go` + `turso_readmodel_filter_test.go`             | 217 + 176       |
-| `pkg/providers/github/client.go`      | 387 ℹ️ | `client.go` + `client_retry.go`                                          | 270 + 123       |
-| `cmd/examples/github-sync/main.go`    | 355 ℹ️ | `main.go` + `helpers.go`                                                 | 209 + 159       |
+| `pkg/crdt/conflict_test.go`           | 404 ⚠️  | `conflict_test.go` + `conflict_sync_test.go`                             | 280 + 131       |
+| `pkg/crdt/vectorclock_test.go`        | 404 ⚠️  | `vectorclock_test.go` + `vectorclock_compare_test.go`                    | 168 + 241       |
+| `pkg/cqrs/stack.go`                   | 402 ℹ️  | `stack.go` + `stack_adapters.go`                                         | 293 + 109       |
+| `pkg/cqrs/turso_readmodel_test.go`    | 383 ℹ️  | `turso_readmodel_test.go` + `turso_readmodel_filter_test.go`             | 217 + 176       |
+| `pkg/providers/github/client.go`      | 387 ℹ️  | `client.go` + `client_retry.go`                                          | 270 + 123       |
+| `cmd/examples/github-sync/main.go`    | 355 ℹ️  | `main.go` + `helpers.go`                                                 | 209 + 159       |
 
 ### Split Strategy Per File
 

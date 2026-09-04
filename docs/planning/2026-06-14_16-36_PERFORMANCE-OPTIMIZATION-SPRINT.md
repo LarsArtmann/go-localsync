@@ -10,38 +10,38 @@
 
 ### The 1% that delivers 51% of the result
 
-| #   | Task                                          | Impact                | Effort | Risk |
-| --- | --------------------------------------------- | --------------------- | ------ | ---- |
-| 1   | Enable SQLite WAL mode (`SQLiteEnableWAL`)    | 3–10× SQLite writes   | 1 line | None |
-| 2   | Fix N+1 in GetStats (single `GROUP BY` query) | N× fewer queries      | 30min  | None |
-| 3   | Add aggregate ID cache (`sync.Map`)           | ~200µs/1k items saved | 15min  | None |
-| 4   | Add HTTP client timeout (30s)                 | Hang resilience       | 5min   | None |
+| # | Task                                          | Impact                | Effort | Risk |
+| - | --------------------------------------------- | --------------------- | ------ | ---- |
+| 1 | Enable SQLite WAL mode (`SQLiteEnableWAL`)    | 3–10× SQLite writes   | 1 line | None |
+| 2 | Fix N+1 in GetStats (single `GROUP BY` query) | N× fewer queries      | 30min  | None |
+| 3 | Add aggregate ID cache (`sync.Map`)           | ~200µs/1k items saved | 15min  | None |
+| 4 | Add HTTP client timeout (30s)                 | Hang resilience       | 5min   | None |
 
 ### The 4% that delivers 64% of the result
 
-| #   | Task                                                      | Impact                | Effort | Risk |
-| --- | --------------------------------------------------------- | --------------------- | ------ | ---- |
-| 5   | Cache rate-limit from response headers                    | 50% fewer API calls   | 30min  | Low  |
-| 6   | Default event/command log level to Debug                  | ~40% faster SyncItems | 15min  | Low  |
-| 7   | SQLite scan: `sql.RawBytes` + result pre-allocation       | ~70% fewer allocs     | 30min  | Low  |
-| 8   | Increase SQLite connection pool (WAL-safe) + busy_timeout | Concurrent reads      | 15min  | Low  |
+| # | Task                                                      | Impact                | Effort | Risk |
+| - | --------------------------------------------------------- | --------------------- | ------ | ---- |
+| 5 | Cache rate-limit from response headers                    | 50% fewer API calls   | 30min  | Low  |
+| 6 | Default event/command log level to Debug                  | ~40% faster SyncItems | 15min  | Low  |
+| 7 | SQLite scan: `sql.RawBytes` + result pre-allocation       | ~70% fewer allocs     | 30min  | Low  |
+| 8 | Increase SQLite connection pool (WAL-safe) + busy_timeout | Concurrent reads      | 15min  | Low  |
 
 ### The 20% that delivers 80% of the result
 
-| #   | Task                                                      | Impact              | Effort | Risk   |
-| --- | --------------------------------------------------------- | ------------------- | ------ | ------ |
-| 9   | Concurrent page fetching (bounded errgroup, max 3)        | ~3× faster network  | 45min  | Medium |
-| 10  | SQLite PRAGMA tuning (cache_size, mmap_size, synchronous) | 2–3× SQLite overall | 15min  | None   |
-| 11  | Benchmarks for all changes (before/after comparison)      | Measurable proof    | 30min  | None   |
+| #  | Task                                                      | Impact              | Effort | Risk   |
+| -- | --------------------------------------------------------- | ------------------- | ------ | ------ |
+| 9  | Concurrent page fetching (bounded errgroup, max 3)        | ~3× faster network  | 45min  | Medium |
+| 10 | SQLite PRAGMA tuning (cache_size, mmap_size, synchronous) | 2–3× SQLite overall | 15min  | None   |
+| 11 | Benchmarks for all changes (before/after comparison)      | Measurable proof    | 30min  | None   |
 
 ### Remaining (not in this sprint)
 
-| #   | Task                                     | Why deferred                                                  |
-| --- | ---------------------------------------- | ------------------------------------------------------------- |
-| 12  | Batch event writes in single transaction | Needs upstream go-cqrs-lite support; WAL + pool already helps |
-| 13  | ETag / conditional requests              | Complex; go-github doesn't expose ETag; marginal gain         |
-| 14  | Event store compaction                   | Future concern; not urgent for local-first tool               |
-| 15  | Memory ReadModel secondary indexes       | Acceptable for dev/testing backend                            |
+| #  | Task                                     | Why deferred                                                  |
+| -- | ---------------------------------------- | ------------------------------------------------------------- |
+| 12 | Batch event writes in single transaction | Needs upstream go-cqrs-lite support; WAL + pool already helps |
+| 13 | ETag / conditional requests              | Complex; go-github doesn't expose ETag; marginal gain         |
+| 14 | Event store compaction                   | Future concern; not urgent for local-first tool               |
+| 15 | Memory ReadModel secondary indexes       | Acceptable for dev/testing backend                            |
 
 ---
 

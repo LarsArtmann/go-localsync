@@ -59,16 +59,16 @@ golangci-lint v2 reports **0 issues** with 125+ linters enabled.
 
 102 tests pass, but coverage is uneven:
 
-| Package                    | Tests | Status                                         |
-| -------------------------- | ----- | ---------------------------------------------- |
-| `pkg/storage`              | 70+   | ✅ Excellent (compliance suite, 3 backends)    |
-| `pkg/providers/github`     | 21    | ✅ Thorough                                    |
-| `pkg/sync`                 | 11    | ✅ Good (basic + conflict-aware)               |
-| `internal/database`        | 6     | ✅ Thorough (idempotency, ordering, schema)    |
+| Package                    | Tests | Status                                        |
+| -------------------------- | ----- | --------------------------------------------- |
+| `pkg/storage`              | 70+   | ✅ Excellent (compliance suite, 3 backends)   |
+| `pkg/providers/github`     | 21    | ✅ Thorough                                   |
+| `pkg/sync`                 | 11    | ✅ Good (basic + conflict-aware)              |
+| `internal/database`        | 6     | ✅ Thorough (idempotency, ordering, schema)   |
 | `pkg/types`                | 13    | ⚠️ Construction/roundtrip — no edge case tests |
 | `pkg/errors`               | 4     | ⚠️ Missing `Wrapf()` test                      |
 | `pkg/provider`             | 1     | ⚠️ Only `Item.Validate`                        |
-| `cmd/examples/github-sync` | 0     | ❌ No tests                                    |
+| `cmd/examples/github-sync` | 0     | ❌ No tests                                   |
 
 ### 2. go-cqrs-lite Integration
 
@@ -155,33 +155,33 @@ Both ginkgo/gomega AND testify are in `go.mod`. BDD tests use ginkgo; unit tests
 
 Sorted by impact × feasibility (highest first):
 
-| #   | Task                                                                                          | Effort | Impact      | Why                                                              |
-| --- | --------------------------------------------------------------------------------------------- | ------ | ----------- | ---------------------------------------------------------------- |
-| 1   | **Fix pre-commit hooks** — remove testify ban or migrate BDD tests to testify                 | 2hr    | 🔴 Critical | Every commit is a workaround                                     |
-| 2   | **Eliminate `EventID`** — now redundant with `ItemID` after migration                         | 30min  | 🟠 High     | Dead type causes confusion                                       |
-| 3   | **Fix `isConflict` to use `.Equal()`** on branded IDs instead of `!=`                         | 15min  | 🟠 High     | Silent correctness bug                                           |
-| 4   | **Batch upserts in ConflictAwareSyncer** — collect to-upsert items, single `UpsertBatch` call | 1hr    | 🟠 High     | N+1 writes on conflict path                                      |
-| 5   | **Create `flake.nix`** — replace deprecated justfile                                          | 2hr    | 🟠 High     | Reproducible builds                                              |
-| 6   | **CQRS Phase 1: Create `pkg/cqrs/aggregate.go`**                                              | 4hr    | 🟠 High     | First real CQRS code                                             |
-| 7   | **Collapse Reader filters into `ItemFilter` pattern**                                         | 3hr    | 🟠 High     | 16→~10 methods on Storage                                        |
-| 8   | **End-to-end integration test** — Provider → Syncer → Storage                                 | 2hr    | 🟠 High     | No test exercises full pipeline                                  |
-| 9   | **Production CLI in `cmd/localsync/`**                                                        | 4hr    | 🟠 High     | Replace example CLI                                              |
-| 10  | **CI/CD: verify GitHub Actions** — check if it actually runs                                  | 30min  | 🟠 High     | Status report said "no CI" but `.github/workflows/ci.yml` exists |
-| 11  | **Standardize on testify** — migrate ginkgo BDD tests                                         | 3hr    | 🟡 Medium   | Fixes pre-commit conflict, reduces dependency count              |
-| 12  | **Go toolchain alignment** — update `go.mod` to 1.26.2                                        | 5min   | 🟡 Medium   | Blocks `go test -cover`                                          |
-| 13  | **Add `go-cqrs-lite/core` as go.mod dependency**                                              | 15min  | 🟠 High     | Start consuming its types                                        |
-| 14  | **Add `errors.Wrapf()` test**                                                                 | 15min  | 🟡 Medium   | Only untested exported function                                  |
-| 15  | **Write `TestLoadConfig` for cmd/examples**                                                   | 1hr    | 🟡 Medium   | Zero test coverage for config                                    |
-| 16  | **Add edge case tests for branded IDs**                                                       | 1hr    | 🟡 Medium   | No tests for empty/long/special chars                            |
-| 17  | **Add benchmark tests for storage layer**                                                     | 2hr    | 🟡 Medium   | Unknown performance characteristics                              |
-| 18  | **Retry: use go-cqrs-lite or `go-retry`**                                                     | 1hr    | 🟡 Medium   | Hand-rolled retry without jitter                                 |
-| 18  | **Structured logging with levels**                                                            | 2hr    | 🟡 Medium   | No structured fields, no correlation IDs                         |
-| 20  | **Second provider: GitLab**                                                                   | 8hr    | 🟠 High     | Tests provider abstraction actually works                        |
-| 21  | **Graceful shutdown in sync loops**                                                           | 2hr    | 🟡 Medium   | No context cancellation handling                                 |
-| 22  | **Config validation with schema**                                                             | 1hr    | 🟡 Medium   | No validation for provider configs                               |
-| 23  | **Remove `ActorAvatarURL`/`RepoURL` from `Item`** — extract from RawJSON                      | 1hr    | 🟡 Medium   | Presentation concerns in domain model                            |
-| 24  | **Remove deprecated `justfile`**                                                              | 5min   | 🟢 Low      | Only after flake.nix exists                                      |
-| 25  | **API reference generation** (godoc)                                                          | 1hr    | 🟢 Low      | Public API has no documentation                                  |
+| #  | Task                                                                                          | Effort | Impact      | Why                                                              |
+| -- | --------------------------------------------------------------------------------------------- | ------ | ----------- | ---------------------------------------------------------------- |
+| 1  | **Fix pre-commit hooks** — remove testify ban or migrate BDD tests to testify                 | 2hr    | 🔴 Critical | Every commit is a workaround                                     |
+| 2  | **Eliminate `EventID`** — now redundant with `ItemID` after migration                         | 30min  | 🟠 High     | Dead type causes confusion                                       |
+| 3  | **Fix `isConflict` to use `.Equal()`** on branded IDs instead of `!=`                         | 15min  | 🟠 High     | Silent correctness bug                                           |
+| 4  | **Batch upserts in ConflictAwareSyncer** — collect to-upsert items, single `UpsertBatch` call | 1hr    | 🟠 High     | N+1 writes on conflict path                                      |
+| 5  | **Create `flake.nix`** — replace deprecated justfile                                          | 2hr    | 🟠 High     | Reproducible builds                                              |
+| 6  | **CQRS Phase 1: Create `pkg/cqrs/aggregate.go`**                                              | 4hr    | 🟠 High     | First real CQRS code                                             |
+| 7  | **Collapse Reader filters into `ItemFilter` pattern**                                         | 3hr    | 🟠 High     | 16→~10 methods on Storage                                        |
+| 8  | **End-to-end integration test** — Provider → Syncer → Storage                                 | 2hr    | 🟠 High     | No test exercises full pipeline                                  |
+| 9  | **Production CLI in `cmd/localsync/`**                                                        | 4hr    | 🟠 High     | Replace example CLI                                              |
+| 10 | **CI/CD: verify GitHub Actions** — check if it actually runs                                  | 30min  | 🟠 High     | Status report said "no CI" but `.github/workflows/ci.yml` exists |
+| 11 | **Standardize on testify** — migrate ginkgo BDD tests                                         | 3hr    | 🟡 Medium   | Fixes pre-commit conflict, reduces dependency count              |
+| 12 | **Go toolchain alignment** — update `go.mod` to 1.26.2                                        | 5min   | 🟡 Medium   | Blocks `go test -cover`                                          |
+| 13 | **Add `go-cqrs-lite/core` as go.mod dependency**                                              | 15min  | 🟠 High     | Start consuming its types                                        |
+| 14 | **Add `errors.Wrapf()` test**                                                                 | 15min  | 🟡 Medium   | Only untested exported function                                  |
+| 15 | **Write `TestLoadConfig` for cmd/examples**                                                   | 1hr    | 🟡 Medium   | Zero test coverage for config                                    |
+| 16 | **Add edge case tests for branded IDs**                                                       | 1hr    | 🟡 Medium   | No tests for empty/long/special chars                            |
+| 17 | **Add benchmark tests for storage layer**                                                     | 2hr    | 🟡 Medium   | Unknown performance characteristics                              |
+| 18 | **Retry: use go-cqrs-lite or `go-retry`**                                                     | 1hr    | 🟡 Medium   | Hand-rolled retry without jitter                                 |
+| 18 | **Structured logging with levels**                                                            | 2hr    | 🟡 Medium   | No structured fields, no correlation IDs                         |
+| 20 | **Second provider: GitLab**                                                                   | 8hr    | 🟠 High     | Tests provider abstraction actually works                        |
+| 21 | **Graceful shutdown in sync loops**                                                           | 2hr    | 🟡 Medium   | No context cancellation handling                                 |
+| 22 | **Config validation with schema**                                                             | 1hr    | 🟡 Medium   | No validation for provider configs                               |
+| 23 | **Remove `ActorAvatarURL`/`RepoURL` from `Item`** — extract from RawJSON                      | 1hr    | 🟡 Medium   | Presentation concerns in domain model                            |
+| 24 | **Remove deprecated `justfile`**                                                              | 5min   | 🟢 Low      | Only after flake.nix exists                                      |
+| 25 | **API reference generation** (godoc)                                                          | 1hr    | 🟢 Low      | Public API has no documentation                                  |
 
 ---
 
@@ -228,7 +228,7 @@ This is a domain modeling decision — I can't determine whether CQRS event IDs 
 | Build          | ✅     | `go build ./...` clean                                      |
 | Tests          | ✅     | 102/102 pass, 0 failures                                    |
 | Lint           | ✅     | 0 issues (golangci-lint v2)                                 |
-| Coverage       | ⚠️     | Unknown (toolchain mismatch blocks `-cover`)                |
+| Coverage       | ⚠️      | Unknown (toolchain mismatch blocks `-cover`)                |
 | Technical Debt | 🟡     | Low — clean code, `EventID` redundancy, two test frameworks |
 | Architecture   | 🟢     | Solid — ID blocker resolved, CQRS path clear                |
 | Documentation  | 🟢     | AGENTS.md excellent, status reports thorough                |

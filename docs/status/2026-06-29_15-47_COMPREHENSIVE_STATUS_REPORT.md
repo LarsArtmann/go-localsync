@@ -108,33 +108,33 @@ The biggest recurring pain point is **vendor/ drift**: every time `go.mod` depen
 
 Ranked by impact × urgency. Pareto-ordered.
 
-| #   | Task                                                                                                        | Impact      | Effort | Package/Area                      |
-| --- | ----------------------------------------------------------------------------------------------------------- | ----------- | ------ | --------------------------------- |
-| 1   | **Add CI check for vendor consistency** (`go mod verify` or build-in-vendor-mode step)                      | 🔴 Critical | S      | `.github/workflows/ci.yml`        |
-| 2   | **Rework CI build/release jobs** for a pure library (remove `./cmd/examples/github-sync` target)            | 🔴 Critical | S      | `.github/workflows/ci.yml`        |
-| 3   | **Make go-cqrs-lite public** — eliminates vendor workaround, unblocks nix                                   | 🔴 Critical | S      | `go-cqrs-lite` repo               |
-| 4   | **Add pre-commit hook for `go mod vendor`** — catches vendor drift before commit                            | 🔴 Critical | S      | git hooks / justfile / flake      |
-| 5   | **Adopt `UpcasterRegistry`** from go-cqrs-lite for schema evolution                                         | 🟡 High     | M      | `pkg/data/schema`, `pkg/cqrs`     |
-| 6   | **OpenTelemetry instrumentation** for Sync, CQRS, HTTP                                                      | 🟡 High     | M      | `pkg/sync`, `pkg/cqrs`, `pkg/api` |
-| 7   | **API authentication middleware** (API key or JWT)                                                          | 🟡 High     | S      | `pkg/api`                         |
-| 8   | **Push `pkg/cqrs` coverage past 85%** (currently 82.1%)                                                     | 🟡 High     | M      | `pkg/cqrs`                        |
-| 9   | **Per-sync conflict resolver override** (`SyncOptions.ConflictResolver`)                                    | 🟡 Medium   | S      | `pkg/sync`                        |
-| 10  | **API rate limiting middleware** for `POST /sync`                                                           | 🟡 Medium   | S      | `pkg/api`                         |
-| 11  | **API pagination headers** (`X-Total-Count`, cursor links)                                                  | 🟡 Medium   | S      | `pkg/api`                         |
-| 12  | **Data export** (JSON/CSV of events and read-model)                                                         | 🟡 Medium   | M      | new `pkg/export`                  |
-| 13  | **Structured logging fields** (source, page, event_id consistently)                                         | 🟢 Low      | S      | `pkg/sync`, `pkg/cqrs`            |
-| 14  | **Drop `vendor/` once go-cqrs-lite is public** — switch to real `vendorHash`                                | 🟡 High     | S      | `flake.nix`, `go.mod`             |
-| 15  | **Provider contract test suite** — embeddable test harness for any `Provider` impl                          | 🟢 Low      | M      | `pkg/testutil`                    |
-| 16  | **`govalid` struct tags** on `SyncOptions`, `CQRSConfig`                                                    | 🟢 Low      | S      | `pkg/sync`, `pkg/cqrs`            |
-| 17  | **Improve `CONTRIBUTING.md`** — architecture guide, testing requirements, PR checklist                      | 🟢 Low      | S      | `CONTRIBUTING.md`                 |
-| 18  | **OpenAPI error-response schemas** per endpoint                                                             | 🟢 Low      | S      | `pkg/api`                         |
-| 19  | **Lower `go.mod` directive when nixpkgs catches up** OR document the nix-Go-lag workaround more prominently | 🟢 Low      | S      | `go.mod`, `AGENTS.md`             |
-| 20  | **Add `nix flake check` to CI** once nixpkgs Go ≥ 1.26.4                                                    | 🟢 Low      | S      | `.github/workflows/ci.yml`        |
-| 21  | **Conflict result error detail** — ensure `ConflictResult.Errors` is surfaced in API `SyncSummary`          | 🟢 Low      | S      | `pkg/api`, `pkg/sync`             |
-| 22  | **Snapshot store integration test** — verify aggregate state survives restart across SQLite                 | 🟢 Low      | M      | `pkg/cqrs`                        |
-| 23  | **Benchmarks for projection replay** — measure `replayJournal` cost at scale                                | 🟢 Low      | S      | `pkg/cqrs`                        |
-| 24  | **Review `pkg/crdt` package name** — it carries no CRDT machinery; consider renaming to `pkg/conflict`      | 🟢 Low      | S      | `pkg/crdt` → `pkg/conflict`       |
-| 25  | **Consolidate status report archive** — 48 status reports in `docs/status/`; consider archiving old ones    | 🟢 Low      | S      | `docs/status/`                    |
+| #  | Task                                                                                                        | Impact      | Effort | Package/Area                      |
+| -- | ----------------------------------------------------------------------------------------------------------- | ----------- | ------ | --------------------------------- |
+| 1  | **Add CI check for vendor consistency** (`go mod verify` or build-in-vendor-mode step)                      | 🔴 Critical | S      | `.github/workflows/ci.yml`        |
+| 2  | **Rework CI build/release jobs** for a pure library (remove `./cmd/examples/github-sync` target)            | 🔴 Critical | S      | `.github/workflows/ci.yml`        |
+| 3  | **Make go-cqrs-lite public** — eliminates vendor workaround, unblocks nix                                   | 🔴 Critical | S      | `go-cqrs-lite` repo               |
+| 4  | **Add pre-commit hook for `go mod vendor`** — catches vendor drift before commit                            | 🔴 Critical | S      | git hooks / justfile / flake      |
+| 5  | **Adopt `UpcasterRegistry`** from go-cqrs-lite for schema evolution                                         | 🟡 High     | M      | `pkg/data/schema`, `pkg/cqrs`     |
+| 6  | **OpenTelemetry instrumentation** for Sync, CQRS, HTTP                                                      | 🟡 High     | M      | `pkg/sync`, `pkg/cqrs`, `pkg/api` |
+| 7  | **API authentication middleware** (API key or JWT)                                                          | 🟡 High     | S      | `pkg/api`                         |
+| 8  | **Push `pkg/cqrs` coverage past 85%** (currently 82.1%)                                                     | 🟡 High     | M      | `pkg/cqrs`                        |
+| 9  | **Per-sync conflict resolver override** (`SyncOptions.ConflictResolver`)                                    | 🟡 Medium   | S      | `pkg/sync`                        |
+| 10 | **API rate limiting middleware** for `POST /sync`                                                           | 🟡 Medium   | S      | `pkg/api`                         |
+| 11 | **API pagination headers** (`X-Total-Count`, cursor links)                                                  | 🟡 Medium   | S      | `pkg/api`                         |
+| 12 | **Data export** (JSON/CSV of events and read-model)                                                         | 🟡 Medium   | M      | new `pkg/export`                  |
+| 13 | **Structured logging fields** (source, page, event_id consistently)                                         | 🟢 Low      | S      | `pkg/sync`, `pkg/cqrs`            |
+| 14 | **Drop `vendor/` once go-cqrs-lite is public** — switch to real `vendorHash`                                | 🟡 High     | S      | `flake.nix`, `go.mod`             |
+| 15 | **Provider contract test suite** — embeddable test harness for any `Provider` impl                          | 🟢 Low      | M      | `pkg/testutil`                    |
+| 16 | **`govalid` struct tags** on `SyncOptions`, `CQRSConfig`                                                    | 🟢 Low      | S      | `pkg/sync`, `pkg/cqrs`            |
+| 17 | **Improve `CONTRIBUTING.md`** — architecture guide, testing requirements, PR checklist                      | 🟢 Low      | S      | `CONTRIBUTING.md`                 |
+| 18 | **OpenAPI error-response schemas** per endpoint                                                             | 🟢 Low      | S      | `pkg/api`                         |
+| 19 | **Lower `go.mod` directive when nixpkgs catches up** OR document the nix-Go-lag workaround more prominently | 🟢 Low      | S      | `go.mod`, `AGENTS.md`             |
+| 20 | **Add `nix flake check` to CI** once nixpkgs Go ≥ 1.26.4                                                    | 🟢 Low      | S      | `.github/workflows/ci.yml`        |
+| 21 | **Conflict result error detail** — ensure `ConflictResult.Errors` is surfaced in API `SyncSummary`          | 🟢 Low      | S      | `pkg/api`, `pkg/sync`             |
+| 22 | **Snapshot store integration test** — verify aggregate state survives restart across SQLite                 | 🟢 Low      | M      | `pkg/cqrs`                        |
+| 23 | **Benchmarks for projection replay** — measure `replayJournal` cost at scale                                | 🟢 Low      | S      | `pkg/cqrs`                        |
+| 24 | **Review `pkg/crdt` package name** — it carries no CRDT machinery; consider renaming to `pkg/conflict`      | 🟢 Low      | S      | `pkg/crdt` → `pkg/conflict`       |
+| 25 | **Consolidate status report archive** — 48 status reports in `docs/status/`; consider archiving old ones    | 🟢 Low      | S      | `docs/status/`                    |
 
 ---
 

@@ -65,14 +65,14 @@
 
         /* --- Type stacks (system only — zero external fonts) --- */
         --font-heading:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-body:
-          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         --font-mono:
-          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono", Menlo, Consolas,
-          monospace;
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
       }
 
       * {
@@ -289,15 +289,27 @@
       }
       .card-problem {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .card-solution {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .card-warning {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
 
       /* --- Issue cards --- */
@@ -310,15 +322,27 @@
       }
       .issue-critical {
         border-left-color: var(--problem);
-        background: color-mix(in srgb, var(--problem) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--problem) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-important {
         border-left-color: var(--warning);
-        background: color-mix(in srgb, var(--warning) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--warning) 8%,
+          var(--surface-raised)
+        );
       }
       .issue-nice {
         border-left-color: var(--solution);
-        background: color-mix(in srgb, var(--solution) 8%, var(--surface-raised));
+        background: color-mix(
+          in srgb,
+          var(--solution) 8%,
+          var(--surface-raised)
+        );
       }
       .issue h3 {
         margin-bottom: 0.3rem;
@@ -831,8 +855,8 @@
           <div class="hero-badge">Naming Review</div>
           <h1>go-localsync Identifier Audit</h1>
           <p class="hero-subtitle">
-            Automated smell detection + manual domain-alignment review of every exported type,
-            function, and field across 52 production Go files.
+            Automated smell detection + manual domain-alignment review of every
+            exported type, function, and field across 52 production Go files.
           </p>
         </div>
 
@@ -860,21 +884,24 @@
           <h4>Verdict: naming quality is high &mdash; no renames required</h4>
           <p>
             Automated detection across six smell categories
-            (Manager/Handler/Processor/Helper/Util/Wrapper/Factory classes, Impl/Concrete/Default
-            suffixes, Abstract/Base prefixes, I-prefix interfaces, Data/Info/Record/Object/Thing
-            type names, vague verbs <code>do/handle/process/manage/perform</code>) returned
-            <strong>zero hits</strong>. Constructors are 100% <code>New*</code>-consistent. Boolean
-            fields read as yes/no questions (<code>IncludeTombstoned</code>, <code>HasMore</code>).
-            Domain clusters (Sync, Item, Conflict, Tombstone, Provider, ReadModel) are internally
-            consistent with no split-brain terminology. Three low/medium observations documented
-            below; none block a release or require action.
+            (Manager/Handler/Processor/Helper/Util/Wrapper/Factory classes,
+            Impl/Concrete/Default suffixes, Abstract/Base prefixes, I-prefix
+            interfaces, Data/Info/Record/Object/Thing type names, vague verbs
+            <code>do/handle/process/manage/perform</code>) returned
+            <strong>zero hits</strong>. Constructors are 100%
+            <code>New*</code>-consistent. Boolean fields read as yes/no
+            questions (<code>IncludeTombstoned</code>, <code>HasMore</code>).
+            Domain clusters (Sync, Item, Conflict, Tombstone, Provider,
+            ReadModel) are internally consistent with no split-brain
+            terminology. Three low/medium observations documented below; none
+            block a release or require action.
           </p>
         </div>
 
         <h2 id="glossary"><span class="num">01</span>Domain Glossary</h2>
         <p>
-          Every exported type, grouped by domain cluster. No cluster shows synonym drift or
-          split-brain terminology.
+          Every exported type, grouped by domain cluster. No cluster shows
+          synonym drift or split-brain terminology.
         </p>
 
         <table>
@@ -889,10 +916,12 @@
             <tr>
               <td><strong>Sync</strong></td>
               <td>
-                <code>Syncer</code>, <code>ConflictAwareSyncer</code>, <code>SyncOptions</code>,
-                <code>SyncResult</code>, <code>SyncSummary</code>, <code>SyncOutcome</code>,
-                <code>SyncAction</code>, <code>SyncStore</code>, <code>SyncItemState</code>,
-                <code>SyncItemCommand</code>, <code>SyncProgressFunc</code>,
+                <code>Syncer</code>, <code>ConflictAwareSyncer</code>,
+                <code>SyncOptions</code>, <code>SyncResult</code>,
+                <code>SyncSummary</code>, <code>SyncOutcome</code>,
+                <code>SyncAction</code>, <code>SyncStore</code>,
+                <code>SyncItemState</code>, <code>SyncItemCommand</code>,
+                <code>SyncProgressFunc</code>,
                 <code>ItemSyncResult</code>
               </td>
               <td><span class="badge badge-fixed">Aligned</span></td>
@@ -900,8 +929,9 @@
             <tr>
               <td><strong>Item</strong></td>
               <td>
-                <code>model.Item</code>, <code>provider.Item</code> (DTO), <code>ItemFilter</code>,
-                <code>ItemReader</code>, <code>ItemID</code>, <code>ItemResponse</code>
+                <code>model.Item</code>, <code>provider.Item</code> (DTO),
+                <code>ItemFilter</code>, <code>ItemReader</code>,
+                <code>ItemID</code>, <code>ItemResponse</code>
               </td>
               <td><span class="badge badge-fixed">Aligned</span></td>
             </tr>
@@ -909,7 +939,8 @@
               <td><strong>Conflict</strong></td>
               <td>
                 <code>Conflict[T]</code>, <code>ConflictResolver[T]</code>,
-                <code>ConflictResult</code>, <code>ConflictWinner</code>, <code>LWWResolver</code>,
+                <code>ConflictResult</code>, <code>ConflictWinner</code>,
+                <code>LWWResolver</code>,
                 <code>ItemConflictFoundPayload</code>
               </td>
               <td><span class="badge badge-fixed">Aligned</span></td>
@@ -918,23 +949,26 @@
               <td><strong>Tombstone</strong></td>
               <td>
                 <code>Tombstone</code>, <code>TombstoneReason</code>,
-                <code>TombstoneItemCommand</code>, <code>ItemTombstonedPayload</code>
+                <code>TombstoneItemCommand</code>,
+                <code>ItemTombstonedPayload</code>
               </td>
               <td><span class="badge badge-fixed">Aligned</span></td>
             </tr>
             <tr>
               <td><strong>Read Model</strong></td>
               <td>
-                <code>ReadModel</code>, <code>MemoryReadModel</code>, <code>SQLiteReadModel</code>,
-                <code>Projector</code>, <code>ItemReader</code>
+                <code>ReadModel</code>, <code>MemoryReadModel</code>,
+                <code>SQLiteReadModel</code>, <code>Projector</code>,
+                <code>ItemReader</code>
               </td>
               <td><span class="badge badge-fixed">Aligned</span></td>
             </tr>
             <tr>
               <td><strong>Provider</strong></td>
               <td>
-                <code>Provider</code>, <code>MockProvider</code>, <code>FetchOptions</code>,
-                <code>FetchResult</code>, <code>RateLimitInfo</code>, <code>RetryConfig</code>
+                <code>Provider</code>, <code>MockProvider</code>,
+                <code>FetchOptions</code>, <code>FetchResult</code>,
+                <code>RateLimitInfo</code>, <code>RetryConfig</code>
               </td>
               <td><span class="badge badge-fixed">Aligned</span></td>
             </tr>
@@ -945,44 +979,56 @@
 
         <div class="issue issue-important">
           <span class="severity severity-important">Medium</span>
-          <h3>SyncResult vs SyncSummary &mdash; sibling result types, non-aligned vocabularies</h3>
+          <h3>
+            SyncResult vs SyncSummary &mdash; sibling result types, non-aligned
+            vocabularies
+          </h3>
           <div class="where">
-            pkg/sync/sync.go:128 (SyncResult) &middot; pkg/sync/types.go:41 (SyncSummary) &middot;
-            pkg/cqrs/sync_outcome.go:14 (SyncOutcome)
+            pkg/sync/sync.go:128 (SyncResult) &middot; pkg/sync/types.go:41
+            (SyncSummary) &middot; pkg/cqrs/sync_outcome.go:14 (SyncOutcome)
           </div>
           <p>
             Three types summarize a sync's outcome at different layers.
             <code>SyncResult</code> (Syncer layer) uses
             <code>Fetched/Skipped/Tombstoned/Errors/ItemErrors</code>.
             <code>SyncSummary</code> (SyncStore layer) uses
-            <code>Synced/Conflicts/Errors/Results</code>. <code>SyncOutcome</code> (decider layer)
-            uses <code>WasNew/ConflictDetected/ConflictWinner/EventCount</code>. The layering is
-            correct (each type lives where its layer needs it), but the two top-level
-            count-vocabularies don't align: <code>Fetched</code> &ne; <code>Synced</code>,
-            <code>Skipped</code> has no SyncSummary equivalent, <code>Conflicts</code> has no
-            SyncResult equivalent. A newcomer cannot predict which counts appear where.
+            <code>Synced/Conflicts/Errors/Results</code>.
+            <code>SyncOutcome</code> (decider layer) uses
+            <code>WasNew/ConflictDetected/ConflictWinner/EventCount</code>. The
+            layering is correct (each type lives where its layer needs it), but
+            the two top-level count-vocabularies don't align:
+            <code>Fetched</code> &ne; <code>Synced</code>,
+            <code>Skipped</code> has no SyncSummary equivalent,
+            <code>Conflicts</code> has no SyncResult equivalent. A newcomer
+            cannot predict which counts appear where.
           </p>
           <div class="callout callout-solution">
             <strong>Recommendation (do not rush)</strong>
-            This is a genuine layering seam, not a bug &mdash; the types are at different
-            abstraction levels on purpose. If touched, align the count-field names across
-            <code>SyncResult</code> and <code>SyncSummary</code> (e.g. both expose
-            <code>Synced/Conflicts/Skipped/Tombstoned/Errors</code>), OR document the layer
-            relationship explicitly in a doc comment. Renaming public fields is a breaking API
-            change for a library &mdash; defer to a v0.5.0.
+            This is a genuine layering seam, not a bug &mdash; the types are at
+            different abstraction levels on purpose. If touched, align the
+            count-field names across
+            <code>SyncResult</code> and <code>SyncSummary</code> (e.g. both
+            expose <code>Synced/Conflicts/Skipped/Tombstoned/Errors</code>), OR
+            document the layer relationship explicitly in a doc comment.
+            Renaming public fields is a breaking API change for a library
+            &mdash; defer to a v0.5.0.
           </div>
         </div>
 
         <div class="issue issue-nice">
           <span class="severity severity-nice">Low</span>
           <h3>Stats &mdash; vague noun for a read-model aggregate</h3>
-          <div class="where">pkg/sync/sync.go:137 &middot; returned by Syncer.GetStats</div>
+          <div class="where">
+            pkg/sync/sync.go:137 &middot; returned by Syncer.GetStats
+          </div>
           <p>
-            The checklist flags <code>Stats</code> as carrying no domain meaning. It is contextually
-            clear (<code>Syncer.GetStats() &rarr; *Stats</code> holds
-            <code>TotalItems/ItemTypes/TypeCounts</code>), but <code>ItemStats</code> or
-            <code>ReadModelStats</code> would be more precise and self-documenting at the
-            type-signature level.
+            The checklist flags <code>Stats</code> as carrying no domain
+            meaning. It is contextually clear (<code
+              >Syncer.GetStats() &rarr; *Stats</code
+            >
+            holds <code>TotalItems/ItemTypes/TypeCounts</code>), but
+            <code>ItemStats</code> or <code>ReadModelStats</code> would be more
+            precise and self-documenting at the type-signature level.
           </p>
         </div>
 
@@ -991,11 +1037,12 @@
           <h3>GetStats &mdash; redundant Get prefix (Go idiom)</h3>
           <div class="where">pkg/sync/sync.go:333</div>
           <p>
-            Go style (Effective Go, golint) prefers accessors without <code>Get</code> when there is
-            no matching <code>Set</code>: <code>syncer.Stats(ctx)</code> over
-            <code>syncer.GetStats(ctx)</code>. Debatable &mdash; many Go codebases keep
-            <code>Get</code> for clarity &mdash; but flagging for consistency with Go conventions.
-            No Set* counterpart exists.
+            Go style (Effective Go, golint) prefers accessors without
+            <code>Get</code> when there is no matching <code>Set</code>:
+            <code>syncer.Stats(ctx)</code> over
+            <code>syncer.GetStats(ctx)</code>. Debatable &mdash; many Go
+            codebases keep <code>Get</code> for clarity &mdash; but flagging for
+            consistency with Go conventions. No Set* counterpart exists.
           </p>
         </div>
 
@@ -1006,9 +1053,10 @@
             <div class="text">
               <strong>100% consistent <code>New*</code> constructors</strong>
               <span
-                >All 12 constructors use the <code>New</code> prefix (<code>NewSyncer</code>,
-                <code>NewCQRSStack</code>, <code>NewLWWResolver</code>, <code>NewItemID</code>,
-                &hellip;). No <code>Create/Make/Build</code> drift.</span
+                >All 12 constructors use the <code>New</code> prefix
+                (<code>NewSyncer</code>, <code>NewCQRSStack</code>,
+                <code>NewLWWResolver</code>, <code>NewItemID</code>, &hellip;).
+                No <code>Create/Make/Build</code> drift.</span
               >
             </div>
           </div>
@@ -1017,8 +1065,9 @@
             <div class="text">
               <strong>Booleans read as yes/no questions</strong>
               <span
-                ><code>IncludeTombstoned</code>, <code>HasMore</code>, <code>Reconcile</code>. No
-                negative booleans (<code>isNot*</code>, <code>hasNo*</code>), no ambiguous
+                ><code>IncludeTombstoned</code>, <code>HasMore</code>,
+                <code>Reconcile</code>. No negative booleans
+                (<code>isNot*</code>, <code>hasNo*</code>), no ambiguous
                 <code>flag/status/check</code>.</span
               >
             </div>
@@ -1029,9 +1078,12 @@
               <strong>No trash-can classes</strong>
               <span
                 >Zero
-                <code>Manager/Handler/Processor/Helper/Util/Utility/Wrapper/Factory</code> types.
-                Every type name describes a domain concept or a concrete role (<code>Syncer</code>,
-                <code>Projector</code>, <code>ReadModel</code>).</span
+                <code
+                  >Manager/Handler/Processor/Helper/Util/Utility/Wrapper/Factory</code
+                >
+                types. Every type name describes a domain concept or a concrete
+                role (<code>Syncer</code>, <code>Projector</code>,
+                <code>ReadModel</code>).</span
               >
             </div>
           </div>
@@ -1041,22 +1093,25 @@
               <strong>No implementation leakage</strong>
               <span
                 >No <code>Impl/Concrete/Default</code> suffixes, no
-                <code>Abstract/Base</code> prefixes, no <code>I</code>-prefix interfaces (Go
-                anti-pattern). Implementations are named for their mechanism:
-                <code>MemoryReadModel</code>, <code>SQLiteReadModel</code>,
-                <code>LWWResolver</code>.</span
+                <code>Abstract/Base</code> prefixes, no <code>I</code>-prefix
+                interfaces (Go anti-pattern). Implementations are named for
+                their mechanism: <code>MemoryReadModel</code>,
+                <code>SQLiteReadModel</code>, <code>LWWResolver</code>.</span
               >
             </div>
           </div>
           <div class="strength">
             <div class="check">+</div>
             <div class="text">
-              <strong>Intentional DTO/entity boundary, not a split-brain</strong>
+              <strong
+                >Intentional DTO/entity boundary, not a split-brain</strong
+              >
               <span
-                >The two <code>Item</code> types (<code>provider.Item</code> DTO vs
-                <code>model.Item</code> domain entity) are a documented DDD boundary, not synonym
-                drift. The conversion lives in one file (<code>item_adapter.go</code>) and the
-                AGENTS.md records the decision.</span
+                >The two <code>Item</code> types (<code>provider.Item</code> DTO
+                vs <code>model.Item</code> domain entity) are a documented DDD
+                boundary, not synonym drift. The conversion lives in one file
+                (<code>item_adapter.go</code>) and the AGENTS.md records the
+                decision.</span
               >
             </div>
           </div>
@@ -1065,9 +1120,10 @@
             <div class="text">
               <strong>Domain language matches code</strong>
               <span
-                >Types map 1:1 to <code>docs/DOMAIN_LANGUAGE.md</code> terms (Sync
-                Session&rarr;CorrelationID, Item&rarr;(Source, ExternalID),
-                Conflict&rarr;RemoteWins). No technical jargon leaking into domain types.</span
+                >Types map 1:1 to <code>docs/DOMAIN_LANGUAGE.md</code> terms
+                (Sync Session&rarr;CorrelationID, Item&rarr;(Source,
+                ExternalID), Conflict&rarr;RemoteWins). No technical jargon
+                leaking into domain types.</span
               >
             </div>
           </div>
@@ -1075,14 +1131,15 @@
 
         <div class="callout callout-solution">
           <strong>Bottom line</strong>
-          The automated bar is met perfectly. The one Medium observation is a layered-API design
-          choice worth a doc comment, not a rename. No blocking naming debt; safe to ship and safe
-          for a public library audience.
+          The automated bar is met perfectly. The one Medium observation is a
+          layered-API design choice worth a doc comment, not a rename. No
+          blocking naming debt; safe to ship and safe for a public library
+          audience.
         </div>
 
         <footer class="footer">
-          Generated 2026-07-19 &middot; 55 exported types + 119 exported functions reviewed against
-          the naming-smells checklist
+          Generated 2026-07-19 &middot; 55 exported types + 119 exported
+          functions reviewed against the naming-smells checklist
         </footer>
       </main>
     </div>

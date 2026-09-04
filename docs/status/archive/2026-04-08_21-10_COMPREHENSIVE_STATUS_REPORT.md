@@ -1,11 +1,11 @@
 # Go-LocalSync Full Status Report
 
-**Date:** 2026-04-08 21:10  
-**Branch:** master  
-**Commits Ahead of Origin:** 11  
-**Working Tree:** CLEAN  
-**Build:** PASSING  
-**Tests:** 39 PASS, 0 FAIL (4 test suites)  
+**Date:** 2026-04-08 21:10\
+**Branch:** master\
+**Commits Ahead of Origin:** 11\
+**Working Tree:** CLEAN\
+**Build:** PASSING\
+**Tests:** 39 PASS, 0 FAIL (4 test suites)\
 **Lint:** BLOCKED (golangci-lint v1 binary vs v2 config)
 
 ---
@@ -208,33 +208,33 @@
 
 ## F) TOP 25 THINGS TO DO NEXT (Priority Order)
 
-| #   | Task                                      | Impact | Effort | Blocker     |
-| --- | ----------------------------------------- | ------ | ------ | ----------- |
-| 1   | Install golangci-lint v2 binary           | HIGH   | 1min   | User action |
-| 2   | Align Go toolchain to 1.26.1              | HIGH   | 5min   | User action |
-| 3   | Run `just verify` and fix any lint issues | HIGH   | 30min  | #1          |
-| 4   | Audit storage layer error wrapping        | HIGH   | 30min  | None        |
-| 5   | Increase storage test coverage (56%→80%)  | HIGH   | 2h     | None        |
-| 6   | Migrate testify→Ginkgo/GOmega (6 files)   | HIGH   | 3h     | Policy      |
-| 7   | CLI integration tests (`cmd/examples/`)   | HIGH   | 2h     | None        |
-| 8   | Real GitHub PAT smoke test                | HIGH   | 1h     | PAT         |
-| 9   | Fix pre-commit hooks (all 4 categories)   | MEDIUM | 4h     | #6          |
-| 10  | Storage E2E tests with real HTTP server   | MEDIUM | 2h     | None        |
-| 11  | Rate limit handling in sync flow          | MEDIUM | 1h     | None        |
-| 12  | Retry logic with exponential backoff      | MEDIUM | 1h     | None        |
-| 13  | github_id → source_id migration 003       | MEDIUM | 2h     | Schema      |
-| 14  | Test coverage for pkg/errors (0%)         | MEDIUM | 30min  | None        |
-| 15  | Test coverage for pkg/types (0%)          | MEDIUM | 30min  | None        |
-| 16  | Structured logging fields                 | MEDIUM | 1h     | None        |
-| 17  | JSON output flag (-json)                  | LOW    | 1h     | None        |
-| 18  | Configuration file support                | LOW    | 2h     | None        |
-| 19  | Real-time progress display                | LOW    | 2h     | None        |
-| 20  | Incremental sync edge case handling       | LOW    | 1h     | None        |
-| 21  | Turso/LibSQL backend                      | LOW    | 3h     | None        |
-| 22  | HTTP API endpoint                         | LOW    | 2h     | None        |
-| 23  | Export to JSON/CSV                        | LOW    | 1h     | None        |
-| 24  | Multi-user sync support                   | LOW    | 3h     | None        |
-| 25  | TUI with Bubble Tea                       | LOW    | 2h     | None        |
+| #  | Task                                      | Impact | Effort | Blocker     |
+| -- | ----------------------------------------- | ------ | ------ | ----------- |
+| 1  | Install golangci-lint v2 binary           | HIGH   | 1min   | User action |
+| 2  | Align Go toolchain to 1.26.1              | HIGH   | 5min   | User action |
+| 3  | Run `just verify` and fix any lint issues | HIGH   | 30min  | #1          |
+| 4  | Audit storage layer error wrapping        | HIGH   | 30min  | None        |
+| 5  | Increase storage test coverage (56%→80%)  | HIGH   | 2h     | None        |
+| 6  | Migrate testify→Ginkgo/GOmega (6 files)   | HIGH   | 3h     | Policy      |
+| 7  | CLI integration tests (`cmd/examples/`)   | HIGH   | 2h     | None        |
+| 8  | Real GitHub PAT smoke test                | HIGH   | 1h     | PAT         |
+| 9  | Fix pre-commit hooks (all 4 categories)   | MEDIUM | 4h     | #6          |
+| 10 | Storage E2E tests with real HTTP server   | MEDIUM | 2h     | None        |
+| 11 | Rate limit handling in sync flow          | MEDIUM | 1h     | None        |
+| 12 | Retry logic with exponential backoff      | MEDIUM | 1h     | None        |
+| 13 | github_id → source_id migration 003       | MEDIUM | 2h     | Schema      |
+| 14 | Test coverage for pkg/errors (0%)         | MEDIUM | 30min  | None        |
+| 15 | Test coverage for pkg/types (0%)          | MEDIUM | 30min  | None        |
+| 16 | Structured logging fields                 | MEDIUM | 1h     | None        |
+| 17 | JSON output flag (-json)                  | LOW    | 1h     | None        |
+| 18 | Configuration file support                | LOW    | 2h     | None        |
+| 19 | Real-time progress display                | LOW    | 2h     | None        |
+| 20 | Incremental sync edge case handling       | LOW    | 1h     | None        |
+| 21 | Turso/LibSQL backend                      | LOW    | 3h     | None        |
+| 22 | HTTP API endpoint                         | LOW    | 2h     | None        |
+| 23 | Export to JSON/CSV                        | LOW    | 1h     | None        |
+| 24 | Multi-user sync support                   | LOW    | 3h     | None        |
+| 25 | TUI with Bubble Tea                       | LOW    | 2h     | None        |
 
 ---
 

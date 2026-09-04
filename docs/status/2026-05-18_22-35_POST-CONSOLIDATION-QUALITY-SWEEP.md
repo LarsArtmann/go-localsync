@@ -1,7 +1,7 @@
 # Post-Consolidation Quality Sweep Status Report
 
-**Date:** 2026-05-18 22:35  
-**Session:** Documentation rewrite + testify/ginkgo removal + new test coverage  
+**Date:** 2026-05-18 22:35\
+**Session:** Documentation rewrite + testify/ginkgo removal + new test coverage\
 **Project:** go-localsync
 
 ---
@@ -127,33 +127,33 @@ No remaining critical issues.
 
 ## f) TOP 25 THINGS TO DO NEXT
 
-| #   | Priority | Project      | Task                                                                         | Impact | Effort |
-| --- | -------- | ------------ | ---------------------------------------------------------------------------- | ------ | ------ |
-| 1   | 🔴 P0    | go-localsync | **Wire error taxonomy** — event.RegisterClassification → exit codes          | MEDIUM | 1h     |
-| 2   | 🔴 P0    | go-localsync | **Adopt projection.Runner** — Replace custom Projector                       | MEDIUM | 2h     |
-| 3   | 🔴 P0    | go-cqrs-lite | **Update README** — Add example/todo, Pebble storage, sync module            | MEDIUM | 1h     |
-| 4   | 🟡 P1    | go-localsync | **Use time.Time in event payloads** — Replace int64 unix nanoseconds         | MEDIUM | 1h     |
-| 5   | 🟡 P1    | go-localsync | **Real GitHub PAT smoke test** — End-to-end verification                     | MEDIUM | 1h     |
-| 6   | 🟡 P1    | go-localsync | **Make SyncAction a typed enum** — Better type safety                        | LOW    | 30min  |
-| 7   | 🟡 P1    | go-localsync | **Add JSON output flag** — Structured output for CLI                         | LOW    | 1h     |
-| 8   | 🟡 P1    | go-localsync | **Add structured logging fields** — Consistent context                       | LOW    | 1h     |
-| 9   | 🟡 P1    | go-cqrs-lite | **PostgreSQL integration tests** — Test against real PG                      | MEDIUM | 4h     |
-| 10  | 🟡 P1    | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md                     | LOW    | 30min  |
-| 11  | 🟡 P1    | go-cqrs-lite | **Consolidate CatalogMeta** — Share between event/command/query              | LOW    | 2h     |
-| 12  | 🟢 P2    | go-localsync | **Build TUI with Bubble Tea** — Interactive event browser                    | LOW    | 2h     |
-| 13  | 🟢 P2    | go-localsync | **Daemon/background mode** — Periodic sync as service                        | MEDIUM | 2h     |
-| 14  | 🟢 P2    | go-localsync | **HTTP API endpoint** — REST via cqrs-htmx                                   | MEDIUM | 4h     |
-| 15  | 🟢 P2    | go-localsync | **Support multiple user sync** — Multiple -user flags or file list           | LOW    | 2h     |
-| 16  | 🟢 P2    | go-localsync | **Add export to JSON/CSV** — Export stored events                            | LOW    | 1h     |
-| 17  | 🟢 P2    | go-localsync | **Add real-time progress display** — charmbracelet/bubbles progress bar      | LOW    | 1h     |
-| 18  | 🟢 P2    | go-localsync | **Support configuration file** — YAML/TOML defaults                          | LOW    | 1h     |
-| 19  | 🟢 P2    | go-localsync | **Adopt command.Dispatcher** — Typed command dispatch                        | LOW    | 2h     |
-| 20  | 🟢 P2    | go-localsync | **Handle edge cases in incremental sync** — Clock skew, duplicate timestamps | LOW    | 1h     |
-| 21  | 🟢 P2    | go-cqrs-lite | **Implement Saga/Process Manager** — Design done, 18h estimate               | HIGH   | 18h    |
-| 22  | 🟢 P2    | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox                   | HIGH   | 4h     |
-| 23  | 🟢 P2    | cqrs-htmx    | **Add DecodeRequest[T]** — Access body + \*http.Request                      | HIGH   | 4h     |
-| 24  | 🟢 P2    | cqrs-htmx    | **Add request logging middleware** — PLANNED in FEATURES.md                  | LOW    | 2h     |
-| 25  | 🟢 P2    | go-cqrs-lite | **Watermill module** — Kafka/NATS adapter                                    | HIGH   | 20h    |
+| #  | Priority | Project      | Task                                                                         | Impact | Effort |
+| -- | -------- | ------------ | ---------------------------------------------------------------------------- | ------ | ------ |
+| 1  | 🔴 P0    | go-localsync | **Wire error taxonomy** — event.RegisterClassification → exit codes          | MEDIUM | 1h     |
+| 2  | 🔴 P0    | go-localsync | **Adopt projection.Runner** — Replace custom Projector                       | MEDIUM | 2h     |
+| 3  | 🔴 P0    | go-cqrs-lite | **Update README** — Add example/todo, Pebble storage, sync module            | MEDIUM | 1h     |
+| 4  | 🟡 P1    | go-localsync | **Use time.Time in event payloads** — Replace int64 unix nanoseconds         | MEDIUM | 1h     |
+| 5  | 🟡 P1    | go-localsync | **Real GitHub PAT smoke test** — End-to-end verification                     | MEDIUM | 1h     |
+| 6  | 🟡 P1    | go-localsync | **Make SyncAction a typed enum** — Better type safety                        | LOW    | 30min  |
+| 7  | 🟡 P1    | go-localsync | **Add JSON output flag** — Structured output for CLI                         | LOW    | 1h     |
+| 8  | 🟡 P1    | go-localsync | **Add structured logging fields** — Consistent context                       | LOW    | 1h     |
+| 9  | 🟡 P1    | go-cqrs-lite | **PostgreSQL integration tests** — Test against real PG                      | MEDIUM | 4h     |
+| 10 | 🟡 P1    | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md                     | LOW    | 30min  |
+| 11 | 🟡 P1    | go-cqrs-lite | **Consolidate CatalogMeta** — Share between event/command/query              | LOW    | 2h     |
+| 12 | 🟢 P2    | go-localsync | **Build TUI with Bubble Tea** — Interactive event browser                    | LOW    | 2h     |
+| 13 | 🟢 P2    | go-localsync | **Daemon/background mode** — Periodic sync as service                        | MEDIUM | 2h     |
+| 14 | 🟢 P2    | go-localsync | **HTTP API endpoint** — REST via cqrs-htmx                                   | MEDIUM | 4h     |
+| 15 | 🟢 P2    | go-localsync | **Support multiple user sync** — Multiple -user flags or file list           | LOW    | 2h     |
+| 16 | 🟢 P2    | go-localsync | **Add export to JSON/CSV** — Export stored events                            | LOW    | 1h     |
+| 17 | 🟢 P2    | go-localsync | **Add real-time progress display** — charmbracelet/bubbles progress bar      | LOW    | 1h     |
+| 18 | 🟢 P2    | go-localsync | **Support configuration file** — YAML/TOML defaults                          | LOW    | 1h     |
+| 19 | 🟢 P2    | go-localsync | **Adopt command.Dispatcher** — Typed command dispatch                        | LOW    | 2h     |
+| 20 | 🟢 P2    | go-localsync | **Handle edge cases in incremental sync** — Clock skew, duplicate timestamps | LOW    | 1h     |
+| 21 | 🟢 P2    | go-cqrs-lite | **Implement Saga/Process Manager** — Design done, 18h estimate               | HIGH   | 18h    |
+| 22 | 🟢 P2    | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox                   | HIGH   | 4h     |
+| 23 | 🟢 P2    | cqrs-htmx    | **Add DecodeRequest[T]** — Access body + \*http.Request                      | HIGH   | 4h     |
+| 24 | 🟢 P2    | cqrs-htmx    | **Add request logging middleware** — PLANNED in FEATURES.md                  | LOW    | 2h     |
+| 25 | 🟢 P2    | go-cqrs-lite | **Watermill module** — Kafka/NATS adapter                                    | HIGH   | 20h    |
 
 ---
 

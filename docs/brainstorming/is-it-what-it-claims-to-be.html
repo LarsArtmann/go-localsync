@@ -22,8 +22,12 @@
         --danger: #ff6b6b;
         --danger-soft: rgba(255, 107, 107, 0.1);
         --code-bg: #0d1117;
-        --font-mono: "JetBrains Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace;
-        --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+        --font-mono:
+          "JetBrains Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono",
+          monospace;
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+          sans-serif;
         --radius: 12px;
         --radius-sm: 8px;
       }
@@ -40,8 +44,16 @@
       body {
         background: var(--bg);
         background-image:
-          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(94, 177, 255, 0.08), transparent),
-          radial-gradient(ellipse 60% 40% at 90% 100%, rgba(255, 107, 107, 0.04), transparent);
+          radial-gradient(
+            ellipse 80% 50% at 50% -20%,
+            rgba(94, 177, 255, 0.08),
+            transparent
+          ),
+          radial-gradient(
+            ellipse 60% 40% at 90% 100%,
+            rgba(255, 107, 107, 0.04),
+            transparent
+          );
         background-attachment: fixed;
         color: var(--text);
         font-family: var(--font-sans);
@@ -137,7 +149,11 @@
       }
 
       .bottom-line {
-        background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-elevated-2) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--bg-elevated) 0%,
+          var(--bg-elevated-2) 100%
+        );
         border: 1px solid var(--border);
         border-left: 4px solid var(--warning);
         border-radius: var(--radius);
@@ -626,11 +642,19 @@
         position: relative;
       }
       .cluster-a {
-        background: linear-gradient(160deg, rgba(94, 177, 255, 0.08), rgba(94, 177, 255, 0.02));
+        background: linear-gradient(
+          160deg,
+          rgba(94, 177, 255, 0.08),
+          rgba(94, 177, 255, 0.02)
+        );
         border: 1px solid rgba(94, 177, 255, 0.3);
       }
       .cluster-b {
-        background: linear-gradient(160deg, rgba(255, 107, 107, 0.08), rgba(255, 107, 107, 0.02));
+        background: linear-gradient(
+          160deg,
+          rgba(255, 107, 107, 0.08),
+          rgba(255, 107, 107, 0.02)
+        );
         border: 1px solid rgba(255, 107, 107, 0.3);
       }
       .cluster-tag {
@@ -664,7 +688,11 @@
       }
 
       .decision-final {
-        background: linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-elevated-2) 100%);
+        background: linear-gradient(
+          160deg,
+          var(--bg-elevated) 0%,
+          var(--bg-elevated-2) 100%
+        );
         border: 2px solid var(--warning);
         border-radius: var(--radius);
         padding: 36px 36px 28px;
@@ -794,35 +822,46 @@
       <div class="hero">
         <h1>Is It What It <span class="accent">Claims</span> To Be?</h1>
         <p class="subtitle">
-          A diagnostic session on go-localsync: brutal audit, two course corrections, and the single
-          fork that decides the entire architecture.
+          A diagnostic session on go-localsync: brutal audit, two course
+          corrections, and the single fork that decides the entire architecture.
         </p>
 
         <div class="meta">
           <div class="meta-badge"><strong>Date:</strong> 2026-06-27</div>
-          <div class="meta-badge"><strong>Type:</strong> Brainstorming / Diagnostic</div>
-          <div class="meta-badge"><strong>Status:</strong> 1 decision pending</div>
-          <div class="meta-badge"><strong>Verified:</strong> against source</div>
+          <div class="meta-badge">
+            <strong>Type:</strong> Brainstorming / Diagnostic
+          </div>
+          <div class="meta-badge">
+            <strong>Status:</strong> 1 decision pending
+          </div>
+          <div class="meta-badge">
+            <strong>Verified:</strong> against source
+          </div>
         </div>
       </div>
 
       <div class="bottom-line">
         <h3>Bottom line</h3>
         <p>
-          The CQRS persistence core is genuinely good. The sync engine draped over it is
-          <strong>uncommitted</strong> — a pull mirror wearing a few of two-way-sync's clothes
-          (<code>DeleteItem</code>, vector clocks, <code>SyncRequest</code>) with
-          <strong>none of them wired</strong>. Worse, the public <code>Sync()</code> API
-          <strong>silently drops data while returning <code>nil</code> error</strong> — the worst
-          failure mode a sync product can have.
+          The CQRS persistence core is genuinely good. The sync engine draped
+          over it is
+          <strong>uncommitted</strong> — a pull mirror wearing a few of
+          two-way-sync's clothes (<code>DeleteItem</code>, vector clocks,
+          <code>SyncRequest</code>) with <strong>none of them wired</strong>.
+          Worse, the public <code>Sync()</code> API
+          <strong
+            >silently drops data while returning <code>nil</code> error</strong
+          >
+          — the worst failure mode a sync product can have.
         </p>
         <p>
           The path to "superb" is not adding features. It's
           <strong
-            >fixing the silent-data-loss paths, killing the phantom surfaces, and committing to one
-            identity</strong
+            >fixing the silent-data-loss paths, killing the phantom surfaces,
+            and committing to one identity</strong
           >
-          — pure pull mirror, or offline two-way sync. Everything hangs on that one choice.
+          — pure pull mirror, or offline two-way sync. Everything hangs on that
+          one choice.
         </p>
       </div>
 
@@ -852,28 +891,46 @@
       <div class="toc">
         <h3>Contents</h3>
         <div class="toc-grid">
-          <a href="#opening"><span class="toc-num">1</span> The CRDT Theater Characterization</a>
-          <a href="#thesis"><span class="toc-num">2</span> The Thesis: Superb ≠ Featureful</a>
+          <a href="#opening"
+            ><span class="toc-num">1</span> The CRDT Theater Characterization</a
+          >
+          <a href="#thesis"
+            ><span class="toc-num">2</span> The Thesis: Superb ≠ Featureful</a
+          >
           <a href="#integrity"
-            ><span class="toc-num">3</span> Data Integrity — What Corrupts Data</a
+            ><span class="toc-num">3</span> Data Integrity — What Corrupts
+            Data</a
           >
-          <a href="#resilience"><span class="toc-num">4</span> Sync Loop &amp; Resilience Audit</a>
-          <a href="#boundaries"><span class="toc-num">5</span> The Boundary: Move to cqrs-lite?</a>
+          <a href="#resilience"
+            ><span class="toc-num">4</span> Sync Loop &amp; Resilience Audit</a
+          >
+          <a href="#boundaries"
+            ><span class="toc-num">5</span> The Boundary: Move to cqrs-lite?</a
+          >
           <a href="#vector-clocks"
-            ><span class="toc-num">6</span> Vector Clocks: Defense → Retraction</a
+            ><span class="toc-num">6</span> Vector Clocks: Defense →
+            Retraction</a
           >
-          <a href="#deleteitem"><span class="toc-num">7</span> The DeleteItem Discovery</a>
-          <a href="#fork"><span class="toc-num">8</span> The Open Fork: What Is This?</a>
+          <a href="#deleteitem"
+            ><span class="toc-num">7</span> The DeleteItem Discovery</a
+          >
+          <a href="#fork"
+            ><span class="toc-num">8</span> The Open Fork: What Is This?</a
+          >
         </div>
       </div>
 
-      <h2 id="opening"><span class="sec-num">1</span>The CRDT Theater Characterization</h2>
+      <h2 id="opening">
+        <span class="sec-num">1</span>The CRDT Theater Characterization
+      </h2>
 
       <div class="section-intro">
         <p>
-          The session opened with a sharp claim about go-localsync's current state, which was
-          <strong>verified against the actual code and confirmed accurate</strong>. Four claims, all
-          true:
+          The session opened with a sharp claim about go-localsync's current
+          state, which was
+          <strong
+            >verified against the actual code and confirmed accurate</strong
+          >. Four claims, all true:
         </p>
         <ul>
           <li>
@@ -881,18 +938,20 @@
             <strong>wired in</strong> to the decider.
           </li>
           <li>
-            <code>VectorClock</code>, <code>Operation[T]</code>, <code>SyncMessage</code>,
-            <code>SyncRequest</code> are <strong>implemented and tested but not wired</strong> —
-            zero references outside <code>pkg/crdt/</code> self-tests.
+            <code>VectorClock</code>, <code>Operation[T]</code>,
+            <code>SyncMessage</code>, <code>SyncRequest</code> are
+            <strong>implemented and tested but not wired</strong> — zero
+            references outside <code>pkg/crdt/</code> self-tests.
           </li>
           <li>
-            The flow is <strong>strictly provider → local PULL</strong>, single-directional. No push
-            path exists.
+            The flow is <strong>strictly provider → local PULL</strong>,
+            single-directional. No push path exists.
           </li>
           <li>
-            <strong>Vector clocks are always empty</strong> (<code>crdt.NewVectorClock()</code>)
-            when LWW runs, so the causal branch is structurally unreachable — LWW always falls
-            through to timestamp comparison.
+            <strong>Vector clocks are always empty</strong>
+            (<code>crdt.NewVectorClock()</code>) when LWW runs, so the causal
+            branch is structurally unreachable — LWW always falls through to
+            timestamp comparison.
           </li>
         </ul>
       </div>
@@ -918,27 +977,29 @@
           <tr>
             <td><code>LWWResolver[T]</code></td>
             <td>
-              The only concrete impl — referenced <strong>only in tests/docs</strong>. Default path
-              is <code>resolver == nil</code> → remote-wins short-circuit.
+              The only concrete impl — referenced
+              <strong>only in tests/docs</strong>. Default path is
+              <code>resolver == nil</code> → remote-wins short-circuit.
             </td>
             <td><span class="badge badge-ok">Tests only</span></td>
           </tr>
           <tr>
             <td><code>VectorClock</code></td>
             <td>
-              Constructed at <code>decider.go:175</code> but <strong>always empty</strong>. Never
-              populated.
+              Constructed at <code>decider.go:175</code> but
+              <strong>always empty</strong>. Never populated.
             </td>
             <td><span class="badge badge-bad">Decorative</span></td>
           </tr>
           <tr>
             <td>
-              <code>Operation[T]</code>, <code>SyncMessage</code>, <code>SyncRequest</code>,
+              <code>Operation[T]</code>, <code>SyncMessage</code>,
+              <code>SyncRequest</code>,
               <code>SyncResponse</code>
             </td>
             <td>
-              <strong>Zero references</strong> in <code>pkg/cqrs/</code> or <code>cmd/</code>. Used
-              only in <code>pkg/crdt/</code> self-tests.
+              <strong>Zero references</strong> in <code>pkg/cqrs/</code> or
+              <code>cmd/</code>. Used only in <code>pkg/crdt/</code> self-tests.
             </td>
             <td><span class="badge badge-bad">Dead code</span></td>
           </tr>
@@ -948,34 +1009,39 @@
       <div class="insight-box">
         <h4>Net characterization</h4>
         <p>
-          It's <strong>YAGNI infrastructure with a documentation alibi</strong>. The CRDT package
-          isn't <em>wrong</em> — it's a correct, tested foundation for a multi-node future that
-          ADR-0003 deliberately defers. The mild smell is calling this "CRDT conflict resolution" in
-          marketing when production behavior is
-          <strong>plain last-write-wins on <code>UpdatedAt</code></strong> with a plugin seam nobody
-          plugs anything into.
+          It's <strong>YAGNI infrastructure with a documentation alibi</strong>.
+          The CRDT package isn't <em>wrong</em> — it's a correct, tested
+          foundation for a multi-node future that ADR-0003 deliberately defers.
+          The mild smell is calling this "CRDT conflict resolution" in marketing
+          when production behavior is
+          <strong>plain last-write-wins on <code>UpdatedAt</code></strong> with
+          a plugin seam nobody plugs anything into.
         </p>
       </div>
 
       <hr />
 
-      <h2 id="thesis"><span class="sec-num">2</span>The Thesis: Superb ≠ Featureful</h2>
+      <h2 id="thesis">
+        <span class="sec-num">2</span>The Thesis: Superb ≠ Featureful
+      </h2>
 
       <p class="lead">The user's challenge, verbatim:</p>
 
       <div class="pullquote">
         <span class="quote-mark">"</span>
-        Let's actually fucking create a superb SDK that handles all edge cases so superbly 99% of
-        developers would fall out of their chair… INSTEAD OF CREATING ANOTHER DOGSHIT PROGRAM!
+        Let's actually fucking create a superb SDK that handles all edge cases
+        so superbly 99% of developers would fall out of their chair… INSTEAD OF
+        CREATING ANOTHER DOGSHIT PROGRAM!
         <cite>— Lars, opening the session</cite>
       </div>
 
       <div class="problem-box">
         <h4>The trap to avoid</h4>
         <p>
-          The instinct is to <strong>add</strong> — wire up the CRDT theater, build multi-node, add
-          push. That's how you build a <em>second</em> dogshit program: by adding features to mask a
-          weak foundation.
+          The instinct is to <strong>add</strong> — wire up the CRDT theater,
+          build multi-node, add push. That's how you build a
+          <em>second</em> dogshit program: by adding features to mask a weak
+          foundation.
         </p>
       </div>
 
@@ -984,16 +1050,17 @@
         <p>For a pull-sync SDK, superb means three things — and only three:</p>
         <ol>
           <li>
-            <strong>It never silently loses or corrupts data</strong> — every partial failure, race,
-            and edge case has a defined, correct outcome.
+            <strong>It never silently loses or corrupts data</strong> — every
+            partial failure, race, and edge case has a defined, correct outcome.
           </li>
           <li>
-            <strong>It's honest about what it is</strong> — no speculative types pretending to be an
-            architecture.
+            <strong>It's honest about what it is</strong> — no speculative types
+            pretending to be an architecture.
           </li>
           <li>
-            <strong>It's invisible to users because it just works</strong> — consumer devs wire a
-            provider in 20 lines and never think about it again.
+            <strong>It's invisible to users because it just works</strong> —
+            consumer devs wire a provider in 20 lines and never think about it
+            again.
           </li>
         </ol>
         <p style="margin-bottom: 0">
@@ -1004,25 +1071,27 @@
 
       <hr />
 
-      <h2 id="integrity"><span class="sec-num">3</span>Data Integrity — What Corrupts User Data</h2>
+      <h2 id="integrity">
+        <span class="sec-num">3</span>Data Integrity — What Corrupts User Data
+      </h2>
 
       <p class="lead">
-        The decider, the event sourcing, the read-model projection — every place data could be
-        silently lost or corrupted.
+        The decider, the event sourcing, the read-model projection — every place
+        data could be silently lost or corrupted.
       </p>
 
       <div class="legend">
         <div class="legend-item">
-          <span class="legend-dot" style="background: var(--danger)"></span> Critical — silent data
-          loss / corruption
+          <span class="legend-dot" style="background: var(--danger)"></span>
+          Critical — silent data loss / corruption
         </div>
         <div class="legend-item">
-          <span class="legend-dot" style="background: var(--warning)"></span> High — data loss under
-          realistic conditions
+          <span class="legend-dot" style="background: var(--warning)"></span>
+          High — data loss under realistic conditions
         </div>
         <div class="legend-item">
-          <span class="legend-dot" style="background: var(--accent)"></span> Medium — correctness
-          risk under edge cases
+          <span class="legend-dot" style="background: var(--accent)"></span>
+          Medium — correctness risk under edge cases
         </div>
       </div>
 
@@ -1039,8 +1108,9 @@
           <tr>
             <td>1</td>
             <td>
-              <strong>No upstream-deletion detection</strong>. Items the provider stops returning
-              live <strong>forever</strong>. No tombstone, no reconciliation. Add/update-only.
+              <strong>No upstream-deletion detection</strong>. Items the
+              provider stops returning live <strong>forever</strong>. No
+              tombstone, no reconciliation. Add/update-only.
             </td>
             <td class="severity sev-critical">Critical</td>
             <td><code>sync/sync.go:72</code></td>
@@ -1048,8 +1118,9 @@
           <tr>
             <td>2</td>
             <td>
-              <strong>Aggregate-ID colon collision</strong> → two distinct items corrupt one event
-              stream. The <code>":"</code> separator isn't length-prefixed or escaped.
+              <strong>Aggregate-ID colon collision</strong> → two distinct items
+              corrupt one event stream. The <code>":"</code> separator isn't
+              length-prefixed or escaped.
             </td>
             <td class="severity sev-critical">Critical</td>
             <td><code>aggregate_id.go:13</code></td>
@@ -1058,10 +1129,11 @@
             <td>3</td>
             <td>
               <strong
-                ><code>hasChanged</code> ignores <code>ActorAvatarURL</code> &amp;
-                <code>RawJSON</code></strong
+                ><code>hasChanged</code> ignores
+                <code>ActorAvatarURL</code> &amp; <code>RawJSON</code></strong
               >
-              → real updates silently dropped. Avatar URLs drift constantly in the wild.
+              → real updates silently dropped. Avatar URLs drift constantly in
+              the wild.
             </td>
             <td class="severity sev-high">High</td>
             <td><code>decider.go:234</code></td>
@@ -1069,8 +1141,8 @@
           <tr>
             <td>4</td>
             <td>
-              <strong>Resurrect bypasses conflict resolution</strong> → stale data reinstated
-              unconditionally when a deleted item reappears.
+              <strong>Resurrect bypasses conflict resolution</strong> → stale
+              data reinstated unconditionally when a deleted item reappears.
             </td>
             <td class="severity sev-high">High</td>
             <td><code>decider.go:83</code></td>
@@ -1078,9 +1150,12 @@
           <tr>
             <td>5</td>
             <td>
-              <strong>Live + background replay overlap resurrects deleted rows</strong> in the read
-              model during startup catch-up. The "no checkpoint needed" comment is wrong under
-              reordering.
+              <strong
+                >Live + background replay overlap resurrects deleted
+                rows</strong
+              >
+              in the read model during startup catch-up. The "no checkpoint
+              needed" comment is wrong under reordering.
             </td>
             <td class="severity sev-high">High</td>
             <td><code>runner.go:17</code></td>
@@ -1088,8 +1163,8 @@
           <tr>
             <td>6</td>
             <td>
-              <strong>LWW with provider clocks, no skew guard</strong>; vector clocks always empty.
-              A fast provider clock always wins.
+              <strong>LWW with provider clocks, no skew guard</strong>; vector
+              clocks always empty. A fast provider clock always wins.
             </td>
             <td class="severity sev-high">High</td>
             <td><code>decider.go:172</code></td>
@@ -1097,8 +1172,9 @@
           <tr>
             <td>7</td>
             <td>
-              <strong>OCC not enforced by localsync</strong>; concurrent same-item syncs can
-              diverge. Relies entirely on go-cqrs-lite's version check.
+              <strong>OCC not enforced by localsync</strong>; concurrent
+              same-item syncs can diverge. Relies entirely on go-cqrs-lite's
+              version check.
             </td>
             <td class="severity sev-medium">Medium</td>
             <td><code>decider.go:80</code></td>
@@ -1106,8 +1182,9 @@
           <tr>
             <td>8</td>
             <td>
-              <strong>Schema upcasting not implemented</strong>; entire "upcasting" is
-              <code>if v==0 { v=V1 }</code>. Future schema changes = silent zero-fills.
+              <strong>Schema upcasting not implemented</strong>; entire
+              "upcasting" is <code>if v==0 { v=V1 }</code>. Future schema
+              changes = silent zero-fills.
             </td>
             <td class="severity sev-medium">Medium</td>
             <td><code>version.go</code></td>
@@ -1121,12 +1198,15 @@
     <span class="keyword">return</span> source + <span class="string">":"</span> + externalID.<span class="func">Get</span>()
 }</code></pre>
       <p>
-        Two distinct items collide: <code>source="github", externalID=":42"</code> → key
-        <code>"github::42"</code> and <code>source="github:", externalID="42"</code> → key
-        <code>"github::42"</code>. Both hash to the same <code>AggregateID</code> → their events
-        interleave in one aggregate → <strong>cross-item corruption</strong>.
-        <span class="badge badge-good">Fix</span> length-prefixed encoding or null-byte separator
-        before hashing.
+        Two distinct items collide:
+        <code>source="github", externalID=":42"</code> → key
+        <code>"github::42"</code> and
+        <code>source="github:", externalID="42"</code> → key
+        <code>"github::42"</code>. Both hash to the same
+        <code>AggregateID</code> → their events interleave in one aggregate →
+        <strong>cross-item corruption</strong>.
+        <span class="badge badge-good">Fix</span> length-prefixed encoding or
+        null-byte separator before hashing.
       </p>
 
       <h3>Detail: <code>hasChanged</code> false-negative</h3>
@@ -1139,20 +1219,24 @@
         local.RepoURL != remote.RepoURL
 }</code></pre>
       <p>
-        <strong>Not compared:</strong> <code>ActorAvatarURL</code>, <code>CreatedAt</code>,
-        <code>ExternalID</code>, <code>Source</code>, <code>SchemaVersion</code>, and crucially
-        <code>RawJSON</code> (the actual provider payload). If <code>hasChanged</code> returns false
-        → <code>return nil, nil</code> → the update is <strong>silently dropped</strong>. Should
-        compare a content hash of <code>RawJSON</code>.
+        <strong>Not compared:</strong> <code>ActorAvatarURL</code>,
+        <code>CreatedAt</code>, <code>ExternalID</code>, <code>Source</code>,
+        <code>SchemaVersion</code>, and crucially <code>RawJSON</code> (the
+        actual provider payload). If <code>hasChanged</code> returns false →
+        <code>return nil, nil</code> → the update is
+        <strong>silently dropped</strong>. Should compare a content hash of
+        <code>RawJSON</code>.
       </p>
 
       <hr />
 
-      <h2 id="resilience"><span class="sec-num">4</span>Sync Loop &amp; Resilience Audit</h2>
+      <h2 id="resilience">
+        <span class="sec-num">4</span>Sync Loop &amp; Resilience Audit
+      </h2>
 
       <p class="lead">
-        The sync engine draped over the CQRS core is a facade. The resilience knobs are all
-        declared, none enforced.
+        The sync engine draped over the CQRS core is a facade. The resilience
+        knobs are all declared, none enforced.
       </p>
 
       <div class="problem-box">
@@ -1161,13 +1245,14 @@
           <code>sync.go:99</code> — <code>Sync()</code> returns
           <code>(*SyncResult, error)</code> but the error is
           <strong>structurally always <code>nil</code></strong
-          >, even when hundreds of items fail. Per-item errors are swallowed into an integer
-          counter; the caller cannot tell <em>which</em> items failed or <em>why</em>.
+          >, even when hundreds of items fail. Per-item errors are swallowed
+          into an integer counter; the caller cannot tell <em>which</em> items
+          failed or <em>why</em>.
         </p>
         <p style="margin-bottom: 0">
           <strong
-            >This is the single worst failure mode a sync product can have: silently dropping data
-            while returning green.</strong
+            >This is the single worst failure mode a sync product can have:
+            silently dropping data while returning green.</strong
           >
         </p>
       </div>
@@ -1187,8 +1272,9 @@
             <td>Partial failure</td>
             <td class="severity sev-high">High</td>
             <td>
-              Partial commit; <code>Sync</code> always returns <code>nil</code> even when hundreds
-              fail; per-item detail discarded.
+              Partial commit; <code>Sync</code> always returns
+              <code>nil</code> even when hundreds fail; per-item detail
+              discarded.
             </td>
           </tr>
           <tr>
@@ -1197,8 +1283,8 @@
             <td class="severity sev-critical">Critical</td>
             <td>
               <code>RateLimitConfig</code>/<code>RateLimitCache</code> are
-              <strong>dead code</strong>. No <code>Retry-After</code>, no backoff. Will hammer a
-              429'd API.
+              <strong>dead code</strong>. No <code>Retry-After</code>, no
+              backoff. Will hammer a 429'd API.
             </td>
           </tr>
           <tr>
@@ -1206,9 +1292,9 @@
             <td>Retry</td>
             <td class="severity sev-critical">Critical</td>
             <td>
-              <code>RetryConfig</code> is <strong>dead code</strong>. Only retry wired in is on CQRS
-              <em>command dispatch</em>, not provider <em>fetch</em>.
-              <code>IsRetryable</code> unused.
+              <code>RetryConfig</code> is <strong>dead code</strong>. Only retry
+              wired in is on CQRS <em>command dispatch</em>, not provider
+              <em>fetch</em>. <code>IsRetryable</code> unused.
             </td>
           </tr>
           <tr>
@@ -1216,9 +1302,8 @@
             <td>Pagination</td>
             <td class="severity sev-critical">Critical</td>
             <td>
-              No <code>FetchAll</code> impl ships. <code>FetchConfig</code>/<code
-                >MaxConcurrentFetches</code
-              >
+              No <code>FetchAll</code> impl ships.
+              <code>FetchConfig</code>/<code>MaxConcurrentFetches</code>
               unused. Memory unbounded by contract.
             </td>
           </tr>
@@ -1227,8 +1312,8 @@
             <td>Observability</td>
             <td class="severity sev-high">High</td>
             <td>
-              Progress callback fires <strong>once at end</strong>. No metrics. Skips are log-only.
-              Top-level result hides per-item failures.
+              Progress callback fires <strong>once at end</strong>. No metrics.
+              Skips are log-only. Top-level result hides per-item failures.
             </td>
           </tr>
           <tr>
@@ -1236,8 +1321,9 @@
             <td>Graceful shutdown</td>
             <td class="severity sev-high">High</td>
             <td>
-              <code>ctx</code> propagated but <strong>never checked in the batch loop</strong>.
-              Cancel mid-batch runs to completion.
+              <code>ctx</code> propagated but
+              <strong>never checked in the batch loop</strong>. Cancel mid-batch
+              runs to completion.
             </td>
           </tr>
           <tr>
@@ -1245,8 +1331,8 @@
             <td>Ergonomics</td>
             <td class="severity sev-medium">Medium</td>
             <td>
-              No example, no <code>cmd/</code>, no provider. ~10 concepts to first sync; consumer
-              writes all the hard parts.
+              No example, no <code>cmd/</code>, no provider. ~10 concepts to
+              first sync; consumer writes all the hard parts.
             </td>
           </tr>
           <tr>
@@ -1263,8 +1349,9 @@
             <td>Concurrency</td>
             <td class="severity sev-medium">Medium</td>
             <td>
-              No global lock; safe at CQRS layer; racy at <code>Syncer</code>/incremental layer
-              (TOCTOU on latest timestamp).
+              No global lock; safe at CQRS layer; racy at
+              <code>Syncer</code>/incremental layer (TOCTOU on latest
+              timestamp).
             </td>
           </tr>
         </tbody>
@@ -1273,44 +1360,59 @@
       <div class="problem-box">
         <h4>Net</h4>
         <p>
-          The SDK is a <strong>CQRS/CRDT persistence core wearing a "sync engine" overcoat</strong>.
-          The overcoat has no buttons: the provider contract is unimplemented, the resilience knobs
-          (<code>RetryConfig</code>, <code>RateLimitConfig</code>, <code>FetchConfig</code>,
-          <code>IsRetryable</code>) are inert, and the public <code>Sync</code> API actively
-          conceals failure. Under real load against a real flaky provider, an operator will see
-          items silently dropped, no retries, no rate-limit respect — and a green "no error" return.
+          The SDK is a
+          <strong
+            >CQRS/CRDT persistence core wearing a "sync engine" overcoat</strong
+          >. The overcoat has no buttons: the provider contract is
+          unimplemented, the resilience knobs (<code>RetryConfig</code>,
+          <code>RateLimitConfig</code>, <code>FetchConfig</code>,
+          <code>IsRetryable</code>) are inert, and the public
+          <code>Sync</code> API actively conceals failure. Under real load
+          against a real flaky provider, an operator will see items silently
+          dropped, no retries, no rate-limit respect — and a green "no error"
+          return.
         </p>
       </div>
 
       <hr />
 
-      <h2 id="boundaries"><span class="sec-num">5</span>The Boundary: Move to go-cqrs-lite?</h2>
+      <h2 id="boundaries">
+        <span class="sec-num">5</span>The Boundary: Move to go-cqrs-lite?
+      </h2>
 
       <p class="lead">
-        User asked: "Maybe we actually just need to move some of the capabilities currently in this
-        project to go-cqrs-lite or a new submodule of it?"
+        User asked: "Maybe we actually just need to move some of the
+        capabilities currently in this project to go-cqrs-lite or a new
+        submodule of it?"
       </p>
 
       <p>
-        go-cqrs-lite is a <strong>43-module CQRS + Event Sourcing library</strong> (v3.1.0) that
-        <strong>deliberately excludes</strong> all distributed-systems sync primitives. Its charter
-        (<code>docs/ECOSYSTEM_BOUNDARIES.md</code>) explicitly assigns CRDT/conflict logic to
-        <strong>go-localsync</strong>, out of cqrs-lite.
+        go-cqrs-lite is a
+        <strong>43-module CQRS + Event Sourcing library</strong> (v3.1.0) that
+        <strong>deliberately excludes</strong> all distributed-systems sync
+        primitives. Its charter (<code>docs/ECOSYSTEM_BOUNDARIES.md</code>)
+        explicitly assigns CRDT/conflict logic to <strong>go-localsync</strong>,
+        out of cqrs-lite.
       </p>
 
-      <h3>The key insight: <code>pkg/crdt/</code> is two unrelated things wearing one name</h3>
+      <h3>
+        The key insight: <code>pkg/crdt/</code> is two unrelated things wearing
+        one name
+      </h3>
 
       <div class="cluster-diagram">
         <div class="cluster cluster-a">
           <span class="cluster-tag">Cluster A</span>
           <h4>Generic conflict resolution</h4>
           <p>
-            <code>Conflict[T]</code>, <code>ConflictResolver[T]</code>, <code>LWWResolver[T]</code>
+            <code>Conflict[T]</code>, <code>ConflictResolver[T]</code>,
+            <code>LWWResolver[T]</code>
           </p>
           <p>
-            A plain strategy pattern: "two candidate values arrive for one aggregate, which wins?"
-            Generic over <code>T</code>. <strong>Not a CRDT</strong> — <code>LWWResolver</code> is
-            literally "compare two timestamps." Every event-sourced app needs this policy.
+            A plain strategy pattern: "two candidate values arrive for one
+            aggregate, which wins?" Generic over <code>T</code>.
+            <strong>Not a CRDT</strong> — <code>LWWResolver</code> is literally
+            "compare two timestamps." Every event-sourced app needs this policy.
           </p>
           <p><span class="badge badge-good">Genuinely used</span></p>
         </div>
@@ -1318,12 +1420,14 @@
           <span class="cluster-tag">Cluster B</span>
           <h4>Distributed delta-CRDT sync</h4>
           <p>
-            <code>VectorClock</code>, <code>Operation[T]</code>, <code>SyncMessage</code>,
-            <code>SyncRequest</code>, <code>SyncResponse[T]</code>
+            <code>VectorClock</code>, <code>Operation[T]</code>,
+            <code>SyncMessage</code>, <code>SyncRequest</code>,
+            <code>SyncResponse[T]</code>
           </p>
           <p>
-            Multi-node delta-exchange protocol types. Real CRDTs. Useful only when ≥2 nodes exchange
-            deltas. <strong>Zero non-test references anywhere.</strong>
+            Multi-node delta-exchange protocol types. Real CRDTs. Useful only
+            when ≥2 nodes exchange deltas.
+            <strong>Zero non-test references anywhere.</strong>
           </p>
           <p><span class="badge badge-bad">Dead</span></p>
         </div>
@@ -1332,9 +1436,10 @@
       <div class="insight-box">
         <h4>Why this matters</h4>
         <p>
-          The <code>crdt/</code> name lied to the boundary doc, and that lie is why everything feels
-          tangled. <code>ConflictResolver[T]</code> isn't a CRDT — so migrating it doesn't violate
-          the charter. The <em>actual</em> CRDTs are Cluster B.
+          The <code>crdt/</code> name lied to the boundary doc, and that lie is
+          why everything feels tangled. <code>ConflictResolver[T]</code> isn't a
+          CRDT — so migrating it doesn't violate the charter. The
+          <em>actual</em> CRDTs are Cluster B.
         </p>
       </div>
 
@@ -1343,58 +1448,71 @@
       <div class="solution-box">
         <h4>1. Cluster A → new <code>go-cqrs-lite/conflict/v3</code></h4>
         <p>
-          The <em>only</em> migration that creates real value. Every event-sourced app needs a "what
-          wins on conflicting writes" policy; today go-cqrs-lite's sole answer is "reject with a
-          Conflict error and retry." A resolve/merge strategy fills a genuine gap.
-          <strong>Isn't a CRDT</strong> — doesn't violate the charter. Amend the doc:
+          The <em>only</em> migration that creates real value. Every
+          event-sourced app needs a "what wins on conflicting writes" policy;
+          today go-cqrs-lite's sole answer is "reject with a Conflict error and
+          retry." A resolve/merge strategy fills a genuine gap.
+          <strong>Isn't a CRDT</strong> — doesn't violate the charter. Amend the
+          doc:
           <em>generic conflict resolution IN, distributed CRDT merge OUT.</em>
         </p>
       </div>
 
       <div class="correction-box">
         <h4>
-          2. Cluster B → delete (or defer) <span class="badge badge-ok">challenged in §6</span>
+          2. Cluster B → delete (or defer)
+          <span class="badge badge-ok">challenged in §6</span>
         </h4>
         <p>
-          Moving dead code to a new home doesn't make it alive — it just relocates the facade.
-          If/when a second node exists, revive into a correctly-named <code>go-crdt-lite</code>.
+          Moving dead code to a new home doesn't make it alive — it just
+          relocates the facade. If/when a second node exists, revive into a
+          correctly-named <code>go-crdt-lite</code>.
         </p>
       </div>
 
       <div class="insight-box">
-        <h4>3. The <code>model.Item</code>-coupled half of <code>pkg/cqrs/</code> stays</h4>
+        <h4>
+          3. The <code>model.Item</code>-coupled half of
+          <code>pkg/cqrs/</code> stays
+        </h4>
         <p>
           It's the domain. The generic wiring helpers (<code>stack.go</code>,
           <code>store_factory.go</code>) could eventually graduate to
-          <code>go-cqrs-lite/stack</code> once de-domain-ified — not worth the cost now.
+          <code>go-cqrs-lite/stack</code> once de-domain-ified — not worth the
+          cost now.
         </p>
       </div>
 
       <div class="problem-box">
         <h4>Crucial caveat</h4>
         <p>
-          Don't let "move things to cqrs-lite" become a way to <em>avoid fixing the bleeding</em>.
-          Migration is <strong>orthogonal</strong> to the data-integrity bugs. The collision, the
-          <code>hasChanged</code> data loss, the lying <code>Sync()</code> — those stay broken
-          regardless of where the types live.
+          Don't let "move things to cqrs-lite" become a way to
+          <em>avoid fixing the bleeding</em>. Migration is
+          <strong>orthogonal</strong> to the data-integrity bugs. The collision,
+          the <code>hasChanged</code> data loss, the lying <code>Sync()</code> —
+          those stay broken regardless of where the types live.
         </p>
       </div>
 
       <hr />
 
-      <h2 id="vector-clocks"><span class="sec-num">6</span>Vector Clocks: Defense → Retraction</h2>
+      <h2 id="vector-clocks">
+        <span class="sec-num">6</span>Vector Clocks: Defense → Retraction
+      </h2>
 
       <p class="lead">
-        User pushed back: "VectorClock's sound cool though, and can solve real problems specially in
-        cases where some emitter may not have internet for a while."
+        User pushed back: "VectorClock's sound cool though, and can solve real
+        problems specially in cases where some emitter may not have internet for
+        a while."
       </p>
 
       <h3>First: a defense (partially correct)</h3>
       <p>
         Vector clocks earn their keep the moment an aggregate has
-        <strong>≥2 potential writers</strong>. The claim was that <code>stack.DeleteItem</code> was
-        already a second writer (local delete vs remote update), making vector clocks the principled
-        fix for a real present-day bug.
+        <strong>≥2 potential writers</strong>. The claim was that
+        <code>stack.DeleteItem</code> was already a second writer (local delete
+        vs remote update), making vector clocks the principled fix for a real
+        present-day bug.
       </p>
 
       <table>
@@ -1432,15 +1550,18 @@
       <div class="correction-box">
         <h4>The honest problem isn't the types — it's the empty wiring</h4>
         <p>
-          The types are correct. <code>VectorClock</code>, <code>Operation[T]</code> are
-          textbook-correct, well-tested. <strong>Not theater.</strong> The lie is the empty
-          construction in the decider — <code>crdt.NewVectorClock()</code> on every conflict, making
-          the causal branch structurally unreachable while <em>pretending</em> it was consulted.
+          The types are correct. <code>VectorClock</code>,
+          <code>Operation[T]</code> are textbook-correct, well-tested.
+          <strong>Not theater.</strong> The lie is the empty construction in the
+          decider — <code>crdt.NewVectorClock()</code> on every conflict, making
+          the causal branch structurally unreachable while
+          <em>pretending</em> it was consulted.
         </p>
         <p style="margin-bottom: 0">
           So "delete the cluster" was the wrong prescription. The right one:
           <strong
-            >keep the types, kill the empty-wiring, decide whether to wire them for real.</strong
+            >keep the types, kill the empty-wiring, decide whether to wire them
+            for real.</strong
           >
         </p>
       </div>
@@ -1448,14 +1569,17 @@
       <div class="problem-box">
         <h4>Then: the retraction</h4>
         <p>
-          This entire defense rested on <code>stack.DeleteItem</code> being a live second writer.
-          The next question exposed that assumption as false. <strong>See §7.</strong>
+          This entire defense rested on <code>stack.DeleteItem</code> being a
+          live second writer. The next question exposed that assumption as
+          false. <strong>See §7.</strong>
         </p>
       </div>
 
       <hr />
 
-      <h2 id="deleteitem"><span class="sec-num">7</span>The DeleteItem Discovery</h2>
+      <h2 id="deleteitem">
+        <span class="sec-num">7</span>The DeleteItem Discovery
+      </h2>
 
       <p class="lead">
         User's two-word reaction to the <code>stack.DeleteItem</code> claim:
@@ -1463,7 +1587,8 @@
       </p>
 
       <p>
-        Verified: <code>DeleteItem</code> exists at <code>stack.go:154</code>. But
+        Verified: <code>DeleteItem</code> exists at <code>stack.go:154</code>.
+        But
         <strong>who calls it?</strong>
       </p>
 
@@ -1498,25 +1623,30 @@
         <h4>Full retraction of the vector-clock defense</h4>
         <p>
           If <code>DeleteItem</code> is never called outside tests,
-          <strong>there is no second writer.</strong> The provider is the sole writer to every
-          aggregate. Which means:
+          <strong>there is no second writer.</strong> The provider is the sole
+          writer to every aggregate. Which means:
         </p>
         <ul>
           <li>
             The resurrect bug (local delete vs remote update)
-            <strong>cannot occur in the running system</strong> — nothing writes the delete.
+            <strong>cannot occur in the running system</strong> — nothing writes
+            the delete.
           </li>
-          <li>Vector clocks genuinely have <strong>no live justification today.</strong></li>
           <li>
-            Pure LWW-by-timestamp is, for the <em>actual</em> single-writer model, a defensible
-            strategy — the problem was the empty vector-clock construction <em>pretending</em> it
-            was consulted.
+            Vector clocks genuinely have
+            <strong>no live justification today.</strong>
+          </li>
+          <li>
+            Pure LWW-by-timestamp is, for the <em>actual</em> single-writer
+            model, a defensible strategy — the problem was the empty
+            vector-clock construction <em>pretending</em> it was consulted.
           </li>
         </ul>
         <p style="margin-bottom: 0">
-          <code>DeleteItem</code>, <code>RateLimitConfig</code>, <code>RetryConfig</code>,
-          <code>crdt.SyncMessage</code>: all the same disease — implemented, unit-tested surfaces
-          with <strong>no caller in the live system.</strong>
+          <code>DeleteItem</code>, <code>RateLimitConfig</code>,
+          <code>RetryConfig</code>, <code>crdt.SyncMessage</code>: all the same
+          disease — implemented, unit-tested surfaces with
+          <strong>no caller in the live system.</strong>
         </p>
       </div>
 
@@ -1528,11 +1658,13 @@
 
       <hr />
 
-      <h2 id="fork"><span class="sec-num">8</span>The Open Fork: What Is go-localsync?</h2>
+      <h2 id="fork">
+        <span class="sec-num">8</span>The Open Fork: What Is go-localsync?
+      </h2>
 
       <p class="lead">
-        This is the single product-identity decision that shapes everything downstream. Nothing else
-        can be decided until it is.
+        This is the single product-identity decision that shapes everything
+        downstream. Nothing else can be decided until it is.
       </p>
 
       <div class="decision-final">
@@ -1546,8 +1678,9 @@
           <div class="decision-option opt-a">
             <h4><span class="opt-tag">Option A</span> Pure pull mirror</h4>
             <p style="font-size: 0.9rem; color: var(--text-muted)">
-              Read-only local projection of upstream. SDK only ever adds/updates from provider.
-              Deletion = "provider stopped returning it" → reconciliation diff.
+              Read-only local projection of upstream. SDK only ever adds/updates
+              from provider. Deletion = "provider stopped returning it" →
+              reconciliation diff.
             </p>
             <p
               style="
@@ -1566,16 +1699,18 @@
                 <code>DeleteItem</code> → <strong>delete the orphan</strong>
               </li>
               <li>
-                <span class="fate-icon" style="color: var(--text-muted)">○</span> Vector clocks →
-                dormant, honestly stubbed
+                <span class="fate-icon" style="color: var(--text-muted)"
+                  >○</span
+                >
+                Vector clocks → dormant, honestly stubbed
               </li>
               <li>
-                <span class="fate-icon" style="color: var(--accent)">→</span> Upstream deletion →
-                set-diff reconciliation
+                <span class="fate-icon" style="color: var(--accent)">→</span>
+                Upstream deletion → set-diff reconciliation
               </li>
               <li>
-                <span class="fate-icon" style="color: var(--danger)">✕</span> Cluster B CRDT types →
-                delete
+                <span class="fate-icon" style="color: var(--danger)">✕</span>
+                Cluster B CRDT types → delete
               </li>
             </ul>
             <p
@@ -1596,8 +1731,9 @@
           <div class="decision-option opt-b">
             <h4><span class="opt-tag">Option B</span> Offline two-way sync</h4>
             <p style="font-size: 0.9rem; color: var(--text-muted)">
-              Local mutations (delete/edit) buffer and reconcile with upstream later. "Emitter loses
-              internet" is a real scenario. <code>DeleteItem</code> is the seed of the real product.
+              Local mutations (delete/edit) buffer and reconcile with upstream
+              later. "Emitter loses internet" is a real scenario.
+              <code>DeleteItem</code> is the seed of the real product.
             </p>
             <p
               style="
@@ -1613,19 +1749,21 @@
             <ul class="decision-fate">
               <li>
                 <span class="fate-icon" style="color: var(--success)">✓</span>
-                <code>DeleteItem</code> → <strong>wire to API + sync loop</strong>
+                <code>DeleteItem</code> →
+                <strong>wire to API + sync loop</strong>
               </li>
               <li>
-                <span class="fate-icon" style="color: var(--success)">✓</span> Vector clocks / HLC →
+                <span class="fate-icon" style="color: var(--success)">✓</span>
+                Vector clocks / HLC →
                 <strong>actually populate</strong>
               </li>
               <li>
-                <span class="fate-icon" style="color: var(--success)">✓</span> Causal history
-                tracked, offline edits reconcile
+                <span class="fate-icon" style="color: var(--success)">✓</span>
+                Causal history tracked, offline edits reconcile
               </li>
               <li>
-                <span class="fate-icon" style="color: var(--warning)">▲</span> Much bigger scope —
-                eat the schema migration
+                <span class="fate-icon" style="color: var(--warning)">▲</span>
+                Much bigger scope — eat the schema migration
               </li>
             </ul>
             <p
@@ -1661,7 +1799,10 @@
           </tr>
           <tr>
             <td><strong>Migration scope</strong></td>
-            <td>Both move Cluster A to <code>conflict/v3</code>. Only A deletes Cluster B.</td>
+            <td>
+              Both move Cluster A to <code>conflict/v3</code>. Only A deletes
+              Cluster B.
+            </td>
             <td>Keeps Cluster B; wires it for real.</td>
           </tr>
           <tr>
@@ -1682,23 +1823,24 @@
         <ol>
           <li>
             <strong>Fix the bleeding first</strong> — aggregate-ID collision,
-            <code>hasChanged</code> content-hash, lying <code>Sync()</code> → real per-item errors.
-            Pure localsync, no migration dependency.
+            <code>hasChanged</code> content-hash, lying <code>Sync()</code> →
+            real per-item errors. Pure localsync, no migration dependency.
           </li>
           <li><strong>Decide A vs B.</strong> This is the pivot.</li>
           <li>
             <strong>Then:</strong> migrate <code>ConflictResolver[T]</code> →
-            <code>go-cqrs-lite/conflict/v3</code>; and either delete the dead CRDT cluster (A) or
-            wire causality for real (B).
+            <code>go-cqrs-lite/conflict/v3</code>; and either delete the dead
+            CRDT cluster (A) or wire causality for real (B).
           </li>
         </ol>
       </div>
 
       <div class="footer">
         <p>
-          <strong>Document type:</strong> Brainstorming capture — diagnostic, not a decision record.
-          All findings verified against source as of 2026-06-27. The open fork (A vs B) is the only
-          blocking item; everything else is execution.
+          <strong>Document type:</strong> Brainstorming capture — diagnostic,
+          not a decision record. All findings verified against source as of
+          2026-06-27. The open fork (A vs B) is the only blocking item;
+          everything else is execution.
         </p>
       </div>
     </div>

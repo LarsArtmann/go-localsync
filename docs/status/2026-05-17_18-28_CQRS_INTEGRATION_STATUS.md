@@ -1,7 +1,7 @@
 # Cross-Project CQRS Integration Status Report
 
-**Date:** 2026-05-17 18:28  
-**Session:** Deep Architecture Review + SchemaVersion Fix Verification  
+**Date:** 2026-05-17 18:28\
+**Session:** Deep Architecture Review + SchemaVersion Fix Verification\
 **Projects:** go-localsync, go-cqrs-lite
 
 ---
@@ -99,33 +99,33 @@ The main remaining work is: `go mod tidy`, removing cockroachdb/errors, updating
 
 ## f) TOP 25 THINGS TO DO NEXT
 
-| #   | Priority | Project      | Task                                                                                                                                          | Impact | Effort |
-| --- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ |
-| 1   | 🔴 P0    | go-localsync | **`go mod tidy`** — Remove unused deps, add missing ones                                                                                      | HIGH   | 5min   |
-| 2   | 🔴 P0    | go-localsync | **Update AGENTS.md** — Remove all references to deleted packages, fix outdated claims                                                         | HIGH   | 30min  |
-| 3   | 🔴 P0    | go-cqrs-lite | **Tag v0.1.0-alpha** — First public release, storage as experimental                                                                          | HIGH   | 30min  |
-| 4   | 🟡 P1    | go-localsync | **Remove cockroachdb/errors** — Replace with stdlib `fmt.Errorf` + `%w`                                                                       | MEDIUM | 1h     |
-| 5   | 🟡 P1    | go-localsync | **Unexport `SyncItemsDDL`/`SyncItemsIndexes`** — Only used internally                                                                         | LOW    | 5min   |
-| 6   | 🟡 P1    | go-localsync | **Fix split-brain conflict detection** — Consolidate `ConflictAwareSyncer` + `DecideSync`                                                     | HIGH   | 2h     |
-| 7   | 🟡 P1    | go-localsync | **Add CLI tests** — Test `exitCodeForError`, flag parsing, signal handling                                                                    | MEDIUM | 2h     |
-| 8   | 🟡 P1    | go-localsync | **Add Push/Pull tests** — Test CQRSStack remote sync methods                                                                                  | MEDIUM | 1h     |
-| 9   | 🟡 P1    | go-localsync | **Wire error taxonomy** — Use go-cqrs-lite error classification for exit codes                                                                | MEDIUM | 1h     |
-| 10  | 🟡 P1    | go-localsync | **Update README.md** — Reflect CQRS-only architecture                                                                                         | MEDIUM | 30min  |
-| 11  | 🟡 P1    | go-localsync | **Update FEATURES.md** — Remove legacy storage references                                                                                     | MEDIUM | 15min  |
-| 12  | 🟡 P1    | go-localsync | **Update TODO_LIST.md** — Mark completed items, add new ones                                                                                  | LOW    | 15min  |
-| 13  | 🟡 P1    | go-localsync | **Delete stale docs** — Remove `CQRS_MIGRATION_PLAN.md`, `PROJECT_SPLIT_EXECUTIVE_REPORT.md`, `BDD_TESTS_REVIEW.md`, `PARTS.md`, `ROADmap.md` | LOW    | 5min   |
-| 14  | 🟡 P1    | go-localsync | **Delete `justfile`** — AGENTS.md says "justfile is deprecated"                                                                               | LOW    | 1min   |
-| 15  | 🟢 P2    | go-localsync | **Adopt `projection.Runner`** — Replace custom Projector with go-cqrs-lite's                                                                  | MEDIUM | 2h     |
-| 16  | 🟢 P2    | go-localsync | **Testify → stdlib** — Migrate 6 test files from testify to stdlib `t.Errorf`/`t.Fatal`                                                       | LOW    | 3h     |
-| 17  | 🟢 P2    | go-localsync | **Unify test framework** — Either all Ginkgo or all stdlib, not mixed                                                                         | LOW    | 4h     |
-| 18  | 🟢 P2    | go-localsync | **Use `time.Time` in event payloads** — Replace int64 unix nanoseconds                                                                        | MEDIUM | 1h     |
-| 19  | 🟢 P2    | go-cqrs-lite | **PostgreSQL integration tests** — Test against real PG, not just mocks                                                                       | MEDIUM | 4h     |
-| 20  | 🟢 P2    | go-cqrs-lite | **Implement Saga/Process Manager** — Design exists, 18h estimate                                                                              | HIGH   | 18h    |
-| 21  | 🟢 P2    | go-cqrs-lite | **CONTRIBUTING.md** — Referenced in README but doesn't exist                                                                                  | LOW    | 1h     |
-| 22  | 🟢 P2    | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox in single DB tx                                                                    | HIGH   | 4h     |
-| 23  | 🟢 P2    | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md                                                                                      | LOW    | 30min  |
-| 24  | 🟢 P2    | go-localsync | **Real GitHub PAT smoke test** — Verify end-to-end with real API                                                                              | MEDIUM | 1h     |
-| 25  | 🟢 P2    | go-localsync | **Add JSON output flag** — Structured output for CLI                                                                                          | LOW    | 1h     |
+| #  | Priority | Project      | Task                                                                                                                                          | Impact | Effort |
+| -- | -------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ------ |
+| 1  | 🔴 P0    | go-localsync | **`go mod tidy`** — Remove unused deps, add missing ones                                                                                      | HIGH   | 5min   |
+| 2  | 🔴 P0    | go-localsync | **Update AGENTS.md** — Remove all references to deleted packages, fix outdated claims                                                         | HIGH   | 30min  |
+| 3  | 🔴 P0    | go-cqrs-lite | **Tag v0.1.0-alpha** — First public release, storage as experimental                                                                          | HIGH   | 30min  |
+| 4  | 🟡 P1    | go-localsync | **Remove cockroachdb/errors** — Replace with stdlib `fmt.Errorf` + `%w`                                                                       | MEDIUM | 1h     |
+| 5  | 🟡 P1    | go-localsync | **Unexport `SyncItemsDDL`/`SyncItemsIndexes`** — Only used internally                                                                         | LOW    | 5min   |
+| 6  | 🟡 P1    | go-localsync | **Fix split-brain conflict detection** — Consolidate `ConflictAwareSyncer` + `DecideSync`                                                     | HIGH   | 2h     |
+| 7  | 🟡 P1    | go-localsync | **Add CLI tests** — Test `exitCodeForError`, flag parsing, signal handling                                                                    | MEDIUM | 2h     |
+| 8  | 🟡 P1    | go-localsync | **Add Push/Pull tests** — Test CQRSStack remote sync methods                                                                                  | MEDIUM | 1h     |
+| 9  | 🟡 P1    | go-localsync | **Wire error taxonomy** — Use go-cqrs-lite error classification for exit codes                                                                | MEDIUM | 1h     |
+| 10 | 🟡 P1    | go-localsync | **Update README.md** — Reflect CQRS-only architecture                                                                                         | MEDIUM | 30min  |
+| 11 | 🟡 P1    | go-localsync | **Update FEATURES.md** — Remove legacy storage references                                                                                     | MEDIUM | 15min  |
+| 12 | 🟡 P1    | go-localsync | **Update TODO_LIST.md** — Mark completed items, add new ones                                                                                  | LOW    | 15min  |
+| 13 | 🟡 P1    | go-localsync | **Delete stale docs** — Remove `CQRS_MIGRATION_PLAN.md`, `PROJECT_SPLIT_EXECUTIVE_REPORT.md`, `BDD_TESTS_REVIEW.md`, `PARTS.md`, `ROADmap.md` | LOW    | 5min   |
+| 14 | 🟡 P1    | go-localsync | **Delete `justfile`** — AGENTS.md says "justfile is deprecated"                                                                               | LOW    | 1min   |
+| 15 | 🟢 P2    | go-localsync | **Adopt `projection.Runner`** — Replace custom Projector with go-cqrs-lite's                                                                  | MEDIUM | 2h     |
+| 16 | 🟢 P2    | go-localsync | **Testify → stdlib** — Migrate 6 test files from testify to stdlib `t.Errorf`/`t.Fatal`                                                       | LOW    | 3h     |
+| 17 | 🟢 P2    | go-localsync | **Unify test framework** — Either all Ginkgo or all stdlib, not mixed                                                                         | LOW    | 4h     |
+| 18 | 🟢 P2    | go-localsync | **Use `time.Time` in event payloads** — Replace int64 unix nanoseconds                                                                        | MEDIUM | 1h     |
+| 19 | 🟢 P2    | go-cqrs-lite | **PostgreSQL integration tests** — Test against real PG, not just mocks                                                                       | MEDIUM | 4h     |
+| 20 | 🟢 P2    | go-cqrs-lite | **Implement Saga/Process Manager** — Design exists, 18h estimate                                                                              | HIGH   | 18h    |
+| 21 | 🟢 P2    | go-cqrs-lite | **CONTRIBUTING.md** — Referenced in README but doesn't exist                                                                                  | LOW    | 1h     |
+| 22 | 🟢 P2    | go-cqrs-lite | **TransactionalStore implementation** — Atomic save+outbox in single DB tx                                                                    | HIGH   | 4h     |
+| 23 | 🟢 P2    | go-cqrs-lite | **Document Pebble storage** — Add to README, FEATURES.md                                                                                      | LOW    | 30min  |
+| 24 | 🟢 P2    | go-localsync | **Real GitHub PAT smoke test** — Verify end-to-end with real API                                                                              | MEDIUM | 1h     |
+| 25 | 🟢 P2    | go-localsync | **Add JSON output flag** — Structured output for CLI                                                                                          | LOW    | 1h     |
 
 ---
 

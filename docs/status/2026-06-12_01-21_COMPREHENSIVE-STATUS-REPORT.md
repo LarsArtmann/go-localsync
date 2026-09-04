@@ -1,7 +1,7 @@
 # Session 17 — Comprehensive Status Report
 
-**Date:** 2026-06-12 01:21  
-**Session:** 17 (resumed from interrupted session 16)  
+**Date:** 2026-06-12 01:21\
+**Session:** 17 (resumed from interrupted session 16)\
 **Author:** Crush (assisted-by)
 
 ---
@@ -162,33 +162,33 @@ Known linter bug in `honnef.co/go/tools@v0.7.0/staticcheck/sa5012` — crashes o
 
 ## f) Top 25 Things We Should Get Done Next
 
-| #   | Item                                                             | Impact | Effort |
-| --- | ---------------------------------------------------------------- | ------ | ------ |
-| 1   | Fix 7 pre-existing lint issues                                   | High   | 30 min |
-| 2   | Add `UpdatedAt` to "missing createdAt" test case for correctness | High   | 5 min  |
-| 3   | Improve `github-sync` test coverage (12.3% → 50%)                | High   | 2h     |
-| 4   | Add real GitHub PAT smoke test (manual/CI)                       | High   | 1h     |
-| 5   | Wire `middleware.CommandRetry` from go-cqrs-lite                 | High   | 1h     |
-| 6   | Add OpenTelemetry traces for sync operations                     | Medium | 3h     |
-| 7   | Add API authentication middleware (API key)                      | Medium | 2h     |
-| 8   | Add API pagination headers                                       | Medium | 2h     |
-| 9   | Propagate correlation IDs to structured logs                     | Medium | 1h     |
-| 10  | Unify test framework (remove testify)                            | Medium | 2h     |
-| 11  | Write CONTRIBUTING.md                                            | Medium | 1h     |
-| 12  | Add `govalid` struct tags to model types                         | Medium | 1h     |
-| 13  | Resolve go-cqrs-lite upstream WIP (`Sink` rename)                | Medium | 30 min |
-| 14  | Clean `nolint:ireturn` in store_factory                          | Medium | 30 min |
-| 15  | Add `t.Parallel()` to integration test subtests                  | Medium | 30 min |
-| 16  | Investigate `unparam` findings (dead code?)                      | Medium | 30 min |
-| 17  | Build TUI with Bubble Tea                                        | Low    | 4h     |
-| 18  | Add daemon/background mode                                       | Low    | 4h     |
-| 19  | Add data export (JSON/CSV)                                       | Low    | 2h     |
-| 20  | Add GitLab provider                                              | Low    | 4h     |
-| 21  | Add Bitbucket provider                                           | Low    | 4h     |
-| 22  | Real-time sync protocol (WebSocket/SSE)                          | Low    | 8h     |
-| 23  | Config hot-reload                                                | Low    | 3h     |
-| 24  | Plugin system for dynamic provider loading                       | Low    | 8h     |
-| 25  | Performance benchmarking and optimization                        | Low    | 4h     |
+| #  | Item                                                             | Impact | Effort |
+| -- | ---------------------------------------------------------------- | ------ | ------ |
+| 1  | Fix 7 pre-existing lint issues                                   | High   | 30 min |
+| 2  | Add `UpdatedAt` to "missing createdAt" test case for correctness | High   | 5 min  |
+| 3  | Improve `github-sync` test coverage (12.3% → 50%)                | High   | 2h     |
+| 4  | Add real GitHub PAT smoke test (manual/CI)                       | High   | 1h     |
+| 5  | Wire `middleware.CommandRetry` from go-cqrs-lite                 | High   | 1h     |
+| 6  | Add OpenTelemetry traces for sync operations                     | Medium | 3h     |
+| 7  | Add API authentication middleware (API key)                      | Medium | 2h     |
+| 8  | Add API pagination headers                                       | Medium | 2h     |
+| 9  | Propagate correlation IDs to structured logs                     | Medium | 1h     |
+| 10 | Unify test framework (remove testify)                            | Medium | 2h     |
+| 11 | Write CONTRIBUTING.md                                            | Medium | 1h     |
+| 12 | Add `govalid` struct tags to model types                         | Medium | 1h     |
+| 13 | Resolve go-cqrs-lite upstream WIP (`Sink` rename)                | Medium | 30 min |
+| 14 | Clean `nolint:ireturn` in store_factory                          | Medium | 30 min |
+| 15 | Add `t.Parallel()` to integration test subtests                  | Medium | 30 min |
+| 16 | Investigate `unparam` findings (dead code?)                      | Medium | 30 min |
+| 17 | Build TUI with Bubble Tea                                        | Low    | 4h     |
+| 18 | Add daemon/background mode                                       | Low    | 4h     |
+| 19 | Add data export (JSON/CSV)                                       | Low    | 2h     |
+| 20 | Add GitLab provider                                              | Low    | 4h     |
+| 21 | Add Bitbucket provider                                           | Low    | 4h     |
+| 22 | Real-time sync protocol (WebSocket/SSE)                          | Low    | 8h     |
+| 23 | Config hot-reload                                                | Low    | 3h     |
+| 24 | Plugin system for dynamic provider loading                       | Low    | 8h     |
+| 25 | Performance benchmarking and optimization                        | Low    | 4h     |
 
 ---
 

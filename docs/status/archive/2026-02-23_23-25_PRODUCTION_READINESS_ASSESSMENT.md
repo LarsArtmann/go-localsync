@@ -16,14 +16,14 @@ go-localsync is a Go library and CLI for syncing GitHub user events to a SQLite 
 
 ### Test Coverage
 
-| Package       | Coverage | Status          |
-| ------------- | -------- | --------------- |
-| `pkg/github`  | 69.9%    | ✅ Good         |
-| `pkg/storage` | 83.9%    | ✅ Excellent    |
+| Package       | Coverage | Status         |
+| ------------- | -------- | -------------- |
+| `pkg/github`  | 69.9%    | ✅ Good        |
+| `pkg/storage` | 83.9%    | ✅ Excellent   |
 | `pkg/sync`    | 58.2%    | ⚠️ Adequate     |
-| `cmd/gh-sync` | 0.0%     | ❌ Missing      |
+| `cmd/gh-sync` | 0.0%     | ❌ Missing     |
 | `pkg/errors`  | 0.0%     | ⚠️ Low priority |
-| `pkg/event`   | N/A      | No test files   |
+| `pkg/event`   | N/A      | No test files  |
 
 **Overall weighted coverage:** ~60-65%
 

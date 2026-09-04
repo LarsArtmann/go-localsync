@@ -12,33 +12,33 @@
 
 All items from the first 14-step improvement plan have been implemented, committed, and pushed.
 
-| #   | Commit    | Description                                                    |
-| --- | --------- | -------------------------------------------------------------- |
-| 1   | `0836008` | Add comprehensive documentation and database tests             |
-| 2   | `8493cab` | Add assertCountEquals helper for BDD count assertions          |
-| 3   | `166e8c8` | Extract BDD test helpers to reduce duplication                 |
-| 4   | `4b5a871` | Extract helper methods to reduce BDD test duplication          |
-| 5   | `43d55e0` | Add comprehensive Related Projects section to README           |
-| 6   | `9e6fce9` | Extract helper functions in sync to reduce code duplication    |
-| 7   | `355e363` | Update gitignore and clean system files                        |
-| 8   | `33e0954` | Extract shared test helpers to reduce duplication              |
-| 9   | `54f940f` | Remove unused FetchSource type alias                           |
-| 10  | `85186fa` | Move conversion functions from interface.go to sqlite.go       |
-| 11  | `607c417` | Add ErrDatabase and ErrConflict sentinels, wrap storage errors |
-| 12  | `18beece` | Add GetItemsBySource, Delete, DeleteAll to Storage interface   |
-| 13  | `1ac7192` | Add unit tests for sentinel errors and branded IDs             |
-| 14  | `bffaebe` | Expose GetItemsSince using existing GetEventsSince SQL query   |
+| #  | Commit    | Description                                                    |
+| -- | --------- | -------------------------------------------------------------- |
+| 1  | `0836008` | Add comprehensive documentation and database tests             |
+| 2  | `8493cab` | Add assertCountEquals helper for BDD count assertions          |
+| 3  | `166e8c8` | Extract BDD test helpers to reduce duplication                 |
+| 4  | `4b5a871` | Extract helper methods to reduce BDD test duplication          |
+| 5  | `43d55e0` | Add comprehensive Related Projects section to README           |
+| 6  | `9e6fce9` | Extract helper functions in sync to reduce code duplication    |
+| 7  | `355e363` | Update gitignore and clean system files                        |
+| 8  | `33e0954` | Extract shared test helpers to reduce duplication              |
+| 9  | `54f940f` | Remove unused FetchSource type alias                           |
+| 10 | `85186fa` | Move conversion functions from interface.go to sqlite.go       |
+| 11 | `607c417` | Add ErrDatabase and ErrConflict sentinels, wrap storage errors |
+| 12 | `18beece` | Add GetItemsBySource, Delete, DeleteAll to Storage interface   |
+| 13 | `1ac7192` | Add unit tests for sentinel errors and branded IDs             |
+| 14 | `bffaebe` | Expose GetItemsSince using existing GetEventsSince SQL query   |
 
 **Additional commits (this session):**
 
-| #   | Commit    | Description                                                 |
-| --- | --------- | ----------------------------------------------------------- |
-| 15  | `34b1ae5` | Add UpsertBatch for transactional batch upserts             |
-| 16  | `70e6501` | Compose Syncer into ConflictAwareSyncer via embedding       |
-| 17  | `bf0742c` | Add input validation for Item and SyncOptions               |
-| 18  | `6047c40` | Add OnProgress callback to SyncOptions                      |
-| 19  | `10522c8` | Add --conflict-aware flag and OnProgress to example CLI     |
-| 20  | `efa0aab` | Expand multi-line struct literals in BDD tests (formatting) |
+| #  | Commit    | Description                                                 |
+| -- | --------- | ----------------------------------------------------------- |
+| 15 | `34b1ae5` | Add UpsertBatch for transactional batch upserts             |
+| 16 | `70e6501` | Compose Syncer into ConflictAwareSyncer via embedding       |
+| 17 | `bf0742c` | Add input validation for Item and SyncOptions               |
+| 18 | `6047c40` | Add OnProgress callback to SyncOptions                      |
+| 19 | `10522c8` | Add --conflict-aware flag and OnProgress to example CLI     |
+| 20 | `efa0aab` | Expand multi-line struct literals in BDD tests (formatting) |
 
 ---
 
@@ -147,33 +147,33 @@ These are real bugs or serious architectural issues found in the audit.
 
 ## F. TOP 25 THINGS TO DO NEXT (Prioritized: Impact × Ease)
 
-| #   | Task                                                                                  | Impact | Work     | Risk            |
-| --- | ------------------------------------------------------------------------------------- | ------ | -------- | --------------- |
-| 1   | Run `sqlc generate` to verify/fix codegen consistency                                 | High   | Trivial  | None            |
-| 2   | Fix silently swallowed errors (6 locations — log or return)                           | High   | Low      | Behavior change |
-| 3   | Remove dead code (`Ptr`, `StorageItemSet`, `MockStorage`, `newMockProviderWithError`) | Medium | Trivial  | None            |
-| 4   | Fix README inaccuracies (7 missing methods, stale test count)                         | High   | Low      | None            |
-| 5   | Fix ROADMAP/TODO stale claims                                                         | Medium | Low      | None            |
-| 6   | Add storage tests for `GetByID`, `UpsertBatch`                                        | High   | Low      | None            |
-| 7   | Add storage tests for `GetItemsBySource`, `GetItemsSince`                             | High   | Low      | None            |
-| 8   | Add storage tests for `Delete`, `DeleteAll`                                           | High   | Low      | None            |
-| 9   | Remove tautological `TestSyncResult`                                                  | Low    | Trivial  | None            |
-| 10  | Convert `TestItem_Validate` to table-driven test                                      | Low    | Trivial  | None            |
-| 11  | Add error-path tests for storage (closed DB, bad input)                               | High   | Medium   | None            |
-| 12  | Migrate Storage interface params from `string` to branded types                       | High   | Medium   | API break       |
-| 13  | Add sqlc column overrides for `source`, `type`, `actor_login`, `repo_name`            | Medium | Medium   | Codegen change  |
-| 14  | Consolidate mock Storage into single testhelpers implementation                       | Medium | Medium   | Test refactor   |
-| 15  | Remove duplicate mock Provider (consolidate to testhelpers)                           | Medium | Low      | Test refactor   |
-| 16  | Add doc comments to `sqlite.go` exported symbols                                      | Low    | Medium   | None            |
-| 17  | Add package doc comments to `testhelpers`                                             | Low    | Trivial  | None            |
-| 18  | Decide: make vector clocks functional or remove them                                  | High   | Analysis | Architecture    |
-| 19  | If keeping clocks: wire into `isConflict()` properly                                  | High   | Medium   | Behavior change |
-| 20  | If keeping clocks: persist to database (migration + load/save)                        | High   | High     | Schema change   |
-| 21  | Fix `buildClockForItem` to group by item ID, not source                               | High   | Low      | Behavior change |
-| 22  | Make `FetchOptions.Source` use `types.ProviderID`                                     | Medium | Low      | API change      |
-| 23  | Make `nodeID` in ConflictAwareSyncer use branded type                                 | Medium | Trivial  | None            |
-| 24  | Standardize on one test framework (recommend Ginkgo/Gomega for BDD, testify for unit) | Low    | Medium   | Large refactor  |
-| 25  | Fix pre-commit hooks or remove BuildFlow config                                       | Medium | Medium   | CI change       |
+| #  | Task                                                                                  | Impact | Work     | Risk            |
+| -- | ------------------------------------------------------------------------------------- | ------ | -------- | --------------- |
+| 1  | Run `sqlc generate` to verify/fix codegen consistency                                 | High   | Trivial  | None            |
+| 2  | Fix silently swallowed errors (6 locations — log or return)                           | High   | Low      | Behavior change |
+| 3  | Remove dead code (`Ptr`, `StorageItemSet`, `MockStorage`, `newMockProviderWithError`) | Medium | Trivial  | None            |
+| 4  | Fix README inaccuracies (7 missing methods, stale test count)                         | High   | Low      | None            |
+| 5  | Fix ROADMAP/TODO stale claims                                                         | Medium | Low      | None            |
+| 6  | Add storage tests for `GetByID`, `UpsertBatch`                                        | High   | Low      | None            |
+| 7  | Add storage tests for `GetItemsBySource`, `GetItemsSince`                             | High   | Low      | None            |
+| 8  | Add storage tests for `Delete`, `DeleteAll`                                           | High   | Low      | None            |
+| 9  | Remove tautological `TestSyncResult`                                                  | Low    | Trivial  | None            |
+| 10 | Convert `TestItem_Validate` to table-driven test                                      | Low    | Trivial  | None            |
+| 11 | Add error-path tests for storage (closed DB, bad input)                               | High   | Medium   | None            |
+| 12 | Migrate Storage interface params from `string` to branded types                       | High   | Medium   | API break       |
+| 13 | Add sqlc column overrides for `source`, `type`, `actor_login`, `repo_name`            | Medium | Medium   | Codegen change  |
+| 14 | Consolidate mock Storage into single testhelpers implementation                       | Medium | Medium   | Test refactor   |
+| 15 | Remove duplicate mock Provider (consolidate to testhelpers)                           | Medium | Low      | Test refactor   |
+| 16 | Add doc comments to `sqlite.go` exported symbols                                      | Low    | Medium   | None            |
+| 17 | Add package doc comments to `testhelpers`                                             | Low    | Trivial  | None            |
+| 18 | Decide: make vector clocks functional or remove them                                  | High   | Analysis | Architecture    |
+| 19 | If keeping clocks: wire into `isConflict()` properly                                  | High   | Medium   | Behavior change |
+| 20 | If keeping clocks: persist to database (migration + load/save)                        | High   | High     | Schema change   |
+| 21 | Fix `buildClockForItem` to group by item ID, not source                               | High   | Low      | Behavior change |
+| 22 | Make `FetchOptions.Source` use `types.ProviderID`                                     | Medium | Low      | API change      |
+| 23 | Make `nodeID` in ConflictAwareSyncer use branded type                                 | Medium | Trivial  | None            |
+| 24 | Standardize on one test framework (recommend Ginkgo/Gomega for BDD, testify for unit) | Low    | Medium   | Large refactor  |
+| 25 | Fix pre-commit hooks or remove BuildFlow config                                       | Medium | Medium   | CI change       |
 
 ---
 
