@@ -223,3 +223,9 @@ This commit appeared in the log during my session. It changes how vendored depen
 ### Q3: The 50-item backlog duplicates TODO_LIST and ROADMAP — should I merge it into those docs?
 
 Items 11–30 above are already in TODO_LIST.md. Items 31–49 are a mix of TODO_LIST, ROADMAP, and new ideas from this session's reviews (naming-review, data-model-review). I did not add the new items (36–42 from review recommendations) to TODO_LIST because I wasn't sure if you want them tracked there or if they belong in ROADMAP as "raw ideas." Should I merge the actionable ones into TODO_LIST and the vague ones into ROADMAP?
+
+---
+
+## Resolution (2026-09-05 evening sweep)
+
+§g answers: (Q1) moot — later sessions ran the full gates repeatedly; this sweep re-verified build/vet/test/coverage, both cqrs-lint gates, and `nix build` + `nix flake check` green. (Q2) moot — `acaa8a5`'s mkPreparedSource approach was itself superseded by the go-standard flake module in v0.5.0 (both migrations documented in CHANGELOG). (Q3) done — every §f item now carries an inline verdict above; the genuinely-open items are routed to TODO_LIST.md (buildflow run, cqrs-lint CLI cluster, hierarchical-errors disposition, v0.6 vocabulary window) and the remaining raw ideas live in ROADMAP.md. Report fully resolved → archived.

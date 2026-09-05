@@ -41,9 +41,9 @@ The tool had **none** of these three flags. All three had to be designed, implem
 
 | Item                      | What's missing                                                                                                                                                                                                                                                        |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CLI testing               | `cmd/cqrs-lint/main.go` has **zero tests**. The suppression engine is tested via the library API, but the CLI flag parsing, exit codes, and output formatting are untested. An integration test that builds the binary and runs it against fixtures would close this. |
-| Suppressed finding detail | The verbose per-rule status table shows `ok` or `N findings` for active findings only. It does **not** show suppressed counts per-rule (e.g. "C0005: 1 finding, 2 suppressed"). The total suppressed count is in the summary, but not broken down by rule.            |
-| Suppression provenance    | When a finding is suppressed, the system records `Suppressed: true` but does **not** record _which_ directive or _which file/line_ silenced it. An audit field (`SuppressedBy string`) would make suppressions traceable in CI logs.                                  |
+| CLI testing               | ~~`cmd/cqrs-lint/main.go` has **zero tests**. The suppression engine is tested via the library API, but the CLI flag parsing, exit codes, and output formatting are untested. An integration test that builds the binary and runs it against fixtures would close this.~~ closed 2026-09-05 (M11): 8 function-level tests (exit-code decision table, summary/`--json`, fixture round trip); process-level binary tests remain in TODO_LIST |
+| Suppressed finding detail | The verbose per-rule status table shows `ok` or `N findings` for active findings only. It does **not** show suppressed counts per-rule (e.g. "C0005: 1 finding, 2 suppressed"). The total suppressed count is in the summary, but not broken down by rule. (Still open — routed to TODO_LIST 2026-09-05.)                                                                                                                                                      |
+| Suppression provenance    | ~~When a finding is suppressed, the system records `Suppressed: true` but does **not** record _which_ directive or _which file/line_ silenced it. An audit field (`SuppressedBy string`) would make suppressions traceable in CI logs.~~ closed 2026-09-05 (M18): `SuppressedBy`/`SuppressedReason` on findings, surfaced in output and `--json` |
 
 ---
 
@@ -51,10 +51,10 @@ The tool had **none** of these three flags. All three had to be designed, implem
 
 | Item                                    | Why it matters                                                                                                              |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `nix build` / `nix flake check`         | Did not verify the Nix build still passes with the new files. Should be fine (no new deps), but unverified.                 |
-| `buildflow --build-mode full`           | Did not run the full pipeline. The jsonv2 build tag requires the devShell; I used `GOFLAGS` manually instead.               |
-| Rule validation in directives           | `//cqrs-lint:ignore C9999` silently succeeds even though C9999 doesn't exist. No warning for typos or unknown rule IDs.     |
-| Block-comment directive support         | Directives only parsed from `//` line comments, not `/* */` block comments.                                                 |
+| `nix build` / `nix flake check`         | ~~Did not verify the Nix build still passes with the new files. Should be fine (no new deps), but unverified.~~ done — verified green at `3247d62` and again 2026-09-05 (post vendorHash re-pin) |
+| `buildflow --build-mode full`           | Did not run the full pipeline. The jsonv2 build tag requires the devShell; I used `GOFLAGS` manually instead. (Still open — routed to TODO_LIST 2026-09-05.)                 |
+| Rule validation in directives           | ~~`//cqrs-lint:ignore C9999` silently succeeds even though C9999 doesn't exist. No warning for typos or unknown rule IDs.~~ closed 2026-09-05 (M18): unknown internal-scheme rule IDs warn (library-scheme IDs respected as cross-linter) |
+| Block-comment directive support         | Directives only parsed from `//` line comments, not `/* */` block comments. (Still open — routed to TODO_LIST 2026-09-05.) |
 | `--no-suppress` flag                    | A CI-hardened mode that errors if any suppression directive is present (forcing all suppressions to be justified/reviewed). |
 | Deprecation path for `-fail-on-warning` | `--strict` is the new canonical name but `-fail-on-warning` still exists with no deprecation notice.                        |
 
@@ -206,4 +206,10 @@ I introduced it to avoid a 6-parameter function (golines violation), but it's a 
 
 The three flags (`--strict`, `--verbose`, `--show-suppressed`) and the suppression directive system are **fully functional and tested**. The code compiles, lints clean, and all 229 project tests pass. Coverage in `internal/cqrslint` rose from 88.5% to 90.0%.
 
-The biggest remaining gap is **zero CLI test coverage** — the library layer is well-tested, but `main.go`'s flag parsing, exit codes, and output formatting are verified only by manual E2E runs. Two careless mistakes (invalid Go comment syntax, grammar bug) were caught and fixed during the session, but both should have been avoided.
+~~The biggest remaining gap is **zero CLI test coverage** — the library layer is well-tested, but `main.go`'s flag parsing, exit codes, and output formatting are verified only by manual E2E runs.~~ Closed 2026-09-05 (M11): 8 CLI tests now cover the exit-code contract, summary/`--json` schema, and a violating-fixture round trip; process-level binary tests are tracked in TODO_LIST. Two careless mistakes (invalid Go comment syntax, grammar bug) were caught and fixed during the session, but both should have been avoided.
+
+---
+
+## Resolution (2026-09-05)
+
+§g questions, answered by later events: (1) directive reasons stay optional; the project standard is a reason on every directive, and M18 added suppression provenance (`SuppressedBy`/`SuppressedReason`) so unjustified silences are visible in output and `--json`. `--strict` reason-enforcement is not implemented (route via the cqrs-lint CLI cluster in TODO_LIST if ever wanted). (2) `-fail-on-warning` kept as-is (no deprecation warning); `--strict` is documented as canonical in AGENTS.md. (3) the `report` struct stayed — commit `0d12549` bundled the emit parameters into it and tests pin its construction. Every §f item carries an inline verdict; report fully resolved → archived.

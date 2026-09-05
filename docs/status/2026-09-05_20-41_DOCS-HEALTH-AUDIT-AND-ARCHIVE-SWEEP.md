@@ -70,56 +70,56 @@ Already tracked in TODO_LIST.md (🔗) or ROADMAP.md (🧭) as of this session; 
 
 | #  | Task                                                                                                                                                                             | Impact   | Effort | Cat     |
 | -- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------ | ------- |
-| 1  | ★ Verify `v0.5.0` + `provider/github/v0.1.0` pushed; GitHub Releases exist; then confirm proxy.golang.org serves them post-public-flip (re-tag/bump if the proxy never saw them) | Critical | S      | Release |
-| 2  | ★ Run `buildflow --build-mode full` inside the devShell (post dep-bump)                                                                                                          | High     | M      | Quality |
-| 3  | ★ Run `nix flake check` (go-standard module, cqrs-lint check)                                                                                                                    | High     | S      | Quality |
-| 4  | 🔗 cqrs-lint CLI test coverage (`cmd/cqrs-lint` zero tests)                                                                                                                      | High     | M      | Quality |
-| 5  | 🔗 cqrs-lint as CI gate step                                                                                                                                                     | High     | S      | Quality |
-| 6  | 🔗 Suppression audit trail (`SuppressedBy`/`SuppressedReason`) + unknown-rule-ID warning                                                                                         | Medium   | S      | Feature |
-| 7  | 🔗 OpenTelemetry instrumentation (otel/v4 v4.3.0 already in graph)                                                                                                               | High     | M      | Feature |
-| 8  | 🔗 Structured logging fields (source, page, event_id)                                                                                                                            | Medium   | S      | Feature |
-| 9  | 🔗 API authentication middleware                                                                                                                                                 | High     | M      | Feature |
-| 10 | 🔗 API pagination headers (`X-Total-Count`, cursor)                                                                                                                              | Medium   | S      | Feature |
-| 11 | 🔗 API rate limiting middleware                                                                                                                                                  | Medium   | S      | Feature |
-| 12 | 🔗 OpenAPI error-response schemas per endpoint                                                                                                                                   | Medium   | S      | Feature |
-| 13 | 🔗 `pkg/cqrs` coverage 82.4% → error paths + store-factory branches                                                                                                              | Medium   | M      | Quality |
-| 14 | 🔗 SQLite file-backed integration tests (`t.TempDir()`, WAL/concurrency)                                                                                                         | High     | M      | Quality |
-| 15 | 🔗 Adopt `UpcasterRegistry` (schema V1→V3 foundation ready)                                                                                                                      | Medium   | M      | Feature |
-| 16 | 🔗 Rename `AggregateID()` → `StreamID()` (breaking; next minor/major)                                                                                                            | Medium   | S      | Cleanup |
-| 17 | 🔗 Real GitHub PAT smoke test for `provider/github`                                                                                                                              | High     | S      | Quality |
-| 18 | 🔗 `govalid` struct tags (`SyncOptions`, `CQRSConfig`)                                                                                                                           | Low      | S      | Quality |
-| 19 | 🔗 Rewrite `CONTRIBUTING.md` (25-line stub → architecture/testing guide)                                                                                                         | Medium   | M      | Docs    |
-| 20 | 🔗 Per-sync `ConflictResolver` override (`SyncOptions`)                                                                                                                          | Medium   | S      | Feature |
-| 21 | 🔗 `ItemFilter.Validate()` (negative Limit/Offset)                                                                                                                               | Low      | S      | Quality |
-| 22 | 🔗 Branded `ContentHash` type                                                                                                                                                    | Low      | S      | Quality |
-| 23 | 🔗 Typed `Attributes` accessors (`pkg/data/model`)                                                                                                                               | Medium   | S      | Feature |
-| 24 | 🔗 `SyncResult`/`SyncSummary` vocabulary alignment                                                                                                                               | Low      | S      | Cleanup |
-| 25 | 🔗 Full-pipeline benchmarks                                                                                                                                                      | Medium   | M      | Quality |
-| 26 | ★ Migrate `exhaustruct` → `exhaustruct_v5` in `.golangci.yml` (deprecation warning observed)                                                                                     | Medium   | S      | Cleanup |
-| 27 | ★ Restructure AGENTS.md under 30 KB (link out to ADRs; keep gotchas ≤20)                                                                                                         | Medium   | M      | Docs    |
-| 28 | ★ Recompute coverage % after dep churn; re-run dprint check on all docs edited today                                                                                             | Low      | S      | Docs    |
-| 29 | ★ Add `dprint` to the nix devShell                                                                                                                                               | Low      | S      | Tooling |
-| 30 | ★ Verify `provider/github/README.md` prose against the `FetchPages` rebuild                                                                                                      | Medium   | S      | Docs    |
-| 31 | ★ Delete unused `SSH_PRIVATE_KEY` GitHub secret (AGENTS notes it's dead)                                                                                                         | Low      | S      | CI      |
-| 32 | ★ Decide + execute: annotate/archive the 11 June 10–15 session reports (routing home now exists)                                                                                 | Low      | M      | Docs    |
-| 33 | ★ Byte-level pass over the 2026-0* HTML snapshots if "viewed" must mean read (else record them as classified-by-prior-pass)                                                      | Low      | M      | Docs    |
-| 34 | ★ Compute test counts in CI/check instead of hand-copying into 4 docs                                                                                                            | Medium   | M      | Tooling |
-| 35 | ★ Commit the concurrent session's untracked `docs/research/2026-09-05_go-cqrs-lite-deep-dive.html`                                                                               | Low      | S      | Docs    |
-| 36 | ★ Check pkg.go.dev indexes go-localsync after the public flip                                                                                                                    | Medium   | S      | Release |
-| 37 | 🧭 Second provider (GitLab/Jira) to validate the interface                                                                                                                       | High     | L      | Feature |
-| 38 | 🧭 Export to JSON/CSV                                                                                                                                                            | Medium   | M      | Feature |
-| 39 | 🧭 Event retention / TTL (+ tombstone purge)                                                                                                                                     | Medium   | M      | Feature |
-| 40 | 🧭 TUI with Bubble Tea (consumer app)                                                                                                                                            | Low      | L      | Feature |
-| 41 | 🧭 Daemon/background mode (consumer app)                                                                                                                                         | Low      | M      | Feature |
-| 42 | 🧭 Multiple-source sync in one run                                                                                                                                               | Medium   | L      | Feature |
-| 43 | 🧭 Recurring-suggestions cluster (BDD suite, fuzz, Prometheus, SSE, config-file, NixOS module) — unowned raw ideas                                                               | Low      | L      | Feature |
-| 44 | ★ Single explicit commit for today's archive sweep (if daemon fragmentation bothers you)                                                                                         | Low      | S      | Git     |
-| 45 | ★ Consider a `docs/status/README.md` explaining archive policy + LEAVE-ALONE tiers                                                                                               | Low      | S      | Docs    |
-| 46 | ★ Record the "appendix-bucket vs per-item-inline" annotation policy as a project convention                                                                                      | Low      | S      | Docs    |
-| 47 | ★ Verify `nix run .#lint` actually exists before any doc claims it (claim was dropped today; verify the app)                                                                     | Low      | S      | Docs    |
-| 48 | ★ Separate `provider/github` CHANGELOG (its lifecycle is now independent of core releases)                                                                                       | Medium   | S      | Docs    |
-| 49 | ★ Docs-health VERIFY as a standing pre-release step (wire into the release routine)                                                                                              | High     | S      | Process |
-| 50 | ★ Sweep remaining `AggregateID` vocabulary in ADRs/docs vs the upstream `StreamID` rename (v0.4.1 item #10, still open)                                                          | Low      | S      | Docs    |
+| ~~1~~  | ~~★ Verify `v0.5.0` + `provider/github/v0.1.0` pushed; GitHub Releases exist; then confirm proxy.golang.org serves them post-public-flip (re-tag/bump if the proxy never saw them)~~ done — verified 2026-09-05 evening — proxy.golang.org @latest = v0.5.0 + GitHub Releases | ~~Critical~~ | ~~S~~ | ~~Release~~ |
+| ~~2~~  | ~~★ Run `buildflow --build-mode full` inside the devShell (post dep-bump)~~ done — routed to TODO_LIST buildflow full run | ~~High~~ | ~~M~~ | ~~Quality~~ |
+| ~~3~~  | ~~★ Run `nix flake check` (go-standard module, cqrs-lint check)~~ done — verified 2026-09-05 evening — nix build + flake check green post vendorHash re-pin | ~~High~~ | ~~S~~ | ~~Quality~~ |
+| ~~4~~  | ~~🔗 cqrs-lint CLI test coverage (`cmd/cqrs-lint` zero tests)~~ done — M11 3b9e8e3 — 8 CLI tests | ~~High~~ | ~~M~~ | ~~Quality~~ |
+| ~~5~~  | ~~🔗 cqrs-lint as CI gate step~~ done — M03 internal gate 3b9e8e3 | ~~High~~ | ~~S~~ | ~~Quality~~ |
+| ~~6~~  | ~~🔗 Suppression audit trail (`SuppressedBy`/`SuppressedReason`) + unknown-rule-ID warning~~ done — M18 3b9e8e3 | ~~Medium~~ | ~~S~~ | ~~Feature~~ |
+| ~~7~~  | ~~🔗 OpenTelemetry instrumentation (otel/v4 v4.3.0 already in graph)~~ done — M05 3b9e8e3 | ~~High~~ | ~~M~~ | ~~Feature~~ |
+| ~~8~~  | ~~🔗 Structured logging fields (source, page, event_id)~~ done — M07 3b9e8e3 | ~~Medium~~ | ~~S~~ | ~~Feature~~ |
+| ~~9~~  | ~~🔗 API authentication middleware~~ done — M12 3b9e8e3 | ~~High~~ | ~~M~~ | ~~Feature~~ |
+| ~~10~~ | ~~🔗 API pagination headers (`X-Total-Count`, cursor)~~ done — M14 3b9e8e3 | ~~Medium~~ | ~~S~~ | ~~Feature~~ |
+| ~~11~~ | ~~🔗 API rate limiting middleware~~ done — M13 3b9e8e3 | ~~Medium~~ | ~~S~~ | ~~Feature~~ |
+| ~~12~~ | ~~🔗 OpenAPI error-response schemas per endpoint~~ done — M22 3b9e8e3 | ~~Medium~~ | ~~S~~ | ~~Feature~~ |
+| ~~13~~ | ~~🔗 `pkg/cqrs` coverage 82.4% → error paths + store-factory branches~~ done — M17 3b9e8e3 | ~~Medium~~ | ~~M~~ | ~~Quality~~ |
+| ~~14~~ | ~~🔗 SQLite file-backed integration tests (`t.TempDir()`, WAL/concurrency)~~ done — M10 3b9e8e3 | ~~High~~ | ~~M~~ | ~~Quality~~ |
+| ~~15~~ | ~~🔗 Adopt `UpcasterRegistry` (schema V1→V3 foundation ready)~~ done — M19 3b9e8e3 | ~~Medium~~ | ~~M~~ | ~~Feature~~ |
+| ~~16~~ | ~~🔗 Rename `AggregateID()` → `StreamID()` (breaking; next minor/major)~~ done — ADR-0009 f6e2f40 (v0.6 window) | ~~Medium~~ | ~~S~~ | ~~Cleanup~~ |
+| ~~17~~ | ~~🔗 Real GitHub PAT smoke test for `provider/github`~~ done — M21 3b9e8e3 | ~~High~~ | ~~S~~ | ~~Quality~~ |
+| ~~18~~ | ~~🔗 `govalid` struct tags (`SyncOptions`, `CQRSConfig`)~~ done — pivoted — real Validate() methods M26 3b9e8e3 | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~19~~ | ~~🔗 Rewrite `CONTRIBUTING.md` (25-line stub → architecture/testing guide)~~ done — M26 3b9e8e3 | ~~Medium~~ | ~~M~~ | ~~Docs~~ |
+| ~~20~~ | ~~🔗 Per-sync `ConflictResolver` override (`SyncOptions`)~~ done — M25 6a45716 | ~~Medium~~ | ~~S~~ | ~~Feature~~ |
+| ~~21~~ | ~~🔗 `ItemFilter.Validate()` (negative Limit/Offset)~~ done — M23 3b9e8e3 | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~22~~ | ~~🔗 Branded `ContentHash` type~~ done — M23 3b9e8e3 | ~~Low~~ | ~~S~~ | ~~Quality~~ |
+| ~~23~~ | ~~🔗 Typed `Attributes` accessors (`pkg/data/model`)~~ done — M23 3b9e8e3 | ~~Medium~~ | ~~S~~ | ~~Feature~~ |
+| ~~24~~ | ~~🔗 `SyncResult`/`SyncSummary` vocabulary alignment~~ done — ADR-0009 f6e2f40 (v0.6 window) | ~~Low~~ | ~~S~~ | ~~Cleanup~~ |
+| ~~25~~ | ~~🔗 Full-pipeline benchmarks~~ done — M27 3b9e8e3 | ~~Medium~~ | ~~M~~ | ~~Quality~~ |
+| ~~26~~ | ~~★ Migrate `exhaustruct` → `exhaustruct_v5` in `.golangci.yml` (deprecation warning observed)~~ done at `dc6b88f` | ~~Medium~~ | ~~S~~ | ~~Cleanup~~ |
+| ~~27~~ | ~~★ Restructure AGENTS.md under 30 KB (link out to ADRs; keep gotchas ≤20)~~ done — routed to TODO_LIST AGENTS restructure | ~~Medium~~ | ~~M~~ | ~~Docs~~ |
+| ~~28~~ | ~~★ Recompute coverage % after dep churn; re-run dprint check on all docs edited today~~ done — recomputed 2026-09-05 evening sweep (309/11 + coverage table) | ~~Low~~ | ~~S~~ | ~~Docs~~ |
+| ~~29~~ | ~~★ Add `dprint` to the nix devShell~~ done at `9625b1b` | ~~Low~~ | ~~S~~ | ~~Tooling~~ |
+| ~~30~~ | ~~★ Verify `provider/github/README.md` prose against the `FetchPages` rebuild~~ done at `9625b1b` | ~~Medium~~ | ~~S~~ | ~~Docs~~ |
+| ~~31~~ | ~~★ Delete unused `SSH_PRIVATE_KEY` GitHub secret (AGENTS notes it's dead)~~ done — routed to TODO_LIST SSH_PRIVATE_KEY owner action | ~~Low~~ | ~~S~~ | ~~CI~~ |
+| ~~32~~ | ~~★ Decide + execute: annotate/archive the 11 June 10–15 session reports (routing home now exists)~~ done — 2026-09-05 evening sweep — June reports annotated + archived | ~~Low~~ | ~~M~~ | ~~Docs~~ |
+| ~~33~~ | ~~★ Byte-level pass over the 2026-0* HTML snapshots if "viewed" must mean read (else record them as classified-by-prior-pass)~~ done — 2026-09-05 evening sweep — 25 HTML snapshots viewed + classified | ~~Low~~ | ~~M~~ | ~~Docs~~ |
+| ~~34~~ | ~~★ Compute test counts in CI/check instead of hand-copying into 4 docs~~ done — routed to TODO_LIST doc-drift CI checks | ~~Medium~~ | ~~M~~ | ~~Tooling~~ |
+| ~~35~~ | ~~★ Commit the concurrent session's untracked `docs/research/2026-09-05_go-cqrs-lite-deep-dive.html`~~ done — verified tracked (git ls-files docs/research) | ~~Low~~ | ~~S~~ | ~~Docs~~ |
+| ~~36~~ | ~~★ Check pkg.go.dev indexes go-localsync after the public flip~~ done — verified 2026-09-05 — release-integrity pass | ~~Medium~~ | ~~S~~ | ~~Release~~ |
+| ~~37~~ | ~~🧭 Second provider (GitLab/Jira) to validate the interface~~ done — ROADMAP recorded-decisions table | ~~High~~ | ~~L~~ | ~~Feature~~ |
+| ~~38~~ | ~~🧭 Export to JSON/CSV~~ done — ROADMAP recorded-decisions table | ~~Medium~~ | ~~M~~ | ~~Feature~~ |
+| ~~39~~ | ~~🧭 Event retention / TTL (+ tombstone purge)~~ done — ROADMAP recorded-decisions table | ~~Medium~~ | ~~M~~ | ~~Feature~~ |
+| ~~40~~ | ~~🧭 TUI with Bubble Tea (consumer app)~~ done — ROADMAP recorded-decisions table | ~~Low~~ | ~~L~~ | ~~Feature~~ |
+| ~~41~~ | ~~🧭 Daemon/background mode (consumer app)~~ done — ROADMAP recorded-decisions table | ~~Low~~ | ~~M~~ | ~~Feature~~ |
+| ~~42~~ | ~~🧭 Multiple-source sync in one run~~ done — ROADMAP recorded-decisions table | ~~Medium~~ | ~~L~~ | ~~Feature~~ |
+| ~~43~~ | ~~🧭 Recurring-suggestions cluster (BDD suite, fuzz, Prometheus, SSE, config-file, NixOS module) — unowned raw ideas~~ done — ROADMAP recurring-suggestions cluster | ~~Low~~ | ~~L~~ | ~~Feature~~ |
+| ~~44~~ | ~~★ Single explicit commit for today's archive sweep (if daemon fragmentation bothers you)~~ done — daemon sweep accepted | ~~Low~~ | ~~S~~ | ~~Git~~ |
+| ~~45~~ | ~~★ Consider a `docs/status/README.md` explaining archive policy + LEAVE-ALONE tiers~~ done — 2026-09-05 — docs/status/README.md | ~~Low~~ | ~~S~~ | ~~Docs~~ |
+| ~~46~~ | ~~★ Record the "appendix-bucket vs per-item-inline" annotation policy as a project convention~~ done — 2026-09-05 — policy recorded in docs/status/README.md | ~~Low~~ | ~~S~~ | ~~Docs~~ |
+| ~~47~~ | ~~★ Verify `nix run .#lint` actually exists before any doc claims it (claim was dropped today; verify the app)~~ done — verified 2026-09-05 — no .#lint app in flake.nix; claim stays dropped | ~~Low~~ | ~~S~~ | ~~Docs~~ |
+| ~~48~~ | ~~★ Separate `provider/github` CHANGELOG (its lifecycle is now independent of core releases)~~ done — routed to TODO_LIST provider/github CHANGELOG | ~~Medium~~ | ~~S~~ | ~~Docs~~ |
+| ~~49~~ | ~~★ Docs-health VERIFY as a standing pre-release step (wire into the release routine)~~ done — routed to TODO_LIST standing pre-release VERIFY step | ~~High~~ | ~~S~~ | ~~Process~~ |
+| ~~50~~ | ~~★ Sweep remaining `AggregateID` vocabulary in ADRs/docs vs the upstream `StreamID` rename (v0.4.1 item #10, still open)~~ done — routed to TODO_LIST AggregateID vocabulary sweep (v0.6) | ~~Low~~ | ~~S~~ | ~~Docs~~ |
 
 ## g) Questions I cannot answer myself
 
