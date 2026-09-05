@@ -121,7 +121,7 @@ Honestly? **Nothing is totally fucked up.** The build compiles. All 290 tests pa
 
 2. **Three global Mapper variables** in `pkg/data/transform/` (`FromProviderItem`, `ToItemView`, `ProviderToView`) — these are lint violations and discourage testability. They exist but are unused by the CQRS layer.
 
-3. **`ConfigureTursoPool` still in codebase** — `store_factory.go:71` calls `cqrsstorage.ConfigureTursoPool(db)`. Turso support was removed in the v2 migration. The function name is misleading and confusing. (Function itself does generic SQLite pool config, but the name is wrong.)
+3. ~~**`ConfigureTursoPool` still in codebase** — `store_factory.go:71` calls `cqrsstorage.ConfigureTursoPool(db)`. Turso support was removed in the v2 migration. The function name is misleading and confusing. (Function itself does generic SQLite pool config, but the name is wrong.)~~ → moot — the Turso layer was removed entirely
 
 4. **`CQRSStack.GetTypes` duplicate** — `GetTypes()` and `GetItemTypes()` are identical. Two names for one method. One satisfies `SyncStore`, one is used by CLI. This is a naming smell.
 
@@ -285,3 +285,16 @@ a542818 test(cqrs,api): add integration tests + benchmarks for data layer migrat
 ---
 
 _Report generated automatically. All data verified against current working tree._
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** The aspirational data packages were deleted (session 13); schema upcasters shipped (pkg/cqrs/upcaster.go); ADRs, pagination headers, and OTel shipped.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

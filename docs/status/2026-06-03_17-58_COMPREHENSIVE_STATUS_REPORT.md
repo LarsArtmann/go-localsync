@@ -111,7 +111,7 @@ Go-LocalSync is a **generic synchronization SDK** with event-sourced CQRS, plugg
 | `pkg/cqrs`                 | 85.7%    | `runner.go`, `store_factory.go`, `projection.go` have low/no direct test coverage |
 | `pkg/providers/github`     | 84.7%    | Minor gaps in error paths                                                         |
 | `pkg/api`                  | 76.3%    | Missing error path tests for store failures, malformed requests                   |
-| `cmd/examples/github-sync` | 13.7%    | **Main sync/stats/server flows completely untested**. Only helpers tested.        |
+| `cmd/examples/github-sync` | 13.7%    | **Main sync/stats/server flows ~~completely untested~~ → false today — cmd/ removed; flows covered by pkg/api + pkg/sync suites (309 tests)**. Only helpers tested.        |
 
 ### Zero-Coverage Files (No Direct Tests)
 
@@ -345,3 +345,16 @@ No circular dependencies. Clean one-way flow: `cqrs → sync → provider/types/
 ---
 
 _Generated at 2026-06-03 17:58 by Session 9_
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** ADRs 0001-0003 shipped; the provider/de-githubify pivots reshaped the feature asks; OTel, API auth, rate limiting, pagination headers, and OpenAPI error schemas all shipped 2026-09-05 (M-plan).
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

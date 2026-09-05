@@ -104,11 +104,11 @@
 
 ### But the following pre-existing issues are still in the codebase:
 
-1. **No upstream-deletion detection** — items the provider stops returning live forever in the read model. This is the #1 missing feature for a real sync SDK.
+1. ~~**No upstream-deletion detection** — items the provider stops returning live forever in the read model. This is the #1 missing feature for a real sync SDK.~~ → false today — opt-in Reconcile (ReasonUpstreamGone) shipped (ADR-0005)
 
 2. **`RateLimitConfig` and `RetryConfig` are still dead code** — declared, never enforced. The SDK will hammer a 429'd API into the ground.
 
-3. **`DeleteItem` is still an orphan API** — exists at `stack.go:154`, called only in tests. Misleading phantom surface.
+3. ~~**`DeleteItem` is still an orphan API** — exists at `stack.go:154`, called only in tests. Misleading phantom surface.~~ → superseded — replaced by TombstoneItem (session 21, ADR-0005)
 
 4. **Schema upcasting is still cargo-culted** — the entire "upcasting" is `if v==0 { v=V1 }`. Future schema changes = silent zero-fills.
 
@@ -183,3 +183,16 @@ The tradeoff:
 - **Explicit opt-in:** Safer — consumer decides when they have a complete view. But then "ghost items" persist until the consumer remembers to run reconciliation.
 
 This is a product-identity question, not an engineering one. It determines whether the SDK is "a mirror that stays in sync" (reconcile every time) or "an append/update log" (reconcile on demand). I cannot decide this without knowing the intended consumer experience.
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** P2-P5 shipped in session 21 (tombstones); P6.2 upcasters shipped (pkg/cqrs/upcaster.go); the §g reconcile question was answered (opt-in, HasMore-guarded).
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

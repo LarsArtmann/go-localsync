@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Go-LocalSync is a **mature, production-quality Go synchronization SDK** with event-sourced CQRS, pluggable conflict resolution, branded IDs, and dual storage backends. **264 tests across 11 packages, all green.** The codebase has reached the mathematical deduplication floor (zero meaningful clones at t=50, all remaining at t=15 are Go syntax atoms).
+~~Go-LocalSync is a **mature, production-quality Go synchronization SDK** with event-sourced CQRS, pluggable conflict resolution, branded IDs, and dual storage backends. **264 tests across 11 packages, all green.** The codebase has reached the mathematical deduplication floor (zero meaningful clones at t=50, all remaining at t=15 are Go syntax atoms).~~ → count churn — authoritative 2026-09-05 count: 309 test functions / 11 packages
 
 The previous session (16) committed a broken build — truncated `WaitForCount` in `testutil.go` and missing `UpdatedAt` validation in model tests. This session fixes both issues before producing this report.
 
@@ -219,3 +219,16 @@ The question is: Should `UpdatedAt` be required for all items, or should it be o
 | Providers           | 1 (GitHub)                                  |
 | HTTP Endpoints      | 4                                           |
 | Storage Backends    | 2 (memory, SQLite)                          |
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** Everything marked open either shipped or was consciously pivoted — govalid became real Validate() methods on 2026-09-05; CONTRIBUTING.md rewritten (M26).
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

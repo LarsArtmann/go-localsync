@@ -44,7 +44,7 @@ Continued the semantic code deduplication effort from session 11, pushing from t
 ### Codebase Health
 
 - **12,667 lines** of Go code across 11 packages
-- **220+ tests** — all green, 0 failures
+- ~~**220+ tests** — all green, 0 failures~~ → count churn — authoritative 2026-09-05 count: 309 test functions / 11 packages
 - **77.3% overall test coverage**
 - **0 clones at threshold 50** (industry standard)
 - **Working tree clean** — all changes committed
@@ -219,3 +219,16 @@ At threshold 15, art-dupl detects **2-token patterns** — these are Go language
 - Helper functions themselves become clones (`assertConfigField` ≈ `AssertEqual`)
 
 **Any extraction at this level creates new clones.** This is the mathematical floor.
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** The stop-deduping conclusion held; lint reached 0 issues; CI carries the coverage gates.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

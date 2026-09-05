@@ -79,7 +79,7 @@ The `pkg/data/` package is a well-architected layer system that is **disconnecte
 6. **Real-time sync protocol** — CRDT `SyncRequest`/`SyncResponse` wire protocol
 7. **Second provider** — Only GitHub exists; GitLab or others would validate the Provider interface
 8. **Migration tooling** — Schema evolution for SQLite read model
-9. **CI pipeline** — No GitHub Actions or equivalent configured
+9. ~~**CI pipeline** — No GitHub Actions or equivalent configured~~ → false — CI has been green across test/lint/security/build/provider jobs
 10. **Benchmarking/Profiling** — No performance baselines or load tests
 
 ---
@@ -259,3 +259,16 @@ $ git status         3 modified files (minor: golangci.yml regex, error wrapping
 - `.golangci.yml` — Regex pattern fix for typecheck exclude
 - `pkg/cqrs/stack.go` — Enhanced error wrapping in SyncItems
 - `pkg/providers/github/client_retry.go` — `errors.AsType` adoption
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** The data/ aspirational packages were deleted (session 13); export + OTel shipped 2026-09-05; TUI/daemon/second-provider remain ROADMAP themes per ADR-0004.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

@@ -70,7 +70,7 @@ Committed in `8c0847f`. The aggregate no longer nils out the item on delete — 
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Tombstone lifecycle** | Tombstone + resurrect + reconcile all work, but there is **no purge/TTL** for tombstoned rows — they accumulate forever. Documented as "future" in ADR-0005. |
 | **Example coverage**    | `ExampleSyncer` shows the happy path. No example yet for tombstone→resurrect or plugging in a `ConflictResolver`.                                            |
-| **Retry configuration** | Retry works with `provider.DefaultRetryConfig`, but there is **no public setter** — consumers can't tune `MaxAttempts`/backoff without editing the SDK.      |
+| **Retry configuration** | Retry works with `provider.DefaultRetryConfig`, but there is **~~no public setter~~ → done — WithRetry shipped (session 22, ca0844c)** — consumers can't tune `MaxAttempts`/backoff without editing the SDK.      |
 
 ---
 
@@ -165,3 +165,16 @@ go build ./...                     ✅
 go test ./... -count=1             ✅ 188 tests, 9 packages
 golangci-lint run ./... --timeout=4m ✅ 0 issues
 ```
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** Nearly everything closed within 24h; retry tuning shipped (WithRetry); purge/TTL remains an ADR-0005 Future tracked in ROADMAP open questions.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

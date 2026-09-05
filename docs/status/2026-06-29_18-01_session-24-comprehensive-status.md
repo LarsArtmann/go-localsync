@@ -135,7 +135,7 @@ The buildflow pre-commit hook (60s budget) runs gofumpt/goimports across the ent
 
 The banned `yaml.v3` (CVEs, aging) is pulled in transitively (indirect). It's not used directly by our code, but it's in the dependency graph. Should be tracked / replaced when the pulling dep updates.
 
-### 5. `otel/v3` is vendored dead weight
+~~### 5. `otel/v3` is vendored dead weight~~ → superseded — vendor/ removed; OTel shipped as opt-in CQRSConfig.OTel (M05)
 
 The entire `otel/v3` module (~11 files) is vendored but produces zero spans/metrics. It's carrying bytes and module-graph weight for nothing. Either wire it or remove it from the direct dependency set.
 
@@ -250,3 +250,8 @@ Session 24's fixes all shipped. Since this report, **v0.4.0** landed:
 - **projectionhost/v3** → upgraded to **projectionhost/v4** (ADR-0006), now with DLQ wired.
 - **`encoding/json` v1→v2** — **done** (adopted `encoding/json/v2` via `GOEXPERIMENT=jsonv2`).
 - **Test count** is now **216** (this report said 190).
+
+### 2026-09-05 sweep update
+
+json/v2 shipped (v0.4.0); OTel shipped (M05); projectionhost adopted (session 25, ADR-0006); the §g OTel question was answered by the built-in opt-in bundle. Remaining forward items were routed to TODO_LIST.md / ROADMAP.md; stale claims struck inline. Report fully resolved → archived 2026-09-05.
+

@@ -3,7 +3,7 @@
 **Date:** 2026-06-11 14:09
 **Branch:** master
 **Commits:** 1360706 (latest)
-**Build:** ✅ CLEAN | **Tests:** ✅ 283 PASS, 0 FAIL | **Vet:** ✅ CLEAN | **gofmt:** ✅ CLEAN | **Race:** ✅ CLEAN
+*~~*Build:** ✅ CLEAN | **Tests:** ✅ 283 PASS, 0 FAIL | **Vet:** ✅ CLEAN | **gofmt:** ✅ CLEAN | **Race:** ✅ CLEAN~~ → count churn — authoritative 2026-09-05 count: 309 test functions / 11 packages
 
 ---
 
@@ -255,3 +255,16 @@ All production files under 300 lines:
 - [x] All files < 300 lines
 - [x] No dead code in production files
 - [x] All exported symbols have external consumers or intentional API surface
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** ADRs 0001-0003 exist; testutil was extracted; the item-unification question was resolved by the ADR-0007 Attributes model.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

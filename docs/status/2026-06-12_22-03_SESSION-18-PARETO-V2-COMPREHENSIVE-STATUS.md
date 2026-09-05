@@ -274,3 +274,16 @@ This is a judgment call about workflow friction vs. static analysis coverage. I 
 ## Working Tree
 
 CLEAN. Everything committed and pushed to `master` at `80f799a`.
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** Phase 2 was superseded by ADR-0007 (Attributes map); Phase 3 items shipped 2026-09-05 (auth/rate-limit/pagination) or remain ROADMAP themes; --conflict-strategy shipped in session 13.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

@@ -124,7 +124,7 @@ Sorted by **impact ÷ effort** (highest first).
 | 10 | **Replace `charm.land/log` in stack.go** — use stdlib `slog` directly if adapter adds no value   | Low    | Low      | Dependencies |
 | 11 | **Remove `SyncItemCommand.Options` field** — move event options to decider/repository layer      | Medium | Medium   | Architecture |
 | 12 | **Add `SyncOutcome` typed key** — replace bare `struct{}` context key with typed wrapper         | Low    | Low      | Type Model   |
-| 13 | **Make go-cqrs-lite public** — enables real `vendorHash`, drops committed vendor/                | High   | External | Dependencies |
+| 13 | **~~Make go-cqrs-lite public~~ → done 2026-09-05 — repo flipped public; proxy + pkg.go.dev serve it** — enables real `vendorHash`, drops committed vendor/                | High   | External | Dependencies |
 | 14 | **Add CI verification** — confirm CI pipeline works with v3 module paths                         | Medium | Low      | CI           |
 | 15 | **Add `buildflow` full run** — verify the complete nix pipeline passes end-to-end                | Medium | Low      | CI           |
 | 16 | **Add coverage badge to README** — surface the 91.7% average                                     | Low    | Low      | Docs         |
@@ -171,3 +171,16 @@ golangci-lint       → 0 issues
 gofmt -l pkg/       → clean
 go mod verify       → all modules verified
 ```
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** The docs were rebuilt; CatchUpSubscriber was superseded by projectionhost (ADR-0006); Materialize was rejected in §g; vendor/ is gone entirely; go-cqrs-lite went public 2026-09-05.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

@@ -46,7 +46,7 @@
 | **Tombstone lifecycle** | 🔄    | Works end-to-end, but **no purge/TTL** — tombstoned rows accumulate forever (ADR-0005 "Future").                                                                                                                                    |
 | **Test inventory docs** | 🔄    | `TODO_LIST.md` + `FEATURES.md` still claim **224 tests**. Reality: **190 functions / 300 runs**. This is a live doc/reality split-brain (see §d).                                                                                   |
 | **Coverage floor**      | 🔄    | `pkg/data/model` 80.5% and `pkg/cqrs` 82.1% sit just under a comfortable 85–90% target. The other 7 packages are 94–100%.                                                                                                           |
-| **CHANGELOG**           | 🔄    | **Frozen at v0.1.0.** Does not mention v0.2, v0.3, the tombstone pivot, CRDT removal, or any session-20→22 work. A consumer reading it would believe `VectorClock`/`Operation[T]`/`SyncMessage` still ship — **they were deleted**. |
+| **CHANGELOG**           | 🔄    | **~~Frozen at v0.1.0~~ → fixed — CHANGELOG maintained through v0.5.0.** Does not mention v0.2, v0.3, the tombstone pivot, CRDT removal, or any session-20→22 work. A consumer reading it would believe `VectorClock`/`Operation[T]`/`SyncMessage` still ship — **they were deleted**. |
 | **Retry surface**       | 🔄    | `WithRetry` is public, but only `fetchItems` is retried — the store path (`SyncItems`) is not. Intentional, but undocumented.                                                                                                       |
 | **Examples**            | 🔄    | Happy-path + tombstone lifecycle covered. **No `ConflictResolver` example** — the third headline capability has no demo.                                                                                                            |
 
@@ -172,3 +172,8 @@ This session correctly identified doc drift but could not fix it all. Since then
 - **Test count** is **216** (this report said 190; the "224" in docs was also wrong — it counted benchmarks/examples).
 - **`VectorClock`/`Operation[T]`/`SyncMessage`** — deleted entirely (CRDT distributed types removed, ADR-0004 scope). `LWWResolver` and `Conflict[T]` remain.
 - **`pkg/sync` rename to `pkg/synclib`** — **not done** (accepted tech debt; the stdlib collision is handled with `stdsync` alias).
+
+### 2026-09-05 sweep update
+
+The doc lies named here were fixed: TODO_LIST/FEATURES rebuilt (2026-09-05 passes), CHANGELOG maintained through v0.5.0, CI fully green. Remaining forward items were routed to TODO_LIST.md / ROADMAP.md; stale claims struck inline. Report fully resolved → archived 2026-09-05.
+

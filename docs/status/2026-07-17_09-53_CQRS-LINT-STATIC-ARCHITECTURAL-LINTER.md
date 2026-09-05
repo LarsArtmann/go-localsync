@@ -264,6 +264,8 @@ The project has both a native Go CI (`.github/workflows/ci.yml` with `go build`/
 - **23 tests, 88.5% coverage** — all passing.
 - **nixpkgs Go lag resolved** — `go_1_26` is now at 1.26.4, so `nix flake check` passes in-sandbox.
 - **golangci-lint integration** — cqrs-lint is wired into `.golangci.yml` and `flake.nix checks.cqrs-lint`.
-- **CLI tests** remain at **zero coverage** — the `cmd/cqrs-lint/main.go` binary itself is untested. This is the main remaining gap.
+- ~~**CLI tests** remain at **zero coverage** — the `cmd/cqrs-lint/main.go` binary itself is untested. This is the main remaining gap.~~ closed 2026-09-05 (M11): 8 CLI tests (exit-code contract, summary/`--json`, fixture round trip); process-level binary tests tracked in TODO_LIST.
 - The `-json` output was refactored (Finding helper constructors extracted across all checks in post-v0.4.0 refactoring).
-- **Still open:** `--version`/`--quiet`/`--format=github` flags, `testdata/` directory pattern, CI workflow step for cqrs-lint.
+- ~~**Still open:** `--version`/`--quiet`/`--format=github` flags, `testdata/` directory pattern, CI workflow step for cqrs-lint.~~ update 2026-09-05: the CI step shipped (internal gate M03 + secret-gated library gate); the flags and `testdata/` pattern are routed to the cqrs-lint CLI cluster in TODO_LIST.md.
+
+**2026-09-05 evening sweep:** every forward item resolved or routed → archived.

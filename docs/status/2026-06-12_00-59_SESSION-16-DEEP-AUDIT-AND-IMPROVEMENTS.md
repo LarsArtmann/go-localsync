@@ -38,7 +38,7 @@ Follow-up to session 15's deduplication work. Executed a deep self-audit, fixed 
 | `WaitForCount` timeout                                                       | Medium   | Has a busy-spin infinite loop with no context cancellation check. Should add `select` on `ctx.Done()` |
 | `ItemFilter.Limit/Offset` typed as `int`                                     | Low      | Can't distinguish "unset" from "zero". Should be `*int` for proper optional pagination                |
 | `provider.Item.Source` is `ProviderID` but `FetchOptions.Source` is `string` | Low      | Type inconsistency at the boundary                                                                    |
-| Real GitHub API integration test                                             | High     | All testing is mock-based. No verification against real API                                           |
+| Real GitHub API integration test                                             | High     | ~~All testing is mock-based~~ → moot — provider/github ships a live env-gated PAT smoke test (M21). No verification against real API                                           |
 | `go.mod` has `go 1.26.3`                                                     | Low      | Should be `go 1.26` (minor version only)                                                              |
 
 ### d) TOTALLY FUCKED UP
@@ -156,3 +156,16 @@ ok  github.com/larsartmann/go-localsync/pkg/provider
 ok  github.com/larsartmann/go-localsync/pkg/providers/github
 ok  github.com/larsartmann/go-localsync/pkg/sync
 ```
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** All five §c items were resolved (sessions 17/18) or explicitly rejected; the §g UpdatedAt question was answered by boundary validation.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

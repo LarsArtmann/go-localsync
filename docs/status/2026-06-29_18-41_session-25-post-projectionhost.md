@@ -100,7 +100,7 @@
 | **CI security**         | golangci-lint + go vet run                                 | No `gosec`, no `govulncheck`, no `gitleaks` in CI pipeline.                                              |
 | **Error response docs** | Error templates registered (What/Why/Fix/WayOut)           | OpenAPI spec lacks per-endpoint error response schemas.                                                  |
 | **API pagination**      | Query params (`limit`, `offset`) work                      | No `X-Total-Count` header, no cursor-based pagination.                                                   |
-| **Projection DLQ**      | `projectionhost` supports DLQ via `WithDeadLetterStore`    | Not wired — host created without DLQ option. Poison events crash-restart the worker but aren't captured. |
+| **Projection DLQ**      | `projectionhost` supports DLQ via `WithDeadLetterStore`    | ~~Not wired~~ → fixed — DLQ wired v0.4.0; SQLite-durable since 2026-09-05 (M01) — host created without DLQ option. Poison events crash-restart the worker but aren't captured. |
 
 ---
 
@@ -242,3 +242,8 @@ projectionhost shipped in **v0.4.0** (2026-07-18) as `projectionhost/v4` (upgrad
 - **projectionhost/v3** → **v4** (JSON v2 migration).
 - **Test count** is now **216** (this report said 191).
 - **Still open:** OpenTelemetry wiring, `UpcasterRegistry` adoption, API auth/rate-limiting — see TODO_LIST.md.
+
+### 2026-09-05 sweep update
+
+The DLQ was wired in v0.4.0 and made SQLite-durable on 2026-09-05 (M01); auth (M12); OTel (M05); per-sync resolver override (M25); json v2 (v0.4.0). Remaining forward items were routed to TODO_LIST.md / ROADMAP.md; stale claims struck inline. Report fully resolved → archived 2026-09-05.
+

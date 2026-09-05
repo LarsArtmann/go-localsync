@@ -54,3 +54,16 @@ All 11 test packages passing (`go test ./... -count=1`). golangci-lint clean (SA
 | P0       | Real GitHub API integration test | All testing is mock-based              |
 | P1       | `FetchOptions.Source` type audit | `string` vs `ProviderID` inconsistency |
 | P1       | Add second provider              | Only GitHub exists                     |
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** The Source audit completed (session 18, 80409a9); the second provider was superseded by the provider/github nested module; the two skipped rows remain recorded decisions.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

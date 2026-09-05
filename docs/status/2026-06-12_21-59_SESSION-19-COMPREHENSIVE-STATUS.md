@@ -132,7 +132,7 @@ These items are complete, tested, committed, and pushed.
 5. **Daemon/background mode** — No cron, systemd, or scheduler integration. Manual execution only.
 6. **Multi-user sync** — CLI accepts single `-user`. No multi-user support.
 7. **Data export** — No JSON/CSV export of stored events.
-8. **Real-time sync protocol** — `SyncRequest`/`SyncResponse` types exist in `pkg/crdt/` but are unused. Multi-node sync is planned, not implemented.
+8. ~~**Real-time sync protocol** — `SyncRequest`/`SyncResponse` types exist in `pkg/crdt/` but are unused. Multi-node sync is planned, not implemented.~~ → false — the CRDT protocol types were deleted (session 21, ADR-0004)
 
 ### Code Quality
 
@@ -321,3 +321,16 @@ ok  github.com/larsartmann/go-localsync/pkg/sync                  coverage: 85.4
 ---
 
 _Generated: 2026-06-12 21:59_
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** The CRDT protocol types were removed (session 21, ADR-0004); CommandRetry adoption is moot at v4; this very sweep executes the report's own archive recommendation.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._

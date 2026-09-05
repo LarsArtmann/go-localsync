@@ -204,4 +204,9 @@ This snapshot was taken at go-cqrs-lite v3.3–v3.4. Since then, **v0.4.0** ship
 | De-githubify                         | **Shipped** — ADR-0007, provider-agnostic `Attributes` map                                                             |
 | cqrs-lint                            | **Shipped** — 10 AST invariants (C0001–C0010)                                                                          |
 
-**Still open:** OpenTelemetry wiring, API auth/rate-limiting, making `go-cqrs-lite` public. See TODO_LIST.md.
+*~~*Still open:** OpenTelemetry wiring, API auth/rate-limiting, making `go-cqrs-lite` public. See TODO_LIST.md.~~ → all three shipped — OTel (M05), auth/rate-limit (M12/M13), go-cqrs-lite public (2026-09-05)
+
+### 2026-09-05 sweep update
+
+All three “still open” items shipped: OTel (M05), API auth/rate limiting (M12/M13), and the go-cqrs-lite public flip (2026-09-05). Remaining forward items were routed to TODO_LIST.md / ROADMAP.md; stale claims struck inline. Report fully resolved → archived 2026-09-05.
+

@@ -61,7 +61,7 @@ was investigated, fixed, tested, and committed — no item was hand-waved.
 | **`pkg/sync` → `pkg/synclib` rename** | Kills the stdlib `sync` collision footgun. **Breaking** for `github-local-sync`; deferred pending consumer coordination (see Top #1 question).                                      |
 | **OpenTelemetry instrumentation**     | `go-cqrs-lite` v3 ships an `otel/v3` module; no spans exist in go-localsync today. Tracked in TODO_LIST.md.                                                                         |
 | **Schema upcasters**                  | Carried over from ADR-0004's deferred data-module work.                                                                                                                             |
-| **CI build/release rework**           | The `.github/workflows/ci.yml` `build` job cross-compiles `./cmd/examples/github-sync` which was removed. Only failing piece of CI (`test` + `lint` pass). Tracked in TODO_LIST.md. |
+| **CI build/release rework**           | The `.github/workflows/ci.yml` `build` job cross-compiles `./cmd/examples/github-sync` which was removed. ~~Only failing piece of CI~~ → fixed — CI reworked in v0.4.0; fully green today (`test` + `lint` pass). Tracked in TODO_LIST.md. |
 | **Make `go-cqrs-lite` public**        | The one private dep; its privacy forces committed `vendor/` + `vendorHash = null`. Making it public drops the workaround.                                                           |
 
 ---
@@ -177,3 +177,16 @@ git status                  ✅ clean (all pushed to origin/master)
 | `pkg/data/model`  | 10      | 80.5%        |
 | `pkg/data/schema` | 4       | 100.0%       |
 | **Total**         | **193** | **~91% avg** |
+
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All forward-looking items in this report are closed as of 2026-09-05 (verified against the tree at `9625b1b`: go-localsync v0.5.0, 309 core tests / 11 packages, CI green, both cqrs-lint gates clean).
+
+- **Shipped since:** The HasMore guard, WithRetry, and ConflictResult parity shipped; CI was reworked in v0.4.0 and is fully green; the synclib rename was rejected 2026-07-22; go-cqrs-lite went public 2026-09-05.
+- **Superseded/moot:** anything tied to the Turso backend, committed `vendor/`, go-cqrs-lite v2/v3 WIP, or the pre-de-githubify domain model — all removed or reshaped by ADR-0005/0006/0007 and the go-cqrs-lite v4 migration.
+- **Routed:** ideas that still matter live in [TODO_LIST.md](../../TODO_LIST.md) or [ROADMAP.md](../../ROADMAP.md); deliberately deferred work is recorded in the ADRs.
+- **Policy:** bucket closure per this directory's [README](README.md); the worst now-false claims are struck inline above.
+
+_Report fully resolved → archived 2026-09-05._
