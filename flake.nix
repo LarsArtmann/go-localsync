@@ -25,6 +25,12 @@
         vendorHash = "sha256-4cEf1Zx8YEUXDj2vgndIhK/wMlR3U1zoqiRTF9A5sOQ=";
         description = "Generic synchronization SDK with CQRS";
 
+        # One-command full suite: `nix flake check` now runs build + format +
+        # hermetic lint (golangci-lint) + hermetic test + the cqrs-lint
+        # architectural gate. Race stays in CI/local (-race needs cgo).
+        lintAsCheck = true;
+        enableTestCheck = true;
+
         extraBuildAttrs.preBuild = "export GOEXPERIMENT=jsonv2";
 
         shellExtraEnv = {
