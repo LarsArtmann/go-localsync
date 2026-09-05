@@ -31,6 +31,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Tooling
 
+- [ ] **Restore the library cqrs-lint CI leg** — the pinned `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` depends on the private `larsartmann/go-finding` module; CI needs an `SSH_PRIVATE_KEY` secret (deploy key with read access to `go-finding`) to run it. The gate runs locally from the devShell meanwhile (documented in the workflow + AGENTS.md).
 - [ ] **Migrate `exhaustruct` → `exhaustruct_v5` in `.golangci.yml`** — golangci-lint v2.13 flags the old linter as deprecated (visible as a warning on every lint run).
 
 ### Provider module (`provider/github`)

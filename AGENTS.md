@@ -102,7 +102,7 @@ CI uses tagged versions from GitHub (no replace directives in `go.mod`), with no
 **Two cqrs-lint gates run in the `lint` job on every push:**
 
 1. **Internal gate**: `go run ./cmd/cqrs-lint --strict` — the ADR-0004 architectural invariant linter (10 rules, C0001-C0010). Fail on any finding incl. warnings.
-2. **Library gate**: `go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` — 203 consumer-facing domain rules from go-cqrs-lite, version-pinned so upstream rule changes cannot break CI without a deliberate bump; error-gated so warnings stay advisory.
+2. **Library gate (LOCAL-ONLY so far)**: `go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` — 203 consumer-facing domain rules from go-cqrs-lite, version-pinned; error-gated so warnings stay advisory. Cannot run on public CI runners yet: the pinned linter depends on the **private** `larsartmann/go-finding` module (the old `SSH_PRIVATE_KEY` secret was deleted). Runs from the devShell; to re-add the CI step, create the secret with a deploy key that can read `go-finding` (see the workflow comment).
    Known heuristic false positives (annotated inline via `//cqrs-lint:ignore <rule> <reason>`, never blanket-disabled): **C017** flags any `NewMemoryDeadLetterStore()` call site — the memory-backend branch in `store_factory.go` legitimately pairs the ephemeral store with the ephemeral DLQ while the sqlite branch wires the persistent one; **E005** handler detection misses handlers registered inside factory closures; **E014** drain heuristic assumes async delivery while our bus delivers synchronously.
 
 ```bash
