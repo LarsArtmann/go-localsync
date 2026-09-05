@@ -50,6 +50,10 @@ type TombstoneItemCommand struct {
 	Source   string
 	SourceID id.ExternalID
 	Reason   model.TombstoneReason
+	// Options carries event options (e.g. a correlation ID) onto the emitted
+	// ItemTombstoned events. TombstoneItem defaults a fresh correlation ID;
+	// callers dispatching directly may supply their own.
+	Options []event.Option
 }
 
 func wireCommandDispatcher(
@@ -63,6 +67,10 @@ func wireCommandDispatcher(
 	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
 
 	syncItemHandler := func(ctx context.Context, cmd *SyncItemCommand) error {
+		// Record causation so every emitted event names the command that
+		// produced it (picked up by the CommandCausalityEnricher on the repo).
+		ctx = event.WithCommandCausality(ctx, commandTypeSyncItem.String(), cmd.ID())
+
 		return repo.ExecuteRef(
 			ctx,
 			cqrsid.NewStreamRef(aggregateType, cmd.StreamID()),
@@ -75,10 +83,12 @@ func wireCommandDispatcher(
 	}
 
 	tombstoneHandler := func(ctx context.Context, cmd *TombstoneItemCommand) error {
+		ctx = event.WithCommandCausality(ctx, commandTypeTombstone.String(), cmd.ID())
+
 		return repo.ExecuteRef(
 			ctx,
 			cqrsid.NewStreamRef(aggregateType, cmd.StreamID()),
-			decideTombstone(cmd.Source, cmd.SourceID, cmd.Reason),
+			decideTombstone(cmd.Source, cmd.SourceID, cmd.Reason, cmd.Options...),
 		)
 	}
 

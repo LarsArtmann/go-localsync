@@ -128,7 +128,7 @@ func decideSync(
 // EventItemTombstoned with the given reason. It is a no-op for a brand-new
 // aggregate (nothing to hide) and idempotent for an already-tombstoned item.
 func decideTombstone(
-	source string, sourceID id.ExternalID, reason model.TombstoneReason,
+	source string, sourceID id.ExternalID, reason model.TombstoneReason, opts ...event.Option,
 ) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		if state.IsNew() || state.IsTombstoned() {
@@ -146,6 +146,7 @@ func decideTombstone(
 				Reason:       string(reason),
 				TombstonedAt: unixNano(time.Now().UTC()),
 			}},
+			opts...,
 		)
 		if err != nil {
 			return nil, pkgerrors.Wrapf(

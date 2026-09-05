@@ -84,8 +84,8 @@ func TestSQLiteDeadLetterStore_PersistsAcrossReopen(t *testing.T) {
 	if got.Error != entry.Error {
 		t.Errorf("Error mismatch: want %q, got %q", entry.Error, got.Error)
 	}
-	if got.Event.Type != entry.Event.Type {
-		t.Errorf("event type mismatch: want %q, got %q", entry.Event.Type, got.Event.Type)
+	if got.Event.Type() != entry.Event.Type() {
+		t.Errorf("event type mismatch: want %q, got %q", entry.Event.Type(), got.Event.Type())
 	}
 }
 
@@ -110,9 +110,9 @@ func sampleDeadLetterEntry(t *testing.T, sourceID string) projectionhost.DeadLet
 
 	return projectionhost.DeadLetterEntry{
 		ProjectionName: "sync-items",
-		EventID:        evts[0].ID.Get(),
-		EventType:      EventItemSynced.Get(),
-		StreamID:       evts[0].StreamID.Get(),
+		EventID:        evts[0].ID().String(),
+		EventType:      EventItemSynced.String(),
+		StreamID:       evts[0].StreamID().String(),
 		Event:          evts[0],
 		Error:          "poison payload",
 		FailedAt:       time.Now().UTC(),

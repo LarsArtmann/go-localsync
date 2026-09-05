@@ -50,6 +50,11 @@ The idempotent projection is still idempotent — overlap between live delivery 
 - **SQLite:** `storage.NewSQLiteCheckpointStore(db)` (creates `projection_checkpoints` table).
 - **Memory:** `memory.NewMemoryCheckpointStore()` (in-memory map; checkpoints lost on restart, which is correct — the memory store itself is ephemeral).
 
+### Per-backend dead-letter stores (addendum 2026-09-05, C017 fix)
+
+- **SQLite:** `projectionhost.NewSQLiteDeadLetterStore(ctx, db)` — the DLQ shares the SQLite file, so captured poison events **survive restarts**. Caught by the 2026-09-05 go-cqrs-lite utilization audit: the original wiring used `NewMemoryDeadLetterStore()` even for the SQLite backend, so captured poison events vanished on restart and every crash re-processed and re-captured them. `storeResult.dlq` carries the store from the factory to the runner.
+- **Memory:** falls back to `NewMemoryDeadLetterStore()` in `startProjectionRunner` (correct — the memory store is ephemeral by design).
+
 ### Wiring
 
 `startProjectionRunner` now:

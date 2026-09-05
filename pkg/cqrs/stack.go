@@ -129,6 +129,9 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 		decider.WithSnapshotStore[SyncItemState](snapshotStore),
 		decider.WithCodec[SyncItemState](codec.CBORCodec{}),
 		decider.WithSnapshotStrategy[SyncItemState](snapshotStrategy),
+		// Propagate command causation from the handler context into event
+		// metadata, so every event names the command that produced it.
+		decider.WithEnricher[SyncItemState](event.CommandCausalityEnricher),
 	)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "create decider repository")
@@ -182,7 +185,9 @@ func cleanupFailedConstruction(
 	}
 }
 
-// SyncItem dispatches a SyncItemCommand for a single item.
+// SyncItem dispatches a SyncItemCommand for a single item. A fresh
+// correlation ID is attached so the emitted events are traceable to this
+// call even outside a batch run.
 func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
@@ -190,7 +195,7 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         toDataItem(item),
 		RawJSON:      item.RawJSON,
-		Options:      nil,
+		Options:      []event.Option{event.WithCorrelationID(cqrsid.NewCorrelationID())},
 		outcome:      nil,
 	})
 }
@@ -211,6 +216,7 @@ func (s *CQRSStack) TombstoneItem(
 		Source:       source,
 		SourceID:     sourceID,
 		Reason:       reason,
+		Options:      []event.Option{event.WithCorrelationID(cqrsid.NewCorrelationID())},
 	})
 }
 
