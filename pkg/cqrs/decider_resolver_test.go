@@ -28,6 +28,19 @@ func (errorResolver) Resolve(_ *crdt.Conflict[*model.Item]) (*model.Item, error)
 	return nil, errors.New("resolver failed")
 }
 
+// recordingResolver delegates to pickSideResolver and records whether Resolve
+// was ever invoked.
+type recordingResolver struct {
+	inner pickSideResolver
+	calls int
+}
+
+func (r *recordingResolver) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
+	r.calls++
+
+	return r.inner.Resolve(c)
+}
+
 var (
 	resolverTestNow    = time.Now().Truncate(time.Millisecond)
 	resolverTestFuture = resolverTestNow.Add(2 * time.Hour)
@@ -110,4 +123,36 @@ func TestDecideSync_WithResolver(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestDecideSync_ResurrectTombstonedItem_BypassesResolver pins the by-design
+// resurrection disposition (ADR-0005 addendum): the resolver never arbitrates a
+// resurrection. The tombstoned local is a deleted marker, not live content, and
+// a sync event is the only path back to "live" — a local-wins resolver vetoing
+// it would hide an upstream-restored item forever, permanently diverging the
+// pull mirror from upstream truth.
+func TestDecideSync_ResurrectTombstonedItem_BypassesResolver(t *testing.T) {
+	t.Parallel()
+
+	localUpdatedAt := resolverTestNow
+	remoteUpdatedAt := resolverTestFuture
+
+	remoteItem := testItem("123", "PushEvent")
+	remoteItem.UpdatedAt = remoteUpdatedAt
+
+	state := testTombstonedState("123")
+	state.Item.UpdatedAt = localUpdatedAt
+
+	resolver := &recordingResolver{inner: pickSideResolver{pickSide: "local"}}
+
+	events, err := decideSync(toDataItem(remoteItem), nil, resolver)(state, 2)
+	testutil.MustNoError(t, err)
+	testutil.RequireLen(t, events, 1)
+	assertEventType(t, events[0], EventItemSynced)
+
+	testutil.AssertEqual(t, resolver.calls, 0, "resolver invocations during resurrection")
+
+	syncedPayload := unmarshalSyncedPayload(t, events[0])
+	testutil.AssertEqual(t, syncedPayload.UpdatedAt, remoteUpdatedAt.UnixNano(),
+		"resurrection must apply the remote item")
 }

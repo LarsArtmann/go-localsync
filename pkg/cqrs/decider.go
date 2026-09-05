@@ -106,6 +106,11 @@ func decideSync(
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		aggID := AggregateID(item.Source.Get(), item.ExternalID)
 
+		// By design (ADR-0005 addendum): resurrections bypass the resolver.
+		// A tombstoned local is a deleted marker, not live content, and a sync
+		// event is the only path back to "live" — a local-wins resolver vetoing
+		// it would hide an upstream-restored item forever. Pinned by
+		// TestDecideSync_ResurrectTombstonedItem_BypassesResolver.
 		if state.ShouldResurrect() {
 			return syncEvents(item, rawJSON, aggID, currentVersion, nil, opts...)
 		}

@@ -62,6 +62,29 @@ Three design rules follow from the data model:
 - SQLite adds `tombstoned`, `tombstone_reason`, `tombstoned_at` columns via an idempotent
   `migrateSyncItems`; `Upsert` resets them on resurrect.
 
+### Addendum (2026-09-06): resurrections bypass the conflict resolver
+
+**Disposition: by-design.** `DecideSync` never consults the configured
+`ConflictResolver` when the state is tombstoned (`ShouldResurrect()`); the incoming
+remote item always wins and a plain `ItemSynced` (no `ItemConflictFound`) is emitted.
+
+Rationale:
+
+1. A tombstoned local is a **deleted marker, not live content**. Its
+   `UpdatedAt`/`ContentHash` describe the pre-delete state; arbitrating that against
+   live upstream content is a category error for a content-conflict resolver.
+2. A sync event is the **only path back to "live"**. If a local-wins resolver could
+   veto a resurrection, an upstream-restored item would stay hidden forever — the
+   pull mirror would permanently diverge from upstream truth, breaking the
+   single-writer mirror contract.
+3. Design rule 2 above already fixed this semantics: "a sync event always means
+   'live'". The resolver's scope is content divergence between two *live* versions,
+   never the lifecycle transition itself.
+
+Pinned by `TestDecideSync_ResurrectTombstonedItem_BypassesResolver`
+(`pkg/cqrs/decider_resolver_test.go`); annotated at the branch in
+`pkg/cqrs/decider.go` (`decideSync`).
+
 ## Consequences
 
 ### Positive
