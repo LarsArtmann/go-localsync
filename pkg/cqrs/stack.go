@@ -299,12 +299,18 @@ func (s *CQRSStack) SyncItems(
 	items []*provider.Item,
 ) *synclib.SyncSummary {
 	if s.otel != nil {
-		var span batchSpan
-
-		ctx, span = startBatchSpan(ctx, s.otel)
-		defer span.End()
+		return withBatchSpan(ctx, s.otel, func(ctx context.Context) *synclib.SyncSummary {
+			return s.syncItems(ctx, items)
+		})
 	}
 
+	return s.syncItems(ctx, items)
+}
+
+func (s *CQRSStack) syncItems(
+	ctx context.Context,
+	items []*provider.Item,
+) *synclib.SyncSummary {
 	summary := &synclib.SyncSummary{
 		Results:   make([]synclib.ItemSyncResult, 0, len(items)),
 		Synced:    0,

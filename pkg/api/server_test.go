@@ -432,7 +432,7 @@ func TestServer_MetricsEndpoint_Optional(t *testing.T) {
 	srv := NewServer(synclib.NewSyncer(&testutil.MockProvider{}, nil, log.Default()), log.Default(), WithMetricsHandler(metricsHandler))
 
 	rec := httptest.NewRecorder()
-	srv.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	srv.ServeHTTP(rec, httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/metrics", nil))
 
 	if rec.Code != http.StatusOK {
 		t.Errorf("expected 200 from /metrics, got %d", rec.Code)
@@ -448,7 +448,7 @@ func TestServer_MetricsEndpoint_AbsentByDefault(t *testing.T) {
 	srv := newTestServer(&mockSyncStore{})
 
 	rec := httptest.NewRecorder()
-	srv.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	srv.ServeHTTP(rec, httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/metrics", nil))
 
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("expected 404 from /metrics without the option, got %d", rec.Code)

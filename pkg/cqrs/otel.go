@@ -7,23 +7,22 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/middleware/v4"
 	cqrsotel "github.com/larsartmann/go-cqrs-lite/otel/v4"
 	"github.com/larsartmann/go-cqrs-lite/projectionhost/v4"
+	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 )
 
-// batchSpan lets callers End() spans without importing the otel API.
-type batchSpan struct {
-	inner interface{ End(...otelSpanEndOption) }
-}
+// withBatchSpan opens the localsync.sync_items span around a batch run when
+// telemetry is enabled and injects the span context into run.
+func withBatchSpan(
+	ctx context.Context,
+	bundle *middleware.OTelBundle,
+	run func(context.Context) *synclib.SyncSummary,
+) *synclib.SyncSummary {
+	ctx, span := cqrsotel.StartSpan(
+		ctx, bundle.Tracer(), "localsync.sync_items", cqrsotel.SpanKindInternal,
+	)
+	defer span.End()
 
-type otelSpanEndOption = cqrsotel.SpanEndOption
-
-func (b batchSpan) End() { b.inner.End() }
-
-// startBatchSpan opens the localsync.sync_items span around a batch run when
-// telemetry is enabled.
-func startBatchSpan(ctx context.Context, bundle *middleware.OTelBundle) (context.Context, batchSpan) {
-	newCtx, span := bundle.Tracer().Start(ctx, "localsync.sync_items")
-
-	return newCtx, batchSpan{inner: span}
+	return run(ctx)
 }
 
 // projectionMetrics adapts a CQRSConfig.OTel bundle's metric instruments to

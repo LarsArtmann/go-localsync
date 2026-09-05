@@ -8,14 +8,14 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 	noopmetric "go.opentelemetry.io/otel/metric/noop"
-	"go.opentelemetry.io/otel/trace"
+	tracenoop "go.opentelemetry.io/otel/trace/noop"
 )
 
 func newNoopOTelBundle(t *testing.T) *middleware.OTelBundle {
 	t.Helper()
 
 	bundle, err := middleware.NewOTelBundle(
-		trace.NewNoopTracerProvider().Tracer("localsync-test"),
+		tracenoop.NewTracerProvider().Tracer("localsync-test"),
 		noopmetric.NewMeterProvider().Meter("localsync-test"),
 	)
 	testutil.MustNoError(t, err)
