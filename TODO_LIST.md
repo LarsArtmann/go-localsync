@@ -58,7 +58,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Consider a windows build leg** — the compile matrix is linux/darwin only; sqlite/CGO behavior on windows is unproven.
 - [ ] **Audit the library-gate suppression** — confirm the single `//cqrs-lint:ignore` reason is still current.
 - [ ] **Revisit inert pre-commit hooks** — formally enable (scoped) or delete; they are neither protecting nor costing anything today.
-- [ ] **Compute doc-drift-prone counts in CI instead of hand-copying** — test/coverage counts (AGENTS.md / README.md / FEATURES.md / TODO_LIST.md) and the AGENTS.md dependency table vs `go.mod` have both drifted repeatedly; generate or check them in CI (every 2026 drift involved hand-copied numbers).
+- [x] **Compute doc-drift-prone counts in CI instead of hand-copying** — test/coverage counts (AGENTS.md / README.md / FEATURES.md / TODO_LIST.md) and the AGENTS.md dependency table vs `go.mod` have both drifted repeatedly; generate or check them in CI (every 2026 drift involved hand-copied numbers).
+  ✅ DONE 2026-09-06: `scripts/check-doc-counts.sh` (per-package + totals + dep-table vs go.mod; `--coverage` local opt-in), wired into the CI lint job; first run caught the +4-test drift (309→313, cqrs 144→148) and it was fixed.
 - [ ] **Separate CHANGELOG for `provider/github`** — the nested module's lifecycle is now independent of core releases.
 - [ ] **Restructure AGENTS.md under ~30 KB** — link out to ADRs instead of inlining decisions; keep gotchas ≤20 (flagged as "bloated" by two consecutive reviews; the 2026-09-05 passes only pruned, never restructured).
 - [ ] **Make docs-health VERIFY a standing pre-release step** — docs drift after every release is systemic (Accuracy scored 1.5/10 once); wire the check into the release routine rather than running on-demand audits.
