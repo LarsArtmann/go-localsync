@@ -153,6 +153,7 @@ func createReadModel(cfg Config, sr storeResult) (ReadModel, error) {
 | 3 | `TimestampNano` helpers    | LOW      | Trivial       |
 | 4 | `CharmLogAdapter`          | LOW      | Low           |
 | 5 | `ireturn` factory guidance | LOW      | Documentation |
+
 ---
 
 ## Resolution (2026-09-05 docs-health sweep)

@@ -221,6 +221,7 @@ The de-githubify refactor shipped in **v0.4.0** (2026-07-18, ADR-0007). Since th
 - **ADR-0008** (Host framework pivot) — **Proposed, dormant**. Never executed. The project stayed within ADR-0004 scope.
 - **5 adoption-feedback gaps** — correctly identified as ADR-0004 scope boundaries. They remain **deferred by design**.
 - **The product question** (standalone vs merge vs upstream) — **still open**. go-localsync remains standalone; `go-cqrs-lite` remains private.
+
 ---
 
 ## Resolution (2026-09-05 docs-health sweep)

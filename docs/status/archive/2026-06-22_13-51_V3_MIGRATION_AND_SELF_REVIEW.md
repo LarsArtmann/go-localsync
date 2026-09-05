@@ -110,33 +110,33 @@ One **near-miss worth calling out:** In the initial migration I skipped `golangc
 
 Sorted by **impact ÷ effort** (highest first).
 
-| #  | Task                                                                                             | Impact | Effort   | Category     |
-| -- | ------------------------------------------------------------------------------------------------ | ------ | -------- | ------------ |
-| 1  | **Update `TODO_LIST.md`** — remove resolved v2 blockers, deleted cmd/examples, fix test count    | High   | Low      | Docs         |
-| 2  | **Update `FEATURES.md`** — replace Fold/projection.Runner references with v3 reality             | High   | Low      | Docs         |
-| 3  | **Fix AGENTS.md line 40** — "dual projection runner" → accurate description                      | Low    | Trivial  | Docs         |
-| 4  | **Add concurrent sync-during-replay test** — verify idempotent overlap assumption                | Medium | Low      | Testing      |
-| 5  | **Cover the 18.6% gap in `pkg/cqrs`** — identify and test uncovered error paths                  | Medium | Medium   | Testing      |
-| 6  | **Add `ParseConflictWinner` unit test** — verify unknown values default to remote                | Low    | Trivial  | Testing      |
-| 7  | **Consider `stack.Materialize` for projection** — evaluate if the tombstone-aware builder fits   | Medium | High     | Architecture |
-| 8  | **Evaluate `watermill.CatchUpSubscriber`** — for checkpointed incremental replay                 | Medium | High     | Architecture |
-| 9  | **Seal `SyncItemState` invariant** — make "deleted ⇒ Item nil" unrepresentable                   | Medium | Medium   | Type Model   |
-| 10 | **Replace `charm.land/log` in stack.go** — use stdlib `slog` directly if adapter adds no value   | Low    | Low      | Dependencies |
-| 11 | **Remove `SyncItemCommand.Options` field** — move event options to decider/repository layer      | Medium | Medium   | Architecture |
-| 12 | **Add `SyncOutcome` typed key** — replace bare `struct{}` context key with typed wrapper         | Low    | Low      | Type Model   |
-| 13 | **~~Make go-cqrs-lite public~~ → done 2026-09-05 — repo flipped public; proxy + pkg.go.dev serve it** — enables real `vendorHash`, drops committed vendor/                | High   | External | Dependencies |
-| 14 | **Add CI verification** — confirm CI pipeline works with v3 module paths                         | Medium | Low      | CI           |
-| 15 | **Add `buildflow` full run** — verify the complete nix pipeline passes end-to-end                | Medium | Low      | CI           |
-| 16 | **Add coverage badge to README** — surface the 91.7% average                                     | Low    | Low      | Docs         |
-| 17 | **Document v3 migration in CHANGELOG** — if the project maintains one                            | Low    | Low      | Docs         |
-| 18 | **Add domain language glossary** — `docs/DOMAIN_LANGUAGE.md` per AGENTS.md conventions           | Medium | Medium   | Docs         |
-| 19 | **Consider `sync.SyncSummary` streaming** — for large syncs, yield results incrementally         | Low    | High     | Feature      |
-| 20 | **Add rate-limit backpressure test** — verify `RateLimitCache` under concurrent access           | Low    | Medium   | Testing      |
-| 21 | **Evaluate `go-error-family` v0.4 patterns** — check if new constructors improve error paths     | Low    | Low      | Dependencies |
-| 22 | **Add `pkg/testutil` tests** — currently 0% coverage                                             | Low    | Low      | Testing      |
-| 23 | **Consider OpenTelemetry tracing** — v3 middleware has `EventTracing`/`CommandTracing`           | Low    | Medium   | Feature      |
-| 24 | **Audit `nolint` directives (13)** — verify each is still necessary after v3 migration           | Low    | Low      | Quality      |
-| 25 | **Add provider example** — since SDK is pure contract, a reference provider would help consumers | Medium | Medium   | Feature      |
+| #  | Task                                                                                                                                                       | Impact | Effort   | Category     |
+| -- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------- | ------------ |
+| 1  | **Update `TODO_LIST.md`** — remove resolved v2 blockers, deleted cmd/examples, fix test count                                                              | High   | Low      | Docs         |
+| 2  | **Update `FEATURES.md`** — replace Fold/projection.Runner references with v3 reality                                                                       | High   | Low      | Docs         |
+| 3  | **Fix AGENTS.md line 40** — "dual projection runner" → accurate description                                                                                | Low    | Trivial  | Docs         |
+| 4  | **Add concurrent sync-during-replay test** — verify idempotent overlap assumption                                                                          | Medium | Low      | Testing      |
+| 5  | **Cover the 18.6% gap in `pkg/cqrs`** — identify and test uncovered error paths                                                                            | Medium | Medium   | Testing      |
+| 6  | **Add `ParseConflictWinner` unit test** — verify unknown values default to remote                                                                          | Low    | Trivial  | Testing      |
+| 7  | **Consider `stack.Materialize` for projection** — evaluate if the tombstone-aware builder fits                                                             | Medium | High     | Architecture |
+| 8  | **Evaluate `watermill.CatchUpSubscriber`** — for checkpointed incremental replay                                                                           | Medium | High     | Architecture |
+| 9  | **Seal `SyncItemState` invariant** — make "deleted ⇒ Item nil" unrepresentable                                                                             | Medium | Medium   | Type Model   |
+| 10 | **Replace `charm.land/log` in stack.go** — use stdlib `slog` directly if adapter adds no value                                                             | Low    | Low      | Dependencies |
+| 11 | **Remove `SyncItemCommand.Options` field** — move event options to decider/repository layer                                                                | Medium | Medium   | Architecture |
+| 12 | **Add `SyncOutcome` typed key** — replace bare `struct{}` context key with typed wrapper                                                                   | Low    | Low      | Type Model   |
+| 13 | **~~Make go-cqrs-lite public~~ → done 2026-09-05 — repo flipped public; proxy + pkg.go.dev serve it** — enables real `vendorHash`, drops committed vendor/ | High   | External | Dependencies |
+| 14 | **Add CI verification** — confirm CI pipeline works with v3 module paths                                                                                   | Medium | Low      | CI           |
+| 15 | **Add `buildflow` full run** — verify the complete nix pipeline passes end-to-end                                                                          | Medium | Low      | CI           |
+| 16 | **Add coverage badge to README** — surface the 91.7% average                                                                                               | Low    | Low      | Docs         |
+| 17 | **Document v3 migration in CHANGELOG** — if the project maintains one                                                                                      | Low    | Low      | Docs         |
+| 18 | **Add domain language glossary** — `docs/DOMAIN_LANGUAGE.md` per AGENTS.md conventions                                                                     | Medium | Medium   | Docs         |
+| 19 | **Consider `sync.SyncSummary` streaming** — for large syncs, yield results incrementally                                                                   | Low    | High     | Feature      |
+| 20 | **Add rate-limit backpressure test** — verify `RateLimitCache` under concurrent access                                                                     | Low    | Medium   | Testing      |
+| 21 | **Evaluate `go-error-family` v0.4 patterns** — check if new constructors improve error paths                                                               | Low    | Low      | Dependencies |
+| 22 | **Add `pkg/testutil` tests** — currently 0% coverage                                                                                                       | Low    | Low      | Testing      |
+| 23 | **Consider OpenTelemetry tracing** — v3 middleware has `EventTracing`/`CommandTracing`                                                                     | Low    | Medium   | Feature      |
+| 24 | **Audit `nolint` directives (13)** — verify each is still necessary after v3 migration                                                                     | Low    | Low      | Quality      |
+| 25 | **Add provider example** — since SDK is pure contract, a reference provider would help consumers                                                           | Medium | Medium   | Feature      |
 
 ---
 

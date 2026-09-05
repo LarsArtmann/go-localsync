@@ -66,11 +66,11 @@ Committed in `8c0847f`. The aggregate no longer nils out the item on delete — 
 
 ## b) PARTIALLY DONE (🔄 In progress or incomplete)
 
-| Item                    | State                                                                                                                                                        |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Tombstone lifecycle** | Tombstone + resurrect + reconcile all work, but there is **no purge/TTL** for tombstoned rows — they accumulate forever. Documented as "future" in ADR-0005. |
-| **Example coverage**    | `ExampleSyncer` shows the happy path. No example yet for tombstone→resurrect or plugging in a `ConflictResolver`.                                            |
-| **Retry configuration** | Retry works with `provider.DefaultRetryConfig`, but there is **~~no public setter~~ → done — WithRetry shipped (session 22, ca0844c)** — consumers can't tune `MaxAttempts`/backoff without editing the SDK.      |
+| Item                    | State                                                                                                                                                                                                        |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Tombstone lifecycle** | Tombstone + resurrect + reconcile all work, but there is **no purge/TTL** for tombstoned rows — they accumulate forever. Documented as "future" in ADR-0005.                                                 |
+| **Example coverage**    | `ExampleSyncer` shows the happy path. No example yet for tombstone→resurrect or plugging in a `ConflictResolver`.                                                                                            |
+| **Retry configuration** | Retry works with `provider.DefaultRetryConfig`, but there is **~~no public setter~~ → done — WithRetry shipped (session 22, ca0844c)** — consumers can't tune `MaxAttempts`/backoff without editing the SDK. |
 
 ---
 

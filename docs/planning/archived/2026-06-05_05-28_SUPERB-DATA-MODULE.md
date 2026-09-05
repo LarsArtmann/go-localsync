@@ -285,6 +285,7 @@ flowchart TD
 - [x] `data.Item` is the domain entity in: decider, events, read models, sync store
 - [x] All new code has tests
 - [x] No TODOs or FIXMEs left in modified files
+
 ---
 
 ## Resolution (2026-09-05 docs-health sweep)

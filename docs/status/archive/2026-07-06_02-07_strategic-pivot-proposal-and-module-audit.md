@@ -232,8 +232,7 @@ This decision cascades into the entire Host API surface. I can't design the Opti
 - **go-cqrs-lite** upgraded from v3.5 to **v4** (JSON v2). The `stack/` layer the proposal referenced has evolved further.
 - **Trigger to revisit:** a 3rd consumer hitting the boilerplate wall. No such consumer has appeared.
 
-Full resolution in `docs/strategy/2026-07-05_localsync-v2-sync-toolkit-proposal.md` Resolution section.
----
+## Full resolution in `docs/strategy/2026-07-05_localsync-v2-sync-toolkit-proposal.md` Resolution section.
 
 ## Resolution (2026-09-05 docs-health sweep)
 

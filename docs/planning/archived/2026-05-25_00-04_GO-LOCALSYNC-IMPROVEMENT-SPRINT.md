@@ -147,8 +147,7 @@ flowchart TD
 
 ### Tasks 10-12: Documentation + Verification
 
-Update TODO_LIST and ROADMAP to reflect completed work. Run full test + lint suite.
----
+## Update TODO_LIST and ROADMAP to reflect completed work. Run full test + lint suite.
 
 ## Resolution (2026-09-05 docs-health sweep)
 

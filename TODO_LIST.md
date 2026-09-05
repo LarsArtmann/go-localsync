@@ -27,13 +27,13 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 ### Correctness hardening (verified open against code 2026-09-05)
 
 - [x] **Disposition "resurrect bypasses conflict resolution"** — the decider emits `ItemSynced` events without invoking the resolver when resurrecting a tombstoned item (`pkg/cqrs/decider.go:109`); either document as by-design with a test pinning it, or route resurrections through `resolveConflict`. Flagged by [is-it-what-it-claims-to-be](docs/brainstorming/is-it-what-it-claims-to-be.html).
-  ✅ DONE 2026-09-06: pinned as by-design ([ADR-0005 addendum](docs/adr/0005-tombstone-over-delete.md)) — a tombstoned local is a deleted marker and a sync event is the only path back to live; pinned by `TestDecideSync_ResurrectTombstonedItem_BypassesResolver` + branch comment in `decider.go`.
+      ✅ DONE 2026-09-06: pinned as by-design ([ADR-0005 addendum](docs/adr/0005-tombstone-over-delete.md)) — a tombstoned local is a deleted marker and a sync event is the only path back to live; pinned by `TestDecideSync_ResurrectTombstonedItem_BypassesResolver` + branch comment in `decider.go`.
 - [x] **Audit memory-store legacy-event mutation** — the upcaster registry stamps schema version in place; SQLite decodes fresh instances (safe) but the memory backend stores shared pointers (`docs/status/2026-09-05_22-30_SUPERB-REFERENCE-CONSUMER-EXECUTION.md` §b). Clone unconditionally or document the caveat.
-  ✅ DONE 2026-09-06: CLONE chosen and implemented — legacy-versioned events (stamp 1/2) now always rebuild a private copy in `upcastItemSyncedToV3` (the anomalous Attributes-present shape previously passed the stored pointer back for in-place stamping); true V3 events keep the zero-cost pass-through.
+      ✅ DONE 2026-09-06: CLONE chosen and implemented — legacy-versioned events (stamp 1/2) now always rebuild a private copy in `upcastItemSyncedToV3` (the anomalous Attributes-present shape previously passed the stored pointer back for in-place stamping); true V3 events keep the zero-cost pass-through.
 - [x] **Pin the upcaster chain semantics** — comment + test explaining WHY the V1→V2→V3 double application is safe, so a library change can't silently break it.
-  ✅ DONE 2026-09-06: WHY comment on `upcastItemSyncedToV3` + `TestUpcaster_ChainSemantics_V1ToFoldedV3` (fold-once, identity preserved, idempotent re-transform).
+      ✅ DONE 2026-09-06: WHY comment on `upcastItemSyncedToV3` + `TestUpcaster_ChainSemantics_V1ToFoldedV3` (fold-once, identity preserved, idempotent re-transform).
 - [x] **Deterministic race-regression for the upcaster path** — sync + replay concurrently under `-race` (the fixed data race from 2026-09-05 has no standing regression test).
-  ✅ DONE 2026-09-06: `TestUpcaster_ConcurrentReadsDuringSync` — 100 anomalous legacy streams, 4 barrier-start readers with shifted visit orders + live V3 writer; verified it FAILS against the old logic (3 DATA RACEs) and is 5× `-race`-clean with the fix.
+      ✅ DONE 2026-09-06: `TestUpcaster_ConcurrentReadsDuringSync` — 100 anomalous legacy streams, 4 barrier-start readers with shifted visit orders + live V3 writer; verified it FAILS against the old logic (3 DATA RACEs) and is 5× `-race`-clean with the fix.
 
 ## 🟡 MEDIUM PRIORITY
 

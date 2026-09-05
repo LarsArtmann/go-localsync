@@ -55,14 +55,14 @@ was investigated, fixed, tested, and committed — no item was hand-waved.
 
 ## c) NOT STARTED
 
-| Item                                  | Notes                                                                                                                                                                               |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Tombstone purge/TTL job**           | Needs a real storage-cost signal from `github-local-sync` first (ADR-0005 "Future").                                                                                                |
-| **`pkg/sync` → `pkg/synclib` rename** | Kills the stdlib `sync` collision footgun. **Breaking** for `github-local-sync`; deferred pending consumer coordination (see Top #1 question).                                      |
-| **OpenTelemetry instrumentation**     | `go-cqrs-lite` v3 ships an `otel/v3` module; no spans exist in go-localsync today. Tracked in TODO_LIST.md.                                                                         |
-| **Schema upcasters**                  | Carried over from ADR-0004's deferred data-module work.                                                                                                                             |
+| Item                                  | Notes                                                                                                                                                                                                                                      |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Tombstone purge/TTL job**           | Needs a real storage-cost signal from `github-local-sync` first (ADR-0005 "Future").                                                                                                                                                       |
+| **`pkg/sync` → `pkg/synclib` rename** | Kills the stdlib `sync` collision footgun. **Breaking** for `github-local-sync`; deferred pending consumer coordination (see Top #1 question).                                                                                             |
+| **OpenTelemetry instrumentation**     | `go-cqrs-lite` v3 ships an `otel/v3` module; no spans exist in go-localsync today. Tracked in TODO_LIST.md.                                                                                                                                |
+| **Schema upcasters**                  | Carried over from ADR-0004's deferred data-module work.                                                                                                                                                                                    |
 | **CI build/release rework**           | The `.github/workflows/ci.yml` `build` job cross-compiles `./cmd/examples/github-sync` which was removed. ~~Only failing piece of CI~~ → fixed — CI reworked in v0.4.0; fully green today (`test` + `lint` pass). Tracked in TODO_LIST.md. |
-| **Make `go-cqrs-lite` public**        | The one private dep; its privacy forces committed `vendor/` + `vendorHash = null`. Making it public drops the workaround.                                                           |
+| **Make `go-cqrs-lite` public**        | The one private dep; its privacy forces committed `vendor/` + `vendorHash = null`. Making it public drops the workaround.                                                                                                                  |
 
 ---
 

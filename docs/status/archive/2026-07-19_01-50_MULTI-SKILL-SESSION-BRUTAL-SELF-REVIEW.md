@@ -257,6 +257,7 @@ All work from this session shipped in **v0.4.0** (2026-07-18, tag `v0.4.0`):
 - All 9 HTML reports + 2 D2 diagrams from this session are committed.
 - The 3 data-model-review hardening recommendations (`ItemFilter.Validate()`, branded `ContentHash`, typed `attrs` accessors) remain **open** — see TODO_LIST and ROADMAP.
 - ADR-0008 reclassified as **Proposed — dormant** (not Rejected); the Host framework was never built.
+
 ---
 
 ## Resolution (2026-09-05 docs-health sweep)

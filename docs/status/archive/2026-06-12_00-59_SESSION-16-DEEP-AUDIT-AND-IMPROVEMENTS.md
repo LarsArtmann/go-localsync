@@ -33,13 +33,13 @@ Follow-up to session 15's deduplication work. Executed a deep self-audit, fixed 
 
 ### c) NOT STARTED
 
-| Item                                                                         | Priority | Notes                                                                                                 |
-| ---------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `WaitForCount` timeout                                                       | Medium   | Has a busy-spin infinite loop with no context cancellation check. Should add `select` on `ctx.Done()` |
-| `ItemFilter.Limit/Offset` typed as `int`                                     | Low      | Can't distinguish "unset" from "zero". Should be `*int` for proper optional pagination                |
-| `provider.Item.Source` is `ProviderID` but `FetchOptions.Source` is `string` | Low      | Type inconsistency at the boundary                                                                    |
-| Real GitHub API integration test                                             | High     | ~~All testing is mock-based~~ → moot — provider/github ships a live env-gated PAT smoke test (M21). No verification against real API                                           |
-| `go.mod` has `go 1.26.3`                                                     | Low      | Should be `go 1.26` (minor version only)                                                              |
+| Item                                                                         | Priority | Notes                                                                                                                                |
+| ---------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `WaitForCount` timeout                                                       | Medium   | Has a busy-spin infinite loop with no context cancellation check. Should add `select` on `ctx.Done()`                                |
+| `ItemFilter.Limit/Offset` typed as `int`                                     | Low      | Can't distinguish "unset" from "zero". Should be `*int` for proper optional pagination                                               |
+| `provider.Item.Source` is `ProviderID` but `FetchOptions.Source` is `string` | Low      | Type inconsistency at the boundary                                                                                                   |
+| Real GitHub API integration test                                             | High     | ~~All testing is mock-based~~ → moot — provider/github ships a live env-gated PAT smoke test (M21). No verification against real API |
+| `go.mod` has `go 1.26.3`                                                     | Low      | Should be `go 1.26` (minor version only)                                                                                             |
 
 ### d) TOTALLY FUCKED UP
 

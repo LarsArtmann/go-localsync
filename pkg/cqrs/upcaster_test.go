@@ -53,7 +53,10 @@ func TestUpcaster_V1PayloadFoldsAttributes(t *testing.T) {
 	// The registry owns the version bump; a direct call only rewrites the
 	// payload (Attributes folded) and PRESERVES the original schema version.
 	if upcasted.SchemaVersion() != 1 {
-		t.Errorf("direct upcast must preserve the event schema version (registry bumps it), got %d", upcasted.SchemaVersion())
+		t.Errorf(
+			"direct upcast must preserve the event schema version (registry bumps it), got %d",
+			upcasted.SchemaVersion(),
+		)
 	}
 
 	if upcasted.ID() != evts[0].ID() || upcasted.Version() != evts[0].Version() {
@@ -311,11 +314,7 @@ func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 	var wg sync.WaitGroup
 
 	for r := range readers {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-
+		wg.Go(func() {
 			<-start
 
 			// Shifted start offset: readers discover each stream's first-load
@@ -338,7 +337,7 @@ func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 					}
 				}
 			}
-		}()
+		})
 	}
 
 	// Live writer overlapping the replay readers: fresh V3 events appended

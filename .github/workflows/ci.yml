@@ -86,10 +86,18 @@ jobs:
       - name: Run go vet
         run: go vet ./...
 
+      # Workflow lint: catches schema errors, shellcheck issues and expression
+      # mistakes in every .github/workflows/*.yml before a push ships them.
+      # Version-pinned to match the actionlint in the nix devShell (1.7.12).
+      - name: Run actionlint (workflow validation)
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
+
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@9fae48acfc02a90574d7c304a1758ef9895495fa # v7
         with:
-          version: latest
+          # Pinned to the exact version the nix devShell provides (golangci-lint
+          # 2.13.2) so local and CI lint can never diverge on a fresh release.
+          version: v2.13.2
           args: --timeout=5m
 
       # ADR-0004 architectural invariants (single aggregate, three fixed
@@ -162,10 +170,36 @@ jobs:
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
     timeout-minutes: 15
+  nix:
+    name: Nix flake check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+
+      # The nix build was silently red for over an hour on 2026-09-05
+      # (vendorHash drift after a dependency refresh) because no CI job ran
+      # it. This gate makes that failure loud: the flake must evaluate,
+      # build, and pass its checks (incl. the cqrs-lint architectural gate)
+      # on every push.
+      #
+      # The flake's go-nix-helpers input uses an SSH URL (works locally with
+      # a loaded SSH key); CI overrides it to anonymous HTTPS since the repo
+      # is public. Owner decision tracked in TODO_LIST.md: make go-finding
+      # public vs keep the SSH_PRIVATE_KEY secret for the library lint gate.
+      - name: Run nix flake check
+        env:
+          NIX_CONFIG: access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+        run: nix flake check --override-input go-nix-helpers "github:LarsArtmann/go-nix-helpers/master"
+
+    timeout-minutes: 30
   build:
     name: Build (${{ matrix.goos }}/${{ matrix.goarch }})
     runs-on: ubuntu-latest
-    needs: [test, lint, security]
+    needs: [test, lint, security, nix]
     strategy:
       matrix:
         goos: [linux, darwin]

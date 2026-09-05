@@ -3,7 +3,7 @@
 **Date:** 2026-06-11 13:27 (Session 15 — Deduplication Planning)
 **Branch:** master
 **Commit:** 5c01041
-*~~*Tests:** 456 PASS / 0 FAIL / 11 packages — ALL GREEN~~ → counting-method churn — authoritative 2026-09-05 count: 309 test functions / 11 packages
+_~~_Tests:__ 456 PASS / 0 FAIL / 11 packages — ALL GREEN~~ → counting-method churn — authoritative 2026-09-05 count: 309 test functions / 11 packages
 **Coverage:** 76.9% total (statements)
 **Lint:** 4 non-blocking issues (exhaustruct×2, ireturn×1, tparallel×1)
 

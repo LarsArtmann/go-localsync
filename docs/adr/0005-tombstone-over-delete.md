@@ -78,7 +78,7 @@ Rationale:
    pull mirror would permanently diverge from upstream truth, breaking the
    single-writer mirror contract.
 3. Design rule 2 above already fixed this semantics: "a sync event always means
-   'live'". The resolver's scope is content divergence between two *live* versions,
+   'live'". The resolver's scope is content divergence between two _live_ versions,
    never the lifecycle transition itself.
 
 Pinned by `TestDecideSync_ResurrectTombstonedItem_BypassesResolver`

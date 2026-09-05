@@ -3,7 +3,7 @@
 **Date:** 2026-06-11 14:09
 **Branch:** master
 **Commits:** 1360706 (latest)
-*~~*Build:** ✅ CLEAN | **Tests:** ✅ 283 PASS, 0 FAIL | **Vet:** ✅ CLEAN | **gofmt:** ✅ CLEAN | **Race:** ✅ CLEAN~~ → count churn — authoritative 2026-09-05 count: 309 test functions / 11 packages
+_~~_Build:__ ✅ CLEAN | **Tests:** ✅ 283 PASS, 0 FAIL | **Vet:** ✅ CLEAN | **gofmt:** ✅ CLEAN | **Race:** ✅ CLEAN~~ → count churn — authoritative 2026-09-05 count: 309 test functions / 11 packages
 
 ---
 

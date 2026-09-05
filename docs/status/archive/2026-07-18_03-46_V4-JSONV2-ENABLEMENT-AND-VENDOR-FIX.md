@@ -180,6 +180,7 @@ The gotcha says go.work must not be on disk during buildflow. I confirmed `go.wo
 - **buildflow before:** 33/42, 4 failed + 3 findings
 - **buildflow after:** 35/35, 0 failed, 51.9s
 - **Commits made:** ~~0 (awaiting instruction)~~ **Shipped in `v0.4.0` (2026-07-18).** All changes committed; jsonv2 build tag wired in flake.nix devShells, `.golangci.yml`, and `buildGoModule` preBuild.
+
 ---
 
 ## Resolution (2026-09-05 docs-health sweep)

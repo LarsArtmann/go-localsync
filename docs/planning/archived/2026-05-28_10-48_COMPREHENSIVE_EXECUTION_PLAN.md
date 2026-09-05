@@ -154,8 +154,7 @@ D1, DOC1-3, ERR1-2 ─────────┘
 
 ---
 
-_Generated with Crush_
----
+## _Generated with Crush_
 
 ## Resolution (2026-09-05 docs-health sweep)
 

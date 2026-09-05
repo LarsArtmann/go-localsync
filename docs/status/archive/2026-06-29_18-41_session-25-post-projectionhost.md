@@ -92,14 +92,14 @@
 
 ## b) PARTIALLY DONE 🟡
 
-| Area                    | What's Done                                                | What's Missing                                                                                           |
-| ----------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **Observability**       | `otel/v3` module vendored; `middleware.EventLogging` wired | **No spans, no metrics, no tracing.** `otel/v3` is vendored but completely unwired. Biggest feature gap. |
-| **Schema evolution**    | `schema.Version` (V1/V2) foundation in place               | `UpcasterRegistry` from go-cqrs-lite not adopted — no actual upcasting logic.                            |
-| **Test coverage**       | 9 packages, 191 tests, 100% on 4 packages                  | `pkg/cqrs` at 81.8% (lowest of core), `pkg/data/model` at 80.5%, `pkg/testutil` at 0%.                   |
-| **CI security**         | golangci-lint + go vet run                                 | No `gosec`, no `govulncheck`, no `gitleaks` in CI pipeline.                                              |
-| **Error response docs** | Error templates registered (What/Why/Fix/WayOut)           | OpenAPI spec lacks per-endpoint error response schemas.                                                  |
-| **API pagination**      | Query params (`limit`, `offset`) work                      | No `X-Total-Count` header, no cursor-based pagination.                                                   |
+| Area                    | What's Done                                                | What's Missing                                                                                                                                                                 |
+| ----------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Observability**       | `otel/v3` module vendored; `middleware.EventLogging` wired | **No spans, no metrics, no tracing.** `otel/v3` is vendored but completely unwired. Biggest feature gap.                                                                       |
+| **Schema evolution**    | `schema.Version` (V1/V2) foundation in place               | `UpcasterRegistry` from go-cqrs-lite not adopted — no actual upcasting logic.                                                                                                  |
+| **Test coverage**       | 9 packages, 191 tests, 100% on 4 packages                  | `pkg/cqrs` at 81.8% (lowest of core), `pkg/data/model` at 80.5%, `pkg/testutil` at 0%.                                                                                         |
+| **CI security**         | golangci-lint + go vet run                                 | No `gosec`, no `govulncheck`, no `gitleaks` in CI pipeline.                                                                                                                    |
+| **Error response docs** | Error templates registered (What/Why/Fix/WayOut)           | OpenAPI spec lacks per-endpoint error response schemas.                                                                                                                        |
+| **API pagination**      | Query params (`limit`, `offset`) work                      | No `X-Total-Count` header, no cursor-based pagination.                                                                                                                         |
 | **Projection DLQ**      | `projectionhost` supports DLQ via `WithDeadLetterStore`    | ~~Not wired~~ → fixed — DLQ wired v0.4.0; SQLite-durable since 2026-09-05 (M01) — host created without DLQ option. Poison events crash-restart the worker but aren't captured. |
 
 ---
@@ -246,4 +246,3 @@ projectionhost shipped in **v0.4.0** (2026-07-18) as `projectionhost/v4` (upgrad
 ### 2026-09-05 sweep update
 
 The DLQ was wired in v0.4.0 and made SQLite-durable on 2026-09-05 (M01); auth (M12); OTel (M05); per-sync resolver override (M25); json v2 (v0.4.0). Remaining forward items were routed to TODO_LIST.md / ROADMAP.md; stale claims struck inline. Report fully resolved → archived 2026-09-05.
-

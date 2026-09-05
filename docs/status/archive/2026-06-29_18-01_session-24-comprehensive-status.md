@@ -254,4 +254,3 @@ Session 24's fixes all shipped. Since this report, **v0.4.0** landed:
 ### 2026-09-05 sweep update
 
 json/v2 shipped (v0.4.0); OTel shipped (M05); projectionhost adopted (session 25, ADR-0006); the §g OTel question was answered by the built-in opt-in bundle. Remaining forward items were routed to TODO_LIST.md / ROADMAP.md; stale claims struck inline. Report fully resolved → archived 2026-09-05.
-

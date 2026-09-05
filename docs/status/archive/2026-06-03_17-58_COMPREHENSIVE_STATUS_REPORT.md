@@ -101,17 +101,17 @@ Go-LocalSync is a **generic synchronization SDK** with event-sourced CQRS, plugg
 
 ### Test Coverage
 
-| Package                    | Coverage | Gap                                                                               |
-| -------------------------- | -------- | --------------------------------------------------------------------------------- |
-| `pkg/errors`               | 100.0%   | —                                                                                 |
-| `pkg/id`                   | 100.0%   | —                                                                                 |
-| `pkg/provider`             | 95.8%    | Minor                                                                             |
-| `pkg/crdt`                 | 97.6%    | Minor                                                                             |
-| `pkg/sync`                 | 91.7%    | Minor                                                                             |
-| `pkg/cqrs`                 | 85.7%    | `runner.go`, `store_factory.go`, `projection.go` have low/no direct test coverage |
-| `pkg/providers/github`     | 84.7%    | Minor gaps in error paths                                                         |
-| `pkg/api`                  | 76.3%    | Missing error path tests for store failures, malformed requests                   |
-| `cmd/examples/github-sync` | 13.7%    | **Main sync/stats/server flows ~~completely untested~~ → false today — cmd/ removed; flows covered by pkg/api + pkg/sync suites (309 tests)**. Only helpers tested.        |
+| Package                    | Coverage | Gap                                                                                                                                                                 |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pkg/errors`               | 100.0%   | —                                                                                                                                                                   |
+| `pkg/id`                   | 100.0%   | —                                                                                                                                                                   |
+| `pkg/provider`             | 95.8%    | Minor                                                                                                                                                               |
+| `pkg/crdt`                 | 97.6%    | Minor                                                                                                                                                               |
+| `pkg/sync`                 | 91.7%    | Minor                                                                                                                                                               |
+| `pkg/cqrs`                 | 85.7%    | `runner.go`, `store_factory.go`, `projection.go` have low/no direct test coverage                                                                                   |
+| `pkg/providers/github`     | 84.7%    | Minor gaps in error paths                                                                                                                                           |
+| `pkg/api`                  | 76.3%    | Missing error path tests for store failures, malformed requests                                                                                                     |
+| `cmd/examples/github-sync` | 13.7%    | **Main sync/stats/server flows ~~completely untested~~ → false today — cmd/ removed; flows covered by pkg/api + pkg/sync suites (309 tests)**. Only helpers tested. |
 
 ### Zero-Coverage Files (No Direct Tests)
 
