@@ -2,7 +2,7 @@
 
 **Project:** go-localsync
 **Last Updated:** 2026-09-05
-**Tests:** 10 packages passing (full suite) | **Lint:** 0 issues (golangci-lint v2, `nix run .#lint`)
+**Tests:** 232 functions across 10 packages, all passing | **Latest release:** v0.5.0 + `provider/github/v0.1.0`
 
 ## Overview
 
@@ -14,12 +14,20 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ## 🔴 HIGH PRIORITY
 
-### Provider release (unblocks `provider/github` consumers)
+### cqrs-lint hardening (the ADR-0004 gate is the least-tested code in the repo)
 
-- [ ] **Release the core, then the provider module**
-      **Source:** `CHANGELOG.md`, `provider/github/go.mod`
-      **Description:** Master is far ahead of `v0.4.2` (new `pkg/id`, `pkg/provider` shape, `RateLimit` in `FetchResult`) and the changelog's `[Unreleased]` does not reflect it. Cut the next core release (reconcile the changelog against `v0.4.2..HEAD` first), then bump `provider/github`'s parent pin from the master pseudo-version to that tag and tag the provider module itself. Until then the module resolves standalone only against the pinned master commit.
-      **Context:** Also wire CI for the nested module (the root workflow only tests the root module) and consider migrating github-local-sync's `internal/github` onto the shared provider afterwards.
+- [ ] **CLI test coverage for `cmd/cqrs-lint`**
+      **Source:** `cmd/cqrs-lint/main.go` (zero test files — verified via `go test ./...`)
+      **Description:** ~250 lines of untested code: flag parsing, exit-code contract (0 clean / 1 findings / 2 usage), `emitSummary`/`countFindings`/`emitRuleStatus`. An integration test that builds the binary and runs it against `internal/cqrslint/testdata` fixtures closes the gap.
+      **Context:** Open since the cqrs-lint CLI sprint (2026-07-17); re-flagged by the 2026-08-02 enhancement session.
+
+- [ ] **Run cqrs-lint as a CI gate**
+      **Source:** `.github/workflows/ci.yml` (no cqrs-lint step — only `nix flake check` runs it via `checks.cqrs-lint`)
+      **Description:** Add a workflow step `go run ./cmd/cqrs-lint --strict -pkg pkg/cqrs` so the architectural invariant is enforced on every push, not only in nix environments.
+
+- [ ] **Suppression audit trail + unknown-rule warning**
+      **Source:** `internal/cqrslint/finding.go:36` (only `Suppressed bool` — no provenance), `internal/cqrslint/suppress.go`
+      **Description:** Add `SuppressedBy`/`SuppressedReason` fields (which directive silenced a finding, and its optional reason — currently parsed and discarded), and warn when a directive names a nonexistent rule (`//cqrs-lint:ignore C9999` silently succeeds today).
 
 ---
 
@@ -29,12 +37,12 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 - [ ] **OpenTelemetry instrumentation**
       **Source:** `pkg/sync/sync.go`, `pkg/cqrs/stack.go`, `pkg/api/server.go`
-      **Description:** Add spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, and HTTP middleware. go-cqrs-lite v4 already ships an `otel/v4` module.
-      **Context:** No observability today; production debugging requires log spelunking.
+      **Description:** Spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, and HTTP middleware. `go-cqrs-lite/otel/v4` (v4.3.0) is already in the module graph as an indirect dep.
+      **Context:** No observability today; production debugging requires log spelunking. Open since 2026-05; confirmed unimplemented.
 
 - [ ] **Structured logging fields**
       **Source:** `pkg/sync/sync.go`
-      **Description:** Add consistent context fields (source, page, event_id) to all log statements.
+      **Description:** Consistent context fields (source, page, event_id) on all log statements.
 
 ### API Hardening
 
@@ -45,16 +53,33 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Code Quality
 
-- [ ] **Improve `pkg/cqrs` coverage (82.5%)**
+- [ ] **Improve `pkg/cqrs` coverage (82.4%)**
       **Source:** `pkg/cqrs/`
       **Description:** Add tests for remaining error paths and store-factory branches.
 
-- [ ] **Adopt `UpcasterRegistry`** from go-cqrs-lite for schema evolution (the `schema.Version` foundation in `pkg/data/schema/` is ready for it).
+- [ ] **SQLite file-backed integration tests**
+      **Source:** `pkg/cqrs/sqlite_readmodel_test.go` (uses `:memory:`, which hides WAL/concurrency behavior)
+      **Description:** Round-trip tests against a real file DB (`t.TempDir()`), incl. reconcile + restart-replay.
+
+- [ ] **Adopt `UpcasterRegistry`** from go-cqrs-lite for schema evolution (the `schema.Version` V1→V3 foundation in `pkg/data/schema/` is ready for it; no upcaster exists yet).
+
+- [ ] **Rename public `AggregateID()` → `StreamID()`**
+      **Source:** `pkg/cqrs/aggregate_id.go:30` — returns `cqrsid.StreamID` since v0.4.1 but kept the old name for API stability
+      **Description:** Breaking rename for the next minor/major; aligns the exported vocabulary with upstream.
+
+### Provider module (`provider/github`)
+
+- [ ] **Real GitHub PAT smoke test** — the ported suite is mock-based; one live-API round-trip would prove the kit wiring (token, rate-limit gating, error mapping).
 
 ---
 
 ## 🟢 LOWER PRIORITY
 
 - [ ] **Add `govalid` struct tags** to `SyncOptions`, `CQRSConfig`.
-- [ ] **Improve `CONTRIBUTING.md`** — add architecture guide, file-split conventions, testing requirements.
+- [ ] **Improve `CONTRIBUTING.md`** — add architecture guide, file-split conventions, testing requirements (current file is a 25-line stub).
 - [ ] **Conflict resolution per-sync override** — `SyncOptions.ConflictResolver` for per-sync strategy (currently only `CQRSConfig.ConflictResolver`).
+- [ ] **`ItemFilter.Validate()`** — reject negative `Limit`/`Offset` instead of silently accepting them (data-model-review finding).
+- [ ] **Branded `ContentHash` type** — `model.Item.ContentHash` is a bare `string` today (data-model-review finding).
+- [ ] **Typed `Attributes` accessors** in `pkg/data/model` (e.g. `ActorLogin()`, `RepoName()` helpers over the map — data-model-review finding).
+- [ ] **`SyncResult` vs `SyncSummary` vocabulary alignment** (naming-review finding: two near-synonymous types in `pkg/sync`).
+- [ ] **Benchmarks for the full sync pipeline** (current benchmarks cover individual operations only).
