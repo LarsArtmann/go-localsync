@@ -14,6 +14,13 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ## 🔴 HIGH PRIORITY
 
+### Release integrity (post-public-flip)
+
+- [ ] **Verify tag push + proxy propagation for `v0.5.0` and `provider/github/v0.1.0`**
+      **Source:** `git tag`, GitHub Releases, proxy.golang.org
+      **Description:** Both tags were created while the repo was private; the repo flipped public the same day. Verify the tags are pushed, GitHub Releases exist, and `proxy.golang.org` serves the versions; if the proxy never fetched them, cut a bump release to re-establish `@latest` (owner decision whether to re-tag).
+      **Context:** Raised by the 2026-09-05 docs-health session (status report §g Q1).
+
 ### cqrs-lint hardening (the ADR-0004 gate is the least-tested code in the repo)
 
 - [ ] **CLI test coverage for `cmd/cqrs-lint`**
@@ -82,4 +89,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Branded `ContentHash` type** — `model.Item.ContentHash` is a bare `string` today (data-model-review finding).
 - [ ] **Typed `Attributes` accessors** in `pkg/data/model` (e.g. `ActorLogin()`, `RepoName()` helpers over the map — data-model-review finding).
 - [ ] **`SyncResult` vs `SyncSummary` vocabulary alignment** (naming-review finding: two near-synonymous types in `pkg/sync`).
+- [ ] **Migrate `exhaustruct` → `exhaustruct_v5` in `.golangci.yml`** — golangci-lint v2.13 flags the old linter as deprecated.
+- [ ] **Verify `provider/github/README.md` prose against the `FetchPages` rebuild** — modified during the 2026-09-05 concurrent dependency session; claims not re-checked since `FetchAll` moved onto the kit kernel.
+- [ ] **Recompute coverage % + run dprint check** after the 2026-09-05 dependency churn (charm.land/log v2.0.1 landed after the last `go test -cover` run); dprint is not yet in the devShell.
 - [ ] **Benchmarks for the full sync pipeline** (current benchmarks cover individual operations only).
