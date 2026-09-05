@@ -33,6 +33,7 @@
         };
 
         devShellExtraPackages = pkgs: [
+          pkgs.actionlint
           pkgs.dprint
           pkgs.ginkgo
           pkgs.gotools
