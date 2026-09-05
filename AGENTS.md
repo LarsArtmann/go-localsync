@@ -84,45 +84,18 @@ The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exporte
 
 `buildflow --build-mode full` MUST run inside this env: its native go subcommands (`test-race`, `go-fix`, `go-auto-upgrade`, `govalid-generate`) inherit `GOFLAGS` from the shell, so a plain-shell invocation fails on the jsonv2 build tag while `golangci-lint` (which reads `.golangci.yml run.build-tags`) and `nix build` (which sets the tag in `preBuild`) pass — a misleading partial-green result.
 
-1. **Optional**: Create `go.work` in project root ONLY for live-editing local sibling checkouts. It is in `.gitignore` and **must never be committed or left on disk during `buildflow`** — buildflow detects go.work on disk and expands `go test ./...` to ALL workspace modules (including `../go-cqrs-lite/*`), causing sibling test failures. With the committed `vendor/` directory, builds and tests work offline without go.work (`go build ./...`, `go test ./...` use vendor mode automatically). Remove go.work before running buildflow:
-
-   ```
-   go 1.26.4
-
-   use .
-
-   use (
-       ../go-branded-id
-       ../go-cqrs-lite/codec
-       ../go-cqrs-lite/command
-       ../go-cqrs-lite/decider
-       ../go-cqrs-lite/dispatcher
-       ../go-cqrs-lite/event
-       ../go-cqrs-lite/id
-       ../go-cqrs-lite/kv
-       ../go-cqrs-lite/listing
-       ../go-cqrs-lite/middleware
-       ../go-cqrs-lite/otel
-       ../go-cqrs-lite/query
-       ../go-cqrs-lite/schema
-       ../go-cqrs-lite/snapshot
-       ../go-cqrs-lite/storage
-       ../go-cqrs-lite/storage/memory
-       ../go-cqrs-lite/watermill
-       ../go-error-family
-   )
-   ```
+1. **`go.work` (root, untracked)**: the default local workspace is `use ( . ./provider/github )` — it wires the core module and the nested provider module so edits run both test suites. It is gitignored and must never be committed. **Never add sibling checkouts** (`../go-cqrs-lite/*` etc.) to it: buildflow detects go.work on disk and runs `go test ./...` in EVERY workspace module — sibling repos fail that leg. Remove go.work (or keep it to the two in-repo modules) before running buildflow.
 
 2. Build: `go build ./...`
 3. Test: `go test ./... -count=1`
 4. Lint: `golangci-lint run ./... --timeout=5m`
 5. Format: `golangci-lint fmt ./...`
 6. CQRS gate: `go run ./cmd/cqrs-lint --strict --verbose` (or `nix run .#cqrs-lint`). Suppression via `//cqrs-lint:ignore <rule>` directives; `--show-suppressed` to list silenced findings.
-7. Full pipeline: `buildflow --build-mode full` (requires the devShell active — see "Required first step" above; ensure go.work is removed first)
+7. Full pipeline: `buildflow --build-mode full` (requires the devShell active — see "Required first step" above; see the go.work caveat above)
 
 ### CI (No go.work)
 
-CI uses tagged versions from GitHub (no replace directives in `go.mod`). The `security` job runs **govulncheck** (dependency CVEs, reachability-based) and **gitleaks** (full-history secret scan via `.gitleaks.toml`); **gosec** runs as part of the golangci-lint job. The build/release jobs gate on the security job.
+CI uses tagged versions from GitHub (no replace directives in `go.mod`), with no private-repo auth — all dependencies are public. Jobs: `test` (race + coverage), `lint` (vet + golangci-lint incl. gosec), `security` (**govulncheck** dependency-CVE scan + **gitleaks** full-history secret scan via `.gitleaks.toml`), `build` (cross-platform compile matrix), `release` (tag-triggered), and `provider` (standalone build + race tests for `provider/github`). The build/release jobs gate on the security job.
 
 ```bash
 go build ./...
@@ -136,29 +109,29 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 ### Build & Lint Gotchas
 
 - **All `larsartmann/*` deps are public** (go-cqrs-lite went public, closing the old private-dep problem): the committed `vendor/` workaround is gone — `flake.nix` now uses a real `vendorHash`. If you ever re-vendor manually, remember `.gitignore` ignores `vendor/` and nix flakes only include git-tracked files in the sandbox source. The force-add pattern still applies to **`.envrc`** (committed so direnv auto-loads the devShell): buildflow's `gitignore-upserter` recommends ignoring it, so it lives in the buildflow-managed `.gitignore` block. After creating/modifying it, force-add once with `git add -f .envrc`; once tracked, `.gitignore` no longer hides it and subsequent edits work normally.
-- **Go experimental `GOEXPERIMENT=jsonv2`**: go-cqrs-lite **v4** adopted JSON v2 (`encoding/json/v2` + `encoding/json/jsontext`), which Go 1.26 gates behind the `goexperiment.jsonv2` build tag until graduation (expected Go 1.27+). Without it, every `go build`/`go test`/`golangci-lint` command fails with `encoding/json/v2: build constraints exclude all Go files`. The tag is wired in three places (mirrors the go-cqrs-lite flake): (1) `flake.nix` devShells set `GOFLAGS = "-tags=goexperiment.jsonv2"` so buildflow's native go subcommands inherit it — **but only when run inside the devShell** (`nix develop` or via the committed `.envrc` / `direnv allow`). Running `buildflow` from a plain shell fails with `encoding/json/v2: build constraints exclude all Go files`, while `golangci-lint` and `nix build` still pass (they get the tag from `.golangci.yml` and `preBuild` respectively) — a misleading partial-green. Symptom: `test-race`, `go-fix`, `go-auto-upgrade`, and `govalid-generate` all fail with the jsonv2 build-constraints error; (2) both `buildGoModule` packages export `GOEXPERIMENT=jsonv2` in `preBuild` (buildGoModule silently drops `GOEXPERIMENT` from `env` — only a `preBuild` export works); (3) `.golangci.yml` `run.build-tags` includes `goexperiment.jsonv2` (golangci-lint does not read `GOFLAGS`). Note: `go mod tidy` now works on v4 (the v3 nested-`eventtest` blocker is gone).
-- **Pre-commit hook OOM on vendor dir**: the buildflow pre-commit hook runs gofumpt/goimports across the entire tree (including vendor/). With the large modernc.org/sqlite vendored sources (~400 generated .go files), these tools get OOM-killed within the 2-minute max timeout. **Workaround**: commit with `--no-verify` after manually verifying formatting on `pkg/` sources (`gofumpt -l pkg/ && goimports -l pkg/`). The hook budget should be increased or vendor/ should be excluded from the formatter steps.
-- **go.work breaks buildflow**: buildflow's `ForEachGoModule` detects go.work **on disk** (not just tracked) and runs `go test ./...` in every workspace module — including sibling repos (`../go-cqrs-lite/*`) whose tests fail. Always **delete go.work before `buildflow`**; with `vendor/` committed, builds/tests work without it.
+- **Go experimental `GOEXPERIMENT=jsonv2`**: go-cqrs-lite **v4** adopted JSON v2 (`encoding/json/v2` + `encoding/json/jsontext`), which Go 1.26 gates behind the `goexperiment.jsonv2` build tag until graduation (expected Go 1.27+). Without it, every `go build`/`go test`/`golangci-lint` command fails with `encoding/json/v2: build constraints exclude all Go files`. The tag is wired in three places (mirrors the go-cqrs-lite flake): (1) `flake.nix` devShells set `GOFLAGS = "-tags=goexperiment.jsonv2"` so buildflow's native go subcommands inherit it — **but only when run inside the devShell** (`nix develop` or via the committed `.envrc` / `direnv allow`). Running `buildflow` from a plain shell fails with `encoding/json/v2: build constraints exclude all Go files`, while `golangci-lint` and `nix build` still pass (they get the tag from `.golangci.yml` and `preBuild` respectively) — a misleading partial-green. Symptom: `test-race`, `go-fix`, `go-auto-upgrade`, and `govalid-generate` all fail with the jsonv2 build-constraints error; (2) the go-standard packages export `GOEXPERIMENT=jsonv2` in `preBuild` (buildGoModule silently drops `GOEXPERIMENT` from `env` — only a `preBuild` export works); (3) `.golangci.yml` `run.build-tags` includes `goexperiment.jsonv2` (golangci-lint does not read `GOFLAGS`). Note: `go mod tidy` now works on v4 (the v3 nested-`eventtest` blocker is gone).
+- **Pre-commit hooks are inert**: hooks use `buildflow` but are not set executable and are skipped (see "Pre-commit Hooks" above). Historically they also OOM'd on the committed `vendor/` tree — that cause is gone with vendor/, but re-enabling the hooks would need a formatter scope/budget review first.
+- **go.work + buildflow**: buildflow's `ForEachGoModule` detects go.work **on disk** (not just tracked) and runs `go test ./...` in every workspace module. Keeping the workspace to `.` + `./provider/github` is safe (CI proves both green); adding sibling repos (`../go-cqrs-lite/*`) makes buildflow run their tests too, which fail. Never commit go.work.
 - **golangci-lint v2.12 `exhaustruct`**: the `settings.exhaustruct.exclude` list does **not** match local-package types in full runs (only stdlib full-path patterns work). For local domain structs with optional fields (`ItemFilter`, `FetchResult`), suppress via `issues.exclusions.rules` with a `text:` regex instead.
 - **`SA5012` disabled**: staticcheck v0.7 panics ("can't set facts on objects belonging another package") on cross-package even-elements analysis (e.g. `testutil.BuildPairs` called from another package's tests). Disabled in `linters.settings.staticcheck.checks`.
-- **`go.mod` requires `go 1.26.4`** (deliberate — matches the active toolchain & silences the go.work warning; commit `a819eb6`). Do **not** lower the directive to work around nix lag (that reverts a deliberate bump). (Resolved: nixpkgs `go_1_26` is now at 1.26.4, so `nix build` / `nix flake check` pass in-sandbox. The earlier 1.26.3 lag self-resolved as predicted. Check readiness with `nix eval --impure --expr 'let pkgs = import (builtins.getFlake "github:NixOS/nixpkgs/nixos-unstable") {}; in pkgs.go_1_26.version'`.)
+- **`go.mod` requires `go 1.26.7`** (matches the active toolchain; bumped alongside dependency refreshes). Do **not** lower the directive to work around toolchain lag — re-raise it when deps require a newer Go.
 
 ## Testing
 
 | Package             | Tests | Coverage | Status                                                                                                         |
 | ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`          | 95    | 82.5%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
+| `pkg/cqrs`          | 97    | 82.4%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
 | `pkg/sync`          | 32    | 88.4%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
 | `pkg/id`            | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
 | `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
 | `pkg/provider`      | 2     | 92.3%    | ✅ Item validation                                                                                             |
 | `pkg/api`           | 15    | 93.1%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
-| `pkg/crdt`          | 7     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
+| `pkg/crdt`          | 8     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
 | `pkg/data/model`    | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
-| `internal/cqrslint` | 36    | 88.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives   |
+| `internal/cqrslint` | 36    | 90.0%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives   |
 
-**229 total test functions** across 10 test packages.
+**232 total test functions** across 10 test packages.
 
 Run: `go test ./... -count=1`
 
@@ -211,24 +184,25 @@ Two tables managed by the CQRS stack:
 
 | Dependency                         | Version | Purpose                                                                                                     |
 | ---------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `go-cqrs-lite/event/v4`            | v4.0.3  | Event types, Store, Bus, Journal, `Version` (uint64), `Instant`/`WallTime` (requires `GOEXPERIMENT=jsonv2`) |
-| `go-cqrs-lite/command/v4`          | v4.0.1  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()`                                        |
-| `go-cqrs-lite/query/v4`            | v4.0.0  | Indirect (transitive); no QueryDispatcher — reads call the ReadModel directly                               |
-| `go-cqrs-lite/decider/v4`          | v4.0.2  | Decider (`Apply` field), Repository, snapshot/codec options                                                 |
-| `go-cqrs-lite/id/v4`               | v4.0.2  | Branded phantom-type IDs (AggregateID, CorrelationID, etc.)                                                 |
-| `go-cqrs-lite/codec/v4`            | v4.0.3  | Codec interface, JSONCodec (CBOR `TimeUnixDynamic` nanosecond fix) — uses `encoding/json/v2`                |
-| `go-cqrs-lite/projection/v4`       | v4.0.1  | Projection interface (moved from `event/` in v3.2, ADR-0037)                                                |
-| `go-cqrs-lite/projectionhost/v4`   | v4.0.2  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)                                          |
-| `go-cqrs-lite/snapshot/v4`         | v4.0.2  | SnapshotStore, EveryNEvents strategy                                                                        |
-| `go-cqrs-lite/storage/memory/v4`   | v4.0.1  | In-memory event store + snapshot store (bus deleted in v3)                                                  |
-| `go-cqrs-lite/middleware/v4`       | v4.0.2  | EventLogging + CommandRetry middleware                                                                      |
-| `go-cqrs-lite/watermill/v4`        | v4.0.3  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                              |
-| `go-cqrs-lite/storage/v4`          | v4.0.2  | SQLite event store, snapshot, KV store                                                                      |
-| `go-branded-id`                    | v0.3.2  | Branded phantom-type IDs for compile-time safety                                                            |
-| `go-error-family`                  | v0.7.0  | Structured error classification + user-facing message templates                                             |
-| `modernc.org/sqlite`               | v1.54.0 | Pure-Go SQLite driver (no CGo)                                                                              |
-| `charm.land/log/v2`                | v2.0.0  | Structured logging                                                                                          |
-| `github.com/danielgtaylor/huma/v2` | v2.39.0 | HTTP API framework with OpenAPI 3 generation + stdlib adapter                                               |
+| `go-cqrs-lite/event/v4`            | v4.9.0  | Event types, Store, Bus, Journal, `Version` (uint64), `Instant`/`WallTime` (requires `GOEXPERIMENT=jsonv2`) |
+| `go-cqrs-lite/command/v4`          | v4.8.1  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()`, `ExecuteRef`                          |
+| `go-cqrs-lite/query/v4`            | v4.7.1  | Indirect (transitive); no QueryDispatcher — reads call the ReadModel directly                               |
+| `go-cqrs-lite/decider/v4`          | v4.5.0  | Decider (`Apply` field), Repository, snapshot/codec options                                                 |
+| `go-cqrs-lite/id/v4`               | v4.5.0  | Branded phantom-type IDs (StreamID, CorrelationID, etc.)                                                    |
+| `go-cqrs-lite/codec/v4`            | v4.4.0  | Codec interface, JSONCodec (CBOR `TimeUnixDynamic` nanosecond fix) — uses `encoding/json/v2`                |
+| `go-cqrs-lite/projection/v4`       | v4.3.0  | Projection interface (moved from `event/` in v3.2, ADR-0037)                                                |
+| `go-cqrs-lite/projectionhost/v4`   | v4.4.0  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)                                          |
+| `go-cqrs-lite/snapshot/v4`         | v4.4.0  | SnapshotStore, EveryNEvents strategy                                                                        |
+| `go-cqrs-lite/storage/memory/v4`   | v4.4.0  | In-memory event store + snapshot store (bus deleted in v3)                                                  |
+| `go-cqrs-lite/middleware/v4`       | v4.5.1  | EventLogging + CommandRetry middleware                                                                      |
+| `go-cqrs-lite/watermill/v4`        | v4.5.1  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                              |
+| `go-cqrs-lite/storage/v4`          | v4.8.1  | SQLite event store, snapshot, KV store                                                                      |
+| `go-branded-id`                    | v0.5.1  | Branded phantom-type IDs for compile-time safety                                                            |
+| `go-error-family`                  | v0.10.0 | Structured error classification + user-facing message templates                                             |
+| `modernc.org/sqlite`               | v1.56.0 | Pure-Go SQLite driver (no CGo)                                                                              |
+| `charm.land/log/v2`                | v2.0.1  | Structured logging                                                                                          |
+| `github.com/danielgtaylor/huma/v2` | v2.39.1 | HTTP API framework with OpenAPI 3 generation + stdlib adapter                                               |
+| `github.com/oklog/ulid/v2`         | v2.1.2  | ULID generation for `ItemID`                                                                                |
 
 ### Test Dependencies
 
@@ -239,9 +213,9 @@ Two tables managed by the CQRS stack:
 
 ### Build System
 
-| File        | Purpose                                            |
-| ----------- | -------------------------------------------------- |
-| `flake.nix` | Nix flake with Go devShell + buildGoModule package |
+| File        | Purpose                                                                                                              |
+| ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| `flake.nix` | Nix flake using the `go-standard` module (go-nix-helpers): devShell, `packages.default` + `packages.cqrs-lint`, `checks.cqrs-lint` |
 
 ## go-cqrs-lite Integration
 

@@ -1,7 +1,7 @@
 # Domain Language — go-localsync
 
 **Project:** go-localsync\
-**Last Updated:** 2026-07-18
+**Last Updated:** 2026-09-05
 
 A Unified Language for the local-sync domain — shared across users, developers, and AI.
 
@@ -97,7 +97,7 @@ Read-side operations against the read model.
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **Sync Engine** | Orchestrates fetching from providers and dispatching to CQRS stack (`pkg/sync`)                                                          |
 | **CQRS Core**   | Event sourcing, command/query dispatch, projections (`pkg/cqrs`)                                                                         |
-| **Provider**    | External API integration contract, rate limiting, retry logic (`pkg/provider` — contract only; concrete providers live in consumer apps) |
+| **Provider**    | External API integration contract, rate limiting, retry logic (`pkg/provider` — contract only; the optional `provider/github` nested module is the reference implementation, other providers live in consumer apps) |
 | **Types**       | Branded identifier types for compile-time safety (`pkg/id`)                                                                              |
 
 ---

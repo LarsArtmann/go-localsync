@@ -148,20 +148,20 @@ My living-doc edits were auto-committed by hooks into **5 separate commits** (21
 
 ### Immediate (verification gaps from this session)
 
-1. Run `golangci-lint run ./... --timeout=5m` and fix any issues
-2. Run `golangci-lint fmt ./...` on all edited docs
+1. ~~Run `golangci-lint run ./... --timeout=5m` and fix any issues~~ done at `f0756d9` (v0.4.1 session fixed all 9 findings)
+2. ~~Run `golangci-lint fmt ./...` on all edited docs~~ done at `4121b34` (dprint/dprint doc formatting sweep in the v0.5.0 prep)
 3. Run `buildflow --build-mode full` (inside devShell, go.work removed)
-4. Run `nix flake check` to verify sandbox build
-5. Investigate commit `acaa8a5` (vendor/ → mkPreparedSource migration)
-6. Verify `docs/DOMAIN_LANGUAGE.md` exists and is current
+4. ~~Run `nix flake check` to verify sandbox build~~ done at `3247d62` (v0.5.0 — nix build + flake check verified green)
+5. ~~Investigate commit `acaa8a5` (vendor/ → mkPreparedSource migration)~~ resolved — shipped as the v0.4.1 build system, then superseded by the go-standard flake module in v0.5.0 (both migrations documented in CHANGELOG)
+6. ~~Verify `docs/DOMAIN_LANGUAGE.md` exists and is current~~ done — exists; refreshed 2026-09-05 (provider/github reference added)
 7. Verify `CONTRIBUTING.md` content matches what CHANGELOG claims ("streamlined")
-8. Open each `docs/adr/000N-*.md` and verify status headers match ROADMAP.md ADR table
+8. ~~Open each `docs/adr/000N-*.md` and verify status headers match ROADMAP.md ADR table~~ done 2026-09-05 — all 8 ADR statuses verified against the ROADMAP table (0001-0007 Accepted, 0008 Proposed-dormant)
 9. Run link integrity sweep: `grep -roE '\]\([^)]+\)' *.md docs/` and verify each resolves
-10. Cross-check every coverage % in AGENTS.md and README.md tables against `go test -cover`
+10. ~~Cross-check every coverage % in AGENTS.md and README.md tables against `go test -cover`~~ done 2026-09-05 — recomputed (cqrs 82.4%, cqrslint 90.0%); both tables corrected
 
 ### Short-term (TODO_LIST items)
 
-11. Make `go-cqrs-lite` public (eliminates vendor/ workaround + `vendorHash = null`)
+11. ~~Make `go-cqrs-lite` public (eliminates vendor/ workaround + `vendorHash = null`)~~ done 2026-09-05 — go-cqrs-lite (and go-localsync itself) are public; real `vendorHash` lives in flake.nix
 12. OpenTelemetry instrumentation — spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, HTTP middleware
 13. Structured logging fields (source, page, event_id) in `pkg/sync/sync.go`
 14. API authentication middleware (API key or JWT)
@@ -180,33 +180,33 @@ My living-doc edits were auto-committed by hooks into **5 separate commits** (21
 24. `cqrslint` `testdata/` directory pattern for cleaner test fixtures
 25. `cqrslint` CI workflow step in `.github/workflows/ci.yml`
 26. `cqrslint` hand-rolled `-json` output → `encoding/json.Marshal`
-27. Pre-commit hook fix (OOM on vendor dir — exclude vendor/ from formatter steps)
+27. ~~Pre-commit hook fix (OOM on vendor dir — exclude vendor/ from formatter steps)~~ moot — the committed `vendor/` tree was removed in v0.4.1; the OOM cause is gone (hooks remain inert)
 28. `hierarchical-errors` 3,711 findings — suppress in `.buildflow.yml` or formally track
 29. Conflict resolution per-sync override (`SyncOptions.ConflictResolver`)
 30. Improve `CONTRIBUTING.md` — architecture guide, file-split conventions, testing requirements
 
 ### Long-term (ROADMAP / vision)
 
-31. TUI with Bubble Tea (consumer app, not SDK)
-32. Multiple-source sync (multiple sources in one sync run)
-33. Daemon / background mode (cron or systemd)
-34. Export to JSON/CSV
-35. Real-time sync protocol (out of scope per ADR-0004; would need to be built from scratch)
+31. ~~TUI with Bubble Tea (consumer app, not SDK)~~ routed to ROADMAP (Future Themes)
+32. ~~Multiple-source sync (multiple sources in one sync run)~~ routed to ROADMAP (Future Themes / Open Questions)
+33. ~~Daemon / background mode (cron or systemd)~~ routed to ROADMAP (Future Themes)
+34. ~~Export to JSON/CSV~~ routed to ROADMAP (Data & Export)
+35. ~~Real-time sync protocol (out of scope per ADR-0004; would need to be built from scratch)~~ recorded as a ROADMAP non-goal
 36. `ItemFilter.Validate()` — reject negative Limit/Offset (data-model-review Low finding)
 37. Branded `ContentHash` type (data-model-review Low finding)
 38. Typed `attrs` accessors in `pkg/data/model/attrs` (data-model-review Medium finding)
-39. Tombstone purge / TTL (tombstoned rows accumulate forever)
+39. ~~Tombstone purge / TTL (tombstoned rows accumulate forever)~~ routed to ROADMAP (Open Questions — retention/TTL)
 40. `SyncResult` vs `SyncSummary` vocabulary alignment (naming-review Medium finding)
 41. Rename `Stats` → `ItemStats` or `ReadModelStats` (naming-review Low finding)
 42. Rename `GetStats` → `Stats()` (naming-review Low finding — redundant `Get` prefix)
-43. Extract `pkg/contracts` neutral seam (if a 2nd orchestrator ever appears)
-44. Resolve the "standalone vs merge vs upstream" product question for go-localsync
-45. Event retention / TTL — SQLite grows unbounded
+43. ~~Extract `pkg/contracts` neutral seam (if a 2nd orchestrator ever appears)~~ conditional — not triggered; revisit only if a second orchestrator appears
+44. ~~Resolve the "standalone vs merge vs upstream" product question for go-localsync~~ resolved — stayed the course within ADR-0004 scope; ADR-0008 (Host pivot) recorded as Proposed-dormant
+45. ~~Event retention / TTL — SQLite grows unbounded~~ routed to ROADMAP (Open Questions)
 46. SQLite file-backed integration tests (current tests use `:memory:` which hides concurrency bugs)
-47. Second provider implementation to validate the Provider interface (GitLab? Jira?)
+47. ~~Second provider implementation to validate the Provider interface (GitLab? Jira?)~~ routed to ROADMAP (Future Themes)
 48. Real GitHub PAT smoke test (mock-passing ≠ working)
 49. Benchmarks for the full sync pipeline (not just individual operations)
-50. ADR-0008 revisitation trigger: a 3rd consumer hitting the boilerplate wall
+50. ~~ADR-0008 revisitation trigger: a 3rd consumer hitting the boilerplate wall~~ recorded — the trigger is documented in ADR-0008 and the ROADMAP ADR table
 
 ---
 

@@ -149,14 +149,14 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 
 ### Project-wide (observed during this session)
 
-26. Run `nix build` to verify the flake still builds with new files
-27. Run `nix flake check` for full flake validation
+26. ~~Run `nix build` to verify the flake still builds with new files~~ done at `3247d62` (v0.5.0 — `nix build` + `nix flake check` verified green)
+27. ~~Run `nix flake check` for full flake validation~~ done at `3247d62` (v0.5.0)
 28. Run `buildflow --build-mode full` inside the devShell (delete go.work first)
 29. Run `golangci-lint run ./...` across the entire project (not just changed packages)
 30. Verify the `gci` import ordering warning on `suppress_test.go` is actually resolved
-31. Add pre-commit hook budget fix or vendor exclusion (documented gotcha in AGENTS.md)
-32. Consider making `go-cqrs-lite` public to eliminate the vendor force-add workaround
-33. Check if `.envrc` needs force-add after any changes
+31. ~~Add pre-commit hook budget fix or vendor exclusion (documented gotcha in AGENTS.md)~~ moot — the committed `vendor/` tree was removed in v0.4.1's build-system migration (go-standard flake since v0.5.0); the OOM cause is gone and the hooks remain inert
+32. ~~Consider making `go-cqrs-lite` public to eliminate the vendor force-add workaround~~ done 2026-09-05 — `go-cqrs-lite` (and `go-localsync` itself) are public now; CI dropped all private-repo auth
+33. ~~Check if `.envrc` needs force-add after any changes~~ done — `.envrc` is tracked (committed), so subsequent edits need no force-add
 
 ### Documentation
 
@@ -164,7 +164,7 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 35. Add examples of valid vs invalid suppression directives to docs
 36. Document the exit code contract (0 clean, 1 findings, 2 usage error) in README
 37. Update `docs/adr/` if suppression directives warrant an ADR (they change the linting contract)
-38. Add a `CHANGELOG.md` entry for the new flags
+38. ~~Add a `CHANGELOG.md` entry for the new flags~~ done at `3247d62` — v0.5.0 "cqrslint suppression directives" entry
 
 ### Testing infrastructure
 
