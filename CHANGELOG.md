@@ -9,8 +9,34 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
-- **`provider/github` optional nested module** — a GitHub events `provider.Provider` built on `go-github-kit` v0.2.0 (token auth, rate-limit gating fed from response headers, retry with backoff). Extracted from github-local-sync's proven `internal/github` package. The core module stays free of GitHub dependencies; consumers opt in by requiring `github.com/larsartmann/go-localsync/provider/github`. Development runs through the new root `go.work`; the module's parent pin is a master pseudo-version until the next core release.
+- Nothing yet.
+
+### Fixed
+
+- Nothing yet.
+
+## [0.5.0] - 2026-09-05
+
+The provider-extraction release: GitHub integration moves into an optional
+nested module, and the module registry gains the `ErrProviderUnavailable`
+sentinel. Also carries the accumulated cqrslint tooling features and the
+go-standard flake migration.
+
+> Tag note: the `v0.4.2` tag is a retroactive proxy-sweep tag pointing at an
+> April 2026 snapshot (it predates v0.4.1's content); it has no changelog
+> section of its own. This release re-establishes `@latest` on current code.
+
+### Added
+
+- **`provider/github` optional nested module** — a GitHub events `provider.Provider` built on `go-github-kit` v0.2.0 (token auth, rate-limit gating fed from response headers, retry with backoff). Extracted from github-local-sync's proven `internal/github` package. The core module stays free of GitHub dependencies; consumers opt in by requiring `github.com/larsartmann/go-localsync/provider/github`. Development runs through the new root `go.work`; the module's parent pin is a master pseudo-version until this release.
 - **`ErrProviderUnavailable` sentinel** (`pkg/errors`, transient) — fills the vocabulary gap for "the provider API could not be reached or kept failing", mapped from the kit's `ErrAPIUnavailable` and unclassified GitHub failures. User-facing message template registered.
+- **cqrslint suppression directives** — `//cqrs-lint:ignore` comments suppress individual findings, with verbose output and improved report formatting (`emitSummary` simplification, bundled emit parameters).
+
+### Changed
+
+- **go-cqrs-lite v4.9 stack** — dependency refresh across all go-cqrs-lite modules, pinned CI actions, dprint doc formatting.
+- **Command dispatch on `ExecuteRef`** — both command handlers migrated off the deprecated `Repository.Execute` pair form to `ExecuteRef` with `id.NewStreamRef`, clearing the staticcheck SA1019 findings and unblocking the future go-cqrs-lite v5 upgrade; the `NewCQRSStack` failure-path cleanup was extracted into a named helper at the same time.
+- **Flake migrated to the go-standard module** — flake.nix reduced from 237 to 86 lines.
 
 ### Fixed
 
