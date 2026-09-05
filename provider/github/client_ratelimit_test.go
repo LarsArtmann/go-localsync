@@ -135,12 +135,12 @@ func TestWrapGitHubError(t *testing.T) {
 			pkgerrors.ErrRateLimited,
 		},
 		{
-			"raw rate limit error (kit v0.1.0 gap)",
+			"native rate limit error (classified by kit since v0.3.0)",
 			&gh.RateLimitError{Response: &http.Response{StatusCode: http.StatusForbidden}},
 			pkgerrors.ErrRateLimited,
 		},
 		{
-			"raw abuse rate limit error (kit v0.1.0 gap)",
+			"native abuse rate limit error (classified by kit since v0.3.0)",
 			&gh.AbuseRateLimitError{Response: &http.Response{StatusCode: http.StatusForbidden}},
 			pkgerrors.ErrRateLimited,
 		},
@@ -152,6 +152,11 @@ func TestWrapGitHubError(t *testing.T) {
 			wrapped := wrapGitHubError(tt.err, "testuser")
 			if !errors.Is(wrapped, tt.wantErr) {
 				t.Errorf("expected %v, got %v", tt.wantErr, wrapped)
+			}
+
+			// The original GitHub error must stay reachable for diagnostics.
+			if !errors.Is(wrapped, tt.err) { //nolint:errorlint // identity of the original is the assertion
+				t.Errorf("wrapped error lost the original cause %T: %v", tt.err, wrapped)
 			}
 		})
 	}

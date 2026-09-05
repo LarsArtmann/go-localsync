@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"charm.land/log/v2"
@@ -22,7 +23,6 @@ import (
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
-	"golang.org/x/sync/errgroup"
 )
 
 const providerName = "github"
@@ -215,18 +215,12 @@ func (c *Client) Fetch(
 
 // FetchAll retrieves all available GitHub events up to maxPages.
 //
-// Page 1 is fetched sequentially to determine if multi-page fetching is worthwhile.
-// Pages 2 through maxPages are fetched concurrently using a bounded goroutine pool
-// controlled by FetchConfig.MaxConcurrentFetches (default 3).
-//
-// Early termination: if a page returns fewer items than requested (PerPage),
-// remaining pending pages are cancelled via context, since GitHub returns
-// full pages until data is exhausted.
-//
-// Progress: if FetchConfig.OnProgress is set, it is called after each page
-// completes with (pageNumber, maxPages, cumulativeItemCount).
-//
-// The caller's context deadline applies to the entire operation.
+// The walk is delegated to githubkit.FetchPages: page 1 is fetched
+// sequentially to detect an exhausted endpoint, pages 2..maxPages run on a
+// bounded pool (FetchConfig.MaxConcurrentFetches, default 3), and a short
+// page stops the walk because GitHub returns full pages until data runs
+// out. Progress callbacks (if configured) receive the page number, the
+// page cap, and the cumulative item count, matching the kernel contract.
 func (c *Client) FetchAll(
 	ctx context.Context,
 	source string,
@@ -236,85 +230,33 @@ func (c *Client) FetchAll(
 		maxPages = 10
 	}
 
-	first, err := c.fetchFirstPage(ctx, source, maxPages)
-	if err != nil {
-		return nil, err
-	}
+	var (
+		rateInfo *provider.RateLimitInfo
+		rateOnce sync.Once
+	)
 
-	if len(first.Items) == 0 || !first.HasMore || maxPages == 1 {
-		return &provider.FetchResult{Items: first.Items, HasMore: false, RateLimit: first.RateLimit}, nil
-	}
-
-	remaining := maxPages - 1
-	results := make([]*provider.FetchResult, remaining) //nolint:makezero
-
-	concurrency := max(c.fetchConfig.MaxConcurrentFetches, 1)
-
-	group, groupCtx := errgroup.WithContext(ctx)
-	sem := make(chan struct{}, concurrency)
-
-	c.reportProgress(1, maxPages, len(first.Items))
-
-	for page := 2; page <= maxPages; page++ {
-		idx := page - 2
-
-		sem <- struct{}{}
-
-		group.Go(func() error {
-			defer func() { <-sem }()
-
-			result, fetchErr := c.Fetch(groupCtx, newFetchOptions(source, page))
-			if fetchErr != nil {
-				return pkgerrors.Wrapf(
-					fetchErr,
-					"fetch page %d/%d for %s failed",
-					page,
-					maxPages,
-					source,
-				)
-			}
-
-			results[idx] = result
-
-			c.reportProgress(page, maxPages, len(result.Items))
-
-			return nil
-		})
-	}
-
-	if err := group.Wait(); err != nil {
-		return nil, err
-	}
-
-	allItems := first.Items
-
-	for _, r := range results {
-		if r == nil || len(r.Items) == 0 {
-			break
+	items, err := githubkit.FetchPages(ctx, githubkit.PaginationOptions{
+		MaxPages:    maxPages,
+		PerPage:     100,
+		Concurrency: c.fetchConfig.MaxConcurrentFetches,
+		OnProgress:  c.reportProgress,
+	}, func(ctx context.Context, page int) ([]*provider.Item, error) {
+		result, fetchErr := c.Fetch(ctx, newFetchOptions(source, page))
+		if fetchErr != nil {
+			return nil, fetchErr
 		}
 
-		allItems = append(allItems, r.Items...)
-	}
+		if page == 1 {
+			rateOnce.Do(func() { rateInfo = result.RateLimit })
+		}
 
-	return &provider.FetchResult{Items: allItems, HasMore: false, RateLimit: first.RateLimit}, nil
-}
-
-func (c *Client) fetchFirstPage(
-	ctx context.Context,
-	source string,
-	maxPages int,
-) (*provider.FetchResult, error) {
-	first, err := c.Fetch(ctx, newFetchOptions(source, 1))
+		return result.Items, nil
+	})
 	if err != nil {
-		return nil, pkgerrors.Wrapf(
-			err,
-			"fetch page 1/%d for %s failed",
-			maxPages,
-			source,
-		)
+		return nil, pkgerrors.Wrapf(err, "fetching all events for %s failed", source)
 	}
 
-	return first, nil
+	return &provider.FetchResult{Items: items, HasMore: false, RateLimit: rateInfo}, nil
 }
 
 // newFetchOptions builds FetchOptions for a single GitHub events page fetch.

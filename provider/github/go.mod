@@ -4,10 +4,9 @@ go 1.26.7
 
 require (
 	charm.land/log/v2 v2.0.0
-	github.com/LarsArtmann/go-github-kit v0.2.0
+	github.com/LarsArtmann/go-github-kit v0.3.0
 	github.com/google/go-github/v69 v69.2.0
 	github.com/larsartmann/go-localsync v0.5.0
-	golang.org/x/sync v0.22.0
 )
 
 require (
@@ -32,5 +31,6 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xo/terminfo v1.0.0 // indirect
 	golang.org/x/exp v0.0.0-20260824195058-e88cd73687aa // indirect
+	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 )

@@ -2,10 +2,8 @@ package github
 
 import (
 	"errors"
-	"net/http"
 
 	githubkit "github.com/LarsArtmann/go-github-kit"
-	gh "github.com/google/go-github/v69/github"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -42,43 +40,33 @@ func retryOption(cfg provider.RetryConfig) githubkit.Option {
 // wrapGitHubError maps any GitHub API failure onto the go-localsync error
 // family so callers can rely on errors.Is(pkgerrors.Err*) checks.
 //
-// go-github's dedicated rate-limit error types are handled first: the kit
-// v0.2.0 classifier does not recognize them, and the kernel's gate only
-// rejects requests whose budget it already knows is empty, so the first
-// teaching 403 with X-RateLimit-Remaining: 0 surfaces raw. Kit sentinels
-// are checked next (they cover gate rejections that never produced an HTTP
-// response), then raw status codes for unclassified errors. Everything
-// else is a provider outage.
+// Since kit v0.3.0, ClassifyError recognizes go-github's dedicated
+// *RateLimitError/*AbuseRateLimitError types, so one classification pass
+// covers raw responses, gate rejections, and native rate-limit errors
+// alike. Kit sentinels drive the mapping; the kit's ErrForbidden (a 403
+// permission denial) reports as ErrRateLimited because the events
+// endpoints only 403 on exhausted budgets in practice and the provider
+// vocabulary has no permission sentinel. The original GitHub error stays
+// reachable in the returned chain for errors.AsType diagnostics.
 func wrapGitHubError(err error, username string) error {
-	if _, ok := errors.AsType[*gh.RateLimitError](err); ok {
-		return pkgerrors.WithDetail(pkgerrors.ErrRateLimited, username)
-	}
+	classified := githubkit.ClassifyError(err)
 
-	if _, ok := errors.AsType[*gh.AbuseRateLimitError](err); ok {
-		return pkgerrors.WithDetail(pkgerrors.ErrRateLimited, username)
-	}
+	var mapped error
 
 	switch {
-	case errors.Is(err, githubkit.ErrRateLimited):
-		return pkgerrors.WithDetail(pkgerrors.ErrRateLimited, username)
-	case errors.Is(err, githubkit.ErrAuthRequired):
-		return pkgerrors.WithDetail(pkgerrors.ErrInvalidToken, username)
-	case errors.Is(err, githubkit.ErrNotFound):
-		return pkgerrors.WithDetail(pkgerrors.ErrUserNotFound, username)
-	case errors.Is(err, githubkit.ErrAPIUnavailable):
-		return pkgerrors.WithDetail(pkgerrors.ErrProviderUnavailable, username)
+	case errors.Is(classified, githubkit.ErrRateLimited),
+		errors.Is(classified, githubkit.ErrForbidden):
+		mapped = pkgerrors.WithDetail(pkgerrors.ErrRateLimited, username)
+	case errors.Is(classified, githubkit.ErrAuthRequired):
+		mapped = pkgerrors.WithDetail(pkgerrors.ErrInvalidToken, username)
+	case errors.Is(classified, githubkit.ErrNotFound):
+		mapped = pkgerrors.WithDetail(pkgerrors.ErrUserNotFound, username)
+	default:
+		// Covers the kit's ErrAPIUnavailable (transport failures,
+		// exhausted 5xx retries) and anything unclassified: from the
+		// provider's point of view the source is unavailable either way.
+		mapped = pkgerrors.WithDetail(pkgerrors.ErrProviderUnavailable, username)
 	}
 
-	if ghErr, ok := errors.AsType[*gh.ErrorResponse](err); ok && ghErr.Response != nil {
-		switch ghErr.Response.StatusCode {
-		case http.StatusUnauthorized:
-			return pkgerrors.WithDetail(pkgerrors.ErrInvalidToken, username)
-		case http.StatusForbidden:
-			return pkgerrors.WithDetail(pkgerrors.ErrRateLimited, username)
-		case http.StatusNotFound:
-			return pkgerrors.WithDetail(pkgerrors.ErrUserNotFound, username)
-		}
-	}
-
-	return pkgerrors.WithDetail(pkgerrors.ErrProviderUnavailable, username)
+	return errors.Join(mapped, pkgerrors.Wrap(err, "github api call failed"))
 }
