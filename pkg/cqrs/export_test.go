@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -22,9 +23,13 @@ func TestExportEvents_JSONLines(t *testing.T) {
 
 	ctx := context.Background()
 	syncTestItem(t, stack, ctx, "exp-1", "PushEvent")
+	waitForCount(t, stack, ctx, 1)
+
 	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("exp-1"), model.ReasonUserHidden))
 
-	waitForCount(t, stack, ctx, 1)
+	// Give the synchronous bus a beat to deliver the tombstone before reading
+	// the journal for export.
+	time.Sleep(50 * time.Millisecond)
 
 	var buf bytes.Buffer
 	testutil.MustNoError(t, stack.ExportEvents(ctx, &buf))

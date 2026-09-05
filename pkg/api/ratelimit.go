@@ -44,7 +44,7 @@ func newTokenBucket(requestsPerMinute int) *tokenBucket {
 
 // take removes one token, reporting whether it was available and how long to
 // wait for the next one when it was not.
-func (b *tokenBucket) take() (ok bool, retryAfter time.Duration) {
+func (b *tokenBucket) take() (bool, time.Duration) {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 
@@ -63,11 +63,11 @@ func (b *tokenBucket) take() (ok bool, retryAfter time.Duration) {
 	return false, time.Duration(missing / b.rate * float64(time.Second))
 }
 
-func (s *Server) rateLimited(h http.Handler) http.Handler {
+func (s *Server) rateLimited(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if s.opts == nil || s.opts.ratePerMinute <= 0 || s.opts.bucket == nil ||
 			r.Method != http.MethodPost || r.URL.Path != "/sync" {
-			h.ServeHTTP(w, r)
+			next.ServeHTTP(w, r)
 
 			return
 		}

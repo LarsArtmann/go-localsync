@@ -66,3 +66,16 @@ if result.RateLimit != nil {
 Standalone development: the module pins a released parent version and builds
 with `go build ./...` from this directory with `GOWORK=off`; inside the
 repository, the root `go.work` wires it against the local core module.
+
+## Live smoke test
+
+The mock-based suite never touches the network. One env-gated round trip
+proves the released wiring (auth, pagination, rate-limit metadata, error
+classification) against the real API:
+
+```bash
+GITHUB_PAT=ghp_yourtoken go test -run TestLivePAT ./...
+```
+
+Without `GITHUB_PAT` the test skips. A public-read PAT is sufficient; it
+fetches one page of `torvalds`' public event feed.

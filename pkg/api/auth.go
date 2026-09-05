@@ -22,10 +22,10 @@ func WithAPIKey(key string) ServerOption {
 // accepted so standard HTTP clients work without custom headers.
 const apiKeyHeader = "X-API-Key"
 
-func (s *Server) authenticated(h http.Handler) http.Handler {
+func (s *Server) authenticated(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if s.opts == nil || s.opts.apiKey == "" || isPublicPath(r.URL.Path) {
-			h.ServeHTTP(w, r)
+			next.ServeHTTP(w, r)
 
 			return
 		}

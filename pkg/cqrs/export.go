@@ -18,16 +18,16 @@ import (
 // metadata, and timing. Payload stays raw so exports never lose fidelity to
 // what was persisted.
 type ExportedEvent struct {
-	EventID       string            `json:"event_id"`
-	EventType     string            `json:"event_type"`
-	StreamID      string            `json:"stream_id"`
-	StreamType    string            `json:"stream_type"`
+	EventID       string            `json:"eventId"`
+	EventType     string            `json:"eventType"`
+	StreamID      string            `json:"streamId"`
+	StreamType    string            `json:"streamType"`
 	Version       uint64            `json:"version"`
-	SchemaVersion int               `json:"schema_version"`
-	OccurredAt    time.Time         `json:"occurred_at"`
-	PayloadBase64 string            `json:"payload_base64"`
+	SchemaVersion int               `json:"schemaVersion"`
+	OccurredAt    time.Time         `json:"occurredAt"`
+	PayloadBase64 string            `json:"payloadBase64"`
 	Encoding      string            `json:"encoding"`
-	CorrelationID string            `json:"correlation_id,omitempty"`
+	CorrelationID string            `json:"correlationId,omitempty"`
 	Causation     *event.Causation  `json:"causation,omitempty"`
 	Metadata      map[string]string `json:"metadata,omitempty"`
 }

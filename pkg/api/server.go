@@ -68,32 +68,54 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.rateLimited(s.authenticated(s.mux)).ServeHTTP(w, r)
 }
 
+// errorStatuses returns the non-2xx statuses an operation can produce given
+// the enabled options, so the OpenAPI document carries a truthful error
+// schema per endpoint (consumers can generate matching error handling).
+func (s *Server) errorStatuses(withAuth, withRateLimit bool) []int {
+	statuses := []int{http.StatusInternalServerError}
+	if withAuth {
+		statuses = append(statuses, http.StatusUnauthorized)
+	}
+
+	if withRateLimit {
+		statuses = append(statuses, http.StatusTooManyRequests)
+	}
+
+	return statuses
+}
+
 func (s *Server) registerRoutes() {
-	register(
+	authEnabled := s.opts != nil && s.opts.apiKey != ""
+	rateLimited := s.opts != nil && s.opts.bucket != nil
+
+	registerWithErrors(
 		s.api,
 		"list-items",
 		http.MethodGet,
 		"/items",
 		"List synced items",
 		[]string{"Items"},
+		append([]int{http.StatusBadRequest}, s.errorStatuses(authEnabled, false)...),
 		s.listItems,
 	)
-	register(
+	registerWithErrors(
 		s.api,
 		"get-stats",
 		http.MethodGet,
 		"/stats",
 		"Get sync statistics",
 		[]string{"Stats"},
+		s.errorStatuses(authEnabled, false),
 		s.getStats,
 	)
-	register(
+	registerWithErrors(
 		s.api,
 		"trigger-sync",
 		http.MethodPost,
 		"/sync",
 		"Trigger a sync operation",
 		[]string{"Sync"},
+		append([]int{http.StatusBadRequest, http.StatusRequestTimeout}, s.errorStatuses(authEnabled, rateLimited)...),
 		s.triggerSync,
 	)
 	register(
@@ -118,11 +140,23 @@ func register[I, O any](
 	tags []string,
 	handler func(context.Context, *I) (*O, error),
 ) {
+	registerWithErrors(api, opID, method, path, summary, tags, nil, handler)
+}
+
+//nolint:exhaustruct // huma.Operation has many optional fields; only route metadata is required
+func registerWithErrors[I, O any](
+	api huma.API,
+	opID, method, path, summary string,
+	tags []string,
+	errorStatuses []int,
+	handler func(context.Context, *I) (*O, error),
+) {
 	huma.Register(api, huma.Operation{
 		OperationID: opID,
 		Method:      method,
 		Path:        path,
 		Summary:     summary,
 		Tags:        tags,
+		Errors:      errorStatuses,
 	}, handler)
 }

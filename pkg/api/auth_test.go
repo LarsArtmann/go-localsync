@@ -149,3 +149,58 @@ func TestAPIKeyAuth_OpenAPIDeclaresScheme(t *testing.T) {
 		t.Error("openapi.json must apply the security requirement globally")
 	}
 }
+
+// TestOpenAPI_ErrorSchemasPerEndpoint pins M22: the OpenAPI document declares
+// the error statuses each endpoint can actually produce (400 on /items for a
+// bad cursor, 401/429 when auth + rate limiting are enabled).
+func TestOpenAPI_ErrorSchemasPerEndpoint(t *testing.T) {
+	t.Parallel()
+
+	syncer := synclib.NewSyncer(&testutil.MockProvider{}, &mockSyncStore{}, log.Default())
+	srv := NewServer(syncer, log.Default(), WithAPIKey("k"), WithRateLimit(60))
+
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/openapi.json", nil)
+	rec := httptest.NewRecorder()
+
+	srv.ServeHTTP(rec, req)
+
+	testutil.AssertStatus(t, rec, http.StatusOK)
+
+	var doc struct {
+		Paths map[string]map[string]struct {
+			Responses map[string]any `json:"responses"`
+		} `json:"paths"`
+	}
+
+	if err := json.Unmarshal(rec.Body.Bytes(), &doc); err != nil {
+		t.Fatalf("openapi.json parse: %v", err)
+	}
+
+	assertErrorStatus := func(path, method, status string) {
+		t.Helper()
+
+		op, ok := doc.Paths[path][method]
+		if !ok {
+			t.Fatalf("openapi.json missing %s %s", method, path)
+		}
+
+		if _, ok := op.Responses[status]; !ok {
+			t.Errorf("%s %s must declare a %s response, got %v", method, path, status, keysOf(op.Responses))
+		}
+	}
+
+	assertErrorStatus("/items", "get", "400")
+	assertErrorStatus("/items", "get", "401")
+	assertErrorStatus("/sync", "post", "400")
+	assertErrorStatus("/sync", "post", "429")
+	assertErrorStatus("/sync", "post", "500")
+}
+
+func keysOf(m map[string]any) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+
+	return keys
+}

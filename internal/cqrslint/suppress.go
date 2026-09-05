@@ -87,21 +87,21 @@ func (s *Suppressor) parseDirective(pkg *Package, comment *ast.Comment) {
 		info := directiveInfo{kind: directiveIgnoreF, reason: reason}
 		s.addFileRules(relFile, rules)
 		s.recordFileProvenance(relFile, rules, info)
-		s.recordUnknownRules(pkg, relFile, position.Line, rules)
+		s.recordUnknownRules(relFile, position.Line, rules)
 
 	case strings.HasPrefix(body, directiveIgnore):
 		rules, reason := parseDirectiveRules(body, directiveIgnore)
 		info := directiveInfo{kind: directiveIgnore, reason: reason}
 		s.addLineRules(relFile, position.Line, rules)
 		s.recordLineProvenance(relFile, position.Line, rules, info)
-		s.recordUnknownRules(pkg, relFile, position.Line, rules)
+		s.recordUnknownRules(relFile, position.Line, rules)
 	}
 }
 
 // recordUnknownRules flags directives naming rule IDs that do not exist in
 // the catalog. A typo like //cqrs-lint:ignore C9999 previously silenced
 // nothing, silently — now it warns (and fails --strict).
-func (s *Suppressor) recordUnknownRules(pkg *Package, file string, line int, rules []string) {
+func (s *Suppressor) recordUnknownRules(file string, line int, rules []string) {
 	known := map[string]bool{}
 	for _, rule := range Rules() {
 		known[rule.ID] = true
