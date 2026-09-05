@@ -1,7 +1,7 @@
 # CQRS-Lite Integration Plan: Immediate Quality + ID Convergence
 
 **Date:** 2026-04-30
-**Status:** Execution Plan
+**Status:** ~~Execution Plan~~ Executed — see Resolution below.
 **Scope:** Fix stale docs, fix lint warnings, add go-cqrs-lite dependency, converge ID systems
 
 ---
@@ -191,3 +191,9 @@ These items from the audit are explicitly deferred to avoid Verschlimmbesserung:
 4. **Replace LWW with generic LWWResolver** — requires extracting from go-localfirst first
 5. **Delete SQLite/Turso backends** — requires CQRS migration first
 6. **go.work is in .gitignore** — CI uses pseudo-versions, not go.work
+
+---
+
+## Resolution (2026-09-05)
+
+Executed: go-cqrs-lite was integrated on 2026-05-03 and has been the storage layer ever since — the dependency is now the v4.9 stack (v0.5.0). No live items remain.

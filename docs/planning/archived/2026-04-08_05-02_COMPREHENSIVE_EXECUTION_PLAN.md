@@ -1,7 +1,7 @@
 # Go-LocalSync Comprehensive Execution Plan
 
 **Created:** 2026-04-08 05:02\
-**Status:** Active\
+**Status:** ~~Active~~ Executed — see Resolution below.\
 **Scope:** Full project audit, prioritization, and execution\
 **Baseline:** Build passes, all tests pass, 0 lint errors, git clean
 
@@ -469,3 +469,9 @@ graph TD
 | P0 tasks             | 7 micro-tasks + verification |
 | Files to modify      | ~20                          |
 | New files to create  | ~8                           |
+
+---
+
+## Resolution (2026-09-05)
+
+Executed by the 2026-05-03 CQRS rewrite (see `docs/status/2026-05-03_08-03_CQRS_REWRITE_COMPLETE.md`): every task targets the legacy CRUD stack (`pkg/storage/`, `internal/db/`, `sql/`) that the rewrite deleted. No live items remain.

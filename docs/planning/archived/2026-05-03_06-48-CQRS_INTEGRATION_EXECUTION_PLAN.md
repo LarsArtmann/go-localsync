@@ -1,7 +1,7 @@
 # CQRS Integration Execution Plan: go-localsync on go-cqrs-lite
 
 **Date:** 2026-05-03
-**Status:** Ready to Execute
+**Status:** ~~Ready to Execute~~ Executed — see Resolution below.
 **Principle:** DO NOT VERSCHLIMMBESSER. Every step must improve the system.
 
 ---
@@ -277,3 +277,9 @@ Sorted by impact/dependency order.
 3. **Phase 4 is pure deletion** — only runs after Phase 3 proves CQRS path works.
 4. **go.work for local dev** — CI uses pseudo-versions. Local dev uses go.work for cross-project changes.
 5. **No Verschlimmbesserung** — every phase is independently verifiable. If any phase breaks, we stop.
+
+---
+
+## Resolution (2026-09-05)
+
+Fully executed and verified against the 2026-09-05 tree: `pkg/cqrs/` exists with the planned shape, and `pkg/storage/`, `internal/database/`, `internal/db/`, `sql/` are all gone. No live items remain.

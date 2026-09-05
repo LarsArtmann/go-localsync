@@ -3,7 +3,7 @@
 **Project:** go-localsync\
 **Date:** 2026-06-05\
 **Goal:** Transform `pkg/data/` from a "good first draft" into a superb, production-grade data layer.\
-**Status:** pkg/data/ exists (11 files, ~800 lines) but has compilation errors, no tests, and doesn't integrate with CQRS.
+**Status:** ~~Superseded~~ — see Resolution below.
 
 ---
 
@@ -433,3 +433,9 @@ Like go-cqrs-lite, migrations are forward-only. Old events are transformed on re
 ---
 
 _Plan created 2026-06-05. Execute Phase 1 first. Do not skip ahead._
+
+---
+
+## Resolution (2026-09-05)
+
+Superseded 26 minutes later by `2026-06-05_05-28_SUPERB-DATA-MODULE.md` (which stays in this directory and carries the still-open Phase D items: `schema.Upcaster` → TODO_LIST; cursor pagination + MetricsRecorder → dropped by scope). No live items remain here.

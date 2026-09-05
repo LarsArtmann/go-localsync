@@ -1,7 +1,7 @@
 # Comprehensive Execution Plan — go-localsync
 
 **Date:** 2026-05-28 06:25\
-**Status:** Planning Phase\
+**Status:** ~~Planning Phase~~ Executed — see Resolution below.\
 **Goal:** Systematic improvement of go-localsync, one small task at a time
 
 ---
@@ -228,3 +228,9 @@ If any task breaks build/tests, fix immediately before proceeding.
 - [ ] All tests pass
 - [ ] `-json` flag works
 - [ ] Documentation updated
+
+---
+
+## Resolution (2026-09-05)
+
+Executed: `pkg/localsync` was deleted and CRDT wired as `pkg/crdt` on 2026-05-29 (`docs/status/2026-05-29_03-19_CRDT-INTEGRATION-COMPLETE.md`); the `-json` output flag and the `ItemFilter` builder shipped in the same sprint; the daemon/CLI items are moot — the example CLI was removed from the SDK in v0.2.0. No live items remain.

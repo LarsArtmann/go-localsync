@@ -162,3 +162,9 @@ graph TD
 3. **Fallback behavior preserved** — if WAL fails, system still works (just slower)
 4. **No new dependencies** — only use stdlib + existing libs
 5. **Incremental commits** — each task is independently committable and revertable
+
+---
+
+## Resolution (2026-09-05)
+
+Executed: rate-limit cache, concurrent `FetchAll` (`MaxConcurrentFetches`), SQLite WAL mode, the aggregate-ID cache, and `CountByType` shipped in v0.1.1/v0.2.0 (CHANGELOG Performance section; deferred follow-ups tracked in `docs/status/2026-06-14_18-25_PERFORMANCE-SPRINT-FINAL-STATUS.md`). No live items remain.

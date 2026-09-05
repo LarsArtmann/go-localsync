@@ -2,7 +2,7 @@
 
 **Project:** go-localsync
 **Date:** 2026-06-11
-**Status:** Planning → Execution
+**Status:** ~~Planning → Execution~~ Executed — see Resolution below.
 **Tests:** 265+ passing, 11 packages | **Lint:** 0 issues (golangci-lint v2)
 
 ---
@@ -315,3 +315,9 @@ graph TD
 | 🟡 4% → 64%  | T04-T09      | 85min       | All files <250 lines, CLI coverage 20%+, nolint documented |
 | 🟢 20% → 80% | T10-T16      | 75min       | All docs current, 3 ADRs, CONTRIBUTING guide               |
 | **Total**    | **16 tasks** | **~200min** | **Production-quality codebase**                            |
+
+---
+
+## Resolution (2026-09-05)
+
+Executed the same day (see `docs/status/2026-06-11_14-09_SESSION-15-FULL-STATUS-REPORT.md`): pkg/testutil, the pkg/api split, ADRs 0001-0004, and CONTRIBUTING.md all exist; D01-D13 were recorded as deferred in that session. No live items remain.

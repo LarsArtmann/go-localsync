@@ -262,3 +262,9 @@ graph TD
 ---
 
 _Arte in Aeternum_
+
+---
+
+## Resolution (2026-09-05)
+
+Superseded by `2026-06-12_SESSION-18-PARETO-V2.md` after v1 left the build broken between sessions (the V2 plan's own verdict). Phases 0-2 were executed; the Phase 3 API items (auth, pagination headers, rate limiting) are still open in TODO_LIST.md. No live items remain here.
