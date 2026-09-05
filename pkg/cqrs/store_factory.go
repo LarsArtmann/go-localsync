@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	"github.com/larsartmann/go-cqrs-lite/projectionhost/v4"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v4"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/storage/memory/v4"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage/v4"
@@ -18,6 +19,7 @@ type storeResult struct {
 	db      *sql.DB
 	journal event.SeekableJournal
 	cpStore event.CheckpointStore
+	dlq     projectionhost.DeadLetterStore
 }
 
 func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error) {
@@ -80,6 +82,16 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 		return storeResult{}, pkgerrors.Wrap(cpErr, "create checkpoint store")
 	}
 
+	// The DLQ shares the SQLite file so captured poison events survive restarts
+	// (C017): catch-up no longer re-processes and re-captures the same event
+	// after every crash. The memory backend keeps its in-memory DLQ.
+	dlq, dlqErr := projectionhost.NewSQLiteDeadLetterStore(ctx, db)
+	if dlqErr != nil {
+		_ = db.Close()
+
+		return storeResult{}, pkgerrors.Wrap(dlqErr, "create dead-letter store")
+	}
+
 	configureSQLitePool(dbPath, db)
 
 	return storeResult{
@@ -88,6 +100,7 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 		db:      db,
 		journal: store,
 		cpStore: cpStore,
+		dlq:     dlq,
 	}, nil
 }
 
