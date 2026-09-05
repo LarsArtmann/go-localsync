@@ -40,12 +40,13 @@ name_lines() {
 }
 
 # per_pkg "<list output>" -> "pkg/short count" lines.
+# go test -list prints a package's names BEFORE its `ok <pkg>` boundary line,
+# so names are accumulated into `pending` and flushed on the boundary.
 per_pkg() {
 	awk -v prefix="$MODULE_PREFIX/" '
-		/^ok / { if (pkg != "" ) print substr(pkg, length(prefix)+1), count; pkg = $2; count = 0; next }
-		/^\?/  { next }
-		/^(Test|Benchmark|Example|Fuzz)/ { count++ }
-		END    { if (pkg != "") print substr(pkg, length(prefix)+1), count }
+		/^ok / { print substr($2, length(prefix)+1), pending; pending = 0; next }
+		/^\?/  { pending = 0; next }
+		/^(Test|Benchmark|Example|Fuzz)/ { pending++ }
 	' <<<"$1"
 }
 
@@ -57,7 +58,7 @@ actual_pkgs="$(per_pkg "$core_list" | wc -l | tr -d ' ')"
 
 # --- 2. AGENTS.md per-package test table ------------------------------------
 
-while IFS=$'\t' read -r pkg actual; do
+while read -r pkg actual; do
 	documented="$(grep -E "^\| \`$pkg\`" "$AGENTS" | head -1 | awk -F'|' '{gsub(/ /,"",$3); print $3}')"
 	if [[ -z "$documented" ]]; then
 		die "AGENTS.md test table has no row for $pkg (actual: $actual tests)"
@@ -69,9 +70,11 @@ done < <(per_pkg "$core_list")
 # --- 3. totals across AGENTS / README / FEATURES ----------------------------
 
 check_pair() {
-	local file="$1" pattern="$2" what="$3" actual="$4"
+	local file="$1" pattern="$2" what="$3" actual="$4" pick="${5:-first}"
 	local documented
-	documented="$(grep -oE "$pattern" "$file" | grep -oE '[0-9]+' | head -1 || true)"
+	local pick_arg="head -1"
+	[[ "$pick" == "last" ]] && pick_arg="tail -1"
+	documented="$(grep -oE "$pattern" "$file" | grep -oE '[0-9]+' | eval "$pick_arg" || true)"
 	if [[ -z "$documented" ]]; then
 		die "$file: no match for '$what' — pattern drifted or claim removed"
 	elif [[ "$documented" != "$actual" ]]; then
@@ -84,19 +87,19 @@ check_pair "$AGENTS" '\*\*[0-9]+ total test functions\*\*' \
 check_pair "$AGENTS" 'total test functions\*\* across [0-9]+ test packages' \
 	"AGENTS test-package count" "$actual_pkgs"
 check_pair "$AGENTS" 'plus [0-9]+ in the standalone .provider/github. module' \
-	"provider/github test count" "$actual_provider"
+	"provider/github test count" "$actual_provider" last
 
 check_pair "$README" '[0-9]+ tests across [0-9]+ packages' \
 	"README quickstart count" "$actual_total"
 check_pair "$README" '[0-9]+ test functions across [0-9]+ packages \(plus [0-9]+ in the standalone' \
 	"README testing-section total" "$actual_total"
 check_pair "$README" 'test functions across [0-9]+ packages \(plus [0-9]+ in the standalone' \
-	"README provider count" "$actual_provider"
+	"README provider count" "$actual_provider" last
 
 check_pair "$FEATURES" '[0-9]+ test functions across [0-9]+ packages \(plus [0-9]+ in the standalone' \
 	"FEATURES test-suite total" "$actual_total"
 check_pair "$FEATURES" 'test functions across [0-9]+ packages \(plus [0-9]+ in the standalone' \
-	"FEATURES provider count" "$actual_provider"
+	"FEATURES provider count" "$actual_provider" last
 
 # --- 4. AGENTS.md dependency table vs go.mod --------------------------------
 
@@ -137,7 +140,7 @@ done <"$AGENTS"
 
 if [[ "${1:-}" == "--coverage" ]]; then
 	cover_out="$(go test -cover ./...)"
-	while IFS=$'\t' read -r pkg actual; do
+	while read -r pkg actual; do
 		documented="$(grep -E "^\| \`$pkg\`" "$AGENTS" | head -1 | awk -F'|' '{gsub(/ /,"",$4); print $4}')"
 		actual_pct="$(grep -E "^ok +$MODULE_PREFIX/$pkg( |	)" <<<"$cover_out" | grep -oE '[0-9]+\.[0-9]% of statements' | grep -oE '^[0-9]+\.[0-9]' | head -1)"
 		if [[ -z "$actual_pct" ]]; then

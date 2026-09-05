@@ -133,7 +133,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package             | Tests | Coverage | Status                                                                                                                           |
 | ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`          | 144   | 87.7%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, upcasting, scenario specs, regression tests |
+| `pkg/cqrs`          | 148   | 87.7%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, upcasting, scenario specs, regression tests |
 | `pkg/sync`          | 34    | 87.7%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                                               |
 | `pkg/id`            | 12    | 75.0%    | ✅ ID construction, roundtrip, zero, equal (ContentHash unit tests: open TODO)                                                   |
 | `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync                   |
@@ -145,7 +145,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `internal/cqrslint` | 38    | 92.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives                     |
 | `cmd/cqrs-lint`     | 8     | 56.4%    | ✅ exit-code contract, summary/JSON output, violating-fixture round trip                                                         |
 
-**309 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
+**313 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
 
 Run: `go test ./... -count=1`
 
