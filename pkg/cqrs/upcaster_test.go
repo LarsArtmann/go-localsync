@@ -263,11 +263,14 @@ func TestUpcaster_LegacyVersionWithAttributes_RebuildsPrivateEvent(t *testing.T)
 }
 
 // TestUpcaster_ConcurrentReadsDuringSync is the standing regression for the
-// upcaster data race: a legacy event in the memory store is replayed
-// (Load/ReadAll → upcast transform) by several goroutines WHILE a live writer
-// appends fresh V3 events — the same overlap that turned the registry's
-// in-place version stamp into a data race on 2026-09-05. Run with -race;
-// any in-place mutation of the stored pointer fails the run.
+// upcaster data race: legacy events in the memory store are replayed
+// (Load → upcast transform) by several goroutines WHILE a live writer appends
+// fresh V3 events — the same overlap that turned the registry's in-place
+// version stamp into a data race on 2026-09-05. Each legacy stream's FIRST
+// load is the write window (the registry stamps the returned event's schema
+// version in place), so the test seeds many legacy streams with a barrier
+// start and shifted visit orders to collide readers inside those windows.
+// Run with -race; any in-place mutation of a stored pointer fails the run.
 func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 	t.Parallel()
 
@@ -277,61 +280,78 @@ func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 	testutil.MustNoError(t, err)
 	defer closeStoreResult(t, sr)
 
-	// Seed the anomalous legacy event (Attributes folded, version stamp 1):
-	// the input shape whose pass-through used to hand the STORED pointer back
-	// to the registry for in-place stamping.
-	legacy := legacyV1Payload()
-	legacy.SourceID = "up-race"
+	const legacyStreams = 100
 
-	aggID := AggregateID("github", id.NewExternalID("up-race"))
-	ref := cqrsid.NewStreamRef(aggregateType, aggID)
+	refs := make([]cqrsid.StreamRef, 0, legacyStreams) //nolint:prealloc // populated in loop below
 
-	rawLegacy, err := event.NewEvents(aggID, aggregateType, event.Version(0),
-		[]event.Type{EventItemSynced}, []any{legacy}, event.WithSchemaVersion(1))
-	testutil.MustNoError(t, err)
+	for i := range legacyStreams {
+		sid := fmt.Sprintf("up-race-%d", i)
 
-	testutil.MustNoError(t, sr.store.Save(ctx, ref, rawLegacy, event.Version(0)))
+		legacy := legacyV1Payload()
+		legacy.SourceID = sid
+		// Anomalous shape (Attributes folded, legacy version stamp): with the
+		// old pass-through this event's FIRST load hands the STORED pointer
+		// to the registry for in-place stamping — the write window.
+		legacy.Attributes = map[string]string{"actor_login": "octocat"}
 
+		aggID := AggregateID("github", id.NewExternalID(sid))
+		ref := cqrsid.NewStreamRef(aggregateType, aggID)
+
+		rawLegacy, err := event.NewEvents(aggID, aggregateType, event.Version(0),
+			[]event.Type{EventItemSynced}, []any{legacy}, event.WithSchemaVersion(1))
+		testutil.MustNoError(t, err)
+
+		testutil.MustNoError(t, sr.store.Save(ctx, ref, rawLegacy, event.Version(0)))
+		refs = append(refs, ref)
+	}
+
+	const readers = 4
+
+	start := make(chan struct{})
 	var wg sync.WaitGroup
-	stop := make(chan struct{})
 
-	for range 4 {
+	for r := range readers {
 		wg.Add(1)
 
 		go func() {
 			defer wg.Done()
 
-			for {
-				select {
-				case <-stop:
-					return
-				default:
-				}
+			<-start
 
-				loaded, err := sr.store.Load(ctx, ref)
-				if err != nil {
-					t.Errorf("concurrent load: %v", err)
+			// Shifted start offset: readers discover each stream's first-load
+			// write window at different times, maximizing overlap.
+			for round := range 30 {
+				for i := range legacyStreams {
+					ref := refs[(i+r+round)%legacyStreams]
 
-					return
-				}
+					loaded, err := sr.store.Load(ctx, ref)
+					if err != nil {
+						t.Errorf("concurrent load: %v", err)
 
-				if len(loaded) != 1 || loaded[0].SchemaVersion() != 3 {
-					t.Errorf("concurrent load must serve exactly one V3 event, got %d events", len(loaded))
+						return
+					}
 
-					return
+					if len(loaded) != 1 || loaded[0].SchemaVersion() != 3 {
+						t.Errorf("concurrent load must serve exactly one V3 event, got %d events", len(loaded))
+
+						return
+					}
 				}
 			}
 		}()
 	}
 
+	// Live writer overlapping the replay readers: fresh V3 events appended
+	// while others are mid-transform (the sync-vs-replay overlap).
 	for i := range 25 {
-		writerAgg := AggregateID("github", id.NewExternalID(fmt.Sprintf("up-race-w%d", i)))
+		sid := fmt.Sprintf("up-race-w%d", i)
+		writerAgg := AggregateID("github", id.NewExternalID(sid))
 		writerRef := cqrsid.NewStreamRef(aggregateType, writerAgg)
 
 		fresh, err := event.NewEvents(writerAgg, aggregateType, event.Version(0),
 			[]event.Type{EventItemSynced},
 			[]any{ItemSyncedPayload{
-				Source: "github", SourceID: fmt.Sprintf("up-race-w%d", i), Type: "PushEvent",
+				Source: "github", SourceID: sid, Type: "PushEvent",
 				Attributes: map[string]string{"actor_login": "fresh"},
 			}},
 			event.WithSchemaVersion(3))
@@ -340,6 +360,6 @@ func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 		testutil.MustNoError(t, sr.store.Save(ctx, writerRef, fresh, event.Version(0)))
 	}
 
-	close(stop)
+	close(start)
 	wg.Wait()
 }
