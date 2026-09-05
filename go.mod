@@ -6,6 +6,7 @@ require (
 	charm.land/log/v2 v2.0.1
 	github.com/danielgtaylor/huma/v2 v2.39.1
 	github.com/larsartmann/go-branded-id v0.5.1
+	github.com/larsartmann/go-cqrs-lite/scenario/v4 v4.2.0
 	github.com/larsartmann/go-error-family v0.10.0
 	github.com/oklog/ulid/v2 v2.1.2
 	modernc.org/sqlite v1.56.0

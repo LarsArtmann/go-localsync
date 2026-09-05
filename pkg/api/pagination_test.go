@@ -46,7 +46,7 @@ func newPagedServer(t *testing.T, count int) *Server {
 	items := make([]*model.Item, count)
 	for i := range items {
 		items[i] = &model.Item{
-			ItemID:      id.NewItemID(),
+			ID:          id.NewItemID(),
 			ExternalID:  id.NewExternalID(string(rune('a' + i))),
 			Source:      id.NewProviderID("github"),
 			Type:        id.NewEventTypeID("PushEvent"),
@@ -160,7 +160,7 @@ func TestPagination_BadCursorIs400(t *testing.T) {
 
 	srv := newPagedServer(t, 5)
 
-	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items?cursor=%%3", nil)
+	req := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/items?cursor=Y3Vyc29y", nil)
 	rec := httptest.NewRecorder()
 
 	srv.ServeHTTP(rec, req)
