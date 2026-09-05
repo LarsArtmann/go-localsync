@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
