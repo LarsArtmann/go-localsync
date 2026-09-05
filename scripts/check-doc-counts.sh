@@ -141,8 +141,8 @@ done <"$AGENTS"
 if [[ "${1:-}" == "--coverage" ]]; then
 	cover_out="$(go test -cover ./...)"
 	while read -r pkg actual; do
-		documented="$(grep -E "^\| \`$pkg\`" "$AGENTS" | head -1 | awk -F'|' '{gsub(/ /,"",$4); print $4}')"
-		actual_pct="$(grep -E "^ok +$MODULE_PREFIX/$pkg( |	)" <<<"$cover_out" | grep -oE '[0-9]+\.[0-9]% of statements' | grep -oE '^[0-9]+\.[0-9]' | head -1)"
+		documented="$(grep -E "^\| \`$pkg\`" "$AGENTS" | head -1 | awk -F'|' '{gsub(/[% ]/,"",$4); print $4}')"
+		actual_pct="$(grep -E "^ok[[:space:]]+$MODULE_PREFIX/$pkg[[:space:]]" <<<"$cover_out" | grep -oE '[0-9]+\.[0-9]% of statements' | grep -oE '^[0-9]+\.[0-9]' | head -1 || true)"
 		if [[ -z "$actual_pct" ]]; then
 			die "coverage run produced no number for $pkg"
 		fi

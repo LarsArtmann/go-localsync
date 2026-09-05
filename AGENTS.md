@@ -91,7 +91,8 @@ The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exporte
 4. Lint: `golangci-lint run ./... --timeout=5m`
 5. Format: `golangci-lint fmt ./...`
 6. CQRS gate: `go run ./cmd/cqrs-lint --strict --verbose` (or `nix run .#cqrs-lint`). Suppression via `//cqrs-lint:ignore <rule>` directives; `--show-suppressed` to list silenced findings.
-7. Full pipeline: `buildflow --build-mode full` (requires the devShell active — see "Required first step" above; see the go.work caveat above)
+7. Doc-count truth: `./scripts/check-doc-counts.sh` (add `--coverage` to also check the coverage column vs a fresh run). CI runs it in the lint job; it fails when AGENTS/README/FEATURES test-count claims (per-package + totals) or the dependency table drift from code. **When you add/remove tests or bump deps, run it and fix the flagged claims — never hand-carry numbers.**
+8. Full pipeline: `buildflow --build-mode full` (requires the devShell active — see "Required first step" above; see the go.work caveat above)
 
 ### CI (No go.work)
 

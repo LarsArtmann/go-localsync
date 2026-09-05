@@ -86,6 +86,14 @@ jobs:
       - name: Run go vet
         run: go vet ./...
 
+      # Documentation-count truth: every drift incident in this repo's
+      # history was a hand-copied number (test counts went 232 -> 437 -> 309
+      # unnoticed). Fails CI when AGENTS/README/FEATURES claims drift from
+      # code (per-package + totals) or the dependency table disagrees with
+      # go.mod. `--coverage` adds the coverage-column check locally.
+      - name: Check documented counts vs code
+        run: ./scripts/check-doc-counts.sh
+
       # Workflow lint: catches schema errors, shellcheck issues and expression
       # mistakes in every .github/workflows/*.yml before a push ships them.
       # Version-pinned to match the actionlint in the nix devShell (1.7.12).
