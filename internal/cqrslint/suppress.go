@@ -135,10 +135,17 @@ func (s *Suppressor) recordUnknownRules(pkg *Package, file string, line int, rul
 // looksLikeInternalRuleID reports whether id matches this linter's scheme
 // (C0 + three digits, e.g. C0001..C0010) without being catalog-dependent.
 func looksLikeInternalRuleID(id string) bool {
-	return len(id) == 5 && id[0] == 'C' && id[1] == '0' &&
-		id[2] >= '0' && id[2] <= '9' &&
-		id[3] >= '0' && id[3] <= '9' &&
-		id[4] >= '0' && id[4] <= '9'
+	if len(id) != 5 || id[0] != 'C' {
+		return false
+	}
+
+	for _, c := range id[1:] {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (s *Suppressor) recordFileProvenance(file string, rules []string, info directiveInfo) {

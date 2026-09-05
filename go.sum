@@ -161,8 +161,8 @@ github.com/larsartmann/go-cqrs-lite/scenario/v4 v4.2.0 h1:ejGVmYQAPCdNebX83hGYJd
 github.com/larsartmann/go-cqrs-lite/scenario/v4 v4.2.0/go.mod h1:XXEunYPwetA3ldagphsp9AIzW+pSPvE2I3PypKGSbwg=
 github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.3.1 h1:b6ED84XSe9IhQ/R23U8IV8wdeE0DkowL3l91SOTgtJc=
 github.com/larsartmann/go-cqrs-lite/scheduling/v4 v4.3.1/go.mod h1:ADZO0TN8BWeFBV4+KJf31i/xdqMxOfUAEMfb6FcHhcA=
-github.com/larsartmann/go-cqrs-lite/schema/v4 v4.3.0 h1:beBCMA1e9+W+O4a/RTMJNe9wN5WFXfCGQfytMGrbDI8=
-github.com/larsartmann/go-cqrs-lite/schema/v4 v4.3.0/go.mod h1:anPV0udumm0KksEndBEJrHI0CVqzoEpnMtHgmILJink=
+github.com/larsartmann/go-cqrs-lite/schema/v4 v4.3.1 h1:S+H7tI1zidgawDpeGSG+6hN3opmw8bCNMl4oF2QttQs=
+github.com/larsartmann/go-cqrs-lite/schema/v4 v4.3.1/go.mod h1:JMfRl2tMSmDTd1gglr7TMSwrYBweF3AYB6cPWoCylzE=
 github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.4.0 h1:1SoEc2ADxypYGc9pKF4q9Jq570PoeKVgLjepm/jziF4=
 github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.4.0/go.mod h1:5nEmuL2Aa+sM9FV4/8rXGz8UJaiIwj3hklXx1/Lf9qM=
 github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.4.0 h1:d9XNH4YBAHIXJ7P19yN3vVtu6H/HHzxMp46Qt8bhJKg=

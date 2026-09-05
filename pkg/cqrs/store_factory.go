@@ -6,6 +6,7 @@ import (
 
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
 	"github.com/larsartmann/go-cqrs-lite/projectionhost/v4"
+	"github.com/larsartmann/go-cqrs-lite/schema/v4"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v4"
 	cqrsmemory "github.com/larsartmann/go-cqrs-lite/storage/memory/v4"
 	cqrsstorage "github.com/larsartmann/go-cqrs-lite/storage/v4"
@@ -23,15 +24,27 @@ type storeResult struct {
 }
 
 func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error) {
+	// Schema evolution: legacy V1/V2 ItemSynced events are upcast to V3 at
+	// the store read boundary (see newLegacyUpcasters). Applied to both
+	// backends so fold/projection/replay/export always see current-schema
+	// payloads regardless of when an event was written.
+	upcast := schema.UpcastSourceTransform(newLegacyUpcasters()...)
+
 	switch cfg.Backend {
 	case backendMemory, "":
-		memStore := cqrsmemory.NewMemoryStore()
+		decorated := event.DecorateStore(cqrsmemory.NewMemoryStore(), nil, upcast)
+		journal, ok := decorated.(event.SeekableJournal)
+		if !ok {
+			return storeResult{}, pkgerrors.Wrap(
+				pkgerrors.ErrUnknownBackend, "decorated memory store is not a seekable journal",
+			)
+		}
 
 		return storeResult{
-			store:   memStore,
+			store:   decorated,
 			bus:     cqrswatermill.NewEventBus(),
 			db:      nil,
-			journal: memStore,
+			journal: journal,
 			cpStore: cqrsmemory.NewMemoryCheckpointStore(),
 			// Ephemeral DLQ to mirror the ephemeral store (C017 discipline: DLQ
 			// lifetime matches event-store lifetime; the sqlite branch below wires
@@ -99,11 +112,21 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 
 	configureSQLitePool(dbPath, db)
 
+	versioned := event.DecorateStore(store, nil, schema.UpcastSourceTransform(newLegacyUpcasters()...))
+	journal, ok := versioned.(event.SeekableJournal)
+	if !ok {
+		closeLogged("sqlite db (journal decoration failed)", db)
+
+		return storeResult{}, pkgerrors.Wrap(
+			pkgerrors.ErrUnknownBackend, "decorated sqlite store is not a seekable journal",
+		)
+	}
+
 	return storeResult{
-		store:   store,
+		store:   versioned,
 		bus:     cqrswatermill.NewEventBus(),
 		db:      db,
-		journal: store,
+		journal: journal,
 		cpStore: cpStore,
 		dlq:     dlq,
 	}, nil
