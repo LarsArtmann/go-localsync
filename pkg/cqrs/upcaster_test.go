@@ -282,7 +282,7 @@ func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 
 	const legacyStreams = 100
 
-	refs := make([]cqrsid.StreamRef, 0, legacyStreams) //nolint:prealloc // populated in loop below
+	refs := make([]cqrsid.StreamRef, 0, legacyStreams)
 
 	for i := range legacyStreams {
 		sid := fmt.Sprintf("up-race-%d", i)

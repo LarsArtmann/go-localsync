@@ -48,6 +48,10 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 - **`provider/github` README verified against the `FetchPages` rebuild** — every prose claim re-checked against code (concurrency 3, `MinRemaining` 10, `MaxWait` 15m, retries 3 with 1s→30s backoff, short-page stop, error family, PAT smoke test); the pagination bullet now names the sequential page-1 probe and the `WithBaseURL` row states its non-chainable `(client, error)` return.
 - **`provider/github` v0.1.0 tagged** — the module's parent pin moved from a master pseudo-version to the released `go-localsync v0.5.0`, and its `go-github-kit` dependency bumped to v0.3.0. `FetchAll` now delegates pagination to `githubkit.FetchPages` (concurrency + short-page early stop come from the kernel), and `wrapGitHubError` drops its native-rate-limit shims in favor of the kit's classification while preserving the original cause in the error chain.
 
+### Fixed
+
+- **Upcaster pass-through could mutate stored events (residual race)** — a legacy-versioned `ItemSynced` event (schema stamp 1/2) whose payload already carried `Attributes` was handed back to the upcaster registry as the STORED pointer; the registry's in-place schema-version stamp then raced concurrent readers (the memory backend serves shared event pointers). Such events now always rebuild a private copy, making "the registry stamp never lands on a stored event" structural rather than data-dependent. Pinned by a pointer-identity test and a 100-stream barrier-start concurrent replay regression (verified: 3 DATA RACEs against the old logic, clean after; 5× race-clean).
+
 ## [0.5.0] - 2026-09-05
 
 The provider-extraction release: GitHub integration moves into an optional
