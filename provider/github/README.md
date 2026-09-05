@@ -22,8 +22,9 @@ Implements the `provider.Provider` interface over GitHub's
   the remaining budget is at or below the floor, bounded by a max wait, fed
   from the `X-RateLimit-*` response headers of every call.
 - **Retry with backoff** on 429 and idempotent 5xx.
-- **Concurrent pagination**: `FetchAll` walks pages 2..N on a bounded pool
-  (default 3) and stops at the first short page.
+- **Concurrent pagination**: `FetchAll` fetches page 1 sequentially (a
+  cheap probe for an exhausted endpoint), then walks pages 2..N on a bounded
+  pool (default 3) and stops at the first short page.
 - **Error classification**: GitHub failures map onto the go-localsync error
   family — `ErrRateLimited`, `ErrInvalidToken`, `ErrUserNotFound`,
   `ErrProviderUnavailable` — while the original SDK error stays reachable in
@@ -61,7 +62,7 @@ if result.RateLimit != nil {
 | `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).           |
 | `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                 |
 | `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).           |
-| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers).           |
+| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers). Returns `(client, error)` — validate the URL, so not chainable. |
 
 Standalone development: the module pins a released parent version and builds
 with `go build ./...` from this directory with `GOWORK=off`; inside the

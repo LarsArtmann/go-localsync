@@ -69,6 +69,10 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    env:
+      # Step `if` cannot read the step's own env, so secret presence is
+      # exposed at job level for the library cqrs-lint gate below.
+      HAS_GO_FINDING_KEY: ${{ secrets.SSH_PRIVATE_KEY != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -98,13 +102,37 @@ jobs:
       # upstream rule cannot break CI without a deliberate bump. Known
       # heuristic gaps are annotated inline via //cqrs-lint:ignore + reason.
       #
-      # LOCAL-ONLY GATE for now: the pinned linter depends on the PRIVATE
-      # larsartmann/go-finding module, which anonymous CI runners cannot
-      # fetch. Run it from the devShell:
+      # The pinned linter depends on the PRIVATE larsartmann/go-finding
+      # module. The step auto-enables once the SSH_PRIVATE_KEY secret (a
+      # deploy key with read access to larsartmann/go-finding) is added to
+      # the repo; until then it skips with a notice and the gate stays
+      # local-only (run it from the devShell:
       #   go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
-      # To enable in CI: add an SSH_PRIVATE_KEY secret holding a deploy key
-      # with read access to larsartmann/go-finding, then restore the step
-      # with GOPRIVATE=github.com/larsartmann/go-finding + GIT_SSH_COMMAND.
+      # ).
+      - name: Run go-cqrs-lite cqrs-lint (error-gated)
+        if: env.HAS_GO_FINDING_KEY == 'true'
+        env:
+          GOPRIVATE: github.com/larsartmann/go-finding
+          GIT_SSH_COMMAND: >-
+            ssh -i $HOME/.ssh/go_finding_key
+            -o StrictHostKeyChecking=no
+            -o UserKnownHostsFile=/dev/null
+        run: |
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/go_finding_key"
+          chmod 600 "$HOME/.ssh/go_finding_key"
+          git config --global url."git@github.com:".insteadOf "https://github.com/"
+          go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
+          rc=$?
+          git config --global --unset url."git@github.com:".insteadOf || true
+          exit $rc
+
+      - name: Library cqrs-lint skipped (missing SSH_PRIVATE_KEY)
+        if: env.HAS_GO_FINDING_KEY != 'true'
+        run: >-
+          echo "::notice::go-cqrs-lite library lint skipped. Add the
+          SSH_PRIVATE_KEY secret (deploy key with read access to
+          larsartmann/go-finding) to enable this gate."
 
     timeout-minutes: 15
   security:

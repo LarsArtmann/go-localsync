@@ -33,6 +33,7 @@
         };
 
         devShellExtraPackages = pkgs: [
+          pkgs.dprint
           pkgs.ginkgo
           pkgs.gotools
           pkgs.gofumpt
