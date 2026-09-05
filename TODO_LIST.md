@@ -14,13 +14,6 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ## 🔴 HIGH PRIORITY
 
-### Release integrity (post-public-flip)
-
-- [ ] **Verify tag push + proxy propagation for `v0.5.0` and `provider/github/v0.1.0`**
-      **Source:** `git tag`, GitHub Releases, proxy.golang.org
-      **Description:** Both tags were created while the repo was private; the repo flipped public the same day. Verify the tags are pushed, GitHub Releases exist, and `proxy.golang.org` serves the versions; if the proxy never fetched them, cut a bump release to re-establish `@latest` (owner decision whether to re-tag).
-      **Context:** Raised by the 2026-09-05 docs-health session (status report §g Q1). Needs the owner's GitHub/proxy access.
-
 ### v0.6 vocabulary window (decided, awaiting the breaking release)
 
 - [ ] **Rename public `AggregateID()` → `StreamID()` (v0.6)**
@@ -31,14 +24,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Tooling
 
-- [ ] **Restore the library cqrs-lint CI leg** — the pinned `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` depends on the private `larsartmann/go-finding` module; CI needs an `SSH_PRIVATE_KEY` secret (deploy key with read access to `go-finding`) to run it. The gate runs locally from the devShell meanwhile (documented in the workflow + AGENTS.md).
-- [ ] **Migrate `exhaustruct` → `exhaustruct_v5` in `.golangci.yml`** — golangci-lint v2.13 flags the old linter as deprecated (visible as a warning on every lint run).
-
-### Provider module (`provider/github`)
-
-- [ ] **Verify `provider/github/README.md` prose against the `FetchPages` rebuild** — modified during the 2026-09-05 concurrent dependency session; claims not re-checked since `FetchAll` moved onto the kit kernel. (The live PAT smoke-test section added 2026-09-05 is accurate.)
+- [ ] **Add the `SSH_PRIVATE_KEY` repo secret so the library cqrs-lint CI leg runs** — the error-gated `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` step is restored in the workflow and auto-enables once the secret exists (a deploy key with read access to the private `larsartmann/go-finding` module); until then it skips with a notice and the gate runs locally from the devShell (documented in the workflow + AGENTS.md).
 
 ## 🟢 LOWER PRIORITY
 
 - [ ] ~~**Add `govalid` struct tags**~~ — pivoted 2026-09-05: govalid is a buildflow-internal generator, not a proxy-resolvable module; real `Validate()` methods were implemented instead (`SyncOptions.Validate`, `CQRSConfig.Validate`, `ItemFilter.Validate`). Reopen only if govalid is ever published with a stable tag format.
-- [ ] **Add dprint to the devShell** (format check parity with CI formatting; coverage was recomputed 2026-09-05).

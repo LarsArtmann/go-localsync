@@ -36,9 +36,15 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 - **Full-pipeline benchmarks** — `BenchmarkPipeline_Sync10kItems` (~62µs/item memory), `BenchmarkPipeline_Replay10kEvents` (~2.8ms checkpoint-bounded reopen), `BenchmarkPipeline_SQLiteGrowth` (~250µs/item on a growing file DB).
 - **CONTRIBUTING.md** — real contributor guide: architecture map, dependency rules, file-split conventions, testing requirements (scenario DSL, file-backed SQLite, ≥87% cqrs coverage), linter suppression policy.
 - **Standalone CI leg for `provider/github`** — a dedicated workflow job builds and race-tests the nested module in isolation (`GOWORK=off`), so the module graph it ships is the graph CI proves. CI also dropped all private-repo auth (GOPRIVATE/SSH-agent): the repository and its dependencies are public now.
+- **dprint in the devShell** — `flake.nix` now installs `dprint` (v0.56) alongside the Go tooling, so `dprint check` / `dprint fmt` (JSON/YAML/Markdown/Dockerfile per `dprint.json`) run locally with format parity.
 
 ### Changed
 
+- **Release integrity verified (post-public-flip)** — `v0.5.0` and `provider/github/v0.1.0` tags are pushed (annotated), both GitHub Releases exist, and proxy.golang.org serves both versions with the correct `@latest` for the core and provider modules; no bump release needed.
+- **Stale `vendorHash` re-pinned** — the 2026-09-05 evening dependency refresh changed `go.mod`/`go.sum` after the flake's `vendorHash` was recorded, silently breaking `nix build` / `nix flake check` with a hash mismatch; the hash now matches again and both pass.
+- **`exhaustruct` → `exhaustruct_v5`** — golangci-lint v2.13 deprecates the old linter; the config migrates to `settings.exhaustruct_v5.ignore-patterns` (same stdlib patterns) and renames the linter in every exclusion rule. Full lint is clean with no deprecation warning.
+- **Library cqrs-lint gate is CI-ready** — the error-gated `go-cqrs-lite` linter step is back in the `lint` job, auto-enabling once the `SSH_PRIVATE_KEY` secret (deploy key with read access to the private `go-finding` module) is added and skipping with a notice until then; the step no longer masks a linter failure with its git-config cleanup (exit code is captured), and the local devShell invocation stays documented.
+- **`provider/github` README verified against the `FetchPages` rebuild** — every prose claim re-checked against code (concurrency 3, `MinRemaining` 10, `MaxWait` 15m, retries 3 with 1s→30s backoff, short-page stop, error family, PAT smoke test); the pagination bullet now names the sequential page-1 probe and the `WithBaseURL` row states its non-chainable `(client, error)` return.
 - **`provider/github` v0.1.0 tagged** — the module's parent pin moved from a master pseudo-version to the released `go-localsync v0.5.0`, and its `go-github-kit` dependency bumped to v0.3.0. `FetchAll` now delegates pagination to `githubkit.FetchPages` (concurrency + short-page early stop come from the kernel), and `wrapGitHubError` drops its native-rate-limit shims in favor of the kit's classification while preserving the original cause in the error chain.
 
 ## [0.5.0] - 2026-09-05

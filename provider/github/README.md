@@ -56,12 +56,12 @@ if result.RateLimit != nil {
 
 ## Configuration
 
-| Method                | Effect                                                                     |
-| --------------------- | -------------------------------------------------------------------------- |
-| `NewClient(token)`    | Explicit PAT; an empty token means unauthenticated (60 req/h core budget). |
-| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).           |
-| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                 |
-| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).           |
+| Method                | Effect                                                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `NewClient(token)`    | Explicit PAT; an empty token means unauthenticated (60 req/h core budget).                                                       |
+| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).                                                                 |
+| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                                                                       |
+| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).                                                                 |
 | `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers). Returns `(client, error)` — validate the URL, so not chainable. |
 
 Standalone development: the module pins a released parent version and builds
