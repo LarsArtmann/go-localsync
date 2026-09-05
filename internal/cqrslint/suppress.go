@@ -112,6 +112,16 @@ func (s *Suppressor) recordUnknownRules(pkg *Package, file string, line int, rul
 			continue
 		}
 
+		// Directives are shared vocabulary: one //cqrs-lint: comment can
+		// target this linter OR go-cqrs-lite's consumer linter (rule IDs
+		// like C017/E005/A001 — a disjoint 4-char scheme vs our C0ddd).
+		// Only IDs that LOOK like ours but are not in the catalog are
+		// typos/stale; foreign-scheme IDs belong to the other linter and
+		// are left to it.
+		if !looksLikeInternalRuleID(rule) {
+			continue
+		}
+
 		s.unknownRules = append(s.unknownRules, Finding{
 			Rule:     rule,
 			Severity: SeverityWarning,
@@ -120,6 +130,15 @@ func (s *Suppressor) recordUnknownRules(pkg *Package, file string, line int, rul
 			Message:  "suppression directive names an unknown rule; it silences nothing (typo or stale after a rule was removed?)",
 		})
 	}
+}
+
+// looksLikeInternalRuleID reports whether id matches this linter's scheme
+// (C0 + three digits, e.g. C0001..C0010) without being catalog-dependent.
+func looksLikeInternalRuleID(id string) bool {
+	return len(id) == 5 && id[0] == 'C' && id[1] == '0' &&
+		id[2] >= '0' && id[2] <= '9' &&
+		id[3] >= '0' && id[3] <= '9' &&
+		id[4] >= '0' && id[4] <= '9'
 }
 
 func (s *Suppressor) recordFileProvenance(file string, rules []string, info directiveInfo) {
@@ -158,11 +177,15 @@ func (s *Suppressor) UnknownRuleFindings() []Finding {
 func (s *Suppressor) Suppress(f Finding) (bool, string, string) {
 	if rules, ok := s.fileRules[f.File]; ok {
 		if rules[suppressAllRules] {
-			return true, s.provenanceFor(f, suppressAllRules)
+			by, reason := s.provenanceFor(f, suppressAllRules)
+
+			return true, by, reason
 		}
 
 		if rules[f.Rule] {
-			return true, s.provenanceFor(f, f.Rule)
+			by, reason := s.provenanceFor(f, f.Rule)
+
+			return true, by, reason
 		}
 	}
 
@@ -178,11 +201,15 @@ func (s *Suppressor) Suppress(f Finding) (bool, string, string) {
 		if lineMap, ok := s.lineRules[f.File]; ok {
 			if rules, ok := lineMap[candidate]; ok {
 				if rules[suppressAllRules] {
-					return true, s.provenanceAtLine(f.File, candidate, suppressAllRules)
+					by, reason := s.provenanceAtLine(f.File, candidate, suppressAllRules)
+
+					return true, by, reason
 				}
 
 				if rules[f.Rule] {
-					return true, s.provenanceAtLine(f.File, candidate, f.Rule)
+					by, reason := s.provenanceAtLine(f.File, candidate, f.Rule)
+
+					return true, by, reason
 				}
 			}
 		}
@@ -213,11 +240,30 @@ func (s *Suppressor) provenanceAtLine(file string, line int, rule string) (strin
 // following the directive keyword. Example:
 //
 //	"ignore C0005,C0006 reason text" → ["C0005", "C0006"]
+// parseDirectiveRules extracts the comma-separated rule list and the optional
+// trailing reason. Two directive shapes are accepted so ONE comment can serve
+// both this linter and go-cqrs-lite's consumer linter:
+//
+//	"ignore C0005,C0006 reason"      (internal form)
+//	"ignore(C0005) reason text"      (go-cqrs-lite form, ADR-0112 style)
 func parseDirectiveRules(body, keyword string) ([]string, string) {
 	rest := strings.TrimPrefix(body, keyword)
 	rest = strings.TrimSpace(rest)
 	if rest == "" {
 		return nil, ""
+	}
+
+	// Parenthesized form: the rule list runs from "(" to the matching ")".
+	if strings.HasPrefix(rest, "(") {
+		end := strings.Index(rest, ")")
+		if end < 0 {
+			return nil, ""
+		}
+
+		inner := strings.TrimSpace(rest[1:end])
+		reason := strings.TrimSpace(rest[end+1:])
+
+		return splitRuleList(inner), reason
 	}
 
 	fields := strings.Fields(rest)
@@ -237,6 +283,19 @@ func parseDirectiveRules(body, keyword string) ([]string, string) {
 	reason := strings.TrimSpace(strings.Join(fields[1:], " "))
 
 	return rules, reason
+}
+
+func splitRuleList(list string) []string {
+	var rules []string
+
+	for r := range strings.SplitSeq(list, ",") {
+		r = strings.TrimSpace(r)
+		if r != "" {
+			rules = append(rules, r)
+		}
+	}
+
+	return rules
 }
 
 func (s *Suppressor) addFileRules(file string, rules []string) {

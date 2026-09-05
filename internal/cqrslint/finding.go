@@ -78,11 +78,14 @@ func (f Finding) String() string {
 
 	suffix := ""
 	if f.Suppressed {
-		suffix = " [suppressed by " + f.SuppressedBy
-		if f.SuppressedReason != "" {
-			suffix += ": " + f.SuppressedReason
+		suffix = " [suppressed]"
+		if f.SuppressedBy != "" {
+			suffix = " [suppressed by " + f.SuppressedBy
+			if f.SuppressedReason != "" {
+				suffix += ": " + f.SuppressedReason
+			}
+			suffix += "]"
 		}
-		suffix += "]"
 	}
 
 	return fmt.Sprintf("%s: %s %s: %s%s", location, f.Rule, f.Severity, f.Message, suffix)

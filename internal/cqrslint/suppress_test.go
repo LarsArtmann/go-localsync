@@ -323,6 +323,14 @@ func TestFinding_SuppressedString(t *testing.T) {
 	if got := f.String(); got != want {
 		t.Fatalf("want %q, got %q", want, got)
 	}
+
+	f.SuppressedBy = "ignore-file"
+	f.SuppressedReason = "historical"
+
+	wantProvenance := "a.go:42: C0005 error: bad [suppressed by ignore-file: historical]"
+	if got := f.String(); got != wantProvenance {
+		t.Fatalf("want %q, got %q", wantProvenance, got)
+	}
 }
 
 func TestFinding_NotSuppressedString(t *testing.T) {
@@ -335,5 +343,97 @@ func TestFinding_NotSuppressedString(t *testing.T) {
 	want := "a.go:42: C0005 error: bad"
 	if got := f.String(); got != want {
 		t.Fatalf("want %q, got %q", want, got)
+	}
+}
+
+// TestRun_UnknownInternalRuleWarns proves the audit trail end to end: a
+// directive naming an internal-scheme rule that does not exist produces a
+// warning, while a library-scheme rule (C017) is left alone.
+func TestRun_UnknownInternalRuleWarns(t *testing.T) {
+	dir := t.TempDir()
+
+	src := `package cqrs
+
+import "example.com/event"
+
+const (
+	//cqrs-lint:ignore C9999 stale directive
+	//cqrs-lint:ignore(C017) targets the library linter
+	EventItemSynced event.Type = "sync_item.synced"
+)
+`
+	if err := os.WriteFile(filepath.Join(dir, "events.go"), []byte(src), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	pkg, err := cqrslint.LoadPackage(dir)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+
+	var unknownWarned, libraryFlagged bool
+
+	for _, f := range cqrslint.Run(pkg) {
+		if f.Rule == "C9999" && !f.Suppressed && strings.Contains(f.Message, "unknown rule") {
+			unknownWarned = true
+		}
+
+		if f.Rule == "C017" {
+			libraryFlagged = true
+		}
+	}
+
+	if !unknownWarned {
+		t.Error("expected a warning for the unknown internal-scheme rule C9999")
+	}
+
+	if libraryFlagged {
+		t.Error("library-scheme rule IDs (C017) must not be flagged by the internal linter")
+	}
+}
+
+// TestRun_SuppressionProvenance asserts SuppressedBy/SuppressedReason are
+// populated from the directive that silenced a finding.
+func TestRun_SuppressionProvenance(t *testing.T) {
+	dir := t.TempDir()
+
+	src := `package cqrs
+
+import "example.com/event"
+
+const (
+	EventItemSynced event.Type = "sync_item.synced"
+	//cqrs-lint:ignore C0002 deliberate extra event
+	EventItemBogus event.Type = "sync_item.bogus"
+)
+`
+
+	if err := os.WriteFile(filepath.Join(dir, "events.go"), []byte(src), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	pkg, err := cqrslint.LoadPackage(dir)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+
+	var found bool
+
+	for _, f := range cqrslint.Run(pkg) {
+		if f.Rule == "C0002" && f.Suppressed {
+			found = true
+
+			if f.SuppressedBy != "ignore" {
+				t.Errorf("SuppressedBy = %q, want ignore", f.SuppressedBy)
+			}
+
+			if f.SuppressedReason != "deliberate extra event" {
+				t.Errorf("SuppressedReason = %q, want the directive text", f.SuppressedReason)
+			}
+		}
+	}
+
+	if !found {
+		t.Fatal("expected a suppressed C0002 finding with provenance")
 	}
 }
