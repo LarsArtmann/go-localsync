@@ -51,3 +51,23 @@ func TestItemFilter_Builder(t *testing.T) {
 		t.Errorf("Offset=%d, want 5", f.Offset)
 	}
 }
+
+func TestItemFilter_Validate(t *testing.T) {
+	t.Parallel()
+
+	if err := (ItemFilter{}).Validate(); err != nil {
+		t.Errorf("zero filter must validate, got %v", err)
+	}
+
+	if err := ((ItemFilter{Limit: 10, Offset: 20})).Validate(); err != nil {
+		t.Errorf("positive limit/offset must validate, got %v", err)
+	}
+
+	if err := ((ItemFilter{Limit: -1})).Validate(); err == nil {
+		t.Error("negative limit must be rejected")
+	}
+
+	if err := ((ItemFilter{Offset: -5})).Validate(); err == nil {
+		t.Error("negative offset must be rejected")
+	}
+}

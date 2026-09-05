@@ -47,7 +47,7 @@ func (si *scannedItem) toItem() (*model.Item, error) {
 		Source:        id.NewProviderID(si.source),
 		Type:          id.NewEventTypeID(si.eventType),
 		Attributes:    attrs,
-		ContentHash:   si.contentHash,
+		ContentHash:   id.NewContentHash(si.contentHash),
 		Tombstone:     tombstone,
 		CreatedAt:     si.createdAt,
 		UpdatedAt:     si.updatedAt,

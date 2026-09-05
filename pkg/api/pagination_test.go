@@ -49,7 +49,7 @@ func newPagedServer(t *testing.T, count int) *Server {
 			Source:      id.NewProviderID("github"),
 			Type:        id.NewEventTypeID("PushEvent"),
 			Attributes:  map[string]string{"actor_login": "u"},
-			ContentHash: "h" + string(rune('a'+i)),
+			ContentHash: id.NewContentHash("h" + string(rune('a'+i))),
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
 		})

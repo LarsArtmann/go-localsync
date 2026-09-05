@@ -20,7 +20,7 @@ func WithAPIKey(key string) ServerOption {
 
 // apiKeyHeader is the canonical header; Authorization: Bearer is also
 // accepted so standard HTTP clients work without custom headers.
-const apiKeyHeader = "X-API-Key" //nolint:gosec // header name, not a credential
+const apiKeyHeader = "X-Api-Key" //nolint:gosec // header name, not a credential
 
 func (s *Server) authenticated(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

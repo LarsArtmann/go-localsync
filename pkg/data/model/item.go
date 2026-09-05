@@ -23,7 +23,7 @@ type Item struct {
 	Source        id.ProviderID
 	Type          id.EventTypeID
 	Attributes    map[string]string
-	ContentHash   string
+	ContentHash   id.ContentHash
 	Tombstone     Tombstone
 	CreatedAt     time.Time
 	UpdatedAt     time.Time

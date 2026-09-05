@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 )
 
@@ -73,4 +74,19 @@ func (f ItemFilter) WithIncludeTombstoned(include bool) ItemFilter {
 	f.IncludeTombstoned = include
 
 	return f
+}
+
+// Validate rejects structurally impossible filters instead of silently
+// accepting them: negative limits/offsets previously flowed into read-model
+// queries where they meant "unbounded" or were clamped, hiding caller bugs.
+func (f ItemFilter) Validate() error {
+	if f.Limit < 0 {
+		return pkgerrors.InvalidField("limit", "must not be negative")
+	}
+
+	if f.Offset < 0 {
+		return pkgerrors.InvalidField("offset", "must not be negative")
+	}
+
+	return nil
 }

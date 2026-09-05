@@ -169,7 +169,7 @@ func TestToDataItem_CarriesRawJSON(t *testing.T) {
 
 	got := toDataItem(src)
 
-	if got.ContentHash != hashRawJSON(src.RawJSON) {
+	if got.ContentHash.String() != hashRawJSON(src.RawJSON) {
 		t.Errorf("ContentHash = %q, want sha256 of RawJSON", got.ContentHash)
 	}
 
