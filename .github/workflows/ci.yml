@@ -97,8 +97,22 @@ jobs:
       # error-severity findings fail the build. Version-pinned so a new
       # upstream rule cannot break CI without a deliberate bump. Known
       # heuristic gaps are annotated inline via //cqrs-lint:ignore + reason.
+      # The pinned linter depends on the PRIVATE larsartmann/go-finding, so
+      # this step fetches it over SSH with the repo deploy key.
       - name: Run go-cqrs-lite cqrs-lint (error-gated)
-        run: go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
+        env:
+          GOPRIVATE: github.com/larsartmann/go-finding
+          GIT_SSH_COMMAND: >-
+            ssh -i $HOME/.ssh/go_finding_key
+            -o StrictHostKeyChecking=no
+            -o UserKnownHostsFile=/dev/null
+        run: |
+          mkdir -p "$HOME/.ssh"
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/go_finding_key"
+          chmod 600 "$HOME/.ssh/go_finding_key"
+          git config --global url."git@github.com:".insteadOf "https://github.com/"
+          go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
+          git config --global --unset url."git@github.com:".insteadOf || true
 
     timeout-minutes: 15
   security:
