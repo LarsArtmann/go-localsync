@@ -22,7 +22,7 @@
 
       go-standard = {
         pname = "go-localsync";
-        vendorHash = "sha256-Y2yKOwLbeNwGc+CPGMT6dqjKFq6AsNL0PfV0F4BVF3s=";
+        vendorHash = "sha256-SpmFejDdm8ZdwHuN58v0IDJvmwYzG9MghefMOdr0gZA=";
         description = "Generic synchronization SDK with CQRS";
 
         extraBuildAttrs.preBuild = "export GOEXPERIMENT=jsonv2";

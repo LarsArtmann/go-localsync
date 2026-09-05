@@ -15,6 +15,7 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 ### Fixed
 
 - `pkg/api/map_error_test.go` did not compile: `errors.AsType` requires a type parameter that satisfies `error`, but the test passed a bare `interface{GetStatus() int}`. Now asserts against `huma.StatusError` directly. Pre-existing at v0.4.2-era master; surfaced by the first full-suite run during the provider extraction.
+- `nix build .#default` failed on master: `mkPreparedSource`'s private-dep validation flagged five LarsArtmann modules that are all public now (`go-codec`, `go-cqrs-lite/codec`, `go-flightrecorder`, `go-idempotency`, `go-retry`), and the pinned private `go-cqrs-lite` master snapshot no longer contains the extracted `codec` module at all. Removed the obsolete `git+ssh` inputs and the `deps` map — everything resolves from the module proxy, pinned by `go.sum`, matching what local `go build`/`go test` already used — and rotated `vendorHash` accordingly. `nix build` and `nix flake check` (treefmt, cqrs-lint) pass.
 
 ## [0.4.1] - 2026-07-23
 

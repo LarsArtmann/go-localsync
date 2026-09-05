@@ -14,11 +14,6 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ## 🔴 HIGH PRIORITY
 
-- [ ] **Make `go-cqrs-lite` public**
-      **Source:** `go.mod`, `flake.nix`, `vendor/`
-      **Description:** `go-cqrs-lite` is the only private dependency. Its privacy forces a committed `vendor/` dir + `vendorHash = null` in `flake.nix` (the nix sandbox can't fetch it). Making it public enables a real `vendorHash` and drops the `vendor/` dir entirely.
-      **Context:** Cleanest long-term fix for the vendored-private-dep workaround documented in AGENTS.md.
-
 ### Provider release (unblocks `provider/github` consumers)
 
 - [ ] **Release the core, then the provider module**
