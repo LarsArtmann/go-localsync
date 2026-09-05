@@ -83,3 +83,16 @@ func TestProjectionMetrics_Interface(t *testing.T) {
 	metrics.WorkerFailed("sync-items")
 	metrics.CheckpointAdvanced("sync-items", 2500)
 }
+
+// TestProjectionMetrics_AllCallbacksNoop exercises every recorder callback
+// path (the interface-pin test covers the same calls; this one names them).
+func TestProjectionMetrics_RecorderInstruments(t *testing.T) {
+	t.Parallel()
+
+	bundle := newNoopOTelBundle(t)
+	recorder := bundle.Recorder()
+
+	if recorder.Histogram() == nil || recorder.Counter() == nil {
+		t.Fatal("bundle recorder must expose its instruments")
+	}
+}

@@ -139,3 +139,24 @@ func indexOf(list []string, target string) int {
 
 	return -1
 }
+
+// TestExportEvents_EmptyJournal exports cleanly from a fresh stack (zero
+// events, valid empty output).
+func TestExportEvents_EmptyJournal(t *testing.T) {
+	t.Parallel()
+
+	stack := newMemoryStack(t)
+	defer func() { _ = stack.Close() }()
+
+	var json bytes.Buffer
+	testutil.MustNoError(t, stack.ExportEvents(context.Background(), &json))
+	if json.Len() != 0 {
+		t.Errorf("empty journal must export nothing, got %q", json.String())
+	}
+
+	var csvOut bytes.Buffer
+	testutil.MustNoError(t, stack.ExportEventsCSV(context.Background(), &csvOut))
+	if !strings.Contains(csvOut.String(), "event_id") {
+		t.Errorf("CSV export must still carry the header, got %q", csvOut.String())
+	}
+}

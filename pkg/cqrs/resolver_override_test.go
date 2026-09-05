@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"

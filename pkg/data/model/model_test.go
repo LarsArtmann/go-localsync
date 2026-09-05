@@ -270,3 +270,44 @@ func TestItemKeyConstructor(t *testing.T) {
 		t.Errorf("ExternalID = %v, want %v", key.ExternalID, external)
 	}
 }
+
+func TestItem_AttributeAccessors(t *testing.T) {
+	t.Parallel()
+
+	full := Item{
+		Attributes: map[string]string{
+			AttrActorLogin:     "octocat",
+			AttrActorAvatarURL: "https://avatars.example/u/1",
+			AttrRepoName:       "octo/hello",
+			AttrRepoURL:        "https://github.com/octo/hello",
+		},
+	}
+
+	if full.ActorLogin() != "octocat" {
+		t.Errorf("ActorLogin() = %q", full.ActorLogin())
+	}
+
+	if full.ActorAvatarURL() != "https://avatars.example/u/1" {
+		t.Errorf("ActorAvatarURL() = %q", full.ActorAvatarURL())
+	}
+
+	if full.RepoName() != "octo/hello" {
+		t.Errorf("RepoName() = %q", full.RepoName())
+	}
+
+	if full.RepoURL() != "https://github.com/octo/hello" {
+		t.Errorf("RepoURL() = %q", full.RepoURL())
+	}
+
+	empty := Item{}
+	for name, got := range map[string]string{
+		"ActorLogin":     empty.ActorLogin(),
+		"ActorAvatarURL": empty.ActorAvatarURL(),
+		"RepoName":       empty.RepoName(),
+		"RepoURL":        empty.RepoURL(),
+	} {
+		if got != "" {
+			t.Errorf("%s() on nil Attributes must be empty, got %q", name, got)
+		}
+	}
+}

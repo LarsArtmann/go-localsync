@@ -183,3 +183,62 @@ func TestToDataItem_CarriesRawJSON(t *testing.T) {
 }
 
 func schemaCurrentVersionForTest() schema.Version { return schema.CurrentVersion() }
+
+func TestCQRSConfig_Validate(t *testing.T) {
+	t.Parallel()
+
+	if err := (CQRSConfig{}).Validate(); err != nil {
+		t.Errorf("empty backend defaults to memory, must validate: %v", err)
+	}
+
+	if err := (CQRSConfig{Backend: backendMemory}).Validate(); err != nil {
+		t.Errorf("memory backend must validate: %v", err)
+	}
+
+	if err := (CQRSConfig{Backend: backendSQLite, DBPath: "x.db"}).Validate(); err != nil {
+		t.Errorf("sqlite backend must validate: %v", err)
+	}
+
+	if err := (CQRSConfig{Backend: "postgres"}).Validate(); err == nil {
+		t.Error("unknown backend must be rejected")
+	}
+}
+
+// TestSyncItemsWithResolver_NilFallsBack verifies the nil fast path.
+func TestSyncItemsWithResolver_NilFallsBack(t *testing.T) {
+	t.Parallel()
+
+	stack := newMemoryStack(t)
+	defer func() { _ = stack.Close() }()
+
+	ctx := context.Background()
+	summary := stack.SyncItemsWithResolver(ctx, testItems("rnil-1", "PushEvent", "rnil-2", "IssueEvent"), nil)
+	if summary.Synced != 2 {
+		t.Errorf("nil resolver must behave like SyncItems, got %d synced", summary.Synced)
+	}
+
+	waitForCount(t, stack, ctx, 2)
+}
+
+// TestCleanupFailedConstruction_ReleasesAllResources drives the error-path
+// cleanup directly with every resource populated: cancel runs, the drain
+// channel is awaited, and each closer is invoked (memory store/bus are not
+// io.Closers; the read model is).
+func TestCleanupFailedConstruction_ReleasesAllResources(t *testing.T) {
+	t.Parallel()
+
+	sr, err := createStoreAndBus(context.Background(), CQRSConfig{Backend: backendMemory})
+	testutil.MustNoError(t, err)
+
+	cancelled := false
+	drainDone := make(chan struct{})
+	close(drainDone)
+
+	cleanupFailedConstruction(sr, NewMemoryReadModel(), func() { cancelled = true }, drainDone)
+
+	if !cancelled {
+		t.Error("cancelRunner must be invoked")
+	}
+
+	cleanupFailedConstruction(sr, nil, nil, nil)
+}
