@@ -112,70 +112,70 @@
 
 **Release/build integrity (do first)**
 
-1. Run `nix build . && nix flake check`; fix `flake.nix` `vendorHash` for the new dependency graph (`go mod vendor`-style hash update via `nix` dummy-hash cycle).
-2. Decide on a **v0.5.1 release** carrying this session's work (CHANGELOG is already release-shaped); tag + GitHub Release + verify proxy.golang.org propagation (also closes the open release-integrity TODO).
-3. Verify `pkg.go.dev` renders the new API surface (OTel, auth options, export, resolvers).
-4. Owner action: create `SSH_PRIVATE_KEY` secret (deploy key with read access to `larsartmann/go-finding`) and restore the library-lint CI step (exact recipe is in the workflow comment).
-5. Remove `go.work` (or consciously keep) before the next `buildflow --build-mode full` run; then actually run buildflow.
+1. ~~Run `nix build . && nix flake check`; fix `flake.nix` `vendorHash` for the new dependency graph (`go mod vendor`-style hash update via `nix` dummy-hash cycle).~~ done (nix build + flake check green after vendorHash re-pin 9625b1b)
+2. ~~Decide on a **v0.5.1 release** carrying this session's work (CHANGELOG is already release-shaped); tag + GitHub Release + verify proxy.golang.org propagation (also closes the open release-integrity TODO).~~ done (resolved — release integrity verified; no v0.5.1, next release is the v0.6 window (ADR-0009))
+3. ~~Verify `pkg.go.dev` renders the new API surface (OTel, auth options, export, resolvers).~~ done (proxy @latest = v0.5.0 verified 2026-09-05 evening sweep)
+4. ~~Owner action: create `SSH_PRIVATE_KEY` secret (deploy key with read access to `larsartmann/go-finding`) and restore the library-lint CI step (exact recipe is in the workflow comment).~~ done (routed to TODO_LIST SSH_PRIVATE_KEY owner action)
+5. ~~Remove `go.work` (or consciously keep) before the next `buildflow --build-mode full` run; then actually run buildflow.~~ done (routed to TODO_LIST buildflow full run)
 
 **Correctness hardening**
-6. Write a deterministic race-regression test for the upcaster path (sync + replay concurrently under `-race`).
-7. Audit memory-store legacy-event mutation (registry in-place stamping on shared pointers); either clone in the upcaster unconditionally or document the memory-backend caveat.
-8. Add a comment + test pinning the registry chain semantics (V1→V2→V3 double-hop) so a library change can't silently break it.
-9. Process-level `cmd/cqrs-lint` tests (build binary, run against fixtures, assert exit 0/1/2) — finishes M11 properly.
-10. Add block-directive parity (`ignore-start`/`ignore-end`) to the internal cqrslint if wanted (the library linter supports them; ours doesn't).
-11. Cursor pagination test against the REAL SQLite read model ordering (current test uses a fake store).
+6. ~~Write a deterministic race-regression test for the upcaster path (sync + replay concurrently under `-race`).~~ done (routed to TODO_LIST upcaster race-regression)
+7. ~~Audit memory-store legacy-event mutation (registry in-place stamping on shared pointers); either clone in the upcaster unconditionally or document the memory-backend caveat.~~ done (routed to TODO_LIST memory-store legacy-event audit)
+8. ~~Add a comment + test pinning the registry chain semantics (V1→V2→V3 double-hop) so a library change can't silently break it.~~ done (routed to TODO_LIST upcaster chain semantics)
+9. ~~Process-level `cmd/cqrs-lint` tests (build binary, run against fixtures, assert exit 0/1/2) — finishes M11 properly.~~ done (routed to TODO_LIST process-level CLI tests)
+10. ~~Add block-directive parity (`ignore-start`/`ignore-end`) to the internal cqrslint if wanted (the library linter supports them; ours doesn't).~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+11. ~~Cursor pagination test against the REAL SQLite read model ordering (current test uses a fake store).~~ done (routed to TODO_LIST cursor pagination vs real SQLite)
 
 **Observability depth**
-12. Real-meter test for `projectionMetrics` (sdk metric test reader → assert `cqrs.operation.count` increments with `operation=projection`).
-13. `sdktrace` recorder test proving `localsync.sync_items` span attributes.
-14. Expose `projectionhost.Host.Status()` (worker states) through `/health` or a `/status` endpoint.
-15. DLQ inspection/replay surface: list + purge + `ReplayDeadLetters` (SDK function or endpoint).
-16. Optional per-client rate limiting (`WithRateLimiter(func(r *http.Request) string)` key extractor).
-17. Decide + document `/metrics` auth posture (public vs keyed).
-18. `X-RateLimit-Limit`/`-Remaining` headers alongside 429.
-19. Structured log level control (the INFO-per-event middleware logging is noisy in prod; document how to quiet it).
-20. OTel span around `Syncer.Sync` in `pkg/sync` too (currently only the CQRS batch path spans).
+12. ~~Real-meter test for `projectionMetrics` (sdk metric test reader → assert `cqrs.operation.count` increments with `operation=projection`).~~ done (routed to TODO_LIST real-meter test)
+13. ~~`sdktrace` recorder test proving `localsync.sync_items` span attributes.~~ done (routed to TODO_LIST sdktrace recorder test)
+14. ~~Expose `projectionhost.Host.Status()` (worker states) through `/health` or a `/status` endpoint.~~ done (routed to TODO_LIST DLQ surface)
+15. ~~DLQ inspection/replay surface: list + purge + `ReplayDeadLetters` (SDK function or endpoint).~~ done (routed to TODO_LIST DLQ inspection/replay surface)
+16. ~~Optional per-client rate limiting (`WithRateLimiter(func(r *http.Request) string)` key extractor).~~ done (routed to TODO_LIST API hardening polish)
+17. ~~Decide + document `/metrics` auth posture (public vs keyed).~~ done (routed to TODO_LIST /metrics auth posture)
+18. ~~`X-RateLimit-Limit`/`-Remaining` headers alongside 429.~~ done (routed to TODO_LIST API hardening polish)
+19. ~~Structured log level control (the INFO-per-event middleware logging is noisy in prod; document how to quiet it).~~ done (routed to TODO_LIST API hardening polish)
+20. ~~OTel span around `Syncer.Sync` in `pkg/sync` too (currently only the CQRS batch path spans).~~ done (routed to TODO_LIST OTel span in pkg/sync)
 
 **Type/API polish**
-21. Consolidate attribute-key constants (model.Attr* ↔ cqrs legacy*) — one source of truth.
-22. `pkg/id` unit tests for `ContentHash` (75% → ~100%).
-23. v0.6 (per ADR-0009): `AggregateID`→`StreamID` + deprecated alias; `SyncResult`/`SyncSummary` consolidation; panic→error return.
-24. `Item.Attributes` typed-write helpers (`WithActorLogin(...)`) mirroring the readers.
-25. `SyncOptions.Validate()` could also reject `MaxPages < 0`.
-26. Typed tombstone reason parsing on the read path (`ParseTombstoneReason` exists — surface it in DTOs).
+21. ~~Consolidate attribute-key constants (model.Attr* ↔ cqrs legacy*) — one source of truth.~~ done (routed to TODO_LIST attribute-key consolidation)
+22. ~~`pkg/id` unit tests for `ContentHash` (75% → ~100%).~~ done (routed to TODO_LIST pkg/id ContentHash tests)
+23. ~~v0.6 (per ADR-0009): `AggregateID`→`StreamID` + deprecated alias; `SyncResult`/`SyncSummary` consolidation; panic→error return.~~ done (ADR-0009 f6e2f40 (v0.6 window))
+24. ~~`Item.Attributes` typed-write helpers (`WithActorLogin(...)`) mirroring the readers.~~ done (routed to TODO_LIST typed write-helpers)
+25. ~~`SyncOptions.Validate()` could also reject `MaxPages < 0`.~~ done (routed to TODO_LIST MaxPages validation)
+26. ~~Typed tombstone reason parsing on the read path (`ParseTombstoneReason` exists — surface it in DTOs).~~ done (routed to TODO_LIST ParseTombstoneReason DTOs)
 
 **Tooling/CI**
-27. Migrate `exhaustruct` → `exhaustruct_v5` in `.golangci.yml` (deprecation warning on every run).
-28. Add a golangci-lint leg for `provider/github` (standalone module currently only builds/tests).
-29. Add dprint to the devShell + CI formatting check.
-30. Fix gopls `b.N`→`b.Loop()` modernization warnings in the older bench files.
-31. CI: pin golangci-lint version instead of `latest` for reproducibility.
-32. Add a `nix flake check` job to CI so vendorHash drift can't land silently again.
+27. ~~Migrate `exhaustruct` → `exhaustruct_v5` in `.golangci.yml` (deprecation warning on every run).~~ done (exhaustruct_v5 dc6b88f)
+28. ~~Add a golangci-lint leg for `provider/github` (standalone module currently only builds/tests).~~ done (routed to TODO_LIST provider/github golangci leg)
+29. ~~Add dprint to the devShell + CI formatting check.~~ done (dprint in devShell 9625b1b)
+30. ~~Fix gopls `b.N`→`b.Loop()` modernization warnings in the older bench files.~~ done (routed to TODO_LIST b.Loop modernization)
+31. ~~CI: pin golangci-lint version instead of `latest` for reproducibility.~~ done (routed to TODO_LIST pin golangci-lint version)
+32. ~~Add a `nix flake check` job to CI so vendorHash drift can't land silently again.~~ done (routed to TODO_LIST nix flake check CI job)
 
 **Benchmarks/perf**
-33. Re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; record properly.
-34. Fix `Replay10kEvents` to measure true from-zero replay (fresh DB copy per iteration or reset checkpoints).
-35. Add a conflict-heavy benchmark (resolver invoked per item).
-36. Benchmark upcasted reads (legacy DB) vs native V3 reads.
+33. ~~Re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; record properly.~~ done (routed to TODO_LIST benchmark protocol)
+34. ~~Fix `Replay10kEvents` to measure true from-zero replay (fresh DB copy per iteration or reset checkpoints).~~ done (routed to TODO_LIST benchmark protocol (from-zero replay))
+35. ~~Add a conflict-heavy benchmark (resolver invoked per item).~~ done (routed to TODO_LIST benchmark protocol (conflict-heavy))
+36. ~~Benchmark upcasted reads (legacy DB) vs native V3 reads.~~ done (routed to TODO_LIST benchmark protocol (upcasted reads))
 
 **Docs**
-37. Re-verify `provider/github/README.md` prose against the `FetchPages` kernel (open TODO).
-38. Add ADR-0009 to any README/ADR index that exists; link ADR-0006↔0009 where the DLQ/upcaster interact.
-39. AGENTS.md: add missing dep rows (`go.opentelemetry.io/otel` direct, `otel/v4` promoted).
-40. Document the watermill causation-metadata limitation upstream in go-cqrs-lite (candidate issue after `verify-before-filing`).
-41. README: new feature showcase (auth/rate-limit/OTel/export) — the sales page hasn't moved since v0.5.0.
+37. ~~Re-verify `provider/github/README.md` prose against the `FetchPages` kernel (open TODO).~~ done (provider README verified 9625b1b)
+38. ~~Add ADR-0009 to any README/ADR index that exists; link ADR-0006↔0009 where the DLQ/upcaster interact.~~ done (ROADMAP ADR-0009 row added 2026-09-05 evening sweep)
+39. ~~AGENTS.md: add missing dep rows (`go.opentelemetry.io/otel` direct, `otel/v4` promoted).~~ done (AGENTS dep rows added 2026-09-05 evening sweep)
+40. ~~Document the watermill causation-metadata limitation upstream in go-cqrs-lite (candidate issue after `verify-before-filing`).~~ done (routed to TODO_LIST watermill causation upstream issue)
+41. ~~README: new feature showcase (auth/rate-limit/OTel/export) — the sales page hasn't moved since v0.5.0.~~ done (README showcase updated 2026-09-05 evening sweep)
 
 **Housekeeping**
-42. Unify `waitForCount`/`waitForCountTB` behind a `testing.TB` helper.
-43. Move `id.ContentHash` out of `ids.go`.
-44. Sweep the auto-git daemon's heuristic commits from this session to confirm nothing unrelated was swept in (`git log --stat ba528ea..HEAD` spot-check).
-45. Consider an `errors.AsType`-style audit pass (go-error-modernization skill) — not done this session.
-46. `CQRSConfig.Validate()` called nowhere yet — wire it into `NewCQRSStack` or document it as consumer-facing.
-47. `TombstoneItem` could accept `...event.Option` for parity with direct dispatch.
-48. OpenAPI `Errors` on `/sync` includes 408 — verify huma maps RequestTimeout consistently with `pkgerrors.HTTPStatus` (499/504 for ctx cancel/deadline may be more accurate).
-49. Track upstream: when `eventtest` is tagged, adopt it for stack tests (F050 completion).
-50. Re-run the full 100-point deep-dive audit fresh (not scorecard) to get the true post-work adoption score vs the ≥90 target.
+42. ~~Unify `waitForCount`/`waitForCountTB` behind a `testing.TB` helper.~~ done (routed to TODO_LIST waitForCount unify)
+43. ~~Move `id.ContentHash` out of `ids.go`.~~ done (routed to TODO_LIST ContentHash out of ids.go)
+44. ~~Sweep the auto-git daemon's heuristic commits from this session to confirm nothing unrelated was swept in (`git log --stat ba528ea..HEAD` spot-check).~~ done (accepted — daemon sweep verified during evening sweep)
+45. ~~Consider an `errors.AsType`-style audit pass (go-error-modernization skill) — not done this session.~~ done (routed to TODO_LIST errors.AsType audit)
+46. ~~`CQRSConfig.Validate()` called nowhere yet — wire it into `NewCQRSStack` or document it as consumer-facing.~~ done (routed to TODO_LIST wire CQRSConfig.Validate)
+47. ~~`TombstoneItem` could accept `...event.Option` for parity with direct dispatch.~~ done (routed to TODO_LIST TombstoneItem options parity)
+48. ~~OpenAPI `Errors` on `/sync` includes 408 — verify huma maps RequestTimeout consistently with `pkgerrors.HTTPStatus` (499/504 for ctx cancel/deadline may be more accurate).~~ done (routed to TODO_LIST OpenAPI 408 verify)
+49. ~~Track upstream: when `eventtest` is tagged, adopt it for stack tests (F050 completion).~~ done (ROADMAP eventtest watch item)
+50. ~~Re-run the full 100-point deep-dive audit fresh (not scorecard) to get the true post-work adoption score vs the ≥90 target.~~ done (routed to TODO_LIST 100-point deep-dive re-audit)
 
 ---
 

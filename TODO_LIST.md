@@ -57,7 +57,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Real-meter and sdktrace recorder tests** — prove values actually land in `cqrs.operation.*` and the `localsync.sync_items` span attributes (noop providers only prove wiring).
 - [ ] **Cursor pagination test against the real SQLite read model ordering** — the current test uses a fake store (`pkg/api`).
 - [ ] **`pkg/id` unit tests for `ContentHash`** — `IsZero`/`String` untested; coverage sits at 75.0%.
-- [ ] **Benchmark protocol** — re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; fix `Replay10kEvents` to measure true from-zero replay (iterations 2+ are checkpoint-bounded no-ops).
+- [ ] **Benchmark protocol** — re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; fix `Replay10kEvents` to measure true from-zero replay (iterations 2+ are checkpoint-bounded no-ops); add a conflict-heavy benchmark (resolver invoked per item) and an upcasted-legacy-read vs native-V3-read benchmark.
 - [ ] **Wire `CQRSConfig.Validate()` into `NewCQRSStack`** (or document it as consumer-facing) — defined at `pkg/cqrs/stack.go:53` with zero production call sites.
 - [ ] **Consolidate attribute-key constants** — `pkg/cqrs/item_adapter.go:18-21` keeps private `legacyActorLogin`-style constants duplicating `pkg/data/model`'s exported `Attr*` keys; two sources of truth for a wire-format constant.
 
@@ -75,6 +75,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Unify `waitForCount`/`waitForCountTB`** behind a `testing.TB` helper.
 - [ ] **Move `id.ContentHash` out of `ids.go`** — it is a content hash, not an identifier.
 - [ ] **`errors.AsType` audit pass** (go-error-modernization sweep, not yet run).
+- [ ] **File the watermill causation-metadata limitation upstream** in go-cqrs-lite (typed `Metadata.Causation` pointer not mapped onto bus-delivered messages; only custom `command.type`/`command.id` fallbacks survive) — candidate issue after `verify-before-filing` (see CHANGELOG Unreleased, correlation entry).
 - [ ] **Disposition `hierarchical-errors` buildflow findings** — ~3,711 findings; suppress in `.buildflow.yml` with a stated rationale or formally track (open since 2026-07-19, carried by two reports).
 - [ ] **`TombstoneItem` variadic `...event.Option`** for parity with direct dispatch.
 - [ ] **Verify OpenAPI `/sync` 408** — confirm huma maps RequestTimeout consistently with `pkgerrors.HTTPStatus` (499/504 for ctx cancel/deadline may be more accurate).

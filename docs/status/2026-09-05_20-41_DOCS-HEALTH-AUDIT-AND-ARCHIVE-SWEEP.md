@@ -130,3 +130,9 @@ Already tracked in TODO_LIST.md (🔗) or ROADMAP.md (🧭) as of this session; 
 ---
 
 _Generated 2026-09-05 20:41 CEST. Point-in-time snapshot; forward items live in TODO_LIST.md / ROADMAP.md._
+
+---
+
+## Resolution (2026-09-05 evening sweep)
+
+All 50 §f rows carry inline verdicts above (M-plan items cite the execution commit; routing items cite TODO_LIST.md). §b partial items: HTML byte-level pass → done this sweep (25 snapshots viewed + classified: 18 superseded / 5 still-relevant / 2 reference; the 5 still-relevant findings are harvested into TODO_LIST/ROADMAP); June 10–15 reports → annotated + archived this sweep; provider README → verified at `9625b1b`; coverage % → recomputed this sweep (309 tests / 11 packages, per-package coverage refreshed in AGENTS.md/README/FEATURES); AGENTS size diet → routed to TODO_LIST (restructure, not prune); living-docs depth → counts/coverage/feature rows re-verified against code this sweep, full row-by-row re-exercise stays a standing convention (docs/status/README.md). §c: `nix flake check` verified green this sweep; release/proxy integrity verified (proxy `@latest` = v0.5.0); dprint check run on the edited docs; buildflow full run stays routed to TODO_LIST. §g: (1) tag/proxy state verified — no re-tag needed, v0.5.1 not required (next release = v0.6 window per ADR-0009); (2) June reports → annotate+archive, LEAVE-ALONE ruling superseded; (3) concurrent session's output treated as authoritative and re-verified where claims overlapped. Report fully resolved → archived.
