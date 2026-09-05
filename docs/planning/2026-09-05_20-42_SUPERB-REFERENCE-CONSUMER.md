@@ -353,7 +353,7 @@ flowchart TD
 | Correlation/causation coverage           | batch path only  | all write paths + causation on every stored event                                                                  |
 | CI lint gates                            | 0                | 2 (internal strict + library error-gated, pinned) — CI itself was red (missing `GOEXPERIMENT=jsonv2`) and is fixed |
 | pkg/cqrs coverage                        | 82.4%            | 87.7% (target ≥87)                                                                                                 |
-| Test functions                           | 232              | ~437                                                                                                               |
+| Test functions                           | 232              | ~~~437~~ corrected 2026-09-05 evening sweep: 309 test functions / 11 packages (+31 standalone provider/github)     |
 | API hardening                            | none             | auth + rate limit + pagination headers + per-endpoint error schemas                                                |
 | Benchmarks                               | micro only       | full pipeline: ~62µs/item (memory 10k batch), ~2.8ms checkpoint-bounded replay reopen, ~250µs/item SQLite growth   |
 
