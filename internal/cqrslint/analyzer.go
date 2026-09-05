@@ -119,8 +119,13 @@ func Run(pkg *Package) []Finding {
 	}
 
 	for i := range findings {
-		findings[i].Suppressed = suppressor.IsSuppressed(findings[i])
+		suppressed, by, reason := suppressor.Suppress(findings[i])
+		findings[i].Suppressed = suppressed
+		findings[i].SuppressedBy = by
+		findings[i].SuppressedReason = reason
 	}
+
+	findings = append(findings, suppressor.UnknownRuleFindings()...)
 
 	SortFindings(findings)
 

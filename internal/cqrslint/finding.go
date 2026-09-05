@@ -34,6 +34,14 @@ type Finding struct {
 	Line       int
 	Message    string
 	Suppressed bool // true when a //cqrs-lint:ignore directive silences this finding
+
+	// SuppressedBy records which directive kind silenced this finding
+	// ("ignore" or "ignore-file"); empty unless Suppressed is true. Together
+	// with SuppressedReason it forms the suppression audit trail: silenced
+	// findings stay attributable to the directive (and its stated reason)
+	// instead of vanishing silently.
+	SuppressedBy     string
+	SuppressedReason string
 }
 
 // errorAt constructs a SeverityError Finding positioned at node. Centralizes the
@@ -70,7 +78,11 @@ func (f Finding) String() string {
 
 	suffix := ""
 	if f.Suppressed {
-		suffix = " [suppressed]"
+		suffix = " [suppressed by " + f.SuppressedBy
+		if f.SuppressedReason != "" {
+			suffix += ": " + f.SuppressedReason
+		}
+		suffix += "]"
 	}
 
 	return fmt.Sprintf("%s: %s %s: %s%s", location, f.Rule, f.Severity, f.Message, suffix)
