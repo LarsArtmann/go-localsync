@@ -18,16 +18,22 @@ type Server struct {
 	syncer *synclib.Syncer
 	store  synclib.SyncStore
 	logger *log.Logger
+	opts   *serverOptions
 }
 
 // NewServer creates an HTTP API server backed by the given syncer.
-func NewServer(syncer *synclib.Syncer, logger *log.Logger) *Server {
+func NewServer(syncer *synclib.Syncer, logger *log.Logger, opts ...ServerOption) *Server {
 	// Populate the user-facing error templates so HandleErrorDetailed can render
 	// What/Why/Fix/WayOut for any error surfaced at this boundary. Idempotent.
 	pkgerrors.RegisterErrorTemplates()
 
 	if logger == nil {
 		logger = log.Default()
+	}
+
+	options := &serverOptions{}
+	for _, opt := range opts {
+		opt(options)
 	}
 
 	mux := http.NewServeMux()
@@ -40,6 +46,7 @@ func NewServer(syncer *synclib.Syncer, logger *log.Logger) *Server {
 		syncer: syncer,
 		store:  syncer.Store(),
 		logger: logger,
+		opts:   options,
 	}
 
 	srv.registerRoutes()
@@ -89,6 +96,10 @@ func (s *Server) registerRoutes() {
 		[]string{"Health"},
 		s.healthCheck,
 	)
+
+	if s.opts != nil && s.opts.metricsHandler != nil {
+		s.mux.Handle("/metrics", s.opts.metricsHandler)
+	}
 }
 
 //nolint:exhaustruct // huma.Operation has many optional fields; only route metadata is required

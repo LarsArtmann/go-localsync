@@ -419,3 +419,38 @@ func TestTriggerSync_InvalidOptions(t *testing.T) {
 
 	testutil.AssertStatus(t, rec, http.StatusBadRequest)
 }
+
+func TestServer_MetricsEndpoint_Optional(t *testing.T) {
+	t.Parallel()
+
+	called := false
+	metricsHandler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		called = true
+		w.WriteHeader(http.StatusOK)
+	})
+
+	srv := NewServer(synclib.NewSyncer(&testutil.MockProvider{}, nil, log.Default()), log.Default(), WithMetricsHandler(metricsHandler))
+
+	rec := httptest.NewRecorder()
+	srv.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 from /metrics, got %d", rec.Code)
+	}
+	if !called {
+		t.Error("expected the configured metrics handler to serve /metrics")
+	}
+}
+
+func TestServer_MetricsEndpoint_AbsentByDefault(t *testing.T) {
+	t.Parallel()
+
+	srv := newTestServer(&mockSyncStore{})
+
+	rec := httptest.NewRecorder()
+	srv.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected 404 from /metrics without the option, got %d", rec.Code)
+	}
+}
