@@ -23,6 +23,10 @@ var (
 	// Transient (retryable): re-running the sync retries the failed items. Consumers can detect
 	// this outcome with errors.Is(err, ErrPartialSync).
 	ErrPartialSync = errorfamily.NewTransient("partial_sync", "sync completed with item errors")
+	// ErrProviderUnavailable indicates the provider's API could not be reached
+	// or kept failing (transport errors, exhausted 5xx retries). Transient
+	// (retryable): the provider may recover without any change on our side.
+	ErrProviderUnavailable = errorfamily.NewTransient("provider_unavailable", "provider unavailable")
 	// ErrDatabase indicates a storage backend error.
 	ErrDatabase = errorfamily.NewInfrastructure("database", "database error")
 	// ErrInvalidInput indicates a required field is missing or invalid.
@@ -70,6 +74,13 @@ var errorEntries = []errorEntry{
 		"The item or resource you requested does not exist in the system.",
 		"Verify the identifier and try again.",
 		"Check the logs for the exact resource path.",
+	),
+	makeEntry(
+		"provider_unavailable",
+		"The data source is temporarily unavailable.",
+		"The external provider API could not be reached or kept failing.",
+		"Wait briefly and retry; the provider usually recovers on its own.",
+		"If it persists, check the provider's status page.",
 	),
 	makeEntry(
 		"rate_limited",

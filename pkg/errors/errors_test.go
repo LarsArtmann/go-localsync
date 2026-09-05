@@ -21,6 +21,7 @@ func TestSentinelErrors(t *testing.T) {
 		{"ErrInvalidToken", ErrInvalidToken, "[rejection:invalid_token] invalid token"},
 		{"ErrUserNotFound", ErrUserNotFound, "[rejection:user_not_found] user not found"},
 		{"ErrPartialSync", ErrPartialSync, "[transient:partial_sync] sync completed with item errors"},
+		{"ErrProviderUnavailable", ErrProviderUnavailable, "[transient:provider_unavailable] provider unavailable"},
 		{"ErrDatabase", ErrDatabase, "[infrastructure:database] database error"},
 		{"ErrInvalidInput", ErrInvalidInput, "[rejection:invalid_input] invalid input"},
 		{"ErrUnknownBackend", ErrUnknownBackend, "[rejection:unknown_backend] unknown backend"},
