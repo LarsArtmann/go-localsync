@@ -39,7 +39,7 @@ func TestSyncer_StructuredLogFields(t *testing.T) {
 
 	completionLines := 0
 
-	for _, line := range strings.Split(output, "\n") {
+	for line := range strings.SplitSeq(output, "\n") {
 		if !strings.Contains(line, "Sync completed") || strings.Contains(line, "no valid items") {
 			continue
 		}
@@ -87,7 +87,7 @@ func TestSyncer_InvalidItemLogCarriesSource(t *testing.T) {
 		t.Fatalf("expected a 'Skipping invalid item' warning, got:\n%s", output)
 	}
 
-	for _, line := range strings.Split(output, "\n") {
+	for line := range strings.SplitSeq(output, "\n") {
 		if strings.Contains(line, "Skipping invalid item") && !strings.Contains(line, "source=github") {
 			t.Errorf("invalid-item warning must carry source=github, got:\n%s", line)
 		}

@@ -33,6 +33,7 @@ func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 	switch cfg.Backend {
 	case backendMemory, "":
 		decorated := event.DecorateStore(cqrsmemory.NewMemoryStore(), nil, upcast)
+
 		journal, ok := decorated.(event.SeekableJournal)
 		if !ok {
 			return storeResult{}, pkgerrors.Wrap(
@@ -113,6 +114,7 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 	configureSQLitePool(dbPath, db)
 
 	versioned := event.DecorateStore(store, nil, schema.UpcastSourceTransform(newLegacyUpcasters()...))
+
 	journal, ok := versioned.(event.SeekableJournal)
 	if !ok {
 		closeLogged("sqlite db (journal decoration failed)", db)

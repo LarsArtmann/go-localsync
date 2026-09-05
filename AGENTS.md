@@ -130,7 +130,6 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 **Decider-test convention (since 2026-09-05):** new decider behavior tests use the library-native `scenario` DSL (`go-cqrs-lite/scenario/v4`, see `pkg/cqrs/scenario_test.go` for Given/When/Then examples incl. the cmd/state adapters). Keep plain table tests for fold edge cases. Note: the `eventtest` module has no released version — do not depend on it until tagged.
 
-
 | Package             | Tests | Coverage | Status                                                                                                         |
 | ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
 | `pkg/cqrs`          | 97    | 82.4%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
@@ -226,8 +225,8 @@ Two tables managed by the CQRS stack:
 
 ### Build System
 
-| File        | Purpose                                                                                                              |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- |
+| File        | Purpose                                                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `flake.nix` | Nix flake using the `go-standard` module (go-nix-helpers): devShell, `packages.default` + `packages.cqrs-lint`, `checks.cqrs-lint` |
 
 ## go-cqrs-lite Integration

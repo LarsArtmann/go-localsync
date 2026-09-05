@@ -79,15 +79,16 @@ func (s *Server) rateLimited(h http.Handler) http.Handler {
 			return
 		}
 
-		seconds := int(math.Ceil(retryAfter.Seconds()))
-		if seconds < 1 {
-			seconds = 1
-		}
+		seconds := max(int(math.Ceil(retryAfter.Seconds())), 1)
 
 		w.Header().Set("Retry-After", strconv.Itoa(seconds))
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusTooManyRequests)
-		//nolint:errcheck // static body; nothing sensible to do on short write
-		_, _ = w.Write([]byte(`{"error":"rate_limited","message":"sync rate limit exceeded, retry after the advised delay"}` + "\n"))
+
+		_, _ = w.Write(
+			[]byte(
+				`{"error":"rate_limited","message":"sync rate limit exceeded, retry after the advised delay"}` + "\n",
+			),
+		)
 	})
 }

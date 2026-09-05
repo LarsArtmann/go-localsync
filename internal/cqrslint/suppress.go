@@ -51,10 +51,10 @@ type directiveInfo struct {
 // findings on the same line or the immediately following line.
 func newSuppressor(pkg *Package) Suppressor {
 	s := Suppressor{
-		fileRules:       map[string]map[string]bool{},
-		lineRules:       map[string]map[int]map[string]bool{},
-		fileProvenance:  map[string]map[string]directiveInfo{},
-		lineProvenance:  map[string]map[int]map[string]directiveInfo{},
+		fileRules:      map[string]map[string]bool{},
+		lineRules:      map[string]map[int]map[string]bool{},
+		fileProvenance: map[string]map[string]directiveInfo{},
+		lineProvenance: map[string]map[int]map[string]directiveInfo{},
 	}
 
 	for _, file := range pkg.Files {
@@ -247,6 +247,7 @@ func (s *Suppressor) provenanceAtLine(file string, line int, rule string) (strin
 // following the directive keyword. Example:
 //
 //	"ignore C0005,C0006 reason text" → ["C0005", "C0006"]
+//
 // parseDirectiveRules extracts the comma-separated rule list and the optional
 // trailing reason. Two directive shapes are accepted so ONE comment can serve
 // both this linter and go-cqrs-lite's consumer linter:

@@ -122,4 +122,3 @@ func dataItemForScenario(externalID string, updatedAtOffset int64) *model.Item {
 		UpdatedAt:   now,
 	}
 }
-

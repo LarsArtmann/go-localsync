@@ -6,6 +6,7 @@ require (
 	charm.land/log/v2 v2.0.1
 	github.com/danielgtaylor/huma/v2 v2.39.1
 	github.com/larsartmann/go-branded-id v0.5.1
+	github.com/larsartmann/go-codec v0.2.0
 	github.com/larsartmann/go-cqrs-lite/scenario/v4 v4.2.0
 	github.com/larsartmann/go-cqrs-lite/schema/v4 v4.3.1
 	github.com/larsartmann/go-error-family v0.10.0
@@ -16,7 +17,6 @@ require (
 require (
 	github.com/bits-and-blooms/bitset v1.25.0 // indirect
 	github.com/failsafe-go/failsafe-go v0.9.7 // indirect
-	github.com/larsartmann/go-codec v0.2.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/record/v4 v4.4.0 // indirect
 	github.com/larsartmann/go-flightrecorder v0.2.0 // indirect
 	github.com/larsartmann/go-idempotency v0.3.0 // indirect

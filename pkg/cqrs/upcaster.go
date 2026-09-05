@@ -1,8 +1,7 @@
 package cqrs
 
 import (
-	"encoding/json"
-
+	"github.com/larsartmann/go-codec"
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
 	"github.com/larsartmann/go-cqrs-lite/schema/v4"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -39,7 +38,10 @@ func upcastItemSyncedToV3(evt event.Event) (event.Event, error) {
 	payload.Attributes = upcastLegacyAttributes(payload)
 	payload.SchemaVersion = 3
 
-	raw, err := json.Marshal(payload)
+	// Re-encode with the same codec family the event was created with
+	// (NewEvents defaults to CBOR) and keep the encoding stamp consistent,
+	// so downstream DecodePayloadAuto keeps working.
+	raw, err := codec.CBORCodec{}.Encode(payload)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "upcast item.synced: encode payload")
 	}
@@ -47,7 +49,7 @@ func upcastItemSyncedToV3(evt event.Event) (event.Event, error) {
 	upcasted, err := event.ReconstructEventWithAdoptedPayload(
 		evt.ID(), evt.Type(), evt.StreamType(), evt.StreamID(),
 		int(evt.Version()), 3, raw, evt.Metadata(), evt.OccurredAt(),
-		evt.Encoding(), "localsync.upcast_item_synced",
+		codec.EncodingCBOR, "localsync.upcast_item_synced",
 	)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "upcast item.synced: reconstruct event")

@@ -93,12 +93,12 @@ Read-side operations against the read model.
 
 ## Bounded Contexts
 
-| Context         | Description                                                                                                                              |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **Sync Engine** | Orchestrates fetching from providers and dispatching to CQRS stack (`pkg/sync`)                                                          |
-| **CQRS Core**   | Event sourcing, command/query dispatch, projections (`pkg/cqrs`)                                                                         |
+| Context         | Description                                                                                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sync Engine** | Orchestrates fetching from providers and dispatching to CQRS stack (`pkg/sync`)                                                                                                                                     |
+| **CQRS Core**   | Event sourcing, command/query dispatch, projections (`pkg/cqrs`)                                                                                                                                                    |
 | **Provider**    | External API integration contract, rate limiting, retry logic (`pkg/provider` — contract only; the optional `provider/github` nested module is the reference implementation, other providers live in consumer apps) |
-| **Types**       | Branded identifier types for compile-time safety (`pkg/id`)                                                                              |
+| **Types**       | Branded identifier types for compile-time safety (`pkg/id`)                                                                                                                                                         |
 
 ---
 

@@ -6,27 +6,25 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
-	"time"
 )
 
 // pageStore serves len(items) items through the ItemFilter contract so the
 // pagination headers and cursor semantics can be asserted precisely.
 type pageStore struct {
 	synclib.SyncStore
+
 	items []*model.Item
 }
 
 func (p *pageStore) List(_ context.Context, filter model.ItemFilter) ([]*model.Item, error) {
-	start := filter.Offset
-	if start > len(p.items) {
-		start = len(p.items)
-	}
+	start := min(filter.Offset, len(p.items))
 
 	end := start + filter.Limit
 	if filter.Limit <= 0 || end > len(p.items) {

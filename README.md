@@ -292,14 +292,14 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 | `pkg/api`           | 15    | 93.1%    | Server, routes, handlers, health/stats/items/sync endpoints             |
 | `pkg/data/model`    | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                              |
 | `pkg/data/schema`   | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
-| `internal/cqrslint` | 36    | 90.0%    | 10 architectural checks (C0001–C0010), suppression, rules catalog        |
+| `internal/cqrslint` | 36    | 90.0%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
 
 ## Related Projects
 
 | Need                                                         | Use                                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
 | Sync GitHub events to local storage (ready-made provider)    | **[`provider/github`](provider/github)** (this repo's nested module)      |
-| Full application example: CLI, SQLite, HTTP server            | **[github-local-sync](https://github.com/larsartmann/github-local-sync)** |
+| Full application example: CLI, SQLite, HTTP server           | **[github-local-sync](https://github.com/larsartmann/github-local-sync)** |
 | Build a local-first application with event sourcing and CQRS | **[go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite)**           |
 
 ## License

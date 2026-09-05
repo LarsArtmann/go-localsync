@@ -10,12 +10,12 @@ import (
 //
 //nolint:tagalign // doc/example/query tags intentionally kept close to values for readability
 type ListItemsInput struct {
-	Type   string    `doc:"Filter by event type"                           example:"PushEvent" query:"type"`
-	Source string    `doc:"Filter by source provider"                      example:"github"    query:"source"`
-	Since  time.Time `doc:"Filter items updated since this time (RFC3339)"                     query:"since"`
-	Limit  int       `doc:"Maximum items to return"                                            query:"limit"  default:"100"`
-	Offset int       `doc:"Offset for pagination"                                              query:"offset" default:"0"`
-	Cursor string    `doc:"Opaque pagination cursor (from X-Next-Cursor); overrides offset"    query:"cursor" example:"b2Zmc2V0PTEwMA=="`
+	Type   string    `doc:"Filter by event type"                                            example:"PushEvent"        query:"type"`
+	Source string    `doc:"Filter by source provider"                                       example:"github"           query:"source"`
+	Since  time.Time `doc:"Filter items updated since this time (RFC3339)"                                             query:"since"`
+	Limit  int       `doc:"Maximum items to return"                                                                    query:"limit"  default:"100"`
+	Offset int       `doc:"Offset for pagination"                                                                      query:"offset" default:"0"`
+	Cursor string    `doc:"Opaque pagination cursor (from X-Next-Cursor); overrides offset" example:"b2Zmc2V0PTEwMA==" query:"cursor"`
 }
 
 // ItemResponse is the API DTO for a synced item.
@@ -52,8 +52,8 @@ type ListItemsOutput struct {
 		Total int64           `doc:"Total number of items matching the filter" json:"total"`
 	}
 
-	XTotalCount int64  `header:"X-Total-Count" doc:"Total items matching the filter"`
-	NextCursor  string `header:"X-Next-Cursor" doc:"Opaque cursor for the next page; empty on the last page"`
+	XTotalCount int64  `doc:"Total items matching the filter"                         header:"X-Total-Count"`
+	NextCursor  string `doc:"Opaque cursor for the next page; empty on the last page" header:"X-Next-Cursor"`
 }
 
 // StatsOutput defines the response for statistics.
