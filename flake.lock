@@ -41,57 +41,6 @@
         "type": "github"
       }
     },
-    "go-branded-id": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786719110,
-        "narHash": "sha256-Ykz1N6x9WHTWoXJP0G08KS/CQn1i1OzKFOFdPLhfMcg=",
-        "ref": "master",
-        "rev": "f1f2f42d34f0da7ce432342a9dfe725a669e33bd",
-        "revCount": 163,
-        "type": "git",
-        "url": "ssh://git@github.com/LarsArtmann/go-branded-id"
-      },
-      "original": {
-        "ref": "master",
-        "type": "git",
-        "url": "ssh://git@github.com/LarsArtmann/go-branded-id"
-      }
-    },
-    "go-cqrs-lite": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1788345563,
-        "narHash": "sha256-6JRNdsvEhhZHfcuzwe4e9PkVaLwqtuLW40T2HWDvtdE=",
-        "ref": "master",
-        "rev": "18f4b0e1c8ff10c7a481e47c6d1b06b484108853",
-        "revCount": 6032,
-        "type": "git",
-        "url": "ssh://git@github.com/LarsArtmann/go-cqrs-lite"
-      },
-      "original": {
-        "ref": "master",
-        "type": "git",
-        "url": "ssh://git@github.com/LarsArtmann/go-cqrs-lite"
-      }
-    },
-    "go-error-family": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1786719179,
-        "narHash": "sha256-ScZULpbTxAz8DpgEM+hF3dlA7CsmMYnw1aBhlyYVQiI=",
-        "ref": "master",
-        "rev": "b1d3e2cdcb013c1cd50a0398b84ac849f16cc647",
-        "revCount": 274,
-        "type": "git",
-        "url": "ssh://git@github.com/LarsArtmann/go-error-family"
-      },
-      "original": {
-        "ref": "master",
-        "type": "git",
-        "url": "ssh://git@github.com/LarsArtmann/go-error-family"
-      }
-    },
     "go-nix-helpers": {
       "inputs": {
         "flake-parts": "flake-parts_2",
@@ -135,9 +84,6 @@
     "root": {
       "inputs": {
         "flake-parts": "flake-parts",
-        "go-branded-id": "go-branded-id",
-        "go-cqrs-lite": "go-cqrs-lite",
-        "go-error-family": "go-error-family",
         "go-nix-helpers": "go-nix-helpers",
         "nixpkgs": "nixpkgs"
       }

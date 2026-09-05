@@ -13,21 +13,6 @@
       url = "git+ssh://git@github.com/LarsArtmann/go-nix-helpers?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    go-cqrs-lite = {
-      url = "git+ssh://git@github.com/LarsArtmann/go-cqrs-lite?ref=master";
-      flake = false;
-    };
-
-    go-branded-id = {
-      url = "git+ssh://git@github.com/LarsArtmann/go-branded-id?ref=master";
-      flake = false;
-    };
-
-    go-error-family = {
-      url = "git+ssh://git@github.com/LarsArtmann/go-error-family?ref=master";
-      flake = false;
-    };
   };
 
   outputs =
@@ -39,12 +24,6 @@
         pname = "go-localsync";
         vendorHash = "sha256-Y2yKOwLbeNwGc+CPGMT6dqjKFq6AsNL0PfV0F4BVF3s=";
         description = "Generic synchronization SDK with CQRS";
-
-        deps = {
-          "github.com/larsartmann/go-cqrs-lite" = inputs.go-cqrs-lite;
-          "github.com/larsartmann/go-branded-id" = inputs.go-branded-id;
-          "github.com/larsartmann/go-error-family" = inputs.go-error-family;
-        };
 
         extraBuildAttrs.preBuild = "export GOEXPERIMENT=jsonv2";
 
