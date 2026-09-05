@@ -80,6 +80,9 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **`b.N` → `b.Loop()`** modernization in the older bench files (gopls warnings: `adapter_bench_test.go`, `stack_bench_test.go`).
 - [ ] **Unify `waitForCount`/`waitForCountTB`** behind a `testing.TB` helper.
 - [ ] **Move `id.ContentHash` out of `ids.go`** — it is a content hash, not an identifier.
+- [ ] **Docs policy cluster**: decide + execute the HTML-artifact policy (banner/archive the 25 generated HTML reports; 3 superseded June dashboards sit in `status/` root); record the dprint scope for `docs/status/` (format vs exclude); classify the two undated planning files; annotate+archive the 23:04 report once routed.
+- [ ] **ROADMAP cleanup: "Export to JSON/CSV" theme is stale** — `stack.ExportEvents` (NDJSON) + `ExportEventsCSV` shipped (FEATURES row 65); strike/replace the ROADMAP idea row.
+- [ ] **Add source-item IDs to cluster TODOs** (cqrs-lint CLI cluster, API-hardening, benchmarks) so future sweeps can strike report items individually.
 - [ ] **`errors.AsType` audit pass** (go-error-modernization sweep, not yet run).
 - [ ] **Disposition `hierarchical-errors` buildflow findings** — ~3,711 findings; suppress in `.buildflow.yml` with a stated rationale or formally track (open since 2026-07-19, carried by two reports).
 - [ ] **File the watermill causation-metadata limitation upstream** in go-cqrs-lite (typed `Metadata.Causation` pointer not mapped onto bus-delivered messages; only custom `command.type`/`command.id` fallbacks survive) — candidate issue after `verify-before-filing` (see CHANGELOG Unreleased, correlation entry).
