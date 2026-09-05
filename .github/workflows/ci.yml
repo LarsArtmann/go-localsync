@@ -38,6 +38,10 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      # -race requires cgo (the race runtime is built with it); the workflow
+      # default CGO_ENABLED=0 is for the pure-Go cross-compile builds.
+      CGO_ENABLED: "1"
     steps:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -174,6 +178,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GOWORK: "off"
+      CGO_ENABLED: "1" # -race requires cgo
     steps:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
