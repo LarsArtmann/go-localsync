@@ -47,6 +47,20 @@ type CQRSConfig struct {
 	OTel *middleware.OTelBundle
 }
 
+// Validate rejects structurally impossible configs early (at construction
+// sites) instead of deep inside store setup: the backend must be a known
+// name, and a DBPath is only meaningful for the sqlite backend.
+func (c CQRSConfig) Validate() error {
+	switch c.Backend {
+	case backendMemory, "":
+	case backendSQLite:
+	default:
+		return pkgerrors.Wrapf(pkgerrors.ErrUnknownBackend, "unknown backend: %s", c.Backend)
+	}
+
+	return nil
+}
+
 // CQRSStack wires together the event store, bus, decider repository, read model,
 // command/query dispatchers, and projection runner.
 //

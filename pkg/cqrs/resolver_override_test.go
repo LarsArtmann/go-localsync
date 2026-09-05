@@ -1,4 +1,4 @@
-package sync
+package cqrs
 
 import (
 	"context"
@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-localsync/pkg/cqrs"
+
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
@@ -29,10 +30,10 @@ func (remoteWins) Resolve(c *crdt.Conflict[*model.Item]) (*model.Item, error) {
 
 // resolverObservingStore wraps the CQRS stack so the test can read the final
 // stored item after a conflict decision.
-func newResolverTestStack(t *testing.T, cfg crdt.ConflictResolver[*model.Item]) *cqrs.CQRSStack {
+func newResolverTestStack(t *testing.T, cfg crdt.ConflictResolver[*model.Item]) *CQRSStack {
 	t.Helper()
 
-	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "memory", ConflictResolver: cfg})
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory", ConflictResolver: cfg})
 	testutil.MustNoError(t, err)
 	t.Cleanup(func() { _ = stack.Close() })
 
@@ -75,13 +76,13 @@ func TestSyncOptions_ConflictResolver_OverridesConfig(t *testing.T) {
 	changed := conflictPair(time.Now().Add(time.Hour))
 	changed.RawJSON = []byte(`{"resolver":true,"changed":true}`)
 
-	syncer := NewSyncer(
+	syncer := synclib.NewSyncer(
 		&testutil.MockProvider{Items: []*provider.Item{changed}},
 		stack,
 		log.Default(),
 	)
 
-	result, err := syncer.Sync(ctx, &SyncOptions{
+	result, err := syncer.Sync(ctx, &synclib.SyncOptions{
 		Source:           "github",
 		MaxPages:         1,
 		ConflictResolver: localWins{},
@@ -119,13 +120,13 @@ func TestSyncOptions_ConflictResolver_NilUsesConfigDefault(t *testing.T) {
 	changed := conflictPair(time.Now().Add(time.Hour))
 	changed.RawJSON = []byte(`{"resolver":true,"changed":true}`)
 
-	syncer := NewSyncer(
+	syncer := synclib.NewSyncer(
 		&testutil.MockProvider{Items: []*provider.Item{changed}},
 		stack,
 		log.Default(),
 	)
 
-	_, err := syncer.Sync(ctx, &SyncOptions{Source: "github", MaxPages: 1})
+	_, err := syncer.Sync(ctx, &synclib.SyncOptions{Source: "github", MaxPages: 1})
 	testutil.MustNoError(t, err)
 
 	after, err := stack.Get(ctx, "github", first.ExternalID)
@@ -136,7 +137,7 @@ func TestSyncOptions_ConflictResolver_NilUsesConfigDefault(t *testing.T) {
 	}
 }
 
-func waitForItem(t *testing.T, stack *cqrs.CQRSStack) {
+func waitForItem(t *testing.T, stack *CQRSStack) {
 	t.Helper()
 
 	deadline := time.Now().Add(5 * time.Second)
