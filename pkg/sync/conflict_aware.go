@@ -78,6 +78,7 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 
 	s.syncer.logger.Info(
 		"Conflict-aware sync completed",
+		"source", opts.Source,
 		"fetched", cr.Fetched,
 		"upserted", cr.Upserted,
 		"conflicts", cr.Conflicts,

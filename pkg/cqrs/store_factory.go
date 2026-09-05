@@ -62,27 +62,27 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 	}
 
 	if err := cqrsstorage.SQLiteInitSchema(ctx, db); err != nil {
-		_ = db.Close()
+		closeLogged("sqlite db (schema init failed)", db)
 
 		return storeResult{}, pkgerrors.Wrap(err, "init schema")
 	}
 
 	store, storeErr := cqrsstorage.NewSQLiteEventStore(db)
 	if storeErr != nil {
-		_ = db.Close()
+		closeLogged("sqlite db (event store init failed)", db)
 
 		return storeResult{}, pkgerrors.Wrap(storeErr, "create event store")
 	}
 
 	if walErr := cqrsstorage.SQLiteEnableWAL(ctx, db); walErr != nil {
-		_ = db.Close()
+		closeLogged("sqlite db (WAL enable failed)", db)
 
 		return storeResult{}, pkgerrors.Wrap(walErr, "enable WAL mode")
 	}
 
 	cpStore, cpErr := cqrsstorage.NewSQLiteCheckpointStore(db)
 	if cpErr != nil {
-		_ = db.Close()
+		closeLogged("sqlite db (checkpoint store init failed)", db)
 
 		return storeResult{}, pkgerrors.Wrap(cpErr, "create checkpoint store")
 	}
@@ -92,7 +92,7 @@ func createSQLiteStore(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 	// after every crash. The memory backend keeps its in-memory DLQ.
 	dlq, dlqErr := projectionhost.NewSQLiteDeadLetterStore(ctx, db)
 	if dlqErr != nil {
-		_ = db.Close()
+		closeLogged("sqlite db (dead-letter store init failed)", db)
 
 		return storeResult{}, pkgerrors.Wrap(dlqErr, "create dead-letter store")
 	}

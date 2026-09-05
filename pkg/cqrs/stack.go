@@ -178,6 +178,9 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 // cleanupFailedConstruction releases the resources opened before a failed
 // NewCQRSStack construction, preventing store/bus/db/goroutine leaks. It is
 // only called on the error path; on success the CQRSStack takes ownership.
+// Close failures are logged, not returned — the primary construction error
+// takes precedence, but a failed close (leaked fd, WAL flush) must not be
+// invisible.
 func cleanupFailedConstruction(
 	sr storeResult,
 	rm ReadModel,
@@ -193,15 +196,24 @@ func cleanupFailedConstruction(
 	}
 
 	if rm != nil {
-		_ = rm.Close()
+		closeLogged("read model", rm)
 	}
 
 	if c, ok := sr.store.(io.Closer); ok {
-		_ = c.Close()
+		closeLogged("event store", c)
 	}
 
 	if c, ok := sr.bus.(io.Closer); ok {
-		_ = c.Close()
+		closeLogged("event bus", c)
+	}
+}
+
+// closeLogged closes c, logging failures instead of returning them. For
+// best-effort cleanup paths where a primary error is already surfacing: a
+// silently swallowed close error would hide resource leaks.
+func closeLogged(name string, c io.Closer) {
+	if err := c.Close(); err != nil {
+		log.Warn("cleanup close failed", "component", name, "error", err)
 	}
 }
 

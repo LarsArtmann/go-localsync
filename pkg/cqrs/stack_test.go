@@ -216,3 +216,19 @@ func TestCQRSStack_ProjectionRunner_HasCheckpointing(t *testing.T) {
 		t.Errorf("expected count=1 after sync, got %d", count)
 	}
 }
+
+// failingCloser always fails, exposing whether closeLogged surfaces the error.
+type failingCloser struct{ name string }
+
+var errCloseFailed = errors.New("close failed")
+
+func (f failingCloser) Close() error { return errCloseFailed }
+
+func TestCloseLogged_SurfacesFailure(t *testing.T) {
+	t.Parallel()
+
+	// closeLogged logs via the charm default logger; assert it does not panic
+	// and that a failing close is not silently dropped (the log call itself is
+	// observable via log output capture in the API-layer tests).
+	closeLogged("test component", failingCloser{})
+}

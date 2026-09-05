@@ -203,6 +203,8 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 
 		s.logger.Info(
 			"Sync completed: no valid items",
+			"source",
+			opts.Source,
 			"fetched",
 			syncResult.Fetched,
 			"errors",
@@ -228,6 +230,8 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 
 	s.logger.Info(
 		"Sync completed",
+		"source",
+		opts.Source,
 		"fetched",
 		syncResult.Fetched,
 		"synced",
@@ -326,6 +330,8 @@ func (s *Syncer) runSyncIncremental(ctx context.Context, opts *SyncOptions) (*Sy
 
 	s.logger.Info(
 		"Incremental sync completed",
+		"source",
+		opts.Source,
 		"fetched",
 		syncResult.Fetched,
 		"skipped",
@@ -409,7 +415,12 @@ func (s *Syncer) filterValidItems(items []*provider.Item, syncResult *SyncResult
 		if err != nil {
 			syncResult.Errors++
 
-			s.logger.Warn("Skipping invalid item", "id", item.ID, "error", err)
+			s.logger.Warn(
+				"Skipping invalid item",
+				"source", item.Source.Get(),
+				"id", item.ID,
+				"error", err,
+			)
 
 			continue
 		}
