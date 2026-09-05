@@ -156,7 +156,7 @@ func decideTombstone(
 				Reason:       string(reason),
 				TombstonedAt: unixNano(at),
 			}},
-			opts...,
+			append([]event.Option{event.WithSchemaVersion(currentSchemaV)}, opts...)...,
 		)
 		if err != nil {
 			return nil, pkgerrors.Wrapf(
@@ -252,6 +252,11 @@ func syncEvents(
 			dataItemToPayload(item, rawJSON),
 		}
 	}
+
+	// Stamp the CURRENT schema version: new events must never match the
+	// legacy V1/V2 upcasters (a V1-stamped new event would pass through the
+	// registry and be mutated in place, racing concurrent bus readers).
+	opts = append(opts, event.WithSchemaVersion(currentSchemaV))
 
 	evts, err := event.NewEvents(aggID, aggregateType, version, eventTypes, payloads, opts...)
 	if err != nil {

@@ -30,9 +30,10 @@ func legacyV1Payload() ItemSyncedPayload {
 	}
 }
 
-// TestUpcaster_V1PayloadBecomesV3 exercises the upcaster directly: legacy
-// fields fold into Attributes, schema version stamps 3, identity is kept.
-func TestUpcaster_V1PayloadBecomesV3(t *testing.T) {
+// TestUpcaster_V1PayloadFoldsAttributes exercises the upcaster directly:
+// legacy fields fold into Attributes; the event schema version is PRESERVED
+// (the registry chain owns version bumps).
+func TestUpcaster_V1PayloadFoldsAttributes(t *testing.T) {
 	t.Parallel()
 
 	aggID := AggregateID("github", id.NewExternalID("up-1"))
@@ -47,8 +48,10 @@ func TestUpcaster_V1PayloadBecomesV3(t *testing.T) {
 	upcasted, err := upcastItemSyncedToV3(evts[0])
 	testutil.MustNoError(t, err)
 
-	if upcasted.SchemaVersion() != 3 {
-		t.Errorf("schema version: want 3, got %d", upcasted.SchemaVersion())
+	// The registry owns the version bump; a direct call only rewrites the
+	// payload (Attributes folded) and PRESERVES the original schema version.
+	if upcasted.SchemaVersion() != 1 {
+		t.Errorf("direct upcast must preserve the event schema version (registry bumps it), got %d", upcasted.SchemaVersion())
 	}
 
 	if upcasted.ID() != evts[0].ID() || upcasted.Version() != evts[0].Version() {

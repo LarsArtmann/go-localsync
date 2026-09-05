@@ -54,9 +54,12 @@ func upcastItemSyncedToV3(evt event.Event) (event.Event, error) {
 		return nil, pkgerrors.Wrap(err, "upcast item.synced: encode payload")
 	}
 
+	// The REGISTRY owns the schema-version bump (V1 -> V2 -> V3 chaining);
+	// this upcaster rebuilds the event at its ORIGINAL version so the chain
+	// can advance it step by step.
 	upcasted, err := event.ReconstructEventWithAdoptedPayload(
 		evt.ID(), evt.Type(), evt.StreamType(), evt.StreamID(),
-		int(evt.Version()), int(currentSchemaV), raw, evt.Metadata(), evt.OccurredAt(),
+		int(evt.Version()), int(evt.SchemaVersion()), raw, evt.Metadata(), evt.OccurredAt(),
 		codec.EncodingCBOR, "localsync.upcast_item_synced",
 	)
 	if err != nil {
