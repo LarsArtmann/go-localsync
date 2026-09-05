@@ -70,7 +70,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Quality
 
-- [ ] **Process-level `cmd/cqrs-lint` tests** — build the binary, run against fixtures, assert exit codes 0/1/2 (finishes M11 properly; `main()`, flag parsing, `printRules`/`printUsage` untested).
+- [x] **Process-level `cmd/cqrs-lint` tests** — build the binary, run against fixtures, assert exit codes 0/1/2 (finishes M11 properly; `main()`, flag parsing, `printRules`/`printUsage` untested).
+  ✅ DONE 2026-09-06: `cmd/cqrs-lint/process_test.go` — builds the binary into `t.TempDir()`, pins exits 0/1/2, `--strict` on the unknown-rule warning, and the NDJSON shape. Coverage stays 56.4% (subprocess runs are coverage-invisible by design).
 - [ ] **Real-meter and sdktrace recorder tests** — prove values actually land in `cqrs.operation.*` and the `localsync.sync_items` span attributes (noop providers only prove wiring).
 - [ ] **Cursor pagination test against the real SQLite read model ordering** — the current test uses a fake store (`pkg/api`).
 - [ ] **`pkg/id` unit tests for `ContentHash`** — `IsZero`/`String` untested; coverage sits at 75.0%.
