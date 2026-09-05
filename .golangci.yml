@@ -148,8 +148,8 @@ linters:
         - fmt.Println
         - (*strings.Builder).WriteString
         - (*bytes.Buffer).WriteString
-    exhaustruct:
-      exclude:
+    exhaustruct_v5:
+      ignore-patterns:
         - net/http\.Client
         - net/http\.Transport
         - net/http\.Server
@@ -234,7 +234,7 @@ linters:
     rules:
       - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache|model\.Item|model\.Tombstone|sync\.SyncResult|sync\.Syncer|cqrs\.Projector|cqrs\.ItemSyncedPayload|cqrs\.TombstoneItemCommand|cqrs\.SyncItemCommand|api\.serverOptions|api\.tokenBucket|cqrslint\.Suppressor|huma\.SecurityScheme|huma\.Operation|sql\.NullTime|cqrslint\.Finding) is missing
         linters:
-          - exhaustruct
+          - exhaustruct_v5
       - path: _test\.go
         linters:
           - exhaustruct
@@ -336,7 +336,7 @@ linters:
           - funlen
       - path: pkg/sync/conflict_aware\.go
         linters:
-          - exhaustruct
+          - exhaustruct_v5
       - path: pkg/sync/sync\.go
         linters:
           - wrapcheck
@@ -344,7 +344,7 @@ linters:
           - funlen
       - path: pkg/testhelpers/
         linters:
-          - exhaustruct
+          - exhaustruct_v5
           - err113
           - godoclint
           - gocritic
