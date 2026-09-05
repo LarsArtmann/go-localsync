@@ -131,19 +131,19 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 **Decider-test convention (since 2026-09-05):** new decider behavior tests use the library-native `scenario` DSL (`go-cqrs-lite/scenario/v4`, see `pkg/cqrs/scenario_test.go` for Given/When/Then examples incl. the cmd/state adapters). Keep plain table tests for fold edge cases. Note: the `eventtest` module has no released version — do not depend on it until tagged.
 
-| Package             | Tests | Coverage | Status                                                                                                         |
-| ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| Package             | Tests | Coverage | Status                                                                                                                           |
+| ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `pkg/cqrs`          | 144   | 87.7%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, upcasting, scenario specs, regression tests |
-| `pkg/sync`          | 34    | 87.7%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
-| `pkg/id`            | 12    | 75.0%    | ✅ ID construction, roundtrip, zero, equal (ContentHash unit tests: open TODO)                                 |
-| `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
-| `pkg/provider`      | 2     | 92.3%    | ✅ Item validation                                                                                             |
-| `pkg/api`           | 31    | 95.2%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
-| `pkg/crdt`          | 8     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
-| `pkg/data/model`    | 12    | 84.9%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
-| `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
-| `internal/cqrslint` | 38    | 92.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives   |
-| `cmd/cqrs-lint`     | 8     | 56.4%    | ✅ exit-code contract, summary/JSON output, violating-fixture round trip                                       |
+| `pkg/sync`          | 34    | 87.7%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                                               |
+| `pkg/id`            | 12    | 75.0%    | ✅ ID construction, roundtrip, zero, equal (ContentHash unit tests: open TODO)                                                   |
+| `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync                   |
+| `pkg/provider`      | 2     | 92.3%    | ✅ Item validation                                                                                                               |
+| `pkg/api`           | 31    | 95.2%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                                  |
+| `pkg/crdt`          | 8     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                                         |
+| `pkg/data/model`    | 12    | 84.9%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                                    |
+| `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                                              |
+| `internal/cqrslint` | 38    | 92.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives                     |
+| `cmd/cqrs-lint`     | 8     | 56.4%    | ✅ exit-code contract, summary/JSON output, violating-fixture round trip                                                         |
 
 **309 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
 
@@ -212,7 +212,7 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/watermill/v4`        | v4.5.1  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                              |
 | `go-cqrs-lite/storage/v4`          | v4.8.1  | SQLite event store, snapshot, KV store                                                                      |
 | `go-cqrs-lite/schema/v4`           | v4.3.1  | Schema `Version` + `UpcastSourceTransform` (upcaster registry wiring)                                       |
-| `go-cqrs-lite/otel/v4`             | v4.3.0  | OTel middleware bundle: command/event spans + `cqrs.operation.*` metrics (opt-in via `CQRSConfig.OTel`)      |
+| `go-cqrs-lite/otel/v4`             | v4.3.0  | OTel middleware bundle: command/event spans + `cqrs.operation.*` metrics (opt-in via `CQRSConfig.OTel`)     |
 | `go.opentelemetry.io/otel`         | v1.46.0 | OpenTelemetry API (metric + trace direct; core/sdk indirect)                                                |
 | `go-branded-id`                    | v0.5.1  | Branded phantom-type IDs for compile-time safety                                                            |
 | `go-error-family`                  | v0.10.0 | Structured error classification + user-facing message templates                                             |

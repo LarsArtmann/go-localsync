@@ -155,3 +155,8 @@ D1, DOC1-3, ERR1-2 ─────────┘
 ---
 
 _Generated with Crush_
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All 49 tasks (FIN4 included) executed across sessions 10-18 and verified in the current tree. Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.

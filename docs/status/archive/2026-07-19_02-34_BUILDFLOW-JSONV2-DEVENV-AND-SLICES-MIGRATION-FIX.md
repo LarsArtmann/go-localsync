@@ -149,3 +149,8 @@ Both fixes shipped in **v0.4.0** (2026-07-18):
 - The masked `slices.Contains` migration bug in `stack_classify_test.go` was fixed (`slices.ContainsFunc`).
 - The `GOFLAGS` propagation gotcha is now documented in AGENTS.md as a required first step for `buildflow --build-mode full`.
 - Open question #3 (hierarchical-errors 3,711 findings) remains **unresolved** — the findings are dismissed as Go-idiomatic noise but no formal suppression or tracker entry exists.
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+Both fixes shipped and held (jsonv2 devShell + slices migration); only the hierarchical-errors disposition carries forward (routed to TODO_LIST). Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.

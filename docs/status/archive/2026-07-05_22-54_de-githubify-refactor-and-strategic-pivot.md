@@ -221,3 +221,8 @@ The de-githubify refactor shipped in **v0.4.0** (2026-07-18, ADR-0007). Since th
 - **ADR-0008** (Host framework pivot) — **Proposed, dormant**. Never executed. The project stayed within ADR-0004 scope.
 - **5 adoption-feedback gaps** — correctly identified as ADR-0004 scope boundaries. They remain **deferred by design**.
 - **The product question** (standalone vs merge vs upstream) — **still open**. go-localsync remains standalone; `go-cqrs-lite` remains private.
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+ADR-0007 shipped in v0.4.0; go-cqrs-lite went public (v4.9) on 2026-09-05, closing the 'Path C' dependency question; the AGENTS dependency table is current (v4.9 stack). Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.

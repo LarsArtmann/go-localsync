@@ -76,3 +76,6 @@ result-*
 
 # BuildFlow resume state (should never be committed)
 .buildflow-resume.json
+
+# local build artifact
+cqrs-lint

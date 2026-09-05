@@ -133,10 +133,10 @@
 
 ## Testing
 
-| #  | Feature      | Status           | Package        | Description                                                                                                                                  |
-| -- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 309 test functions across 11 packages (plus 31 in the standalone `provider/github` module), all passing race-clean. Run: `go test ./... -count=1`.   |
-| 56 | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.) |
+| #  | Feature      | Status           | Package        | Description                                                                                                                                        |
+| -- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 309 test functions across 11 packages (plus 31 in the standalone `provider/github` module), all passing race-clean. Run: `go test ./... -count=1`. |
+| 56 | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.)       |
 
 ## Quality
 
@@ -152,7 +152,7 @@
 | 64 | Schema upcasting                 | FULLY_FUNCTIONAL     | `pkg/cqrs`              | V1/V2 `ItemSynced` events upcast to V3 at the store read boundary (`event.DecorateStore` + `schema.UpcastSourceTransform`): legacy actor/repo fields fold into `Attributes`. New events stamped `WithSchemaVersion(3)` at creation.                                                                                                                                                                                                                |
 | 65 | Event export                     | FULLY_FUNCTIONAL     | `pkg/cqrs`              | `ExportEvents` (NDJSON) + `ExportEventsCSV`: full journal with identity, positioning, base64 payload, correlation + causation metadata.                                                                                                                                                                                                                                                                                                            |
 | 66 | Per-sync conflict resolver       | FULLY_FUNCTIONAL     | `pkg/sync` + `pkg/cqrs` | `SyncOptions.ConflictResolver` overrides the stack strategy for one run via the optional `ResolverAwareStore` seam (`CQRSStack.SyncItemsWithResolver`); precedence command > option > config.                                                                                                                                                                                                                                                      |
-| 67 | cqrs-lint CLI + tests            | FULLY_FUNCTIONAL     | `cmd/cqrs-lint`         | CLI for the internal linter: `--strict`, `--verbose`, `--show-suppressed`, `--json` (with suppression provenance). 8 tests: exit-code decision table, summary/JSON schema, verbose rule status, violating-fixture + suppression round trip. |
+| 67 | cqrs-lint CLI + tests            | FULLY_FUNCTIONAL     | `cmd/cqrs-lint`         | CLI for the internal linter: `--strict`, `--verbose`, `--show-suppressed`, `--json` (with suppression provenance). 8 tests: exit-code decision table, summary/JSON schema, verbose rule status, violating-fixture + suppression round trip.                                                                                                                                                                                                        |
 
 ---
 

@@ -188,3 +188,9 @@
 ---
 
 _Report generated at session end; tree state: `master` @ `3b9e8e3`, clean working tree, CI green (33989995377)._
+
+---
+
+## Resolution (2026-09-05 evening sweep)
+
+All 50 §f items carry inline verdicts above: shipped items cite their commits (`9625b1b` vendorHash/dprint/release-integrity, `dc6b88f` exhaustruct_v5, `ea021c9` library-lint gate), and everything still open is routed to TODO_LIST.md or ROADMAP.md (correctness hardening, observability depth, cqrs-lint CLI cluster, benchmark protocol, v0.6 window). The §d-1 "nix build almost certainly broken" fear was resolved same-day: the vendorHash was re-pinned (`9625b1b`) and `nix build` + `nix flake check` verify green. §b partial rows → their "missing" halves are the routed TODO items; §g answers: (1) no deploy key exists — the secret stays an owner action tracked in TODO_LIST; (2) `/metrics` stays keyed until the owner decides otherwise (tracked in TODO_LIST decisions); (3) release shape decided — no v0.5.1; the additive work rides the v0.6 breaking window (ADR-0009), with release integrity independently re-verified on the live proxy. This report stays in `status/` root as the current-cycle snapshot (cross-referenced by the 2026-09-05 plan's execution record); it will be archived by a later sweep once its routed items close.

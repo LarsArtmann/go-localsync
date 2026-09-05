@@ -153,3 +153,8 @@ func createReadModel(cfg Config, sr storeResult) (ReadModel, error) {
 | 3 | `TimestampNano` helpers    | LOW      | Trivial       |
 | 4 | `CharmLogAdapter`          | LOW      | Low           |
 | 5 | `ireturn` factory guidance | LOW      | Documentation |
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+Suggestion #1 (consumer boilerplate) was answered by go-cqrs-lite's own stack/ layer; the rest remain upstream correspondence, superseded by the v4 module split. Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.

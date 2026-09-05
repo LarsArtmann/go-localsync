@@ -277,11 +277,16 @@ flowchart TD
 
 ## Definition of Done
 
-- [ ] `go build ./...` passes with zero errors
-- [ ] `go test ./... -count=1` passes with zero failures
-- [ ] `go test ./... -race` passes with zero races
-- [ ] `golangci-lint run ./...` reports zero issues
-- [ ] `provider.Item` is only used in: provider implementations, adapter functions, and API input binding
-- [ ] `data.Item` is the domain entity in: decider, events, read models, sync store
-- [ ] All new code has tests
-- [ ] No TODOs or FIXMEs left in modified files
+- [x] `go build ./...` passes with zero errors
+- [x] `go test ./... -count=1` passes with zero failures
+- [x] `go test ./... -race` passes with zero races
+- [x] `golangci-lint run ./...` reports zero issues
+- [x] `provider.Item` is only used in: provider implementations, adapter functions, and API input binding
+- [x] `data.Item` is the domain entity in: decider, events, read models, sync store
+- [x] All new code has tests
+- [x] No TODOs or FIXMEs left in modified files
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+Executed in full: the domain moved to model.Item with schema-versioned events and upcasters; every Definition-of-Done box above is met in the current tree (checked in place). Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.

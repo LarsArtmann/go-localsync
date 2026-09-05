@@ -98,3 +98,8 @@ Phase 2 (4% → 64%):
 Phase 3 (20% → 80%):
   3.1 → 3.2 → 3.3 → 3.4 → [COMMIT + PUSH]
 ```
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+Executed across sessions 18-26; the API auth/pagination items were re-executed to a higher bar by M12/M14 (2026-09-05); client.go line numbers drifted in the provider extraction. Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.

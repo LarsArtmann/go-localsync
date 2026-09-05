@@ -40,16 +40,22 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Tooling / CI
 
-- [ ] **Add the `SSH_PRIVATE_KEY` repo secret so the library cqrs-lint CI leg runs** — the error-gated `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` step is restored in the workflow and auto-enables once the secret exists (a deploy key with read access to the private `larsartmann/go-finding` module); until then it skips with a notice and the gate runs locally from the devShell (documented in the workflow + AGENTS.md).
+- [ ] **Add the `SSH_PRIVATE_KEY` repo secret so the library cqrs-lint CI leg runs** — the error-gated `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` step is restored in the workflow, CI-verified on the skip path, and auto-enables once the secret exists (a deploy key with read access to the private `larsartmann/go-finding` module); until then it skips with a notice and the gate runs locally from the devShell (documented in the workflow + AGENTS.md). Alternative endgame (owner call): make `go-finding` public and delete all SSH machinery.
 - [ ] **Run `buildflow --build-mode full`** inside the devShell (go.work kept to the two in-repo modules) — last full-pipeline run predates the M-plan session.
 - [ ] **Add a `nix flake check` CI job** so `vendorHash` drift can't land silently again (it silently broke `nix build` once already — see CHANGELOG 0.5.0-era "Stale vendorHash re-pinned").
 - [ ] **Pin the golangci-lint version in CI** instead of `latest` (reproducibility).
-- [ ] **Add a golangci-lint leg for `provider/github`** — the standalone CI job builds + race-tests but does not lint.
+- [ ] **Add `actionlint` to the devShell + a CI workflow-validation step** (replaces ad-hoc `yaml.safe_load` checks).
+- [ ] **`vendorHash` drift guard** — warn (hook or CI) when `go.mod`/`go.sum` change without a matching `flake.nix` re-pin; the drift silently broke `nix build` once (see CHANGELOG + the AGENTS gotcha).
+- [ ] **CI formatting story** — either add a dprint check job (json/yaml/md/dockerfile) or drop the parity claim; today dprint is devShell-only by decision default, not by recorded decision.
+- [ ] **Purge stale `.golangci.yml` exclusion paths** — `pkg/providers/github/client.go`, `pkg/types/ids.go`, `pkg/testhelpers/` predate the restructures; verify and delete dead rules.
+- [ ] **Consider a windows build leg** — the compile matrix is linux/darwin only; sqlite/CGO behavior on windows is unproven.
+- [ ] **Audit the library-gate suppression** — confirm the single `//cqrs-lint:ignore` reason is still current.
+- [ ] **Revisit inert pre-commit hooks** — formally enable (scoped) or delete; they are neither protecting nor costing anything today.
 - [ ] **Compute doc-drift-prone counts in CI instead of hand-copying** — test/coverage counts (AGENTS.md / README.md / FEATURES.md / TODO_LIST.md) and the AGENTS.md dependency table vs `go.mod` have both drifted repeatedly; generate or check them in CI (every 2026 drift involved hand-copied numbers).
 - [ ] **Separate CHANGELOG for `provider/github`** — the nested module's lifecycle is now independent of core releases.
 - [ ] **Restructure AGENTS.md under ~30 KB** — link out to ADRs instead of inlining decisions; keep gotchas ≤20 (flagged as "bloated" by two consecutive reviews; the 2026-09-05 passes only pruned, never restructured).
 - [ ] **Make docs-health VERIFY a standing pre-release step** — docs drift after every release is systemic (Accuracy scored 1.5/10 once); wire the check into the release routine rather than running on-demand audits.
-- [ ] **Pre-release verification target** — a nix target (or script) running the full suite (build, race tests, lint, both cqrs-lint gates, `nix flake check`) plus a CONTRIBUTING.md release-checklist section pointing at it.
+- [ ] **Pre-release verification target** — a nix target (or script) running the full suite (build, race tests, lint, both cqrs-lint gates, `nix flake check`) plus a CONTRIBUTING.md release-checklist section pointing at it; codify the manual release-integrity checks (tags pushed, GitHub Release bodies, proxy `@v/list` + `@latest`, pkg.go.dev indexing) into the same script — they were hand-run twice on 2026-09-05.
 
 ### Quality
 
@@ -64,7 +70,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 ## 🟢 LOWER PRIORITY
 
 - [ ] ~~**Add `govalid` struct tags**~~ — pivoted 2026-09-05: govalid is a buildflow-internal generator, not a proxy-resolvable module; real `Validate()` methods were implemented instead (`SyncOptions.Validate`, `CQRSConfig.Validate`, `ItemFilter.Validate`). Reopen only if govalid is ever published with a stable tag format.
-- [ ] **cqrs-lint CLI surface cluster** (aggregate; from [2026-08-02 report](docs/status/2026-08-02_20-31_CQRS-LINT_CLI_ENHANCEMENT.md) §f): `--version`/`--quiet`/`--format=github`, `--rules`/`--exclude-rules`, `--no-suppress`, `--explain`, block + range (`ignore-start`/`ignore-end`) directives, SARIF output, dedicated directives doc page, hand-rolled `--json` → `encoding/json`, per-rule suppressed counts in `--verbose`, new rules C0011+.
+- [ ] **cqrs-lint CLI surface cluster** (aggregate; from [2026-08-02 report](docs/status/archive/2026-08-02_20-31_CQRS-LINT_CLI_ENHANCEMENT.md) §f): `--version`/`--quiet`/`--format=github`, `--rules`/`--exclude-rules`, `--no-suppress`, `--explain`, block + range (`ignore-start`/`ignore-end`) directives, SARIF output, dedicated directives doc page, hand-rolled `--json` → `encoding/json`, per-rule suppressed counts in `--verbose`, new rules C0011+.
 - [ ] **API hardening polish**: `X-RateLimit-Limit`/`-Remaining` headers on 429; optional per-client rate limiting (`WithRateLimiter(keyExtractor)`); document the global-vs-per-client scope; structured log level control (per-event INFO is noisy in prod).
 - [ ] **OTel span for `Syncer.Sync`** in `pkg/sync` (currently only the CQRS batch path spans).
 - [ ] **`provider/github`: ETag / conditional requests** for incremental revalidation (flagged by [performance review](docs/research/performance-review.html)).
@@ -75,8 +81,11 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Unify `waitForCount`/`waitForCountTB`** behind a `testing.TB` helper.
 - [ ] **Move `id.ContentHash` out of `ids.go`** — it is a content hash, not an identifier.
 - [ ] **`errors.AsType` audit pass** (go-error-modernization sweep, not yet run).
-- [ ] **File the watermill causation-metadata limitation upstream** in go-cqrs-lite (typed `Metadata.Causation` pointer not mapped onto bus-delivered messages; only custom `command.type`/`command.id` fallbacks survive) — candidate issue after `verify-before-filing` (see CHANGELOG Unreleased, correlation entry).
 - [ ] **Disposition `hierarchical-errors` buildflow findings** — ~3,711 findings; suppress in `.buildflow.yml` with a stated rationale or formally track (open since 2026-07-19, carried by two reports).
+- [ ] **File the watermill causation-metadata limitation upstream** in go-cqrs-lite (typed `Metadata.Causation` pointer not mapped onto bus-delivered messages; only custom `command.type`/`command.id` fallbacks survive) — candidate issue after `verify-before-filing` (see CHANGELOG Unreleased, correlation entry).
+- [ ] **Quality: coverage floor raises** — `cmd/cqrs-lint` 56.4% (lowest in repo; process-level tests above cover much of it) and `pkg/data/model` 84.9% (lowest package).
+- [ ] **Verify kit-side claims in `go-github-kit` source** before trusting the provider README's "empty token = unauthenticated (60 req/h)" and "retry on 429 and idempotent 5xx" lines (`verify-external-claims`); annotate if wrong.
+- [ ] **Document gopls `stdversion` warnings as known GOEXPERIMENT noise** (`json.Marshal*` wants go1.27, `go.mod` says 1.26) so sessions stop re-debugging LSP-only noise.
 - [ ] **`TombstoneItem` variadic `...event.Option`** for parity with direct dispatch.
 - [ ] **Verify OpenAPI `/sync` 408** — confirm huma maps RequestTimeout consistently with `pkgerrors.HTTPStatus` (499/504 for ctx cancel/deadline may be more accurate).
 - [ ] **`AggregateID` → `StreamID` vocabulary sweep in ADRs/docs** — ADR prose still uses the old vocabulary (v0.4.1 leftover; mechanical, do with the v0.6 rename).

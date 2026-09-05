@@ -1,7 +1,7 @@
 # go-localsync Improvement Sprint
 
 **Date:** 2026-05-25\
-**Status:** In Progress\
+All 12 tasks executed long before SESSION-26; verified 2026-09-05 (lint 0 issues, doc.go truthful).\
 **Goal:** Fix lint issues, remove dead code, improve architecture, and create upstream guidance
 
 ---
@@ -148,3 +148,8 @@ flowchart TD
 ### Tasks 10-12: Documentation + Verification
 
 Update TODO_LIST and ROADMAP to reflect completed work. Run full test + lint suite.
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+All 12 tasks were executed by later sessions; every file:line reference has drifted but the outcomes are verified in the current tree. Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.

@@ -233,3 +233,8 @@ This decision cascades into the entire Host API surface. I can't design the Opti
 - **Trigger to revisit:** a 3rd consumer hitting the boilerplate wall. No such consumer has appeared.
 
 Full resolution in `docs/strategy/2026-07-05_localsync-v2-sync-toolkit-proposal.md` Resolution section.
+---
+
+## Resolution (2026-09-05 docs-health sweep)
+
+ADR-0008 remains dormant by recorded decision; the DLQ gap was fixed (v0.4.0, SQLite-durable 2026-09-05); the module audit's ask/shipped deltas are superseded by the v4.9 stack + M-plan execution. Verified against the 2026-09-05 tree (`9625b1b`: v0.5.0, 309 core tests, CI green). Report fully resolved → archived.
