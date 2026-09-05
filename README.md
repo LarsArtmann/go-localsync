@@ -232,24 +232,30 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 | Decider Pattern         | ✅ Done | Pure Apply/DecideSync/DecideTombstone with SyncItemState               |
 | Incremental Sync        | ✅ Done | Only fetch new items since last sync — no duplicate data               |
 | Full Fidelity           | ✅ Done | Raw JSON stored for 100% data preservation                             |
-| Conflict Detection      | ✅ Done | Timestamp-based comparison, remote-wins resolution                     |
+| Conflict Detection      | ✅ Done | ContentHash-first comparison (UpdatedAt/Type fallbacks), remote-wins   |
 | Branded IDs             | ✅ Done | Compile-time type-safe identifiers                                     |
-| SQLite Backend          | ✅ Done | SQLite event store + read model + snapshots (no CGo)                   |
+| SQLite Backend          | ✅ Done | SQLite event store + read model + snapshots + durable DLQ (no CGo)     |
 | No CGO                  | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                             |
 | Rate Limiting           | ✅ Done | Configurable rate limiting wired into sync flow                        |
 | Retry Logic             | ✅ Done | Exponential backoff + jitter, honors IsRetryable, optional Retry-After |
 | Snapshots               | ✅ Done | Aggregate state persistence caps replay cost across restarts           |
-| Correlation IDs         | ✅ Done | Unique per sync run for cross-event tracing and debugging              |
+| Correlation + Causation | ✅ Done | Unique correlation per run; every event names its causing command      |
 | Event Logging           | ✅ Done | Structured logging of all domain events via middleware                 |
 | Tombstone + Resurrect   | ✅ Done | Soft-delete keeps history; re-syncing a tombstoned item resurrects it  |
 | Upstream Reconciliation | ✅ Done | Tombstone items the provider stopped returning (opt-in per sync)       |
 | Per-source Locking      | ✅ Done | Concurrent syncs of one source are ordered; sources run in parallel    |
+| Schema Upcasting        | ✅ Done | V1/V2 events upcast to V3 at the store read boundary                   |
+| Event Export            | ✅ Done | `ExportEvents` (NDJSON) + `ExportEventsCSV` for the full journal       |
+| OTel Observability      | ✅ Done | Opt-in spans + metrics via `CQRSConfig.OTel`; `/metrics` hook in API   |
+| API Authentication      | ✅ Done | `WithAPIKey`: constant-time key check, 401 + OpenAPI security scheme   |
+| API Rate Limiting       | ✅ Done | `WithRateLimit`: token bucket on `POST /sync`, 429 + `Retry-After`     |
+| API Pagination          | ✅ Done | `X-Total-Count` + opaque `X-Next-Cursor` on `GET /items`               |
 
 ## Development
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (232 tests across 10 packages)
+go test ./... -count=1                # Run tests (309 tests across 11 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -279,20 +285,21 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 
 ## Testing
 
-232 test functions across 10 packages:
+309 test functions across 11 packages (plus 31 in the standalone `provider/github` module):
 
 | Package             | Tests | Coverage | Description                                                             |
 | ------------------- | ----- | -------- | ----------------------------------------------------------------------- |
-| `pkg/cqrs`          | 97    | 82.4%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
-| `pkg/sync`          | 32    | 88.4%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
-| `pkg/crdt`          | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
-| `pkg/id`            | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                 |
+| `pkg/cqrs`          | 144   | 87.7%    | Decider, ReadModel, Projection, Stack, SQLite RM, upcasting, regression |
+| `pkg/sync`          | 34    | 87.7%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
+| `pkg/api`           | 31    | 95.2%    | Server, routes, auth, rate limit, pagination, error mapping             |
 | `pkg/errors`        | 16    | 92.9%    | Sentinel errors, wrapping, classification, IsRetryable, HTTPStatus      |
-| `pkg/provider`      | 2     | 92.3%    | Item validation                                                         |
-| `pkg/api`           | 15    | 93.1%    | Server, routes, handlers, health/stats/items/sync endpoints             |
-| `pkg/data/model`    | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                              |
+| `pkg/id`            | 12    | 75.0%    | ID construction, roundtrip, zero, equal (ContentHash tests: open TODO)  |
+| `pkg/data/model`    | 12    | 84.9%    | Item, Key, Validate, ItemFilter, Tombstone                              |
+| `pkg/crdt`          | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/data/schema`   | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
-| `internal/cqrslint` | 36    | 90.0%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
+| `pkg/provider`      | 2     | 92.3%    | Item validation                                                         |
+| `internal/cqrslint` | 38    | 92.5%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
+| `cmd/cqrs-lint`     | 8     | 56.4%    | Exit-code contract, summary/`--json` output, fixture round trip         |
 
 ## Related Projects
 
