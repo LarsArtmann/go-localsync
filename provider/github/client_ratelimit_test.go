@@ -2,7 +2,7 @@ package github
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"net/http"
@@ -65,7 +65,7 @@ func TestGetRateLimit(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(rateLimitResponse(4999))
+		_ = json.MarshalWrite(w, rateLimitResponse(4999))
 	}))
 	defer server.Close()
 
@@ -155,7 +155,7 @@ func TestWrapGitHubError(t *testing.T) {
 			}
 
 			// The original GitHub error must stay reachable for diagnostics.
-			if !errors.Is(wrapped, tt.err) { //nolint:errorlint // identity of the original is the assertion
+			if !errors.Is(wrapped, tt.err) {
 				t.Errorf("wrapped error lost the original cause %T: %v", tt.err, wrapped)
 			}
 		})

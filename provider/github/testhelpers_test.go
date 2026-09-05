@@ -2,7 +2,7 @@ package github
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -32,7 +32,7 @@ func newErrorTestServer(statusCode int, message string) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(statusCode)
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(gh.ErrorResponse{Message: message})
+		_ = json.MarshalWrite(w, gh.ErrorResponse{Message: message})
 	}))
 }
 
@@ -41,7 +41,7 @@ func newErrorTestServer(statusCode int, message string) *httptest.Server {
 // response from the GitHub API.
 func writeEmptyEventsResponse(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode([]*gh.Event{})
+	_ = json.MarshalWrite(w, []*gh.Event{})
 }
 
 func newFailingThenSucceedingTestServer(attempts int) (*httptest.Server, *int) {

@@ -3,7 +3,7 @@ module github.com/larsartmann/go-localsync/provider/github
 go 1.26.7
 
 require (
-	charm.land/log/v2 v2.0.0
+	charm.land/log/v2 v2.0.1
 	github.com/LarsArtmann/go-github-kit v0.3.0
 	github.com/google/go-github/v69 v69.2.0
 	github.com/larsartmann/go-localsync v0.5.0
@@ -12,7 +12,7 @@ require (
 require (
 	charm.land/lipgloss/v2 v2.0.6 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
-	github.com/charmbracelet/ultraviolet v0.0.0-20260901234956-af8eda3ed701 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260903151058-ae99b731b8c5 // indirect
 	github.com/charmbracelet/x/ansi v0.11.8 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect

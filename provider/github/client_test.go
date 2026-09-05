@@ -2,7 +2,7 @@ package github
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"errors"
 	"fmt"
 	"net/http"
@@ -50,7 +50,7 @@ func newRateLimitCoreServer(t *testing.T, core *gh.Rate) *httptest.Server {
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(map[string]any{
+		_ = json.MarshalWrite(w, map[string]any{
 			"resources": gh.RateLimits{Core: core},
 		})
 	}))
@@ -89,7 +89,7 @@ func TestFetch_DefaultOptions(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(events)
+		_ = json.MarshalWrite(w, events)
 	}))
 	defer server.Close()
 
@@ -209,7 +209,7 @@ func TestFetchAll_MultiplePages(t *testing.T) {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(events)
+		_ = json.MarshalWrite(w, events)
 	}))
 	defer server.Close()
 
@@ -252,7 +252,7 @@ func TestFetchAll_StopsOnEmptyPage(t *testing.T) {
 
 		if page == "1" {
 			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode([]*gh.Event{{ID: new("1"), Type: new("PushEvent")}})
+			_ = json.MarshalWrite(w, []*gh.Event{{ID: new("1"), Type: new("PushEvent")}})
 
 			return
 		}
@@ -283,14 +283,14 @@ func TestWithConfig(t *testing.T) {
 			name:        "RateLimitConfig",
 			config:      RateLimitConfig{Enabled: true, MinRemaining: 100},
 			getConfig:   func(c *Client) any { return c.rateLimitConfig },
-			withConfig:  func(c *Client, cfg any) *Client { return c.WithRateLimitConfig(cfg.(RateLimitConfig)) }, //nolint:forcetypeassert // test code with known concrete type
+			withConfig:  func(c *Client, cfg any) *Client { return c.WithRateLimitConfig(cfg.(RateLimitConfig)) },
 			assertField: "rateLimitConfig",
 		},
 		{
 			name:        "RetryConfig",
 			config:      provider.RetryConfig{Enabled: true, MaxRetries: 5},
 			getConfig:   func(c *Client) any { return c.retryConfig },
-			withConfig:  func(c *Client, cfg any) *Client { return c.WithRetryConfig(cfg.(provider.RetryConfig)) }, //nolint:forcetypeassert // test code with known concrete type
+			withConfig:  func(c *Client, cfg any) *Client { return c.WithRetryConfig(cfg.(provider.RetryConfig)) },
 			assertField: "retryConfig",
 		},
 	}

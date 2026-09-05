@@ -2,7 +2,7 @@ package github
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +18,7 @@ import (
 )
 
 type githubTestWorld struct {
-	ctx       context.Context //nolint:containedctx // BDD test world holds the scenario context
+	ctx       context.Context
 	server    *httptest.Server
 	client    *Client
 	result    *provider.FetchResult
@@ -84,7 +84,7 @@ func TestBDD_FetchValidUser(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(events)
+			_ = json.MarshalWrite(w, events)
 		}),
 	)
 	defer world.server.Close()
@@ -176,7 +176,7 @@ func TestBDD_FetchAllPaginated(t *testing.T) {
 			}
 
 			w.Header().Set("Content-Type", "application/json")
-			_ = json.NewEncoder(w).Encode(events)
+			_ = json.MarshalWrite(w, events)
 		}),
 	)
 	defer world.server.Close()
@@ -219,7 +219,7 @@ func TestBDD_RateLimitInfo(t *testing.T) {
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/rate_limit/" || r.URL.Path == "/rate_limit" {
 				w.Header().Set("Content-Type", "application/json")
-				_ = json.NewEncoder(w).Encode(rateLimitResponse(5))
+				_ = json.MarshalWrite(w, rateLimitResponse(5))
 
 				return
 			}

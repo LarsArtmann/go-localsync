@@ -3,7 +3,7 @@ module github.com/larsartmann/go-localsync
 go 1.26.7
 
 require (
-	charm.land/log/v2 v2.0.0
+	charm.land/log/v2 v2.0.1
 	github.com/danielgtaylor/huma/v2 v2.39.1
 	github.com/larsartmann/go-branded-id v0.5.1
 	github.com/larsartmann/go-error-family v0.10.0
@@ -17,7 +17,7 @@ require (
 	github.com/larsartmann/go-codec v0.2.0 // indirect
 	github.com/larsartmann/go-cqrs-lite/record/v4 v4.4.0 // indirect
 	github.com/larsartmann/go-flightrecorder v0.2.0 // indirect
-	github.com/larsartmann/go-idempotency v0.2.0 // indirect
+	github.com/larsartmann/go-idempotency v0.3.0 // indirect
 	github.com/larsartmann/go-retry v0.4.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 )
@@ -28,7 +28,7 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
-	github.com/charmbracelet/ultraviolet v0.0.0-20260901234956-af8eda3ed701 // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260903151058-ae99b731b8c5 // indirect
 	github.com/charmbracelet/x/ansi v0.11.8 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect

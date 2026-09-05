@@ -32,7 +32,7 @@ env:
 
 jobs:
   test:
-    name: Test (Go ${{ env.GO_VERSION }})
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

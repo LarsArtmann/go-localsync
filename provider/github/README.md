@@ -55,13 +55,13 @@ if result.RateLimit != nil {
 
 ## Configuration
 
-| Method                | Effect                                                                          |
-| --------------------- | ------------------------------------------------------------------------------- |
-| `NewClient(token)`    | Explicit PAT; an empty token means unauthenticated (60 req/h core budget).      |
-| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).                |
-| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                      |
-| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).                |
-| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers).                |
+| Method                | Effect                                                                     |
+| --------------------- | -------------------------------------------------------------------------- |
+| `NewClient(token)`    | Explicit PAT; an empty token means unauthenticated (60 req/h core budget). |
+| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).           |
+| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                 |
+| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).           |
+| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers).           |
 
 Standalone development: the module pins a released parent version and builds
 with `go build ./...` from this directory with `GOWORK=off`; inside the

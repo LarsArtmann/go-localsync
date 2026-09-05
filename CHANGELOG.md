@@ -3,17 +3,17 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.3.0`, `v0.4.0`, `v0.4.1`).
+Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v0.2.0`, `v0.3.0`, `v0.4.0`, `v0.4.1`, `v0.5.0`; the retroactive `v0.4.2` proxy-sweep tag has no section — see the note under 0.5.0).
 
 ## [Unreleased]
 
 ### Added
 
-- Nothing yet.
+- **Standalone CI leg for `provider/github`** — a dedicated workflow job builds and race-tests the nested module in isolation (`GOWORK=off`, parent fetched via the checkout token), so the module graph it ships is the graph CI proves.
 
-### Fixed
+### Changed
 
-- Nothing yet.
+- **`provider/github` v0.1.0 tagged** — the module's parent pin moved from a master pseudo-version to the released `go-localsync v0.5.0`, and its `go-github-kit` dependency bumped to v0.3.0. `FetchAll` now delegates pagination to `githubkit.FetchPages` (concurrency + short-page early stop come from the kernel), and `wrapGitHubError` drops its native-rate-limit shims in favor of the kit's classification while preserving the original cause in the error chain.
 
 ## [0.5.0] - 2026-09-05
 
