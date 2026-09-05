@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/larsartmann/go-cqrs-lite/event/v4"
+	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v4"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -97,6 +99,12 @@ func TestCQRSStack_CorrelationID_SingleItemPath(t *testing.T) {
 // names the command that caused it: Metadata.Causation carries the command
 // type and ID (CommandCausalityEnricher + WithCommandCausality in the
 // handlers).
+//
+// Assertions run against events loaded from the STORE, not the bus: the
+// watermill protocol maps the scalar CausationID and Custom metadata but not
+// the typed ADR-0031 Causation pointer onto delivered messages, so the
+// durable stream is the authoritative place to assert enrichment (delivered
+// events keep the command.type/command.id Custom fallbacks, asserted too).
 func TestCQRSStack_Causation_PropagatedToEvents(t *testing.T) {
 	t.Parallel()
 
@@ -112,43 +120,61 @@ func TestCQRSStack_Causation_PropagatedToEvents(t *testing.T) {
 
 	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("caus-1"), model.ReasonUserHidden))
 
-	evts := waitFor(2)
-	if len(evts) < 2 {
-		t.Fatalf("expected sync + tombstone events, got %d", len(evts))
+	delivered := waitFor(2)
+	if len(delivered) < 2 {
+		t.Fatalf("expected sync + tombstone events, got %d", len(delivered))
 	}
 
-	var tombstoneFound bool
+	for _, evt := range delivered {
+		if evt.Metadata().CorrelationID.String() == "" {
+			t.Errorf("%s event must carry a correlation ID, got empty", evt.Type())
+		}
+	}
 
-	for _, evt := range evts {
+	ref := cqrsid.NewStreamRef(aggregateType, AggregateID("github", id.NewExternalID("caus-1")))
+
+	stored, loadErr := stack.Load(ctx, ref)
+	testutil.MustNoError(t, loadErr)
+
+	if len(stored) < 2 {
+		t.Fatalf("expected 2 stored events, got %d", len(stored))
+	}
+
+	for _, evt := range stored {
 		caus := evt.Metadata().Causation
 		if caus == nil {
+			t.Errorf("%s: expected causation metadata on stored event, got nil", evt.Type())
+
 			continue
 		}
 
+		wantType := commandTypeSyncItem.String()
 		if evt.Type() == EventItemTombstoned {
-			tombstoneFound = true
-
-			if caus.CommandType != commandTypeTombstone.String() {
-				t.Errorf(
-					"tombstone causation command type: want %q, got %q",
-					commandTypeTombstone.String(), caus.CommandType,
-				)
-			}
-			if caus.CommandID.String() == "" {
-				t.Error("tombstone causation command ID must be non-empty")
-			}
-			if evt.Metadata().CorrelationID.String() == "" {
-				t.Error("tombstone event must carry a correlation ID from TombstoneItem, got empty")
-			}
+			wantType = commandTypeTombstone.String()
 		}
 
-		if caus.CommandType != commandTypeSyncItem.String() &&
-			caus.CommandType != commandTypeTombstone.String() {
-			t.Errorf("unexpected causation command type %q", caus.CommandType)
+		if caus.CommandType != wantType {
+			t.Errorf("%s: causation command type: want %q, got %q", evt.Type(), wantType, caus.CommandType)
+		}
+
+		if caus.CommandID.String() == "" {
+			t.Errorf("%s: causation command ID must be non-empty", evt.Type())
 		}
 	}
 
-	if !tombstoneFound {
-		t.Error("expected an ItemTombstoned event with causation metadata")
+	var tombstoneCausationOnBus bool
+
+	for _, evt := range delivered {
+		if evt.Type() != EventItemTombstoned {
+			continue
+		}
+
+		if cmdType, ok := evt.Metadata().Custom[event.MetadataKeyCommandType]; ok && cmdType != "" {
+			tombstoneCausationOnBus = true
+		}
+	}
+
+	if !tombstoneCausationOnBus {
+		t.Error("expected delivered tombstone event to keep the command.type custom causation fallback")
 	}
 }

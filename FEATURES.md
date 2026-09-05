@@ -93,7 +93,7 @@
 | #  | Feature          | Status           | Package    | Description                                                                                                                                                          |
 | -- | ---------------- | ---------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 37 | Event Logging MW | FULLY_FUNCTIONAL | `pkg/cqrs` | `middleware.EventLogging` (from go-cqrs-lite v4) via charm log adapter. Structured logging of all domain events on the bus. Replaces the former hand-rolled adapter. |
-| 38 | Correlation IDs  | FULLY_FUNCTIONAL | `pkg/cqrs` | `SyncItems()` generates unique `CorrelationID` per sync run via `event.WithCorrelationID`. Cross-event tracing.                                                      |
+| 38 | Correlation + causation IDs | FULLY_FUNCTIONAL | `pkg/cqrs` | Every write path attaches correlation: `SyncItems()` shares one `CorrelationID` per run, `SyncItem`/`TombstoneItem` default a fresh one. Causation: handlers stash the command via `event.WithCommandCausality` and the repo-level `decider.WithEnricher(event.CommandCausalityEnricher)` stamps every stored event with the causing command's type + ID. |
 | 39 | Snapshots        | FULLY_FUNCTIONAL | `pkg/cqrs` | `SQLiteSnapshotStore` (sqlite) + `MemorySnapshotStore` (memory). `EveryNEvents(10)` strategy. Caps replay cost.                                                      |
 
 ## Type System

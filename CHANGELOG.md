@@ -9,6 +9,8 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
+- **Persistent SQLite projection DLQ (C017 fix)** — the SQLite backend now wires `projectionhost.NewSQLiteDeadLetterStore` sharing the same database file, so captured poison events survive restarts instead of vanishing with the old in-memory store; the memory backend keeps the in-memory DLQ by design.
+- **Correlation + causation metadata on all write paths** — `SyncItem` and `TombstoneItem` now default a fresh correlation ID (previously only the batch path had one), `TombstoneItemCommand` grew an `Options` field, and every stored event names its causing command (type + ID) via `decider.WithEnricher(event.CommandCausalityEnricher)`. Note: bus-delivered messages keep the `command.type`/`command.id` custom fallbacks; the typed `Metadata.Causation` pointer lives on the durable stream (watermill protocol limitation).
 - **Standalone CI leg for `provider/github`** — a dedicated workflow job builds and race-tests the nested module in isolation (`GOWORK=off`), so the module graph it ships is the graph CI proves. CI also dropped all private-repo auth (GOPRIVATE/SSH-agent): the repository and its dependencies are public now.
 
 ### Changed
