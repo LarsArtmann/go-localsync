@@ -9,6 +9,8 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
+- **ADR-0009 addendum: ExternalID ↔ SourceID duality decided** — v0.6 will align the Go surface to `SourceID` (`id.ExternalID` type + fields → `SourceID`, deprecated aliases) while the persisted event payloads (`json:"sourceId"`) stay untouched, avoiding a schema V4/upcast; `Syncer.GetStats` → `Stats` joins the same window. Enactment gated on the owner's recorded sign-off.
+
 - **Pre-release pipeline** — `scripts/verify-release.sh <core-tag> [provider-tag]` verifies publication end-to-end (tags local+origin+ancestry, GitHub Release, proxy.golang.org `@v/list`/`@latest` for both modules, pkg.go.dev indexing warn-only); `nix flake check` is now the one-command full suite (hermetic `checks.test` + `checks.lint` joined build/format/cqrs-lint); CONTRIBUTING.md gained a release checklist. Dry-run against the live release: `v0.5.0 v0.1.0` → all green.
 - **vendorHash drift guard (`scripts/check-vendorhash.sh`)** — the CI `nix` job fails fast with re-pin instructions when `go.mod`/`go.sum` change without a `flake.nix` re-pin (base: PR base sha / push before-sha / `HEAD~1` locally); proven red→green with a dummy dep touch.
 - **Doc-count truth in CI (`scripts/check-doc-counts.sh`)** — the lint job now fails when hand-copied numbers drift from code: per-package + total test counts (AGENTS table, AGENTS/README/FEATURES totals) and the AGENTS dependency table vs `go.mod`; `--coverage` adds the coverage-column check (±1.0 pt) for local runs. Its first run immediately caught the drift from the upcaster session (+4 tests: 309→313, pkg/cqrs 144→148) — fixed in the same commit.

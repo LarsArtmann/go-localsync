@@ -19,10 +19,11 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Rename public `AggregateID()` → `StreamID()` (v0.6)**
       **Source:** `pkg/cqrs/aggregate_id.go` — returns `cqrsid.StreamID` since v0.4.1 but kept the old name for API stability
       **Description:** Breaking rename for v0.6, decided and recorded in [ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md) — with the deliberate `DeriveStreamID` encoding divergence (keep ours; documented at the definition site) and the `AggregateID` panic-fallback → error-return conversion in the same window.
-- [ ] **Consolidate `SyncResult`/`SyncSummary` into exactly one user-facing result type (v0.6)**
+- [ ] **Consolidate `SyncResult`/`SyncSummary` into exactly one user-facing result type (v0.6)** — scope extended 2026-09-06 (ADR-0009 addendum): `Syncer.GetStats` → `Stats` joins the same window
       **Source:** ADR-0009 decision #2; `pkg/sync/types.go` (`Stats` also renames there — vague noun per the [naming review](docs/reviews/2026-07-19_01-25_naming-review.html))
-- [ ] **Decide the `ExternalID` ↔ `SourceID` field duality (v0.6 candidate)**
-      **Source:** `provider.Item.ExternalID` vs event-payload `SourceID string` (`pkg/cqrs/events.go:32,52,61` vs `pkg/provider/provider.go`). Touches versioned event payloads, so [ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md) does not cover it yet — disposition (align + upcast, or document) needs an ADR addendum. Raised by the session-26/27 self-reviews, never dispositioned.
+- [x] **Decide the `ExternalID` ↔ `SourceID` field duality (v0.6 candidate)**
+      ✅ DECIDED 2026-09-06 ([ADR-0009 addendum](docs/adr/0009-v06-vocabulary-alignment.md)): v0.6 aligns the GO SURFACE to `SourceID` (`id.ExternalID` → `id.SourceID` + field renames, deprecated aliases); the persisted wire payloads already say `sourceId` and stay untouched (no schema V4, no upcast). **Enactment gate: requires the owner's sign-off recorded here before the v0.6 branch enacts it.**
+      **Origin:** raised by the session-26/27 self-reviews.
 
 ### Correctness hardening (verified open against code 2026-09-05)
 
