@@ -47,6 +47,9 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Add a golangci-lint leg for `provider/github`** — the standalone CI job builds + race-tests but does not lint.
 - [ ] **Compute test/coverage counts in CI instead of hand-copying** — the counts drifted across AGENTS.md / README.md / FEATURES.md / TODO_LIST.md multiple times; generate or check them (every drift in 2026 involved hand-copied numbers).
 - [ ] **Separate CHANGELOG for `provider/github`** — the nested module's lifecycle is now independent of core releases.
+- [ ] **Restructure AGENTS.md under ~30 KB** — link out to ADRs instead of inlining decisions; keep gotchas ≤20 (flagged as "bloated" by two consecutive reviews; the 2026-09-05 passes only pruned, never restructured).
+- [ ] **Make docs-health VERIFY a standing pre-release step** — docs drift after every release is systemic (Accuracy scored 1.5/10 once); wire the check into the release routine rather than running on-demand audits.
+- [ ] **Pre-release verification target** — a nix target (or script) running the full suite (build, race tests, lint, both cqrs-lint gates, `nix flake check`) plus a CONTRIBUTING.md release-checklist section pointing at it.
 
 ### Quality
 
@@ -72,6 +75,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Unify `waitForCount`/`waitForCountTB`** behind a `testing.TB` helper.
 - [ ] **Move `id.ContentHash` out of `ids.go`** — it is a content hash, not an identifier.
 - [ ] **`errors.AsType` audit pass** (go-error-modernization sweep, not yet run).
+- [ ] **Disposition `hierarchical-errors` buildflow findings** — ~3,711 findings; suppress in `.buildflow.yml` with a stated rationale or formally track (open since 2026-07-19, carried by two reports).
 - [ ] **`TombstoneItem` variadic `...event.Option`** for parity with direct dispatch.
 - [ ] **Verify OpenAPI `/sync` 408** — confirm huma maps RequestTimeout consistently with `pkgerrors.HTTPStatus` (499/504 for ctx cancel/deadline may be more accurate).
 - [ ] **`AggregateID` → `StreamID` vocabulary sweep in ADRs/docs** — ADR prose still uses the old vocabulary (v0.4.1 leftover; mechanical, do with the v0.6 rename).

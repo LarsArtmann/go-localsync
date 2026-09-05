@@ -133,9 +133,9 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package             | Tests | Coverage | Status                                                                                                         |
 | ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`          | 134   | 87.7%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
+| `pkg/cqrs`          | 144   | 87.7%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, upcasting, scenario specs, regression tests |
 | `pkg/sync`          | 34    | 87.7%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
-| `pkg/id`            | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
+| `pkg/id`            | 12    | 75.0%    | ✅ ID construction, roundtrip, zero, equal (ContentHash unit tests: open TODO)                                 |
 | `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
 | `pkg/provider`      | 2     | 92.3%    | ✅ Item validation                                                                                             |
 | `pkg/api`           | 31    | 95.2%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
@@ -143,10 +143,9 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/data/model`    | 12    | 84.9%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
 | `internal/cqrslint` | 38    | 92.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives   |
+| `cmd/cqrs-lint`     | 8     | 56.4%    | ✅ exit-code contract, summary/JSON output, violating-fixture round trip                                       |
 
-| `cmd/cqrs-lint` | 8 | 56.4% | ✅ exit-code contract, summary/JSON output, violating-fixture round trip |
-
-**~437 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`; the whole suite is race-clean).
+**309 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
 
 Run: `go test ./... -count=1`
 
@@ -212,12 +211,16 @@ Two tables managed by the CQRS stack:
 | `go-cqrs-lite/middleware/v4`       | v4.5.1  | EventLogging + CommandRetry middleware                                                                      |
 | `go-cqrs-lite/watermill/v4`        | v4.5.1  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                              |
 | `go-cqrs-lite/storage/v4`          | v4.8.1  | SQLite event store, snapshot, KV store                                                                      |
+| `go-cqrs-lite/schema/v4`           | v4.3.1  | Schema `Version` + `UpcastSourceTransform` (upcaster registry wiring)                                       |
+| `go-cqrs-lite/otel/v4`             | v4.3.0  | OTel middleware bundle: command/event spans + `cqrs.operation.*` metrics (opt-in via `CQRSConfig.OTel`)      |
+| `go.opentelemetry.io/otel`         | v1.46.0 | OpenTelemetry API (metric + trace direct; core/sdk indirect)                                                |
 | `go-branded-id`                    | v0.5.1  | Branded phantom-type IDs for compile-time safety                                                            |
 | `go-error-family`                  | v0.10.0 | Structured error classification + user-facing message templates                                             |
 | `modernc.org/sqlite`               | v1.56.0 | Pure-Go SQLite driver (no CGo)                                                                              |
 | `charm.land/log/v2`                | v2.0.1  | Structured logging                                                                                          |
 | `github.com/danielgtaylor/huma/v2` | v2.39.1 | HTTP API framework with OpenAPI 3 generation + stdlib adapter                                               |
 | `github.com/oklog/ulid/v2`         | v2.1.2  | ULID generation for `ItemID`                                                                                |
+| `go-cqrs-lite/scenario/v4`         | v4.2.0  | Test-only: scenario DSL for decider Given/When/Then specs                                                   |
 
 ### Test Dependencies
 
@@ -225,6 +228,8 @@ Two tables managed by the CQRS stack:
 | ---------------- | -------------------------------------- |
 | `onsi/ginkgo/v2` | Indirect only (via go-cqrs-lite tests) |
 | `onsi/gomega`    | Indirect only (via go-cqrs-lite tests) |
+
+Note: the `eventtest` module has no released version — do not depend on it until tagged (tracked in ROADMAP open questions).
 
 ### Build System
 
