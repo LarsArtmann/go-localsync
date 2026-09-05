@@ -29,6 +29,10 @@ concurrency:
 env:
   GO_VERSION: "1.26"
   CGO_ENABLED: "0"
+  # go-cqrs-lite v4 adopted encoding/json/v2, which Go 1.26 gates behind
+  # this experiment until graduation. Without it every job fails with
+  # "encoding/json/v2: build constraints exclude all Go files".
+  GOEXPERIMENT: "jsonv2"
 
 jobs:
   test:
@@ -79,6 +83,18 @@ jobs:
         with:
           version: latest
           args: --timeout=5m
+
+      # ADR-0004 architectural invariants (single aggregate, three fixed
+      # events, projection guards) enforced on every push.
+      - name: Run internal cqrs-lint (strict)
+        run: go run ./cmd/cqrs-lint --strict
+
+      # Library-side consumer lint (203 domain rules), error-gated: only
+      # error-severity findings fail the build. Version-pinned so a new
+      # upstream rule cannot break CI without a deliberate bump. Known
+      # heuristic gaps are annotated inline via //cqrs-lint:ignore + reason.
+      - name: Run go-cqrs-lite cqrs-lint (error-gated)
+        run: go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
 
     timeout-minutes: 15
   security:

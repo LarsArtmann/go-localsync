@@ -33,6 +33,11 @@ func createStoreAndBus(ctx context.Context, cfg CQRSConfig) (storeResult, error)
 			db:      nil,
 			journal: memStore,
 			cpStore: cqrsmemory.NewMemoryCheckpointStore(),
+			// Ephemeral DLQ to mirror the ephemeral store (C017 discipline: DLQ
+			// lifetime matches event-store lifetime; the sqlite branch below wires
+			// the persistent SQLite DLQ — this is the memory-backend branch only).
+			//cqrs-lint:ignore(C017) memory backend pairs with the ephemeral memory store by design; the sqlite branch persists
+			dlq: projectionhost.NewMemoryDeadLetterStore(),
 		}, nil
 	case backendSQLite:
 		return createSQLiteStore(ctx, cfg)

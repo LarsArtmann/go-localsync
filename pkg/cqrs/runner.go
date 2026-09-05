@@ -36,17 +36,13 @@ func startProjectionRunner(
 	// Capture events that fail to project more than 3 times so a single
 	// poison message can never permanently block catch-up. The capture is
 	// logged via the host logger; the checkpoint then advances past it.
-	// SQLite-backed stacks get the persistent DLQ from the store factory
-	// (survives restarts); the memory backend falls back to the in-memory one.
-	dlq := sr.dlq
-	if dlq == nil {
-		dlq = projectionhost.NewMemoryDeadLetterStore()
-	}
-
+	// The store factory picked the DLQ implementation matching the backend's
+	// durability (SQLite file for sqlite, in-memory for memory) — the runner
+	// treats it as required.
 	host, err := projectionhost.New(
 		sr.journal, sr.cpStore,
 		projectionhost.WithLogger(newSlogLogger()),
-		projectionhost.WithDeadLetterStore(dlq, 3),
+		projectionhost.WithDeadLetterStore(sr.dlq, 3),
 	)
 	if err != nil {
 		return nil, nil, pkgerrors.Wrap(err, "create projection host")

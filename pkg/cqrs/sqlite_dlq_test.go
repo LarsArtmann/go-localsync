@@ -33,16 +33,16 @@ func TestSQLiteStore_WiresPersistentDLQ(t *testing.T) {
 }
 
 // TestSQLiteStore_MemoryBackendKeepsMemoryDLQ pins the other half of the
-// contract: the memory backend has no db handle, so its dead-letter store
-// stays nil and the runner falls back to the in-memory implementation.
+// contract: the memory backend pairs its ephemeral store with an in-memory
+// dead-letter store — DLQ lifetime matches event-store lifetime.
 func TestSQLiteStore_MemoryBackendKeepsMemoryDLQ(t *testing.T) {
 	t.Parallel()
 
 	sr, err := createStoreAndBus(context.Background(), CQRSConfig{Backend: backendMemory})
 	testutil.MustNoError(t, err)
 
-	if sr.dlq != nil {
-		t.Fatalf("memory backend must not wire a persistent DLQ, got %T", sr.dlq)
+	if _, ok := sr.dlq.(*projectionhost.MemoryDeadLetterStore); !ok {
+		t.Fatalf("memory backend must use the in-memory DLQ, got %T", sr.dlq)
 	}
 }
 
