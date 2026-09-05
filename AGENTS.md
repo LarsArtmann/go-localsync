@@ -143,7 +143,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
 | `internal/cqrslint` | 38    | 92.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives   |
 
-| `cmd/cqrs-lint`      | 8     | 56.4%    | ✅ exit-code contract, summary/JSON output, violating-fixture round trip          |
+| `cmd/cqrs-lint` | 8 | 56.4% | ✅ exit-code contract, summary/JSON output, violating-fixture round trip |
 
 **~437 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`; the whole suite is race-clean).
 

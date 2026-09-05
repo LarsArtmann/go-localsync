@@ -59,10 +59,7 @@ func BenchmarkPipeline_Replay10kEvents(b *testing.B) {
 	const batchSize = 500
 
 	for offset := 0; offset < total; offset += batchSize {
-		end := offset + batchSize
-		if end > total {
-			end = total
-		}
+		end := min(offset+batchSize, total)
 
 		if summary := seed.SyncItems(ctx, benchProviderItemsRange(offset, end)); summary.Errors > 0 {
 			b.Fatalf("seed errors: %d", summary.Errors)
@@ -135,7 +132,7 @@ func benchProviderItemsRange(from, to int) []*provider.Item {
 			},
 			CreatedAt: now,
 			UpdatedAt: now,
-			RawJSON:   []byte(fmt.Sprintf(`{"bench":%d,"payload":"%s"}`, i, fillerPayload)),
+			RawJSON:   fmt.Appendf(nil, `{"bench":%d,"payload":"%s"}`, i, fillerPayload),
 		})
 	}
 

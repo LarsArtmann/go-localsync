@@ -346,16 +346,16 @@ flowchart TD
 
 ### Delta vs the audit baseline
 
-| Metric | Audit (pre-plan) | After execution |
-| --- | --- | --- |
-| Library modules adopted (scorecard USED) | 5 | 8 (middleware-OTel, schema/upcasters, go-codec added; scenario adopted in tests but counted as test-only) |
-| Defects (C017 DLQ volatility) | 1 ERROR | 0 |
-| Correlation/causation coverage | batch path only | all write paths + causation on every stored event |
-| CI lint gates | 0 | 2 (internal strict + library error-gated, pinned) — CI itself was red (missing `GOEXPERIMENT=jsonv2`) and is fixed |
-| pkg/cqrs coverage | 82.4% | 87.7% (target ≥87) |
-| Test functions | 232 | ~437 |
-| API hardening | none | auth + rate limit + pagination headers + per-endpoint error schemas |
-| Benchmarks | micro only | full pipeline: ~62µs/item (memory 10k batch), ~2.8ms checkpoint-bounded replay reopen, ~250µs/item SQLite growth |
+| Metric                                   | Audit (pre-plan) | After execution                                                                                                    |
+| ---------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Library modules adopted (scorecard USED) | 5                | 8 (middleware-OTel, schema/upcasters, go-codec added; scenario adopted in tests but counted as test-only)          |
+| Defects (C017 DLQ volatility)            | 1 ERROR          | 0                                                                                                                  |
+| Correlation/causation coverage           | batch path only  | all write paths + causation on every stored event                                                                  |
+| CI lint gates                            | 0                | 2 (internal strict + library error-gated, pinned) — CI itself was red (missing `GOEXPERIMENT=jsonv2`) and is fixed |
+| pkg/cqrs coverage                        | 82.4%            | 87.7% (target ≥87)                                                                                                 |
+| Test functions                           | 232              | ~437                                                                                                               |
+| API hardening                            | none             | auth + rate limit + pagination headers + per-endpoint error schemas                                                |
+| Benchmarks                               | micro only       | full pipeline: ~62µs/item (memory 10k batch), ~2.8ms checkpoint-bounded replay reopen, ~250µs/item SQLite growth   |
 
 ### Deviations from plan (recorded honestly)
 

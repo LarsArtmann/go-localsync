@@ -10,12 +10,14 @@
 ## a) FULLY DONE (verified green this session)
 
 ### P0 — Correctness core
+
 - **M01 Durable SQLite DLQ (C017)** — `NewSQLiteDeadLetterStore` wired in the sqlite branch of `store_factory.go`; memory backend pairs its ephemeral store with an ephemeral DLQ (moved out of the runner; annotated `//cqrs-lint:ignore(C017)` with reason). Tests: wiring, memory-backend pin, entry-survives-reopen on a file DB. ADR-0006 addendum written.
 - **M02 Correlation + causation everywhere** — `SyncItem`/`TombstoneItem` default fresh correlation IDs; `TombstoneItemCommand.Options` added; handlers stash `event.WithCommandCausality`; repo-level `decider.WithEnricher(event.CommandCausalityEnricher)`. Tests assert stored-stream causation + the `command.type` custom fallbacks on delivered events. Documented watermill protocol limitation (typed `Causation` pointer not mapped onto delivered messages).
 - **M03 CI internal cqrs-lint gate** — `go run ./cmd/cqrs-lint --strict` in the Lint job; violation-injection verified locally (exit 1 → revert → exit 0).
-- **M04 Library cqrs-lint leg** — pinned `@v4.8.1 --min-severity error`. Runs clean locally (1 annotated suppression). **CI step deferred to local-only** (see d): the tool depends on the *private* `larsartmann/go-finding`; no secret exists.
+- **M04 Library cqrs-lint leg** — pinned `@v4.8.1 --min-severity error`. Runs clean locally (1 annotated suppression). **CI step deferred to local-only** (see d): the tool depends on the _private_ `larsartmann/go-finding`; no secret exists.
 
 ### P1 — Observability & guard trust
+
 - **M05 OTel opt-in** — `CQRSConfig.OTel *middleware.OTelBundle`: command/event middleware, `localsync.sync_items` batch span (via `cqrsotel.StartSpan`), `stack.OTel()` getter. Nil = zero behavior change (tested both ways with noop providers).
 - **M06 Metrics + /metrics** — `projectionMetrics` adapter implements `projectionhost.MetricsRecorder` over the bundle's instruments; `api.WithMetricsHandler(h)` mounts any exporter under `GET /metrics`.
 - **M07 Structured logging** — `source` on every completion/warning line in `pkg/sync`; capture-assert tests via `log.New(&buf)`.
@@ -25,6 +27,7 @@
 - **M11 CLI tests** — 8 tests: exit-code decision table, countFindings, summary variants, `--json` schema (incl. provenance keys), verbose rule status, end-to-end violating fixture + suppression round trip.
 
 ### P2 — Consumer value
+
 - **M12 Auth** — `WithAPIKey`: constant-time compare, `/health` + OpenAPI docs stay public, 401 + `WWW-Authenticate` + JSON body, security scheme + global requirement in openapi.json. 5 tests incl. scheme declaration.
 - **M13 Rate limiting** — `WithRateLimit(perMinute)` token bucket on `POST /sync` only; 429 + `Retry-After` + JSON; reads unlimited; off by default. 4 tests.
 - **M14 Pagination** — `X-Total-Count` + `X-Next-Cursor` (opaque base64(`offset=N`)); cursor walk test over a fake store; bad cursor → 400.
@@ -38,6 +41,7 @@
 - **M22 OpenAPI error schemas** — per-endpoint `Errors: []int` (option-aware 400/401/429/500/408); test asserts the document.
 
 ### P3 — Polish
+
 - **M23 Type safety** — branded `id.ContentHash` (named string: literal-compatible), `NewContentHash/IsZero/String`; typed accessors `ActorLogin()/ActorAvatarURL()/RepoName()/RepoURL()` + `Attr*` constants (tested); `ItemFilter.Validate()` (tested).
 - **M24 Vocabulary** — **ADR-0009** written (v0.6: `AggregateID`→`StreamID`, SyncResult/SyncSummary consolidation, deliberate `DeriveStreamID` divergence kept); divergence pinned in a comment at the definition site.
 - **M25 Per-sync resolver** — `SyncOptions.ConflictResolver` + optional `ResolverAwareStore` seam (`CQRSStack.SyncItemsWithResolver`); precedence command > option > config; override test proves local-wins beats a remote-wins stack config.
@@ -45,6 +49,7 @@
 - **M27 Benchmarks** — `BenchmarkPipeline_Sync10kItems` (~62µs/item memory), `BenchmarkPipeline_Replay10kEvents` (~2.8ms — see caveat in e), `BenchmarkPipeline_SQLiteGrowth` (~250µs/item on a growing file DB).
 
 ### Beyond the plan (found & fixed)
+
 1. **CI was red before I touched it** — the whole workflow lacked `GOEXPERIMENT: jsonv2` (every job failed with `encoding/json/v2: build constraints exclude all Go files`). Fixed at workflow env level.
 2. **`-race` vs `CGO_ENABLED=0`** — test + provider jobs failed; per-job `CGO_ENABLED=1` overrides.
 3. **Private `go-finding` dependency** — library-lint step can't fetch it anonymously; tried SSH-with-secret (secret doesn't exist — deleted), settled on documented local gate + TODO owner action.
@@ -55,15 +60,15 @@
 
 ## b) PARTIALLY DONE (honest)
 
-| Item | What's done | What's missing |
-| --- | --- | --- |
-| **M11 CLI coverage** | Function-level tests (exit codes via `exitCode()`, summary/JSON, fixture round trip) — cmd/cqrs-lint now 56.4% | No process-level integration test (build the binary, run it, assert os.Exit codes 0/1/2); `main()`, flag parsing, `printRules`/`printUsage` untested. The original TODO explicitly asked for binary-level testing. |
-| **Deep-dive re-score ≥90/100** (plan's closing step) | Library scorecard re-run (USED modules 5→8), delta table recorded in the plan file | The full 100-point capability re-audit was NOT re-performed — that's a manual scoring exercise from the prior session, not re-runnable as-is. No new /100 number exists. |
-| **M06 metrics proof** | Adapter wiring tested with noop instruments | No test with a real `metric.Reader` proving values actually land in `cqrs.operation.*` (noop proves wiring, not observation). Same for the batch span (no `sdktrace` recorder test). |
-| **`pkg/id` coverage** | ContentHash type + constructor used across packages | Direct unit tests for `IsZero/String` missing — coverage sits at 75.0%. |
-| **Upcaster chain semantics** | Works, tested at both direct and registry level | The chain advances V1→V2→V3 by *double application* (registry re-matches the V2 upcaster on the rebuilt event). Correct today, but it depends on registry chaining semantics; not covered by a comment explaining WHY it's safe. Memory-store legacy events (stored as shared pointers) would still be mutated in place by the registry — safe for SQLite (fresh decoded instances), untested for memory. |
-| **Benchmark rigor** | Three pipeline benchmarks exist and run | 3 iterations on a loaded dev machine, no benchstat; the Replay benchmark's ~2.8ms is a **checkpoint-bounded no-op catch-up** for iterations 2+ (only the first replays from zero) — the number recorded in the plan is misleading as "replay 10k". |
-| **`cleanupFailedConstruction` coverage** | Covered (87.7% depends on it) | By DIRECT call, not via a real construction failure — proves the body, not the invocation path. |
+| Item                                                 | What's done                                                                                                    | What's missing                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **M11 CLI coverage**                                 | Function-level tests (exit codes via `exitCode()`, summary/JSON, fixture round trip) — cmd/cqrs-lint now 56.4% | No process-level integration test (build the binary, run it, assert os.Exit codes 0/1/2); `main()`, flag parsing, `printRules`/`printUsage` untested. The original TODO explicitly asked for binary-level testing.                                                                                                                                                                                        |
+| **Deep-dive re-score ≥90/100** (plan's closing step) | Library scorecard re-run (USED modules 5→8), delta table recorded in the plan file                             | The full 100-point capability re-audit was NOT re-performed — that's a manual scoring exercise from the prior session, not re-runnable as-is. No new /100 number exists.                                                                                                                                                                                                                                  |
+| **M06 metrics proof**                                | Adapter wiring tested with noop instruments                                                                    | No test with a real `metric.Reader` proving values actually land in `cqrs.operation.*` (noop proves wiring, not observation). Same for the batch span (no `sdktrace` recorder test).                                                                                                                                                                                                                      |
+| **`pkg/id` coverage**                                | ContentHash type + constructor used across packages                                                            | Direct unit tests for `IsZero/String` missing — coverage sits at 75.0%.                                                                                                                                                                                                                                                                                                                                   |
+| **Upcaster chain semantics**                         | Works, tested at both direct and registry level                                                                | The chain advances V1→V2→V3 by _double application_ (registry re-matches the V2 upcaster on the rebuilt event). Correct today, but it depends on registry chaining semantics; not covered by a comment explaining WHY it's safe. Memory-store legacy events (stored as shared pointers) would still be mutated in place by the registry — safe for SQLite (fresh decoded instances), untested for memory. |
+| **Benchmark rigor**                                  | Three pipeline benchmarks exist and run                                                                        | 3 iterations on a loaded dev machine, no benchstat; the Replay benchmark's ~2.8ms is a **checkpoint-bounded no-op catch-up** for iterations 2+ (only the first replays from zero) — the number recorded in the plan is misleading as "replay 10k".                                                                                                                                                        |
+| **`cleanupFailedConstruction` coverage**             | Covered (87.7% depends on it)                                                                                  | By DIRECT call, not via a real construction failure — proves the body, not the invocation path.                                                                                                                                                                                                                                                                                                           |
 
 ---
 
@@ -106,6 +111,7 @@
 ## f) NEXT — up to 50 things, prioritized
 
 **Release/build integrity (do first)**
+
 1. Run `nix build . && nix flake check`; fix `flake.nix` `vendorHash` for the new dependency graph (`go mod vendor`-style hash update via `nix` dummy-hash cycle).
 2. Decide on a **v0.5.1 release** carrying this session's work (CHANGELOG is already release-shaped); tag + GitHub Release + verify proxy.golang.org propagation (also closes the open release-integrity TODO).
 3. Verify `pkg.go.dev` renders the new API surface (OTel, auth options, export, resolvers).
@@ -181,4 +187,4 @@
 
 ---
 
-*Report generated at session end; tree state: `master` @ `3b9e8e3`, clean working tree, CI green (33989995377).*
+_Report generated at session end; tree state: `master` @ `3b9e8e3`, clean working tree, CI green (33989995377)._
