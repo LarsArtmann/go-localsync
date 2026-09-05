@@ -2,6 +2,7 @@ package cqrs
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -173,4 +174,172 @@ func TestUpcaster_StoreReadBoundaryUpcasts(t *testing.T) {
 	if loaded[0].SchemaVersion() != 3 {
 		t.Errorf("store read must serve V3, got schema version %d", loaded[0].SchemaVersion())
 	}
+}
+
+// TestUpcaster_ChainSemantics_V1ToFoldedV3 pins WHY the registry's
+// V1→V2→V3 chain applies the same upcaster function twice without corrupting
+// the payload: the fold runs exactly once (the second pass sees Attributes
+// already present and only re-encodes), legacy fields stay for round-trip
+// safety, and identity is preserved through every step. A library change to
+// the chaining contract must break THIS test, not production data.
+func TestUpcaster_ChainSemantics_V1ToFoldedV3(t *testing.T) {
+	t.Parallel()
+
+	transform := schema.UpcastSourceTransform(newLegacyUpcasters()...)
+
+	aggID := AggregateID("github", id.NewExternalID("up-chain"))
+
+	raw, err := event.NewEvents(aggID, aggregateType, event.Version(7),
+		[]event.Type{EventItemSynced}, []any{legacyV1Payload()}, event.WithSchemaVersion(1))
+	testutil.MustNoError(t, err)
+
+	upcasted, err := transform(raw)
+	testutil.MustNoError(t, err)
+	testutil.RequireLen(t, upcasted, 1)
+
+	got := upcasted[0]
+
+	if got.SchemaVersion() != 3 {
+		t.Fatalf("raw V1 event must reach V3 through the chain, got %d", got.SchemaVersion())
+	}
+
+	if got.ID() != raw[0].ID() || got.Version() != raw[0].Version() {
+		t.Error("chain must preserve event identity (ID, stream version)")
+	}
+
+	payload, err := event.DecodePayloadAuto[ItemSyncedPayload](got)
+	testutil.MustNoError(t, err)
+
+	testutil.AssertEqual(t, payload.Attributes["actor_login"], "octocat", "folded actor_login")
+	testutil.AssertEqual(t, payload.Attributes["repo_name"], "octo/hello", "folded repo_name")
+	testutil.AssertEqual(t, payload.ActorLogin, "octocat", "legacy field retained")
+
+	// Idempotent at the read boundary: re-transforming the already-V3 result
+	// changes nothing (same pointer, no second fold).
+	again, err := transform([]event.Event{got})
+	testutil.MustNoError(t, err)
+
+	if again[0] != got {
+		t.Error("re-transforming a V3 event must be a pass-through")
+	}
+
+	reread, err := event.DecodePayloadAuto[ItemSyncedPayload](again[0])
+	testutil.MustNoError(t, err)
+	testutil.AssertEqual(t, reread.Attributes["actor_login"], "octocat", "no double fold")
+}
+
+// TestUpcaster_LegacyVersionWithAttributes_RebuildsPrivateEvent pins the
+// concurrency fix: an event carrying a legacy version stamp (1/2) but already
+// folded Attributes must come back as a FRESH event, because the registry
+// stamps the returned event's schema version in place and the memory backend
+// serves stored pointers to concurrent readers. Handing the stored pointer
+// back was the exact shape of the 2026-09-05 data race.
+func TestUpcaster_LegacyVersionWithAttributes_RebuildsPrivateEvent(t *testing.T) {
+	t.Parallel()
+
+	transform := schema.UpcastSourceTransform(newLegacyUpcasters()...)
+
+	aggID := AggregateID("github", id.NewExternalID("up-anomaly"))
+
+	anomalous := legacyV1Payload()
+	anomalous.Attributes = map[string]string{"actor_login": "octocat"}
+
+	raw, err := event.NewEvents(aggID, aggregateType, event.Version(0),
+		[]event.Type{EventItemSynced}, []any{anomalous}, event.WithSchemaVersion(1))
+	testutil.MustNoError(t, err)
+
+	upcasted, err := transform(raw)
+	testutil.MustNoError(t, err)
+	testutil.RequireLen(t, upcasted, 1)
+
+	if upcasted[0] == raw[0] {
+		t.Error("legacy-versioned event with Attributes must be rebuilt, not passed through: " +
+			"the registry's in-place version stamp would mutate the stored event")
+	}
+
+	if upcasted[0].SchemaVersion() != 3 {
+		t.Errorf("anomalous legacy event must reach V3, got %d", upcasted[0].SchemaVersion())
+	}
+}
+
+// TestUpcaster_ConcurrentReadsDuringSync is the standing regression for the
+// upcaster data race: a legacy event in the memory store is replayed
+// (Load/ReadAll → upcast transform) by several goroutines WHILE a live writer
+// appends fresh V3 events — the same overlap that turned the registry's
+// in-place version stamp into a data race on 2026-09-05. Run with -race;
+// any in-place mutation of the stored pointer fails the run.
+func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	sr, err := createStoreAndBus(ctx, CQRSConfig{Backend: backendMemory})
+	testutil.MustNoError(t, err)
+	defer closeStoreResult(t, sr)
+
+	// Seed the anomalous legacy event (Attributes folded, version stamp 1):
+	// the input shape whose pass-through used to hand the STORED pointer back
+	// to the registry for in-place stamping.
+	legacy := legacyV1Payload()
+	legacy.SourceID = "up-race"
+
+	aggID := AggregateID("github", id.NewExternalID("up-race"))
+	ref := cqrsid.NewStreamRef(aggregateType, aggID)
+
+	rawLegacy, err := event.NewEvents(aggID, aggregateType, event.Version(0),
+		[]event.Type{EventItemSynced}, []any{legacy}, event.WithSchemaVersion(1))
+	testutil.MustNoError(t, err)
+
+	testutil.MustNoError(t, sr.store.Save(ctx, ref, rawLegacy, event.Version(0)))
+
+	var wg sync.WaitGroup
+	stop := make(chan struct{})
+
+	for range 4 {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			for {
+				select {
+				case <-stop:
+					return
+				default:
+				}
+
+				loaded, err := sr.store.Load(ctx, ref)
+				if err != nil {
+					t.Errorf("concurrent load: %v", err)
+
+					return
+				}
+
+				if len(loaded) != 1 || loaded[0].SchemaVersion() != 3 {
+					t.Errorf("concurrent load must serve exactly one V3 event, got %d events", len(loaded))
+
+					return
+				}
+			}
+		}()
+	}
+
+	for i := range 25 {
+		writerAgg := AggregateID("github", id.NewExternalID(fmt.Sprintf("up-race-w%d", i)))
+		writerRef := cqrsid.NewStreamRef(aggregateType, writerAgg)
+
+		fresh, err := event.NewEvents(writerAgg, aggregateType, event.Version(0),
+			[]event.Type{EventItemSynced},
+			[]any{ItemSyncedPayload{
+				Source: "github", SourceID: fmt.Sprintf("up-race-w%d", i), Type: "PushEvent",
+				Attributes: map[string]string{"actor_login": "fresh"},
+			}},
+			event.WithSchemaVersion(3))
+		testutil.MustNoError(t, err)
+
+		testutil.MustNoError(t, sr.store.Save(ctx, writerRef, fresh, event.Version(0)))
+	}
+
+	close(stop)
+	wg.Wait()
 }
