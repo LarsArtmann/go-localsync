@@ -87,6 +87,34 @@ provider (contract)  →  pkg/sync (Syncer orchestration)  →  pkg/cqrs (event-
 - `TODO_LIST.md` is the source of truth for open work; move finished items
   out when their PR merges.
 
+## Release checklist
+
+Releases are tag-triggered (the `release` job cuts the GitHub Release after
+CI gates pass). Both modules version **independently**: the core module tags
+`v0.Y.Z`, `provider/github` tags its own `vX.Y.Z`.
+
+1. **Green tree**: `nix flake check` locally (runs build + format + hermetic
+   lint + hermetic test + the cqrs-lint gate) and confirm CI is green on
+   master — including the `nix` job.
+2. **CHANGELOG**: the release needs a `[X.Y.Z]` section (not
+   `[Unreleased]`); release notes are auto-generated.
+3. **Tag and push**: `git tag -a vX.Y.Z -m "..." && git push origin vX.Y.Z`
+   (repeat for the provider module when it changed).
+4. **Verify publication** (run after CI finishes, a few minutes later):
+
+   ```bash
+   ./scripts/verify-release.sh vX.Y.Z [provider-vX.Y.Z]
+   # e.g.: ./scripts/verify-release.sh v0.5.0 v0.1.0
+   ```
+
+   It checks tags (local + origin + ancestry), the GitHub Release,
+   proxy.golang.org `@v/list` / `@latest` for both modules, and —
+   best-effort, warn-only — pkg.go.dev indexing.
+
+If any required check fails, the release is not out: fix (usually a missing
+push or a proxy that has not seen the tag yet) and re-run. Never re-tag a
+pushed version — see the go-release discipline notes in AGENTS.md.
+
 ## Reporting Issues
 
 Please use GitHub Issues. Include the Go version, backend (`memory`/
