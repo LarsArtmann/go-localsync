@@ -45,7 +45,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Add a `nix flake check` CI job** so `vendorHash` drift can't land silently again (it silently broke `nix build` once already — see CHANGELOG 0.5.0-era "Stale vendorHash re-pinned").
 - [ ] **Pin the golangci-lint version in CI** instead of `latest` (reproducibility).
 - [ ] **Add a golangci-lint leg for `provider/github`** — the standalone CI job builds + race-tests but does not lint.
-- [ ] **Compute test/coverage counts in CI instead of hand-copying** — the counts drifted across AGENTS.md / README.md / FEATURES.md / TODO_LIST.md multiple times; generate or check them (every drift in 2026 involved hand-copied numbers).
+- [ ] **Compute doc-drift-prone counts in CI instead of hand-copying** — test/coverage counts (AGENTS.md / README.md / FEATURES.md / TODO_LIST.md) and the AGENTS.md dependency table vs `go.mod` have both drifted repeatedly; generate or check them in CI (every 2026 drift involved hand-copied numbers).
 - [ ] **Separate CHANGELOG for `provider/github`** — the nested module's lifecycle is now independent of core releases.
 - [ ] **Restructure AGENTS.md under ~30 KB** — link out to ADRs instead of inlining decisions; keep gotchas ≤20 (flagged as "bloated" by two consecutive reviews; the 2026-09-05 passes only pruned, never restructured).
 - [ ] **Make docs-health VERIFY a standing pre-release step** — docs drift after every release is systemic (Accuracy scored 1.5/10 once); wire the check into the release routine rather than running on-demand audits.
