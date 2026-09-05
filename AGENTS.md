@@ -132,18 +132,20 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 
 | Package             | Tests | Coverage | Status                                                                                                         |
 | ------------------- | ----- | -------- | -------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`          | 97    | 82.4%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
-| `pkg/sync`          | 32    | 88.4%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
+| `pkg/cqrs`          | 134   | 87.7%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, regression tests          |
+| `pkg/sync`          | 34    | 87.7%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                             |
 | `pkg/id`            | 12    | 100.0%   | ✅ ID construction, roundtrip, zero, equal                                                                     |
 | `pkg/errors`        | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync |
 | `pkg/provider`      | 2     | 92.3%    | ✅ Item validation                                                                                             |
-| `pkg/api`           | 15    | 93.1%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
+| `pkg/api`           | 31    | 95.2%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                |
 | `pkg/crdt`          | 8     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                       |
-| `pkg/data/model`    | 10    | 80.5%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
+| `pkg/data/model`    | 12    | 84.9%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                  |
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                            |
-| `internal/cqrslint` | 36    | 90.0%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives   |
+| `internal/cqrslint` | 38    | 92.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives   |
 
-**232 total test functions** across 10 test packages.
+| `cmd/cqrs-lint`      | 8     | 56.4%    | ✅ exit-code contract, summary/JSON output, violating-fixture round trip          |
+
+**~437 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`; the whole suite is race-clean).
 
 Run: `go test ./... -count=1`
 

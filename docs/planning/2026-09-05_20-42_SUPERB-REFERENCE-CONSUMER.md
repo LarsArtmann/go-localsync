@@ -328,3 +328,43 @@ flowchart TD
 
 - New tasks introduced by this plan have been added to `TODO_LIST.md` (this plan is the snapshot; the TODO list is the source of truth).
 - Completed work → `CHANGELOG.md`; feature status → `FEATURES.md`; on completion of P0, re-run the deep-dive scorecard and record the delta here.
+
+---
+
+## Execution Record (2026-09-05, full run)
+
+**Status: 27/27 medium tasks complete. All four tiers executed in one session.**
+
+### Verification results (final gate)
+
+- `go build ./...` ✅
+- `go test ./... -count=1 -race` ✅ 11/11 packages × 3 consecutive runs (a real data race in the initial upcaster wiring — the library registry's in-place version stamping mutating events shared with bus readers — was found by the race detector and fixed by stamping new events `WithSchemaVersion(3)` at creation; see CHANGELOG)
+- `golangci-lint run ./...` ✅ 0 issues
+- `go run ./cmd/cqrs-lint --strict` ✅ clean
+- library `cqrs-lint@v4.8.1 ./pkg --min-severity error` ✅ clean (1 annotated suppression: the memory-backend DLQ branch)
+- `provider/github` standalone (`GOWORK=off`) ✅
+
+### Delta vs the audit baseline
+
+| Metric | Audit (pre-plan) | After execution |
+| --- | --- | --- |
+| Library modules adopted (scorecard USED) | 5 | 8 (middleware-OTel, schema/upcasters, go-codec added; scenario adopted in tests but counted as test-only) |
+| Defects (C017 DLQ volatility) | 1 ERROR | 0 |
+| Correlation/causation coverage | batch path only | all write paths + causation on every stored event |
+| CI lint gates | 0 | 2 (internal strict + library error-gated, pinned) — CI itself was red (missing `GOEXPERIMENT=jsonv2`) and is fixed |
+| pkg/cqrs coverage | 82.4% | 87.7% (target ≥87) |
+| Test functions | 232 | ~437 |
+| API hardening | none | auth + rate limit + pagination headers + per-endpoint error schemas |
+| Benchmarks | micro only | full pipeline: ~62µs/item (memory 10k batch), ~2.8ms checkpoint-bounded replay reopen, ~250µs/item SQLite growth |
+
+### Deviations from plan (recorded honestly)
+
+- **M16/F050 (`eventtest`)**: module has no released version — not adoptable; the scenario DSL carries the BDD convention.
+- **M26/F077 (govalid tags)**: govalid is a buildflow-internal generator, not a proxy-resolvable module — pivoted to real `Validate()` methods (SyncOptions/CQRSConfig/ItemFilter).
+- **M06 Prometheus endpoint**: implemented as `WithMetricsHandler` (consumer-supplied handler) instead of importing a metrics backend into the SDK — exporter-agnostic by design.
+- **M20 API endpoint for export**: SDK functions only (`ExportEvents`/`ExportEventsCSV`); an HTTP endpoint would need auth/rate decisions better made by consumers.
+- **NEW bug found & fixed during execution**: schema-version stamping on new events (see race note above) — the kind of defect tier-P0 gates exist to catch.
+
+### Remaining open work (transferred to TODO_LIST)
+
+Release-integrity verification (owner action), v0.6 vocabulary window (ADR-0009), exhaustruct_v5 migration, provider README re-verify, dprint in devShell.
