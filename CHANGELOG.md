@@ -7,6 +7,15 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ## [Unreleased]
 
+### Added
+
+- **`provider/github` optional nested module** — a GitHub events `provider.Provider` built on `go-github-kit` v0.2.0 (token auth, rate-limit gating fed from response headers, retry with backoff). Extracted from github-local-sync's proven `internal/github` package. The core module stays free of GitHub dependencies; consumers opt in by requiring `github.com/larsartmann/go-localsync/provider/github`. Development runs through the new root `go.work`; the module's parent pin is a master pseudo-version until the next core release.
+- **`ErrProviderUnavailable` sentinel** (`pkg/errors`, transient) — fills the vocabulary gap for "the provider API could not be reached or kept failing", mapped from the kit's `ErrAPIUnavailable` and unclassified GitHub failures. User-facing message template registered.
+
+### Fixed
+
+- `pkg/api/map_error_test.go` did not compile: `errors.AsType` requires a type parameter that satisfies `error`, but the test passed a bare `interface{GetStatus() int}`. Now asserts against `huma.StatusError` directly. Pre-existing at v0.4.2-era master; surfaced by the first full-suite run during the provider extraction.
+
 ## [0.4.1] - 2026-07-23
 
 A maintenance release: go-cqrs-lite v4.1 dependency bump with full deprecation cleanup, build-system migration from committed `vendor/` to Nix `mkPreparedSource`, and internal refactoring.

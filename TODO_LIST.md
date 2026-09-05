@@ -19,6 +19,13 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
       **Description:** `go-cqrs-lite` is the only private dependency. Its privacy forces a committed `vendor/` dir + `vendorHash = null` in `flake.nix` (the nix sandbox can't fetch it). Making it public enables a real `vendorHash` and drops the `vendor/` dir entirely.
       **Context:** Cleanest long-term fix for the vendored-private-dep workaround documented in AGENTS.md.
 
+### Provider release (unblocks `provider/github` consumers)
+
+- [ ] **Release the core, then the provider module**
+      **Source:** `CHANGELOG.md`, `provider/github/go.mod`
+      **Description:** Master is far ahead of `v0.4.2` (new `pkg/id`, `pkg/provider` shape, `RateLimit` in `FetchResult`) and the changelog's `[Unreleased]` does not reflect it. Cut the next core release (reconcile the changelog against `v0.4.2..HEAD` first), then bump `provider/github`'s parent pin from the master pseudo-version to that tag and tag the provider module itself. Until then the module resolves standalone only against the pinned master commit.
+      **Context:** Also wire CI for the nested module (the root workflow only tests the root module) and consider migrating github-local-sync's `internal/github` onto the shared provider afterwards.
+
 ---
 
 ## 🟡 MEDIUM PRIORITY

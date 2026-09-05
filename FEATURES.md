@@ -143,6 +143,7 @@
 | #  | Feature            | Status           | Package | Description                                                                                             |
 | -- | ------------------ | ---------------- | ------- | ------------------------------------------------------------------------------------------------------- |
 | 57 | Lint (Zero Issues) | FULLY_FUNCTIONAL | project | golangci-lint v2 with `enable-all` (+ targeted `disable`/exclusions), 0 issues. Strict `.golangci.yml`. |
+| 58 | GitHub Events Provider | PARTIALLY_FUNCTIONAL | `provider/github` | Optional nested module: `provider.Provider` over `go-github-kit` v0.2.0 (auth, rate gate, retry; `Fetch`/`FetchAll`/`GetRateLimit`; error-family mapping incl. `ErrProviderUnavailable`). Extracted from github-local-sync, suite ported. Unreleased: parent pin is a master pseudo-version and no module tag exists yet. |
 
 ---
 

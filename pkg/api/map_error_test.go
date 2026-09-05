@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/danielgtaylor/huma/v2"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
@@ -39,7 +40,7 @@ func TestMapSyncError(t *testing.T) {
 
 			humaErr := mapSyncError(tt.err)
 
-			httpErr, ok := errors.AsType[interface{GetStatus() int}](humaErr)
+			httpErr, ok := errors.AsType[huma.StatusError](humaErr)
 			if !ok {
 				t.Fatalf("expected huma error, got %T: %v", humaErr, humaErr)
 			}
