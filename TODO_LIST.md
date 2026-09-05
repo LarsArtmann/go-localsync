@@ -46,9 +46,12 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 - [ ] **Add the `SSH_PRIVATE_KEY` repo secret so the library cqrs-lint CI leg runs** — the error-gated `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` step is restored in the workflow, CI-verified on the skip path, and auto-enables once the secret exists (a deploy key with read access to the private `larsartmann/go-finding` module); until then it skips with a notice and the gate runs locally from the devShell (documented in the workflow + AGENTS.md). Alternative endgame (owner call): make `go-finding` public and delete all SSH machinery.
 - [ ] **Run `buildflow --build-mode full`** inside the devShell (go.work kept to the two in-repo modules) — last full-pipeline run predates the M-plan session.
-- [ ] **Add a `nix flake check` CI job** so `vendorHash` drift can't land silently again (it silently broke `nix build` once already — see CHANGELOG 0.5.0-era "Stale vendorHash re-pinned").
-- [ ] **Pin the golangci-lint version in CI** instead of `latest` (reproducibility).
-- [ ] **Add `actionlint` to the devShell + a CI workflow-validation step** (replaces ad-hoc `yaml.safe_load` checks).
+- [x] **Add a `nix flake check` CI job** so `vendorHash` drift can't land silently again (it silently broke `nix build` once already — see CHANGELOG 0.5.0-era "Stale vendorHash re-pinned").
+  ✅ DONE 2026-09-06: `nix` job added, gates build/release; overrides the SSH `go-nix-helpers` input to anonymous HTTPS.
+- [x] **Pin the golangci-lint version in CI** instead of `latest` (reproducibility).
+  ✅ DONE 2026-09-06: pinned to `v2.13.2` — the exact devShell version.
+- [x] **Add `actionlint` to the devShell + a CI workflow-validation step** (replaces ad-hoc `yaml.safe_load` checks).
+  ✅ DONE 2026-09-06: `pkgs.actionlint` in devShell; CI step runs pinned `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12`; local run clean.
 - [ ] **`vendorHash` drift guard** — warn (hook or CI) when `go.mod`/`go.sum` change without a matching `flake.nix` re-pin; the drift silently broke `nix build` once (see CHANGELOG + the AGENTS gotcha).
 - [ ] **CI formatting story** — either add a dprint check job (json/yaml/md/dockerfile) or drop the parity claim; today dprint is devShell-only by decision default, not by recorded decision.
 - [ ] **Purge stale `.golangci.yml` exclusion paths** — `pkg/providers/github/client.go`, `pkg/types/ids.go`, `pkg/testhelpers/` predate the restructures; verify and delete dead rules.
