@@ -8,6 +8,9 @@ type ServerOption func(*serverOptions)
 
 type serverOptions struct {
 	metricsHandler http.Handler
+	apiKey         string
+	ratePerMinute  int
+	bucket         *tokenBucket
 }
 
 // WithMetricsHandler serves the given handler under GET /metrics. Consumers

@@ -36,6 +36,10 @@ func NewServer(syncer *synclib.Syncer, logger *log.Logger, opts ...ServerOption)
 		opt(options)
 	}
 
+	if options.ratePerMinute > 0 {
+		options.bucket = newTokenBucket(options.ratePerMinute)
+	}
+
 	mux := http.NewServeMux()
 	cfg := huma.DefaultConfig("Go-LocalSync API", "1.0.0")
 	api := humago.New(mux, cfg)
@@ -51,12 +55,17 @@ func NewServer(syncer *synclib.Syncer, logger *log.Logger, opts ...ServerOption)
 
 	srv.registerRoutes()
 
+	if options.apiKey != "" {
+		registerSecurityScheme(api)
+	}
+
 	return srv
 }
 
-// ServeHTTP implements http.Handler.
+// ServeHTTP implements http.Handler. The mux is wrapped by the auth
+// middleware when WithAPIKey is set; /health and the OpenAPI docs stay public.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.mux.ServeHTTP(w, r)
+	s.rateLimited(s.authenticated(s.mux)).ServeHTTP(w, r)
 }
 
 func (s *Server) registerRoutes() {

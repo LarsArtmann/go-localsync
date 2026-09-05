@@ -60,10 +60,6 @@ func isPublicPath(path string) bool {
 // registerSecurityScheme declares the API-key scheme on the OpenAPI document
 // so generated clients surface the requirement.
 func registerSecurityScheme(api huma.API) {
-	if api.OpenAPI().Security == nil {
-		api.OpenAPI().Security = make(map[string][]string)
-	}
-
 	if api.OpenAPI().Components.SecuritySchemes == nil {
 		api.OpenAPI().Components.SecuritySchemes = make(map[string]*huma.SecurityScheme)
 	}
@@ -73,4 +69,6 @@ func registerSecurityScheme(api huma.API) {
 		In:   "header",
 		Name: apiKeyHeader,
 	}
+
+	api.OpenAPI().Security = append(api.OpenAPI().Security, map[string][]string{"apiKey": {}})
 }

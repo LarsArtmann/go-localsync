@@ -18,6 +18,15 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 	filter.Limit = input.Limit
 	filter.Offset = input.Offset
 
+	if input.Cursor != "" {
+		decoded, curErr := decodeCursor(input.Cursor)
+		if curErr != nil {
+			return nil, mapSyncError(curErr)
+		}
+
+		filter.Offset = decoded
+	}
+
 	if input.Type != "" {
 		t := id.NewEventTypeID(input.Type)
 		filter.Type = &t
@@ -50,6 +59,11 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 	}
 
 	resp.Body.Total = total
+	resp.XTotalCount = total
+
+	if next := nextCursor(filter.Offset, filter.Limit, len(items), total); next != "" {
+		resp.NextCursor = next
+	}
 
 	return &resp, nil
 }

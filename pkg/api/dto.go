@@ -15,6 +15,7 @@ type ListItemsInput struct {
 	Since  time.Time `doc:"Filter items updated since this time (RFC3339)"                     query:"since"`
 	Limit  int       `doc:"Maximum items to return"                                            query:"limit"  default:"100"`
 	Offset int       `doc:"Offset for pagination"                                              query:"offset" default:"0"`
+	Cursor string    `doc:"Opaque pagination cursor (from X-Next-Cursor); overrides offset"    query:"cursor" example:"b2Zmc2V0PTEwMA=="`
 }
 
 // ItemResponse is the API DTO for a synced item.
@@ -50,6 +51,9 @@ type ListItemsOutput struct {
 		Items []*ItemResponse `doc:"List of sync items"                        json:"items"`
 		Total int64           `doc:"Total number of items matching the filter" json:"total"`
 	}
+
+	XTotalCount int64  `header:"X-Total-Count" doc:"Total items matching the filter"`
+	NextCursor  string `header:"X-Next-Cursor" doc:"Opaque cursor for the next page; empty on the last page"`
 }
 
 // StatsOutput defines the response for statistics.
