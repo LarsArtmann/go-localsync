@@ -52,7 +52,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
   ✅ DONE 2026-09-06: pinned to `v2.13.2` — the exact devShell version.
 - [x] **Add `actionlint` to the devShell + a CI workflow-validation step** (replaces ad-hoc `yaml.safe_load` checks).
   ✅ DONE 2026-09-06: `pkgs.actionlint` in devShell; CI step runs pinned `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12`; local run clean.
-- [ ] **`vendorHash` drift guard** — warn (hook or CI) when `go.mod`/`go.sum` change without a matching `flake.nix` re-pin; the drift silently broke `nix build` once (see CHANGELOG + the AGENTS gotcha).
+- [x] **`vendorHash` drift guard** — warn (hook or CI) when `go.mod`/`go.sum` change without a matching `flake.nix` re-pin; the drift silently broke `nix build` once (see CHANGELOG + the AGENTS gotcha).
+  ✅ DONE 2026-09-06: `scripts/check-vendorhash.sh` — CI nix job fails fast with re-pin instructions when go.mod/go.sum move without flake.nix; proven red/green locally.
 - [ ] **CI formatting story** — either add a dprint check job (json/yaml/md/dockerfile) or drop the parity claim; today dprint is devShell-only by decision default, not by recorded decision.
 - [ ] **Purge stale `.golangci.yml` exclusion paths** — `pkg/providers/github/client.go`, `pkg/types/ids.go`, `pkg/testhelpers/` predate the restructures; verify and delete dead rules.
 - [ ] **Consider a windows build leg** — the compile matrix is linux/darwin only; sqlite/CGO behavior on windows is unproven.

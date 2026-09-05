@@ -188,6 +188,16 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
 
+      # Fail fast with the fix spelled out when go.mod/go.sum moved without a
+      # vendorHash re-pin, instead of surfacing a cryptic hash mismatch after
+      # a full nix build (or worse, not surfacing at all pre-nix-job).
+      - name: Guard vendorHash drift
+        env:
+          # PRs diff against the base branch; pushes against the previous sha.
+          # New branches / force-pushes skip (nix flake check remains the gate).
+          VENDORHASH_BASE: ${{ github.event.pull_request.base.sha || github.event.before || 'HEAD~1' }}
+        run: ./scripts/check-vendorhash.sh "$VENDORHASH_BASE"
+
       # The nix build was silently red for over an hour on 2026-09-05
       # (vendorHash drift after a dependency refresh) because no CI job ran
       # it. This gate makes that failure loud: the flake must evaluate,
