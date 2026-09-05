@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-cqrs-lite/middleware/v4"
 	"github.com/larsartmann/go-cqrs-lite/projection/v4"
 	"github.com/larsartmann/go-cqrs-lite/projectionhost/v4"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
@@ -28,22 +29,27 @@ import (
 func startProjectionRunner(
 	sr storeResult,
 	proj projection.Projection,
+	otel *middleware.OTelBundle,
 ) (context.CancelFunc, <-chan struct{}, error) {
 	if subErr := sr.bus.SubscribeAll(proj.Handle); subErr != nil {
 		return nil, nil, pkgerrors.Wrap(subErr, "subscribe projection")
 	}
 
-	// Capture events that fail to project more than 3 times so a single
-	// poison message can never permanently block catch-up. The capture is
-	// logged via the host logger; the checkpoint then advances past it.
-	// The store factory picked the DLQ implementation matching the backend's
-	// durability (SQLite file for sqlite, in-memory for memory) — the runner
-	// treats it as required.
-	host, err := projectionhost.New(
-		sr.journal, sr.cpStore,
+	hostOpts := []projectionhost.HostOption{
 		projectionhost.WithLogger(newSlogLogger()),
+		// Capture events that fail to project more than 3 times so a single
+		// poison message can never permanently block catch-up. The capture is
+		// logged via the host logger; the checkpoint then advances past it.
+		// The store factory picked the DLQ implementation matching the backend's
+		// durability (SQLite file for sqlite, in-memory for memory).
 		projectionhost.WithDeadLetterStore(sr.dlq, 3),
-	)
+	}
+
+	if otel != nil {
+		hostOpts = append(hostOpts, projectionhost.WithMetrics(newProjectionMetrics(otel)))
+	}
+
+	host, err := projectionhost.New(sr.journal, sr.cpStore, hostOpts...)
 	if err != nil {
 		return nil, nil, pkgerrors.Wrap(err, "create projection host")
 	}

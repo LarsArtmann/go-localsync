@@ -95,11 +95,21 @@ The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exporte
 
 ### CI (No go.work)
 
-CI uses tagged versions from GitHub (no replace directives in `go.mod`), with no private-repo auth — all dependencies are public. Jobs: `test` (race + coverage), `lint` (vet + golangci-lint incl. gosec), `security` (**govulncheck** dependency-CVE scan + **gitleaks** full-history secret scan via `.gitleaks.toml`), `build` (cross-platform compile matrix), `release` (tag-triggered), and `provider` (standalone build + race tests for `provider/github`). The build/release jobs gate on the security job.
+CI uses tagged versions from GitHub (no replace directives in `go.mod`), with no private-repo auth — all dependencies are public. Jobs: `test` (race + coverage), `lint` (vet + golangci-lint incl. gosec + **two cqrs-lint gates**, see below), `security` (**govulncheck** dependency-CVE scan + **gitleaks** full-history secret scan via `.gitleaks.toml`), `build` (cross-platform compile matrix), `release` (tag-triggered), and `provider` (standalone build + race tests for `provider/github`). The build/release jobs gate on the security job.
+
+**Workflow-level `GOEXPERIMENT: jsonv2` is required** — every CI job compiles go-cqrs-lite v4 code that imports `encoding/json/v2`; without the env the whole workflow goes red with `encoding/json/v2: build constraints exclude all Go files`. Setting the experiment at the `env:` top level satisfies the build constraint for all jobs (no `-tags` needed); `.golangci.yml` keeps its `run.build-tags` entry harmlessly.
+
+**Two cqrs-lint gates run in the `lint` job on every push:**
+
+1. **Internal gate**: `go run ./cmd/cqrs-lint --strict` — the ADR-0004 architectural invariant linter (10 rules, C0001-C0010). Fail on any finding incl. warnings.
+2. **Library gate**: `go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` — 203 consumer-facing domain rules from go-cqrs-lite, version-pinned so upstream rule changes cannot break CI without a deliberate bump; error-gated so warnings stay advisory.
+   Known heuristic false positives (annotated inline via `//cqrs-lint:ignore <rule> <reason>`, never blanket-disabled): **C017** flags any `NewMemoryDeadLetterStore()` call site — the memory-backend branch in `store_factory.go` legitimately pairs the ephemeral store with the ephemeral DLQ while the sqlite branch wires the persistent one; **E005** handler detection misses handlers registered inside factory closures; **E014** drain heuristic assumes async delivery while our bus delivers synchronously.
 
 ```bash
 go build ./...
 go test ./... -count=1
+go run ./cmd/cqrs-lint --strict
+go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
 ```
 
 ### Pre-commit Hooks

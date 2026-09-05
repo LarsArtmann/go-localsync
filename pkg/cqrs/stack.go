@@ -38,6 +38,13 @@ type CQRSConfig struct {
 	Backend          string
 	DBPath           string
 	ConflictResolver crdt.ConflictResolver[*model.Item]
+	// OTel is the opt-in observability surface: when non-nil, its command and
+	// event middleware chains (spans + cqrs.operation.* metrics) attach to the
+	// dispatcher and bus, SyncItems opens a span, and the projection host
+	// reports through the same instruments. Nil (default) leaves behavior and
+	// performance unchanged. Build one with middleware.NewOTelBundle from
+	// your own TracerProvider/MeterProvider.
+	OTel *middleware.OTelBundle
 }
 
 // CQRSStack wires together the event store, bus, decider repository, read model,
@@ -54,11 +61,17 @@ type CQRSStack struct {
 
 	Repo              *decider.Repository[SyncItemState]
 	CommandDispatcher *command.Dispatcher
+	otel              *middleware.OTelBundle
 	cancelRunner      context.CancelFunc
 	drainDone         <-chan struct{}
 }
 
 var _ synclib.SyncStore = (*CQRSStack)(nil)
+
+// OTel returns the observability bundle the stack was configured with, or
+// nil when telemetry is off. Consumers can reuse it (e.g. HTTP middleware)
+// so all signals share one tracer/meter.
+func (s *CQRSStack) OTel() *middleware.OTelBundle { return s.otel }
 
 // NewCQRSStack creates a fully wired CQRS stack based on the given config.
 func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonamedreturns
@@ -98,7 +111,13 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 		return nil, pkgerrors.Wrap(err, "wire event logging middleware")
 	}
 
-	cancelRunner, drainDone, err = startProjectionRunner(sr, proj)
+	if cfg.OTel != nil {
+		if err = sr.bus.Use(cfg.OTel.Event()...); err != nil {
+			return nil, pkgerrors.Wrap(err, "wire otel event middleware")
+		}
+	}
+
+	cancelRunner, drainDone, err = startProjectionRunner(sr, proj, cfg.OTel)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "start projection runner")
 	}
@@ -139,7 +158,7 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 
 	var commandDispatcher *command.Dispatcher
 
-	commandDispatcher, err = wireCommandDispatcher(repo, cfg.ConflictResolver)
+	commandDispatcher, err = wireCommandDispatcher(repo, cfg.ConflictResolver, cfg.OTel)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "wire command dispatcher")
 	}
@@ -150,6 +169,7 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 		Repo:              repo,
 		ReadModel:         rm,
 		CommandDispatcher: commandDispatcher,
+		otel:              cfg.OTel,
 		cancelRunner:      cancelRunner,
 		drainDone:         drainDone,
 	}, nil
@@ -266,6 +286,13 @@ func (s *CQRSStack) SyncItems(
 	ctx context.Context,
 	items []*provider.Item,
 ) *synclib.SyncSummary {
+	if s.otel != nil {
+		var span batchSpan
+
+		ctx, span = startBatchSpan(ctx, s.otel)
+		defer span.End()
+	}
+
 	summary := &synclib.SyncSummary{
 		Results:   make([]synclib.ItemSyncResult, 0, len(items)),
 		Synced:    0,

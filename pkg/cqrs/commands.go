@@ -59,12 +59,17 @@ type TombstoneItemCommand struct {
 func wireCommandDispatcher(
 	repo *decider.Repository[SyncItemState],
 	resolver crdt.ConflictResolver[*model.Item],
+	otel *middleware.OTelBundle,
 ) (*command.Dispatcher, error) {
 	dispatcher := command.NewDispatcher()
 
 	dispatcher.Use(middleware.CommandLogging(newSlogLogger()))
 	dispatcher.Use(commandValidationMiddleware())
 	dispatcher.Use(middleware.CommandRetry(middleware.DefaultRetryConfig(), middleware.WithLogger(newSlogLogger())))
+
+	if otel != nil {
+		dispatcher.Use(otel.Command()...)
+	}
 
 	syncItemHandler := func(ctx context.Context, cmd *SyncItemCommand) error {
 		// Record causation so every emitted event names the command that
