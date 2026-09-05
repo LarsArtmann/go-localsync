@@ -6,7 +6,7 @@ require (
 	charm.land/log/v2 v2.0.0
 	github.com/LarsArtmann/go-github-kit v0.2.0
 	github.com/google/go-github/v69 v69.2.0
-	github.com/larsartmann/go-localsync v0.4.3-0.20260904105131-4121b34b0237
+	github.com/larsartmann/go-localsync v0.5.0
 	golang.org/x/sync v0.22.0
 )
 
