@@ -37,13 +37,6 @@ Not for multi-writer or distributed sync: the provider is the sole source of tru
 go get github.com/larsartmann/go-localsync
 ```
 
-> **Note:** This module depends on a **private** repository (`go-cqrs-lite`). Set environment variables for private module access:
->
-> ```bash
-> export GONOSUMCHECK=github.com/larsartmann/*
-> export GONOSUMDB=github.com/larsartmann/*
-> ```
->
 > For local development with sibling checkouts, create a `go.work` file — see [AGENTS.md](AGENTS.md) for setup instructions.
 
 ## Quick Start
