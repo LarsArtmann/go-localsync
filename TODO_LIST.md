@@ -64,7 +64,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Separate CHANGELOG for `provider/github`** — the nested module's lifecycle is now independent of core releases.
 - [ ] **Restructure AGENTS.md under ~30 KB** — link out to ADRs instead of inlining decisions; keep gotchas ≤20 (flagged as "bloated" by two consecutive reviews; the 2026-09-05 passes only pruned, never restructured).
 - [ ] **Make docs-health VERIFY a standing pre-release step** — docs drift after every release is systemic (Accuracy scored 1.5/10 once); wire the check into the release routine rather than running on-demand audits.
-- [ ] **Pre-release verification target** — a nix target (or script) running the full suite (build, race tests, lint, both cqrs-lint gates, `nix flake check`) plus a CONTRIBUTING.md release-checklist section pointing at it; codify the manual release-integrity checks (tags pushed, GitHub Release bodies, proxy `@v/list` + `@latest`, pkg.go.dev indexing) into the same script — they were hand-run twice on 2026-09-05.
+- [x] **Pre-release verification target** — a nix target (or script) running the full suite (build, race tests, lint, both cqrs-lint gates, `nix flake check`) plus a CONTRIBUTING.md release-checklist section pointing at it; codify the manual release-integrity checks (tags pushed, GitHub Release bodies, proxy `@v/list` + `@latest`, pkg.go.dev indexing) into the same script — they were hand-run twice on 2026-09-05.
+  ✅ DONE 2026-09-06: `scripts/verify-release.sh <core-tag> [provider-tag]` (tags/Release/proxy/pkg.go.dev) + CONTRIBUTING release checklist + `nix flake check` now runs the hermetic full suite (`checks.test` + `checks.lint`); dry-run green against v0.5.0/v0.1.0.
 
 ### Quality
 
