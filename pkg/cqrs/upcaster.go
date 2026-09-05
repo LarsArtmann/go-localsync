@@ -13,10 +13,18 @@ import (
 // Attributes map. Applied at the store read boundary via
 // event.DecorateStore + schema.UpcastSourceTransform so every consumer of
 // stored events (fold, projection, journal replay, export) sees V3 only.
+// Legacy schema versions of ItemSynced payloads (ADR-0007): V1 and V2 carry
+// actor/repo as top-level fields.
+const (
+	legacySchemaV1 = event.SchemaVersion(1)
+	legacySchemaV2 = event.SchemaVersion(2)
+	currentSchemaV = event.SchemaVersion(3)
+)
+
 func newLegacyUpcasters() []schema.Upcaster {
 	return []schema.Upcaster{
-		schema.NewUpcaster(EventItemSynced, 1, upcastItemSyncedToV3),
-		schema.NewUpcaster(EventItemSynced, 2, upcastItemSyncedToV3),
+		schema.NewUpcaster(EventItemSynced, legacySchemaV1, upcastItemSyncedToV3),
+		schema.NewUpcaster(EventItemSynced, legacySchemaV2, upcastItemSyncedToV3),
 	}
 }
 
@@ -36,7 +44,7 @@ func upcastItemSyncedToV3(evt event.Event) (event.Event, error) {
 	}
 
 	payload.Attributes = upcastLegacyAttributes(payload)
-	payload.SchemaVersion = 3
+	payload.SchemaVersion = int(currentSchemaV)
 
 	// Re-encode with the same codec family the event was created with
 	// (NewEvents defaults to CBOR) and keep the encoding stamp consistent,
@@ -48,7 +56,7 @@ func upcastItemSyncedToV3(evt event.Event) (event.Event, error) {
 
 	upcasted, err := event.ReconstructEventWithAdoptedPayload(
 		evt.ID(), evt.Type(), evt.StreamType(), evt.StreamID(),
-		int(evt.Version()), 3, raw, evt.Metadata(), evt.OccurredAt(),
+		int(evt.Version()), int(currentSchemaV), raw, evt.Metadata(), evt.OccurredAt(),
 		codec.EncodingCBOR, "localsync.upcast_item_synced",
 	)
 	if err != nil {

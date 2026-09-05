@@ -41,9 +41,9 @@ func (p *pageStore) Count(context.Context, model.ItemFilter) (int64, error) {
 func newPagedServer(t *testing.T, count int) *Server {
 	t.Helper()
 
-	items := make([]*model.Item, count)
-	for i := range items {
-		items[i] = &model.Item{
+	items := make([]*model.Item, 0, count)
+	for i := range count {
+		items = append(items, &model.Item{
 			ID:          id.NewItemID(),
 			ExternalID:  id.NewExternalID(string(rune('a' + i))),
 			Source:      id.NewProviderID("github"),
@@ -52,7 +52,7 @@ func newPagedServer(t *testing.T, count int) *Server {
 			ContentHash: "h" + string(rune('a'+i)),
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
-		}
+		})
 	}
 
 	syncer := synclib.NewSyncer(&testutil.MockProvider{}, &pageStore{items: items}, log.Default())

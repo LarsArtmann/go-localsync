@@ -31,8 +31,11 @@ type tokenBucket struct {
 	last     time.Time
 }
 
+// secondsPerMinute converts a per-minute budget to a per-second refill rate.
+const secondsPerMinute = 60.0
+
 func newTokenBucket(requestsPerMinute int) *tokenBucket {
-	perSecond := float64(requestsPerMinute) / 60.0
+	perSecond := float64(requestsPerMinute) / secondsPerMinute
 
 	return &tokenBucket{
 		rate:     perSecond,
@@ -74,7 +77,7 @@ func (s *Server) rateLimited(next http.Handler) http.Handler {
 
 		ok, retryAfter := s.opts.bucket.take()
 		if ok {
-			h.ServeHTTP(w, r)
+			next.ServeHTTP(w, r)
 
 			return
 		}

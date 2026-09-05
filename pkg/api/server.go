@@ -133,7 +133,6 @@ func (s *Server) registerRoutes() {
 	}
 }
 
-//nolint:exhaustruct // huma.Operation has many optional fields; only route metadata is required
 func register[I, O any](
 	api huma.API,
 	opID, method, path, summary string,
@@ -143,7 +142,6 @@ func register[I, O any](
 	registerWithErrors(api, opID, method, path, summary, tags, nil, handler)
 }
 
-//nolint:exhaustruct // huma.Operation has many optional fields; only route metadata is required
 func registerWithErrors[I, O any](
 	api huma.API,
 	opID, method, path, summary string,

@@ -201,25 +201,41 @@ func (s *Suppressor) Suppress(f Finding) (bool, string, string) {
 	}
 
 	for _, candidate := range []int{f.Line, f.Line - 1} {
-		if candidate <= 0 {
-			continue
+		if matched, by, reason := s.matchLineRule(f.File, candidate, f.Rule); matched {
+			return true, by, reason
 		}
+	}
 
-		if lineMap, ok := s.lineRules[f.File]; ok {
-			if rules, ok := lineMap[candidate]; ok {
-				if rules[suppressAllRules] {
-					by, reason := s.provenanceAtLine(f.File, candidate, suppressAllRules)
+	return false, "", ""
+}
 
-					return true, by, reason
-				}
+// matchLineRule reports whether a line-scoped directive at (file, line)
+// covers the rule (directly or via "all"), with its provenance.
+func (s *Suppressor) matchLineRule(file string, line int, rule string) (bool, string, string) {
+	if line <= 0 {
+		return false, "", ""
+	}
 
-				if rules[f.Rule] {
-					by, reason := s.provenanceAtLine(f.File, candidate, f.Rule)
+	lineMap, ok := s.lineRules[file]
+	if !ok {
+		return false, "", ""
+	}
 
-					return true, by, reason
-				}
-			}
-		}
+	rules, ok := lineMap[line]
+	if !ok {
+		return false, "", ""
+	}
+
+	if rules[suppressAllRules] {
+		by, reason := s.provenanceAtLine(file, line, suppressAllRules)
+
+		return true, by, reason
+	}
+
+	if rules[rule] {
+		by, reason := s.provenanceAtLine(file, line, rule)
+
+		return true, by, reason
 	}
 
 	return false, "", ""

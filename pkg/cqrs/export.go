@@ -45,6 +45,7 @@ func (s *CQRSStack) ExportEvents(ctx context.Context, w io.Writer) error {
 	return exportEvents(ctx, journal, w)
 }
 
+//nolint:ireturn // private capability probe; the interface IS the point
 func (s *CQRSStack) journal() (event.Journal, error) {
 	if j, ok := s.Store.(event.Journal); ok {
 		return j, nil
