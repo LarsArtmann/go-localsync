@@ -248,3 +248,9 @@ The error-handling overhaul shipped in **v0.4.0** (2026-07-18). Since this repor
 - The **`retryAfterer` dead-code** concern flagged here was resolved — it's now wired via `errors.AsType` for Retry-After header lookup.
 - The **`Conflict` error family (409) unused** concern remains accepted design — conflicts are tracked as `SyncAction`/event types, not error-family-classified errors (correct for a single-writer pull mirror).
 - **go-error-family** is now at v0.7.0 (was v0.5.0 at time of report).
+
+---
+
+## Resolution addendum (2026-09-05)
+
+Addendum to the 2026-07-22 Resolution: 'make go-cqrs-lite public' was completed 2026-09-05 (go-cqrs-lite and go-localsync are both public now). The remaining forward items are all tracked: OTel, API auth/rate-limit/pagination, OpenAPI error schemas, UpcasterRegistry, pkg/cqrs coverage, per-sync ConflictResolver, govalid tags, SyncResult unification (naming) in TODO_LIST; data export + property-based tests in ROADMAP. No live items remain.

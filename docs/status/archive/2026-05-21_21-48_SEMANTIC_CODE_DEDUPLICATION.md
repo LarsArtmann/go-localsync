@@ -198,3 +198,9 @@ This is a design decision that requires your input on Go project conventions vs.
 | `pkg/providers/github`     | 84.6%      |
 | `cmd/examples/github-sync` | 10.5%      |
 | **Overall**                | **~73.7%** |
+
+---
+
+## Resolution (2026-09-05)
+
+Dedup pass shipped (test counts stabilized after later sessions); `pkg/testhelpers` deleted 2026-05-25 (helpers moved to `pkg/testutil`); LWWResolver wired 2026-05-29; second-provider/export/TUI ideas routed to ROADMAP; fuzz ideas routed to ROADMAP 'Recurring suggestions'. No live items remain.

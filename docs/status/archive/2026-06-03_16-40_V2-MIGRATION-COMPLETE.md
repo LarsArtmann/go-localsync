@@ -193,3 +193,9 @@ Arguments FOR: The name "Turso" is misleading since we no longer use Turso sync 
 Arguments AGAINST: This is a public type used in tests and referenced in docs. Renaming is a breaking change for any consumer. It's also a lot of file churn for what's essentially a naming concern.
 
 **My recommendation:** Rename it. The project is pre-1.0, there are no external consumers, and honesty in naming is more valuable than avoiding churn. But I'd like confirmation before proceeding.
+
+---
+
+## Resolution addendum (2026-09-05)
+
+Shipped as v0.2.0. Forward items: dead-config removal + Turso deletion shipped in v0.2.0 itself; the rename cleanup followed (sqlite_readmodel.go etc.); golangci-lint v2 adopted (0 issues since v0.4.1); the watermill EventBus shipped as the v2/v4 bus; `schema/v2` versioning shipped as `pkg/data/schema` V1/V2 (V3 in v0.4.0); flake modernization culminated in the go-standard module (v0.5.0); CommandRetry was never adopted by design (retry lives in `pkg/sync/retry.go` + `provider/github`); pebble/protobuf/catalog were rejected by scope; OTel is tracked in TODO_LIST. No live items remain.

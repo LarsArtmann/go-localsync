@@ -198,3 +198,9 @@ The types exist as an independent sub-module with 52 tests and solid coverage. B
 | `1b2f31c` | Deduplicate ItemFilter into `pkg/provider/`                         |
 | `153c34f` | Clean SyncStore interface — remove unused SyncItem and Count        |
 | `f14ef32` | Update AGENTS.md with SyncStore interface and ItemFilter location   |
+
+---
+
+## Resolution (2026-09-05)
+
+The modularity split shipped; `pkg/localsync` became `pkg/crdt` and was wired 2026-05-29; `internal/` boundary exists (`internal/cqrslint`); CLI items moot (v0.2.0); OTel tracked in TODO_LIST. No live items remain.

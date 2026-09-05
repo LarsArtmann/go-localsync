@@ -202,3 +202,9 @@ After:   ███████░░░░░░░░░░░░░  6 violati
 ```
 
 Remaining: 4 in event payloads (architectural decision needed) + 1 in scan struct + 1 in result struct.
+
+---
+
+## Resolution (2026-09-05)
+
+Strong-ID migration + NewEvents shipped (v0.1.0); the go-cqrs-lite tagging items superseded by the v2-v4 major model; VectorClock items moot (CRDT machinery deleted in v0.4.0 per ADR-0004); circuit-breaker/ginkgo ideas routed to ROADMAP. No live items remain.

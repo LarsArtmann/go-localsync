@@ -221,3 +221,9 @@ The CRDT package has excellent test coverage (97.6%) and was extracted from `go-
 | Files split needed | 3 (stack.go, client.go, sync.go)                          |
 | External blockers  | 1 (go-cqrs-lite WIP)                                      |
 | Coverage           | 78.3% total (up from ~78.0%)                              |
+
+---
+
+## Resolution (2026-09-05)
+
+The sprint's cleanups shipped; the go-cqrs-lite upstream-WIP blocker died with the v2 migration; CLI items moot (v0.2.0); stack split executed 2026-05-29 04:29; API auth/pagination/rate-limit tracked in TODO_LIST; OTel tracked in TODO_LIST. No live items remain.

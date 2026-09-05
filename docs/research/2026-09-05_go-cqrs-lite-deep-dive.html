@@ -1,0 +1,1555 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>go-cqrs-lite — Adoption &amp; Utilization Audit</title>
+    <style>
+      /* =========================================================================
+         BAUHAUS LIGHT — Editorial template
+         Design language: form follows function. Primary colors on warm paper.
+         Zero external dependencies: system fonts, no CDN, no build step.
+         Token architecture: see references/bauhaus-tokens.md
+         ========================================================================= */
+
+      :root {
+        /* --- Primitive palette (Bauhaus Light) --- */
+        --color-paper: #f4f4f0;
+        --color-paper-2: #ffffff;
+        --color-paper-3: #e8e8e2;
+        --color-ink: #111111;
+        --color-red: #e63946;
+        --color-blue: #1d3557;
+        --color-yellow: #f4d35e;
+        --color-hairline: rgba(17, 17, 17, 0.14);
+        --color-hairline-strong: rgba(17, 17, 17, 0.3);
+
+        /* --- Semantic layer (shared vocabulary with dark template) --- */
+        --surface: var(--color-paper);
+        --surface-raised: var(--color-paper-2);
+        --surface-sunken: var(--color-paper-3);
+        --text: var(--color-ink);
+        --text-muted: rgba(17, 17, 17, 0.72);
+        --text-faint: rgba(17, 17, 17, 0.5);
+        --border: var(--color-hairline);
+        --border-strong: var(--color-hairline-strong);
+        --accent: var(--color-red);
+        --problem: var(--color-red);
+        --solution: var(--color-blue);
+        --warning: var(--color-yellow);
+
+        /* --- Backward-compatible aliases (do not break consumer skills) --- */
+        --bg: var(--surface);
+        --bg-elevated: var(--surface-raised);
+        --bg-sunken: var(--surface-sunken);
+        --bg-card: var(--surface-raised);
+        --bg-code: var(--surface-sunken);
+        --ink: var(--text);
+        --ink-secondary: var(--text-muted);
+        --ink-muted: var(--text-faint);
+        --rose: var(--problem);
+        --rose-glow: color-mix(in srgb, var(--problem) 15%, transparent);
+        --emerald: var(--solution);
+        --emerald-glow: color-mix(in srgb, var(--solution) 15%, transparent);
+        --amber: var(--warning);
+        --amber-glow: color-mix(in srgb, var(--warning) 15%, transparent);
+        --amber-light: color-mix(in srgb, var(--warning) 22%, transparent);
+        --coral: var(--problem);
+        --coral-light: color-mix(in srgb, var(--problem) 12%, transparent);
+        --teal: var(--solution);
+        --teal-light: color-mix(in srgb, var(--solution) 12%, transparent);
+
+        /* --- Shape --- */
+        --radius: 0px;
+        --radius-sm: 0px;
+
+        /* --- Type stacks (system only — zero external fonts) --- */
+        --font-heading:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-body:
+          ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        --font-mono:
+          ui-monospace, "Cascadia Code", "Source Code Pro", "JetBrains Mono",
+          Menlo, Consolas, monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      section[id],
+      [id] {
+        scroll-margin-top: 60px;
+      }
+
+      body {
+        background: var(--surface);
+        color: var(--text);
+        font-family: var(--font-body);
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* --- Accessibility: keyboard focus --- */
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      a:focus-visible {
+        outline-offset: -1px;
+      }
+
+      /* --- Full-bleed top bar --- */
+      .top-bar {
+        background: var(--text);
+        color: var(--surface);
+        padding: 0.6rem 2rem;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* --- Layout: optional sticky sidebar TOC --- */
+      .layout {
+        display: flex;
+        gap: 2.5rem;
+        padding: 2rem;
+      }
+      .sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 1rem;
+        align-self: flex-start;
+        height: calc(100vh - 2rem);
+        overflow-y: auto;
+        display: none;
+      }
+      .sidebar nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .sidebar .label {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 2px solid var(--text);
+      }
+      .sidebar a {
+        font-size: 0.86rem;
+        color: var(--text);
+        text-decoration: none;
+        padding: 0.5rem 0.75rem;
+        border-left: 4px solid transparent;
+        font-weight: 600;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+      }
+      .sidebar a:hover,
+      .sidebar a.active {
+        border-left-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, transparent);
+        color: var(--accent);
+      }
+      .main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      /* --- Headings --- */
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-family: var(--font-heading);
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        color: var(--text);
+      }
+      h1 {
+        font-size: clamp(1.9rem, 4.5vw, 2.8rem);
+        line-height: 1.05;
+        margin: 0 0 0.6rem;
+      }
+      h2 {
+        font-size: 1.5rem;
+        margin: 2.5rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 3px solid var(--text);
+        display: flex;
+        align-items: baseline;
+        gap: 0.7rem;
+      }
+      h2 .num {
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        color: var(--accent);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+      }
+      h3 {
+        font-size: 1.15rem;
+        margin: 0 0 0.4rem;
+        font-weight: 700;
+      }
+      h4 {
+        font-size: 1rem;
+        margin: 0 0 0.3rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0 0 1rem;
+      }
+
+      /* --- Hero --- */
+      .hero {
+        padding: 1.5rem 0 2rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 3px solid var(--text);
+      }
+      .eyebrow {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--accent);
+        margin-bottom: 0.9rem;
+      }
+      .subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        max-width: 70ch;
+        margin: 0 0 1rem;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+      .tag {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        padding: 0.25rem 0.6rem;
+        background: var(--surface-sunken);
+        color: var(--text);
+        border: 1px solid var(--border-strong);
+      }
+      .tag.amber {
+        background: var(--warning);
+        border-color: var(--warning);
+        color: var(--text);
+      }
+      .tag.teal {
+        background: var(--solution);
+        border-color: var(--solution);
+        color: var(--surface);
+      }
+
+      /* Bauhaus signature: geometric shape cluster (optional) */
+      .hero-shapes {
+        position: relative;
+        height: 90px;
+        margin-bottom: 1.2rem;
+      }
+      .hero-shapes .circle {
+        position: absolute;
+        top: 0;
+        right: 180px;
+        width: 64px;
+        height: 64px;
+        background: var(--problem);
+        border-radius: 50%;
+      }
+      .hero-shapes .square {
+        position: absolute;
+        top: 26px;
+        right: 90px;
+        width: 56px;
+        height: 56px;
+        background: var(--solution);
+      }
+      .hero-shapes .tri {
+        position: absolute;
+        top: 8px;
+        right: 0;
+        width: 0;
+        height: 0;
+        border-left: 32px solid transparent;
+        border-right: 32px solid transparent;
+        border-bottom: 56px solid var(--warning);
+      }
+      .hero-shapes .bar {
+        position: absolute;
+        bottom: 0;
+        right: 230px;
+        width: 100px;
+        height: 14px;
+        background: var(--text);
+      }
+
+      /* --- Scorecard / stat cards --- */
+      .scorecard,
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0;
+        margin: 1.5rem 0 2rem;
+        border: 3px solid var(--text);
+      }
+      .score-card,
+      .stat-card {
+        padding: 1.3rem 1rem;
+        text-align: center;
+        border-right: 3px solid var(--text);
+        background: var(--surface-raised);
+      }
+      .score-card:last-child,
+      .stat-card:last-child {
+        border-right: none;
+      }
+
+      .score,
+      .stat-value {
+        font-family: var(--font-heading);
+        font-size: 2.6rem;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+      .score-card .label,
+      .stat-label {
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-top: 0.5rem;
+      }
+      /* Semantic state classes — no nth-child decoration, no !important */
+      .score-good,
+      .stat-good {
+        background: var(--solution);
+        color: var(--surface);
+      }
+      .score-warn,
+      .stat-warn {
+        background: var(--warning);
+        color: var(--text);
+      }
+      .score-bad,
+      .stat-bad {
+        background: var(--problem);
+        color: var(--surface);
+      }
+
+      /* --- General cards --- */
+      .card {
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        border-left: 8px solid var(--border-strong);
+      }
+      .card-problem {
+        border-left-color: var(--problem);
+      }
+      .card-solution {
+        border-left-color: var(--solution);
+      }
+      .card-warning {
+        border-left-color: var(--warning);
+      }
+
+      /* --- Issue cards --- */
+      .issue {
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1rem;
+        border-left: 8px solid var(--border-strong);
+      }
+      .issue-critical {
+        border-left-color: var(--problem);
+      }
+      .issue-important {
+        border-left-color: var(--warning);
+      }
+      .issue-nice {
+        border-left-color: var(--solution);
+      }
+      .issue h3 {
+        margin-bottom: 0.3rem;
+      }
+      .issue .where {
+        font-family: var(--font-mono);
+        font-size: 0.78rem;
+        color: var(--text-faint);
+        margin: 0.2rem 0 0.6rem;
+      }
+      .issue p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* --- Severity badges --- */
+      .severity {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 0.22rem 0.6rem;
+        margin-bottom: 0.6rem;
+        color: var(--surface);
+      }
+      .severity-critical {
+        background: var(--problem);
+      }
+      .severity-important {
+        background: var(--warning);
+        color: var(--text);
+      }
+      .severity-nice {
+        background: var(--solution);
+      }
+
+      /* --- Inline badges --- */
+      .badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.2rem 0.55rem;
+        border: 1px solid var(--text);
+        color: var(--text);
+      }
+      .badge-critical {
+        background: var(--problem);
+        color: var(--surface);
+      }
+      .badge-high {
+        background: var(--warning);
+      }
+      .badge-medium {
+        background: var(--surface-sunken);
+      }
+      .badge-low {
+        background: var(--surface-raised);
+        color: var(--text-muted);
+      }
+      .badge-fixed {
+        background: var(--solution);
+        color: var(--surface);
+      }
+
+      /* --- Callouts --- */
+      .callout {
+        margin: 0.8rem 0 0;
+        padding: 0.8rem 1rem;
+        border: 1px solid var(--border-strong);
+        border-left: 4px solid var(--border-strong);
+        background: var(--surface-sunken);
+        font-size: 0.92rem;
+      }
+      .callout strong {
+        display: inline-block;
+        margin-right: 0.4rem;
+      }
+      .callout-teal,
+      .callout-solution {
+        border-left-color: var(--solution);
+        background: color-mix(
+          in srgb,
+          var(--solution) 10%,
+          var(--surface-raised)
+        );
+      }
+      .callout-amber,
+      .callout-warning {
+        border-left-color: var(--warning);
+        background: color-mix(
+          in srgb,
+          var(--warning) 18%,
+          var(--surface-raised)
+        );
+      }
+
+      /* --- Strengths --- */
+      .strengths {
+        display: grid;
+        gap: 0.5rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .strength {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.9rem;
+        padding: 0.75rem 0;
+        border-bottom: 2px solid var(--border);
+      }
+      .strength .check {
+        font-family: var(--font-mono);
+        font-weight: 900;
+        color: var(--solution);
+        font-size: 1.3rem;
+        line-height: 1.3;
+      }
+      .strength .text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+      }
+      .strength .text span {
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+
+      /* --- Tables --- */
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.92rem;
+        border: 2px solid var(--text);
+      }
+      th {
+        text-align: left;
+        padding: 0.6rem 0.9rem;
+        background: var(--text);
+        color: var(--surface);
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        border-right: 1px solid var(--border-strong);
+      }
+      th:last-child {
+        border-right: none;
+      }
+      td {
+        padding: 0.6rem 0.9rem;
+        border-top: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+      }
+      td:last-child {
+        border-right: none;
+      }
+      tr:nth-child(even) td {
+        background: var(--surface-sunken);
+      }
+      table.compare td.yes {
+        color: var(--solution);
+        font-weight: 700;
+      }
+      table.compare td.no {
+        color: var(--problem);
+        font-weight: 700;
+      }
+
+      /* --- Code blocks + syntax highlighting --- */
+      pre {
+        background: var(--text);
+        color: var(--surface);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        overflow-x: auto;
+        border: 2px solid var(--text);
+      }
+      code {
+        font-family: var(--font-mono);
+      }
+      p code,
+      li code,
+      td code {
+        font-size: 0.88em;
+        background: var(--surface-sunken);
+        padding: 0.1rem 0.35rem;
+      }
+      .tok-keyword {
+        color: var(--warning);
+      }
+      .tok-type {
+        color: var(--warning);
+      }
+      .tok-string {
+        color: #95e1d3;
+      }
+      .tok-comment {
+        color: rgba(244, 244, 240, 0.45);
+        font-style: italic;
+      }
+      .tok-func {
+        color: #6eb5ff;
+      }
+      .tok-number {
+        color: var(--warning);
+      }
+      .tok-generic {
+        color: var(--problem);
+      }
+      .tok-builtin {
+        color: #6eb5ff;
+      }
+      .tok-punct {
+        color: rgba(244, 244, 240, 0.7);
+      }
+      .tok-attr {
+        color: var(--warning);
+      }
+
+      /* --- Dependency tree / ASCII diagrams --- */
+      .dep-tree {
+        background: var(--surface-sunken);
+        border: 2px solid var(--text);
+        padding: 1rem 1.2rem;
+        margin: 1rem 0;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        line-height: 1.7;
+        white-space: pre;
+        overflow-x: auto;
+      }
+      .dep-tree .root {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .dep-tree .ok {
+        color: var(--solution);
+      }
+      .dep-tree .unwanted {
+        color: var(--problem);
+      }
+
+      /* --- Inline node-and-arrow diagrams --- */
+      .diagram {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem;
+        margin: 1rem 0;
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+      }
+      .node {
+        display: inline-block;
+        padding: 0.4rem 0.75rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: var(--surface-sunken);
+        border: 1px solid var(--text);
+      }
+      .node-core {
+        background: var(--accent);
+        color: var(--surface);
+      }
+      .node-problem {
+        background: var(--problem);
+        color: var(--surface);
+      }
+      .node-good {
+        background: var(--solution);
+        color: var(--surface);
+      }
+      .arrow {
+        color: var(--text-faint);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Grids --- */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+
+      /* --- Inline TOC --- */
+      .toc {
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        border-left: 6px solid var(--accent);
+        padding: 1rem 1.3rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .toc h3 {
+        margin-bottom: 0.5rem;
+      }
+      .toc ul {
+        list-style: none;
+        padding: 0;
+      }
+      .toc li {
+        margin: 0.25rem 0;
+      }
+      .toc a {
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+      .toc a:hover {
+        color: var(--accent);
+      }
+
+      /* --- Migration / numbered steps --- */
+      .migration-step {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+        padding: 1.1rem;
+        background: var(--surface-raised);
+        border: 2px solid var(--text);
+        border-left: 6px solid var(--accent);
+      }
+      .migration-num {
+        font-family: var(--font-mono);
+        font-weight: 900;
+        font-size: 1.8rem;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .migration-content h4 {
+        margin-bottom: 0.2rem;
+      }
+      .migration-content p {
+        margin-bottom: 0;
+        color: var(--text-muted);
+        font-size: 0.94rem;
+      }
+
+      /* --- Before/After comparison --- */
+      .compare-header {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin: 1rem 0 0.5rem;
+      }
+      .compare-before,
+      .compare-after {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 0.4rem 0.7rem;
+        color: var(--surface);
+      }
+      .compare-before {
+        background: var(--problem);
+      }
+      .compare-after {
+        background: var(--solution);
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .compare-row pre {
+        margin: 0;
+      }
+
+      /* --- Footer --- */
+      .footer {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 3px solid var(--text);
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        font-family: var(--font-mono);
+      }
+
+      /* --- Responsive --- */
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: block;
+        }
+      }
+      @media (max-width: 768px) {
+        .layout {
+          flex-direction: column;
+          padding: 1rem;
+        }
+        .top-bar {
+          padding: 0.6rem 1rem;
+          flex-wrap: wrap;
+          gap: 0.3rem;
+        }
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+        .compare-header,
+        .compare-row {
+          grid-template-columns: 1fr;
+        }
+        .scorecard,
+        .stat-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .score-card:nth-child(2),
+        .stat-card:nth-child(2) {
+          border-right: none;
+        }
+        .score-card:nth-child(1),
+        .stat-card:nth-child(1),
+        .score-card:nth-child(2),
+        .stat-card:nth-child(2) {
+          border-bottom: 3px solid var(--text);
+        }
+        .migration-step {
+          grid-template-columns: 1fr;
+        }
+        .hero-shapes {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <span>Library Deep Dive</span>
+      <span>2026-09-05</span>
+      <span>go-localsync &times; go-cqrs-lite</span>
+    </div>
+
+    <div class="layout">
+      <aside class="sidebar" data-nav>
+        <nav>
+          <div class="label">Contents</div>
+          <a href="#summary">Summary</a>
+          <a href="#scorecard">Scorecard</a>
+          <a href="#usage">Current Usage</a>
+          <a href="#findings">Findings</a>
+          <a href="#leveraged">Fully Leveraged</a>
+          <a href="#na">Not Applicable</a>
+          <a href="#versions">Version Currency</a>
+          <a href="#opportunities">Top Opportunities</a>
+          <a href="#lint-run">Appendix: Lint Run</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="hero">
+          <div class="hero-shapes">
+            <div class="bar"></div>
+            <div class="circle"></div>
+            <div class="square"></div>
+            <div class="tri"></div>
+          </div>
+          <div class="eyebrow">Library Deep Dive &middot; 2026-09-05</div>
+          <h1>go-cqrs-lite — Adoption &amp; Utilization Audit</h1>
+          <p class="subtitle">
+            go-localsync is go-cqrs-lite's most deliberate consumer: a single-aggregate
+            pull-mirror SDK built entirely on the library's event-sourcing core. This audit
+            compares what the project uses against everything the library's 34-module
+            monorepo offers. Verdict: the core engine usage is textbook — near-superb —
+            with one real defect, three missed opportunity classes, and a handful of
+            small hand-rolls the library has since absorbed.
+          </p>
+          <div class="meta">
+            <span class="tag amber">12 direct modules &middot; all latest</span>
+            <span class="tag">event/v4 v4.9.0 line</span>
+            <span class="tag teal">Adoption Score: 78/100</span>
+          </div>
+        </header>
+
+        <section id="scorecard" class="scorecard">
+          <div class="score-card score-warn">
+            <div class="score">78</div>
+            <div class="label">Adoption Score /100</div>
+          </div>
+          <div class="score-card score-warn">
+            <div class="score">9/16</div>
+            <div class="label">Fully leveraged</div>
+          </div>
+          <div class="score-card score-warn">
+            <div class="score">3</div>
+            <div class="label">Missed opportunities</div>
+          </div>
+          <div class="score-card score-bad">
+            <div class="score">1</div>
+            <div class="label">Anti-patterns</div>
+          </div>
+          <div class="score-card score-good">
+            <div class="score">0</div>
+            <div class="label">Versions behind</div>
+          </div>
+        </section>
+
+        <section id="summary">
+          <h2><span class="num">00</span>Summary</h2>
+          <p>
+            go-localsync consumes go-cqrs-lite exactly the way the library's README asks
+            consumers to: as a <em>library</em>, not a framework. The decider pattern,
+            typed command dispatch, snapshot integration, CBOR codec, managed projection
+            hosting, and the deliberate avoidance of deprecated presets all reflect a
+            project that understands the library's architecture — and documents its
+            decisions in ADRs. Every one of the 12 direct module dependencies is pinned
+            at the latest release.
+          </p>
+          <p>
+            The gaps are real but bounded. One is an outright defect: the projection
+            dead-letter queue is in-memory while the event store is SQLite, so captured
+            poison events vanish on restart (the library's own linter flags this as its
+            only ERROR). The others are observability (no correlation IDs on single-item
+            syncs, no telemetry hooks), an untouched testing toolkit
+            (<code>eventtest</code>, <code>scenario</code>, <code>testutil</code>), and a
+            few small hand-rolls (<code>DeriveStreamID</code>, validation middleware)
+            that duplicate capabilities the library now ships.
+          </p>
+          <div class="callout callout-amber">
+            <strong>The bottom line</strong>
+            Nearly superb. Fix the DLQ volatility mismatch (one-line constructor swap),
+            make correlation/causation metadata universal (a day of work), and wire the
+            library's own cqrs-lint into CI — those three move this from "very good
+            consumer" to "reference consumer."
+          </div>
+        </section>
+
+        <section id="usage">
+          <h2><span class="num">01</span>Current Usage</h2>
+          <p>
+            All library usage is concentrated in <code>pkg/cqrs</code> (11 production
+            files), with the storage backends selected in
+            <code>store_factory.go</code> and the projection wiring in
+            <code>runner.go</code>. The stack is composed by hand in
+            <code>NewCQRSStack</code> — deliberately, per ADR-0004's single-aggregate
+            scope — rather than via the library's (deprecated) stack presets.
+          </p>
+
+          <div class="strengths">
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Decider pattern, textbook</strong>
+                <span
+                  ><code>decider.Decider[SyncItemState]{Initial, Apply}</code> with pure
+                  fold + <code>DecideFunc</code> via
+                  <code>repo.ExecuteRef</code> — decider.go:45-63, commands.go:65-83</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Typed command dispatch with middleware chain</strong>
+                <span
+                  ><code>command.RegisterTyped</code> + logging → validation → retry
+                  middleware — commands.go:59-91</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Managed projection host (ADR-0006)</strong>
+                <span
+                  >checkpoint-persisted catch-up, crash auto-restart, DLQ, graceful
+                  drain — runner.go:28-79</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Snapshots + CBOR codec wired through the repository</strong>
+                <span
+                  ><code>WithSnapshotStore</code> +
+                  <code>WithSnapshotStrategy(EveryNEvents(10))</code> +
+                  <code>WithCodec(CBORCodec{})</code> — stack.go:127-132</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Dual-path projection with synchronous read-your-writes</strong>
+                <span
+                  >live <code>bus.SubscribeAll</code> (BlockPublishUntilSubscriberAck) +
+                  host catch-up, harmonized by a mutex-guarded per-aggregate version
+                  gate — projection.go, runner.go</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Full SQLite storage lifecycle</strong>
+                <span
+                  ><code>OpenSQLite</code> → <code>SQLiteInitSchema</code> →
+                  <code>SQLiteEnableWAL</code> + separate checkpoint &amp; snapshot
+                  stores — store_factory.go:52-131</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Deprecation discipline</strong>
+                <span
+                  >deprecated <code>stack/*</code> presets, <code>transport/*</code>, and
+                  the query dispatcher are all avoided with documented rationale —
+                  stack_adapters.go:1-7</span
+                >
+              </div>
+            </div>
+            <div class="strength">
+              <div class="check">+</div>
+              <div class="text">
+                <strong>Error-taxonomy alignment</strong>
+                <span
+                  ><code>pkg/errors</code> mirrors the library's family classification and
+                  is tested against it — pkg/errors/errors_test.go:144-155</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Module</th>
+                  <th>Pinned</th>
+                  <th>Role in go-localsync</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td><code>event/v4</code></td><td>v4.9.0</td><td>Events, Store/Bus, journal, decode, correlation</td></tr>
+                <tr><td><code>command/v4</code></td><td>v4.8.1</td><td>Typed commands, dispatcher</td></tr>
+                <tr><td><code>decider/v4</code></td><td>v4.5.0</td><td>Pure-function ES + repository + snapshots</td></tr>
+                <tr><td><code>id/v4</code></td><td>v4.5.0</td><td>StreamID, StreamRef, CorrelationID</td></tr>
+                <tr><td><code>codec/v4</code></td><td>v4.4.0</td><td>CBOR payload codec</td></tr>
+                <tr><td><code>middleware/v4</code></td><td>v4.5.1</td><td>Command logging/retry, event logging</td></tr>
+                <tr><td><code>projection/v4</code></td><td>v4.3.0</td><td>Projection contract</td></tr>
+                <tr><td><code>projectionhost/v4</code></td><td>v4.4.0</td><td>Managed catch-up host + DLQ</td></tr>
+                <tr><td><code>snapshot/v4</code></td><td>v4.4.0</td><td>Snapshot strategy (EveryNEvents)</td></tr>
+                <tr><td><code>storage/v4</code></td><td>v4.8.1</td><td>SQLite event/checkpoint/snapshot stores</td></tr>
+                <tr><td><code>storage/memory/v4</code></td><td>v4.4.0</td><td>In-memory backend (tests, default)</td></tr>
+                <tr><td><code>watermill/v4</code></td><td>v4.5.1</td><td>In-process EventBus</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="findings">
+          <h2><span class="num">02</span>Findings — gaps &amp; defects</h2>
+          <p>Ordered by impact. Every claim is cited to code or library source.</p>
+
+          <div class="issue issue-critical" id="dlq-volatility">
+            <span class="severity severity-critical">Misused &middot; High impact</span>
+            <h3>In-memory DLQ paired with a persistent event store</h3>
+            <div class="where">pkg/cqrs/runner.go:42 &middot; flagged by cqrs-lint C017 (its only ERROR)</div>
+            <p>
+              The projection host captures poison events into
+              <code>projectionhost.NewMemoryDeadLetterStore()</code> — but with the SQLite
+              backend the event store, checkpoints, and read model all survive restarts.
+              A captured poison event is lost on restart, so after every crash the host
+              re-reads the same poison event from the journal, fails 3 more times, and
+              re-captures it. The DLQ's purpose — a durable quarantine for inspection —
+              silently degrades to a per-process buffer.
+            </p>
+            <div class="compare-header">
+              <div class="compare-before">Before — volatile</div>
+              <div class="compare-after">After — matches the store backend</div>
+            </div>
+            <div class="compare-row">
+              <pre><code>host, err := projectionhost.New(
+    sr.journal, sr.cpStore,
+    projectionhost.WithLogger(newSlogLogger()),
+    projectionhost.WithDeadLetterStore(
+        projectionhost.<span class="tok-type">NewMemoryDeadLetterStore</span>(), 3),
+)</code></pre>
+              <pre><code><span class="tok-comment">// memory backend keeps the memory DLQ; sqlite gets:</span>
+dlq, err := projectionhost.<span class="tok-type">NewSQLiteDeadLetterStore</span>(ctx, db)
+host, err := projectionhost.New(
+    sr.journal, sr.cpStore,
+    projectionhost.WithLogger(newSlogLogger()),
+    projectionhost.WithDeadLetterStore(dlq, 3),
+)</code></pre>
+            </div>
+            <div class="callout callout-teal">
+              <strong>Fix</strong>
+              In <code>createStores</code>' SQLite branch, construct
+              <code>projectionhost.NewSQLiteDeadLetterStore(ctx, db)</code>
+              (sqlite_dlq.go:83 — takes the already-open <code>*sql.DB</code>, creates its
+              table idempotently) and thread it into the host alongside the checkpoint
+              store. Keep the memory DLQ for the memory backend. Small test addition:
+              assert the DLQ table survives a store reopen.
+            </div>
+          </div>
+
+          <div class="issue issue-important" id="correlation-gap">
+            <span class="severity severity-important">Partially Used &middot; Medium impact</span>
+            <h3>Correlation metadata covers only the batch path; causation is never recorded</h3>
+            <div class="where">pkg/cqrs/stack.go:193 (Options: nil) vs stack.go:270-288 &middot; commands.go:77-83</div>
+            <p>
+              <code>SyncItems</code> stamps every event with a per-run
+              <code>CorrelationID</code> via <code>event.WithCorrelationID</code> — good.
+              But <code>SyncItem</code> (single item) dispatches with
+              <code>Options: nil</code>, and <code>TombstoneItemCommand</code> has no
+              options field at all. Half the write paths emit events that cannot be tied
+              to a run. Additionally, the library offers
+              <code>decider.WithEnricher</code> (options.go:41) and command-causality
+              tagging — every event could carry the causing command's ID for free, giving
+              a complete command→event audit chain. Today no event carries a
+              <code>CausationID</code>.
+            </p>
+            <div class="callout callout-teal">
+              <strong>Recommendation</strong>
+              Two moves: (1) give <code>TombstoneItemCommand</code> an
+              <code>Options</code> field and default a fresh
+              <code>cqrsid.NewCorrelationID()</code> in both single-item paths; (2)
+              register the library's causality enricher once at repository construction
+              so metadata enrichment stops being a per-call-site concern:
+              <pre><code>repo, err := decider.NewRepository[SyncItemState](store, bus, d,
+    decider.WithSnapshotStore(snapStore),
+    decider.WithCodec(codec.CBORCodec{}),
+    decider.WithSnapshotStrategy(snapshot.EveryNEvents(10)),
+    decider.<span class="tok-type">WithEnricher</span>(event.CommandCausalityEnricher),
+)</code></pre>
+            </div>
+          </div>
+
+          <div class="issue issue-important" id="testing-utils">
+            <span class="severity severity-important">Missed Opportunity &middot; Medium impact</span>
+            <h3>The library's testing toolkit is completely untouched</h3>
+            <div class="where">not used anywhere &middot; eventtest, scenario/v4, testutil/v4 exist only in go.sum</div>
+            <p>
+              go-cqrs-lite ships a purpose-built test layer: <code>eventtest</code>
+              (FakeStore/FakeBus/FakeSnapshotStore with fluent error injection, event
+              factories, golden assertions), <code>scenario</code> (a BDD DSL for exactly
+              the decider/projection tests pkg/cqrs writes), <code>testutil</code> (rapid
+              property-based generators), and <code>event.WithClock</code> for
+              deterministic timestamps. None of the 95 pkg/cqrs tests use any of it —
+              every fixture is hand-rolled (<code>mustNewTestEvent</code>,
+              <code>waitForCount</code>, state builders in testing_test.go:91-188).
+              The library also documents its own fold-exhaustiveness concern (rule B005)
+              which the custom fold already handles correctly by erroring on unknown
+              types.
+            </p>
+            <div class="callout callout-teal">
+              <strong>Recommendation</strong>
+              Don't retrofit the passing suite. Adopt <code>scenario</code> for new
+              decider specs — it maps 1:1 onto the existing test intent and enforces a
+              terminal assertion:
+              <pre><code>scenario.<span class="tok-type">Given</span>(t, fold, SyncItemState{},
+    tombstonedSyncedEvent(t, item)).
+    When(cmd, decideSync(item, raw, nil)).
+    Then(EventItemSynced) <span class="tok-comment">// resurrection emits a sync event</span></code></pre>
+              Use <code>eventtest.FakeStore</code> where tests currently assert against
+              real in-memory stores, and <code>event.WithClock</code> to make timestamp
+              assertions deterministic instead of post-hoc range checks.
+            </div>
+          </div>
+
+          <div class="issue issue-important" id="telemetry">
+            <span class="severity severity-important">Missed Opportunity &middot; Medium impact</span>
+            <h3>No telemetry hooks despite the library being instrumented end-to-end</h3>
+            <div class="where">not used anywhere &middot; otel/v4 is an indirect dep; middleware/projectionhost metrics unused</div>
+            <p>
+              The library provides one-call observability:
+              <code>middleware.NewOTelBundle(tracer, meter)</code> (otel_bundle.go:83)
+              yields command/event/query/publish middleware plus a correlation enricher;
+              <code>projectionhost.WithMetrics(r)</code> (metrics.go:42) exports lag and
+              worker-state gauges; <code>prometheus.Setup()</code> bridges everything to
+              <code>/metrics</code>. go-localsync — itself an SDK that consumers embed —
+              exposes none of this: <code>CQRSConfig</code> has no telemetry surface, so
+              consumers cannot observe sync latency, conflict rates, DLQ depth, or
+              projection lag without forking.
+            </p>
+            <div class="callout callout-teal">
+              <strong>Recommendation</strong>
+              Add an optional <code>CQRSConfig.OTel *middleware.OTelBundle</code> (nil =
+              today's zero-telemetry behavior). When set, apply
+              <code>bundle.Command()</code>/<code>bundle.Event()</code> to the dispatchers
+              and pass <code>bundle.MetricsRecorder</code> to
+              <code>projectionhost.WithMetrics</code>. Purely additive; no default
+              behavior change.
+            </div>
+          </div>
+
+          <div class="issue issue-important" id="library-lint">
+            <span class="severity severity-important">Missed Opportunity &middot; Medium impact &middot; trivial effort</span>
+            <h3>The library's own cqrs-lint (203 rules) is not in CI</h3>
+            <div class="where">cmd/cqrs-lint in go-cqrs-lite &middot; consumer-facing by design ("for go-cqrs-lite consumers")</div>
+            <p>
+              go-localsync maintains its own <code>internal/cqrslint</code> (10
+              bespoke ADR-0004 invariants — good, keep it). But the library ships a
+              domain-aware consumer linter that found, in this audit's run against
+              pkg/cqrs (101&nbsp;ms): the C017 DLQ error above, 8 ignored
+              <code>Close()</code> errors, a <code>time.Now()</code> inside the decider,
+              and a panic in a production path. Full results in the
+              <a href="#lint-run">appendix</a>. It runs read-only, emits SARIF/JSON, and
+              its false positives (2 confirmed) are suppressible.
+            </p>
+            <div class="callout callout-teal">
+              <strong>Recommendation</strong>
+              Add a CI leg: <code>go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@latest ./pkg/... --min-severity error</code>
+              (gate on errors only; let warnings report non-blocking). It complements
+              internal/cqrslint: theirs checks library-consumer correctness, ours checks
+              project architecture.
+            </div>
+          </div>
+
+          <div class="issue issue-important" id="validation-middleware">
+            <span class="severity severity-important">Partially Used &middot; Low-medium impact</span>
+            <h3>Hand-rolled validation middleware duplicates middleware.CommandValidation</h3>
+            <div class="where">pkg/cqrs/middleware.go:10-35 vs middleware/validation.go:49-63</div>
+            <p>
+              The 25-line <code>commandValidationMiddleware</code> reimplements what the
+              library already ships: <code>middleware.CommandValidation(validator)</code>
+              takes a <code>CommandValidator func(command.Command) error</code> — the
+              exact shape of the hand-rolled switch — and adds opt-in failure logging via
+              <code>middleware.WithLogger</code>, which the hand-roll lacks (validation
+              failures are currently silent).
+            </p>
+            <div class="compare-header">
+              <div class="compare-before">Before — 25 lines, unlogged</div>
+              <div class="compare-after">After — library middleware</div>
+            </div>
+            <div class="compare-row">
+              <pre><code>dispatcher.Use(commandValidationMiddleware())
+<span class="tok-comment">// middleware.go:10-35, hand-rolled</span></code></pre>
+              <pre><code>dispatcher.Use(middleware.<span class="tok-type">CommandValidation</span>(
+    validateSyncCommands,
+    middleware.WithLogger(newSlogLogger()),
+))
+<span class="tok-comment">// validateSyncCommands = the same type switch, as a plain func</span></code></pre>
+            </div>
+          </div>
+
+          <div class="issue issue-nice" id="derive-stream-id">
+            <span class="severity severity-nice">Partially Used &middot; Low impact &middot; migration-sensitive</span>
+            <h3>AggregateID hand-rolls what id.DeriveStreamID now provides</h3>
+            <div class="where">pkg/cqrs/aggregate_id.go:17-52 vs id/stream_id.go:145, id/derive.go:14-24</div>
+            <p>
+              The library's <code>DeriveStreamID(namespace, keys...)</code> is a
+              namespaced SHA-256 (NUL-separated, collision-safe) — the same concept as
+              the hand-rolled length-prefixed SHA-256[:16] + sync.Map cache. The
+              hand-roll adds caching the library lacks, but encodes differently, so the
+              two produce different stream IDs for the same item. Switching outright
+              would orphan every existing event stream — this is a documentation
+              decision, not a refactor.
+            </p>
+            <div class="callout callout-teal">
+              <strong>Recommendation</strong>
+              Keep the current derivation (data compatibility wins) but pin the
+              divergence in a comment on <code>AggregateID</code> referencing
+              <code>id.DeriveStreamID</code>, and consider upstream-contributing the
+              <code>sync.Map</code> cache idea to the library's derive path.
+            </div>
+          </div>
+
+          <div class="issue issue-nice" id="upcasters">
+            <span class="severity severity-nice">Partially Used &middot; Low impact</span>
+            <h3>Schema evolution handled by "fat payload" instead of the Upcaster registry</h3>
+            <div class="where">pkg/cqrs/events.go:41-47 vs schema/upcaster.go (NewUpcaster, UpcastSourceTransform)</div>
+            <p>
+              V1/V2→V3 (de-githubify, ADR-0007) compatibility is achieved by keeping four
+              legacy fields in <code>ItemSyncedPayload</code> forever and upcasting in
+              <code>dataItemFromPayload</code>. The library's schema module formalizes
+              this: versioned <code>Upcaster</code>s registered per event type, applied
+              transparently at the store boundary via
+              <code>UpcastSourceTransform</code> + <code>event.DecorateStore</code>.
+              With exactly three event types and one historical migration already
+              shipped, the fat payload is defensible — but a second schema change would
+              make the upcaster pipeline the cheaper path.
+            </p>
+          </div>
+
+          <div class="issue issue-nice" id="hygiene">
+            <span class="severity severity-nice">Polish &middot; Low impact</span>
+            <h3>Hygiene cluster: time.Now in decider, panic fallback, ignored Close errors</h3>
+            <div class="where">decider.go:147 &middot; aggregate_id.go:46 &middot; stack.go:173-181, store_factory.go:58-78</div>
+            <p>
+              Three small items surfaced by the lint run:
+              <code>TombstonedAt: unixNano(time.Now().UTC())</code> (decider.go:147)
+              makes new-tombstone event payloads non-deterministic — inject a clock (the
+              library's <code>event.Clock</code> pattern) or thread the timestamp from
+              the command; the documented-unreachable <code>panic</code>
+              (aggregate_id.go:46) could return an error now that
+              <code>AggregateID</code> has a single call contract; and eight
+              <code>_ = x.Close()</code> calls in shutdown paths swallow real close
+              failures — log them (C023).
+            </p>
+          </div>
+        </section>
+
+        <section id="leveraged">
+          <h2><span class="num">03</span>Fully leveraged — done right</h2>
+
+          <div class="issue issue-nice" id="core-engine">
+            <span class="severity severity-nice">Fully Leveraged</span>
+            <h3>The event-sourced core is used exactly as designed</h3>
+            <div class="where">decider.go &middot; commands.go &middot; stack.go &middot; events.go</div>
+            <p>
+              Pure fold with a strict default branch (unknown event types return a
+              classified error, decider.go:53-61 — satisfying the library's B005 concern
+              by hand), events built via <code>event.NewEvents</code> with the
+              aggregate-type const (project lint C0010), payloads decoded via
+              <code>event.DecodePayloadAuto</code> with zero manual
+              json.Unmarshal in the decider path, and optimistic concurrency through
+              <code>repo.ExecuteRef</code> alone. Conflict handling is a clean
+              <code>ConflictResolver</code> seam with remote-wins default — a pattern the
+              library explicitly leaves to consumers.
+            </p>
+          </div>
+
+          <div class="issue issue-nice" id="projection-arch">
+            <span class="severity severity-nice">Fully Leveraged</span>
+            <h3>Projection architecture matches the library's intended tier</h3>
+            <div class="where">runner.go &middot; projection.go &middot; ADR-0006</div>
+            <p>
+              Live synchronous delivery (<code>bus.SubscribeAll</code> relying on
+              BlockPublishUntilSubscriberAck for read-your-writes) plus
+              <code>projectionhost.Host</code> for checkpointed, crash-restarting,
+              DLQ-guarded catch-up is precisely the split the library's
+              projection-tiers doc prescribes. The per-aggregate mutex-guarded version
+              gate is a justified addition (stronger than the library's dedup.Ring
+              event-ID ring, which cannot prevent stale-event resurrection). The only
+              defect in this area is the DLQ volatility covered
+              <a href="#dlq-volatility">above</a>.
+            </p>
+          </div>
+
+          <div class="issue issue-nice" id="storage-and-versions">
+            <span class="severity severity-nice">Fully Leveraged</span>
+            <h3>Storage lifecycle, codec choice, and version hygiene</h3>
+            <div class="where">store_factory.go &middot; stack.go:106-132 &middot; go.mod:44-63</div>
+            <p>
+              SQLite is opened, schema-initialized, and WAL-enabled through the library's
+              own helpers with pool constraints applied after; memory and SQLite
+              backends are selected behind one config knob. CBOR (not JSON) payloads
+              keep event storage compact. And every direct dependency sits at the latest
+              published release — event v4.9.0, command v4.8.1, storage v4.8.1,
+              watermill v4.5.1 — with the deprecated surface (stack presets,
+              transports, VersionedStore) deliberately untouched.
+            </p>
+          </div>
+        </section>
+
+        <section id="na">
+          <h2><span class="num">04</span>Considered and correctly not adopted</h2>
+          <p>
+            An honest utilization audit is not a maximalism contest. These library
+            capabilities are deliberately out of scope for a single-aggregate, pull-only
+            mirror (ADR-0004) — not adopting them is a decision, not a gap.
+          </p>
+          <div class="table-wrap">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th>Capability</th>
+                  <th>Why not applicable</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Encryption / signing</td><td>Mirror of public GitHub activity in local SQLite; no sensitive payloads or transit</td></tr>
+                <tr><td>Scheduling, Deriver (sagas)</td><td>Single aggregate, no process management; sync cadence belongs to the consumer</td></tr>
+                <tr><td>Graph projections, metaengine, kv/listing tiers</td><td>One flat Item projection with SQL filtering; metaengine is experimental and the SQL view store is deprecated for v5</td></tr>
+                <tr><td>dedup.Ring</td><td>Per-aggregate version gate is strictly stronger than event-ID ring dedup</td></tr>
+                <tr><td>State cache / load coalescing</td><td>Streams are 1-3 events; single-writer with per-source mutex — nothing to dedup</td></tr>
+                <tr><td>WaitForVersion</td><td>Synchronous bus delivery already guarantees read-your-writes</td></tr>
+                <tr><td>Dispatch idempotency / command DLQ</td><td>Synchronous dispatch returns errors to callers; the decider no-ops unchanged items (natural idempotency)</td></tr>
+                <tr><td>Query dispatcher</td><td>Reads call the read model directly — documented decision (stack_adapters.go:1-7)</td></tr>
+                <tr><td>stack/* presets, transport/*</td><td>Deprecated (ADR-0123/0127); hand-wiring is the sanctioned path</td></tr>
+                <tr><td>catalog (AsyncAPI/D2 docs)</td><td>Three event types; Huma already generates the public OpenAPI surface</td></tr>
+                <tr><td>External brokers via watermill adapters</td><td>In-process bus by design; the adapter remains the escape hatch if distribution ever lands</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="versions">
+          <h2><span class="num">05</span>Version currency</h2>
+          <div class="callout callout-teal">
+            <strong>Perfect on everything that matters</strong>
+            All 12 direct dependencies are at their latest published releases
+            (<code>go list -m -u all</code>, 2026-09-05). The only available bump in the
+            entire graph is an indirect patch: schema v4.3.0 → v4.3.1.
+          </div>
+          <div class="table-wrap">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th>Module</th>
+                  <th>Pinned</th>
+                  <th>Latest</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>event/v4</td><td>v4.9.0</td><td>v4.9.0</td><td class="yes">current</td></tr>
+                <tr><td>command/v4</td><td>v4.8.1</td><td>v4.8.1</td><td class="yes">current</td></tr>
+                <tr><td>storage/v4</td><td>v4.8.1</td><td>v4.8.1</td><td class="yes">current</td></tr>
+                <tr><td>decider / id / codec / middleware / projection / projectionhost / snapshot / storage-memory / watermill</td><td>v4.3-v4.5 line</td><td>same</td><td class="yes">current</td></tr>
+                <tr><td>schema/v4 (indirect)</td><td>v4.3.0</td><td>v4.3.1</td><td class="no">patch behind</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="opportunities">
+          <h2><span class="num">06</span>Top opportunities</h2>
+          <p>Ranked by impact &times; ease (1-5 each). The top three are the Pareto set.</p>
+          <div class="table-wrap">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Opportunity</th>
+                  <th>Impact</th>
+                  <th>Ease</th>
+                  <th>Priority</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>SQLite DLQ when backend is SQLite (fixes C017)</td><td class="yes">5</td><td class="yes">5</td><td><span class="highlight">25</span></td></tr>
+                <tr><td>2</td><td>Correlation + causation metadata on all write paths</td><td class="yes">4</td><td class="yes">5</td><td><span class="highlight">20</span></td></tr>
+                <tr><td>3</td><td>cqrs-lint (library) as CI leg, error-gated</td><td class="yes">4</td><td class="yes">4</td><td><span class="highlight">16</span></td></tr>
+                <tr><td>4</td><td>Optional OTel/metrics surface on CQRSConfig</td><td class="yes">4</td><td>3</td><td><span class="highlight">12</span></td></tr>
+                <tr><td>5</td><td>Swap validation middleware for middleware.CommandValidation</td><td>2</td><td class="yes">5</td><td><span class="highlight">10</span></td></tr>
+                <tr><td>6</td><td>scenario DSL for new decider/projection tests</td><td>3</td><td>3</td><td><span class="highlight">9</span></td></tr>
+                <tr><td>7</td><td>Log Close() errors in shutdown paths (8 sites)</td><td>2</td><td>4</td><td><span class="highlight">8</span></td></tr>
+                <tr><td>8</td><td>Clock injection for tombstone timestamps</td><td>2</td><td>3</td><td><span class="highlight">6</span></td></tr>
+                <tr><td>9</td><td>eventtest fakes + WithClock in new stack tests</td><td>2</td><td>3</td><td><span class="highlight">6</span></td></tr>
+                <tr><td>10</td><td>Document DeriveStreamID divergence on AggregateID</td><td>1</td><td>4</td><td><span class="highlight">4</span></td></tr>
+                <tr><td>11</td><td>Evaluate Upcaster registry before next schema change</td><td>2</td><td>2</td><td><span class="highlight">4</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="lint-run">
+          <h2><span class="num">07</span>Appendix — library cqrs-lint run (v4.8.1)</h2>
+          <p>
+            Primary evidence for several findings. Run read-only against
+            <code>./pkg/cqrs</code> on 2026-09-05; 19 files analyzed in 101&nbsp;ms.
+            False positives are marked and were verified against source.
+          </p>
+          <div class="table-wrap">
+            <table class="compare">
+              <thead>
+                <tr>
+                  <th>Rule</th>
+                  <th>Severity</th>
+                  <th>Finding</th>
+                  <th>Verdict</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>C017</td><td class="no">ERROR</td><td>Memory DLQ + persistent store (runner.go:42)</td><td class="no">Real — finding #1</td></tr>
+                <tr><td>C009</td><td>WARN</td><td>panic() in production path (aggregate_id.go:46)</td><td>Documented-unreachable; polish item</td></tr>
+                <tr><td>C007</td><td>WARN</td><td>time.Now() inside decider (decider.go:147)</td><td>Real determinism gap</td></tr>
+                <tr><td>E005 &times;2</td><td>WARN</td><td>"no registered handler" for both commands</td><td class="yes">False positive — registered in newCommandHandlers (commands.go:73,85)</td></tr>
+                <tr><td>A016</td><td>WARN</td><td>No idempotency middleware on dispatcher</td><td class="yes">By design — decider no-ops unchanged items</td></tr>
+                <tr><td>C023 &times;8</td><td>WARN</td><td>Close() errors ignored in shutdown paths</td><td>Real hygiene item</td></tr>
+                <tr><td>E014</td><td>INFO</td><td>projectionhost without drain-before-respond</td><td class="yes">False positive — synchronous live bus gives read-your-writes</td></tr>
+                <tr><td>F022-F025</td><td>INFO</td><td>Memory read model does in-memory filter/sort/page/count</td><td class="yes">By design — that is the memory backend; SQLite RM does SQL-side filtering</td></tr>
+                <tr><td>B004 &times;2</td><td>INFO</td><td>Consider cqrs-gen constructors</td><td>Optional tooling</td></tr>
+                <tr><td>B005</td><td>INFO</td><td>Consider decider.StrictApply</td><td>Already satisfied — fold errors on unknown types</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            The linter's <code>scorecard</code> subcommand grades the project
+            "5/28 relevant modules (17%) — Minimal." That metric counts raw module
+            adoption — including the deprecated stack presets as "missing" — and its
+            detection missed actual usage of codec, decider, event, and id (verified:
+            stack.go:130, decider.go:6-8, events.go:7). Treat it as a lower bound; this
+            report's per-capability analysis is the real assessment.
+          </p>
+        </section>
+
+        <footer class="footer">
+          <p>
+            Generated 2026-09-05 &middot; Library audited: go-cqrs-lite v4 line (34
+            modules, local checkout @ 62aa4165c + released v4.8.1-v4.9.0) &middot; All
+            code claims verified against go-localsync source; all API claims verified
+            against library source in the sibling checkout
+          </p>
+        </footer>
+      </main>
+    </div>
+
+    <!-- Progressive-enhancement scrollspy. Nav still works without JS via anchor links. -->
+    <script>
+      (function () {
+        if (!("IntersectionObserver" in window)) return;
+        var nav = document.querySelector("[data-nav]");
+        if (!nav) return;
+        var links = nav.querySelectorAll('a[href^="#"]');
+        var ids = Array.from(links).map(function (l) {
+          return l.getAttribute("href").slice(1);
+        });
+        var sections = ids
+          .map(function (id) {
+            return document.getElementById(id);
+          })
+          .filter(Boolean);
+        if (!sections.length) return;
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                links.forEach(function (link) {
+                  link.classList.toggle(
+                    "active",
+                    link.getAttribute("href") === "#" + entry.target.id,
+                  );
+                });
+              }
+            });
+          },
+          { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
+        );
+        sections.forEach(function (s) {
+          observer.observe(s);
+        });
+      })();
+    </script>
+  </body>
+</html>

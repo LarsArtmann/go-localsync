@@ -115,3 +115,9 @@ golangci-lint run ./...
 # Build
 go build ./...
 ```
+
+---
+
+## Resolution (2026-09-05)
+
+The executed renames (`pkg/crdt`) shipped; the remaining renames (`pkg/sync`→`pkg/engine`, `pkg/cqrs`→`pkg/store`) were decided against — vocabulary stabilized as sync/cqrs/crdt; CLI coverage items moot (CLI deleted v0.2.0); ItemFilter builder shipped. No live items remain.

@@ -23,6 +23,17 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 
 - **Export to JSON/CSV** — export stored events to file formats for analysis in external tools.
 
+### Recurring suggestions (raw ideas, unowned)
+
+Ideas that recur across 2026 status reports but were never picked up; collected here so they stop masquerading as open tasks in old snapshots. None is committed to.
+
+- BDD/Ginkgo suite for the sync flow; fuzz tests (`DecideSync`, `AggregateID`, the cqrs-lint directive parser); property-based tests
+- Full-pipeline benchmarks under load (SQLite growth, 10k-event replay)
+- Prometheus `/metrics` endpoint on the HTTP API
+- Live updates via WebSocket/SSE from the read model
+- Config-file support and provider auto-detection/plugin registry
+- NixOS module for consumer deployments
+
 ---
 
 ## Open Questions
@@ -37,7 +48,7 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 
 - **Multi-writer / distributed sync** — the provider is the sole source of truth per aggregate. No vector clocks, no operation-based CRDTs, no multi-node merge (see [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md)).
 - **Push ingestion** — go-localsync is pull-only. Push-driven consumers share `go-cqrs-lite v4` directly.
-- **Provider sprawl in the core module** — the SDK core stays a pure contract library. Concrete providers live in optional nested modules (reference: [`provider/github`](../provider/github), released as `provider/github/v0.1.0`) or in consumer apps (reference: [`github-local-sync`](https://github.com/larsartmann/github-local-sync)).
+- **Provider sprawl in the core module** — the SDK core stays a pure contract library. Concrete providers live in optional nested modules (reference: [`provider/github`](provider/github), released as `provider/github/v0.1.0`) or in consumer apps (reference: [`github-local-sync`](https://github.com/larsartmann/github-local-sync)).
 - **Multi-aggregate framework** — one `sync_item` aggregate, three fixed events, one flat projection. Widening this requires revisiting ADR-0004.
 
 ---

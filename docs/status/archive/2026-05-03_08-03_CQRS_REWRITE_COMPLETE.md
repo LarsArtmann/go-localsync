@@ -263,3 +263,9 @@ This is a **domain modeling decision** that only the project owner can make. The
 | ~07:30 | Improvement plan created, user asked for direction                     |
 | ~08:00 | Complete rewrite: 12 files deleted, 10 files created, 34 tests passing |
 | 08:03  | This status report                                                     |
+
+---
+
+## Resolution (2026-09-05)
+
+Shipped as the v0.1.0 CQRS foundation. Forward items: typed commands + dispatcher + middleware + snapshots + SQLite store + LWWResolver shipped (v0.1.0-v0.4.0); `projection.Runner` superseded by `projectionhost.Host` (ADR-0006, v0.4.0); `query.Pagination` rejected by design (no query dispatcher — ADR note in `stack_adapters.go`); CLI items moot (example CLI removed in v0.2.0); '298 tests' / 'MemoryStore only' claims superseded (232 tests, dual backends). BDD/fuzz/large-aggregate test ideas now live in ROADMAP 'Recurring suggestions'.

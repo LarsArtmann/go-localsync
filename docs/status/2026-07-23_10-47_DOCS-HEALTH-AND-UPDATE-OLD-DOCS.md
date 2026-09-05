@@ -156,7 +156,7 @@ My living-doc edits were auto-committed by hooks into **5 separate commits** (21
 6. ~~Verify `docs/DOMAIN_LANGUAGE.md` exists and is current~~ done — exists; refreshed 2026-09-05 (provider/github reference added)
 7. Verify `CONTRIBUTING.md` content matches what CHANGELOG claims ("streamlined")
 8. ~~Open each `docs/adr/000N-*.md` and verify status headers match ROADMAP.md ADR table~~ done 2026-09-05 — all 8 ADR statuses verified against the ROADMAP table (0001-0007 Accepted, 0008 Proposed-dormant)
-9. Run link integrity sweep: `grep -roE '\]\([^)]+\)' *.md docs/` and verify each resolves
+9. ~~Run link integrity sweep: `grep -roE '\]\([^)]+\)' *.md docs/` and verify each resolves~~ done 2026-09-05 — scripted sweep over living docs + ADRs + current status/planning files; all internal links resolve
 10. ~~Cross-check every coverage % in AGENTS.md and README.md tables against `go test -cover`~~ done 2026-09-05 — recomputed (cqrs 82.4%, cqrslint 90.0%); both tables corrected
 
 ### Short-term (TODO_LIST items)

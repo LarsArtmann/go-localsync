@@ -228,3 +228,9 @@ This matters because it determines whether we invest in the projection-based bra
 | `go-error-family`         | v0.2.0  | ✅                                  |
 | `go-github/v69`           | v69.2.0 | ✅                                  |
 | `huma/v2`                 | v2.38.0 | ✅                                  |
+
+---
+
+## Resolution (2026-09-05)
+
+CRDT integration shipped (v0.1.0 `ConflictResolver` seam); stack/client splits executed 2026-05-29 04:29; VectorClock items moot (deleted v0.4.0); real-time protocol is a recorded non-goal (ADR-0004); second provider routed to ROADMAP; OTel/API auth tracked in TODO_LIST. No live items remain.

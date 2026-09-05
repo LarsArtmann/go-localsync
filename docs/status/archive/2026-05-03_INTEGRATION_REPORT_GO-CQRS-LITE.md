@@ -148,3 +148,9 @@ Provider → SyncItemCommand → SyncItem Decider → event.Store (Pebble/Memory
 **The integration is architecturally ready but not yet started.** The ULID migration in go-localsync was the critical prerequisite — it's done. The ID types share the same underlying `ulid.ULID` value, making conversion trivial. go-localfirst provides a proven reference pattern for the exact same integration.
 
 The biggest risk is **go-cqrs-lite's unpublished changes** — 257 commits of improvements since `v0.1.1` including the `decider` package (recommended approach), error taxonomy, and ISP improvements. Publishing `v0.2.0` should be the first action.
+
+---
+
+## Resolution (2026-09-05)
+
+Integration completed 2026-05-03 and deepened through v2/v3/v4 (now the v4.9 stack, v0.5.0). 'Integration level 0%' is historical. Pebble was never adopted (SQLite became the production backend); the go-cqrs-lite v0.2.0 publishing items were superseded by the v2-v4 major-version model. No live items remain.

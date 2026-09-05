@@ -245,3 +245,9 @@ This requires upstream repository access / maintainer communication.
 9. Bulk-migrated all test files to `testutil.*` calls
 10. Fixed all build/lint issues
 11. Verified: **0 clone groups at threshold 30**, all 384 tests pass, 0 lint regressions
+
+---
+
+## Resolution addendum (2026-09-05)
+
+Dedup pass shipped. The go-cqrs-lite upstream-WIP blocker died with the v3 migration (2026-06-22); CLI coverage items are moot (example CLI removed in v0.2.0); the E2E and concurrent read-model tests now exist (`pkg/cqrs/integration_test.go`, `readmodel_concurrent_test.go`); OTel/PAT-smoke/benchmarks/export are tracked in TODO_LIST/ROADMAP. No live items remain.

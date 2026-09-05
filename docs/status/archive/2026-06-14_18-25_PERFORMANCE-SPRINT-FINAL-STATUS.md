@@ -162,3 +162,9 @@ These are all currently unconditional defaults. For a library/SDK, should they b
 | `2df72e7` | perf: SQLite WAL, aggregate ID cache, HTTP timeout, log level Debug   |
 | `38e954b` | perf: rate limit cache, concurrent FetchAll, SQLite scan optimization |
 | `5685c27` | fix: remove gh.Rate type leak from rateLimitCache, fix test data race |
+
+---
+
+## Resolution addendum (2026-09-05)
+
+Shipped in v0.1.1/v0.2.0 (CHANGELOG Performance section): rate-limit cache, concurrent `FetchAll` with `MaxConcurrentFetches`, WAL mode, aggregate-ID cache, `CountByType`. Early-page termination and per-page retry were re-implemented in `provider/github` on the go-github-kit kernel (`provider/github/v0.1.0`); rate-limit info in `FetchResult` shipped with the v0.5.0 provider shape. The mock-Count and dead-code audit items were resolved by the later read-model/testutil refactors. Full-pipeline benchmarks are tracked in TODO_LIST; deeper test ideas live in ROADMAP 'Recurring suggestions'. No live items remain.

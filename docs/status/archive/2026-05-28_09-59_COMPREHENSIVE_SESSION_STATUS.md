@@ -179,3 +179,9 @@ The `ConflictAwareSyncer` currently delegates all conflict detection to the CQRS
 ---
 
 _End of report. Waiting for instructions._
+
+---
+
+## Resolution (2026-09-05)
+
+CRDT integration + DOMAIN_LANGUAGE.md + ADRs 0001-0003 shipped within days (2026-05-29 / session 15); VectorClock/NodeID items moot (CRDT machinery deleted v0.4.0); the HTTP API shipped (pkg/api); OTel tracked in TODO_LIST. No live items remain.

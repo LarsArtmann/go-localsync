@@ -196,3 +196,9 @@ It's 2 lines under the limit. Adding any new feature (e.g., new SyncOption field
 ---
 
 _Arte in Aeternum_
+
+---
+
+## Resolution (2026-09-05)
+
+The file-size splits shipped same day; Push/Pull test items moot (v0.2.0); CLI coverage moot (CLI deleted v0.2.0); 350-line CI limit never adopted (judgment call, not tracked); OTel tracked in TODO_LIST; benchmark ideas routed to ROADMAP. No live items remain.

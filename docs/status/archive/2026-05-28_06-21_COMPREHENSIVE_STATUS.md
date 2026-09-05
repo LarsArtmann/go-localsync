@@ -222,3 +222,9 @@ go build ./...
 go test ./... -coverprofile=coverage.out
 go tool cover -func=coverage.out
 ```
+
+---
+
+## Resolution (2026-09-05)
+
+The CRDT integration shipped next day (2026-05-29_03-19); the 'CI/CD FULLY DONE' claim was corrected by the 2026-06-29 reports and CI was reworked in v0.4.0; Turso/multi-user/TTL ideas moot or routed (retention/TTL → ROADMAP Open Questions); OTel/auth/export routed (TODO_LIST/ROADMAP). No live items remain.
