@@ -5,7 +5,7 @@
 
 **A Go SDK for building a local-first mirror of any paginated REST API.** Pull every item from GitHub, GitLab, Jira, or your own service into an offline, idempotent read model — with full-fidelity JSON storage, incremental sync, conflict detection, soft-deletes (tombstones), and a CQRS event log you can replay from scratch.
 
-_go-localsync is a **single-writer pull mirror**: the provider is the sole source of truth and there is no local mutation or multi-writer merge. It is a **pure contract library** — not a CLI and not a provider implementation._ It defines the `Provider` interface and the sync/CQRS engine. The reference consumer (GitHub provider + CLI) is [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
+_go-localsync is a **single-writer pull mirror**: the provider is the sole source of truth and there is no local mutation or multi-writer merge. The core module is a **pure contract library** — no CLI binary._ It defines the `Provider` interface and the sync/CQRS engine. A ready-made **GitHub events provider** ships as the optional nested module [`provider/github`](provider/github) (see [GitHub events out of the box](#github-events-out-of-the-box)); the reference CLI consumer is [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
 
 ## Overview
 
@@ -41,7 +41,7 @@ go get github.com/larsartmann/go-localsync
 
 ## Quick Start
 
-The SDK ships no provider, so the quickest way to see it work is a tiny in-process provider. Implement `provider.Provider`, then wire it into a CQRS stack and sync:
+The SDK core ships no provider, so the quickest way to see it work is a tiny in-process provider. Implement `provider.Provider`, then wire it into a CQRS stack and sync:
 
 ```go
 package main
@@ -104,7 +104,18 @@ func main() {
 }
 ```
 
-For a real-world example — GitHub API client, CLI flags, SQLite persistence, HTTP server — see the reference consumer app [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
+### GitHub events out of the box
+
+Syncing GitHub user events? The optional [`provider/github`](provider/github) module implements `provider.Provider` over GitHub's `GET /users/{user}/events` endpoint — token auth, rate-limit gating fed from response headers, retry with backoff, and error classification onto the SDK's error family:
+
+```bash
+go get github.com/larsartmann/go-localsync@latest
+go get github.com/larsartmann/go-localsync/provider/github@latest
+```
+
+See the [module README](provider/github/README.md) for configuration and usage.
+
+For a full application — CLI flags, SQLite persistence, HTTP server — see the reference consumer app [`github-local-sync`](https://github.com/larsartmann/github-local-sync).
 
 ## Core Interfaces
 
@@ -238,12 +249,14 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (216 tests across 10 packages)
+go test ./... -count=1                # Run tests (232 tests across 10 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
 
-Full pipeline: `buildflow --build-mode full` (ensure `go.work` is removed first — see AGENTS.md).
+> **Build tag required (Go 1.26):** the storage layer uses `encoding/json/v2`, which Go 1.26 gates behind `GOEXPERIMENT=jsonv2`. Enter the nix devShell (`nix develop`, or `direnv allow` with the committed `.envrc`) — it exports `GOFLAGS=-tags=goexperiment.jsonv2` for you. Plain-shell `go build`/`go test` fail with `encoding/json/v2: build constraints exclude all Go files` until Go 1.27 graduates the package.
+
+Full pipeline: `buildflow --build-mode full` (inside the devShell; see AGENTS.md for the go.work caveat).
 
 ## Architecture
 
@@ -260,30 +273,33 @@ pkg/
 ├── errors/           # Structured errors via go-error-family constructors
 ├── api/              # HTTP API server (Huma v2)
 └── testutil/         # Shared test helpers (MockProvider, SyncStore double)
+
+provider/github/      # Optional nested module: GitHub events provider (go-github-kit)
 ```
 
 ## Testing
 
-216 test functions across 10 packages:
+232 test functions across 10 packages:
 
 | Package             | Tests | Coverage | Description                                                             |
 | ------------------- | ----- | -------- | ----------------------------------------------------------------------- |
-| `pkg/cqrs`          | 95    | 82.5%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
+| `pkg/cqrs`          | 97    | 82.4%    | Decider, ReadModel, Projection, Stack, SQLite RM, tombstone, regression |
 | `pkg/sync`          | 32    | 88.4%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
-| `pkg/crdt`          | 7     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
+| `pkg/crdt`          | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/id`            | 12    | 100.0%   | ID construction, roundtrip, zero, equal                                 |
 | `pkg/errors`        | 16    | 92.9%    | Sentinel errors, wrapping, classification, IsRetryable, HTTPStatus      |
 | `pkg/provider`      | 2     | 92.3%    | Item validation                                                         |
 | `pkg/api`           | 15    | 93.1%    | Server, routes, handlers, health/stats/items/sync endpoints             |
 | `pkg/data/model`    | 10    | 80.5%    | Item, Key, Validate, ItemFilter, Tombstone                              |
 | `pkg/data/schema`   | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
-| `internal/cqrslint` | 23    | 88.5%    | 10 architectural checks (C0001–C0010), loader, rules catalog            |
+| `internal/cqrslint` | 36    | 90.0%    | 10 architectural checks (C0001–C0010), suppression, rules catalog        |
 
 ## Related Projects
 
 | Need                                                         | Use                                                                       |
 | ------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| Sync GitHub events to local storage (reference consumer)     | **[github-local-sync](https://github.com/larsartmann/github-local-sync)** |
+| Sync GitHub events to local storage (ready-made provider)    | **[`provider/github`](provider/github)** (this repo's nested module)      |
+| Full application example: CLI, SQLite, HTTP server            | **[github-local-sync](https://github.com/larsartmann/github-local-sync)** |
 | Build a local-first application with event sourcing and CQRS | **[go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite)**           |
 
 ## License

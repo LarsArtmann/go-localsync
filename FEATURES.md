@@ -1,8 +1,8 @@
 # FEATURES.md — go-localsync
 
-**Updated:** 2026-07-22
+**Updated:** 2026-09-05
 
-> The SDK is a **pure contract library**. It defines the `Provider` interface, the CQRS sync engine, and CRDT primitives — but ships **no provider implementations and no CLI binary**. The reference consumer application — GitHub provider + CLI — lives in [`github.com/larsartmann/github-local-sync`](https://github.com/larsartmann/github-local-sync). New providers (GitLab, Jira, …) are built the same way, in their own consumer apps.
+> The core module is a **pure contract library**: it defines the `Provider` interface, the CQRS sync engine, and CRDT primitives — no CLI binary. The reference **GitHub provider ships in-repo as the optional nested module [`provider/github`](provider/github)** (released as `provider/github/v0.1.0`, built on go-github-kit v0.3.0); the reference CLI consumer lives in [`github.com/larsartmann/github-local-sync`](https://github.com/larsartmann/github-local-sync). New providers (GitLab, Jira, …) are built the same way, as separate modules or consumer apps.
 >
 > **Scope boundary (see [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md)):** go-localsync is a **single-aggregate, pull-only, flat-Item sync engine**. The domain model is provider-agnostic (`Attributes map[string]string` carries provider-specific content; see [ADR-0007](docs/adr/0007-de-githubify-domain-model.md)), the event vocabulary is fixed at three events, and there is one flat projection. It is **not** a generic multi-aggregate event-sourcing framework — generalising it was considered and deferred. For push-driven, multi-aggregate consumers (e.g. DiscordSync), share `go-cqrs-lite v4` directly instead.
 
@@ -120,14 +120,14 @@
 
 | #  | Feature   | Status           | Package     | Description                                                                                                           |
 | -- | --------- | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------- |
-| 50 | Nix Flake | FULLY_FUNCTIONAL | `flake.nix` | Dev shell (Go 1.26, golangci-lint) + `buildGoModule` package derivation. Vendored private deps (`vendorHash = null`). |
+| 50 | Nix Flake | FULLY_FUNCTIONAL | `flake.nix` | Dev shell (Go 1.26, golangci-lint, ginkgo, gofumpt) + `go-standard` flake module (go-nix-helpers) with a real `vendorHash`; `checks.cqrs-lint` gate. |
 | 51 | No CGO    | FULLY_FUNCTIONAL | project     | Pure Go via `modernc.org/sqlite`. Builds with `CGO_ENABLED=0`.                                                        |
 
 ## CI/CD
 
 | #  | Feature               | Status           | Package             | Description                                                                                                                               |
 | -- | --------------------- | ---------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 52 | GitHub Actions CI     | FULLY_FUNCTIONAL | `.github/workflows` | `test` (race + coverage) + `lint` (vet + golangci-lint) + `build` (cross-platform compile verify) jobs. All pass on master.               |
+| 52 | GitHub Actions CI     | FULLY_FUNCTIONAL | `.github/workflows` | `test` (race + coverage) + `lint` (vet + golangci-lint, gosec) + `security` (govulncheck + gitleaks) + `build` (cross-platform compile verify) + `provider` (standalone build + race tests for the nested `provider/github` module). All dependencies are public — no private-repo auth in CI. All pass on master. |
 | 53 | Cross-Platform Builds | FULLY_FUNCTIONAL | `.github/workflows` | Build matrix (linux/darwin × amd64/arm64) verifies the library compiles on all target platforms. A pure library has no binary to ship.    |
 | 54 | Automated Releases    | FULLY_FUNCTIONAL | `.github/workflows` | Tag-triggered release via `softprops/action-gh-release` generates release notes. Library releases ship source only (no binary artifacts). |
 
@@ -135,15 +135,16 @@
 
 | #  | Feature      | Status           | Package        | Description                                                                                                                                  |
 | -- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 216 test functions across 10 packages, all passing. Run: `go test ./... -count=1`.                                                           |
+| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 232 test functions across 10 packages, all passing. Run: `go test ./... -count=1`.                                                           |
 | 56 | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.) |
 
 ## Quality
 
 | #  | Feature                | Status               | Package           | Description                                                                                                                                                                                                                                                                                                               |
 | -- | ---------------------- | -------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 57 | Lint (Zero Issues)     | FULLY_FUNCTIONAL     | project           | golangci-lint v2 with `enable-all` (+ targeted `disable`/exclusions), 0 issues. Strict `.golangci.yml`.                                                                                                                                                                                                                   |
-| 58 | GitHub Events Provider | PARTIALLY_FUNCTIONAL | `provider/github` | Optional nested module: `provider.Provider` over `go-github-kit` v0.2.0 (auth, rate gate, retry; `Fetch`/`FetchAll`/`GetRateLimit`; error-family mapping incl. `ErrProviderUnavailable`). Extracted from github-local-sync, suite ported. Unreleased: parent pin is a master pseudo-version and no module tag exists yet. |
+| 57 | Lint (Zero Issues) | FULLY_FUNCTIONAL | project | golangci-lint v2 with `enable-all` (+ targeted `disable`/exclusions), 0 issues. Strict `.golangci.yml`. |
+| 58 | GitHub Events Provider | PARTIALLY_FUNCTIONAL | `provider/github` | Optional nested module (released `provider/github/v0.1.0`): `provider.Provider` over `go-github-kit` v0.3.0 (token auth, rate gate from `X-RateLimit-*` headers, retry with backoff, `FetchAll` on `githubkit.FetchPages`; error-family mapping incl. `ErrProviderUnavailable`). Parent pinned to released `go-localsync v0.5.0`; standalone CI leg builds + race-tests it. Remaining gap: mock-based suite only — no live-API smoke test. |
+| 59 | cqrs-lint Suppression Directives | FULLY_FUNCTIONAL | `internal/cqrslint` | `//cqrs-lint:ignore <rule>` / `//cqrs-lint:ignore-file <rule>` directives with `all`, comma-separated rules, and optional reason; `--strict`, `--verbose`, `--show-suppressed`, `--json` flags. Shipped in v0.5.0. |
 
 ---
 
@@ -157,7 +158,7 @@
 - Error taxonomy gives smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
 - Projection via synchronous `bus.SubscribeAll` (live) + `projectionhost.Host` (managed catch-up with checkpoint, crash-restart, DLQ — ADR-0006)
-- 216 tests with good coverage across all packages
+- 232 tests with good coverage across all packages
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 - Clear DTO/domain boundary: `provider.Item` (DTO) → `model.Item` (domain entity) via `item_adapter.go`
 
@@ -165,7 +166,7 @@
 
 | Area                   | Issue                                                                                                                                                                                                                | Impact                                                                                                                                      |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Contract-only SDK      | No provider or CLI shipped in-repo. GitHub provider + CLI live in [`github-local-sync`](https://github.com/larsartmann/github-local-sync).                                                                           | Consumers implement their own provider against the interface.                                                                               |
+| Contract-only core       | The core module ships interfaces and engine only — no CLI binary. GitHub provider = optional nested module; CLI consumer lives in [`github-local-sync`](https://github.com/larsartmann/github-local-sync).                                                  | Consumers implement their own provider against the interface (or require `provider/github`).                                               |
 | No observability       | No OpenTelemetry, no metrics, no tracing                                                                                                                                                                             | Production debugging requires log spelunking                                                                                                |
 | API has no auth        | HTTP API has no authentication middleware                                                                                                                                                                            | Not safe to expose on a network                                                                                                             |
 | No data export         | No JSON/CSV export of stored events                                                                                                                                                                                  | Cannot export for analysis in external tools                                                                                                |

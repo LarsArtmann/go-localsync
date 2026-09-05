@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-07-22
+**Last Updated:** 2026-09-05
 
 ## Overview
 
@@ -16,6 +16,7 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 - **TUI with Bubble Tea** — interactive terminal UI for browsing events, filtering, and real-time sync monitoring. Lives in a consumer app, not the SDK.
 - **Multiple-source sync** — accept multiple sources in one sync run. Requires read model schema to track which source each event belongs to.
 - **Daemon / background mode** — run as a cron job or systemd service for periodic sync. Consumer-app concern.
+- **Second provider implementation** (GitLab? Jira?) — a second concrete provider would validate the `Provider` interface against a different API shape; today only `provider/github` exists. Follow the nested-module pattern.
 - **Real-time sync protocol** — live multi-node sync. The former `SyncRequest`/`SyncResponse` types were removed when the CRDT machinery was deleted; this would need to be built from scratch and is out of scope per [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md).
 
 ### Data & Export
@@ -27,9 +28,8 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 ## Open Questions
 
 1. **Multi-source sync** — Should the read model track which source each event belongs to?
-2. **Event retention / TTL** — Automatic cleanup of old events? Configurable?
-3. **Library release flow** — What does a tagged release of a pure Go module look like without a binary? (CI reworked in v0.4.0 to verify cross-platform compilation + binary-free GitHub releases.)
-4. **Multi-aggregate generalisation** — Should go-localsync generalise beyond a single `sync_item` aggregate into a multi-aggregate event-sourcing framework? **Decided: deferred.** See [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [DiscordSync adoption feedback](docs/feedback/2026-06-23_discordsync-adoption-feedback.html). Revisit only if a third+ consumer needs it or `go-cqrs-lite` can't evolve the ergonomics. `go-cqrs-lite v4` remains the cross-project sharing boundary.
+2. **Event retention / TTL** — Automatic cleanup of old events (and purged tombstones)? Configurable?
+3. **Multi-aggregate generalisation** — Should go-localsync generalise beyond a single `sync_item` aggregate into a multi-aggregate event-sourcing framework? **Decided: deferred.** See [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [DiscordSync adoption feedback](docs/feedback/2026-06-23_discordsync-adoption-feedback.html). Revisit only if a third+ consumer needs it or `go-cqrs-lite` can't evolve the ergonomics. `go-cqrs-lite v4` remains the cross-project sharing boundary.
 
 ---
 
@@ -37,7 +37,7 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 
 - **Multi-writer / distributed sync** — the provider is the sole source of truth per aggregate. No vector clocks, no operation-based CRDTs, no multi-node merge (see [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md)).
 - **Push ingestion** — go-localsync is pull-only. Push-driven consumers share `go-cqrs-lite v4` directly.
-- **Provider implementations in-repo** — the SDK is a pure contract library. Concrete providers live in consumer apps (reference: [`github-local-sync`](https://github.com/larsartmann/github-local-sync)).
+- **Provider sprawl in the core module** — the SDK core stays a pure contract library. Concrete providers live in optional nested modules (reference: [`provider/github`](../provider/github), released as `provider/github/v0.1.0`) or in consumer apps (reference: [`github-local-sync`](https://github.com/larsartmann/github-local-sync)).
 - **Multi-aggregate framework** — one `sync_item` aggregate, three fixed events, one flat projection. Widening this requires revisiting ADR-0004.
 
 ---

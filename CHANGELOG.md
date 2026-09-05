@@ -9,7 +9,7 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
-- **Standalone CI leg for `provider/github`** — a dedicated workflow job builds and race-tests the nested module in isolation (`GOWORK=off`, parent fetched via the checkout token), so the module graph it ships is the graph CI proves.
+- **Standalone CI leg for `provider/github`** — a dedicated workflow job builds and race-tests the nested module in isolation (`GOWORK=off`), so the module graph it ships is the graph CI proves. CI also dropped all private-repo auth (GOPRIVATE/SSH-agent): the repository and its dependencies are public now.
 
 ### Changed
 

@@ -18,7 +18,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 - [ ] **CLI test coverage for `cmd/cqrs-lint`**
       **Source:** `cmd/cqrs-lint/main.go` (zero test files — verified via `go test ./...`)
-      **Description:** ~250 lines of untested code: flag parsing, exit-code contract (0 clean / 1 findings / 2 usage), `emitSummary`/`countFindings`/`emitRuleStatus`. An integration test that builds the binary and runs it against `internal/cqrslint/testdata` fixtures closes the gap.
+      **Description:** ~250 lines of untested code: flag parsing, exit-code contract (0 clean / 1 findings / 2 usage), `emitSummary`/`countFindings`/`emitRuleStatus`. An integration test that builds the binary and runs it against small fixture packages closes the gap.
       **Context:** Open since the cqrs-lint CLI sprint (2026-07-17); re-flagged by the 2026-08-02 enhancement session.
 
 - [ ] **Run cqrs-lint as a CI gate**
