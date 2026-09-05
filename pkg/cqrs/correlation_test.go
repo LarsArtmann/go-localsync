@@ -112,8 +112,8 @@ func TestCQRSStack_Causation_PropagatedToEvents(t *testing.T) {
 
 	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("caus-1"), model.ReasonUserHidden))
 
-	evts := waitFor(3)
-	if len(evts) < 3 {
+	evts := waitFor(2)
+	if len(evts) < 2 {
 		t.Fatalf("expected sync + tombstone events, got %d", len(evts))
 	}
 
