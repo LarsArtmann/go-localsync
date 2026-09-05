@@ -78,27 +78,11 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 	var drainDone <-chan struct{}
 
 	defer func() {
-		if err != nil {
-			if cancelRunner != nil {
-				cancelRunner()
-			}
-
-			if drainDone != nil {
-				<-drainDone
-			}
-
-			if rm != nil {
-				_ = rm.Close()
-			}
-
-			if c, ok := sr.store.(io.Closer); ok {
-				_ = c.Close()
-			}
-
-			if c, ok := sr.bus.(io.Closer); ok {
-				_ = c.Close()
-			}
+		if err == nil {
+			return
 		}
+
+		cleanupFailedConstruction(sr, rm, cancelRunner, drainDone)
 	}()
 
 	rm, err = createReadModel(ctx, cfg, sr)
@@ -166,6 +150,36 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 		cancelRunner:      cancelRunner,
 		drainDone:         drainDone,
 	}, nil
+}
+
+// cleanupFailedConstruction releases the resources opened before a failed
+// NewCQRSStack construction, preventing store/bus/db/goroutine leaks. It is
+// only called on the error path; on success the CQRSStack takes ownership.
+func cleanupFailedConstruction(
+	sr storeResult,
+	rm ReadModel,
+	cancelRunner context.CancelFunc,
+	drainDone <-chan struct{},
+) {
+	if cancelRunner != nil {
+		cancelRunner()
+	}
+
+	if drainDone != nil {
+		<-drainDone
+	}
+
+	if rm != nil {
+		_ = rm.Close()
+	}
+
+	if c, ok := sr.store.(io.Closer); ok {
+		_ = c.Close()
+	}
+
+	if c, ok := sr.bus.(io.Closer); ok {
+		_ = c.Close()
+	}
 }
 
 // SyncItem dispatches a SyncItemCommand for a single item.
