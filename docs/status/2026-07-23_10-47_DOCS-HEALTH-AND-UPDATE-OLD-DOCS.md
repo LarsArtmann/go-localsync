@@ -150,11 +150,11 @@ My living-doc edits were auto-committed by hooks into **5 separate commits** (21
 
 1. ~~Run `golangci-lint run ./... --timeout=5m` and fix any issues~~ done at `f0756d9` (v0.4.1 session fixed all 9 findings)
 2. ~~Run `golangci-lint fmt ./...` on all edited docs~~ done at `4121b34` (dprint/dprint doc formatting sweep in the v0.5.0 prep)
-3. Run `buildflow --build-mode full` (inside devShell, go.work removed)
+3. ~~Run `buildflow --build-mode full` (inside devShell, go.work removed)~~ done (routed to TODO_LIST buildflow full run)
 4. ~~Run `nix flake check` to verify sandbox build~~ done at `3247d62` (v0.5.0 — nix build + flake check verified green)
 5. ~~Investigate commit `acaa8a5` (vendor/ → mkPreparedSource migration)~~ resolved — shipped as the v0.4.1 build system, then superseded by the go-standard flake module in v0.5.0 (both migrations documented in CHANGELOG)
 6. ~~Verify `docs/DOMAIN_LANGUAGE.md` exists and is current~~ done — exists; refreshed 2026-09-05 (provider/github reference added)
-7. Verify `CONTRIBUTING.md` content matches what CHANGELOG claims ("streamlined")
+7. ~~Verify `CONTRIBUTING.md` content matches what CHANGELOG claims ("streamlined")~~ done (M26 CONTRIBUTING rewritten 3b9e8e3)
 8. ~~Open each `docs/adr/000N-*.md` and verify status headers match ROADMAP.md ADR table~~ done 2026-09-05 — all 8 ADR statuses verified against the ROADMAP table (0001-0007 Accepted, 0008 Proposed-dormant)
 9. ~~Run link integrity sweep: `grep -roE '\]\([^)]+\)' *.md docs/` and verify each resolves~~ done 2026-09-05 — scripted sweep over living docs + ADRs + current status/planning files; all internal links resolve
 10. ~~Cross-check every coverage % in AGENTS.md and README.md tables against `go test -cover`~~ done 2026-09-05 — recomputed (cqrs 82.4%, cqrslint 90.0%); both tables corrected
@@ -162,28 +162,28 @@ My living-doc edits were auto-committed by hooks into **5 separate commits** (21
 ### Short-term (TODO_LIST items)
 
 11. ~~Make `go-cqrs-lite` public (eliminates vendor/ workaround + `vendorHash = null`)~~ done 2026-09-05 — go-cqrs-lite (and go-localsync itself) are public; real `vendorHash` lives in flake.nix
-12. OpenTelemetry instrumentation — spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, HTTP middleware
-13. Structured logging fields (source, page, event_id) in `pkg/sync/sync.go`
-14. API authentication middleware (API key or JWT)
-15. API pagination headers (`X-Total-Count`, cursor-based)
-16. API rate limiting middleware (prevent `POST /sync` abuse)
-17. API OpenAPI spec enhancement (error response schemas per endpoint)
-18. Improve `pkg/cqrs` coverage from 82.5% (error paths, store-factory branches)
-19. Adopt `UpcasterRegistry` from go-cqrs-lite for schema evolution
-20. Add `govalid` struct tags to `SyncOptions`, `CQRSConfig`
+12. ~~OpenTelemetry instrumentation — spans for `Syncer.Sync()`, `CQRSStack.SyncItems()`, HTTP middleware~~ done (partially — CQRS batch span M05; pkg/sync span tracked in TODO_LIST)
+13. ~~Structured logging fields (source, page, event_id) in `pkg/sync/sync.go`~~ done (M07 source fields 3b9e8e3; page/event_id moot post-de-githubify)
+14. ~~API authentication middleware (API key or JWT)~~ done (M12 3b9e8e3)
+15. ~~API pagination headers (`X-Total-Count`, cursor-based)~~ done (M14 3b9e8e3)
+16. ~~API rate limiting middleware (prevent `POST /sync` abuse)~~ done (M13 3b9e8e3)
+17. ~~API OpenAPI spec enhancement (error response schemas per endpoint)~~ done (M22 3b9e8e3)
+18. ~~Improve `pkg/cqrs` coverage from 82.5% (error paths, store-factory branches)~~ done (M17 82.4→87.7 3b9e8e3)
+19. ~~Adopt `UpcasterRegistry` from go-cqrs-lite for schema evolution~~ done (M19 3b9e8e3)
+20. ~~Add `govalid` struct tags to `SyncOptions`, `CQRSConfig`~~ done (pivoted — govalid not proxy-resolvable; real Validate() methods M26 3b9e8e3)
 
 ### Medium-term (code quality + architecture)
 
-21. `pkg/sync` → `pkg/synclib` rename (stdlib collision with `stdsync` alias everywhere)
-22. `cqrslint` CLI tests (zero coverage on `cmd/cqrs-lint/main.go`)
-23. `cqrslint` `--version` / `--quiet` / `--format=github` flags
-24. `cqrslint` `testdata/` directory pattern for cleaner test fixtures
-25. `cqrslint` CI workflow step in `.github/workflows/ci.yml`
-26. `cqrslint` hand-rolled `-json` output → `encoding/json.Marshal`
+21. ~~`pkg/sync` → `pkg/synclib` rename (stdlib collision with `stdsync` alias everywhere)~~ **Won't implement — rejected 2026-07-22 — pkg/sync name kept.**
+22. ~~`cqrslint` CLI tests (zero coverage on `cmd/cqrs-lint/main.go`)~~ done (M11 3b9e8e3 — 8 CLI tests now exist)
+23. ~~`cqrslint` `--version` / `--quiet` / `--format=github` flags~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+24. ~~`cqrslint` `testdata/` directory pattern for cleaner test fixtures~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+25. ~~`cqrslint` CI workflow step in `.github/workflows/ci.yml`~~ done (M03 internal gate + secret-gated library gate ea021c9)
+26. ~~`cqrslint` hand-rolled `-json` output → `encoding/json.Marshal`~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
 27. ~~Pre-commit hook fix (OOM on vendor dir — exclude vendor/ from formatter steps)~~ moot — the committed `vendor/` tree was removed in v0.4.1; the OOM cause is gone (hooks remain inert)
-28. `hierarchical-errors` 3,711 findings — suppress in `.buildflow.yml` or formally track
-29. Conflict resolution per-sync override (`SyncOptions.ConflictResolver`)
-30. Improve `CONTRIBUTING.md` — architecture guide, file-split conventions, testing requirements
+28. ~~`hierarchical-errors` 3,711 findings — suppress in `.buildflow.yml` or formally track~~ done (routed to TODO_LIST hierarchical-errors disposition)
+29. ~~Conflict resolution per-sync override (`SyncOptions.ConflictResolver`)~~ done (M25 6a45716)
+30. ~~Improve `CONTRIBUTING.md` — architecture guide, file-split conventions, testing requirements~~ done (M26 3b9e8e3)
 
 ### Long-term (ROADMAP / vision)
 
@@ -192,19 +192,19 @@ My living-doc edits were auto-committed by hooks into **5 separate commits** (21
 33. ~~Daemon / background mode (cron or systemd)~~ routed to ROADMAP (Future Themes)
 34. ~~Export to JSON/CSV~~ routed to ROADMAP (Data & Export)
 35. ~~Real-time sync protocol (out of scope per ADR-0004; would need to be built from scratch)~~ recorded as a ROADMAP non-goal
-36. `ItemFilter.Validate()` — reject negative Limit/Offset (data-model-review Low finding)
-37. Branded `ContentHash` type (data-model-review Low finding)
-38. Typed `attrs` accessors in `pkg/data/model/attrs` (data-model-review Medium finding)
+36. ~~`ItemFilter.Validate()` — reject negative Limit/Offset (data-model-review Low finding)~~ done (M23 3b9e8e3)
+37. ~~Branded `ContentHash` type (data-model-review Low finding)~~ done (M23 id.ContentHash 3b9e8e3)
+38. ~~Typed `attrs` accessors in `pkg/data/model/attrs` (data-model-review Medium finding)~~ done (M23 typed accessors 3b9e8e3)
 39. ~~Tombstone purge / TTL (tombstoned rows accumulate forever)~~ routed to ROADMAP (Open Questions — retention/TTL)
-40. `SyncResult` vs `SyncSummary` vocabulary alignment (naming-review Medium finding)
-41. Rename `Stats` → `ItemStats` or `ReadModelStats` (naming-review Low finding)
-42. Rename `GetStats` → `Stats()` (naming-review Low finding — redundant `Get` prefix)
+40. ~~`SyncResult` vs `SyncSummary` vocabulary alignment (naming-review Medium finding)~~ done (ADR-0009 f6e2f40 — v0.6 window)
+41. ~~Rename `Stats` → `ItemStats` or `ReadModelStats` (naming-review Low finding)~~ done (ADR-0009/TODO_LIST v0.6 window — Stats rename)
+42. ~~Rename `GetStats` → `Stats()` (naming-review Low finding — redundant `Get` prefix)~~ done (ADR-0009/TODO_LIST v0.6 window — GetStats rename)
 43. ~~Extract `pkg/contracts` neutral seam (if a 2nd orchestrator ever appears)~~ conditional — not triggered; revisit only if a second orchestrator appears
 44. ~~Resolve the "standalone vs merge vs upstream" product question for go-localsync~~ resolved — stayed the course within ADR-0004 scope; ADR-0008 (Host pivot) recorded as Proposed-dormant
 45. ~~Event retention / TTL — SQLite grows unbounded~~ routed to ROADMAP (Open Questions)
-46. SQLite file-backed integration tests (current tests use `:memory:` which hides concurrency bugs)
+46. ~~SQLite file-backed integration tests (current tests use `:memory:` which hides concurrency bugs)~~ done (M10 3b9e8e3)
 47. ~~Second provider implementation to validate the Provider interface (GitLab? Jira?)~~ routed to ROADMAP (Future Themes)
-48. Real GitHub PAT smoke test (mock-passing ≠ working)
+48. ~~Real GitHub PAT smoke test (mock-passing ≠ working)~~ done (M27 3b9e8e3)
 49. Benchmarks for the full sync pipeline (not just individual operations)
 50. ~~ADR-0008 revisitation trigger: a 3rd consumer hitting the boilerplate wall~~ recorded — the trigger is documented in ADR-0008 and the ROADMAP ADR table
 

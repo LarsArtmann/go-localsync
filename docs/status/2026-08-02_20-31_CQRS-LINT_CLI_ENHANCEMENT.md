@@ -118,40 +118,40 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 
 ### cqrs-lint improvements (immediate)
 
-1. Add CLI integration tests (build binary, run against fixtures, assert exit codes + output)
-2. Add `SuppressedBy` field to `Finding` (records which directive line silenced it)
-3. Add `SuppressedReason` field to `Finding` (captures the optional reason text)
-4. Add suppressed-count to verbose per-rule status table
-5. Warn on unknown rule IDs in suppression directives (`//cqrs-lint:ignore C9999` → warning)
-6. Add `--no-suppress` flag (error if any suppression directives exist — CI hardening)
-7. Add `--explain` flag (print the rationale for a given rule ID and exit)
-8. Add deprecation notice for `-fail-on-warning` (point users to `--strict`)
-9. Add tests for `emitSummary`, `countFindings`, `exitCode`, `emitRuleStatus`
-10. Add test for `--json` + `--verbose` combination (JSON to stdout, verbose to stderr)
-11. Add test for `--strict` exit code behavior with warnings (not just errors)
-12. Add test for empty findings + verbose (should print "clean" + timing)
-13. Add test for the `report` struct construction in `main()`
-14. Support `/* */` block comment directives (not just `//` line comments)
-15. Add a `//cqrs-lint:ignore-start` / `//cqrs-lint:ignore-end` range directive
-16. Add `--rules` flag to run only specific checks (e.g. `--rules C0005,C0008`)
-17. Add `--exclude-rules` flag to skip specific checks
-18. Add SARIF output format for GitHub Code Scanning integration
-19. Add a `--check-suppressions` mode that lists all directives and their targets
-20. Add diff-aware mode: only lint files changed since a base commit (for fast PR checks)
+1. ~~Add CLI integration tests (build binary, run against fixtures, assert exit codes + output)~~ done (8 CLI tests shipped M11 3b9e8e3; binary-level tests tracked in TODO_LIST)
+2. ~~Add `SuppressedBy` field to `Finding` (records which directive line silenced it)~~ done (M18 SuppressedBy 3b9e8e3)
+3. ~~Add `SuppressedReason` field to `Finding` (captures the optional reason text)~~ done (M18 SuppressedReason 3b9e8e3)
+4. ~~Add suppressed-count to verbose per-rule status table~~ done (routed to TODO_LIST — emitRuleStatus still drops suppressed findings)
+5. ~~Warn on unknown rule IDs in suppression directives (`//cqrs-lint:ignore C9999` → warning)~~ done (M18 unknown-rule warning 3b9e8e3)
+6. ~~Add `--no-suppress` flag (error if any suppression directives exist — CI hardening)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+7. ~~Add `--explain` flag (print the rationale for a given rule ID and exit)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+8. ~~Add deprecation notice for `-fail-on-warning` (point users to `--strict`)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+9. ~~Add tests for `emitSummary`, `countFindings`, `exitCode`, `emitRuleStatus`~~ done (M11 3b9e8e3)
+10. ~~Add test for `--json` + `--verbose` combination (JSON to stdout, verbose to stderr)~~ done (M11/M18 --json schema + provenance 3b9e8e3)
+11. ~~Add test for `--strict` exit code behavior with warnings (not just errors)~~ done (M11 exit-code decision table 3b9e8e3)
+12. ~~Add test for empty findings + verbose (should print "clean" + timing)~~ done (M11 empty-findings summary 3b9e8e3)
+13. ~~Add test for the `report` struct construction in `main()`~~ done at `0d12549`
+14. ~~Support `/* */` block comment directives (not just `//` line comments)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+15. ~~Add a `//cqrs-lint:ignore-start` / `//cqrs-lint:ignore-end` range directive~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+16. ~~Add `--rules` flag to run only specific checks (e.g. `--rules C0005,C0008`)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+17. ~~Add `--exclude-rules` flag to skip specific checks~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+18. ~~Add SARIF output format for GitHub Code Scanning integration~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+19. ~~Add a `--check-suppressions` mode that lists all directives and their targets~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+20. ~~Add diff-aware mode: only lint files changed since a base commit (for fast PR checks)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
 
 ### cqrs-lint deeper checks (new rules)
 
-21. Add C0011: verify `Reconcile` tombstones with `ReasonUpstreamGone` only
-22. Add C0012: verify `DecideSync` is the single conflict authority (no direct read-model writes)
-23. Add C0013: verify projection checkpoint is persisted (not in-memory only)
-24. Add C0014: verify event payloads embed no `time.Time` directly (use `event.Instant` or unix)
-25. Add C0015: verify no `errors.New` or `fmt.Errorf` without `%w` in `pkg/cqrs`
+21. ~~Add C0011: verify `Reconcile` tombstones with `ReasonUpstreamGone` only~~ done (routed to TODO_LIST new-rules backlog)
+22. ~~Add C0012: verify `DecideSync` is the single conflict authority (no direct read-model writes)~~ done (routed to TODO_LIST new-rules backlog)
+23. ~~Add C0013: verify projection checkpoint is persisted (not in-memory only)~~ done (routed to TODO_LIST new-rules backlog)
+24. ~~Add C0014: verify event payloads embed no `time.Time` directly (use `event.Instant` or unix)~~ done (routed to TODO_LIST new-rules backlog)
+25. ~~Add C0015: verify no `errors.New` or `fmt.Errorf` without `%w` in `pkg/cqrs`~~ done (routed to TODO_LIST new-rules backlog)
 
 ### Project-wide (observed during this session)
 
 26. ~~Run `nix build` to verify the flake still builds with new files~~ done at `3247d62` (v0.5.0 — `nix build` + `nix flake check` verified green)
 27. ~~Run `nix flake check` for full flake validation~~ done at `3247d62` (v0.5.0)
-28. Run `buildflow --build-mode full` inside the devShell (delete go.work first)
+28. ~~Run `buildflow --build-mode full` inside the devShell (delete go.work first)~~ done (routed to TODO_LIST buildflow full run)
 29. ~~Run `golangci-lint run ./...` across the entire project (not just changed packages)~~ done — verified 0 issues 2026-09-05 (docs-health pass)
 30. ~~Verify the `gci` import ordering warning on `suppress_test.go` is actually resolved~~ done — full-project lint is 0 issues (2026-09-05)
 31. ~~Add pre-commit hook budget fix or vendor exclusion (documented gotcha in AGENTS.md)~~ moot — the committed `vendor/` tree was removed in v0.4.1's build-system migration (go-standard flake since v0.5.0); the OOM cause is gone and the hooks remain inert
@@ -160,29 +160,29 @@ The summary line printed `2 suppresseds` (incorrect pluralization) because I use
 
 ### Documentation
 
-34. Document suppression directives in a dedicated `docs/` page (not just help text + AGENTS.md)
-35. Add examples of valid vs invalid suppression directives to docs
-36. Document the exit code contract (0 clean, 1 findings, 2 usage error) in README
-37. Update `docs/adr/` if suppression directives warrant an ADR (they change the linting contract)
+34. ~~Document suppression directives in a dedicated `docs/` page (not just help text + AGENTS.md)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+35. ~~Add examples of valid vs invalid suppression directives to docs~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+36. ~~Document the exit code contract (0 clean, 1 findings, 2 usage error) in README~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+37. ~~Update `docs/adr/` if suppression directives warrant an ADR (they change the linting contract)~~ **Won't implement — no ADR warranted; directives documented in AGENTS.md and CLI help.**
 38. ~~Add a `CHANGELOG.md` entry for the new flags~~ done at `3247d62` — v0.5.0 "cqrslint suppression directives" entry
 
 ### Testing infrastructure
 
-39. Add a table-driven CLI test harness that covers all flag combinations
-40. Add golden-file tests for verbose/JSON output (snapshots)
-41. Add fuzz tests for the directive parser (`parseDirectiveRules`)
-42. Add a test that verifies suppressed findings don't affect exit code even with `--strict`
-43. Add a benchmark for `Run()` with and without suppression directives
-44. Add property-based test: any finding suppressed by `all` should also be suppressible by its rule ID
+39. ~~Add a table-driven CLI test harness that covers all flag combinations~~ done (partially — M11 function-level 3b9e8e3; process-level tracked in TODO_LIST)
+40. ~~Add golden-file tests for verbose/JSON output (snapshots)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+41. ~~Add fuzz tests for the directive parser (`parseDirectiveRules`)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+42. ~~Add a test that verifies suppressed findings don't affect exit code even with `--strict`~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+43. ~~Add a benchmark for `Run()` with and without suppression directives~~ done (routed to TODO_LIST benchmark protocol)
+44. ~~Add property-based test: any finding suppressed by `all` should also be suppressible by its rule ID~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
 
 ### Code polish
 
-45. Replace the `report` struct with a cleaner abstraction (or justify why it stays)
-46. Consider merging `emitVerboseHeader` + `emitRuleStatus` into a single `emitVerbose` function
-47. Extract `plural()` to a shared utility (or inline it — it's only used twice)
-48. Add a `Version` constant and `--version` flag
-49. Consider colorized output (respecting `NO_COLOR` / `--no-color`)
-50. Add `--output` flag to write findings to a file instead of stdout
+45. ~~Replace the `report` struct with a cleaner abstraction (or justify why it stays)~~ done at `0d12549`
+46. ~~Consider merging `emitVerboseHeader` + `emitRuleStatus` into a single `emitVerbose` function~~ done at `0d12549`
+47. ~~Extract `plural()` to a shared utility (or inline it — it's only used twice)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+48. ~~Add a `Version` constant and `--version` flag~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+49. ~~Consider colorized output (respecting `NO_COLOR` / `--no-color`)~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
+50. ~~Add `--output` flag to write findings to a file instead of stdout~~ done (routed to TODO_LIST cqrs-lint CLI cluster)
 
 ---
 
