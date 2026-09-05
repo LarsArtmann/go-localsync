@@ -2,6 +2,7 @@ package cqrs
 
 import (
 	"context"
+	"errors"
 	"runtime"
 	"testing"
 	"time"

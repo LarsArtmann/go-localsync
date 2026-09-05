@@ -3,6 +3,7 @@ package cqrs
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/command/v4"
 	"github.com/larsartmann/go-cqrs-lite/decider/v4"
@@ -50,6 +51,10 @@ type TombstoneItemCommand struct {
 	Source   string
 	SourceID id.ExternalID
 	Reason   model.TombstoneReason
+	// At is when the tombstone is considered to have happened. Zero means
+	// "now" at decision time. An explicit value makes the decider
+	// deterministic (tests) and supports backdated tombstones (tooling).
+	At time.Time
 	// Options carries event options (e.g. a correlation ID) onto the emitted
 	// ItemTombstoned events. TombstoneItem defaults a fresh correlation ID;
 	// callers dispatching directly may supply their own.
@@ -93,7 +98,7 @@ func wireCommandDispatcher(
 		return repo.ExecuteRef(
 			ctx,
 			cqrsid.NewStreamRef(aggregateType, cmd.StreamID()),
-			decideTombstone(cmd.Source, cmd.SourceID, cmd.Reason, cmd.Options...),
+			decideTombstone(cmd.Source, cmd.SourceID, cmd.Reason, cmd.At, cmd.Options...),
 		)
 	}
 

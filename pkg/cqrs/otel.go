@@ -10,7 +10,9 @@ import (
 )
 
 // batchSpan lets callers End() spans without importing the otel API.
-type batchSpan struct{ inner interface{ End(...otelSpanEndOption) } }
+type batchSpan struct {
+	inner interface{ End(...otelSpanEndOption) }
+}
 
 type otelSpanEndOption = cqrsotel.SpanEndOption
 

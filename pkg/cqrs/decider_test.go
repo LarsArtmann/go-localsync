@@ -299,7 +299,7 @@ func TestDecideTombstone_ActiveItem(t *testing.T) {
 
 	state := testActiveState("123", "")
 
-	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone)(state, 1)
+	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone, time.Time{})(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemTombstoned)
@@ -310,7 +310,7 @@ func TestDecideTombstone_AlreadyTombstoned(t *testing.T) {
 
 	state := testTombstonedState("123")
 
-	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone)(state, 1)
+	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone, time.Time{})(state, 1)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
@@ -320,7 +320,7 @@ func TestDecideTombstone_AlreadyTombstoned(t *testing.T) {
 func TestDecideTombstone_NewItem(t *testing.T) {
 	t.Parallel()
 
-	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone)(InitialState, 0)
+	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone, time.Time{})(InitialState, 0)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
@@ -398,5 +398,50 @@ func TestHasChanged(t *testing.T) {
 				t.Errorf("hasChanged() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+// TestDecideTombstone_DeterministicTimestamp verifies clock injection: an
+// explicit At produces an event payload with exactly that TombstonedAt, and
+// the zero value falls back to wall-clock now.
+func TestDecideTombstone_DeterministicTimestamp(t *testing.T) {
+	t.Parallel()
+
+	fixed := time.Date(2026, 9, 5, 20, 42, 0, 0, time.UTC)
+
+	state := SyncItemState{Item: &model.Item{Source: id.NewProviderID("github")}}
+	state.Item.ExternalID = id.NewExternalID("clock-1")
+
+	decide := decideTombstone("github", id.NewExternalID("clock-1"), model.ReasonUserHidden, fixed)
+
+	evts, err := decide(state, event.Version(1))
+	testutil.MustNoError(t, err)
+	if len(evts) != 1 {
+		t.Fatalf("expected 1 tombstone event, got %d", len(evts))
+	}
+
+	payload, decodeErr := event.DecodePayloadAuto[ItemTombstonedPayload](evts[0])
+	testutil.MustNoError(t, decodeErr)
+
+	if payload.TombstonedAt != fixed.UnixNano() {
+		t.Errorf(
+			"TombstonedAt: want fixed %d, got %d",
+			fixed.UnixNano(), payload.TombstonedAt,
+		)
+	}
+
+	// Zero At must stamp approximately-now (within a minute window).
+	nowBefore := time.Now().UTC()
+
+	decideNow := decideTombstone("github", id.NewExternalID("clock-1"), model.ReasonUserHidden, time.Time{})
+	evtsNow, err := decideNow(state, event.Version(1))
+	testutil.MustNoError(t, err)
+
+	payloadNow, nowErr := event.DecodePayloadAuto[ItemTombstonedPayload](evtsNow[0])
+	testutil.MustNoError(t, nowErr)
+
+	stamped := fromUnixNano(payloadNow.TombstonedAt)
+	if stamped.Before(nowBefore.Add(-time.Minute)) || stamped.After(time.Now().UTC().Add(time.Minute)) {
+		t.Errorf("zero At should stamp ~now, got %v", stamped)
 	}
 }

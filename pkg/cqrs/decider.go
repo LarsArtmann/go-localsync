@@ -127,12 +127,22 @@ func decideSync(
 // decideTombstone returns a decider.DecideFunc that hides an item by emitting an
 // EventItemTombstoned with the given reason. It is a no-op for a brand-new
 // aggregate (nothing to hide) and idempotent for an already-tombstoned item.
+// A zero at means "now"; an explicit timestamp makes the decider deterministic
+// (exact event assertions in tests, backdated tombstones in tooling).
 func decideTombstone(
-	source string, sourceID id.ExternalID, reason model.TombstoneReason, opts ...event.Option,
+	source string,
+	sourceID id.ExternalID,
+	reason model.TombstoneReason,
+	at time.Time,
+	opts ...event.Option,
 ) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
 		if state.IsNew() || state.IsTombstoned() {
 			return nil, nil
+		}
+
+		if at.IsZero() {
+			at = time.Now().UTC()
 		}
 
 		aggID := AggregateID(source, sourceID)
@@ -144,7 +154,7 @@ func decideTombstone(
 				Source:       source,
 				SourceID:     sourceID.Get(),
 				Reason:       string(reason),
-				TombstonedAt: unixNano(time.Now().UTC()),
+				TombstonedAt: unixNano(at),
 			}},
 			opts...,
 		)
