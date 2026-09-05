@@ -1,8 +1,8 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-07-22
-**Tests:** 216 passing, 10 packages | **Lint:** 0 issues (golangci-lint v2)
+**Last Updated:** 2026-09-05
+**Tests:** 10 packages passing (full suite) | **Lint:** 0 issues (golangci-lint v2, `nix run .#lint`)
 
 ## Overview
 

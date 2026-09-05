@@ -175,12 +175,19 @@ Event store + read model use the same backend.
 
 ## Provider Development
 
-The SDK is a pure contract library — concrete providers live in consumer apps. To add a new provider:
+The SDK core is a pure contract library — concrete providers are separate modules. The reference implementation is the **`provider/github` nested module** (released as `provider/github/v0.1.0`, built on go-github-kit v0.3.0); see its README. To add a new provider:
 
 1. Implement the `provider.Provider` interface (`Name`, `Fetch`, `FetchAll`, `GetRateLimit`)
 2. Convert provider-specific data to `provider.Item` using branded types from `pkg/id/` (for identity) and `Attributes map[string]string` (for provider-specific content like actor, repo, etc.)
 3. Add provider-specific tests
 4. Update documentation with provider configuration
+
+### Nested module + go.work (non-obvious)
+
+- `provider/github/` is a **separate Go module** with its own `go.mod`; it pins released parent versions (`go-localsync v0.5.0`, `go-github-kit v0.3.0`) and builds **standalone** with `GOWORK=off` from that directory.
+- The root `go.work` (`use .` and `use ./provider/github`) wires both modules for local development; `nix build` builds only the core module.
+- Editing provider code runs tests through the workspace exactly like core code; CI runs the provider leg standalone (`.github/workflows/ci.yml`, job `provider`).
+- **go-localsync is a PRIVATE repo**: its module versions never appear on pkg.go.dev, and consumers without repo credentials resolve it via VCS auth, not the module proxy. `go get github.com/larsartmann/go-localsync@v0.5.0` locally succeeds through git credentials — this is NOT proxy propagation. Making it public is an owner decision (kit ROADMAP records it as a non-decision for agents).
 
 ## Database Schema
 
