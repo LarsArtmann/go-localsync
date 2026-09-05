@@ -60,3 +60,40 @@ plan. Renames are cheap at release boundaries and expensive mid-stream.
   release if the signature is touched anyway.
 - Until v0.6, this ADR is the canonical answer to "why do the names not
   match upstream?".
+
+## Addendum (2026-09-06): ExternalID ↔ SourceID payload duality
+
+**Finding.** One concept — the provider's key for an item — carries two
+names: `ExternalID` (branded type `id.ExternalID`; fields on
+`provider.Item`, `model.Item`, `model.Key`) and `SourceID` (field name in
+all three event payloads, `json:"sourceId"`). Flagged by the session-26/27
+self-reviews; never dispositioned.
+
+**Decision for v0.6: align the Go surface to `SourceID`; do NOT touch the
+wire.** Concretely:
+
+- `id.ExternalID` (type) → `id.SourceID`, with `NewSourceID`/`ParseSourceID`
+  and a deprecated `ExternalID` alias for one minor cycle (same pattern as
+  decision 1).
+- `provider.Item.ExternalID`, `model.Item.ExternalID`, `model.Key.ExternalID`
+  → `SourceID`, mechanically migrated (60 non-test occurrences, 18 files).
+- Event payloads stay EXACTLY as they are: `SourceID string` +
+  `json:"sourceId"` is already the target vocabulary, and payload field
+  names are a persisted wire contract — renaming them would force a schema
+  V4 + upcast for zero functional gain.
+
+**Why this beats the two options originally on the table** (align-with-upcast
+vs document-dual-names): the original framing assumed "align" meant renaming
+the wire (expensive: schema bump, upcast, replay risk) and "document" meant
+living with the mismatch forever. Aligning the GO SURFACE instead gets one
+name everywhere users touch (`Source` / `SourceID` / `StreamID`) while the
+persisted events are already consistent. `AggregateID(source, externalID)`
+→ `StreamID(source, sourceID)` (decision 1) completes the picture.
+
+**Scope addition (Stats):** `Syncer.GetStats` → `Syncer.Stats` in the same
+window (Go idiom: no `Get` prefix; mirrors `GetRateLimit` → `RateLimit`
+upstream moves). Deprecated alias, one minor cycle. The unexported API
+handler (`getStats`) needs no change.
+
+**Gate:** v0.6 cannot enact without the owner's sign-off recorded in
+TODO_LIST.md — these are public-API breaks under the ADR-0009 guardrail.
