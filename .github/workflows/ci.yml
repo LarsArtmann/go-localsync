@@ -178,3 +178,34 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     timeout-minutes: 15
+  provider:
+    name: Provider module (provider/github)
+    runs-on: ubuntu-latest
+    env:
+      GOWORK: "off"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # The provider pins its parent (this repo) at a released tag, so the
+      # standalone module graph needs read auth for this repo; the checkout
+      # token is scoped to exactly that.
+      - name: Configure Git for parent module fetch
+        run: git config --global url."https://x-access-token:${{ github.token }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Setup Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: provider/github/go.mod
+          cache: true
+          cache-dependency-path: provider/github/go.sum
+
+      - name: Build (standalone)
+        working-directory: provider/github
+        run: go build ./...
+
+      - name: Test (standalone, race)
+        working-directory: provider/github
+        run: go test -race -count=1 ./...
+
+    timeout-minutes: 15
