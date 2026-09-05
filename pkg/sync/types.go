@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
@@ -61,4 +62,15 @@ type SyncStore interface {
 	Reconcile(ctx context.Context, source string, seen []model.Key) (int, error)
 	model.ItemReader
 	Close() error
+}
+
+// ResolverAwareStore is an optional SyncStore extension for per-sync conflict
+// strategy overrides. The CQRS stack implements it; custom stores opt in by
+// adding the method — Syncer picks it up automatically.
+type ResolverAwareStore interface {
+	SyncItemsWithResolver(
+		ctx context.Context,
+		items []*provider.Item,
+		resolver crdt.ConflictResolver[*model.Item],
+	) *SyncSummary
 }

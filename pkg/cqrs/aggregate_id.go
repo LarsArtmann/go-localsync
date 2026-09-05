@@ -27,6 +27,12 @@ var aggIDCache sync.Map
 
 // AggregateID returns a deterministic stream ID derived from (source, externalID).
 // Same inputs always produce the same ID. Results are cached for O(1) repeat lookups.
+//
+// DELIBERATE DIVERGENCE from cqrsid.DeriveStreamID (see ADR-0009): this uses
+// length-prefixed SHA256 truncated to 16 bytes (hex-32); the library's uses
+// NUL-separated full SHA256. Encodings are incompatible — switching would
+// orphan every stored stream. Keep this encoding for existing streams; the
+// rename to StreamID() is planned for v0.6 together with ADR-0009.
 func AggregateID(source string, externalID id.ExternalID) cqrsid.StreamID {
 	key := itemKey(source, externalID)
 

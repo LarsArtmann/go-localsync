@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
@@ -107,6 +108,11 @@ type SyncOptions struct {
 	Source     string
 	MaxPages   int
 	OnProgress SyncProgressFunc
+	// ConflictResolver overrides the store's default conflict strategy for
+	// THIS sync run (per-sync strategy without re-stacking). Nil uses whatever
+	// the store was configured with. Only effective when the store implements
+	// ResolverAwareStore (the CQRS stack does).
+	ConflictResolver crdt.ConflictResolver[*model.Item]
 	// Reconcile, when true, runs an upstream-gone reconciliation pass after the
 	// items are synced: live items for Source absent from the fetched set are
 	// tombstoned (ReasonUpstreamGone). Only set this when the fetch was COMPLETE
@@ -214,7 +220,7 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 		return syncResult, errIfFailed(syncResult, len(result.Items))
 	}
 
-	summary := s.store.SyncItems(ctx, valid)
+	summary := s.syncBatch(ctx, opts, valid)
 	syncResult.Errors += summary.Errors
 	syncResult.Skipped = len(valid) - summary.Synced - summary.Errors
 
@@ -533,4 +539,22 @@ func (s *Syncer) validateOpts(opts *SyncOptions) error {
 	}
 
 	return opts.Validate()
+}
+
+// syncBatch dispatches a validated batch through the store, honoring a
+// per-sync conflict resolver (SyncOptions.ConflictResolver) when the store
+// supports the override seam; otherwise it falls back to plain SyncItems and
+// the store's configured strategy applies.
+func (s *Syncer) syncBatch(
+	ctx context.Context,
+	opts *SyncOptions,
+	valid []*provider.Item,
+) *SyncSummary {
+	if opts != nil && opts.ConflictResolver != nil {
+		if aware, ok := s.store.(ResolverAwareStore); ok {
+			return aware.SyncItemsWithResolver(ctx, valid, opts.ConflictResolver)
+		}
+	}
+
+	return s.store.SyncItems(ctx, valid)
 }

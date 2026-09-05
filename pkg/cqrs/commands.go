@@ -41,7 +41,10 @@ type SyncItemCommand struct {
 	Item    *model.Item
 	RawJSON []byte
 	Options []event.Option
-	outcome *SyncOutcome
+	// Resolver overrides the stack-configured ConflictResolver for this one
+	// command (per-sync strategy). Nil means "use the stack default".
+	Resolver crdt.ConflictResolver[*model.Item]
+	outcome  *SyncOutcome
 }
 
 // TombstoneItemCommand dispatches a tombstone operation for a single item.
@@ -81,10 +84,17 @@ func wireCommandDispatcher(
 		// produced it (picked up by the CommandCausalityEnricher on the repo).
 		ctx = event.WithCommandCausality(ctx, commandTypeSyncItem.String(), cmd.ID())
 
+		// Precedence: per-command resolver (per-sync override) beats the
+		// stack-configured default.
+		effective := cmd.Resolver
+		if effective == nil {
+			effective = resolver
+		}
+
 		return repo.ExecuteRef(
 			ctx,
 			cqrsid.NewStreamRef(aggregateType, cmd.StreamID()),
-			decideWithOutcome(cmd.Item, cmd.RawJSON, resolver, cmd.outcome, cmd.Options...),
+			decideWithOutcome(cmd.Item, cmd.RawJSON, effective, cmd.outcome, cmd.Options...),
 		)
 	}
 

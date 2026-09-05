@@ -307,9 +307,41 @@ func (s *CQRSStack) SyncItems(
 	return s.syncItems(ctx, items)
 }
 
+// SyncItemsWithResolver syncs a batch using the given conflict resolver for
+// this run, overriding the stack-configured default. It implements the
+// per-sync resolver seam consumed by pkg/sync (SyncOptions.ConflictResolver).
+// A nil resolver behaves exactly like SyncItems.
+func (s *CQRSStack) SyncItemsWithResolver(
+	ctx context.Context,
+	items []*provider.Item,
+	resolver crdt.ConflictResolver[*model.Item],
+) *synclib.SyncSummary {
+	if resolver == nil {
+		return s.syncItems(ctx, items)
+	}
+
+	if s.otel != nil {
+		return withBatchSpan(ctx, s.otel, func(ctx context.Context) *synclib.SyncSummary {
+			return s.syncItemsWith(ctx, items, resolver)
+		})
+	}
+
+	return s.syncItemsWith(ctx, items, resolver)
+}
+
 func (s *CQRSStack) syncItems(
 	ctx context.Context,
 	items []*provider.Item,
+) *synclib.SyncSummary {
+	return s.syncItemsWith(ctx, items, nil)
+}
+
+// syncItemsWith is the batch body; a non-nil resolver overrides the
+// stack-configured conflict strategy for every command in this run.
+func (s *CQRSStack) syncItemsWith(
+	ctx context.Context,
+	items []*provider.Item,
+	resolver crdt.ConflictResolver[*model.Item],
 ) *synclib.SyncSummary {
 	summary := &synclib.SyncSummary{
 		Results:   make([]synclib.ItemSyncResult, 0, len(items)),
@@ -337,6 +369,7 @@ func (s *CQRSStack) syncItems(
 			Item:         dataItem,
 			RawJSON:      item.RawJSON,
 			Options:      syncOpts,
+			Resolver:     resolver,
 			outcome:      &outcome,
 		}
 
