@@ -182,4 +182,4 @@ Note: the `eventtest` module has no released version — do not depend on it unt
 | Errors      | go-error-family constructors + `pkgerrors.HTTPStatus`/`WithCtx`         | 5-family error taxonomy               |
 | Correlation | `event.WithCorrelationID` per sync run + causation enricher on commands | typed Metadata (stream-durable)       |
 
-Note: typed `Metadata.Causation` is stream-durable; bus-delivered messages keep only the `command.type`/`command.id` custom fallbacks (known watermill protocol limitation — upstream issue candidate, see TODO_LIST).
+Note: typed `Metadata.Causation` is stream-durable; bus-delivered messages keep only the `command.type`/`command.id` custom fallbacks (watermill event-wire gap — filed upstream as [go-cqrs-lite#21](https://github.com/LarsArtmann/go-cqrs-lite/issues/21), source-verified: `eventToMessage` drops CorrelationID/CausationID/Causation while `buildMetadata` parses them).
