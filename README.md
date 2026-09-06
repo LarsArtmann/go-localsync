@@ -168,13 +168,13 @@ At the CQRS boundary, `provider.Item` is converted to the domain entity `model.I
 
 The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/larsartmann/go-cqrs-lite) v4. There is no legacy CRUD path.
 
-| Component        | Description                                                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Decider**      | Pure Apply/DecideSync/DecideTombstone — single authority for state transitions (`SyncItemState{Item *model.Item}`)                          |
-| **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`                                                                                         |
-| **Projection**   | Live events via synchronous `bus.SubscribeAll`; SQLite catch-up via `projectionhost.Host` (checkpoint persistence, crash auto-restart, DLQ) |
-| **Read Model**   | In-memory or SQLite with filter/pagination, stores `*model.Item`                                                                            |
-| **Stream ID**    | Deterministic SHA256→hex from (source, sourceID) for idempotency                                                                            |
+| Component      | Description                                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Decider**    | Pure Apply/DecideSync/DecideTombstone — single authority for state transitions (`SyncItemState{Item *model.Item}`)                          |
+| **Events**     | `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`                                                                                         |
+| **Projection** | Live events via synchronous `bus.SubscribeAll`; SQLite catch-up via `projectionhost.Host` (checkpoint persistence, crash auto-restart, DLQ) |
+| **Read Model** | In-memory or SQLite with filter/pagination, stores `*model.Item`                                                                            |
+| **Stream ID**  | Deterministic SHA256→hex from (source, sourceID) for idempotency                                                                            |
 
 ### Key Properties
 

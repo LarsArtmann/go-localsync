@@ -40,13 +40,7 @@ Nothing yet — the next release is staged as [v0.6.0] below.
 - Block-comment suppression directives (`/* cqrs-lint:ignore ... */`) and range directives (`ignore-start`/`ignore-end`) with a nesting guard; unmatched ends and unclosed ranges now warn.
 - `cqrslint.RunOptions`/`RunWithOptions` (rule selection + suppression toggle), `ValidateRuleSelection`, `RuleByID`, and the `ErrUnknownRule` sentinel.
 
-### Changed
-- **`errors.AsType` modernization driven to zero** — `erraudit lint ./... --type-aware` reports 0 violations; the one `exec.ExitError` case in the CLI test harness migrated to `errors.AsType`. Remaining buildflow `hierarchical-errors` findings (17) are deliberate patterns (cleanup-log-only, ignored writes, defer-Close) dispositioned to formal-track; the `.buildflow.yml` `suppress:` key was tested and proven a silent no-op.
-- **Sentinel errors interface-typed** — `pkg/errors` + `pkg/crdt` sentinels are now declared `var X error = errorfamily.New*` so no package exports a concrete error type as an API surface.
-- **Renamed the internal linter command `cqrs-lint` → `localsync-lint`** to remove the name collision with go-cqrs-lite's library `cqrs-lint` (the pinned 203-rule CI gate). The `//cqrs-lint:` directive vocabulary is unchanged on purpose: one inline comment can target both linters.
-
-### Added
-
+- **cqrs-lint architectural rules C0011–C0015** — five new invariants with compliant/violating fixtures, growing the catalog 10 → 15: C0011 single projection (exactly one `EventTypes` method), C0012 fold purity (no `time.Now`/`time.Since` inside `fold*`), C0013 projector read-only (no `Append`/`Save` from `Projector`), C0014 wire values pinned (canonical event/aggregate literals only in their declaring file), C0015 no inline `NewEvents` type literals (event-type slices must use consts). The real `pkg/cqrs` tree runs clean under all 15.
 - **cqrs-lint CLI phase 1** — `--version`, `--quiet` (exit-code-only operation for scripts), `--format=github` (GitHub Actions `::error`/`::warning` annotations with file/line so findings surface inline in PRs), per-rule suppressed counts in `--verbose` (stale-directive detection), and `--json` findings now emitted through `encoding/json` against an explicitly tagged schema struct (keys unchanged).
 
 - **`.buildflow.yml`** — buildflow full mode is green again (61 success / 0 failed, ending a three-session deferral): the nix steps that auto-repair hashes by evaluating every flake-check system are skipped locally (aarch64-darwin is unbuildable without a darwin builder); `nix flake check` remains the gate.
@@ -99,6 +93,9 @@ Nothing yet — the next release is staged as [v0.6.0] below.
 
 ### Changed
 
+- **`errors.AsType` modernization driven to zero** — `erraudit lint ./... --type-aware` reports 0 violations; the one `exec.ExitError` case in the CLI test harness migrated to `errors.AsType`. Remaining buildflow `hierarchical-errors` findings (17) are deliberate patterns (cleanup-log-only, ignored writes, defer-Close) dispositioned to formal-track; the `.buildflow.yml` `suppress:` key was tested and proven a silent no-op.
+- **Sentinel errors interface-typed** — `pkg/errors` + `pkg/crdt` sentinels are now declared `var X error = errorfamily.New*` so no package exports a concrete error type as an API surface.
+- **Renamed the internal linter command `cqrs-lint` → `localsync-lint`** to remove the name collision with go-cqrs-lite's library `cqrs-lint` (the pinned 203-rule CI gate). The `//cqrs-lint:` directive vocabulary is unchanged on purpose: one inline comment can target both linters.
 - **CI/tooling hardening** — dprint format check added to the lint job (pinned `0.56.1`), `windows/amd64` added to the build matrix (`CGO_ENABLED=0`; modernc.org/sqlite is pure-Go), three stale `.golangci.yml` exclusion blocks deleted (paths from pre-restructure layouts), inert pre-commit hooks formally disabled (documented decision), and `verify-release.sh` gained a docs-consistency section running `check-doc-counts.sh` — which immediately proved itself by failing the v0.5.0 smoke run on the 358→378 test-count drift.
 - **Release integrity verified (post-public-flip)** — `v0.5.0` and `provider/github/v0.1.0` tags are pushed (annotated), both GitHub Releases exist, and proxy.golang.org serves both versions with the correct `@latest` for the core and provider modules; no bump release needed.
 - **Stale `vendorHash` re-pinned** — the 2026-09-05 evening dependency refresh changed `go.mod`/`go.sum` after the flake's `vendorHash` was recorded, silently breaking `nix build` / `nix flake check` with a hash mismatch; the hash now matches again and both pass.

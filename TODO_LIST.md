@@ -171,12 +171,14 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### LOWER additions (same harvest; bounded polish)
 
-- [ ] **provider/github ETag docs polish**: `WithETagCache` usage snippet + config-table row + `ETagStats` example in the provider README. (`08:05` §b4/§f15)
+- [ ] **provider/github ETag docs polish**: `WithETagCache` usage snippet + config-table row + `ETagStats` example in the provider README; surface `ETagStats` in `FetchResult` (optional field); measure a page-1 304 probe in `FetchAll` revalidation (only if it pays). (`08:05` §b4/§f15-17)
 - [ ] **DLQ ops runbook** (list → replay → delete → purge) in README or `docs/`, plus a replay→delete doc example in the `dlq.go` package doc. (`06:19` §f27/§f41)
 - [ ] **`StreamID` cache growth note** — document that the sync.Map is bounded by the source×sourceID set (mirror the `lockSource` doc pattern). (`06:19` §f26)
 - [ ] **Per-client limiter recipe**: key from API key — document + test the exact key-extractor snippet. (`06:19` §f25)
 - [ ] **CONTRIBUTING.md**: add the log-level config snippets. (`08:05` §f39)
 - [ ] **Verify the gap-analysis banner's relative ADR link** renders from `docs/` (used `adr/0009-...`). (`08:05` §f43)
 - [ ] **`nix flake check --all-systems` triage doc** — which systems are intentionally unsupported and why the check omits them. (`08:05` §f41)
+- [ ] **Scenario DSL for projection tests** (currently decider-only, per the testing convention). (`08:05` §f29)
+- [ ] **CI cosmetics cluster**: job-summary step posting the three gate badges per run; eyeball the library-gate `::notice::` skip rendering in the Actions UI. (`08:05` §f10/§f12)
 - [ ] **Small hygiene cluster**: `errors_test.go` cosmetic `InvalidField("externalId")` literal → `sourceID`; `pkg/testutil/syncstore.go` doc comments post-`BatchOutcome`; `conflict_aware.go` `summary` locals → `batch`; reusable `blockingProvider`-style double in `pkg/testutil`; sweep for other hardcoded cross-layer identifiers (projectionName-style); consider `SyncResult.Batch` exposure in the `/sync` HTTP response. (`06:19` §f37/§f38/§f42-44/§f49)
 - [ ] **API niceties (post-v0.6, small)**: request-ID middleware + echo header; SQLite opt-in WAL/pragma knob on `CQRSConfig`; `/stats` source/type filter params (read model already supports filtering). (`08:05` §f32-34)
