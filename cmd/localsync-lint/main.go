@@ -453,7 +453,7 @@ type sarifLocation struct {
 
 type sarifPhysicalLocation struct {
 	ArtifactLocation sarifArtifactLocation `json:"artifactLocation"`
-	Region           sarifRegion           `json:"region,omitempty"`
+	Region           *sarifRegion          `json:"region,omitempty"` // pointer: nested omitempty is otherwise a no-op
 }
 
 type sarifArtifactLocation struct {
@@ -505,7 +505,7 @@ func emitSarif(w io.Writer, findings []cqrslint.Finding, opts outputOptions) {
 			// SARIF regions are 1-based; package-level findings carry no
 			// position and omit the region rather than lying with a 0.
 			if f.Line > 0 {
-				location.PhysicalLocation.Region = sarifRegion{StartLine: f.Line}
+				location.PhysicalLocation.Region = &sarifRegion{StartLine: f.Line}
 			}
 
 			result.Locations = []sarifLocation{location}

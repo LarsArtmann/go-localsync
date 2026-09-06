@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"os"
 	"path/filepath"
 	"strings"
@@ -301,12 +302,14 @@ func TestParseRuleSelection_UnknownRuleIsUsageError(t *testing.T) {
 
 func TestPrintRuleDetail(t *testing.T) {
 	rules := cqrslint.Rules()
-	printRuleDetail(rules[0])
+	printRuleDetail(&bytes.Buffer{}, rules[0])
 }
 
 func TestPrintRulesAndUsage(t *testing.T) {
-	printRules()
-	printUsage()
+	fs := flag.NewFlagSet("localsync-lint", flag.ContinueOnError)
+	fs.SetOutput(&bytes.Buffer{})
+	printRules(&bytes.Buffer{})
+	printUsage(fs)
 }
 
 func TestEmitFindingGitHub(t *testing.T) {

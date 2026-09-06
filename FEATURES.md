@@ -135,7 +135,7 @@
 
 | #  | Feature      | Status           | Package        | Description                                                                                                                                        |
 | -- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 401 test functions across 11 packages (plus 35 in the standalone `provider/github` module), all passing race-clean. Run: `go test ./... -count=1`. |
+| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 415 test functions across 11 packages (plus 35 in the standalone `provider/github` module), all passing race-clean. Run: `go test ./... -count=1`. |
 | 56 | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.)       |
 
 ## Quality

@@ -99,9 +99,9 @@ Use `buildflow`; not executable, formally disabled (documented decision). Re-ena
 | `pkg/data/model`     | 18    | 100.0%   | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                                                                                                                                                                                     |
 | `pkg/data/schema`    | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                                                                                                                                                                                               |
 | `internal/cqrslint`  | 69    | 93.2%    | ✅ 15 architectural checks (C0001-C0015), loader, finding sort/format, rules catalog, suppression directives                                                                                                                                                                      |
-| `cmd/localsync-lint` | 33    | 64.8% *  | ✅ exit-code contract, summary/JSON output, violating-fixture round trip + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape). *the phase-1 flags/formatting grew the surface while its tests are process-level (coverage-invisible by design) |
+| `cmd/localsync-lint` | 47    | 64.8% *  | ✅ exit-code contract, summary/JSON output, violating-fixture round trip + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape). *the phase-1 flags/formatting grew the surface while its tests are process-level (coverage-invisible by design) |
 
-**401 total test functions** across 11 test packages (incl. `cmd/localsync-lint`), plus 35 in the standalone `provider/github` module; the whole suite is race-clean.
+**415 total test functions** across 11 test packages (incl. `cmd/localsync-lint`), plus 35 in the standalone `provider/github` module; the whole suite is race-clean.
 
 Run: `go test ./... -count=1`
 

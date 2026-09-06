@@ -379,3 +379,78 @@ func TestProcess_Explain(t *testing.T) {
 		t.Errorf("-explain C9999: exit = %d, want 2\n%s", exit, out)
 	}
 }
+
+// TestProcess_HelpMatchesAcceptedFormats is the help-vs-acceptance contract:
+// every output format the -format help advertises must be accepted by the
+// binary (exit != 2), and a bogus format must be rejected with an error that
+// names every advertised format. This pins the lie the 06:25 report caught —
+// help text advertising sarif before it was implemented.
+func TestProcess_HelpMatchesAcceptedFormats(t *testing.T) {
+	t.Parallel()
+
+	bin := buildBinary(t)
+
+	exit, help := runBinary(t, bin, "-h")
+	if !strings.Contains(help, "output format:") {
+		t.Fatalf("-h output must document -format:\n%s", help)
+	}
+	_ = exit // -h exits 2 under ContinueOnError; only the text matters here
+
+	advertised := advertisedFormats(t, help)
+	if len(advertised) < 3 {
+		t.Fatalf("could not parse advertised formats from help text:\n%s", help)
+	}
+
+	clean := writeFixtureDir(t, nil)
+
+	for _, name := range advertised {
+		if exit, out := runBinary(t, bin, "-pkg", clean, "-format="+name); exit == 2 {
+			t.Errorf("help advertises -format=%s but the binary rejects it:\n%s", name, out)
+		}
+	}
+
+	exit, out := runBinary(t, bin, "-pkg", clean, "-format=telepathy")
+	if exit != 2 {
+		t.Errorf("bogus format: exit = %d, want 2", exit)
+	}
+
+	for _, name := range advertised {
+		if !strings.Contains(out, name) {
+			t.Errorf("format-rejection error must name every advertised format (missing %s):\n%s", name, out)
+		}
+	}
+}
+
+// advertisedFormats extracts the format names from the -format help sentence
+// ("output format: text, json (NDJSON), github (workflow annotations), or
+// sarif"), dropping the parenthesized qualifiers.
+func advertisedFormats(t *testing.T, help string) []string {
+	t.Helper()
+
+	line := ""
+	for candidate := range strings.SplitSeq(help, "\n") {
+		if strings.Contains(candidate, "output format:") {
+			line = strings.TrimSpace(candidate)
+		}
+	}
+	if line == "" {
+		t.Fatalf("no -format documentation in help:\n%s", help)
+	}
+
+	segment := line[strings.Index(line, "output format:")+len("output format:"):]
+
+	var names []string
+	for token := range strings.SplitSeq(segment, ",") {
+		token = strings.TrimSpace(token)
+		token = strings.TrimPrefix(token, "or ")
+		if start := strings.Index(token, " ("); start >= 0 { // drop "(NDJSON)"-style qualifiers
+			token = token[:start]
+		}
+		token = strings.TrimSpace(token)
+		if token != "" {
+			names = append(names, token)
+		}
+	}
+
+	return names
+}

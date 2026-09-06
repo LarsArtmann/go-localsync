@@ -246,7 +246,7 @@ rules_file="$(grep -l '^func Rules()' internal/cqrslint/*.go | head -1)"
 if [[ -z "$rules_file" ]]; then
 	die "rule-catalog check: no 'func Rules()' found in internal/cqrslint — extraction pattern drifted"
 fi
-rule_count="$(awk '/^func Rules\(\)/,/^}/' "$rules_file" | grep -c 'ID: rule' || true)"
+rule_count="$(awk '/^func Rules\(\)/,/^}/' "$rules_file" | grep -cE 'ID:[[:space:]]+rule' || true)"
 if [[ "$rule_count" -eq 0 ]]; then
 	die "rule-catalog check: extracted 0 rules from $rules_file — extraction pattern drifted"
 fi
