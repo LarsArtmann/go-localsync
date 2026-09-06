@@ -42,61 +42,84 @@ const (
 	formatText   = "text"
 	formatJSON   = "json"
 	formatGitHub = "github"
+	formatSarif  = "sarif"
+
+	// sarifSchema is the SARIF 2.1.0 schema URI every consumer validates
+	// against; the version field below must stay in sync with it.
+	sarifSchema = "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json"
+	sarifFormat = "2.1.0"
+
+	repoURI = "https://github.com/LarsArtmann/go-localsync"
 )
 
 func main() {
-	target := flag.String("pkg", defaultTarget, "path to the Go package to lint")
-	listRules := flag.Bool("list", false, "list all rules and exit")
-	strict := flag.Bool("strict", false, "exit non-zero when warnings are present (alias for -fail-on-warning)")
-	failOnWarning := flag.Bool("fail-on-warning", false, "exit non-zero when warnings are present")
-	jsonOut := flag.Bool("json", false,
+	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
+}
+
+// run is the entire CLI flow minus process plumbing: flag parsing, dispatch,
+// analysis, and output. It returns the process exit code (0 clean, 1 findings,
+// 2 usage/internal error) so tests can drive the real flow in-process instead
+// of paying a binary build per case.
+func run(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("localsync-lint", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+
+	target := fs.String("pkg", defaultTarget, "path to the Go package to lint")
+	listRules := fs.Bool("list", false, "list all rules and exit")
+	strict := fs.Bool("strict", false, "exit non-zero when warnings are present (alias for -fail-on-warning)")
+	failOnWarning := fs.Bool("fail-on-warning", false, "exit non-zero when warnings are present")
+	jsonOut := fs.Bool("json", false,
 		"emit findings as newline-delimited JSON (machine readable; alias for -format=json)")
-	format := flag.String(
+	format := fs.String(
 		"format",
 		"text",
 		"output format: text, json (NDJSON), github (workflow annotations), or sarif",
 	)
-	quiet := flag.Bool("quiet", false, "suppress all output; communicate through the exit code only")
-	verbose := flag.Bool("verbose", false, "show package info, per-rule status, and timing on stderr")
-	showSuppressed := flag.Bool("show-suppressed", false, "show findings silenced by //cqrs-lint:ignore directives")
-	rules := flag.String("rules", "", "comma-separated rule IDs to run (default: all)")
-	excludeRules := flag.String("exclude-rules", "", "comma-separated rule IDs to skip")
-	noSuppress := flag.Bool("no-suppress", false,
+	quiet := fs.Bool("quiet", false, "suppress all output; communicate through the exit code only")
+	verbose := fs.Bool("verbose", false, "show package info, per-rule status, and timing on stderr")
+	showSuppressed := fs.Bool("show-suppressed", false, "show findings silenced by //cqrs-lint:ignore directives")
+	rules := fs.String("rules", "", "comma-separated rule IDs to run (default: all)")
+	excludeRules := fs.String("exclude-rules", "", "comma-separated rule IDs to skip")
+	noSuppress := fs.Bool("no-suppress", false,
 		"disable //cqrs-lint: directives; every violation counts (CI hardening)")
-	explain := flag.String("explain", "", "print the full description of one rule and exit")
-	showVersion := flag.Bool("version", false, "print the localsync-lint version and exit")
-	flag.Usage = printUsage
+	explain := fs.String("explain", "", "print the full description of one rule and exit")
+	showVersion := fs.Bool("version", false, "print the localsync-lint version and exit")
+	fs.Usage = func() { printUsage(fs) }
 
-	flag.Parse()
+	if err := fs.Parse(args); err != nil {
+		return 2 // ContinueOnError already printed the reason and usage
+	}
 
 	if *showVersion {
-		fmt.Printf("localsync-lint %s\n", cliVersion)
+		fmt.Fprintf(stdout, "localsync-lint %s\n", cliVersion)
 
-		return
+		return 0
 	}
 
 	if *listRules {
-		printRules()
+		printRules(stdout)
 
-		return
+		return 0
 	}
 
 	if *explain != "" {
 		rule, ok := cqrslint.RuleByID(*explain)
 		if !ok {
-			fmt.Fprintf(os.Stderr, "localsync-lint: unknown rule %q (see --list)\n", *explain)
-			os.Exit(2)
+			fmt.Fprintf(stderr, "localsync-lint: unknown rule %q (see --list)\n", *explain)
+
+			return 2
 		}
 
-		printRuleDetail(rule)
+		printRuleDetail(stdout, rule)
 
-		return
+		return 0
 	}
 
 	ruleSelection, err := parseRuleSelection(*rules, *excludeRules)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "localsync-lint:", err)
-		os.Exit(2)
+		fmt.Fprintln(stderr, "localsync-lint:", err)
+
+		return 2
 	}
 
 	resolvedFormat := *format
@@ -105,11 +128,12 @@ func main() {
 	}
 
 	switch resolvedFormat {
-	case formatText, formatJSON, formatGitHub:
+	case formatText, formatJSON, formatGitHub, formatSarif:
 		// valid
 	default:
-		fmt.Fprintf(os.Stderr, "localsync-lint: unknown -format %q (want text, json, or github)\n", resolvedFormat)
-		os.Exit(2)
+		fmt.Fprintf(stderr, "localsync-lint: unknown -format %q (want text, json, github, or sarif)\n", resolvedFormat)
+
+		return 2
 	}
 
 	opts := outputOptions{
@@ -132,11 +156,12 @@ func main() {
 	elapsed := time.Since(start)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "localsync-lint:", err)
-		os.Exit(2)
+		fmt.Fprintln(stderr, "localsync-lint:", err)
+
+		return 2
 	}
 
-	emit(os.Stdout, os.Stderr, report{
+	emit(stdout, stderr, report{
 		findings:  findings,
 		opts:      opts,
 		target:    *target,
@@ -144,7 +169,7 @@ func main() {
 		elapsed:   elapsed,
 	})
 
-	os.Exit(exitCode(findings, opts))
+	return exitCode(findings, opts)
 }
 
 // ruleSelection is the parsed --rules / --exclude-rules flag pair.
@@ -185,8 +210,8 @@ func splitRuleList(value string) []string {
 
 // printRuleDetail renders one rule for --explain: identity, severity, and
 // the rationale that ties the rule back to its design decision.
-func printRuleDetail(rule cqrslint.Rule) {
-	fmt.Printf("%s — %s [%s]\n\n%s\n", rule.ID, rule.Title, rule.Severity, rule.Rationale)
+func printRuleDetail(w io.Writer, rule cqrslint.Rule) {
+	fmt.Fprintf(w, "%s — %s [%s]\n\n%s\n", rule.ID, rule.Title, rule.Severity, rule.Rationale)
 }
 
 type outputOptions struct {
@@ -228,7 +253,12 @@ func emit(stdout, stderr io.Writer, r report) {
 		emitSuppressedByRule(stderr, r.findings)
 	}
 
-	emitFindings(stdout, r.findings, r.opts)
+	if r.opts.format == formatSarif {
+		emitSarif(stdout, r.findings, r.opts)
+	} else {
+		emitFindings(stdout, r.findings, r.opts)
+	}
+
 	emitSummary(stderr, counts, r.opts, r.elapsed)
 }
 
@@ -371,6 +401,167 @@ func emitFindingGitHub(w io.Writer, f cqrslint.Finding) {
 	fmt.Fprintf(w, "%s file=%s,line=%d,title=%s::%s\n", annotation, f.File, f.Line, f.Rule, f.Message)
 }
 
+// SARIF 2.1.0 emission (https://json.sarifspec.com/): one run, one result per
+// visible finding, and the full rule catalog in tool.driver.rules so any
+// ruleId resolves for consumers even when it has no findings. Suppressed
+// findings reuse the same visibility rule as every other format (hidden
+// unless --show-suppressed) and are additionally tagged with an inSource
+// suppression entry, which is SARIF's native spelling of a //cqrs-lint:
+// directive.
+type sarifReport struct {
+	Schema  string     `json:"$schema"`
+	Version string     `json:"version"`
+	Runs    []sarifRun `json:"runs"`
+}
+
+type sarifRun struct {
+	Tool    sarifTool     `json:"tool"`
+	Results []sarifResult `json:"results"`
+}
+
+type sarifTool struct {
+	Driver sarifDriver `json:"driver"`
+}
+
+type sarifDriver struct {
+	Name            string           `json:"name"`
+	Version         string           `json:"version"`
+	InformationURI  string           `json:"informationUri"`
+	Rules           []sarifRuleDesc  `json:"rules"`
+}
+
+type sarifRuleDesc struct {
+	ID               string       `json:"id"`
+	ShortDescription sarifMessage `json:"shortDescription"`
+}
+
+type sarifResult struct {
+	RuleID       string           `json:"ruleId"`
+	Level        string           `json:"level"`
+	Message      sarifMessage     `json:"message"`
+	Locations    []sarifLocation  `json:"locations,omitempty"`
+	Suppressions []sarifSuppression `json:"suppressions,omitempty"`
+}
+
+type sarifMessage struct {
+	Text string `json:"text"`
+}
+
+type sarifLocation struct {
+	PhysicalLocation sarifPhysicalLocation `json:"physicalLocation"`
+}
+
+type sarifPhysicalLocation struct {
+	ArtifactLocation sarifArtifactLocation `json:"artifactLocation"`
+	Region           sarifRegion           `json:"region,omitempty"`
+}
+
+type sarifArtifactLocation struct {
+	URI string `json:"uri"`
+}
+
+type sarifRegion struct {
+	StartLine int `json:"startLine"`
+}
+
+type sarifSuppression struct {
+	Kind    string `json:"kind"`
+	Status  string `json:"status"`
+	Justification string `json:"justification"`
+}
+
+// emitSarif writes the whole log as a single JSON document (not NDJSON):
+// SARIF consumers expect one object per file.
+func emitSarif(w io.Writer, findings []cqrslint.Finding, opts outputOptions) {
+	driverRules := make([]sarifRuleDesc, 0, len(cqrslint.Rules()))
+
+	for _, rule := range cqrslint.Rules() {
+		driverRules = append(driverRules, sarifRuleDesc{
+			ID:               rule.ID,
+			ShortDescription: sarifMessage{Text: rule.Title},
+		})
+	}
+
+	results := make([]sarifResult, 0, len(findings))
+
+	for _, f := range findings {
+		if f.Suppressed && !opts.showSuppressed {
+			continue
+		}
+
+		result := sarifResult{
+			RuleID:  f.Rule,
+			Level:   sarifLevel(f.Severity),
+			Message: sarifMessage{Text: f.Message},
+		}
+
+		if f.File != "" {
+			location := sarifLocation{
+				PhysicalLocation: sarifPhysicalLocation{
+					ArtifactLocation: sarifArtifactLocation{URI: f.File},
+				},
+			}
+
+			// SARIF regions are 1-based; package-level findings carry no
+			// position and omit the region rather than lying with a 0.
+			if f.Line > 0 {
+				location.PhysicalLocation.Region = sarifRegion{StartLine: f.Line}
+			}
+
+			result.Locations = []sarifLocation{location}
+		}
+
+		if f.Suppressed {
+			result.Suppressions = []sarifSuppression{{
+				Kind:     "inSource",
+				Status:   "accepted",
+				Justification: "//cqrs-lint: directive",
+			}}
+		}
+
+		results = append(results, result)
+	}
+
+	log := sarifReport{
+		Schema:  sarifSchema,
+		Version: sarifFormat,
+		Runs: []sarifRun{{
+			Tool: sarifTool{
+				Driver: sarifDriver{
+					Name:           "localsync-lint",
+					Version:        cliVersion,
+					InformationURI: repoURI,
+					Rules:          driverRules,
+				},
+			},
+			Results: results,
+		}},
+	}
+
+	encoded, err := json.MarshalIndent(log, "", "  ")
+	if err != nil {
+		// Same contract as the NDJSON path: a marshal failure on this shape
+		// is a programming error, not a runtime condition.
+		panic(fmt.Sprintf("localsync-lint: marshal sarif log: %v", err))
+	}
+
+	fmt.Fprintf(w, "%s\n", encoded)
+}
+
+// sarifLevel maps the two severities onto SARIF's level vocabulary; anything
+// unknown degrades to a note rather than inventing a level.
+func sarifLevel(severity cqrslint.Severity) string {
+	if severity == cqrslint.SeverityError {
+		return "error"
+	}
+
+	if severity == cqrslint.SeverityWarning {
+		return "warning"
+	}
+
+	return "note"
+}
+
 func emitSummary(w io.Writer, counts findingCounts, opts outputOptions, elapsed time.Duration) {
 	total := counts.errors + counts.warnings
 
@@ -431,32 +622,32 @@ func plural(word string, n int) string {
 	return word + "s"
 }
 
-func printRules() {
+func printRules(w io.Writer) {
 	rules := cqrslint.Rules()
 
-	fmt.Printf("%-7s  %-8s  %-32s  %s\n", "RULE", "SEVERITY", "TITLE", "RATIONALE")
+	fmt.Fprintf(w, "%-7s  %-8s  %-32s  %s\n", "RULE", "SEVERITY", "TITLE", "RATIONALE")
 
 	for _, rule := range rules {
-		fmt.Printf("%-7s  %-8s  %-32s  %s\n", rule.ID, rule.Severity, rule.Title, rule.Rationale)
+		fmt.Fprintf(w, "%-7s  %-8s  %-32s  %s\n", rule.ID, rule.Severity, rule.Title, rule.Rationale)
 	}
 }
 
-func printUsage() {
-	out := flag.CommandLine.Output()
+func printUsage(fs *flag.FlagSet) {
+	w := fs.Output()
 
-	fmt.Fprintf(out, "Usage: localsync-lint [flags] [package]\n\n")
-	fmt.Fprintf(out, "Statically verifies go-localsync CQRS architectural invariants.\n\n")
-	fmt.Fprintf(out, "Flags:\n")
+	fmt.Fprintf(w, "Usage: localsync-lint [flags] [package]\n\n")
+	fmt.Fprintf(w, "Statically verifies go-localsync CQRS architectural invariants.\n\n")
+	fmt.Fprintf(w, "Flags:\n")
 
-	flag.PrintDefaults()
+	fs.PrintDefaults()
 
-	fmt.Fprintf(out, "\nSuppression directives:\n")
-	fmt.Fprintf(out, "  //cqrs-lint:ignore C0005         silence a rule on the next/same line\n")
-	fmt.Fprintf(out, "  //cqrs-lint:ignore C0005 reason  with an optional reason\n")
-	fmt.Fprintf(out, "  //cqrs-lint:ignore all           silence every rule at this position\n")
-	fmt.Fprintf(out, "  //cqrs-lint:ignore-file C0005    silence a rule for the entire file\n")
-	fmt.Fprintf(out, "  /* cqrs-lint:ignore C0005 */     block-comment form of any directive\n")
-	fmt.Fprintf(out, "  //cqrs-lint:ignore-start C0005   begin a suppressed interval\n")
-	fmt.Fprintf(out, "  //cqrs-lint:ignore-end C0005     end the interval (bare ignore-end closes all)\n")
-	fmt.Fprintf(out, "\nRun -no-suppress to ignore every directive (CI hardening).\n")
+	fmt.Fprintf(w, "\nSuppression directives:\n")
+	fmt.Fprintf(w, "  //cqrs-lint:ignore C0005         silence a rule on the next/same line\n")
+	fmt.Fprintf(w, "  //cqrs-lint:ignore C0005 reason  with an optional reason\n")
+	fmt.Fprintf(w, "  //cqrs-lint:ignore all           silence every rule at this position\n")
+	fmt.Fprintf(w, "  //cqrs-lint:ignore-file C0005    silence a rule for the entire file\n")
+	fmt.Fprintf(w, "  /* cqrs-lint:ignore C0005 */     block-comment form of any directive\n")
+	fmt.Fprintf(w, "  //cqrs-lint:ignore-start C0005   begin a suppressed interval\n")
+	fmt.Fprintf(w, "  //cqrs-lint:ignore-end C0005     end the interval (bare ignore-end closes all)\n")
+	fmt.Fprintf(w, "\nRun -no-suppress to ignore every directive (CI hardening).\n")
 }
