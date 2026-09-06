@@ -70,4 +70,3 @@ func NewProviderID(v string) ProviderID { return brandid.NewID[ProviderBrand](v)
 
 // NewEventTypeID creates a new EventTypeID from a string value.
 func NewEventTypeID(v string) EventTypeID { return brandid.NewID[EventTypeBrand](v) }
-

@@ -74,7 +74,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
   ✅ DONE 2026-09-06: `cmd/cqrs-lint/process_test.go` — builds the binary into `t.TempDir()`, pins exits 0/1/2, `--strict` on the unknown-rule warning, and the NDJSON shape. Coverage stays 56.4% (subprocess runs are coverage-invisible by design).
 - [ ] **Real-meter and sdktrace recorder tests** — prove values actually land in `cqrs.operation.*` and the `localsync.sync_items` span attributes (noop providers only prove wiring).
 - [ ] **Cursor pagination test against the real SQLite read model ordering** — the current test uses a fake store (`pkg/api`).
-- [ ] **`pkg/id` unit tests for `ContentHash`** — `IsZero`/`String` untested; coverage sits at 75.0%.
+- [x] **`pkg/id` unit tests for `ContentHash`** — `IsZero`/`String` untested; coverage sits at 75.0%.
+  ✅ DONE 2026-09-06: constructor/round-trip + literal-compat + sha256-path tests; package coverage 75.0% → 100.0%.
 - [ ] **Benchmark protocol** — re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; fix `Replay10kEvents` to measure true from-zero replay (iterations 2+ are checkpoint-bounded no-ops); add a conflict-heavy benchmark (resolver invoked per item) and an upcasted-legacy-read vs native-V3-read benchmark.
 - [ ] **Wire `CQRSConfig.Validate()` into `NewCQRSStack`** (or document it as consumer-facing) — defined at `pkg/cqrs/stack.go:53` with zero production call sites.
 - [ ] **Consolidate attribute-key constants** — `pkg/cqrs/item_adapter.go:18-21` keeps private `legacyActorLogin`-style constants duplicating `pkg/data/model`'s exported `Attr*` keys; two sources of truth for a wire-format constant.
@@ -91,7 +92,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Surface `ParseTombstoneReason` in API DTOs** (typed tombstone reason on the read path).
 - [ ] **`b.N` → `b.Loop()`** modernization in the older bench files (gopls warnings: `adapter_bench_test.go`, `stack_bench_test.go`).
 - [ ] **Unify `waitForCount`/`waitForCountTB`** behind a `testing.TB` helper.
-- [ ] **Move `id.ContentHash` out of `ids.go`** — it is a content hash, not an identifier.
+- [x] **Move `id.ContentHash` out of `ids.go`** — it is a content hash, not an identifier.
+  ✅ DONE 2026-09-06: moved to `pkg/id/content_hash.go`.
 - [ ] **Docs policy cluster**: decide + execute the HTML-artifact policy (banner/archive the 25 generated HTML reports; 3 superseded June dashboards sit in `status/` root); record the dprint scope for `docs/status/` (format vs exclude); classify the two undated planning files; annotate+archive the 23:04 report once routed.
 - [ ] **ROADMAP cleanup: "Export to JSON/CSV" theme is stale** — `stack.ExportEvents` (NDJSON) + `ExportEventsCSV` shipped (FEATURES row 65); strike/replace the ROADMAP idea row.
 - [ ] **Add source-item IDs to cluster TODOs** (cqrs-lint CLI cluster, API-hardening, benchmarks) so future sweeps can strike report items individually.
