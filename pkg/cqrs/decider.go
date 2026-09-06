@@ -104,7 +104,10 @@ func decideSync(
 	opts ...event.Option,
 ) decider.DecideFunc[SyncItemState] {
 	return func(state SyncItemState, currentVersion event.Version) ([]event.Event, error) {
-		aggID := AggregateID(item.Source.Get(), item.ExternalID)
+		streamID, err := StreamID(item.Source.Get(), item.SourceID)
+		if err != nil {
+			return nil, pkgerrors.Wrapf(err, "derive stream ID for %s/%s", item.Source.Get(), item.SourceID)
+		}
 
 		// By design (ADR-0005 addendum): resurrections bypass the resolver.
 		// A tombstoned local is a deleted marker, not live content, and a sync
@@ -112,7 +115,7 @@ func decideSync(
 		// it would hide an upstream-restored item forever. Pinned by
 		// TestDecideSync_ResurrectTombstonedItem_BypassesResolver.
 		if state.ShouldResurrect() {
-			return syncEvents(item, rawJSON, aggID, currentVersion, nil, opts...)
+			return syncEvents(item, rawJSON, streamID, currentVersion, nil, opts...)
 		}
 
 		if !hasChanged(state.Item, item) {
@@ -121,7 +124,7 @@ func decideSync(
 
 		winner, winnerLabel := resolveConflict(resolver, state.Item, item)
 
-		return syncEvents(winner, rawJSON, aggID, currentVersion, &conflictMeta{
+		return syncEvents(winner, rawJSON, streamID, currentVersion, &conflictMeta{
 			localUpdatedAt:  state.Item.UpdatedAt,
 			remoteUpdatedAt: item.UpdatedAt,
 			winner:          winnerLabel,
@@ -136,7 +139,7 @@ func decideSync(
 // (exact event assertions in tests, backdated tombstones in tooling).
 func decideTombstone(
 	source string,
-	sourceID id.ExternalID,
+	sourceID id.SourceID,
 	reason model.TombstoneReason,
 	at time.Time,
 	opts ...event.Option,
@@ -150,10 +153,13 @@ func decideTombstone(
 			at = time.Now().UTC()
 		}
 
-		aggID := AggregateID(source, sourceID)
+		streamID, err := StreamID(source, sourceID)
+		if err != nil {
+			return nil, pkgerrors.Wrapf(err, "derive stream ID for %s/%s", source, sourceID)
+		}
 
 		evts, err := event.NewEvents(
-			aggID, aggregateType, currentVersion,
+			streamID, aggregateType, currentVersion,
 			[]event.Type{EventItemTombstoned},
 			[]any{ItemTombstonedPayload{
 				Source:       source,
@@ -167,7 +173,7 @@ func decideTombstone(
 			return nil, pkgerrors.Wrapf(
 				err,
 				"create tombstone event for %s/%s (version=%d)",
-				aggID,
+				streamID,
 				sourceID,
 				currentVersion,
 			)

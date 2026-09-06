@@ -4,7 +4,7 @@
 //
 // All entity identifiers use ULID as the value type, aligning with go-cqrs-lite's
 // id.Of[T] which wraps cbid.ID[T, ulid.ULID]. External provider IDs (strings from
-// GitHub, GitLab, etc.) are stored as attributes via ExternalID, not as entity IDs.
+// GitHub, GitLab, etc.) are stored as SourceID, not as entity IDs.
 package id
 
 import (
@@ -19,8 +19,8 @@ import (
 type (
 	// ItemBrand distinguishes ItemID from other identifier types.
 	ItemBrand struct{}
-	// ExternalBrand distinguishes ExternalID from other identifier types.
-	ExternalBrand struct{}
+	// SourceBrand distinguishes SourceID from other identifier types.
+	SourceBrand struct{}
 	// ProviderBrand distinguishes ProviderID from other identifier types.
 	ProviderBrand struct{}
 	// EventTypeBrand distinguishes EventTypeID from other identifier types.
@@ -31,9 +31,11 @@ type (
 	// ItemID is the internal ULID-based identifier for sync items.
 	// Aligned with go-cqrs-lite's id.Of[T] which uses ULID-only identifiers.
 	ItemID = brandid.ID[ItemBrand, ulid.ULID]
-	// ExternalID is the provider-specific item identifier used for upsert operations.
-	// Stores the original string ID from external providers (e.g., GitHub event "1234567890").
-	ExternalID = brandid.ID[ExternalBrand, string]
+	// SourceID is the provider's own key for an item (e.g. a GitHub event ID),
+	// used for upsert operations and deterministic stream derivation. It is the
+	// v0.6 vocabulary-aligned name (ADR-0009): event payloads already persist
+	// this value as "sourceId".
+	SourceID = brandid.ID[SourceBrand, string]
 	// ProviderID identifies the source provider.
 	// Example: "github", "gitlab".
 	ProviderID = brandid.ID[ProviderBrand, string]
@@ -41,6 +43,14 @@ type (
 	// Example: "PushEvent", "CreateEvent".
 	EventTypeID = brandid.ID[EventTypeBrand, string]
 )
+
+// Deprecated: use SourceBrand (ADR-0009 vocabulary alignment). Type alias kept
+// for one minor cycle so pre-v0.6 code compiles unchanged.
+type ExternalBrand = SourceBrand
+
+// Deprecated: use SourceID (ADR-0009 vocabulary alignment). True type alias,
+// so existing code compiles unchanged; removed in the next breaking window.
+type ExternalID = SourceID
 
 // NewItemID creates a new ItemID with a freshly generated ULID.
 func NewItemID() ItemID {
@@ -62,11 +72,15 @@ func ParseItemID(s string) (ItemID, error) {
 	return brandid.NewID[ItemBrand](parsed), nil
 }
 
-// NewExternalID creates a new ExternalID from a string value.
-func NewExternalID(v string) ExternalID { return brandid.NewID[ExternalBrand](v) }
+// NewSourceID creates a new SourceID from a string value.
+func NewSourceID(v string) SourceID { return brandid.NewID[SourceBrand](v) }
 
 // NewProviderID creates a new ProviderID from a string value.
 func NewProviderID(v string) ProviderID { return brandid.NewID[ProviderBrand](v) }
 
 // NewEventTypeID creates a new EventTypeID from a string value.
 func NewEventTypeID(v string) EventTypeID { return brandid.NewID[EventTypeBrand](v) }
+
+// Deprecated: use NewSourceID (ADR-0009 vocabulary alignment). Alias kept for
+// one minor cycle; removed in the next breaking window.
+var NewExternalID = NewSourceID
