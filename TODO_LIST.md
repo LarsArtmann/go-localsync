@@ -2,7 +2,7 @@
 
 **Project:** go-localsync
 **Last Updated:** 2026-09-06 (v0.6 enactment + whole-list sweep)
-**Tests:** 378 test functions across 11 packages, plus 35 in the standalone `provider/github` module — all passing (race-clean) | **Latest release:** v0.5.0 + `provider/github/v0.1.0` (v0.6.0 enacted, untagged)
+**Tests:** 386 test functions across 11 packages, plus 35 in the standalone `provider/github` module — all passing (race-clean) | **Latest release:** v0.5.0 + `provider/github/v0.1.0` (v0.6.0 enacted, untagged)
 
 ## Overview
 
@@ -106,7 +106,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [x] **API hardening: rate limiting** — `X-RateLimit-Limit`/`-Remaining` headers on 429; optional per-client rate limiting (`WithRateLimiter(keyExtractor)`); document the global-vs-per-client scope.
       ✅ DONE 2026-09-06: `WithRateLimiter(perMinute, keyExtractor)` (global + per-client bucketing), canonical `X-Ratelimit-Limit`/`X-Ratelimit-Remaining` headers, per-client tests; global-vs-per-client scope documented at the option.
       ⏳ Remaining (split out below): structured log level control.
-- [ ] **API hardening: structured log level control** — per-event INFO logging is noisy in prod; expose a level knob on the server (event logs → Debug by default or configurable).
+- [x] **API hardening: structured log level control** — per-event INFO logging is noisy in prod; expose a level knob on the server (event logs → Debug by default or configurable).
+      ✅ DONE 2026-09-06: `CQRSConfig.LogLevel` (string, construction-validated, stack-owned event logger only — consumer loggers keep their own control, pinned by test) + `api.WithLogLevel(log.Level)` (typed option applying to the server logger, global-fallback documented). API-hardening cluster now fully closed.
 - [x] **OTel span for `Syncer.Sync`** in `pkg/sync` (currently only the CQRS batch path spans).
       ✅ DONE 2026-09-06: `pkg/sync/otel.go` — `WithTracer(trace.Tracer)` + `withSyncSpan` wrapping `Sync`/`SyncIncremental` (spans `localsync.sync`/`localsync.sync_incremental`, error status + `RecordError`); `CQRSConfig.OTel` propagates the tracer end-to-end.
 - [x] **`provider/github`: ETag / conditional requests** for incremental revalidation (flagged by [performance review](docs/research/performance-review.html)).
