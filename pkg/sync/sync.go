@@ -127,16 +127,28 @@ func (o *SyncOptions) Validate() error {
 		return pkgerrors.WithDetail(pkgerrors.ErrInvalidInput, "SyncOptions.Source is required")
 	}
 
+	if o.MaxPages < 0 {
+		return pkgerrors.InvalidField("maxPages", "SyncOptions.MaxPages must not be negative")
+	}
+
 	return nil
 }
 
-// SyncResult holds the result of a sync operation.
+// SyncResult is THE user-facing result of a sync run (ADR-0009 decision #2):
+// Fetched/Skipped/Tombstoned/Errors summarize the run, ItemErrors carries the
+// failed items, and Batch holds the store-dispatch outcome when a batch ran.
 type SyncResult struct {
 	Fetched    int
 	Skipped    int
 	Tombstoned int
 	Errors     int
 	ItemErrors []ItemSyncResult
+	// Batch is the outcome of the store dispatch (SyncItems), set whenever a
+	// batch of valid items was persisted during the run. Nil when no batch ran
+	// (fetch failed, nothing valid to sync, or no incremental candidates).
+	// Consumers wanting per-item actions/conflicts read it here instead of
+	// calling the store again.
+	Batch *BatchOutcome
 }
 
 // Stats holds aggregate statistics about synced items.
@@ -220,11 +232,12 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 		return syncResult, errIfFailed(syncResult, len(result.Items))
 	}
 
-	summary := s.syncBatch(ctx, opts, valid)
-	syncResult.Errors += summary.Errors
-	syncResult.Skipped = len(valid) - summary.Synced - summary.Errors
+	batch := s.syncBatch(ctx, opts, valid)
+	syncResult.Batch = batch
+	syncResult.Errors += batch.Errors
+	syncResult.Skipped = len(valid) - batch.Synced - batch.Errors
 
-	for _, r := range summary.Results {
+	for _, r := range batch.Results {
 		if r.Action == ActionError {
 			syncResult.ItemErrors = append(syncResult.ItemErrors, r)
 		}
@@ -241,7 +254,7 @@ func (s *Syncer) runSync(ctx context.Context, opts *SyncOptions) (*SyncResult, e
 		"fetched",
 		syncResult.Fetched,
 		"synced",
-		summary.Synced,
+		batch.Synced,
 		"tombstoned",
 		syncResult.Tombstoned,
 		"errors",
@@ -349,9 +362,9 @@ func (s *Syncer) runSyncIncremental(ctx context.Context, opts *SyncOptions) (*Sy
 	return syncResult, errIfFailed(syncResult, syncResult.Fetched)
 }
 
-// GetStats returns aggregate statistics including per-type counts.
+// Stats returns aggregate statistics including per-type counts.
 // Uses a single CountByType query instead of N+1 per-type Count calls.
-func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
+func (s *Syncer) Stats(ctx context.Context) (*Stats, error) {
 	typeCounts, err := s.store.CountByType(ctx, model.ItemFilter{})
 	if err != nil {
 		return nil, err
@@ -372,6 +385,12 @@ func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
 		ItemTypes:  types,
 		TypeCounts: typeCounts,
 	}, nil
+}
+
+// Deprecated: use Stats (ADR-0009 addendum: no Get prefix). Alias kept for one
+// minor cycle; removed in the next breaking window.
+func (s *Syncer) GetStats(ctx context.Context) (*Stats, error) {
+	return s.Stats(ctx)
 }
 
 func (s *Syncer) Close() error {
@@ -405,9 +424,10 @@ func (s *Syncer) processIncrementalItems(
 	toSync := s.filterValidItems(filtered, syncResult)
 
 	if len(toSync) > 0 {
-		summary := s.store.SyncItems(ctx, toSync)
-		syncResult.Errors += summary.Errors
-		syncResult.Skipped += len(toSync) - summary.Synced - summary.Errors
+		batch := s.store.SyncItems(ctx, toSync)
+		syncResult.Batch = batch
+		syncResult.Errors += batch.Errors
+		syncResult.Skipped += len(toSync) - batch.Synced - batch.Errors
 	}
 
 	return syncResult

@@ -49,7 +49,9 @@ func StreamID(source string, sourceID id.SourceID) (cqrsid.StreamID, error) {
 		// bytes is always 32 chars, so this is unreachable for any real
 		// input — but the error return keeps the signature honest instead
 		// of panicking (v0.6 conversion per ADR-0009).
-		return cqrsid.StreamID(""), pkgerrors.Wrapf(
+		var zero cqrsid.StreamID
+
+		return zero, pkgerrors.Wrapf(
 			pkgerrors.ErrInvalidInput,
 			"cqrs: derive stream ID: ParseStreamID failed for valid hex %q: %v",
 			hexID,
@@ -76,9 +78,11 @@ func MustStreamID(source string, sourceID id.SourceID) cqrsid.StreamID {
 
 // Deprecated: use StreamID (ADR-0009 vocabulary alignment), which returns an
 // error instead of panicking on the (unreachable) derivation failure. Alias
-// kept for one minor cycle; removed in the next breaking window.
-func AggregateID(source string, externalID id.ExternalID) cqrsid.StreamID {
-	streamID, err := StreamID(source, externalID)
+// kept for one minor cycle; removed in the next breaking window. The sourceID
+// parameter is id.SourceID; pre-v0.6 id.ExternalID values are the same type
+// (true alias), so legacy call sites compile unchanged.
+func AggregateID(source string, sourceID id.SourceID) cqrsid.StreamID {
+	streamID, err := StreamID(source, sourceID)
 	if err != nil {
 		// Preserves the pre-v0.6 fail-fast contract of this deprecated shim.
 		panic(fmt.Sprintf("cqrs: AggregateID: %v", err)) //nolint:goerr113 // deprecated shim
