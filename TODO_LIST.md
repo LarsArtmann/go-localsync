@@ -2,7 +2,7 @@
 
 **Project:** go-localsync
 **Last Updated:** 2026-09-06 (v0.6 enactment + whole-list sweep)
-**Tests:** 386 test functions across 11 packages, plus 35 in the standalone `provider/github` module — all passing (race-clean) | **Latest release:** v0.5.0 + `provider/github/v0.1.0` (v0.6.0 enacted, untagged)
+**Tests:** 401 test functions across 11 packages, plus 35 in the standalone `provider/github` module — all passing (race-clean) | **Latest release:** v0.5.0 + `provider/github/v0.1.0` (v0.6.0 enacted, untagged)
 
 ## Overview
 

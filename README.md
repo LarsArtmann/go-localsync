@@ -268,7 +268,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (386 tests across 11 packages)
+go test ./... -count=1                # Run tests (401 tests across 11 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -298,7 +298,7 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 
 ## Testing
 
-386 test functions across 11 packages (plus 35 in the standalone `provider/github` module):
+401 test functions across 11 packages (plus 35 in the standalone `provider/github` module):
 
 | Package              | Tests | Coverage | Description                                                             |
 | -------------------- | ----- | -------- | ----------------------------------------------------------------------- |
@@ -307,12 +307,12 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 | `pkg/api`            | 35    | 95.2%    | Server, routes, auth, rate limit, pagination, error mapping             |
 | `pkg/errors`         | 16    | 92.9%    | Sentinel errors, wrapping, classification, IsRetryable, HTTPStatus      |
 | `pkg/id`             | 15    | 100.0%   | ID construction, roundtrip, zero, equal, ContentHash                    |
-| `pkg/data/model`     | 13    | 87.1%    | Item, Key, Validate, ItemFilter, Tombstone                              |
+| `pkg/data/model`     | 18    | 100.0%   | Item, Key, Validate, ItemFilter, Tombstone                              |
 | `pkg/crdt`           | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/data/schema`    | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
 | `pkg/provider`       | 2     | 92.3%    | Item validation                                                         |
 | `internal/cqrslint`  | 69    | 93.2%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
-| `cmd/localsync-lint` | 23    | 35.2%    | Exit-code contract, summary/`--json` output, fixture round trip         |
+| `cmd/localsync-lint` | 33    | 64.8%    | Exit-code contract, summary/`--json` output, fixture round trip         |
 
 ## Related Projects
 
