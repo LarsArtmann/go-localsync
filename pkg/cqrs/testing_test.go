@@ -243,20 +243,27 @@ func subscribeAll(t *testing.T, stack *CQRSStack) func(minCount int) []event.Eve
 	return func(minCount int) []event.Event {
 		t.Helper()
 
-		deadline := time.Now().Add(5 * time.Second)
+		// 30s + a loud failure, matching waitForCount: a silently expired
+		// short deadline used to hand callers a short slice and fail their
+		// content assertions instead — an unattributable flake under load.
+		deadline := time.Now().Add(30 * time.Second)
 		for time.Now().Before(deadline) {
 			mu.Lock()
-			if len(captured) >= minCount {
-				mu.Unlock()
+			enough := len(captured) >= minCount
+			mu.Unlock()
+			if enough {
 				break
 			}
-			mu.Unlock()
 			time.Sleep(time.Millisecond)
 		}
 
 		mu.Lock()
 		evts := captured
 		mu.Unlock()
+
+		if len(evts) < minCount {
+			t.Fatalf("timed out waiting for %d subscribed events, got %d", minCount, len(evts))
+		}
 
 		return evts
 	}

@@ -179,13 +179,25 @@ func TestCQRSStack_Close_NoGoroutineLeak(t *testing.T) {
 		testutil.MustNoError(t, stack.Close())
 	}
 
-	// Allow projection goroutines to exit after Close's drain.
-	time.Sleep(100 * time.Millisecond)
-	runtime.GC()
+	// Poll instead of sampling once: this test runs parallel with siblings
+	// that each start projection-runner/bus goroutines of their own, so the
+	// process-wide count can spike transiently between our two samples. The
+	// 2026-09-06 -race flake (no DATA RACE, load-dependent) had exactly this
+	// shape: a single post-sleep sample racing sibling activity. Close's
+	// drain only has to bring OUR goroutines home — the poll waits for the
+	// sibling noise to pass instead of failing on it.
+	deadline := time.Now().Add(30 * time.Second)
 
-	after := runtime.NumGoroutine()
-	if after > before+2 {
-		t.Fatalf("goroutine leak: before=%d after=%d", before, after)
+	for {
+		runtime.GC()
+
+		if after := runtime.NumGoroutine(); after <= before+2 {
+			return
+		} else if !time.Now().Before(deadline) {
+			t.Fatalf("goroutine leak: before=%d after=%d", before, after)
+		}
+
+		time.Sleep(25 * time.Millisecond)
 	}
 }
 

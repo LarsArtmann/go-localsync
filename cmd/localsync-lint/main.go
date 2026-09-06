@@ -424,10 +424,10 @@ type sarifTool struct {
 }
 
 type sarifDriver struct {
-	Name            string           `json:"name"`
-	Version         string           `json:"version"`
-	InformationURI  string           `json:"informationUri"`
-	Rules           []sarifRuleDesc  `json:"rules"`
+	Name           string          `json:"name"`
+	Version        string          `json:"version"`
+	InformationURI string          `json:"informationUri"`
+	Rules          []sarifRuleDesc `json:"rules"`
 }
 
 type sarifRuleDesc struct {
@@ -436,10 +436,10 @@ type sarifRuleDesc struct {
 }
 
 type sarifResult struct {
-	RuleID       string           `json:"ruleId"`
-	Level        string           `json:"level"`
-	Message      sarifMessage     `json:"message"`
-	Locations    []sarifLocation  `json:"locations,omitempty"`
+	RuleID       string             `json:"ruleId"`
+	Level        string             `json:"level"`
+	Message      sarifMessage       `json:"message"`
+	Locations    []sarifLocation    `json:"locations,omitempty"`
 	Suppressions []sarifSuppression `json:"suppressions,omitempty"`
 }
 
@@ -465,8 +465,8 @@ type sarifRegion struct {
 }
 
 type sarifSuppression struct {
-	Kind    string `json:"kind"`
-	Status  string `json:"status"`
+	Kind          string `json:"kind"`
+	Status        string `json:"status"`
 	Justification string `json:"justification"`
 }
 
@@ -513,8 +513,8 @@ func emitSarif(w io.Writer, findings []cqrslint.Finding, opts outputOptions) {
 
 		if f.Suppressed {
 			result.Suppressions = []sarifSuppression{{
-				Kind:     "inSource",
-				Status:   "accepted",
+				Kind:          "inSource",
+				Status:        "accepted",
 				Justification: "//cqrs-lint: directive",
 			}}
 		}

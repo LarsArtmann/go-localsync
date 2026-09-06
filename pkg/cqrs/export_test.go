@@ -15,6 +15,30 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
+// waitForExportedCount polls the exported journal until it holds at least
+// want events — the deterministic replacement for the fixed sleep that used
+// to race bus delivery under load.
+func waitForExportedCount(t *testing.T, stack *CQRSStack, ctx context.Context, want int) {
+	t.Helper()
+
+	deadline := time.Now().Add(30 * time.Second)
+
+	for time.Now().Before(deadline) {
+		var buf bytes.Buffer
+		if err := stack.ExportEvents(ctx, &buf); err != nil {
+			t.Fatal(err)
+		}
+
+		if lines := strings.Split(strings.TrimSpace(buf.String()), "\n"); len(lines) >= want && buf.Len() > 0 {
+			return
+		}
+
+		time.Sleep(time.Millisecond)
+	}
+
+	t.Fatalf("timed out waiting for %d exported events", want)
+}
+
 func TestExportEvents_JSONLines(t *testing.T) {
 	t.Parallel()
 
@@ -27,9 +51,10 @@ func TestExportEvents_JSONLines(t *testing.T) {
 
 	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewSourceID("exp-1"), model.ReasonUserHidden))
 
-	// Give the synchronous bus a beat to deliver the tombstone before reading
-	// the journal for export.
-	time.Sleep(50 * time.Millisecond)
+	// The tombstone must reach the journal before the export is read. A
+	// fixed sleep raced the bus under load; poll for the second event
+	// instead.
+	waitForExportedCount(t, stack, ctx, 2)
 
 	var buf bytes.Buffer
 	testutil.MustNoError(t, stack.ExportEvents(ctx, &buf))
