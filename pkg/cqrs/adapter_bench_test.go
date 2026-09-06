@@ -28,21 +28,21 @@ func testProviderItem() *provider.Item {
 
 func BenchmarkToDataItem(b *testing.B) {
 	item := testProviderItem()
-	for range b.N {
+	for b.Loop() {
 		_ = toDataItem(item)
 	}
 }
 
 func BenchmarkDataItemToPayload(b *testing.B) {
 	item := toDataItem(testProviderItem())
-	for range b.N {
+	for b.Loop() {
 		_ = dataItemToPayload(item, []byte(`{}`))
 	}
 }
 
 func BenchmarkDataItemFromPayload(b *testing.B) {
 	payload := dataItemToPayload(toDataItem(testProviderItem()), []byte(`{}`))
-	for range b.N {
+	for b.Loop() {
 		_, err := dataItemFromPayload(payload)
 		if err != nil {
 			b.Fatal(err)

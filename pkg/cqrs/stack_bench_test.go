@@ -57,8 +57,7 @@ func BenchmarkSyncItems_ExistingItems(b *testing.B) {
 	defer func() { _ = stack.Close() }()
 	items := benchItems(100)
 	stack.SyncItems(ctx, items)
-	b.ResetTimer()
-	for range b.N {
+	for b.Loop() {
 		stack.SyncItems(ctx, items)
 	}
 }
