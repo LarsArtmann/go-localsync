@@ -95,7 +95,7 @@
 **This sweep's follow-ups (do first)**
 
 1. Owner: add the `SSH_PRIVATE_KEY` deploy-key secret (or decide to make `go-finding` public and delete all SSH machinery) — unblocks the library cqrs-lint CI leg; two CI runs have now verified only its skip path.
-2. Run `buildflow --build-mode full` — deferred by three consecutive sessions; oldest open P0.
+2. ~~Run `buildflow --build-mode full` — deferred by three consecutive sessions; oldest open P0.~~ ✅ DONE 2026-09-06: **61 success, 0 failed**. The streak's root cause was environmental, not code: buildflow's nix-hash-fix/nix-build steps evaluate every flake-check system (incl. aarch64-darwin — impossible locally without a darwin builder). Resolved via `.buildflow.yml` skip_steps for those three steps; `nix flake check` (current system) remains the gate and now includes the hermetic test+lint checks.
 3. Decide the HTML-artifact policy (g-1): banner + keep, or `archive/`-move, for the 3 June HTML dashboards in `status/` root and the superseded HTML set generally.
 4. Add the classification outcome (superseded/still-relevant/reference) as a banner or sidecar index for all 25 HTML snapshots — currently it exists only in this report.
 5. Classify the two undated planning files (`conflict-sync-audit-fix-report.md`, `go-composable-business-types-usage.md`) in a future sweep.

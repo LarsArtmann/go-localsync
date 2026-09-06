@@ -46,7 +46,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 ### Tooling / CI
 
 - [ ] **Add the `SSH_PRIVATE_KEY` repo secret so the library cqrs-lint CI leg runs** — the error-gated `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` step is restored in the workflow, CI-verified on the skip path, and auto-enables once the secret exists (a deploy key with read access to the private `larsartmann/go-finding` module); until then it skips with a notice and the gate runs locally from the devShell (documented in the workflow + AGENTS.md). Alternative endgame (owner call): make `go-finding` public and delete all SSH machinery.
-- [ ] **Run `buildflow --build-mode full`** inside the devShell (go.work kept to the two in-repo modules) — last full-pipeline run predates the M-plan session.
+- [x] **Run `buildflow --build-mode full`** inside the devShell (go.work kept to the two in-repo modules) — last full-pipeline run predates the M-plan session.
+  ✅ DONE 2026-09-06 (ended the 3-session deferral streak): **61 success, 0 failed** via `.buildflow.yml` `skip_steps` (nix-hash-fix, nix-build, nix-build-verify) — those steps evaluate EVERY flake-check system incl. aarch64-darwin, which local machines cannot build without a darwin builder; `nix flake check` (current system, now incl. hermetic test+lint) stays as the gate. Cross-platform build proof remains in CI.
 - [x] **Add a `nix flake check` CI job** so `vendorHash` drift can't land silently again (it silently broke `nix build` once already — see CHANGELOG 0.5.0-era "Stale vendorHash re-pinned").
   ✅ DONE 2026-09-06: `nix` job added, gates build/release; overrides the SSH `go-nix-helpers` input to anonymous HTTPS.
 - [x] **Pin the golangci-lint version in CI** instead of `latest` (reproducibility).
