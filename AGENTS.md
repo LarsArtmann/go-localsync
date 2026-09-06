@@ -10,18 +10,18 @@ Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based 
 
 ## Architecture
 
-| Package              | Purpose                                                                                                                                                                                                                                              |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/provider/`      | Core contract: `Provider`, `Item`, `FetchResult`, `RetryConfig`, `RateLimitInfo`. Concrete providers live in consumer apps or nested modules.                                                                                                        |
-| `pkg/sync/`          | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface, `SyncAction`, `ItemSyncResult`, `BatchOutcome` (single user-facing result), retry/backoff, per-source mutex, opt-in reconciliation, OTel spans (`otel.go`).                                  |
-| `pkg/cqrs/`          | go-cqrs-lite **v4** integration: Decider, ReadModel (memory+SQLite), Projector, `CQRSStack`, typed commands, DLQ surface (`dlq.go`), OTel wiring (`otel.go`). See [CQRS Architecture](#cqrs-architecture).                                           |
-| `pkg/data/`          | Domain model (`model.Item` with `SchemaVersion` + optional `Tombstone`, `Key`, `ItemFilter`) + `schema.Version` V1/V2/V3 event upcasting (V3 = de-githubify, ADR-0007). Everything CQRS operates on `*model.Item`.                                   |
-| `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `SourceID` string, `ContentHash`, `ProviderID`, `ActorLogin`, `RepoID`).                                                                                                                                    |
-| `pkg/errors/`        | Structured errors via go-error-family: intrinsic classification, `IsRetryable`, `HTTPStatus`, `WithCtx`/`InvalidField`.                                                                                                                              |
-| `pkg/crdt/`          | `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` — pluggable conflict strategy wired into `DecideSync`. No vector clocks (single writer needs none).                                                                                           |
-| `pkg/api/`           | HTTP API (Huma v2): `GET /items`, `GET /stats`, `POST /sync`, `GET /health`; auth, rate limiting, pagination, error mapping. Split server.go + dto.go + handlers.go.                                                                                 |
-| `internal/cqrslint/` | ADR-0004 architectural-invariant linter: 15 architectural checks (C0001-C0015), `//cqrs-lint:` suppression directives (line/block/range). CLI: `cmd/localsync-lint` (`--strict`, `--json`, `--rules`, `--explain`, ...). Details in the package doc. |
-| `pkg/testutil/`      | Shared test doubles (`MockProvider`, `SyncStore` fake, `BuildPairs`).                                                                                                                                                                                |
+| Package              | Purpose                                                                                                                                                                                                                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pkg/provider/`      | Core contract: `Provider`, `Item`, `FetchResult`, `RetryConfig`, `RateLimitInfo`. Concrete providers live in consumer apps or nested modules.                                                                                     |
+| `pkg/sync/`          | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface, `SyncAction`, `ItemSyncResult`, `BatchOutcome` (single user-facing result), retry/backoff, per-source mutex, opt-in reconciliation, OTel spans (`otel.go`).               |
+| `pkg/cqrs/`          | go-cqrs-lite **v4** integration: Decider, ReadModel (memory+SQLite), Projector, `CQRSStack`, typed commands, DLQ surface (`dlq.go`), OTel wiring (`otel.go`). See [CQRS Architecture](#cqrs-architecture).                        |
+| `pkg/data/`          | Domain model (`model.Item` with `SchemaVersion` + optional `Tombstone`, `Key`, `ItemFilter`) + `schema.Version` V1/V2/V3 event upcasting (V3 = de-githubify, ADR-0007). Everything CQRS operates on `*model.Item`.                |
+| `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `SourceID` string, `ContentHash`, `ProviderID`, `ActorLogin`, `RepoID`).                                                                                                                 |
+| `pkg/errors/`        | Structured errors via go-error-family: intrinsic classification, `IsRetryable`, `HTTPStatus`, `WithCtx`/`InvalidField`.                                                                                                           |
+| `pkg/crdt/`          | `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` — pluggable conflict strategy wired into `DecideSync`. No vector clocks (single writer needs none).                                                                        |
+| `pkg/api/`           | HTTP API (Huma v2): `GET /items`, `GET /stats`, `POST /sync`, `GET /health`; auth, rate limiting, pagination, error mapping. Split server.go + dto.go + handlers.go.                                                              |
+| `internal/cqrslint/` | ADR-0004 architectural-invariant linter: 15 architectural checks (C0001-C0015), `//cqrs-lint:` suppression directives (line/block/range). CLI: `cmd/localsync-lint` (`--strict`, `--json`, `--rules`, `--explain`, `--format=text |
+| `pkg/testutil/`      | Shared test doubles (`MockProvider`, `SyncStore` fake, `BuildPairs`).                                                                                                                                                             |
 
 **SyncStore seam:** `pkg/sync` defines `SyncStore`; `*cqrs.CQRSStack` implements it via adapters. Dependency flows one way: `cqrs → sync → provider/types/errors`. No import cycles. `SyncAction`/`ItemSyncResult` live in `pkg/sync/` (the seam), never in `pkg/cqrs/` (enforced by cqrslint C0007).
 
@@ -48,7 +48,7 @@ The entire storage layer is CQRS via go-cqrs-lite v4. **No legacy CRUD path.** N
 2. Build: `go build ./...`
 3. Test: `go test ./... -count=1`
 4. Lint: `golangci-lint run ./... --timeout=5m` · Format: `golangci-lint fmt ./...`
-5. CQRS gate: `go run ./cmd/localsync-lint --strict --verbose` (suppressions: `//cqrs-lint:ignore`; `--show-suppressed` to audit)
+5. CQRS gate: `go run ./cmd/localsync-lint --strict --verbose` (suppressions: `//cqrs-lint:ignore`; `--show-suppressed` to audit; formats incl. `--format=sarif`)
 6. Library cqrs-lint gate: `go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` (needs the private `go-finding` module → devShell/SSH only; CI runs it secret-gated)
 7. Doc-count truth: `./scripts/check-doc-counts.sh` (CI runs it; `--coverage` adds coverage-column checking locally). When you add/remove tests or bump deps, run it and fix flagged claims — **never hand-carry numbers**.
 8. Full pipeline: `buildflow --build-mode full` (devShell active; go.work limited to the two in-repo modules)
@@ -56,7 +56,7 @@ The entire storage layer is CQRS via go-cqrs-lite v4. **No legacy CRUD path.** N
 
 ### CI (No go.work)
 
-All dependencies are public; no private-repo auth except the secret-gated library gate. Jobs: `test` (race + coverage), `lint` (vet + actionlint@v1.7.12 + golangci-lint@v2.13.2 + dprint@0.56.1 + both cqrs-lint gates), `security` (govulncheck + gitleaks), `nix` (`nix flake check` — guards vendorHash drift), `build` (linux/darwin/windows compile matrix), `release` (tag-triggered), `provider` (standalone `GOWORK=off` build + race for `provider/github`). Build/release gate on test/lint/security/nix.
+All dependencies are public; no private-repo auth except the secret-gated library gate. Jobs: `test` (race + coverage), `lint` (vet + actionlint@v1.7.12 + golangci-lint@v2.13.2 + dprint@0.56.1 + both cqrs-lint gates), `security` (govulncheck + gitleaks), `nix` (`nix flake check` — guards vendorHash drift), `build` (linux/darwin/windows compile matrix), `release` (tag-triggered), `provider` (standalone `GOWORK=off` build + pinned golangci-lint v2.13.2 + race for `provider/github`, own `.golangci.yml`). Build/release gate on test/lint/security/nix.
 
 **`GOEXPERIMENT: jsonv2` is set at workflow `env:` level** — every job compiles go-cqrs-lite v4 code importing `encoding/json/v2`; without it the whole workflow goes red.
 
@@ -89,19 +89,19 @@ Use `buildflow`; not executable, formally disabled (documented decision). Re-ena
 
 | Package              | Tests | Coverage | Status                                                                                                                                                                                                                                                        |
 | -------------------- | ----- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/cqrs`           | 162   | 85.1%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, upcasting, scenario specs, regression tests                                                                                                                              |
-| `pkg/sync`           | 36    | 87.7%    | ✅ Syncer + ConflictAwareSyncer + retry + reconcile + per-source lock + regression                                                                                                                                                                            |
+| `pkg/cqrs`           | 168   | 85.1%    | ✅ Decider, ReadModel, Projection, Stack, SQLite RM, Replay, Correlation, tombstone, upcasting, decider+projection scenario specs, regression tests                                                                                                           |
+| `pkg/sync`           | 42    | 90.0%    | ✅ Syncer + ConflictAwareSyncer + retry/backoff edges + Retry-After + reconcile + per-source lock + span outcome attrs + regression                                                                                                                           |
 | `pkg/id`             | 15    | 100.0%   | ✅ ID construction, roundtrip, zero, equal, ContentHash (constructor, literal-compat, sha256 round trip)                                                                                                                                                      |
 | `pkg/errors`         | 16    | 92.9%    | ✅ Sentinels, wrapping, classification, IsRetryable, HTTPStatus, WithCtx/InvalidField, templates, partial-sync                                                                                                                                                |
 | `pkg/provider`       | 2     | 92.3%    | ✅ Item validation                                                                                                                                                                                                                                            |
-| `pkg/api`            | 38    | 96.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200                                                                                                                                                               |
+| `pkg/api`            | 42    | 96.4%    | ✅ Server, routes, handlers, health/stats/items/sync endpoints, error mapping, partial-sync→200, tombstone visibility (SQLite integration + OpenAPI pin)                                                                                                      |
 | `pkg/crdt`           | 8     | 100.0%   | ✅ Conflict, ConflictResolver, LWWResolver, example test                                                                                                                                                                                                      |
 | `pkg/data/model`     | 18    | 100.0%   | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                                                                                                                                                                 |
 | `pkg/data/schema`    | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                                                                                                                                                                           |
 | `internal/cqrslint`  | 69    | 93.2%    | ✅ 15 architectural checks (C0001-C0015), loader, finding sort/format, rules catalog, suppression directives                                                                                                                                                  |
 | `cmd/localsync-lint` | 47    | 95.5%    | ✅ exit-code contract, summary/JSON/SARIF output, violating-fixture round trip, in-process `run()` tests + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape, help-vs-acceptance). `main()` stays process-tested by design |
 
-**415 total test functions** across 11 test packages (incl. `cmd/localsync-lint`), plus 35 in the standalone `provider/github` module; the whole suite is race-clean.
+**431 total test functions** across 11 test packages (incl. `cmd/localsync-lint`), plus 35 in the standalone `provider/github` module; the whole suite is race-clean.
 
 Run: `go test ./... -count=1`
 

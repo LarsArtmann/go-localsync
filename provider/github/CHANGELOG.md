@@ -8,7 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- **Self-contained lint gate** — `provider/github/.golangci.yml` (standard set + canonicalheader/godot/misspell/wrapcheck; exhaustruct deliberately omitted: every struct literal here is an external SDK DTO or test fixture, partial by design). Stops golangci config discovery from walking up to the root config; CI's provider job now runs pinned golangci-lint v2.13.2 alongside build + race.
+- **ETag documentation** — README section with the `WithETagCache` usage snippet, a config-table row, an `ETagStats()` example, and the recorded decision that a page-1 304 probe shortcut would be INCORRECT for shifting event feeds (a cached page 1 proves nothing about pages 2..N; per-page 304s via the kernel are the right granularity).
 - **ETag conditional cache wiring** — `Client.WithETagCache(githubkit.ETagOptions)` enables the kernel's conditional GET cache (unchanged re-fetches become free 304 revalidations; `Client.ETagStats()` reports hits/stored/entries). Off by default. 4 tests cover hit/refetch/default-off/derive paths.
+
+### Changed
+
+- Test-server header literals canonicalized (`X-RateLimit-*` → `X-Ratelimit-*`, matching Go's `textproto.CanonicalMIMEHeaderKey` and the canonicalheader linter).
+- External errors now wrapped with context on the rate-limit fetch and event-encode paths (`github: fetch rate limits: %w`, `github: encode event %s: %w`).
 
 ### Verified (claims, no code change)
 

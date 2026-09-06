@@ -2,7 +2,7 @@
 
 **Project:** go-localsync
 **Last Updated:** 2026-09-06 (docs-health sweep: vocabulary/CI rows synced, harvest from 06:19 + 08:05 reports)
-**Tests:** 401 test functions across 11 packages, plus 35 in the standalone `provider/github` module — all passing (race-clean) | **Latest release:** v0.5.0 + `provider/github/v0.1.0` (v0.6.0 enacted, untagged)
+**Tests:** 431 test functions across 11 packages, plus 35 in the standalone `provider/github` module — all passing (race-clean) | **Latest release:** v0.5.0 + `provider/github/v0.1.0` (v0.6.0 enacted, untagged)
 
 ## Overview
 

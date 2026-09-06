@@ -28,6 +28,8 @@ type TombstoneInfo struct {
 }
 
 // ItemResponse is the API DTO for a synced item.
+//
+//nolint:tagalign // doc/json tags intentionally kept close to values for readability
 type ItemResponse struct {
 	ID         string            `json:"id"`
 	SourceID   string            `json:"sourceId"`
