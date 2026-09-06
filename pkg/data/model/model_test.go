@@ -370,3 +370,76 @@ func TestItem_TypedAttributeWriteHelpers(t *testing.T) {
 		t.Errorf("derived attributes[%s] = %q, want %q", AttrActorLogin, derived.Attributes[AttrActorLogin], "carol")
 	}
 }
+
+func TestItemIsTombstoned(t *testing.T) {
+	item := Item{}
+	if item.IsTombstoned() {
+		t.Error("zero item reported tombstoned")
+	}
+
+	item.Tombstone = NewTombstone(ReasonUserHidden)
+	if !item.IsTombstoned() {
+		t.Error("tombstoned item reported live")
+	}
+}
+
+func TestParseTombstoneReason(t *testing.T) {
+	for _, known := range []TombstoneReason{ReasonUpstreamGone, ReasonUserHidden, ReasonRedacted} {
+		if got := ParseTombstoneReason(string(known)); got != known {
+			t.Errorf("ParseTombstoneReason(%q) = %q, want %q", known, got, known)
+		}
+	}
+
+	if got := ParseTombstoneReason("aliens-took-it"); got != ReasonUpstreamGone {
+		t.Errorf("unknown reason = %q, want safe default %q", got, ReasonUpstreamGone)
+	}
+
+	if got := ParseTombstoneReason(""); got != ReasonUpstreamGone {
+		t.Errorf("empty reason = %q, want safe default %q", got, ReasonUpstreamGone)
+	}
+}
+
+func TestNewTombstone_SetsReasonAndUTCTime(t *testing.T) {
+	before := time.Now().UTC()
+	tomb := NewTombstone(ReasonRedacted)
+
+	if tomb.Reason != ReasonRedacted {
+		t.Errorf("reason = %q, want %q", tomb.Reason, ReasonRedacted)
+	}
+	if tomb.At.Before(before) {
+		t.Errorf("tombstone At %v predates construction %v", tomb.At, before)
+	}
+	if _, offset := tomb.At.Zone(); offset != 0 {
+		t.Errorf("tombstone At not UTC: offset %d", offset)
+	}
+}
+
+func TestTombstoneIsZero(t *testing.T) {
+	if !(Tombstone{}).IsZero() {
+		t.Error("zero tombstone reported non-zero")
+	}
+
+	live := Tombstone{At: time.Now().UTC()}
+	if !live.IsZero() {
+		t.Error("At-only tombstone (empty reason) should be zero: reason is the discriminant")
+	}
+
+	if (Tombstone{Reason: ReasonUpstreamGone}).IsZero() {
+		t.Error("reasoned tombstone reported zero")
+	}
+}
+
+func TestItemFilterWithIncludeTombstoned(t *testing.T) {
+	base := ItemFilter{Limit: 5}
+	inclusive := base.WithIncludeTombstoned(true)
+
+	if !inclusive.IncludeTombstoned {
+		t.Error("inclusive copy lost IncludeTombstoned=true")
+	}
+	if base.IncludeTombstoned {
+		t.Error("WithIncludeTombstoned mutated the receiver (must be a copy)")
+	}
+	if inclusive.Limit != 5 {
+		t.Error("copy lost unrelated fields")
+	}
+}
