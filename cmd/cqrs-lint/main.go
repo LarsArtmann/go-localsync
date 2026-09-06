@@ -41,7 +41,8 @@ func main() {
 	listRules := flag.Bool("list", false, "list all rules and exit")
 	strict := flag.Bool("strict", false, "exit non-zero when warnings are present (alias for -fail-on-warning)")
 	failOnWarning := flag.Bool("fail-on-warning", false, "exit non-zero when warnings are present")
-	jsonOut := flag.Bool("json", false, "emit findings as newline-delimited JSON (machine readable; alias for -format=json)")
+	jsonOut := flag.Bool("json", false,
+		"emit findings as newline-delimited JSON (machine readable; alias for -format=json)")
 	format := flag.String("format", "text", "output format: text, json (NDJSON), or github (workflow annotations)")
 	quiet := flag.Bool("quiet", false, "suppress all output; communicate through the exit code only")
 	verbose := flag.Bool("verbose", false, "show package info, per-rule status, and timing on stderr")
@@ -272,8 +273,7 @@ func emitFindingJSON(w io.Writer, f cqrslint.Finding) {
 		panic(fmt.Sprintf("cqrs-lint: marshal finding: %v", err))
 	}
 
-	w.Write(encoded)      //nolint:errcheck // stdout write errors surface at exit
-	w.Write([]byte("\n")) //nolint:errcheck // stdout write errors surface at exit
+	fmt.Fprintf(w, "%s\n", encoded)
 }
 
 // emitFindingGitHub prints GitHub Actions workflow annotations so findings
