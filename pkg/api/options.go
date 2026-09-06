@@ -44,3 +44,16 @@ func WithMetricsHandler(handler http.Handler) ServerOption {
 		o.metricsHandler = handler
 	}
 }
+
+// WithLogLevel sets the server logger's level (charm debug/info/warn/error
+// as a typed log.Level), taming per-request or per-event verbosity in
+// production. Applies to the logger passed to NewServer (including the
+// log.Default() fallback — which mutates the process-global default logger,
+// so pass a dedicated logger when that is undesirable). Nil default leaves
+// the level untouched.
+func WithLogLevel(level log.Level) ServerOption {
+	return func(o *serverOptions) {
+		copied := level
+		o.logLevel = &copied
+	}
+}

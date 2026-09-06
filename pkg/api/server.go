@@ -44,6 +44,10 @@ func NewServer(syncer *synclib.Syncer, logger *log.Logger, opts ...ServerOption)
 		options.bucket = newTokenBucket(options.ratePerMinute)
 	}
 
+	if options.logLevel != nil {
+		logger.SetLevel(*options.logLevel)
+	}
+
 	mux := http.NewServeMux()
 	cfg := huma.DefaultConfig("Go-LocalSync API", "1.0.0")
 	api := humago.New(mux, cfg)
