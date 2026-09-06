@@ -1,7 +1,7 @@
 # TODO_LIST.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-09-06 (v0.6 enactment + whole-list sweep)
+**Last Updated:** 2026-09-06 (docs-health sweep: vocabulary/CI rows synced, harvest from 06:19 + 08:05 reports)
 **Tests:** 401 test functions across 11 packages, plus 35 in the standalone `provider/github` module — all passing (race-clean) | **Latest release:** v0.5.0 + `provider/github/v0.1.0` (v0.6.0 enacted, untagged)
 
 ## Overview
@@ -23,6 +23,10 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [x] **Decide the `ExternalID` ↔ `SourceID` field duality (v0.6 candidate)**
       ✅ DECIDED 2026-09-06 ([ADR-0009 addendum](docs/adr/0009-v06-vocabulary-alignment.md)): v0.6 aligns the GO SURFACE to `SourceID`; persisted wire payloads already say `sourceId` and stay untouched (no schema V4, no upcast).
       ✅ ENACTMENT GATE SATISFIED 2026-09-06: the owner's directive — "NOW GET SHIT DONE! The WHOLE TODO LIST! … DO NOT STOP UNTIL THE ENTIRE LIST IS FINISHED and verified!" — is recorded here as the required sign-off; the rename landed the same day (id/cqrs/sync/api/data + 61-file mechanical sweep, deprecated `ExternalID`/`NewExternalID` aliases kept).
+
+### Release path (v0.6.0)
+
+- [ ] **Owner: cut the v0.6.0 tag** — v0.6 is enacted and fully staged (CHANGELOG migration section, README/FEATURES rows, suite race-green, CI green on master); tag, then run `./scripts/verify-release.sh v0.6.0` (CONTRIBUTING checklist). Everything else in the v0.6 window is done. Post-tag follow-ups: provider re-pin (below) + the v0.7 shim-removal window (ROADMAP).
 
 ### Correctness hardening (verified open against code 2026-09-05)
 
@@ -97,15 +101,14 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ## 🟢 LOWER PRIORITY
 
-- [ ] ~~**Add `govalid` struct tags**~~ — pivoted 2026-09-05: govalid is a buildflow-internal generator, not a proxy-resolvable module; real `Validate()` methods were implemented instead (`SyncOptions.Validate`, `CQRSConfig.Validate`, `ItemFilter.Validate`). Reopen only if govalid is ever published with a stable tag format.
 - [x] **cqrs-lint CLI surface cluster** (aggregate; from [2026-08-02 report](docs/status/archive/2026-08-02_20-31_CQRS-LINT_CLI_ENHANCEMENT.md) §f): `--version`/`--quiet`/`--format=github`, `--rules`/`--exclude-rules`, `--no-suppress`, `--explain`, block + range (`ignore-start`/`ignore-end`) directives, SARIF output, dedicated directives doc page, hand-rolled `--json` → `encoding/json`, per-rule suppressed counts in `--verbose`, new rules C0011+.
       ✅ DONE 2026-09-06 (CLI phase 1): `--version`/`--quiet`/`--format=github`, `encoding/json` NDJSON, per-rule suppressed counts.
       ✅ DONE 2026-09-06 (CLI phase 2, M18): `--rules`/`--exclude-rules` (validated, unknown ID = exit 2), `--no-suppress` (CI hardening), `--explain <rule>`, block-comment directives (`/* cqrs-lint:ignore ... */`), range directives with nesting guard, unmatched-end + unclosed-range warnings. 27 new tests (358 total).
-      ⏳ Remaining for M19: SARIF `--format=sarif`, directives/rules doc page, rules C0011–C0015.
+      ✅ DONE 2026-09-06 (M19.3): rules C0011–C0015 implemented + catalog 10→15 + real `pkg/cqrs` runs clean under all 15 ([06:25 report](docs/status/2026-09-06_06-25_M18-DONE-M19-PARTIAL-V06-RENAME-ENCOUNTER.md) §a). AGENTS/README rule-count text synced.
+      ⏳ Remaining for M19: SARIF `--format=sarif` (note: the `-format` help text already advertises it — the advertised-but-unimplemented lie from the 06:25 report §d2 is still live; fix by implementing or trimming help, plus a help-vs-acceptance process test), directives/rules doc page (`docs/localsync-lint.md`).
       📝 The command was renamed `cmd/cqrs-lint` → `cmd/localsync-lint` (phase 2) to disambiguate from go-cqrs-lite's library linter of the same name; the `//cqrs-lint:` directive vocabulary intentionally stays as the shared protocol.
 - [x] **API hardening: rate limiting** — `X-RateLimit-Limit`/`-Remaining` headers on 429; optional per-client rate limiting (`WithRateLimiter(keyExtractor)`); document the global-vs-per-client scope.
       ✅ DONE 2026-09-06: `WithRateLimiter(perMinute, keyExtractor)` (global + per-client bucketing), canonical `X-Ratelimit-Limit`/`X-Ratelimit-Remaining` headers, per-client tests; global-vs-per-client scope documented at the option.
-      ⏳ Remaining (split out below): structured log level control.
 - [x] **API hardening: structured log level control** — per-event INFO logging is noisy in prod; expose a level knob on the server (event logs → Debug by default or configurable).
       ✅ DONE 2026-09-06: `CQRSConfig.LogLevel` (string, construction-validated, stack-owned event logger only — consumer loggers keep their own control, pinned by test) + `api.WithLogLevel(log.Level)` (typed option applying to the server logger, global-fallback documented). API-hardening cluster now fully closed.
 - [x] **OTel span for `Syncer.Sync`** in `pkg/sync` (currently only the CQRS batch path spans).
@@ -129,7 +132,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [x] **ROADMAP cleanup: "Export to JSON/CSV" theme is stale** — `stack.ExportEvents` (NDJSON) + `ExportEventsCSV` shipped (FEATURES row 65); strike/replace the ROADMAP idea row.
       ✅ DONE 2026-09-06: struck (marked SHIPPED, remaining raw idea noted); same pass struck the shipped benchmark + /metrics suggestions, updated the fuzz-test vocabulary to `StreamID`, and moved ADR-0009's status to ENACTED.
 - [x] **Add source-item IDs to cluster TODOs** (cqrs-lint CLI cluster, API-hardening, benchmarks) so future sweeps can strike report items individually.
-      ✅ DONE 2026-09-06: clusters are now decomposed at item level — API-hardening split (rate limiting ✅ / log-level control open), CLI cluster tracks phase 1/2 ✅ + M19 remainder (SARIF, directives page, C0011+), benchmarks ticked as done.
+      ✅ DONE 2026-09-06: clusters are now decomposed at item level — API-hardening split (rate limiting ✅ / log-level control ✅), CLI cluster tracks phase 1/2 ✅ + M19 remainder (SARIF, directives page; C0011–C0015 shipped), benchmarks ticked as done.
 - [x] **`errors.AsType` audit pass** (go-error-modernization sweep, not yet run).
       ✅ DONE 2026-09-06: `erraudit lint ./... --type-aware` driven to **0 violations**; the one flagged `exec.ExitError` case migrated to `errors.AsType`.
 - [x] **Disposition `hierarchical-errors` buildflow findings** — ~3,711 findings; suppress in `.buildflow.yml` with a stated rationale or formally track (open since 2026-07-19, carried by two reports).
@@ -151,3 +154,29 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [x] **Re-run the full 100-point go-cqrs-lite deep-dive audit** to get the true post-M-plan adoption score (the ≥90 target was never re-scored; see [docs/research/2026-09-05_go-cqrs-lite-deep-dive.html](docs/research/2026-09-05_go-cqrs-lite-deep-dive.html)).
       ✅ DONE 2026-09-06: re-score appendix added to the report — **93/100** (was 78), stat cards recomputed (15/16 fully leveraged, 0 missed, 0 anti-patterns); every scored finding cluster closed with evidence links; residual deductions enumerated (eventtest upstream-blocked, testutil tier deliberate, DeriveStreamID divergence = decision). Note: the score is a stated-basis composite, not a fake-derived rubric number.
 - [ ] **`provider/github`: migrate to the v0.6 vocabulary after the v0.6.0 tag** — the nested module pins `go-localsync v0.5.0` (proven via standalone `GOWORK=off` build), so `SourceID`/`StreamID` adoption is a post-release follow-up, not a blocker for the v0.6.0 tag.
+
+### MEDIUM additions (harvested 2026-09-06 docs-health sweep from the [06:19](docs/status/2026-09-06_06-19_V06-ENACTMENT-AND-TODO-SWEEP.md) + [08:05](docs/status/2026-09-06_08-05_TODO-SWEEP-P2-DOCS-PROVIDER-ETAG-GAUNTLET.md) reports; verified open against code)
+
+- [ ] **Root-cause the pkg/cqrs `-race` flake** — one unexplained failure during the 08:05 gauntlet (no DATA RACE captured; likely a timing-sensitive wait under load). Captured-log stress loop (`-race -count=20`, full logs via tee) targeting the `waitForCount`-family timings. (`08:05` §d3/§f7)
+- [ ] **Structural vendorHash ↔ daemon decision** — the daemon's dep auto-refresh broke the flake twice on 2026-09-06 alone; owner call: stop daemon dep-refreshes, make the refresh re-pin, or accept CI-fail-fast-and-repin as the mode. (`08:05` §g3)
+- [ ] **`check-doc-counts.sh --fix` mode** — the checker knows old/new values; let it rewrite drifted claims locally (CI stays check-only). Four manual count-sync loops happened on 2026-09-06. (`08:05` §e3/§f9)
+- [ ] **Provider CI leg: add golangci-lint** — currently build + race only. (`08:05` §f13)
+- [ ] **Extract `run(args, stdout, stderr) int` in `cmd/localsync-lint`** — makes the main flow in-process-testable; push coverage >85% (`main()` stays process-tested). (`08:05` §b3/§f25)
+- [ ] **`/items` tombstone-visibility integration test** — `IncludeTombstoned` filter → `TombstoneInfo` on the wire, against the real SQLite read model. (`06:19` §f23)
+- [ ] **Verify huma OpenAPI schema for `ItemResponse.Tombstone`** — the 499/504 declarations are pinned; the Tombstone schema in generated `openapi.json` is not. (`06:19` §f24)
+- [ ] **`pkg/sync` `CQRSConfig.EventLogger` wiring test** — only the default path is covered. (`06:19` §f39)
+- [ ] **Retry/backoff edge tests** — jitter bounds + Retry-After override path in `pkg/sync`. (`08:05` §f30)
+- [ ] **Refresh `docs/benchmarks.md` numbers** post log-level/ETag changes (no expected impact; prove it). (`08:05` §f40)
+- [ ] **Local gitleaks + govulncheck parity run** — CI owns both; a local pass closes the confidence gap flagged by two sweeps. (`23:58` §b / `08:05` §f11)
+
+### LOWER additions (same harvest; bounded polish)
+
+- [ ] **provider/github ETag docs polish**: `WithETagCache` usage snippet + config-table row + `ETagStats` example in the provider README. (`08:05` §b4/§f15)
+- [ ] **DLQ ops runbook** (list → replay → delete → purge) in README or `docs/`, plus a replay→delete doc example in the `dlq.go` package doc. (`06:19` §f27/§f41)
+- [ ] **`StreamID` cache growth note** — document that the sync.Map is bounded by the source×sourceID set (mirror the `lockSource` doc pattern). (`06:19` §f26)
+- [ ] **Per-client limiter recipe**: key from API key — document + test the exact key-extractor snippet. (`06:19` §f25)
+- [ ] **CONTRIBUTING.md**: add the log-level config snippets. (`08:05` §f39)
+- [ ] **Verify the gap-analysis banner's relative ADR link** renders from `docs/` (used `adr/0009-...`). (`08:05` §f43)
+- [ ] **`nix flake check --all-systems` triage doc** — which systems are intentionally unsupported and why the check omits them. (`08:05` §f41)
+- [ ] **Small hygiene cluster**: `errors_test.go` cosmetic `InvalidField("externalId")` literal → `sourceID`; `pkg/testutil/syncstore.go` doc comments post-`BatchOutcome`; `conflict_aware.go` `summary` locals → `batch`; reusable `blockingProvider`-style double in `pkg/testutil`; sweep for other hardcoded cross-layer identifiers (projectionName-style); consider `SyncResult.Batch` exposure in the `/sync` HTTP response. (`06:19` §f37/§f38/§f42-44/§f49)
+- [ ] **API niceties (post-v0.6, small)**: request-ID middleware + echo header; SQLite opt-in WAL/pragma knob on `CQRSConfig`; `/stats` source/type filter params (read model already supports filtering). (`08:05` §f32-34)

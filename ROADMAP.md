@@ -33,6 +33,13 @@ Ideas that recur across 2026 status reports but were never picked up; collected 
 - Live updates via WebSocket/SSE from the read model
 - Config-file support and provider auto-detection/plugin registry
 - NixOS module for consumer deployments
+- `govalid` struct tags — revisit only if govalid is published as a proxy-resolvable module with a stable tag format (pivoted 2026-09-05 to real `Validate()` methods; decision in CHANGELOG)
+- DLQ HTTP admin endpoints (`GET /dead-letters`, `POST /dead-letters/replay`) — the SDK surface shipped; endpoints stay optional pending owner buy-in on API surface growth
+- Upstream contributions to go-cqrs-lite: PR for [#21](https://github.com/LarsArtmann/go-cqrs-lite/issues/21) (bus metadata mapping); watermill `MessageToEvent` reconstructing typed `Causation`; projectionhost auto-delete-on-successful-replay option
+- Dedicated per-server/per-stack loggers instead of `WithLogLevel` mutating a shared logger (API hygiene for a future minor)
+- Multi-error aggregation for partial sync (`errors.Join` of per-item failures)
+- Rename the internal package `internal/cqrslint` → `internal/localsynclint` for full vocabulary alignment (owner-optional; the command rename was the user-visible fix)
+- Per-page ETag reuse in provider pagination (upstream go-github-kit feature request if useful)
 
 ---
 
@@ -43,6 +50,7 @@ Ideas that recur across 2026 status reports but were never picked up; collected 
 3. **Conflict timestamp trust (LWW clock-skew)** — provider-supplied clocks decide LWW conflicts; does a skewed provider clock need a skew guard or server-time fallback? Raised by [is-it-what-it-claims-to-be](docs/brainstorming/is-it-what-it-claims-to-be.html); no guard exists today.
 4. **Upstream watch: `eventtest`** — adopt `go-cqrs-lite/eventtest` for stack tests once the module has a released version (never tagged as of 2026-09-05).
 5. **Multi-aggregate generalisation** — Should go-localsync generalise beyond a single `sync_item` aggregate into a multi-aggregate event-sourcing framework? **Decided: deferred.** See [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [DiscordSync adoption feedback](docs/feedback/2026-06-23_discordsync-adoption-feedback.html). Revisit only if a third+ consumer needs it or `go-cqrs-lite` can't evolve the ergonomics. `go-cqrs-lite v4` remains the cross-project sharing boundary.
+6. **Deprecated-alias lifetime** — `id.ExternalID`/`NewExternalID`, `cqrs.AggregateID`, `Syncer.GetStats` shims ship in v0.6.0 for the migration window; drop in v0.7 or hold longer for consumer comfort? (ADR-0009 implies one cycle; owner call at v0.7 planning.)
 
 ---
 
