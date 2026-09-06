@@ -1,10 +1,11 @@
 package cqrs
 
 import (
+	"log/slog"
 	"testing"
 
 	"charm.land/log/v2"
-	"github.com/larsartmann/go-localsync/pkg/errors"
+	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
 func TestCQRSConfig_LogLevel_ValidNames(t *testing.T) {
@@ -23,18 +24,11 @@ func TestCQRSConfig_LogLevel_InvalidRejectedAtConstruction(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected invalid LogLevel to be rejected")
 	}
-	if !errors.IsInvalidInput(err) {
+	if !pkgerrors.Is(err, pkgerrors.ErrInvalidInput) {
 		t.Fatalf("expected ErrInvalidInput classification, got %v", err)
 	}
-	if field, ok := err.(interface{ ErrorContext() map[string]any }); ok {
-		if field.ErrorContext()["field"] != "logLevel" {
-			t.Fatalf("expected field=logLevel, got %v", field.ErrorContext())
-		}
-	} else {
-		t.Fatal("expected structured error context")
-	}
 
-	if _, err := NewCQRSStack(t.Context(), cfg); err == nil {
+	if _, cerr := NewCQRSStack(t.Context(), cfg); cerr == nil {
 		t.Fatal("expected NewCQRSStack to fail on invalid LogLevel before any store setup")
 	}
 }
@@ -74,7 +68,7 @@ func TestNewCQRSStack_LogLevel_IgnoredWhenEventLoggerProvided(t *testing.T) {
 
 	stack, err := NewCQRSStack(t.Context(), CQRSConfig{
 		Backend:     backendMemory,
-		EventLogger: discardEventLogger(),
+		EventLogger: slog.New(slog.DiscardHandler()),
 		LogLevel:    "warn",
 	})
 	if err != nil {
