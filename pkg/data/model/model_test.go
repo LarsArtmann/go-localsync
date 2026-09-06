@@ -358,7 +358,12 @@ func TestItem_TypedAttributeWriteHelpers(t *testing.T) {
 	derived := shared.WithActorLogin("carol")
 
 	if shared.Attributes[AttrActorLogin] != "bob" {
-		t.Errorf("shared map mutated: attributes[%s] = %q, want %q", AttrActorLogin, shared.Attributes[AttrActorLogin], "bob")
+		t.Errorf(
+			"shared map mutated: attributes[%s] = %q, want %q",
+			AttrActorLogin,
+			shared.Attributes[AttrActorLogin],
+			"bob",
+		)
 	}
 
 	if derived.Attributes[AttrActorLogin] != "carol" {

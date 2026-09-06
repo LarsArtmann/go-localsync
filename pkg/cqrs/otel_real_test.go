@@ -160,7 +160,8 @@ func TestOTel_RealSpan_SyncItems(t *testing.T) {
 
 	attrs := map[string]int64{}
 	for _, kv := range syncItemsSpan.Attributes() {
-		if string(kv.Key) == "localsync.synced" || string(kv.Key) == "localsync.conflicts" || string(kv.Key) == "localsync.errors" {
+		if string(kv.Key) == "localsync.synced" || string(kv.Key) == "localsync.conflicts" ||
+			string(kv.Key) == "localsync.errors" {
 			attrs[string(kv.Key)] = kv.Value.AsInt64()
 		}
 	}

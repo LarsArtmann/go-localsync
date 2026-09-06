@@ -288,8 +288,8 @@ func TestSyncOptions_Validate(t *testing.T) {
 		t.Fatal("expected error for negative MaxPages")
 	}
 
-	var fieldErr *errorfamily.Error
-	if !errors.AsType(err, &fieldErr) || fieldErr.ErrorContext()["field"] != "maxPages" {
+	fieldErr, ok := errors.AsType[*errorfamily.Error](err)
+	if !ok || fieldErr.ErrorContext()["field"] != "maxPages" {
 		t.Errorf("expected InvalidField context field=maxPages, got %v (ctx=%v)", err, fieldErr.ErrorContext())
 	}
 

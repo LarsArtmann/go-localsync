@@ -7,13 +7,12 @@ import (
 	"time"
 
 	"charm.land/log/v2"
-	"go.opentelemetry.io/otel/trace"
-
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Syncer orchestrates fetching items from a provider and persisting them via a SyncStore.
