@@ -30,9 +30,9 @@ func startProjectionRunner(
 	sr storeResult,
 	proj projection.Projection,
 	otel *middleware.OTelBundle,
-) (context.CancelFunc, <-chan struct{}, error) {
+) (*projectionhost.Host, context.CancelFunc, <-chan struct{}, error) {
 	if subErr := sr.bus.SubscribeAll(proj.Handle); subErr != nil {
-		return nil, nil, pkgerrors.Wrap(subErr, "subscribe projection")
+		return nil, nil, nil, pkgerrors.Wrap(subErr, "subscribe projection")
 	}
 
 	hostOpts := []projectionhost.HostOption{
@@ -51,11 +51,11 @@ func startProjectionRunner(
 
 	host, err := projectionhost.New(sr.journal, sr.cpStore, hostOpts...)
 	if err != nil {
-		return nil, nil, pkgerrors.Wrap(err, "create projection host")
+		return nil, nil, nil, pkgerrors.Wrap(err, "create projection host")
 	}
 
 	if regErr := host.Register(proj); regErr != nil {
-		return nil, nil, pkgerrors.Wrap(regErr, "register projection with host")
+		return nil, nil, nil, pkgerrors.Wrap(regErr, "register projection with host")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -63,13 +63,13 @@ func startProjectionRunner(
 	if startErr := host.Start(ctx); startErr != nil {
 		cancel()
 
-		return nil, nil, pkgerrors.Wrap(startErr, "start projection host")
+		return nil, nil, nil, pkgerrors.Wrap(startErr, "start projection host")
 	}
 
 	drainDone := make(chan struct{})
 	go drainHostOnCancel(ctx, host, drainDone)
 
-	return cancel, drainDone, nil
+	return host, cancel, drainDone, nil
 }
 
 // drainHostOnCancel waits for the runner context to be cancelled (Close or

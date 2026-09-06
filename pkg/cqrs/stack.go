@@ -12,6 +12,7 @@ import (
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
 	cqrsid "github.com/larsartmann/go-cqrs-lite/id/v4"
 	"github.com/larsartmann/go-cqrs-lite/middleware/v4"
+	"github.com/larsartmann/go-cqrs-lite/projectionhost/v4"
 	"github.com/larsartmann/go-cqrs-lite/snapshot/v4"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
@@ -78,6 +79,8 @@ type CQRSStack struct {
 	otel              *middleware.OTelBundle
 	cancelRunner      context.CancelFunc
 	drainDone         <-chan struct{}
+	projHost          *projectionhost.Host
+	dlq               projectionhost.DeadLetterStore
 }
 
 var _ synclib.SyncStore = (*CQRSStack)(nil)
@@ -111,6 +114,8 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 
 	var drainDone <-chan struct{}
 
+	var projHost *projectionhost.Host
+
 	defer func() {
 		if err == nil {
 			return
@@ -138,7 +143,7 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 		}
 	}
 
-	cancelRunner, drainDone, err = startProjectionRunner(sr, proj, cfg.OTel)
+	cancelRunner, drainDone, projHost, err = startProjectionRunner(sr, proj, cfg.OTel)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "start projection runner")
 	}
@@ -193,6 +198,8 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 		otel:              cfg.OTel,
 		cancelRunner:      cancelRunner,
 		drainDone:         drainDone,
+		projHost:          projHost,
+		dlq:               sr.dlq,
 	}, nil
 }
 
