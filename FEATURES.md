@@ -135,7 +135,7 @@
 
 | #  | Feature      | Status           | Package        | Description                                                                                                                                        |
 | -- | ------------ | ---------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 358 test functions across 11 packages (plus 31 in the standalone `provider/github` module), all passing race-clean. Run: `go test ./... -count=1`. |
+| 55 | Test Suite   | FULLY_FUNCTIONAL | all            | 378 test functions across 11 packages (plus 31 in the standalone `provider/github` module), all passing race-clean. Run: `go test ./... -count=1`. |
 | 56 | Test Helpers | FULLY_FUNCTIONAL | `pkg/testutil` | Shared test utilities: `MockProvider`, `SyncStore` test double, `BuildPairs`, assertions. (Provider-specific helpers live in consumer apps.)       |
 
 ## Quality
@@ -166,7 +166,7 @@
 - Error taxonomy gives smart retry classification
 - Idempotent sync — deterministic aggregate IDs prevent duplicates
 - Projection via synchronous `bus.SubscribeAll` (live) + `projectionhost.Host` (managed catch-up with checkpoint, crash-restart, DLQ — ADR-0006)
-- 358 tests across 11 packages, plus 31 in `provider/github` (race-clean); pkg/cqrs ≥87% coverage, gated by CI
+- 378 tests across 11 packages, plus 31 in `provider/github` (race-clean); pkg/cqrs ≥87% coverage, gated by CI
 - Pluggable CRDT conflict resolution — `LWWResolver` is default, any `ConflictResolver[T]` works
 - Clear DTO/domain boundary: `provider.Item` (DTO) → `model.Item` (domain entity) via `item_adapter.go`
 
