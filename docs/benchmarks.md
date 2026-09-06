@@ -22,14 +22,15 @@ expose).
 - Comparison: `benchstat old.txt new.txt` — only deltas with low variance
   and a small p-value are regressions/improvements; single-run numbers are
   noise until proven otherwise.
-- Results land in `bench-results/<date>-<label>.txt`; commit the file when
-  recording a number in docs.
+- Results land in `bench-results/<date>-<label>.txt` (gitignored — raw runs are
+  machine-specific); paste the benchstat summary into this doc when recording
+  a number.
 
 ## Environment caveats (record honestly next to any published number)
 
 - The benchmarks hit real SQLite files (modernc, CGO-free) with WAL — disk
   speed matters; a dev machine's NVMe will beat CI runners by a wide margin.
-- `waitForCountTB` polling granularity (1ms) adds sub-millisecond noise to
+- `waitForCount` polling granularity (1ms) adds sub-millisecond noise to
   pipeline benchmarks.
 - GOEXPERIMENT=jsonv2 build tag changes encoding performance; always run
   inside the devShell so the tag matches production builds.

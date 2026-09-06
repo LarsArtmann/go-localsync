@@ -40,6 +40,8 @@ Ideas that recur across 2026 status reports but were never picked up; collected 
 - Multi-error aggregation for partial sync (`errors.Join` of per-item failures)
 - Rename the internal package `internal/cqrslint` → `internal/localsynclint` for full vocabulary alignment (owner-optional; the command rename was the user-visible fix)
 - Per-page ETag reuse in provider pagination (upstream go-github-kit feature request if useful)
+- `encoding/json` v1→v2 source migration + dropping `GOEXPERIMENT=jsonv2` — blocked until Go 1.27 graduates `encoding/json/v2`; revisit then (deferred by three reviews: session-24/26 plans, 17:52 brutal review)
+- v0.7+ breaking-change candidates (bundle with the deprecated-shim removal, Open Question 6): rename `pkg/sync` → `pkg/synclib` (stdlib collision, `stdsync "sync"` alias today); prune the provider interface (`Fetch`/`FetchOptions`/`GetRateLimit`); widen `source string` → `id.ProviderID` across read-model/API signatures; keep-or-trim `ConflictAwareSyncer` (public API, zero in-repo production callers)
 
 ---
 

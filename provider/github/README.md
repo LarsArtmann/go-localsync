@@ -95,7 +95,12 @@ granularity: per-page revalidation without page-skip inferences.
 
 Standalone development: the module pins a released parent version and builds
 with `go build ./...` from this directory with `GOWORK=off`; inside the
-repository, the root `go.work` wires it against the local core module.
+repository, the root `go.work` wires it against the local core module. Lint it
+standalone with the same pinned version CI uses:
+
+```bash
+GOWORK=off go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2 run ./... --timeout=5m
+```
 
 ## Live smoke test
 
