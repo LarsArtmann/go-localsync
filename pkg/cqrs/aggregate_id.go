@@ -23,6 +23,15 @@ func itemKey(source string, sourceID id.SourceID) string {
 // repeated SHA256 hashing of the same (source, sourceID) pairs.
 // Keys are immutable so cache entries never need invalidation.
 //
+// Growth is bounded by the distinct (source, sourceID) set the process
+// derives IDs for — mirror of the lockSource doc in pkg/sync: this is a
+// bounded cache, not a leak. It is the set of items the consumer mirrors,
+// finite by construction; a process mirroring N items holds at most N
+// entries (~100 bytes each), regardless of how long it runs or how many
+// syncs it performs. Never call StreamID with caller-controlled unbounded
+// inputs (e.g. a request path accepting arbitrary IDs); doing so would let
+// a client grow the cache without bound.
+//
 //nolint:gochecknoglobals // immutable append-only cache, not mutable global state
 var streamIDCache sync.Map
 

@@ -59,7 +59,7 @@ func syncedPayloadFor(item *model.Item) ItemSyncedPayload {
 		SourceID:     item.SourceID.Get(),
 		Type:         item.Type.Get(),
 		Attributes:   item.Attributes,
-		ContentHash:  item.ContentHash.Get(),
+		ContentHash:  item.ContentHash.String(),
 		RawJSON:      []byte(`{}`),
 		CreatedAt:    item.CreatedAt.UnixNano(),
 		UpdatedAt:    item.UpdatedAt.UnixNano(),
@@ -194,12 +194,11 @@ func TestProjectionScenario_ConflictFoundIsMetadataOnly(t *testing.T) {
 	scenario.GivenProjection(t, proj,
 		mustScenarioEvent(t, "proj-5", 1, EventItemSynced, syncedPayloadFor(item)),
 		mustScenarioEvent(t, "proj-5", 2, EventItemConflictFound, ItemConflictFoundPayload{
-			Source:      "github",
-			SourceID:    "proj-5",
-			Winner:      "remote",
-			LocalHash:   "aaa",
-			RemoteHash:  "bbb",
-			ResolvedVia: "lww",
+			Source:          "github",
+			SourceID:        "proj-5",
+			Winner:          "remote",
+			LocalUpdatedAt:  time.Now().Add(-time.Hour).Unix(),
+			RemoteUpdatedAt: time.Now().Unix(),
 		}),
 	).ThenNoError()
 
@@ -209,21 +208,26 @@ func TestProjectionScenario_ConflictFoundIsMetadataOnly(t *testing.T) {
 	}
 }
 
-// TestProjectionScenario_TombstoneForUnknownItemFails: a tombstone with no
-// prior row is a projection error (the DSL's ThenError path), not a silent
-// no-op — the read model refuses to invent history.
-func TestProjectionScenario_TombstoneForUnknownItemFails(t *testing.T) {
+// TestProjectionScenario_TombstoneForUnknownItemIsIdempotent: a tombstone
+// with no prior row is a silent no-op — reconciliation replays may tombstone
+// items the local store never saw, and re-delivery must stay idempotent.
+func TestProjectionScenario_TombstoneForUnknownItemIsIdempotent(t *testing.T) {
 	t.Parallel()
 
 	rm := NewMemoryReadModel()
 	proj := newProjector(rm)
 
-	scenario.GivenProjection(t, proj,
+	sc := scenario.GivenProjection(t, proj,
 		mustScenarioEvent(t, "proj-ghost", 1, EventItemTombstoned, ItemTombstonedPayload{
 			Source:       "github",
 			SourceID:     "proj-ghost",
 			Reason:       string(model.ReasonUpstreamGone),
 			TombstonedAt: time.Now().UTC().UnixNano(),
 		}),
-	).ThenError()
+	)
+	sc.ThenNoError()
+
+	if got := projectedItem(t, rm, "proj-ghost", true); got != nil {
+		t.Error("tombstoning an unseen item must not invent a row")
+	}
 }

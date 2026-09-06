@@ -204,3 +204,75 @@ func TestRateLimiter_PerClientIsolation(t *testing.T) {
 		t.Fatal("empty key must still yield a response")
 	}
 }
+
+// TestRateLimit_APIKeyClientRecipe pins the documented per-client recipe
+// (WithAPIKey + WithRateLimiter(_, APIKeyClient)): buckets are keyed by the
+// presented credential, so one client exhausting its budget leaves another
+// client's bucket untouched — and both header spellings (X-Api-Key and
+// Authorization: Bearer) resolve to the same bucket.
+func TestRateLimit_APIKeyClientRecipe(t *testing.T) {
+	t.Parallel()
+
+	syncer := synclib.NewSyncer(&testutil.MockProvider{}, &mockSyncStore{}, log.Default())
+	server := NewServer(syncer, log.Default(),
+		WithAPIKey("secret-1"),
+		WithRateLimiter(1, APIKeyClient), // 1/min: first POST spends the burst
+	)
+
+	payload := `{"source":"github","maxPages":0}`
+
+	post := func(keyHeader, keyValue string) int {
+		t.Helper()
+
+		req := httptest.NewRequestWithContext(
+			context.Background(), http.MethodPost, "/sync", strings.NewReader(payload),
+		)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set(keyHeader, keyValue)
+
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+
+		return rec.Code
+	}
+
+	// Client one (via X-Api-Key) burns its whole budget, then gets 429.
+	if code := post("X-Api-Key", "secret-1"); code != http.StatusOK && code != http.StatusPartialContent {
+		t.Fatalf("first sync for client one must pass, got %d", code)
+	}
+	if code := post("X-Api-Key", "secret-1"); code != http.StatusTooManyRequests {
+		t.Fatalf("client one exhausted its bucket: want 429, got %d", code)
+	}
+
+	// Client two (via Bearer, same acceptance path) still has its full budget.
+	if code := post("Authorization", "Bearer secret-2"); code != http.StatusOK && code != http.StatusPartialContent {
+		t.Fatalf("client two must be rate-limited independently, got %d", code)
+	}
+
+	// Unauthenticated requests share the "" fallback bucket — and are
+	// rejected by auth before they can spend any tokens anyway.
+	if code := post("X-Api-Key", ""); code != http.StatusUnauthorized {
+		t.Fatalf("missing credential must be an auth failure, got %d", code)
+	}
+}
+
+// TestAPIKeyClient_ExtractorContract covers the extractor itself: header
+// precedence and the empty fallback.
+func TestAPIKeyClient_ExtractorContract(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequest(http.MethodPost, "/sync", nil)
+	if got := APIKeyClient(req); got != "" {
+		t.Errorf("no headers must extract empty, got %q", got)
+	}
+
+	req.Header.Set("Authorization", "Bearer via-auth")
+	if got := APIKeyClient(req); got != "via-auth" {
+		t.Errorf("bearer fallback must extract, got %q", got)
+	}
+
+	req.Header.Set("X-Api-Key", "via-header")
+	if got := APIKeyClient(req); got != "via-header" {
+		t.Errorf("X-Api-Key must win over bearer, got %q", got)
+	}
+}

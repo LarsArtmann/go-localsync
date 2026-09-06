@@ -7,6 +7,29 @@ import (
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
+// Package cqrs dead-letter operations runbook (ADR-0006).
+//
+// Events that poison a projection handler past the retry threshold are
+// captured, not dropped. The ops loop is list → replay → delete → purge:
+//
+//	// 1. Inspect what was captured (per projection, or "" for all).
+//	entries, err := stack.DeadLetters(ctx, "sync_item_projection")
+//
+//	// 2. Re-deliver everything for that projection.
+//	result, err := stack.ReplayDeadLetters(ctx, "sync_item_projection")
+//
+//	// 3. Delete exactly the entries that now replay cleanly — replay does
+//	//    NOT auto-delete, so the caller keeps surgical control.
+//	for _, replayed := range result.Replayed {
+//	    err := stack.DeleteDeadLetter(ctx, replayed.ProjectionName, replayed.EventID)
+//	}
+//
+//	// 4. Purge is the blunt instrument: only when every entry is resolved.
+//	err = stack.PurgeDeadLetters(ctx, "sync_item_projection")
+//
+// Still-failing entries stay captured and are reported in result.StillFailing;
+// fix the underlying cause (usually a schema-upcast gap) and replay again.
+
 // DeadLetters lists the projection dead-letter entries: events that poisoned a
 // projection handler past the retry threshold and were captured for later
 // inspection or replay. An empty projectionName lists entries across all
@@ -77,8 +100,10 @@ func (s *CQRSStack) PurgeDeadLetters(ctx context.Context, projectionName string)
 
 // ReplayDeadLetters re-delivers every captured poison event for the given
 // projection (empty name = all projections) to its handler. Events that still
-// fail are reported in the result and remain in the DLQ; successfully
-// replayed events are deleted from the DLQ by the host.
+// fail are reported in the result and remain in the DLQ. Successfully
+// replayed events are NOT auto-deleted — the caller deletes exactly those via
+// DeleteDeadLetter (see the runbook at the top of this file), keeping cleanup
+// surgical and re-replayable.
 func (s *CQRSStack) ReplayDeadLetters(
 	ctx context.Context,
 	projectionName string,

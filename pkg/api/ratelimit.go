@@ -4,6 +4,7 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -33,12 +34,39 @@ func WithRateLimit(requestsPerMinute int) ServerOption {
 // global bucket. The key→bucket map lives for the server's lifetime and grows
 // with the number of distinct keys — keep the extractor to bounded identities
 // (API keys, usernames), not unbounded remote addresses behind proxies.
+//
+// Recipe — key from the API key (pairs with WithAPIKey, which accepts the same
+// two headers; X-Api-Key first, Authorization: Bearer as fallback):
+//
+//	server := api.NewServer(syncer, logger,
+//		api.WithAPIKey(os.Getenv("LOCALSYNC_API_KEY")),
+//		api.WithRateLimiter(30, api.APIKeyClient),
+//	)
+//
+// APIKeyClient is the canonical extractor; use it directly instead of
+// re-deriving the header dance in consumer code.
 func WithRateLimiter(requestsPerMinute int, keyExtractor func(*http.Request) string) ServerOption {
 	return func(o *serverOptions) {
 		o.ratePerMinute = requestsPerMinute
 		o.perClient = requestsPerMinute > 0
 		o.keyExtractor = keyExtractor
 	}
+}
+
+// APIKeyClient is the canonical per-client key extractor for WithRateLimiter:
+// it keys the bucket by the presented API credential — X-Api-Key first, then
+// Authorization: Bearer — mirroring WithAPIKey's acceptance rules. Requests
+// without a credential share the "" fallback bucket.
+func APIKeyClient(r *http.Request) string {
+	if key := r.Header.Get(apiKeyHeader); key != "" {
+		return key
+	}
+
+	if auth := r.Header.Get("Authorization"); strings.HasPrefix(auth, "Bearer ") {
+		return strings.TrimPrefix(auth, "Bearer ")
+	}
+
+	return ""
 }
 
 // tokenBucket is a minimal, mutex-guarded token bucket. Capacity equals one
