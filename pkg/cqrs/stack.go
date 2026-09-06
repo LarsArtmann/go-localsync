@@ -91,6 +91,13 @@ func (s *CQRSStack) OTel() *middleware.OTelBundle { return s.otel }
 func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonamedreturns
 	ctx := context.Background()
 
+	// Reject invalid configs before any factory dispatch: construction must
+	// fail fast at the boundary with the classified error (ErrUnknownBackend
+	// carries HTTP 501 semantics), not after partial resource setup.
+	if vErr := cfg.Validate(); vErr != nil {
+		return nil, vErr
+	}
+
 	sr, storeErr := createStoreAndBus(ctx, cfg)
 	if storeErr != nil {
 		return nil, storeErr
