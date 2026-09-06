@@ -107,29 +107,110 @@ func Rules() []Rule {
 	}
 }
 
-// Run executes every registered check against pkg and returns the findings,
-// sorted by (file, line, rule) for stable, diff-friendly output. Each finding
-// is annotated with whether a //cqrs-lint:ignore directive suppresses it.
+// RunOptions tunes a single RunWithOptions invocation.
+type RunOptions struct {
+	// Rules restricts the run to these rule IDs (empty = run all).
+	Rules []string
+	// ExcludeRules removes these rule IDs from the run (ignored when Rules
+	// is set, since an explicit include already fixes the set).
+	ExcludeRules []string
+	// NoSuppress disables //cqrs-lint:ignore directives entirely: every
+	// violation counts, whatever the source says (CI hardening mode).
+	// Directive audit warnings (unknown rules, nesting misuse) still fire.
+	NoSuppress bool
+}
+
+// Run executes every registered check against pkg with default options.
 func Run(pkg *Package) []Finding {
+	return RunWithOptions(pkg, RunOptions{})
+}
+
+// RunWithOptions executes the checks selected by opts against pkg and returns
+// the findings, sorted by (file, line, rule) for stable, diff-friendly output.
+// Each finding is annotated with whether a //cqrs-lint:ignore directive
+// suppresses it — unless opts.NoSuppress is set, in which case directives are
+// ignored and every finding is active.
+func RunWithOptions(pkg *Package, opts RunOptions) []Finding {
 	findings := make([]Finding, 0, estimateFindings(pkg))
 	suppressor := newSuppressor(pkg)
+	active := activeRuleSet(opts)
 
-	for _, check := range allChecks {
-		findings = append(findings, check(pkg)...)
+	for _, rc := range allChecks {
+		if _, selected := active[rc.rule]; !selected {
+			continue
+		}
+
+		findings = append(findings, rc.check(pkg)...)
 	}
 
-	for i := range findings {
-		suppressed, by, reason := suppressor.Suppress(findings[i])
-		findings[i].Suppressed = suppressed
-		findings[i].SuppressedBy = by
-		findings[i].SuppressedReason = reason
+	if !opts.NoSuppress {
+		for i := range findings {
+			suppressed, by, reason := suppressor.Suppress(findings[i])
+			findings[i].Suppressed = suppressed
+			findings[i].SuppressedBy = by
+			findings[i].SuppressedReason = reason
+		}
 	}
 
-	findings = append(findings, suppressor.UnknownRuleFindings()...)
+	findings = append(findings, suppressor.DirectiveFindings()...)
 
 	SortFindings(findings)
 
 	return findings
+}
+
+// activeRuleSet resolves opts into the set of rule IDs this run enforces.
+func activeRuleSet(opts RunOptions) map[string]bool {
+	active := map[string]bool{}
+
+	if len(opts.Rules) > 0 {
+		for _, id := range opts.Rules {
+			active[id] = true
+		}
+
+		return active
+	}
+
+	for _, rc := range allChecks {
+		active[rc.rule] = true
+	}
+
+	for _, id := range opts.ExcludeRules {
+		delete(active, id)
+	}
+
+	return active
+}
+
+// ValidateRuleSelection reports whether every ID in include and exclude names
+// a rule in the catalog. Unlike inline directives, these flags name this
+// linter's rules explicitly — a typo there is a usage error, not a warning.
+func ValidateRuleSelection(include, exclude []string) error {
+	known := map[string]bool{}
+	for _, rule := range Rules() {
+		known[rule.ID] = true
+	}
+
+	for _, group := range [][]string{include, exclude} {
+		for _, id := range group {
+			if !known[id] {
+				return fmt.Errorf("unknown rule %q (see --list)", id)
+			}
+		}
+	}
+
+	return nil
+}
+
+// RuleByID looks up a single rule, for --explain-style output.
+func RuleByID(id string) (Rule, bool) {
+	for _, rule := range Rules() {
+		if rule.ID == id {
+			return rule, true
+		}
+	}
+
+	return Rule{}, false
 }
 
 // estimateFindings returns a rough prealloc hint: one slot per file per check.

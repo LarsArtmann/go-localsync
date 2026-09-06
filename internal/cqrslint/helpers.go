@@ -11,21 +11,29 @@ import (
 // AST nor perform I/O.
 type Check func(pkg *Package) []Finding
 
+// ruleCheck pairs a check with the rule ID it enforces, so a run can execute
+// a selected subset (--rules / --exclude-rules) without post-filtering
+// findings — an excluded check never runs at all.
+type ruleCheck struct {
+	rule  string
+	check Check
+}
+
 // allChecks is the ordered registry of architectural checks. Order matters
 // only for deterministic reporting when two checks share a line.
 //
 //nolint:gochecknoglobals // immutable ordered registry, not mutable state
-var allChecks = []Check{
-	checkAggregateTypeConst,    // C0001
-	checkEventTypeConsts,       // C0002
-	checkFoldSwitchCoverage,    // C0003
-	checkProjectorEventTypes,   // C0004
-	checkHasChangedProviderAgn, // C0005
-	checkNoQueryDispatcher,     // C0006
-	checkNoSyncActionInCQRS,    // C0007
-	checkProjectionLockGuard,   // C0008
-	checkPayloadJSONTags,       // C0009
-	checkNewEventsUsesAggType,  // C0010
+var allChecks = []ruleCheck{
+	{ruleAggregateTypeConst, checkAggregateTypeConst},    // C0001
+	{ruleEventTypeConsts, checkEventTypeConsts},          // C0002
+	{ruleFoldSwitchCoverage, checkFoldSwitchCoverage},    // C0003
+	{ruleProjectorEventTypes, checkProjectorEventTypes},  // C0004
+	{ruleHasChangedProviderAgn, checkHasChangedProviderAgn}, // C0005
+	{ruleNoQueryDispatcher, checkNoQueryDispatcher},      // C0006
+	{ruleNoSyncActionInCQRS, checkNoSyncActionInCQRS},    // C0007
+	{ruleProjectionLockGuard, checkProjectionLockGuard},  // C0008
+	{rulePayloadJSONTags, checkPayloadJSONTags},          // C0009
+	{ruleNewEventsUsesAggType, checkNewEventsUsesAggType}, // C0010
 }
 
 // literalStringValue extracts the unquoted value of a string BasicLit, returning
