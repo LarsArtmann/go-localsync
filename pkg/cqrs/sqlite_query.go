@@ -22,7 +22,12 @@ func buildListQuery(filter model.ItemFilter) (string, []any, error) {
 		return "", nil, err
 	}
 
-	query += " ORDER BY created_at DESC"
+	// The item_id tiebreaker makes the ordering TOTAL: rows sharing a
+	// created_at (batch imports, truncated timestamps) otherwise have
+	// unspecified relative order, and OFFSET pagination across ties can
+	// duplicate or skip rows between pages. Deterministic walks are a
+	// contract — pinned by TestSQLiteReadModel_CursorWalk_RealOrdering.
+	query += " ORDER BY created_at DESC, item_id ASC"
 
 	if filter.Limit > 0 {
 		query += " LIMIT ?"
