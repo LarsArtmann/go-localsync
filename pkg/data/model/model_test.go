@@ -311,3 +311,57 @@ func TestItem_AttributeAccessors(t *testing.T) {
 		}
 	}
 }
+
+// TestItem_TypedAttributeWriteHelpers pins the With* write-helper contract:
+// values land under the canonical Attr* keys, the receiver is copied (the
+// original item and any map sharing its backing array stay untouched), and a
+// nil Attributes map is allocated on first write.
+func TestItem_TypedAttributeWriteHelpers(t *testing.T) {
+	t.Parallel()
+
+	original := Item{}
+	withActor := original.WithActorLogin("alice")
+
+	if original.Attributes != nil {
+		t.Error("WithActorLogin must not allocate on the receiver copy source")
+	}
+
+	if got := withActor.ActorLogin(); got != "alice" {
+		t.Errorf("ActorLogin() = %q, want %q", got, "alice")
+	}
+
+	both := withActor.
+		WithActorAvatarURL("https://example.com/a.png").
+		WithRepoName("owner/repo").
+		WithRepoURL("https://github.com/owner/repo")
+
+	want := map[string]string{
+		AttrActorLogin:     "alice",
+		AttrActorAvatarURL: "https://example.com/a.png",
+		AttrRepoName:       "owner/repo",
+		AttrRepoURL:        "https://github.com/owner/repo",
+	}
+
+	if len(both.Attributes) != len(want) {
+		t.Fatalf("attributes = %v, want %v", both.Attributes, want)
+	}
+
+	for k, v := range want {
+		if both.Attributes[k] != v {
+			t.Errorf("attributes[%s] = %q, want %q", k, both.Attributes[k], v)
+		}
+	}
+
+	// Copy semantics: writing on a derived item must not leak into an item
+	// that shared the original map.
+	shared := Item{Attributes: map[string]string{AttrActorLogin: "bob"}}
+	derived := shared.WithActorLogin("carol")
+
+	if shared.Attributes[AttrActorLogin] != "bob" {
+		t.Errorf("shared map mutated: attributes[%s] = %q, want %q", AttrActorLogin, shared.Attributes[AttrActorLogin], "bob")
+	}
+
+	if derived.Attributes[AttrActorLogin] != "carol" {
+		t.Errorf("derived attributes[%s] = %q, want %q", AttrActorLogin, derived.Attributes[AttrActorLogin], "carol")
+	}
+}

@@ -45,6 +45,11 @@ const (
 )
 
 // CQRSConfig configures the CQRS stack's storage backend and conflict resolution.
+//
+// Backend "sqlite" requires a sqlite database/sql driver to be linked into the
+// consumer binary — go-cqrs-lite's storage layer deliberately registers none
+// (you may choose modernc.org/sqlite, pure Go, or mattn/go-sqlite3, CGo).
+// Add one with a blank import: `_ "modernc.org/sqlite"`.
 type CQRSConfig struct {
 	Backend          string
 	DBPath           string

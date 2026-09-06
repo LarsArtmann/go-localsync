@@ -8,12 +8,17 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	errorfamily "github.com/larsartmann/go-error-family"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/data/schema"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
+	"go.opentelemetry.io/otel/codes"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type mockSyncStore struct {
@@ -277,4 +282,115 @@ func TestSyncOptions_Validate(t *testing.T) {
 	if !strings.Contains(err.Error(), "required") {
 		t.Errorf("expected error to contain 'required', got %v", err)
 	}
+
+	err = (&SyncOptions{Source: "github", MaxPages: -1}).Validate()
+	if err == nil {
+		t.Fatal("expected error for negative MaxPages")
+	}
+
+	var fieldErr *errorfamily.Error
+	if !errors.AsType(err, &fieldErr) || fieldErr.ErrorContext()["field"] != "maxPages" {
+		t.Errorf("expected InvalidField context field=maxPages, got %v (ctx=%v)", err, fieldErr.ErrorContext())
+	}
+
+	if err := (&SyncOptions{Source: "github", MaxPages: 0}).Validate(); err != nil {
+		t.Errorf("MaxPages 0 (unlimited) must be valid, got %v", err)
+	}
+}
+
+// TestSyncOptions_Validate_RejectsNegativeMaxPages is covered in
+// TestSyncOptions_Validate above; this file otherwise owns the tracer span
+// tests introduced with WithTracer.
+
+// TestSyncer_Tracer_RecordsSpansWithStatus proves WithTracer emits real,
+// inspectable spans for both entry points, including error status when the
+// run fails validation — not noop-swallowed wiring.
+func TestSyncer_Tracer_RecordsSpansWithStatus(t *testing.T) {
+	t.Parallel()
+
+	recorder := tracetest.NewSpanRecorder()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
+	t.Cleanup(func() { _ = tp.Shutdown(context.Background()) })
+
+	syncer, _ := newTestSyncer([]*provider.Item{testSyncItem("span-1", "PushEvent")})
+	syncer.tracer = tp.Tracer("sync-tracer-test")
+
+	ctx := context.Background()
+
+	if _, err := syncer.Sync(ctx, testSyncOpts()); err != nil {
+		t.Fatalf("sync failed: %v", err)
+	}
+
+	var syncSpan trace.Span
+	_ = syncSpan
+
+	var fullSpan sdktrace.ReadOnlySpan
+
+	for _, span := range recorder.Ended() {
+		if span.Name() == "localsync.sync" {
+			fullSpan = span
+
+			break
+		}
+	}
+
+	if fullSpan == nil {
+		t.Fatal("localsync.sync span was not recorded")
+	}
+
+	if fullSpan.SpanKind() != trace.SpanKindInternal {
+		t.Errorf("span kind = %v, want internal", fullSpan.SpanKind())
+	}
+
+	if fullSpan.Status().Code != codes.Unset {
+		t.Errorf("successful run must leave span status unset, got %v", fullSpan.Status().Code)
+	}
+
+	// A validation failure happens inside the span and must be recorded.
+	_, err := syncer.Sync(ctx, &SyncOptions{Source: "", MaxPages: 1})
+	if err == nil {
+		t.Fatal("expected validation error")
+	}
+
+	var failSpan sdktrace.ReadOnlySpan
+	for _, span := range recorder.Ended() {
+		if span.Name() == "localsync.sync" && span.Status().Code == codes.Error {
+			failSpan = span
+
+			break
+		}
+	}
+
+	if failSpan == nil {
+		t.Fatal("failed run must record an error-status localsync.sync span")
+	}
+
+	if len(failSpan.Events()) == 0 {
+		t.Error("error span must carry a recorded error event")
+	}
+}
+
+// TestSyncer_Tracer_IncrementalSpan pins the incremental entry point's span
+// name so dashboards can rely on it.
+func TestSyncer_Tracer_IncrementalSpan(t *testing.T) {
+	t.Parallel()
+
+	recorder := tracetest.NewSpanRecorder()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder))
+	t.Cleanup(func() { _ = tp.Shutdown(context.Background()) })
+
+	syncer, _ := newTestSyncer([]*provider.Item{testSyncItem("span-inc", "PushEvent")})
+	syncer.tracer = tp.Tracer("sync-tracer-test")
+
+	if _, err := syncer.SyncIncremental(context.Background(), testSyncOpts()); err != nil {
+		t.Fatalf("incremental sync failed: %v", err)
+	}
+
+	for _, span := range recorder.Ended() {
+		if span.Name() == "localsync.sync_incremental" {
+			return
+		}
+	}
+
+	t.Fatal("localsync.sync_incremental span was not recorded")
 }
