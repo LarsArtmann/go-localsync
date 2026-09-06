@@ -11,7 +11,7 @@ import (
 // You cannot construct a Key without both fields, and you cannot
 // look up an item by partial key.
 type Key struct {
-	Source     id.ProviderID
+	Source   id.ProviderID
 	SourceID id.SourceID
 }
 

@@ -135,7 +135,8 @@ func Rules() []Rule {
 			Rationale: "The projector is read-side only; Append/Save inside it inverts the CQRS contract.",
 		},
 		{
-			ID: ruleWireValueLiterals, Severity: SeverityError,
+			ID:        ruleWireValueLiterals,
+			Severity:  SeverityError,
 			Title:     "wire values stay in their const file",
 			Rationale: "Event/aggregate wire values must be referenced via consts; literals outside the declaring file drift.",
 		},

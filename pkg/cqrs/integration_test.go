@@ -173,8 +173,8 @@ func TestIntegration_SyncItems_ConflictLocal(t *testing.T) {
 	futureTime := time.Now().Add(3 * time.Hour).Truncate(time.Millisecond)
 	localItem := &provider.Item{
 		SourceID: id.NewSourceID("1"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "owner/repo",
@@ -194,8 +194,8 @@ func TestIntegration_SyncItems_ConflictLocal(t *testing.T) {
 	olderTime := time.Now().Truncate(time.Millisecond)
 	remoteItem := &provider.Item{
 		SourceID: id.NewSourceID("1"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "owner/repo",

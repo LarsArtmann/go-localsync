@@ -48,7 +48,7 @@ func TestSQLiteReadModel_CursorWalk_RealOrdering(t *testing.T) {
 
 	for i := range total {
 		item := &provider.Item{
-			SourceID: id.NewSourceID("cursor-" + string(rune('a'+i))),
+			SourceID:   id.NewSourceID("cursor-" + string(rune('a'+i))),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{"actor_login": "walker"},

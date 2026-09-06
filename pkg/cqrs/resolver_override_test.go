@@ -44,7 +44,7 @@ func conflictPair(updatedAt time.Time) *provider.Item {
 
 	return &provider.Item{
 		ID:         id.NewItemID(),
-		SourceID: id.NewSourceID("res-1"),
+		SourceID:   id.NewSourceID("res-1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{"actor_login": "resolver-test"},

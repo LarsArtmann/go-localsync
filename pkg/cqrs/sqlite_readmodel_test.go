@@ -37,10 +37,10 @@ func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) 
 	t.Helper()
 
 	return &model.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID(extID),
-		Source:     id.NewProviderID(source),
-		Type:       id.NewEventTypeID(eventType),
+		Source:   id.NewProviderID(source),
+		Type:     id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
 			"actor_login":      actor,
 			"actor_avatar_url": "https://avatar.example.com/" + actor,

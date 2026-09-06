@@ -40,7 +40,7 @@ func TestRegression_HasChanged_ContentHash(t *testing.T) {
 	now := time.Now()
 	base := func() *model.Item {
 		return &model.Item{
-			SourceID:  id.NewSourceID("1"),
+			SourceID:    id.NewSourceID("1"),
 			Source:      id.NewProviderID("github"),
 			Type:        id.NewEventTypeID("PushEvent"),
 			UpdatedAt:   now,

@@ -174,8 +174,8 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 	state := SyncItemState{
 		Item: &model.Item{
 			SourceID: id.NewSourceID("123"),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
+			Source:   id.NewProviderID("github"),
+			Type:     id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
 				"actor_login": "testuser",
 				"repo_name":   "owner/repo",
@@ -353,7 +353,7 @@ func TestHasChanged(t *testing.T) {
 
 	base := func() *model.Item {
 		return &model.Item{
-			SourceID:  id.NewSourceID("123"),
+			SourceID:    id.NewSourceID("123"),
 			Source:      id.NewProviderID("github"),
 			Type:        id.NewEventTypeID("PushEvent"),
 			ContentHash: "hash-1",

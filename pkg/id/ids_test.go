@@ -25,7 +25,7 @@ func assertPanics(t *testing.T, fn func()) {
 	fn()
 }
 
-func TestNewExternalIDs(t *testing.T) {
+func TestNewSourceIDs(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -114,7 +114,7 @@ func TestItemIDIsZero(t *testing.T) {
 	}
 }
 
-func TestExternalIDIsZero(t *testing.T) {
+func TestSourceIDIsZero(t *testing.T) {
 	t.Parallel()
 
 	if !NewSourceID("").IsZero() {
@@ -181,5 +181,25 @@ func TestItemIDStringRoundTrip(t *testing.T) {
 	parsed := MustParseItemID(s)
 	if !testID.Equal(parsed) {
 		t.Errorf("round-trip failed: %s != %s", testID.String(), parsed.String())
+	}
+}
+
+// TestDeprecatedExternalIDAliases pins the ADR-0009 migration contract: the
+// deprecated ExternalID name is a TRUE type alias of SourceID (same type, not
+// a conversion), so pre-v0.6 code keeps compiling unchanged until the alias
+// is removed in the next breaking window.
+func TestDeprecatedExternalIDAliases(t *testing.T) {
+	t.Parallel()
+
+	viaAlias := NewExternalID("event-9")
+	direct := NewSourceID("event-9")
+
+	if viaAlias != direct {
+		t.Error("NewExternalID and NewSourceID must produce identical values")
+	}
+
+	var zero ExternalID
+	if !zero.IsZero() {
+		t.Error("zero ExternalID must be the zero SourceID")
 	}
 }

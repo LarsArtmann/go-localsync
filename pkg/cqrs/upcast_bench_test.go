@@ -49,7 +49,7 @@ func BenchmarkConflict_SyncExisting(b *testing.B) {
 		now := time.Now().Add(-time.Hour)
 
 		existing = append(existing, &provider.Item{
-			SourceID: id.NewSourceID("conflict-" + strconv.Itoa(i)),
+			SourceID:   id.NewSourceID("conflict-" + strconv.Itoa(i)),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{"actor_login": "bencher"},
@@ -156,7 +156,11 @@ func BenchmarkUpcastedLegacyRead(b *testing.B) {
 	} {
 		b.Run(tc.name, func(b *testing.B) {
 			dbPath := filepath.Join(b.TempDir(), "upcast-bench.db")
-			seedUpcastStream(b, dbPath, tc.legacy) //nolint:contextcheck // seeding is benchmark setup, not request-scoped
+			seedUpcastStream(
+				b,
+				dbPath,
+				tc.legacy,
+			) //nolint:contextcheck // seeding is benchmark setup, not request-scoped
 
 			db, err := sql.Open("sqlite", dbPath)
 			if err != nil {

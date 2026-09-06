@@ -43,8 +43,8 @@ func makeTestItem(t *testing.T, sourceID, eventType, date string) *provider.Item
 
 	return &provider.Item{
 		SourceID: id.NewSourceID(sourceID),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID(eventType),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "test/repo",

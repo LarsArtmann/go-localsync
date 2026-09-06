@@ -14,7 +14,7 @@ func TestKeyString(t *testing.T) {
 	t.Parallel()
 
 	k := Key{
-		Source:     id.NewProviderID("github"),
+		Source:   id.NewProviderID("github"),
 		SourceID: id.NewSourceID("12345"),
 	}
 
@@ -83,7 +83,7 @@ func TestItemKey(t *testing.T) {
 	t.Parallel()
 
 	item := Item{
-		Source:     id.NewProviderID("github"),
+		Source:   id.NewProviderID("github"),
 		SourceID: id.NewSourceID("event-123"),
 	}
 
@@ -132,11 +132,11 @@ func TestItemValidate(t *testing.T) {
 		{
 			name: "valid",
 			item: Item{
-				SourceID: id.NewSourceID("123"),
-				Source:     id.NewProviderID("github"),
-				Type:       id.NewEventTypeID("PushEvent"),
-				CreatedAt:  time.Now(),
-				UpdatedAt:  time.Now(),
+				SourceID:  id.NewSourceID("123"),
+				Source:    id.NewProviderID("github"),
+				Type:      id.NewEventTypeID("PushEvent"),
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
 			},
 			wantErr: false,
 		},
@@ -152,38 +152,38 @@ func TestItemValidate(t *testing.T) {
 		{
 			name: "missing source",
 			item: Item{
-				SourceID: id.NewSourceID("123"),
-				Type:       id.NewEventTypeID("PushEvent"),
-				CreatedAt:  time.Now(),
+				SourceID:  id.NewSourceID("123"),
+				Type:      id.NewEventTypeID("PushEvent"),
+				CreatedAt: time.Now(),
 			},
 			wantErr: true,
 		},
 		{
 			name: "missing type",
 			item: Item{
-				SourceID: id.NewSourceID("123"),
-				Source:     id.NewProviderID("github"),
-				CreatedAt:  time.Now(),
+				SourceID:  id.NewSourceID("123"),
+				Source:    id.NewProviderID("github"),
+				CreatedAt: time.Now(),
 			},
 			wantErr: true,
 		},
 		{
 			name: "missing createdAt",
 			item: Item{
-				SourceID: id.NewSourceID("123"),
-				Source:     id.NewProviderID("github"),
-				Type:       id.NewEventTypeID("PushEvent"),
-				UpdatedAt:  time.Now(),
+				SourceID:  id.NewSourceID("123"),
+				Source:    id.NewProviderID("github"),
+				Type:      id.NewEventTypeID("PushEvent"),
+				UpdatedAt: time.Now(),
 			},
 			wantErr: true,
 		},
 		{
 			name: "missing updatedAt",
 			item: Item{
-				SourceID: id.NewSourceID("123"),
-				Source:     id.NewProviderID("github"),
-				Type:       id.NewEventTypeID("PushEvent"),
-				CreatedAt:  time.Now(),
+				SourceID:  id.NewSourceID("123"),
+				Source:    id.NewProviderID("github"),
+				Type:      id.NewEventTypeID("PushEvent"),
+				CreatedAt: time.Now(),
 			},
 			wantErr: true,
 		},

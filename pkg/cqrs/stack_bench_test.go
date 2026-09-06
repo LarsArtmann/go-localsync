@@ -14,10 +14,10 @@ func benchItems(n int) []*provider.Item {
 	items := make([]*provider.Item, 0, n)
 	for i := range n {
 		items = append(items, &provider.Item{
-			ID:         id.NewItemID(),
+			ID:       id.NewItemID(),
 			SourceID: id.NewSourceID(fmt.Sprintf("bench-%d", i)),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
+			Source:   id.NewProviderID("github"),
+			Type:     id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
 				"actor_login": "benchuser",
 				"repo_name":   "bench/repo",

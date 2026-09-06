@@ -44,12 +44,17 @@ type (
 	EventTypeID = brandid.ID[EventTypeBrand, string]
 )
 
+// ExternalBrand is the former name of SourceBrand.
+//
 // Deprecated: use SourceBrand (ADR-0009 vocabulary alignment). Type alias kept
 // for one minor cycle so pre-v0.6 code compiles unchanged.
 type ExternalBrand = SourceBrand
 
-// Deprecated: use SourceID (ADR-0009 vocabulary alignment). True type alias,
-// so existing code compiles unchanged; removed in the next breaking window.
+// ExternalID is the former name of SourceID. It is a true type alias, so
+// existing code compiles unchanged.
+//
+// Deprecated: use SourceID (ADR-0009 vocabulary alignment); removed in the
+// next breaking window.
 type ExternalID = SourceID
 
 // NewItemID creates a new ItemID with a freshly generated ULID.
@@ -81,6 +86,8 @@ func NewProviderID(v string) ProviderID { return brandid.NewID[ProviderBrand](v)
 // NewEventTypeID creates a new EventTypeID from a string value.
 func NewEventTypeID(v string) EventTypeID { return brandid.NewID[EventTypeBrand](v) }
 
-// Deprecated: use NewSourceID (ADR-0009 vocabulary alignment). Alias kept for
-// one minor cycle; removed in the next breaking window.
-var NewExternalID = NewSourceID
+// NewExternalID is the former name of NewSourceID.
+//
+// Deprecated: use NewSourceID (ADR-0009 vocabulary alignment); removed in the
+// next breaking window.
+var NewExternalID = NewSourceID //nolint:gochecknoglobals // deprecated one-cycle alias, not mutable state

@@ -141,10 +141,10 @@ func benchProviderItemsRange(from, to int) []*provider.Item {
 		now := time.Now()
 
 		items = append(items, &provider.Item{
-			ID:         id.NewItemID(),
+			ID:       id.NewItemID(),
 			SourceID: id.NewSourceID(fmt.Sprintf("pipe-%d", i)),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
+			Source:   id.NewProviderID("github"),
+			Type:     id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
 				"actor_login": "benchuser",
 				"repo_name":   fmt.Sprintf("bench/repo-%d", i%64),

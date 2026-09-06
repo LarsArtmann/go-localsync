@@ -42,8 +42,8 @@ func upsertTestItem(
 
 	testutil.MustNoError(t, rm.Upsert(ctx, &model.Item{
 		SourceID: id.NewSourceID(extID),
-		Source:     id.NewProviderID(source),
-		Type:       id.NewEventTypeID(eventType),
+		Source:   id.NewProviderID(source),
+		Type:     id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
 			"actor_login": actor,
 			"repo_name":   repo,
@@ -60,8 +60,8 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 
 	item := &model.Item{
 		SourceID: id.NewSourceID("123"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID("PushEvent"),
 	}
 
 	testutil.MustNoError(t, rm.Upsert(ctx, item))
@@ -92,7 +92,7 @@ func TestMemoryReadModel_Tombstone(t *testing.T) {
 
 	item := &model.Item{
 		SourceID: id.NewSourceID("123"),
-		Source:     id.NewProviderID("github"),
+		Source:   id.NewProviderID("github"),
 	}
 
 	testutil.MustNoError(t, rm.Upsert(ctx, item))

@@ -111,10 +111,10 @@ func testSyncItem(sourceID, eventType string) *provider.Item {
 	now := time.Now()
 
 	return &provider.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID(sourceID),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID(eventType),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "test/repo",
@@ -136,10 +136,10 @@ func testDataItem(sourceID, eventType string) *model.Item {
 	now := time.Now()
 
 	return &model.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID(sourceID),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID(eventType),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "test/repo",

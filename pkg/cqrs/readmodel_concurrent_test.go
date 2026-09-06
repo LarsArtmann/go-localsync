@@ -15,10 +15,10 @@ func concurrentTestItem(source, extID, eventType string) *model.Item {
 	ts := time.Date(2026, 1, 15, 10, 30, 0, 0, time.UTC)
 
 	return &model.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID(extID),
-		Source:     id.NewProviderID(source),
-		Type:       id.NewEventTypeID(eventType),
+		Source:   id.NewProviderID(source),
+		Type:     id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
 			"actor_login": "user",
 			"repo_name":   "repo",

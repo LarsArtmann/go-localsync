@@ -10,10 +10,10 @@ import (
 
 func testProviderItem() *provider.Item {
 	return &provider.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID("12345"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
 			"actor_login":      "testuser",
 			"actor_avatar_url": "https://example.com/avatar.png",

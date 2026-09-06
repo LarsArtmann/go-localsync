@@ -21,7 +21,7 @@ func toDataItem(p *provider.Item) *model.Item {
 
 	return &model.Item{
 		ID:            p.ID,
-		SourceID:    p.SourceID,
+		SourceID:      p.SourceID,
 		Source:        p.Source,
 		Type:          p.Type,
 		Attributes:    p.Attributes,
@@ -63,7 +63,7 @@ func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 
 	item := &model.Item{
 		ID:            itemID,
-		SourceID:    id.NewSourceID(payload.SourceID),
+		SourceID:      id.NewSourceID(payload.SourceID),
 		Source:        id.NewProviderID(payload.Source),
 		Type:          id.NewEventTypeID(payload.Type),
 		Attributes:    attrs,

@@ -92,8 +92,8 @@ func testActiveState(sourceID, eventType string) SyncItemState {
 	return SyncItemState{
 		Item: &model.Item{
 			SourceID: id.NewSourceID(sourceID),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID(eventType),
+			Source:   id.NewProviderID("github"),
+			Type:     id.NewEventTypeID(eventType),
 		},
 	}
 }
@@ -101,10 +101,10 @@ func testActiveState(sourceID, eventType string) SyncItemState {
 func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) SyncItemState {
 	return SyncItemState{
 		Item: &model.Item{
-			SourceID: id.NewSourceID(sourceID),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID(eventType),
-			UpdatedAt:  updatedAt,
+			SourceID:  id.NewSourceID(sourceID),
+			Source:    id.NewProviderID("github"),
+			Type:      id.NewEventTypeID(eventType),
+			UpdatedAt: updatedAt,
 		},
 	}
 }
@@ -112,8 +112,8 @@ func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) Syn
 func testTombstonedState(sourceID string) SyncItemState {
 	return SyncItemState{
 		Item: &model.Item{
-			SourceID: id.NewSourceID(sourceID),
-			Tombstone:  model.NewTombstone(model.ReasonUpstreamGone),
+			SourceID:  id.NewSourceID(sourceID),
+			Tombstone: model.NewTombstone(model.ReasonUpstreamGone),
 		},
 	}
 }
@@ -137,8 +137,8 @@ func mustNewTestEvent(eventType event.Type, payload any) *event.ImmutableEvent {
 func testItem(sourceID, itemType string) *provider.Item {
 	return &provider.Item{
 		SourceID: id.NewSourceID(sourceID),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID(itemType),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID(itemType),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "owner/repo",

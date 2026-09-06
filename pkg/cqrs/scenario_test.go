@@ -125,7 +125,7 @@ func dataItemForScenario(sourceID string, updatedAtOffset int64) *model.Item {
 
 	return &model.Item{
 		ID:          id.NewItemID(),
-		SourceID:  id.NewSourceID(sourceID),
+		SourceID:    id.NewSourceID(sourceID),
 		Source:      id.NewProviderID("github"),
 		Type:        id.NewEventTypeID("PushEvent"),
 		Attributes:  map[string]string{"actor_login": "scen"},

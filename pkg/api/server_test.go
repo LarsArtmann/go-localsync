@@ -76,10 +76,10 @@ func testItem(itemID, eventType string) *model.Item {
 	now := time.Now()
 
 	return &model.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID(itemID),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID(eventType),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "test/repo",
@@ -329,10 +329,10 @@ func TestTriggerSync_PartialFailureReturns200(t *testing.T) {
 
 	now := time.Now()
 	valid := &provider.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID("1"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
 			"actor_login": "testuser",
 			"repo_name":   "test/repo",

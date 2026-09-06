@@ -18,10 +18,10 @@ func benchmarkReadModelList(b *testing.B, rm ReadModel) {
 	// Seed with 1000 items.
 	for i := range 1000 {
 		item := &model.Item{
-			ID:         id.NewItemID(),
+			ID:       id.NewItemID(),
 			SourceID: id.NewSourceID(fmt.Sprintf("item-%d", i)),
-			Source:     id.NewProviderID("github"),
-			Type:       id.NewEventTypeID("PushEvent"),
+			Source:   id.NewProviderID("github"),
+			Type:     id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
 				"actor_login": "testuser",
 				"repo_name":   "test/repo",

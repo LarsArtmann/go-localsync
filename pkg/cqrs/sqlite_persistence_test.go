@@ -26,10 +26,10 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 	testutil.MustNoError(t, err)
 
 	item := &model.Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID("persist-1"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
 			"actor_login": "alice",
 			"repo_name":   "org/repo",

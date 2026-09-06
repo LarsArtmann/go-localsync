@@ -22,15 +22,15 @@ func ExampleLWWResolver() {
 	}
 
 	local := &model.Item{
-		SourceID: id.NewSourceID("123"),
-		Source:     id.NewProviderID("github"),
-		UpdatedAt:  ts,
+		SourceID:  id.NewSourceID("123"),
+		Source:    id.NewProviderID("github"),
+		UpdatedAt: ts,
 	}
 
 	remote := &model.Item{
-		SourceID: id.NewSourceID("123"),
-		Source:     id.NewProviderID("github"),
-		UpdatedAt:  ts.Add(time.Hour),
+		SourceID:  id.NewSourceID("123"),
+		Source:    id.NewProviderID("github"),
+		UpdatedAt: ts.Add(time.Hour),
 	}
 
 	conflict := &crdt.Conflict[*model.Item]{

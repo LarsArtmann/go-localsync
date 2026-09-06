@@ -19,7 +19,7 @@ import (
 // Attributes as an opaque map the sync machinery never inspects.
 type Item struct {
 	ID            id.ItemID
-	SourceID    id.SourceID
+	SourceID      id.SourceID
 	Source        id.ProviderID
 	Type          id.EventTypeID
 	Attributes    map[string]string

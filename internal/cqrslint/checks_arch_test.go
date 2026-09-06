@@ -29,10 +29,13 @@ func TestC0011_SecondProjection(t *testing.T) {
 func TestC0012_FoldUsesTimeNow(t *testing.T) {
 	runFixture(t, fixtureCase{
 		name: "fold-time-now",
-		files: map[string]string{"cqrs.go": withTimeImport(strings.Replace(compliantSource(),
+		files: map[string]string{"cqrs.go": withTimeImport(strings.Replace(
+			compliantSource(),
 			"func hasChanged(local, remote *Item) bool {",
 			"func foldLegacy(state State, evt event.Event) (State, error) {\n\t_ = time.Now()\n\treturn state, nil\n}\n"+
-				"\nfunc hasChanged(local, remote *Item) bool {", 1))},
+				"\nfunc hasChanged(local, remote *Item) bool {",
+			1,
+		))},
 		wantRules:     []string{"C0012"},
 		wantRuleCount: -1,
 	})

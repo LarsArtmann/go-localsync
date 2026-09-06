@@ -20,12 +20,12 @@ func assertValidationError(t *testing.T, item *Item) {
 
 func TestItem_Validate(t *testing.T) {
 	validItem := &Item{
-		ID:         id.NewItemID(),
-		SourceID: id.NewSourceID("123"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
+		ID:        id.NewItemID(),
+		SourceID:  id.NewSourceID("123"),
+		Source:    id.NewProviderID("github"),
+		Type:      id.NewEventTypeID("PushEvent"),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	t.Run("valid item passes", func(t *testing.T) {
@@ -97,10 +97,10 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 	t.Parallel()
 
 	original := &Item{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID("12345"),
-		Source:     id.NewProviderID("github"),
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   id.NewProviderID("github"),
+		Type:     id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
 			"actor_login":      "octocat",
 			"actor_avatar_url": "https://avatar.url",

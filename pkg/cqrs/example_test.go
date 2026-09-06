@@ -46,10 +46,10 @@ func ExampleSyncer() {
 	src := id.NewProviderID("example")
 	p := exampleProvider{items: []*provider.Item{
 		{
-			ID:         id.NewItemID(),
+			ID:       id.NewItemID(),
 			SourceID: id.NewSourceID("evt-1"),
-			Source:     src,
-			Type:       id.NewEventTypeID("PushEvent"),
+			Source:   src,
+			Type:     id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
 				"actor_login": "octocat",
 				"repo_name":   "octocat/Hello-World",
@@ -58,10 +58,10 @@ func ExampleSyncer() {
 			UpdatedAt: now,
 		},
 		{
-			ID:         id.NewItemID(),
+			ID:       id.NewItemID(),
 			SourceID: id.NewSourceID("evt-2"),
-			Source:     src,
-			Type:       id.NewEventTypeID("WatchEvent"),
+			Source:   src,
+			Type:     id.NewEventTypeID("WatchEvent"),
 			Attributes: map[string]string{
 				"actor_login": "octocat",
 				"repo_name":   "octocat/Hello-World",
@@ -116,10 +116,10 @@ func ExampleSyncer_tombstoneResurrect() {
 	src := id.NewProviderID("example")
 	now := time.Date(2026, 6, 28, 9, 0, 0, 0, time.UTC)
 	p := exampleProvider{items: []*provider.Item{{
-		ID:         id.NewItemID(),
+		ID:       id.NewItemID(),
 		SourceID: id.NewSourceID("evt-1"),
-		Source:     src,
-		Type:       id.NewEventTypeID("PushEvent"),
+		Source:   src,
+		Type:     id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
 			"actor_login": "octocat",
 			"repo_name":   "octocat/Hello-World",
