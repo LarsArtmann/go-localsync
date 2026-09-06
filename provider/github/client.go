@@ -360,7 +360,7 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 
 	return &provider.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID(e.GetID()),
+		SourceID: id.NewSourceID(e.GetID()),
 		Source:     id.NewProviderID(providerName),
 		Type:       id.NewEventTypeID(e.GetType()),
 		Attributes: map[string]string{

@@ -22,13 +22,13 @@ func ExampleLWWResolver() {
 	}
 
 	local := &model.Item{
-		ExternalID: id.NewExternalID("123"),
+		SourceID: id.NewSourceID("123"),
 		Source:     id.NewProviderID("github"),
 		UpdatedAt:  ts,
 	}
 
 	remote := &model.Item{
-		ExternalID: id.NewExternalID("123"),
+		SourceID: id.NewSourceID("123"),
 		Source:     id.NewProviderID("github"),
 		UpdatedAt:  ts.Add(time.Hour),
 	}

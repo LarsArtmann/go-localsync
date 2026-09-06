@@ -25,7 +25,7 @@ const (
 
 // ItemSyncResult holds the result of syncing a single item.
 type ItemSyncResult struct {
-	SourceID id.ExternalID
+	SourceID id.SourceID
 	Action   SyncAction
 	Error    error
 }
@@ -38,15 +38,15 @@ func (r ItemSyncResult) String() string {
 	return fmt.Sprintf("%s:%s", r.SourceID, r.Action)
 }
 
-// SyncSummary aggregates results from a batch SyncItems call.
-type SyncSummary struct {
+// BatchOutcome aggregates results from a batch SyncItems call.
+type BatchOutcome struct {
 	Synced    int
 	Conflicts int
 	Errors    int
 	Results   []ItemSyncResult
 }
 
-func (s SyncSummary) String() string {
+func (s BatchOutcome) String() string {
 	return fmt.Sprintf("synced=%d conflicts=%d errors=%d", s.Synced, s.Conflicts, s.Errors)
 }
 
@@ -56,7 +56,7 @@ func (a SyncAction) String() string { return string(a) }
 // *cqrs.CQRSStack implements this interface by embedding the cqrs ReadModel and
 // adding SyncItems + Reconcile + Close. The read-side methods come from model.ItemReader.
 type SyncStore interface {
-	SyncItems(ctx context.Context, items []*provider.Item) *SyncSummary
+	SyncItems(ctx context.Context, items []*provider.Item) *BatchOutcome
 	// Reconcile tombstones live items for source that are absent from seen,
 	// detecting upstream deletions. Returns the number of items tombstoned.
 	Reconcile(ctx context.Context, source string, seen []model.Key) (int, error)
@@ -72,5 +72,5 @@ type ResolverAwareStore interface {
 		ctx context.Context,
 		items []*provider.Item,
 		resolver crdt.ConflictResolver[*model.Item],
-	) *SyncSummary
+	) *BatchOutcome
 }

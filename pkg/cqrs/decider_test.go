@@ -11,27 +11,27 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
-func TestAggregateID_Deterministic(t *testing.T) {
+func TestStreamID_Deterministic(t *testing.T) {
 	t.Parallel()
 
-	aggID := AggregateID("github", id.NewExternalID("123"))
+	aggID := MustStreamID("github", id.NewSourceID("123"))
 
-	if aggID != AggregateID("github", id.NewExternalID("123")) {
-		t.Error("same inputs must produce same AggregateID")
+	if aggID != MustStreamID("github", id.NewSourceID("123")) {
+		t.Error("same inputs must produce same StreamID")
 	}
 }
 
-func TestAggregateID_DifferentInputs(t *testing.T) {
+func TestStreamID_DifferentInputs(t *testing.T) {
 	t.Parallel()
 
-	if AggregateID(
+	if MustStreamID(
 		"github",
-		id.NewExternalID("123"),
-	) == AggregateID(
+		id.NewSourceID("123"),
+	) == MustStreamID(
 		"github",
-		id.NewExternalID("456"),
+		id.NewSourceID("456"),
 	) {
-		t.Error("different inputs must produce different AggregateIDs")
+		t.Error("different inputs must produce different StreamIDs")
 	}
 }
 
@@ -48,7 +48,7 @@ func TestFold_ItemSynced(t *testing.T) {
 		t.Fatal("expected non-nil Item")
 	}
 	testutil.AssertEqual(t, state.Item.Source.Get(), "github", "Source")
-	testutil.AssertExternalID(t, state.Item, "123")
+	testutil.AssertSourceID(t, state.Item, "123")
 	testutil.AssertType(t, state.Item, "PushEvent")
 	if state.IsTombstoned() {
 		t.Error("expected not tombstoned")
@@ -173,7 +173,7 @@ func TestDecideSync_UnchangedItem(t *testing.T) {
 
 	state := SyncItemState{
 		Item: &model.Item{
-			ExternalID: id.NewExternalID("123"),
+			SourceID: id.NewSourceID("123"),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
@@ -299,7 +299,7 @@ func TestDecideTombstone_ActiveItem(t *testing.T) {
 
 	state := testActiveState("123", "")
 
-	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone, time.Time{})(state, 1)
+	events, err := decideTombstone("github", id.NewSourceID("123"), model.ReasonUpstreamGone, time.Time{})(state, 1)
 	testutil.MustNoError(t, err)
 	testutil.RequireLen(t, events, 1)
 	assertEventType(t, events[0], EventItemTombstoned)
@@ -310,7 +310,7 @@ func TestDecideTombstone_AlreadyTombstoned(t *testing.T) {
 
 	state := testTombstonedState("123")
 
-	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone, time.Time{})(state, 1)
+	events, err := decideTombstone("github", id.NewSourceID("123"), model.ReasonUpstreamGone, time.Time{})(state, 1)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))
@@ -322,7 +322,7 @@ func TestDecideTombstone_NewItem(t *testing.T) {
 
 	events, err := decideTombstone(
 		"github",
-		id.NewExternalID("123"),
+		id.NewSourceID("123"),
 		model.ReasonUpstreamGone,
 		time.Time{},
 	)(
@@ -353,7 +353,7 @@ func TestHasChanged(t *testing.T) {
 
 	base := func() *model.Item {
 		return &model.Item{
-			ExternalID:  id.NewExternalID("123"),
+			SourceID:  id.NewSourceID("123"),
 			Source:      id.NewProviderID("github"),
 			Type:        id.NewEventTypeID("PushEvent"),
 			ContentHash: "hash-1",
@@ -388,7 +388,7 @@ func TestHasChanged(t *testing.T) {
 		},
 		{
 			name: "only ID fields differ (not tracked)",
-			mut:  func(r *model.Item) { r.ExternalID = id.NewExternalID("other") },
+			mut:  func(r *model.Item) { r.SourceID = id.NewSourceID("other") },
 			want: false,
 		},
 	}
@@ -418,9 +418,9 @@ func TestDecideTombstone_DeterministicTimestamp(t *testing.T) {
 	fixed := time.Date(2026, 9, 5, 20, 42, 0, 0, time.UTC)
 
 	state := SyncItemState{Item: &model.Item{Source: id.NewProviderID("github")}}
-	state.Item.ExternalID = id.NewExternalID("clock-1")
+	state.Item.SourceID = id.NewSourceID("clock-1")
 
-	decide := decideTombstone("github", id.NewExternalID("clock-1"), model.ReasonUserHidden, fixed)
+	decide := decideTombstone("github", id.NewSourceID("clock-1"), model.ReasonUserHidden, fixed)
 
 	evts, err := decide(state, event.Version(1))
 	testutil.MustNoError(t, err)
@@ -441,7 +441,7 @@ func TestDecideTombstone_DeterministicTimestamp(t *testing.T) {
 	// Zero At must stamp approximately-now (within a minute window).
 	nowBefore := time.Now().UTC()
 
-	decideNow := decideTombstone("github", id.NewExternalID("clock-1"), model.ReasonUserHidden, time.Time{})
+	decideNow := decideTombstone("github", id.NewSourceID("clock-1"), model.ReasonUserHidden, time.Time{})
 	evtsNow, err := decideNow(state, event.Version(1))
 	testutil.MustNoError(t, err)
 

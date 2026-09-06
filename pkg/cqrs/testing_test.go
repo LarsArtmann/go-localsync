@@ -91,7 +91,7 @@ func testSyncedPayload(sourceID, eventType string) ItemSyncedPayload {
 func testActiveState(sourceID, eventType string) SyncItemState {
 	return SyncItemState{
 		Item: &model.Item{
-			ExternalID: id.NewExternalID(sourceID),
+			SourceID: id.NewSourceID(sourceID),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID(eventType),
 		},
@@ -101,7 +101,7 @@ func testActiveState(sourceID, eventType string) SyncItemState {
 func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) SyncItemState {
 	return SyncItemState{
 		Item: &model.Item{
-			ExternalID: id.NewExternalID(sourceID),
+			SourceID: id.NewSourceID(sourceID),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID(eventType),
 			UpdatedAt:  updatedAt,
@@ -112,7 +112,7 @@ func testStateWithTimestamp(sourceID, eventType string, updatedAt time.Time) Syn
 func testTombstonedState(sourceID string) SyncItemState {
 	return SyncItemState{
 		Item: &model.Item{
-			ExternalID: id.NewExternalID(sourceID),
+			SourceID: id.NewSourceID(sourceID),
 			Tombstone:  model.NewTombstone(model.ReasonUpstreamGone),
 		},
 	}
@@ -136,7 +136,7 @@ func mustNewTestEvent(eventType event.Type, payload any) *event.ImmutableEvent {
 
 func testItem(sourceID, itemType string) *provider.Item {
 	return &provider.Item{
-		ExternalID: id.NewExternalID(sourceID),
+		SourceID: id.NewSourceID(sourceID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(itemType),
 		Attributes: map[string]string{
@@ -159,7 +159,7 @@ func syncTestItem(t *testing.T, stack *CQRSStack, ctx context.Context, sourceID,
 }
 
 // syncTestItems is a shorthand for syncing multiple items at once.
-// Returns the SyncSummary so callers can assert on Synced/Conflicts/Errors.
+// Returns the BatchOutcome so callers can assert on Synced/Conflicts/Errors.
 // Reduces the `items := []*provider.Item{...}; _ = stack.SyncItems(ctx, items)` pattern
 // at sites that ignore the return value.
 func syncTestItems(t *testing.T, stack *CQRSStack, ctx context.Context, pairs ...string) {
@@ -168,9 +168,9 @@ func syncTestItems(t *testing.T, stack *CQRSStack, ctx context.Context, pairs ..
 	_ = stack.SyncItems(ctx, testItems(pairs...))
 }
 
-// syncTestItemsResult returns the SyncSummary for a multi-item sync.
+// syncTestItemsResult returns the BatchOutcome for a multi-item sync.
 // Used when the test needs to assert on Synced/Conflicts/Errors.
-func syncTestItemsResult(t *testing.T, stack *CQRSStack, ctx context.Context, pairs ...string) *synclib.SyncSummary {
+func syncTestItemsResult(t *testing.T, stack *CQRSStack, ctx context.Context, pairs ...string) *synclib.BatchOutcome {
 	t.Helper()
 
 	return stack.SyncItems(ctx, testItems(pairs...))

@@ -31,7 +31,7 @@ func TestCommandDispatcher_TombstoneItem_ThroughDispatcher(t *testing.T) {
 	syncTestItem(t, stack, ctx, "dispatch-2", "PushEvent")
 	testutil.MustNoError(
 		t,
-		stack.TombstoneItem(ctx, "github", id.NewExternalID("dispatch-2"), model.ReasonUpstreamGone),
+		stack.TombstoneItem(ctx, "github", id.NewSourceID("dispatch-2"), model.ReasonUpstreamGone),
 	)
 
 	count, err := stack.Count(ctx, model.ItemFilter{})
@@ -46,7 +46,7 @@ func TestCommandDispatcher_InvalidCommandType(t *testing.T) {
 
 	// Send a raw SyncItemCommand with wrong type by using the dispatcher directly
 	// This tests the type assertion path in handleSyncItem
-	aggID := AggregateID("github", id.NewExternalID("wrong-type-test"))
+	aggID := MustStreamID("github", id.NewSourceID("wrong-type-test"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         toDataItem(testItem("wrong-type-test", "PushEvent")),
@@ -58,7 +58,7 @@ func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
 	stack, ctx := setupMemoryStack(t)
 
 	// Try to dispatch an unregistered command type
-	aggID := AggregateID("github", id.NewExternalID("unknown"))
+	aggID := MustStreamID("github", id.NewSourceID("unknown"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(command.Type("unknown.command"), aggID),
 		Item:         toDataItem(testItem("unknown", "PushEvent")),
@@ -70,7 +70,7 @@ func TestCommandDispatcher_UnknownCommandType(t *testing.T) {
 
 func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
 	stack, ctx := setupMemoryStack(t)
-	aggID := AggregateID("github", id.NewExternalID("nil-item"))
+	aggID := MustStreamID("github", id.NewSourceID("nil-item"))
 
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
@@ -87,7 +87,7 @@ func TestCommandDispatcher_Validation_NilItem(t *testing.T) {
 // standalone sentinel; it must now report non-retryable via the family.
 func TestCommandDispatcher_ValidationError_IsClassified(t *testing.T) {
 	stack, ctx := setupMemoryStack(t)
-	aggID := AggregateID("github", id.NewExternalID("classified"))
+	aggID := MustStreamID("github", id.NewSourceID("classified"))
 
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
@@ -112,7 +112,7 @@ func TestCommandDispatcher_Validation_EmptySource(t *testing.T) {
 	item := testItem("empty-source", "PushEvent")
 	item.Source = id.NewProviderID("") // empty source
 
-	aggID := AggregateID("", id.NewExternalID("empty-source"))
+	aggID := MustStreamID("", id.NewSourceID("empty-source"))
 	err := stack.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
 		Item:         toDataItem(item),

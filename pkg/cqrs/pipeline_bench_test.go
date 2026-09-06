@@ -142,7 +142,7 @@ func benchProviderItemsRange(from, to int) []*provider.Item {
 
 		items = append(items, &provider.Item{
 			ID:         id.NewItemID(),
-			ExternalID: id.NewExternalID(fmt.Sprintf("pipe-%d", i)),
+			SourceID: id.NewSourceID(fmt.Sprintf("pipe-%d", i)),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{

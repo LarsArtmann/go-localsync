@@ -33,7 +33,7 @@ func TestNewExternalIDs(t *testing.T) {
 		got  string
 		want string
 	}{
-		{"NewExternalID", NewExternalID("event-123").Get(), "event-123"},
+		{"NewSourceID", NewSourceID("event-123").Get(), "event-123"},
 		{"NewProviderID", NewProviderID("github").Get(), "github"},
 		{"NewEventTypeID", NewEventTypeID("PushEvent").Get(), "PushEvent"},
 	}
@@ -117,21 +117,21 @@ func TestItemIDIsZero(t *testing.T) {
 func TestExternalIDIsZero(t *testing.T) {
 	t.Parallel()
 
-	if !NewExternalID("").IsZero() {
-		t.Error("expected empty ExternalID to be zero")
+	if !NewSourceID("").IsZero() {
+		t.Error("expected empty SourceID to be zero")
 	}
 
-	if NewExternalID("abc").IsZero() {
-		t.Error("expected non-empty ExternalID to not be zero")
+	if NewSourceID("abc").IsZero() {
+		t.Error("expected non-empty SourceID to not be zero")
 	}
 }
 
 func TestIDEqual(t *testing.T) {
 	t.Parallel()
 
-	a := NewExternalID("1")
-	b := NewExternalID("1")
-	c := NewExternalID("2")
+	a := NewSourceID("1")
+	b := NewSourceID("1")
+	c := NewSourceID("2")
 
 	if !a.Equal(b) {
 		t.Error("expected equal IDs to be equal")
@@ -161,7 +161,7 @@ func TestItemIDEqual(t *testing.T) {
 func TestIDString(t *testing.T) {
 	t.Parallel()
 
-	testID := NewExternalID("test-id")
+	testID := NewSourceID("test-id")
 	s := testID.String()
 	if s == "" {
 		t.Error("expected non-empty string representation")

@@ -118,7 +118,7 @@ func TestCQRSStack_Causation_PropagatedToEvents(t *testing.T) {
 	syncTestItem(t, stack, ctx, "caus-1", "PushEvent")
 	waitForCount(t, stack, ctx, 1)
 
-	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("caus-1"), model.ReasonUserHidden))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewSourceID("caus-1"), model.ReasonUserHidden))
 
 	delivered := waitFor(2)
 	if len(delivered) < 2 {
@@ -131,7 +131,7 @@ func TestCQRSStack_Causation_PropagatedToEvents(t *testing.T) {
 		}
 	}
 
-	ref := cqrsid.NewStreamRef(aggregateType, AggregateID("github", id.NewExternalID("caus-1")))
+	ref := cqrsid.NewStreamRef(aggregateType, MustStreamID("github", id.NewSourceID("caus-1")))
 
 	stored, loadErr := stack.Load(ctx, ref)
 	testutil.MustNoError(t, loadErr)

@@ -69,7 +69,7 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 }
 
 func (s *Server) getStats(ctx context.Context, _ *struct{}) (*StatsOutput, error) {
-	stats, err := s.syncer.GetStats(ctx)
+	stats, err := s.syncer.Stats(ctx)
 	if err != nil {
 		return nil, mapSyncError(err)
 	}

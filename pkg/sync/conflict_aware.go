@@ -6,7 +6,7 @@ import (
 
 // ConflictAwareSyncer adds per-item conflict detection on top of a Syncer.
 // It delegates fetching and validation to the base Syncer, then classifies
-// conflict outcomes from the CQRS decider's SyncSummary.
+// conflict outcomes from the CQRS decider's BatchOutcome.
 type ConflictAwareSyncer struct {
 	syncer *Syncer
 }
@@ -90,9 +90,9 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 	return cr, partialSyncError(cr.Errors, len(result.Items))
 }
 
-// classify folds a SyncSummary into a ConflictResult, counting upserts,
+// classify folds a BatchOutcome into a ConflictResult, counting upserts,
 // conflicts, skips, and errors while retaining per-item error detail.
-func (s *ConflictAwareSyncer) classify(summary *SyncSummary, cr *ConflictResult) {
+func (s *ConflictAwareSyncer) classify(summary *BatchOutcome, cr *ConflictResult) {
 	for _, r := range summary.Results {
 		switch r.Action {
 		case ActionCreated:

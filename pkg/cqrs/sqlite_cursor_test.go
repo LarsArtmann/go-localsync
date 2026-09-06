@@ -48,7 +48,7 @@ func TestSQLiteReadModel_CursorWalk_RealOrdering(t *testing.T) {
 
 	for i := range total {
 		item := &provider.Item{
-			ExternalID: id.NewExternalID("cursor-" + string(rune('a'+i))),
+			SourceID: id.NewSourceID("cursor-" + string(rune('a'+i))),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{"actor_login": "walker"},
@@ -77,12 +77,12 @@ func TestSQLiteReadModel_CursorWalk_RealOrdering(t *testing.T) {
 		}
 
 		for _, item := range items {
-			seen[item.ExternalID.Get()]++
+			seen[item.SourceID.Get()]++
 
 			got := item.UpdatedAt.UnixNano()
 			if got > lastUpdatedAt {
 				t.Errorf("ordering violated across page boundary: %s (updated %d) after %d",
-					item.ExternalID, got, lastUpdatedAt)
+					item.SourceID, got, lastUpdatedAt)
 			}
 			lastUpdatedAt = got
 		}

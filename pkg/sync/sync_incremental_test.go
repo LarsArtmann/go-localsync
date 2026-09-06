@@ -194,7 +194,7 @@ func TestSyncer_SyncIncremental_ListItemsError(t *testing.T) {
 	}
 }
 
-func TestSyncer_GetStats_CountError(t *testing.T) {
+func TestSyncer_Stats_CountError(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{countErr: errors.New("count failed")}
@@ -202,13 +202,13 @@ func TestSyncer_GetStats_CountError(t *testing.T) {
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
-	_, err := syncer.GetStats(context.Background())
+	_, err := syncer.Stats(context.Background())
 	if err == nil {
 		t.Fatal("expected error, got nil")
 	}
 }
 
-func TestSyncer_GetStats_CountByTypeError(t *testing.T) {
+func TestSyncer_Stats_CountByTypeError(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{countErr: errors.New("count by type failed")}
@@ -216,7 +216,7 @@ func TestSyncer_GetStats_CountByTypeError(t *testing.T) {
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()
 
-	_, err := syncer.GetStats(context.Background())
+	_, err := syncer.Stats(context.Background())
 	if err == nil {
 		t.Fatal("expected error when CountByType fails")
 	}

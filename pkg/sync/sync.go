@@ -280,7 +280,7 @@ func (s *Syncer) reconcile(
 	seen := make([]model.Key, 0, len(fetched.Items))
 
 	for _, item := range fetched.Items {
-		seen = append(seen, model.Key{Source: item.Source, ExternalID: item.ExternalID})
+		seen = append(seen, model.Key{Source: item.Source, SourceID: item.SourceID})
 	}
 
 	tombstoned, err := s.store.Reconcile(ctx, opts.Source, seen)
@@ -549,7 +549,7 @@ func (s *Syncer) syncBatch(
 	ctx context.Context,
 	opts *SyncOptions,
 	valid []*provider.Item,
-) *SyncSummary {
+) *BatchOutcome {
 	if opts != nil && opts.ConflictResolver != nil {
 		if aware, ok := s.store.(ResolverAwareStore); ok {
 			return aware.SyncItemsWithResolver(ctx, valid, opts.ConflictResolver)

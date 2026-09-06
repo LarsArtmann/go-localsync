@@ -14,20 +14,20 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
-// TestRegression_AggregateID_NoDelimiterCollision guards the length-prefixed
+// TestRegression_StreamID_NoDelimiterCollision guards the length-prefixed
 // itemKey fix: "github" + ":42" must never collide with "github:" + "42".
-func TestRegression_AggregateID_NoDelimiterCollision(t *testing.T) {
+func TestRegression_StreamID_NoDelimiterCollision(t *testing.T) {
 	t.Parallel()
 
-	a := itemKey("github", id.NewExternalID(":42"))
-	b := itemKey("github:", id.NewExternalID("42"))
+	a := itemKey("github", id.NewSourceID(":42"))
+	b := itemKey("github:", id.NewSourceID("42"))
 
 	if a == b {
 		t.Fatalf("length-prefixed key must distinguish %q from %q", a, b)
 	}
 
-	if AggregateID("github", id.NewExternalID(":42")) == AggregateID("github:", id.NewExternalID("42")) {
-		t.Error("AggregateIDs must not collide across delimiter injection")
+	if MustStreamID("github", id.NewSourceID(":42")) == MustStreamID("github:", id.NewSourceID("42")) {
+		t.Error("StreamIDs must not collide across delimiter injection")
 	}
 }
 
@@ -40,7 +40,7 @@ func TestRegression_HasChanged_ContentHash(t *testing.T) {
 	now := time.Now()
 	base := func() *model.Item {
 		return &model.Item{
-			ExternalID:  id.NewExternalID("1"),
+			SourceID:  id.NewSourceID("1"),
 			Source:      id.NewProviderID("github"),
 			Type:        id.NewEventTypeID("PushEvent"),
 			UpdatedAt:   now,
@@ -106,7 +106,7 @@ func TestRegression_Projection_VersionGate_PreventsResurrect(t *testing.T) {
 	rm := NewMemoryReadModel()
 	proj := newProjector(rm)
 
-	aggID := AggregateID("github", id.NewExternalID("1"))
+	aggID := MustStreamID("github", id.NewSourceID("1"))
 	now := time.Now().UnixNano()
 
 	synced := testSyncedPayload("1", "PushEvent")
@@ -155,7 +155,7 @@ func TestRegression_Projection_VersionGate_ConcurrentNoResurrect(t *testing.T) {
 		rm := NewMemoryReadModel()
 		proj := newProjector(rm)
 
-		aggID := AggregateID("github", id.NewExternalID("1"))
+		aggID := MustStreamID("github", id.NewSourceID("1"))
 		now := time.Now().UnixNano()
 
 		synced := testSyncedPayload("1", "PushEvent")
@@ -209,7 +209,7 @@ func TestRegression_Tombstone_Reconcile_UpstreamGone(t *testing.T) {
 
 	// Provider now only returns item "1": item "2" is gone upstream.
 	seen := []model.Key{
-		{Source: id.NewProviderID("github"), ExternalID: id.NewExternalID("1")},
+		{Source: id.NewProviderID("github"), SourceID: id.NewSourceID("1")},
 	}
 
 	tombstoned, err := stack.Reconcile(ctx, "github", seen)

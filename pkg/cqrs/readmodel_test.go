@@ -41,7 +41,7 @@ func upsertTestItem(
 	t.Helper()
 
 	testutil.MustNoError(t, rm.Upsert(ctx, &model.Item{
-		ExternalID: id.NewExternalID(extID),
+		SourceID: id.NewSourceID(extID),
 		Source:     id.NewProviderID(source),
 		Type:       id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
@@ -59,14 +59,14 @@ func TestMemoryReadModel_UpsertAndGet(t *testing.T) {
 	ctx := context.Background()
 
 	item := &model.Item{
-		ExternalID: id.NewExternalID("123"),
+		SourceID: id.NewSourceID("123"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 	}
 
 	testutil.MustNoError(t, rm.Upsert(ctx, item))
 
-	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewSourceID("123"))
 	testutil.MustNoError(t, err)
 	if got == nil {
 		t.Fatal("expected non-nil item")
@@ -80,7 +80,7 @@ func TestMemoryReadModel_GetNotFound(t *testing.T) {
 	rm := NewMemoryReadModel()
 	ctx := context.Background()
 
-	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
+	got, err := rm.Get(ctx, "github", id.NewSourceID("nonexistent"))
 	assertNotFound(t, err, got)
 }
 
@@ -91,18 +91,18 @@ func TestMemoryReadModel_Tombstone(t *testing.T) {
 	ctx := context.Background()
 
 	item := &model.Item{
-		ExternalID: id.NewExternalID("123"),
+		SourceID: id.NewSourceID("123"),
 		Source:     id.NewProviderID("github"),
 	}
 
 	testutil.MustNoError(t, rm.Upsert(ctx, item))
 	testutil.MustNoError(
 		t,
-		rm.Tombstone(ctx, "github", id.NewExternalID("123"), model.NewTombstone(model.ReasonUserHidden)),
+		rm.Tombstone(ctx, "github", id.NewSourceID("123"), model.NewTombstone(model.ReasonUserHidden)),
 	)
 
 	// Get returns the item itself (now tombstoned), since it is a direct key lookup.
-	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewSourceID("123"))
 	testutil.MustNoError(t, err)
 	if !got.IsTombstoned() {
 		t.Error("expected tombstoned item")
@@ -191,7 +191,7 @@ func TestProjector_ItemSynced(t *testing.T) {
 
 	assertLen(t, rm, 1)
 
-	got, err := rm.Get(context.Background(), "github", id.NewExternalID("123"))
+	got, err := rm.Get(context.Background(), "github", id.NewSourceID("123"))
 	testutil.MustNoError(t, err)
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 }
@@ -307,7 +307,7 @@ func TestReadModel_Integration(t *testing.T) {
 		testutil.MustNoError(t, proj.Handle(ctx, evt))
 	}
 
-	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewSourceID("123"))
 	testutil.MustNoError(t, err)
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 	if got.Attributes["actor_login"] != "testuser" {

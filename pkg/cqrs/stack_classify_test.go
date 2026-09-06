@@ -229,7 +229,7 @@ func TestCQRSStack_SyncItems_LWWConflictResolution(t *testing.T) {
 				t.Errorf("expected %v in results", tt.wantAction)
 			}
 
-			got, getErr := stack.Get(ctx, "github", id.NewExternalID("1"))
+			got, getErr := stack.Get(ctx, "github", id.NewSourceID("1"))
 			testutil.MustNoError(t, getErr)
 
 			testutil.AssertEqual(t, got.Type.Get(), tt.wantWinnerType, "Type")

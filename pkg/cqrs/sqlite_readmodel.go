@@ -101,7 +101,7 @@ func newSQLiteReadModel(ctx context.Context, db *sql.DB) (*SQLiteReadModel, erro
 func (m *SQLiteReadModel) Get(
 	ctx context.Context,
 	source string,
-	sourceID id.ExternalID,
+	sourceID id.SourceID,
 ) (*model.Item, error) {
 	query := `SELECT item_id, source, source_id, type, attributes, created_at, updated_at, tombstoned, tombstone_reason, tombstoned_at, content_hash, schema_version
 		FROM sync_items WHERE source = ? AND source_id = ?`
@@ -224,7 +224,7 @@ func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 
 	_, err = m.db.ExecContext(
 		ctx, query,
-		item.ID.String(), item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
+		item.ID.String(), item.Source.Get(), item.SourceID.Get(), item.Type.Get(),
 		string(attrsJSON), item.ContentHash, item.CreatedAt, item.UpdatedAt, item.SchemaVersion.Int(),
 	)
 	if err != nil {
@@ -237,7 +237,7 @@ func (m *SQLiteReadModel) Upsert(ctx context.Context, item *model.Item) error {
 func (m *SQLiteReadModel) Tombstone(
 	ctx context.Context,
 	source string,
-	sourceID id.ExternalID,
+	sourceID id.SourceID,
 	tombstone model.Tombstone,
 ) error {
 	var at any

@@ -39,10 +39,10 @@ func TestIntegration_SyncItemsPipeline(t *testing.T) {
 
 	for _, item := range list {
 		if item.Source.IsZero() {
-			t.Errorf("expected non-zero Source for item %s", item.ExternalID.Get())
+			t.Errorf("expected non-zero Source for item %s", item.SourceID.Get())
 		}
 		if item.Type.IsZero() {
-			t.Errorf("expected non-zero Type for item %s", item.ExternalID.Get())
+			t.Errorf("expected non-zero Type for item %s", item.SourceID.Get())
 		}
 	}
 }
@@ -110,7 +110,7 @@ func TestIntegration_DeleteAndResurrect(t *testing.T) {
 	stack.SyncItems(ctx, []*provider.Item{item})
 	waitForCount(t, stack, ctx, 1)
 
-	err := stack.TombstoneItem(ctx, "github", id.NewExternalID("1"), model.ReasonUpstreamGone)
+	err := stack.TombstoneItem(ctx, "github", id.NewSourceID("1"), model.ReasonUpstreamGone)
 	testutil.MustNoError(t, err)
 	waitForCount(t, stack, ctx, 0)
 
@@ -172,7 +172,7 @@ func TestIntegration_SyncItems_ConflictLocal(t *testing.T) {
 
 	futureTime := time.Now().Add(3 * time.Hour).Truncate(time.Millisecond)
 	localItem := &provider.Item{
-		ExternalID: id.NewExternalID("1"),
+		SourceID: id.NewSourceID("1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
@@ -193,7 +193,7 @@ func TestIntegration_SyncItems_ConflictLocal(t *testing.T) {
 
 	olderTime := time.Now().Truncate(time.Millisecond)
 	remoteItem := &provider.Item{
-		ExternalID: id.NewExternalID("1"),
+		SourceID: id.NewSourceID("1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{

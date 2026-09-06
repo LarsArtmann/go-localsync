@@ -33,7 +33,7 @@ func TestCQRSStack_SQLiteBackend_SyncAndDelete(t *testing.T) {
 
 	waitForCount(t, stack, ctx, 2)
 
-	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("1"), model.ReasonUpstreamGone))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewSourceID("1"), model.ReasonUpstreamGone))
 
 	waitForCount(t, stack, ctx, 1)
 }
@@ -105,7 +105,7 @@ func TestCQRSStack_SQLiteRestart_PreservesData(t *testing.T) {
 		t.Errorf("expected count=2 after restart, got %d", count)
 	}
 
-	got, err := stack2.Get(ctx, "github", id.NewExternalID("replay-1"))
+	got, err := stack2.Get(ctx, "github", id.NewSourceID("replay-1"))
 	testutil.MustNoError(t, err)
 	if got == nil {
 		t.Fatal("item replay-1 should be readable after restart")

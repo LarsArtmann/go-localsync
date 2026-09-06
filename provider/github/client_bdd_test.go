@@ -106,8 +106,8 @@ func TestBDD_FetchValidUser(t *testing.T) {
 		{1, "event-456", "IssuesEvent"},
 	} {
 		got := world.result.Items[want.index]
-		if got.ExternalID.Get() != want.external {
-			t.Errorf("items[%d] ExternalID: got %s, want %s", want.index, got.ExternalID.Get(), want.external)
+		if got.SourceID.Get() != want.external {
+			t.Errorf("items[%d] SourceID: got %s, want %s", want.index, got.SourceID.Get(), want.external)
 		}
 
 		if got.Type.Get() != want.eventType {

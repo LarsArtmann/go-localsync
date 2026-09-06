@@ -81,7 +81,7 @@ func TestSQLiteReadModel_List_FilterBySince(t *testing.T) {
 	items, err := rm.List(ctx, model.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "items after Since cutoff")
-	testutil.AssertEqual(t, items[0].ExternalID.Get(), "2", "ExternalID")
+	testutil.AssertEqual(t, items[0].SourceID.Get(), "2", "SourceID")
 
 	count, err := rm.Count(ctx, model.ItemFilter{Since: &since})
 	testutil.MustNoError(t, err)
@@ -127,7 +127,7 @@ func TestSQLiteReadModel_List_FilterByTypeAndActorLogin(t *testing.T) {
 	items, err := rm.List(ctx, model.ItemFilter{Type: &pushType, Attributes: map[string]string{"actor_login": "alice"}})
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, items, 1, "PushEvent by alice")
-	testutil.AssertEqual(t, items[0].ExternalID.Get(), "1", "ExternalID")
+	testutil.AssertEqual(t, items[0].SourceID.Get(), "1", "SourceID")
 }
 
 func TestSQLiteReadModel_List_ZeroResults(t *testing.T) {

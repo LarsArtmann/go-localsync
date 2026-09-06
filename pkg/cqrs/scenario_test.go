@@ -19,12 +19,12 @@ import (
 
 // mustScenarioEvents builds events for a fresh aggregate at the given base version.
 func mustScenarioEvents(
-	t *testing.T, externalID string, base event.Version, types []event.Type, payloads []any,
+	t *testing.T, sourceID string, base event.Version, types []event.Type, payloads []any,
 ) []event.Event {
 	t.Helper()
 
 	evts, err := event.NewEvents(
-		AggregateID("github", id.NewExternalID(externalID)),
+		MustStreamID("github", id.NewSourceID(sourceID)),
 		aggregateType,
 		base,
 		types,
@@ -120,12 +120,12 @@ func (localWinsResolver) Resolve(conflict *crdt.Conflict[*model.Item]) (*model.I
 	return conflict.Local, nil
 }
 
-func dataItemForScenario(externalID string, updatedAtOffset int64) *model.Item {
+func dataItemForScenario(sourceID string, updatedAtOffset int64) *model.Item {
 	now := time.Now().UTC().Add(time.Duration(updatedAtOffset) * time.Second)
 
 	return &model.Item{
 		ID:          id.NewItemID(),
-		ExternalID:  id.NewExternalID(externalID),
+		SourceID:  id.NewSourceID(sourceID),
 		Source:      id.NewProviderID("github"),
 		Type:        id.NewEventTypeID("PushEvent"),
 		Attributes:  map[string]string{"actor_login": "scen"},

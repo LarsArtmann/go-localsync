@@ -15,8 +15,8 @@ import (
 func withBatchSpan(
 	ctx context.Context,
 	bundle *middleware.OTelBundle,
-	run func(context.Context) *synclib.SyncSummary,
-) *synclib.SyncSummary {
+	run func(context.Context) *synclib.BatchOutcome,
+) *synclib.BatchOutcome {
 	ctx, span := cqrsotel.StartSpan(
 		ctx, bundle.Tracer(), "localsync.sync_items", cqrsotel.SpanKindInternal,
 	)

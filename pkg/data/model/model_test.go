@@ -15,7 +15,7 @@ func TestKeyString(t *testing.T) {
 
 	k := Key{
 		Source:     id.NewProviderID("github"),
-		ExternalID: id.NewExternalID("12345"),
+		SourceID: id.NewSourceID("12345"),
 	}
 
 	if got, want := k.String(), "github/12345"; got != want {
@@ -45,8 +45,8 @@ func TestKeyIsZero(t *testing.T) {
 	}{
 		{"zero", Key{}, true},
 		{"only source", Key{Source: id.NewProviderID("github")}, false},
-		{"only externalID", Key{ExternalID: id.NewExternalID("x")}, false},
-		{"both", Key{Source: id.NewProviderID("github"), ExternalID: id.NewExternalID("x")}, false},
+		{"only sourceID", Key{SourceID: id.NewSourceID("x")}, false},
+		{"both", Key{Source: id.NewProviderID("github"), SourceID: id.NewSourceID("x")}, false},
 	}
 
 	for _, tt := range tests {
@@ -61,10 +61,10 @@ func TestKeyIsZero(t *testing.T) {
 func TestKeyEquals(t *testing.T) {
 	t.Parallel()
 
-	a := Key{Source: id.NewProviderID("github"), ExternalID: id.NewExternalID("123")}
-	b := Key{Source: id.NewProviderID("github"), ExternalID: id.NewExternalID("123")}
-	c := Key{Source: id.NewProviderID("gitlab"), ExternalID: id.NewExternalID("123")}
-	d := Key{Source: id.NewProviderID("github"), ExternalID: id.NewExternalID("456")}
+	a := Key{Source: id.NewProviderID("github"), SourceID: id.NewSourceID("123")}
+	b := Key{Source: id.NewProviderID("github"), SourceID: id.NewSourceID("123")}
+	c := Key{Source: id.NewProviderID("gitlab"), SourceID: id.NewSourceID("123")}
+	d := Key{Source: id.NewProviderID("github"), SourceID: id.NewSourceID("456")}
 
 	if !a.Equals(b) {
 		t.Error("expected a.Equals(b) = true")
@@ -84,7 +84,7 @@ func TestItemKey(t *testing.T) {
 
 	item := Item{
 		Source:     id.NewProviderID("github"),
-		ExternalID: id.NewExternalID("event-123"),
+		SourceID: id.NewSourceID("event-123"),
 	}
 
 	key := item.Key()
@@ -93,8 +93,8 @@ func TestItemKey(t *testing.T) {
 		t.Errorf("Key.Source = %v, want %v", key.Source, item.Source)
 	}
 
-	if key.ExternalID != item.ExternalID {
-		t.Errorf("Key.ExternalID = %v, want %v", key.ExternalID, item.ExternalID)
+	if key.SourceID != item.SourceID {
+		t.Errorf("Key.SourceID = %v, want %v", key.SourceID, item.SourceID)
 	}
 }
 
@@ -108,8 +108,8 @@ func TestItemIsZero(t *testing.T) {
 	}{
 		{"zero", Item{}, true},
 		{"only source", Item{Source: id.NewProviderID("github")}, false},
-		{"only externalID", Item{ExternalID: id.NewExternalID("x")}, false},
-		{"both", Item{Source: id.NewProviderID("github"), ExternalID: id.NewExternalID("x")}, false},
+		{"only sourceID", Item{SourceID: id.NewSourceID("x")}, false},
+		{"both", Item{Source: id.NewProviderID("github"), SourceID: id.NewSourceID("x")}, false},
 	}
 
 	for _, tt := range tests {
@@ -132,7 +132,7 @@ func TestItemValidate(t *testing.T) {
 		{
 			name: "valid",
 			item: Item{
-				ExternalID: id.NewExternalID("123"),
+				SourceID: id.NewSourceID("123"),
 				Source:     id.NewProviderID("github"),
 				Type:       id.NewEventTypeID("PushEvent"),
 				CreatedAt:  time.Now(),
@@ -141,7 +141,7 @@ func TestItemValidate(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "missing externalID",
+			name: "missing sourceID",
 			item: Item{
 				Source:    id.NewProviderID("github"),
 				Type:      id.NewEventTypeID("PushEvent"),
@@ -152,7 +152,7 @@ func TestItemValidate(t *testing.T) {
 		{
 			name: "missing source",
 			item: Item{
-				ExternalID: id.NewExternalID("123"),
+				SourceID: id.NewSourceID("123"),
 				Type:       id.NewEventTypeID("PushEvent"),
 				CreatedAt:  time.Now(),
 			},
@@ -161,7 +161,7 @@ func TestItemValidate(t *testing.T) {
 		{
 			name: "missing type",
 			item: Item{
-				ExternalID: id.NewExternalID("123"),
+				SourceID: id.NewSourceID("123"),
 				Source:     id.NewProviderID("github"),
 				CreatedAt:  time.Now(),
 			},
@@ -170,7 +170,7 @@ func TestItemValidate(t *testing.T) {
 		{
 			name: "missing createdAt",
 			item: Item{
-				ExternalID: id.NewExternalID("123"),
+				SourceID: id.NewSourceID("123"),
 				Source:     id.NewProviderID("github"),
 				Type:       id.NewEventTypeID("PushEvent"),
 				UpdatedAt:  time.Now(),
@@ -180,7 +180,7 @@ func TestItemValidate(t *testing.T) {
 		{
 			name: "missing updatedAt",
 			item: Item{
-				ExternalID: id.NewExternalID("123"),
+				SourceID: id.NewSourceID("123"),
 				Source:     id.NewProviderID("github"),
 				Type:       id.NewEventTypeID("PushEvent"),
 				CreatedAt:  time.Now(),
@@ -221,7 +221,7 @@ func TestValidate_CollectsAllFieldErrors(t *testing.T) {
 
 	msg := err.Error()
 	for _, want := range []string{
-		"externalID", "source", "type", "createdAt", "updatedAt",
+		"sourceID", "source", "type", "createdAt", "updatedAt",
 	} {
 		if !contains(msg, want) {
 			t.Errorf("Validate() error should mention %q, got: %v", want, err)
@@ -258,7 +258,7 @@ func TestItemKeyConstructor(t *testing.T) {
 	t.Parallel()
 
 	source := id.NewProviderID("github")
-	external := id.NewExternalID("event-42")
+	external := id.NewSourceID("event-42")
 
 	key := ItemKey(source, external)
 
@@ -266,8 +266,8 @@ func TestItemKeyConstructor(t *testing.T) {
 		t.Errorf("Source = %v, want %v", key.Source, source)
 	}
 
-	if key.ExternalID != external {
-		t.Errorf("ExternalID = %v, want %v", key.ExternalID, external)
+	if key.SourceID != external {
+		t.Errorf("SourceID = %v, want %v", key.SourceID, external)
 	}
 }
 

@@ -50,7 +50,7 @@ func TestCQRSStack_SyncMultipleItems(t *testing.T) {
 	testutil.AssertEqual(t, count, 3, "count")
 }
 
-func TestCQRSStack_Idempotency_DeterministicAggregateID(t *testing.T) {
+func TestCQRSStack_Idempotency_DeterministicStreamID(t *testing.T) {
 	t.Parallel()
 
 	stack := newMemoryStack(t)
@@ -81,7 +81,7 @@ func TestCQRSStack_TombstoneItem(t *testing.T) {
 	testutil.MustNoError(t, err)
 	testutil.AssertEqual(t, count, 1, "count")
 
-	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("123"), model.ReasonUpstreamGone))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewSourceID("123"), model.ReasonUpstreamGone))
 
 	count, err = stack.Count(ctx, model.ItemFilter{})
 	testutil.MustNoError(t, err)
@@ -97,7 +97,7 @@ func TestCQRSStack_TombstoneThenResurrect(t *testing.T) {
 	ctx := context.Background()
 
 	syncTestItem(t, stack, ctx, "123", "PushEvent")
-	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("123"), model.ReasonUpstreamGone))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewSourceID("123"), model.ReasonUpstreamGone))
 
 	count, _ := stack.Count(ctx, model.ItemFilter{})
 	testutil.AssertEqual(t, count, 0, "count after tombstone")
@@ -107,7 +107,7 @@ func TestCQRSStack_TombstoneThenResurrect(t *testing.T) {
 	count, _ = stack.Count(ctx, model.ItemFilter{})
 	testutil.AssertEqual(t, count, 1, "count after resurrect")
 
-	got, err := stack.Get(ctx, "github", id.NewExternalID("123"))
+	got, err := stack.Get(ctx, "github", id.NewSourceID("123"))
 	testutil.MustNoError(t, err)
 	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "resurrected item type")
 }
@@ -189,11 +189,11 @@ func TestCQRSStack_Close_NoGoroutineLeak(t *testing.T) {
 	}
 }
 
-func TestCQRSStack_DeterministicAggregateID_Matches(t *testing.T) {
+func TestCQRSStack_DeterministicStreamID_Matches(t *testing.T) {
 	t.Parallel()
 
-	id1 := AggregateID("github", id.NewExternalID("123"))
-	id2 := AggregateID("github", id.NewExternalID("123"))
+	id1 := MustStreamID("github", id.NewSourceID("123"))
+	id2 := MustStreamID("github", id.NewSourceID("123"))
 
 	if id1 != id2 {
 		t.Error("deterministic IDs must be equal for same inputs")

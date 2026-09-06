@@ -93,7 +93,7 @@ func sampleDeadLetterEntry(t *testing.T, sourceID string) projectionhost.DeadLet
 	t.Helper()
 
 	evts, err := event.NewEvents(
-		AggregateID("github", id.NewExternalID(sourceID)),
+		MustStreamID("github", id.NewSourceID(sourceID)),
 		aggregateType,
 		event.Version(1),
 		[]event.Type{EventItemSynced},

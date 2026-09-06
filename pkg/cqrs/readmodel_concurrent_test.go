@@ -16,7 +16,7 @@ func concurrentTestItem(source, extID, eventType string) *model.Item {
 
 	return &model.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID(extID),
+		SourceID: id.NewSourceID(extID),
 		Source:     id.NewProviderID(source),
 		Type:       id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
@@ -45,7 +45,7 @@ func TestMemoryReadModel_ConcurrentReadWrite(t *testing.T) {
 			defer wg.Done()
 
 			for i := range itemsPerWriter {
-				extID := id.NewExternalID(fmt.Sprintf("w%d-i%d", writerID, i))
+				extID := id.NewSourceID(fmt.Sprintf("w%d-i%d", writerID, i))
 				item := concurrentTestItem("github", extID.Get(), "PushEvent")
 
 				if err := rm.Upsert(ctx, item); err != nil {
@@ -120,7 +120,7 @@ func TestMemoryReadModel_ConcurrentUpsertDelete(t *testing.T) {
 	ctx := context.Background()
 
 	source := "github"
-	extID := id.NewExternalID("contested")
+	extID := id.NewSourceID("contested")
 
 	var wg sync.WaitGroup
 	wg.Add(2)

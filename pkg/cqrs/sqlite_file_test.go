@@ -73,9 +73,9 @@ func TestSQLiteFileDB_ParallelSourceSyncs(t *testing.T) {
 
 			for i := range itemsPerSource {
 				src := "ps-" + string(rune('a'+source))
-				externalID := string(rune('0'+i%10)) + "-" + string(rune('a'+i/10))
+				sourceID := string(rune('0'+i%10)) + "-" + string(rune('a'+i/10))
 
-				if err := stack.SyncItem(ctx, testItemWithSource(src, externalID)); err != nil {
+				if err := stack.SyncItem(ctx, testItemWithSource(src, sourceID)); err != nil {
 					errs <- err
 				}
 			}
@@ -100,8 +100,8 @@ func TestSQLiteFileDB_ParallelSourceSyncs(t *testing.T) {
 
 // testItemWithSource builds a valid provider item under the given source.
 // Parallel sources never collide on the (source, source_id) primary key.
-func testItemWithSource(source, externalID string) *provider.Item {
-	item := testItem(externalID, "PushEvent")
+func testItemWithSource(source, sourceID string) *provider.Item {
+	item := testItem(sourceID, "PushEvent")
 	item.Source = id.NewProviderID(source)
 
 	return item

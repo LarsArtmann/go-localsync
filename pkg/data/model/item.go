@@ -19,7 +19,7 @@ import (
 // Attributes as an opaque map the sync machinery never inspects.
 type Item struct {
 	ID            id.ItemID
-	ExternalID    id.ExternalID
+	SourceID    id.SourceID
 	Source        id.ProviderID
 	Type          id.EventTypeID
 	Attributes    map[string]string
@@ -31,15 +31,15 @@ type Item struct {
 }
 
 // Key returns the composite identifier for this item.
-// The composite key (Source, ExternalID) is the stable identity
+// The composite key (Source, SourceID) is the stable identity
 // across all systems — it determines the aggregate ID.
 func (item Item) Key() Key {
-	return Key{Source: item.Source, ExternalID: item.ExternalID}
+	return Key{Source: item.Source, SourceID: item.SourceID}
 }
 
 // IsZero reports whether the item is the zero value.
 func (item Item) IsZero() bool {
-	return item.ExternalID.IsZero() && item.Source.IsZero()
+	return item.SourceID.IsZero() && item.Source.IsZero()
 }
 
 // IsTombstoned reports whether the item is hidden from the default read model.
@@ -62,11 +62,11 @@ type ItemReader interface {
 // provider payload) is valid. All field errors are collected and returned
 // together via errors.Join so callers see every problem in a single call.
 func (item Item) Validate() error {
-	return validateIdentity(item.ExternalID, item.Source, item.Type, item.CreatedAt, item.UpdatedAt)
+	return validateIdentity(item.SourceID, item.Source, item.Type, item.CreatedAt, item.UpdatedAt)
 }
 
 func validateIdentity(
-	externalID id.ExternalID,
+	sourceID id.SourceID,
 	source id.ProviderID,
 	eventType id.EventTypeID,
 	createdAt time.Time,
@@ -74,8 +74,8 @@ func validateIdentity(
 ) error {
 	var errs []error
 
-	if externalID.IsZero() {
-		errs = append(errs, pkgerrors.InvalidField("externalID", "externalID is required"))
+	if sourceID.IsZero() {
+		errs = append(errs, pkgerrors.InvalidField("sourceID", "sourceID is required"))
 	}
 
 	if source.IsZero() {

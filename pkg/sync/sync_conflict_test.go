@@ -98,7 +98,7 @@ func TestConflictAwareSyncer_Conflicts(t *testing.T) {
 // that a LOCAL-wins conflict is counted as a conflict but NOT an upsert: when
 // the resolver keeps the existing item, no new remote data is written, so
 // Upserted must stay 0. This guards the intentional difference between
-// SyncSummary.Synced (an event is emitted to re-confirm local) and
+// BatchOutcome.Synced (an event is emitted to re-confirm local) and
 // ConflictResult.Upserted (remote data persisted) — the two metrics legitimately
 // diverge for ActionConflictLocal, and this test prevents either side drifting.
 func TestConflictAwareSyncer_LocalWinsConflictIsNotUpserted(t *testing.T) {

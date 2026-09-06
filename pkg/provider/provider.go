@@ -18,9 +18,9 @@ type Item struct {
 	// ID is the internal ULID-based identifier for this item.
 	// Generated on first insert and stable thereafter.
 	ID id.ItemID `json:"id"`
-	// ExternalID is the original identifier from the source system (e.g., GitHub event "1234567890").
+	// SourceID is the original identifier from the source system (e.g., GitHub event "1234567890").
 	// Used for upsert conflict detection against the source.
-	ExternalID id.ExternalID `json:"externalId"`
+	SourceID id.SourceID `json:"externalId"`
 	// Source identifies which provider this item came from (e.g., "github", "gitlab").
 	Source id.ProviderID `json:"source"`
 	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
@@ -41,8 +41,8 @@ type Item struct {
 // String returns a human-readable summary of the Item for logging.
 func (item *Item) String() string {
 	return fmt.Sprintf(
-		"Item{Source:%s ExternalID:%s Type:%s Attributes:%d}",
-		item.Source.Get(), item.ExternalID.Get(), item.Type.Get(),
+		"Item{Source:%s SourceID:%s Type:%s Attributes:%d}",
+		item.Source.Get(), item.SourceID.Get(), item.Type.Get(),
 		len(item.Attributes),
 	)
 }
@@ -51,8 +51,8 @@ func (item *Item) String() string {
 func (item *Item) Validate() error {
 	var errs []error
 
-	if item.ExternalID.IsZero() {
-		errs = append(errs, pkgerrors.InvalidField("externalId", "item.ExternalID is required"))
+	if item.SourceID.IsZero() {
+		errs = append(errs, pkgerrors.InvalidField("externalId", "item.SourceID is required"))
 	}
 
 	if item.Source.IsZero() {

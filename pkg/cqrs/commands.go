@@ -52,7 +52,7 @@ type TombstoneItemCommand struct {
 	command.BasicCommand
 
 	Source   string
-	SourceID id.ExternalID
+	SourceID id.SourceID
 	Reason   model.TombstoneReason
 	// At is when the tombstone is considered to have happened. Zero means
 	// "now" at decision time. An explicit value makes the decider

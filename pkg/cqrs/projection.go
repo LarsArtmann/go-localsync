@@ -91,7 +91,7 @@ func (p *Projector) handleItemTombstoned(ctx context.Context, evt event.Event) e
 		At:     fromUnixNano(payload.TombstonedAt),
 	}
 
-	return p.readModel.Tombstone(ctx, payload.Source, id.NewExternalID(payload.SourceID), tombstone)
+	return p.readModel.Tombstone(ctx, payload.Source, id.NewSourceID(payload.SourceID), tombstone)
 }
 
 var _ projection.Projection = (*Projector)(nil)

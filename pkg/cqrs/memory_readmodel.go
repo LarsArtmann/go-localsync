@@ -27,7 +27,7 @@ func NewMemoryReadModel() *MemoryReadModel {
 func (m *MemoryReadModel) Get(
 	_ context.Context,
 	source string,
-	sourceID id.ExternalID,
+	sourceID id.SourceID,
 ) (*model.Item, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -93,7 +93,7 @@ func (m *MemoryReadModel) Upsert(_ context.Context, item *model.Item) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	m.items[itemKey(item.Source.Get(), item.ExternalID)] = item
+	m.items[itemKey(item.Source.Get(), item.SourceID)] = item
 
 	return nil
 }
@@ -101,7 +101,7 @@ func (m *MemoryReadModel) Upsert(_ context.Context, item *model.Item) error {
 func (m *MemoryReadModel) Tombstone(
 	_ context.Context,
 	source string,
-	sourceID id.ExternalID,
+	sourceID id.SourceID,
 	tombstone model.Tombstone,
 ) error {
 	m.mu.Lock()

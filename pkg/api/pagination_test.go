@@ -45,7 +45,7 @@ func newPagedServer(t *testing.T, count int) *Server {
 	for i := range count {
 		items = append(items, &model.Item{
 			ID:          id.NewItemID(),
-			ExternalID:  id.NewExternalID(string(rune('a' + i))),
+			SourceID:  id.NewSourceID(string(rune('a' + i))),
 			Source:      id.NewProviderID("github"),
 			Type:        id.NewEventTypeID("PushEvent"),
 			Attributes:  map[string]string{"actor_login": "u"},

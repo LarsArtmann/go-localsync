@@ -27,7 +27,7 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 
 	item := &model.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID("persist-1"),
+		SourceID: id.NewSourceID("persist-1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
@@ -48,14 +48,14 @@ func TestSQLiteReadModel_FilePersistence(t *testing.T) {
 	rm2, err := newSQLiteReadModel(context.Background(), db2)
 	testutil.MustNoError(t, err)
 
-	got, err := rm2.Get(ctx, "github", id.NewExternalID("persist-1"))
+	got, err := rm2.Get(ctx, "github", id.NewSourceID("persist-1"))
 	testutil.MustNoError(t, err)
 
 	if got == nil {
 		t.Fatal("item should survive across read model restarts")
 	}
 
-	testutil.AssertEqual(t, got.ExternalID.Get(), "persist-1", "ExternalID")
+	testutil.AssertEqual(t, got.SourceID.Get(), "persist-1", "SourceID")
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 
 	count, err := rm2.Count(ctx, model.ItemFilter{})

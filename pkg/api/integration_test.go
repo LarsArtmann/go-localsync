@@ -42,7 +42,7 @@ func makeTestItem(t *testing.T, sourceID, eventType, date string) *provider.Item
 	ts := mustParseTime(t, date)
 
 	return &provider.Item{
-		ExternalID: id.NewExternalID(sourceID),
+		SourceID: id.NewSourceID(sourceID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(eventType),
 		Attributes: map[string]string{

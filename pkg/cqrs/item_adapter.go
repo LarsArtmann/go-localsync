@@ -21,7 +21,7 @@ func toDataItem(p *provider.Item) *model.Item {
 
 	return &model.Item{
 		ID:            p.ID,
-		ExternalID:    p.ExternalID,
+		SourceID:    p.SourceID,
 		Source:        p.Source,
 		Type:          p.Type,
 		Attributes:    p.Attributes,
@@ -63,7 +63,7 @@ func dataItemFromPayload(payload ItemSyncedPayload) (*model.Item, error) {
 
 	item := &model.Item{
 		ID:            itemID,
-		ExternalID:    id.NewExternalID(payload.SourceID),
+		SourceID:    id.NewSourceID(payload.SourceID),
 		Source:        id.NewProviderID(payload.Source),
 		Type:          id.NewEventTypeID(payload.Type),
 		Attributes:    attrs,
@@ -114,7 +114,7 @@ func dataItemToPayload(item *model.Item, rawJSON []byte) ItemSyncedPayload {
 	return ItemSyncedPayload{
 		ItemID:        item.ID.String(),
 		Source:        item.Source.Get(),
-		SourceID:      item.ExternalID.Get(),
+		SourceID:      item.SourceID.Get(),
 		Type:          item.Type.Get(),
 		Attributes:    item.Attributes,
 		ContentHash:   item.ContentHash.String(),

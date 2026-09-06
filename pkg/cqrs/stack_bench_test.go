@@ -15,7 +15,7 @@ func benchItems(n int) []*provider.Item {
 	for i := range n {
 		items = append(items, &provider.Item{
 			ID:         id.NewItemID(),
-			ExternalID: id.NewExternalID(fmt.Sprintf("bench-%d", i)),
+			SourceID: id.NewSourceID(fmt.Sprintf("bench-%d", i)),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{

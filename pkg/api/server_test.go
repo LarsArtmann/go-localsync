@@ -30,13 +30,13 @@ type mockSyncStore struct {
 	countErr error
 }
 
-func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *synclib.SyncSummary {
-	summary := &synclib.SyncSummary{Results: make([]synclib.ItemSyncResult, 0, len(items))}
+func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *synclib.BatchOutcome {
+	summary := &synclib.BatchOutcome{Results: make([]synclib.ItemSyncResult, 0, len(items))}
 
 	for _, item := range items {
 		summary.Synced++
 		summary.Results = append(summary.Results, synclib.ItemSyncResult{
-			SourceID: item.ExternalID,
+			SourceID: item.SourceID,
 			Action:   synclib.ActionCreated,
 		})
 	}
@@ -77,7 +77,7 @@ func testItem(itemID, eventType string) *model.Item {
 
 	return &model.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID(itemID),
+		SourceID: id.NewSourceID(itemID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
@@ -330,7 +330,7 @@ func TestTriggerSync_PartialFailureReturns200(t *testing.T) {
 	now := time.Now()
 	valid := &provider.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID("1"),
+		SourceID: id.NewSourceID("1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{

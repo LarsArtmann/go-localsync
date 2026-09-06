@@ -107,7 +107,7 @@ func TestWithCtxf(t *testing.T) {
 func TestInvalidField(t *testing.T) {
 	t.Parallel()
 
-	err := InvalidField("externalId", "item.ExternalID is required")
+	err := InvalidField("externalId", "item.SourceID is required")
 
 	if !errors.Is(err, ErrInvalidInput) {
 		t.Error("expected InvalidField to match ErrInvalidInput")

@@ -47,7 +47,7 @@ func ExampleSyncer() {
 	p := exampleProvider{items: []*provider.Item{
 		{
 			ID:         id.NewItemID(),
-			ExternalID: id.NewExternalID("evt-1"),
+			SourceID: id.NewSourceID("evt-1"),
 			Source:     src,
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
@@ -59,7 +59,7 @@ func ExampleSyncer() {
 		},
 		{
 			ID:         id.NewItemID(),
-			ExternalID: id.NewExternalID("evt-2"),
+			SourceID: id.NewSourceID("evt-2"),
 			Source:     src,
 			Type:       id.NewEventTypeID("WatchEvent"),
 			Attributes: map[string]string{
@@ -85,11 +85,11 @@ func ExampleSyncer() {
 	}
 
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].ExternalID.Get() < items[j].ExternalID.Get()
+		return items[i].SourceID.Get() < items[j].SourceID.Get()
 	})
 
 	for _, it := range items {
-		fmt.Printf("%s %s by %s\n", it.ExternalID.Get(), it.Type.Get(), it.Attributes["actor_login"])
+		fmt.Printf("%s %s by %s\n", it.SourceID.Get(), it.Type.Get(), it.Attributes["actor_login"])
 	}
 
 	fmt.Println("tombstoned:", items[0].IsTombstoned())
@@ -117,7 +117,7 @@ func ExampleSyncer_tombstoneResurrect() {
 	now := time.Date(2026, 6, 28, 9, 0, 0, 0, time.UTC)
 	p := exampleProvider{items: []*provider.Item{{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID("evt-1"),
+		SourceID: id.NewSourceID("evt-1"),
 		Source:     src,
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
@@ -135,7 +135,7 @@ func ExampleSyncer_tombstoneResurrect() {
 	}
 
 	// 2) Tombstone it: history is kept, but it leaves the default view.
-	if err := stack.TombstoneItem(ctx, "example", id.NewExternalID("evt-1"), model.ReasonUserHidden); err != nil {
+	if err := stack.TombstoneItem(ctx, "example", id.NewSourceID("evt-1"), model.ReasonUserHidden); err != nil {
 		panic(err)
 	}
 

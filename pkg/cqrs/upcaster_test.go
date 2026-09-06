@@ -38,7 +38,7 @@ func legacyV1Payload() ItemSyncedPayload {
 func TestUpcaster_V1PayloadFoldsAttributes(t *testing.T) {
 	t.Parallel()
 
-	aggID := AggregateID("github", id.NewExternalID("up-1"))
+	aggID := MustStreamID("github", id.NewSourceID("up-1"))
 
 	evts, err := event.NewEvents(aggID, aggregateType, event.Version(0),
 		[]event.Type{EventItemSynced},
@@ -82,7 +82,7 @@ func TestUpcaster_V1PayloadFoldsAttributes(t *testing.T) {
 func TestUpcaster_AlreadyV3PassesThrough(t *testing.T) {
 	t.Parallel()
 
-	aggID := AggregateID("github", id.NewExternalID("up-2"))
+	aggID := MustStreamID("github", id.NewSourceID("up-2"))
 
 	evts, err := event.NewEvents(aggID, aggregateType, event.Version(0),
 		[]event.Type{EventItemSynced},
@@ -111,7 +111,7 @@ func TestUpcaster_RegistryAppliesByVersion(t *testing.T) {
 
 	transform := schema.UpcastSourceTransform(newLegacyUpcasters()...)
 
-	aggID := AggregateID("github", id.NewExternalID("up-3"))
+	aggID := MustStreamID("github", id.NewSourceID("up-3"))
 
 	v1, err := event.NewEvents(aggID, aggregateType, event.Version(0),
 		[]event.Type{EventItemSynced}, []any{legacyV1Payload()}, event.WithSchemaVersion(1))
@@ -151,7 +151,7 @@ func TestUpcaster_StoreReadBoundaryUpcasts(t *testing.T) {
 	testutil.MustNoError(t, err)
 	defer closeStoreResult(t, sr)
 
-	aggID := AggregateID("github", id.NewExternalID("up-4"))
+	aggID := MustStreamID("github", id.NewSourceID("up-4"))
 	ref := cqrsid.NewStreamRef(aggregateType, aggID)
 
 	// Save a legacy event BYPASSING the decorated store (raw store semantics):
@@ -190,7 +190,7 @@ func TestUpcaster_ChainSemantics_V1ToFoldedV3(t *testing.T) {
 
 	transform := schema.UpcastSourceTransform(newLegacyUpcasters()...)
 
-	aggID := AggregateID("github", id.NewExternalID("up-chain"))
+	aggID := MustStreamID("github", id.NewSourceID("up-chain"))
 
 	raw, err := event.NewEvents(aggID, aggregateType, event.Version(7),
 		[]event.Type{EventItemSynced}, []any{legacyV1Payload()}, event.WithSchemaVersion(1))
@@ -242,7 +242,7 @@ func TestUpcaster_LegacyVersionWithAttributes_RebuildsPrivateEvent(t *testing.T)
 
 	transform := schema.UpcastSourceTransform(newLegacyUpcasters()...)
 
-	aggID := AggregateID("github", id.NewExternalID("up-anomaly"))
+	aggID := MustStreamID("github", id.NewSourceID("up-anomaly"))
 
 	anomalous := legacyV1Payload()
 	anomalous.Attributes = map[string]string{"actor_login": "octocat"}
@@ -297,7 +297,7 @@ func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 		// to the registry for in-place stamping — the write window.
 		legacy.Attributes = map[string]string{"actor_login": "octocat"}
 
-		aggID := AggregateID("github", id.NewExternalID(sid))
+		aggID := MustStreamID("github", id.NewSourceID(sid))
 		ref := cqrsid.NewStreamRef(aggregateType, aggID)
 
 		rawLegacy, err := event.NewEvents(aggID, aggregateType, event.Version(0),
@@ -344,7 +344,7 @@ func TestUpcaster_ConcurrentReadsDuringSync(t *testing.T) {
 	// while others are mid-transform (the sync-vs-replay overlap).
 	for i := range 25 {
 		sid := fmt.Sprintf("up-race-w%d", i)
-		writerAgg := AggregateID("github", id.NewExternalID(sid))
+		writerAgg := MustStreamID("github", id.NewSourceID(sid))
 		writerRef := cqrsid.NewStreamRef(aggregateType, writerAgg)
 
 		fresh, err := event.NewEvents(writerAgg, aggregateType, event.Version(0),

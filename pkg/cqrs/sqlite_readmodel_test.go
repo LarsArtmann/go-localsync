@@ -38,7 +38,7 @@ func sqliteTestItem(t *testing.T, source, extID, eventType, actor, repo string) 
 
 	return &model.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID(extID),
+		SourceID: id.NewSourceID(extID),
 		Source:     id.NewProviderID(source),
 		Type:       id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
@@ -73,7 +73,7 @@ func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 
 	testutil.MustNoError(t, rm.Upsert(ctx, item))
 
-	got, err := rm.Get(ctx, "github", id.NewExternalID("123"))
+	got, err := rm.Get(ctx, "github", id.NewSourceID("123"))
 	testutil.MustNoError(t, err)
 
 	if got == nil {
@@ -84,7 +84,7 @@ func TestSQLiteReadModel_UpsertAndGet(t *testing.T) {
 		t.Errorf("ID = %q, want %q (ItemID not preserved)", got.ID.String(), item.ID.String())
 	}
 
-	testutil.AssertEqual(t, got.ExternalID.Get(), "123", "ExternalID")
+	testutil.AssertEqual(t, got.SourceID.Get(), "123", "SourceID")
 	testutil.AssertEqual(t, got.Type.Get(), "PushEvent", "Type")
 	testutil.AssertEqual(t, got.ContentHash, "abc123hash", "ContentHash")
 	testutil.AssertEqual(t, got.SchemaVersion.Int(), schema.V2.Int(), "SchemaVersion")
@@ -96,7 +96,7 @@ func TestSQLiteReadModel_Get_NotFound(t *testing.T) {
 	rm := newSQLiteTestDB(t)
 	ctx := context.Background()
 
-	got, err := rm.Get(ctx, "github", id.NewExternalID("nonexistent"))
+	got, err := rm.Get(ctx, "github", id.NewSourceID("nonexistent"))
 	assertNotFound(t, err, got)
 }
 
@@ -161,11 +161,11 @@ func TestSQLiteReadModel_Tombstone(t *testing.T) {
 
 	testutil.MustNoError(
 		t,
-		rm.Tombstone(ctx, "github", id.NewExternalID("1"), model.NewTombstone(model.ReasonUpstreamGone)),
+		rm.Tombstone(ctx, "github", id.NewSourceID("1"), model.NewTombstone(model.ReasonUpstreamGone)),
 	)
 
 	// Get returns the tombstoned item directly (key lookup, not the live view).
-	got, err := rm.Get(ctx, "github", id.NewExternalID("1"))
+	got, err := rm.Get(ctx, "github", id.NewSourceID("1"))
 	testutil.MustNoError(t, err)
 	if got == nil || !got.IsTombstoned() {
 		t.Fatal("expected tombstoned item")
@@ -191,7 +191,7 @@ func TestSQLiteReadModel_Upsert_Idempotent(t *testing.T) {
 	item2 := sqliteTestItem(t, "github", "1", "IssueEvent", "bob", "org/repo")
 	testutil.MustNoError(t, rm.Upsert(ctx, item2))
 
-	got, _ := rm.Get(ctx, "github", id.NewExternalID("1"))
+	got, _ := rm.Get(ctx, "github", id.NewSourceID("1"))
 	testutil.AssertEqual(t, got.Type.Get(), "IssueEvent", "Type")
 
 	count, _ := rm.Count(ctx, model.ItemFilter{})

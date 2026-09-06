@@ -12,8 +12,8 @@ import (
 // both ReadModel and sync.SyncStore share the same declarations.
 type ReadModel interface {
 	model.ItemReader
-	Get(ctx context.Context, source string, sourceID id.ExternalID) (*model.Item, error)
+	Get(ctx context.Context, source string, sourceID id.SourceID) (*model.Item, error)
 	Upsert(ctx context.Context, item *model.Item) error
-	Tombstone(ctx context.Context, source string, sourceID id.ExternalID, tombstone model.Tombstone) error
+	Tombstone(ctx context.Context, source string, sourceID id.SourceID, tombstone model.Tombstone) error
 	Close() error
 }

@@ -19,7 +19,7 @@ func benchmarkReadModelList(b *testing.B, rm ReadModel) {
 	for i := range 1000 {
 		item := &model.Item{
 			ID:         id.NewItemID(),
-			ExternalID: id.NewExternalID(fmt.Sprintf("item-%d", i)),
+			SourceID: id.NewSourceID(fmt.Sprintf("item-%d", i)),
 			Source:     id.NewProviderID("github"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{

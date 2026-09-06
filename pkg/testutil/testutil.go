@@ -35,10 +35,10 @@ func AssertContains[T comparable](t *testing.T, haystack []T, needle T, label st
 	}
 }
 
-func AssertExternalID(t *testing.T, item *model.Item, want string) {
+func AssertSourceID(t *testing.T, item *model.Item, want string) {
 	t.Helper()
 
-	AssertEqual(t, item.ExternalID.Get(), want, "ExternalID")
+	AssertEqual(t, item.SourceID.Get(), want, "SourceID")
 }
 
 func AssertType(t *testing.T, item *model.Item, want string) {

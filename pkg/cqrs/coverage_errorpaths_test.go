@@ -131,10 +131,10 @@ func TestUpcastLegacyAttributes_FullMatrix(t *testing.T) {
 	}
 }
 
-func upsertMemoryItem(t *testing.T, rm ReadModel, externalID, itemType string) {
+func upsertMemoryItem(t *testing.T, rm ReadModel, sourceID, itemType string) {
 	t.Helper()
 
-	item := testItem(externalID, itemType)
+	item := testItem(sourceID, itemType)
 
 	testutil.MustNoError(t, rm.Upsert(context.Background(), toDataItem(item)))
 }

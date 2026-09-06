@@ -30,8 +30,8 @@ type mockSyncStore struct {
 	reconcileErr    error
 }
 
-func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *SyncSummary {
-	summary := &SyncSummary{Results: make([]ItemSyncResult, 0, len(items))}
+func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *BatchOutcome {
+	summary := &BatchOutcome{Results: make([]ItemSyncResult, 0, len(items))}
 
 	for _, item := range items {
 		action := ActionCreated
@@ -45,7 +45,7 @@ func (m *mockSyncStore) SyncItems(_ context.Context, items []*provider.Item) *Sy
 		}
 
 		summary.Results = append(summary.Results, ItemSyncResult{
-			SourceID: item.ExternalID,
+			SourceID: item.SourceID,
 			Action:   action,
 		})
 		switch action {
@@ -107,12 +107,12 @@ func newTestSyncer(items []*provider.Item) (*Syncer, *mockSyncStore) {
 	return NewSyncer(p, store, logger), store
 }
 
-func testSyncItem(externalID, eventType string) *provider.Item {
+func testSyncItem(sourceID, eventType string) *provider.Item {
 	now := time.Now()
 
 	return &provider.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID(externalID),
+		SourceID: id.NewSourceID(sourceID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
@@ -125,19 +125,19 @@ func testSyncItem(externalID, eventType string) *provider.Item {
 	}
 }
 
-// testSyncItems constructs a slice of test sync items from (externalID, eventType) pairs.
+// testSyncItems constructs a slice of test sync items from (sourceID, eventType) pairs.
 //
 //	testSyncItems("1", "PushEvent", "2", "IssueEvent")
 func testSyncItems(pairs ...string) []*provider.Item {
 	return testutil.BuildPairs(testSyncItem, pairs...)
 }
 
-func testDataItem(externalID, eventType string) *model.Item {
+func testDataItem(sourceID, eventType string) *model.Item {
 	now := time.Now()
 
 	return &model.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID(externalID),
+		SourceID: id.NewSourceID(sourceID),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID(eventType),
 		Attributes: map[string]string{
@@ -234,7 +234,7 @@ func TestSyncer_SyncIncremental_FallsBackToFull(t *testing.T) {
 	testutil.AssertEqual(t, count, 1, "count")
 }
 
-func TestSyncer_GetStats(t *testing.T) {
+func TestSyncer_Stats(t *testing.T) {
 	t.Parallel()
 
 	items := testSyncItems("1", "PushEvent", "2", "IssueEvent", "3", "PushEvent")
@@ -248,7 +248,7 @@ func TestSyncer_GetStats(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	stats, err := syncer.GetStats(ctx)
+	stats, err := syncer.Stats(ctx)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

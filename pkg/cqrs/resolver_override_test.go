@@ -44,7 +44,7 @@ func conflictPair(updatedAt time.Time) *provider.Item {
 
 	return &provider.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID("res-1"),
+		SourceID: id.NewSourceID("res-1"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{"actor_login": "resolver-test"},
@@ -67,7 +67,7 @@ func TestSyncOptions_ConflictResolver_OverridesConfig(t *testing.T) {
 	testutil.MustNoError(t, stack.SyncItem(ctx, first))
 	waitForItem(t, stack)
 
-	localBefore, err := stack.Get(ctx, "github", first.ExternalID)
+	localBefore, err := stack.Get(ctx, "github", first.SourceID)
 	testutil.MustNoError(t, err)
 
 	// Second sync with a CHANGED item while the option forces local-wins:
@@ -92,7 +92,7 @@ func TestSyncOptions_ConflictResolver_OverridesConfig(t *testing.T) {
 		t.Fatalf("expected 1 fetched item, got %+v", result)
 	}
 
-	localAfter, err := stack.Get(ctx, "github", first.ExternalID)
+	localAfter, err := stack.Get(ctx, "github", first.SourceID)
 	testutil.MustNoError(t, err)
 
 	if localAfter.ContentHash != localBefore.ContentHash {
@@ -128,7 +128,7 @@ func TestSyncOptions_ConflictResolver_NilUsesConfigDefault(t *testing.T) {
 	_, err := syncer.Sync(ctx, &synclib.SyncOptions{Source: "github", MaxPages: 1})
 	testutil.MustNoError(t, err)
 
-	after, err := stack.Get(ctx, "github", first.ExternalID)
+	after, err := stack.Get(ctx, "github", first.SourceID)
 	testutil.MustNoError(t, err)
 
 	if after.ContentHash.IsZero() {

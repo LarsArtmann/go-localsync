@@ -43,7 +43,7 @@ func (si *scannedItem) toItem() (*model.Item, error) {
 
 	return &model.Item{
 		ID:            itemID,
-		ExternalID:    id.NewExternalID(si.sourceID),
+		SourceID:    id.NewSourceID(si.sourceID),
 		Source:        id.NewProviderID(si.source),
 		Type:          id.NewEventTypeID(si.eventType),
 		Attributes:    attrs,

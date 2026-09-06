@@ -11,7 +11,7 @@ import (
 func testProviderItem() *provider.Item {
 	return &provider.Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID("12345"),
+		SourceID: id.NewSourceID("12345"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{

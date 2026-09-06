@@ -21,7 +21,7 @@ func assertValidationError(t *testing.T, item *Item) {
 func TestItem_Validate(t *testing.T) {
 	validItem := &Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID("123"),
+		SourceID: id.NewSourceID("123"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		CreatedAt:  time.Now(),
@@ -35,9 +35,9 @@ func TestItem_Validate(t *testing.T) {
 		}
 	})
 
-	t.Run("rejects zero ExternalID", func(t *testing.T) {
+	t.Run("rejects zero SourceID", func(t *testing.T) {
 		item := *validItem
-		item.ExternalID = id.ExternalID{}
+		item.SourceID = id.SourceID{}
 		assertValidationError(t, &item)
 	})
 
@@ -67,16 +67,16 @@ func TestItem_Validate(t *testing.T) {
 
 	t.Run("rejects multiple zero fields", func(t *testing.T) {
 		item := *validItem
-		item.ExternalID = id.ExternalID{}
+		item.SourceID = id.SourceID{}
 		item.Source = id.ProviderID{}
 		item.Type = id.EventTypeID{}
 		item.CreatedAt = time.Time{}
 		assertValidationError(t, &item)
 	})
 
-	t.Run("rejects empty string ExternalID", func(t *testing.T) {
+	t.Run("rejects empty string SourceID", func(t *testing.T) {
 		item := *validItem
-		item.ExternalID = id.NewExternalID("")
+		item.SourceID = id.NewSourceID("")
 		assertValidationError(t, &item)
 	})
 
@@ -98,7 +98,7 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 
 	original := &Item{
 		ID:         id.NewItemID(),
-		ExternalID: id.NewExternalID("12345"),
+		SourceID: id.NewSourceID("12345"),
 		Source:     id.NewProviderID("github"),
 		Type:       id.NewEventTypeID("PushEvent"),
 		Attributes: map[string]string{
@@ -127,8 +127,8 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 		t.Errorf("ID: got %s, want %s", decoded.ID.String(), original.ID.String())
 	}
 
-	if decoded.ExternalID.Get() != original.ExternalID.Get() {
-		t.Errorf("ExternalID: got %s, want %s", decoded.ExternalID.Get(), original.ExternalID.Get())
+	if decoded.SourceID.Get() != original.SourceID.Get() {
+		t.Errorf("SourceID: got %s, want %s", decoded.SourceID.Get(), original.SourceID.Get())
 	}
 
 	if decoded.Source.Get() != original.Source.Get() {

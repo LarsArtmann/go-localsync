@@ -25,7 +25,7 @@ func TestExportEvents_JSONLines(t *testing.T) {
 	syncTestItem(t, stack, ctx, "exp-1", "PushEvent")
 	waitForCount(t, stack, ctx, 1)
 
-	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewExternalID("exp-1"), model.ReasonUserHidden))
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewSourceID("exp-1"), model.ReasonUserHidden))
 
 	// Give the synchronous bus a beat to deliver the tombstone before reading
 	// the journal for export.
