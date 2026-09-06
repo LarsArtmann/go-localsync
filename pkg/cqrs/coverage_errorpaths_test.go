@@ -242,3 +242,33 @@ func TestCleanupFailedConstruction_ReleasesAllResources(t *testing.T) {
 
 	cleanupFailedConstruction(sr, nil, nil, nil)
 }
+
+// TestUpcastLegacyAttributes_RoundTripThroughAccessors pins the single
+// source of truth for attribute keys: the adapter folds legacy fields into
+// Attributes under the model.Attr* constants, and the model's typed
+// accessors read those exact entries back. A key drift in either direction
+// fails here.
+func TestUpcastLegacyAttributes_RoundTripThroughAccessors(t *testing.T) {
+	t.Parallel()
+
+	attrs := upcastLegacyAttributes(ItemSyncedPayload{
+		ActorLogin:     "octocat",
+		ActorAvatarURL: "https://avatars.example/u/1",
+		RepoName:       "octo/hello",
+		RepoURL:        "https://github.com/octo/hello",
+	})
+
+	item := &model.Item{Attributes: attrs}
+
+	if item.ActorLogin() != "octocat" {
+		t.Errorf("ActorLogin() = %q, want octocat", item.ActorLogin())
+	}
+
+	if item.RepoName() != "octo/hello" {
+		t.Errorf("RepoName() = %q, want octo/hello", item.RepoName())
+	}
+
+	if item.RepoURL() != "https://github.com/octo/hello" {
+		t.Errorf("RepoURL() = %q", item.RepoURL())
+	}
+}

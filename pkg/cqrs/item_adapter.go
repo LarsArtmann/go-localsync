@@ -12,7 +12,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-
 // toDataItem converts a provider.Item to a data model Item.
 // This is the boundary between the provider DTO and the domain entity.
 func toDataItem(p *provider.Item) *model.Item {

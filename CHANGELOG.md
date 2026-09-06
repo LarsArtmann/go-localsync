@@ -9,6 +9,8 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
+- **Single source of truth for attribute keys** — the cqrs adapter's duplicated `legacy*` key constants are deleted; `upcastLegacyAttributes` now writes `model.Attr*` keys directly, and a round-trip test proves adapter-written attributes read back through the model's typed accessors.
+
 - **`CQRSConfig.Validate()` wired into `NewCQRSStack`** — invalid configs (unknown backend) now fail at the constructor boundary before any factory dispatch or resource setup, with the classified `ErrUnknownBackend` chain.
 
 - **Benchmark protocol + new benchmarks** — `docs/benchmarks.md` fixes the measurement protocol (fixed `-benchtime 20x`, `-count 5`, benchstat comparison, environment caveats) and `scripts/run-benchmarks.sh` runs it. `BenchmarkPipeline_Replay10kEvents` now measures TRUE from-zero replay (persisted projection checkpoints are wiped per iteration — the old version measured stack open/close, since the checkpoint resumed at head and replayed nothing). New: `BenchmarkConflict_SyncExisting` (per-item resolver path) and `BenchmarkUpcastedLegacyRead` (V1 upcast-on-read vs native V3 pass-through; measured ~3.3× upcast tax on a protocol run).
