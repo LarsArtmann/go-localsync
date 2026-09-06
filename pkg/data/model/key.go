@@ -15,7 +15,7 @@ type Key struct {
 	SourceID id.SourceID
 }
 
-// String returns the canonical string representation: "source/externalId".
+// String returns the canonical string representation: "source/sourceId".
 func (k Key) String() string {
 	return fmt.Sprintf("%s/%s", k.Source.Get(), k.SourceID.Get())
 }

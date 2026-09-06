@@ -21,7 +21,7 @@ type ListItemsInput struct {
 // ItemResponse is the API DTO for a synced item.
 type ItemResponse struct {
 	ID         string            `json:"id"`
-	SourceID string            `json:"externalId"`
+	SourceID string            `json:"sourceId"`
 	Source     string            `json:"source"`
 	Type       string            `json:"type"`
 	Attributes map[string]string `json:"attributes,omitempty"`

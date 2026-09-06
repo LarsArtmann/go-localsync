@@ -20,7 +20,7 @@ type Item struct {
 	ID id.ItemID `json:"id"`
 	// SourceID is the original identifier from the source system (e.g., GitHub event "1234567890").
 	// Used for upsert conflict detection against the source.
-	SourceID id.SourceID `json:"externalId"`
+	SourceID id.SourceID `json:"sourceId"`
 	// Source identifies which provider this item came from (e.g., "github", "gitlab").
 	Source id.ProviderID `json:"source"`
 	// Type categorizes the item (e.g., "PushEvent", "IssueEvent").
@@ -52,7 +52,7 @@ func (item *Item) Validate() error {
 	var errs []error
 
 	if item.SourceID.IsZero() {
-		errs = append(errs, pkgerrors.InvalidField("externalId", "item.SourceID is required"))
+		errs = append(errs, pkgerrors.InvalidField("sourceID", "item.SourceID is required"))
 	}
 
 	if item.Source.IsZero() {

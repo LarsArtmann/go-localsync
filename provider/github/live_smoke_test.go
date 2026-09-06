@@ -41,7 +41,7 @@ func TestLivePAT_Smoke(t *testing.T) {
 	}
 
 	for _, item := range result.Items {
-		if item.Source.Get() == "" || item.SourceID.Get() == "" {
+		if item.Source.Get() == "" || item.ExternalID.Get() == "" {
 			t.Fatalf("item missing identity: %+v", item)
 		}
 
