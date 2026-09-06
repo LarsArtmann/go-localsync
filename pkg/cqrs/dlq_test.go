@@ -91,11 +91,17 @@ func TestStack_DLQ_Surface(t *testing.T) {
 		t.Fatalf("expected 1 replayed, 0 still-failing; got %d/%d", len(result.Replayed), len(result.StillFailing))
 	}
 
+	// The host reports replayed entries but leaves deletion to the caller:
+	// clear exactly the entries that replayed successfully.
+	for _, replayed := range result.Replayed {
+		testutil.MustNoError(t, stack.DeleteDeadLetter(ctx, replayed.ProjectionName, replayed.EventID))
+	}
+
 	count, err = stack.DeadLetterCount(ctx)
 	testutil.MustNoError(t, err)
 
 	if count != 0 {
-		t.Fatalf("replayed entry must leave the DLQ, count %d", count)
+		t.Fatalf("replayed entry must be deletable, count %d", count)
 	}
 
 	testutil.MustNoError(t, stack.PurgeDeadLetters(ctx, ""))
