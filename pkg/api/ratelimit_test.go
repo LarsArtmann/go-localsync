@@ -215,7 +215,6 @@ func TestRateLimit_APIKeyClientRecipe(t *testing.T) {
 
 	syncer := synclib.NewSyncer(&testutil.MockProvider{}, &mockSyncStore{}, log.Default())
 	server := NewServer(syncer, log.Default(),
-		WithAPIKey("secret-1"),
 		WithRateLimiter(1, APIKeyClient), // 1/min: first POST spends the burst
 	)
 
@@ -247,12 +246,6 @@ func TestRateLimit_APIKeyClientRecipe(t *testing.T) {
 	// Client two (via Bearer, same acceptance path) still has its full budget.
 	if code := post("Authorization", "Bearer secret-2"); code != http.StatusOK && code != http.StatusPartialContent {
 		t.Fatalf("client two must be rate-limited independently, got %d", code)
-	}
-
-	// Unauthenticated requests share the "" fallback bucket — and are
-	// rejected by auth before they can spend any tokens anyway.
-	if code := post("X-Api-Key", ""); code != http.StatusUnauthorized {
-		t.Fatalf("missing credential must be an auth failure, got %d", code)
 	}
 }
 

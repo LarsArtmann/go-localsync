@@ -30,6 +30,31 @@ go run ./cmd/localsync-lint --strict
 CI runs the same gates plus a pinned library-lint leg; see AGENTS.md for the
 full CI matrix.
 
+## Log-level configuration
+
+Per-event INFO logging is noisy in production; both layers expose a level
+knob. They are independent by design — the stack owns its event logger, the
+API server owns its request logger.
+
+```go
+// Stack-owned event logging (CQRSConfig.LogLevel, validated at construction;
+// applies only when EventLogger is nil — a consumer-provided EventLogger
+// keeps its own level control):
+stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
+    Backend:  "sqlite",
+    LogLevel: "warn", // debug | info | warn | error
+})
+
+// Consumer-provided sink instead of the default logger:
+stack, err = cqrs.NewCQRSStack(cqrs.CQRSConfig{
+    Backend:     "sqlite",
+    EventLogger: slog.New(myHandler), // LogLevel is ignored for this sink
+})
+
+// API server request logging (api.WithLogLevel, typed):
+server := api.NewServer(syncer, logger, api.WithLogLevel(log.WarnLevel))
+```
+
 ## Architecture in one page
 
 go-localsync is a **single-aggregate, pull-only sync SDK** (ADR-0004 scope
