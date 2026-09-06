@@ -20,6 +20,7 @@ type Syncer struct {
 	store    SyncStore
 	logger   *log.Logger
 	retry    provider.RetryConfig
+	tracer   trace.Tracer
 	sourceMu stdsync.Mutex
 	locks    map[string]*stdsync.Mutex
 }
@@ -198,8 +199,10 @@ func (s *Syncer) withSourceLock(
 
 // Sync fetches all items from the provider and persists them.
 func (s *Syncer) Sync(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	return s.withSourceLock(ctx, opts, func(ctx context.Context) (*SyncResult, error) {
-		return s.runSync(ctx, opts)
+	return s.withSyncSpan(ctx, "localsync.sync", func(ctx context.Context) (*SyncResult, error) {
+		return s.withSourceLock(ctx, opts, func(ctx context.Context) (*SyncResult, error) {
+			return s.runSync(ctx, opts)
+		})
 	})
 }
 
@@ -311,8 +314,10 @@ func (s *Syncer) reconcile(
 }
 
 func (s *Syncer) SyncIncremental(ctx context.Context, opts *SyncOptions) (*SyncResult, error) {
-	return s.withSourceLock(ctx, opts, func(ctx context.Context) (*SyncResult, error) {
-		return s.runSyncIncremental(ctx, opts)
+	return s.withSyncSpan(ctx, "localsync.sync_incremental", func(ctx context.Context) (*SyncResult, error) {
+		return s.withSourceLock(ctx, opts, func(ctx context.Context) (*SyncResult, error) {
+			return s.runSyncIncremental(ctx, opts)
+		})
 	})
 }
 

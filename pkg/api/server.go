@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"sync"
 
 	"charm.land/log/v2"
 	"github.com/danielgtaylor/huma/v2"
@@ -19,6 +20,9 @@ type Server struct {
 	store  synclib.SyncStore
 	logger *log.Logger
 	opts   *serverOptions
+
+	clientMu      sync.Mutex
+	clientBuckets map[string]*tokenBucket
 }
 
 // NewServer creates an HTTP API server backed by the given syncer.

@@ -11,6 +11,11 @@ type serverOptions struct {
 	apiKey         string
 	ratePerMinute  int
 	bucket         *tokenBucket
+	// perClient switches the /sync guard from the single global bucket to one
+	// bucket per keyExtractor key (see WithRateLimiter). Unset when the
+	// global WithRateLimit scope is active.
+	perClient    bool
+	keyExtractor func(*http.Request) string
 }
 
 // WithMetricsHandler serves the given handler under GET /metrics. Consumers
@@ -19,6 +24,13 @@ type serverOptions struct {
 // cqrs.operation.* instruments — command/event throughput plus projection
 // catch-up health — become scrapeable. The SDK stays exporter-agnostic: it
 // never imports a metrics backend, it just mounts yours.
+//
+// Auth posture (decided 2026-09-06): /metrics is deliberately NOT a public
+// path — when WithAPIKey is set, scraping requires the key, because metrics
+// leak operational detail (source names, item volumes, error rates).
+// Consumers scraping through an unauthenticated local sidecar can run a
+// second, key-less server on loopback or front /metrics with their own proxy
+// that injects the key.
 func WithMetricsHandler(handler http.Handler) ServerOption {
 	return func(o *serverOptions) {
 		o.metricsHandler = handler
