@@ -242,7 +242,7 @@ func closeLogged(name string, c io.Closer) {
 // correlation ID is attached so the emitted events are traceable to this
 // call even outside a batch run.
 func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
-	aggID := AggregateID(item.Source.Get(), item.ExternalID)
+	aggID := AggregateID(item.Source.Get(), item.SourceID)
 
 	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
 		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
@@ -253,13 +253,13 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 	})
 }
 
-// TombstoneItem dispatches a TombstoneItemCommand for the given source/externalID
+// TombstoneItem dispatches a TombstoneItemCommand for the given source/sourceID
 // and reason, hiding the item from the default read model while preserving its
 // history. A later sync resurrects it automatically.
 func (s *CQRSStack) TombstoneItem(
 	ctx context.Context,
 	source string,
-	sourceID id.ExternalID,
+	sourceID id.SourceID,
 	reason model.TombstoneReason,
 ) error {
 	aggID := AggregateID(source, sourceID)
@@ -290,7 +290,7 @@ func (s *CQRSStack) Reconcile(ctx context.Context, source string, seen []model.K
 	seenSet := make(map[string]struct{}, len(seen))
 
 	for _, k := range seen {
-		seenSet[itemKey(k.Source.Get(), k.ExternalID)] = struct{}{}
+		seenSet[itemKey(k.Source.Get(), k.SourceID)] = struct{}{}
 	}
 
 	var tombstoned int
@@ -300,12 +300,12 @@ func (s *CQRSStack) Reconcile(ctx context.Context, source string, seen []model.K
 			return tombstoned, ctx.Err()
 		}
 
-		if _, ok := seenSet[itemKey(item.Source.Get(), item.ExternalID)]; ok {
+		if _, ok := seenSet[itemKey(item.Source.Get(), item.SourceID)]; ok {
 			continue
 		}
 
-		if err := s.TombstoneItem(ctx, source, item.ExternalID, model.ReasonUpstreamGone); err != nil {
-			return tombstoned, pkgerrors.Wrapf(err, "reconcile: tombstone %s/%s", source, item.ExternalID)
+		if err := s.TombstoneItem(ctx, source, item.SourceID, model.ReasonUpstreamGone); err != nil {
+			return tombstoned, pkgerrors.Wrapf(err, "reconcile: tombstone %s/%s", source, item.SourceID)
 		}
 
 		tombstoned++
@@ -318,9 +318,9 @@ func (s *CQRSStack) Reconcile(ctx context.Context, source string, seen []model.K
 func (s *CQRSStack) SyncItems(
 	ctx context.Context,
 	items []*provider.Item,
-) *synclib.SyncSummary {
+) *synclib.BatchOutcome {
 	if s.otel != nil {
-		return withBatchSpan(ctx, s.otel, func(ctx context.Context) *synclib.SyncSummary {
+		return withBatchSpan(ctx, s.otel, func(ctx context.Context) *synclib.BatchOutcome {
 			return s.syncItems(ctx, items)
 		})
 	}
@@ -336,13 +336,13 @@ func (s *CQRSStack) SyncItemsWithResolver(
 	ctx context.Context,
 	items []*provider.Item,
 	resolver crdt.ConflictResolver[*model.Item],
-) *synclib.SyncSummary {
+) *synclib.BatchOutcome {
 	if resolver == nil {
 		return s.syncItems(ctx, items)
 	}
 
 	if s.otel != nil {
-		return withBatchSpan(ctx, s.otel, func(ctx context.Context) *synclib.SyncSummary {
+		return withBatchSpan(ctx, s.otel, func(ctx context.Context) *synclib.BatchOutcome {
 			return s.syncItemsWith(ctx, items, resolver)
 		})
 	}
@@ -353,7 +353,7 @@ func (s *CQRSStack) SyncItemsWithResolver(
 func (s *CQRSStack) syncItems(
 	ctx context.Context,
 	items []*provider.Item,
-) *synclib.SyncSummary {
+) *synclib.BatchOutcome {
 	return s.syncItemsWith(ctx, items, nil)
 }
 
@@ -363,8 +363,8 @@ func (s *CQRSStack) syncItemsWith(
 	ctx context.Context,
 	items []*provider.Item,
 	resolver crdt.ConflictResolver[*model.Item],
-) *synclib.SyncSummary {
-	summary := &synclib.SyncSummary{
+) *synclib.BatchOutcome {
+	summary := &synclib.BatchOutcome{
 		Results:   make([]synclib.ItemSyncResult, 0, len(items)),
 		Synced:    0,
 		Conflicts: 0,
@@ -378,7 +378,7 @@ func (s *CQRSStack) syncItemsWith(
 			break
 		}
 
-		aggID := AggregateID(item.Source.Get(), item.ExternalID)
+		aggID := AggregateID(item.Source.Get(), item.SourceID)
 		dataItem := toDataItem(item)
 
 		var outcome SyncOutcome
@@ -396,7 +396,7 @@ func (s *CQRSStack) syncItemsWith(
 
 		err := s.CommandDispatcher.Dispatch(ctx, cmd)
 		if err != nil {
-			err = pkgerrors.Wrapf(err, "sync %s/%s", item.Source.Get(), item.ExternalID.Get())
+			err = pkgerrors.Wrapf(err, "sync %s/%s", item.Source.Get(), item.SourceID.Get())
 		}
 
 		action := classifyAction(err, outcome)
@@ -406,7 +406,7 @@ func (s *CQRSStack) syncItemsWith(
 		}
 
 		result := synclib.ItemSyncResult{
-			SourceID: item.ExternalID,
+			SourceID: item.SourceID,
 			Action:   action,
 			Error:    err,
 		}

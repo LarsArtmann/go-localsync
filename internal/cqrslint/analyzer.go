@@ -24,6 +24,11 @@ const (
 	ruleProjectionLockGuard   = "C0008"
 	rulePayloadJSONTags       = "C0009"
 	ruleNewEventsUsesAggType  = "C0010"
+	ruleSingleProjection      = "C0011"
+	ruleFoldPurity            = "C0012"
+	ruleProjectorReadOnly     = "C0013"
+	ruleWireValueLiterals     = "C0014"
+	ruleNewEventsTypeLiterals = "C0015"
 )
 
 // canonicalAggregateType is the sole permitted aggregate type identifier
@@ -113,6 +118,31 @@ func Rules() []Rule {
 			ID: ruleNewEventsUsesAggType, Severity: SeverityError,
 			Title:     "NewEvents uses aggregateType const",
 			Rationale: "All events must be tagged with the aggregateType const, never a literal.",
+		},
+		{
+			ID: ruleSingleProjection, Severity: SeverityError,
+			Title:     "single projection",
+			Rationale: "ADR-0004: exactly one projection; a second EventTypes method means a second projection.",
+		},
+		{
+			ID: ruleFoldPurity, Severity: SeverityError,
+			Title:     "fold is deterministic",
+			Rationale: "Folds replay history; time.Now/Since inside a fold makes replays diverge from live folds.",
+		},
+		{
+			ID: ruleProjectorReadOnly, Severity: SeverityError,
+			Title:     "projector never writes events",
+			Rationale: "The projector is read-side only; Append/Save inside it inverts the CQRS contract.",
+		},
+		{
+			ID: ruleWireValueLiterals, Severity: SeverityError,
+			Title:     "wire values stay in their const file",
+			Rationale: "Event/aggregate wire values must be referenced via consts; literals outside the declaring file drift.",
+		},
+		{
+			ID: ruleNewEventsTypeLiterals, Severity: SeverityError,
+			Title:     "NewEvents types use consts",
+			Rationale: "Inline event-type strings in NewEvents bypass the single source of truth C0002 establishes.",
 		},
 	}
 }
