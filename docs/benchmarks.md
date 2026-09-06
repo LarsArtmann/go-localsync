@@ -60,3 +60,26 @@ expose).
 `BenchmarkPipeline_Replay10kEvents` was fixed the same day to a true from-zero
 replay (checkpoints wiped per iteration); any number recorded before that fix
 measured stack open/close, not replay — do not compare across the fix.
+
+## 2026-09-06 evening re-run (post log-level / ETag changes)
+
+Question: did the v0.6 log-level control or the provider ETag cache shift any
+benchmarked path? **No — by code path and by numbers.** The log-level knob
+applies to loggers the benchmarks never construct (`WithLogLevel` /
+`CQRSConfig.LogLevel` are configuration-time, not in the measured loop); the
+ETag cache lives in `provider/github`, which contributes zero benchmarks to
+the protocol. The sync-span attributes added the same day sit behind the
+nil-tracer fast path the benchmarks take (unconfigured tracer → zero work).
+
+Protocol re-run on the same machine (evening, load average ~20 — this box's
+normal multi-user state; both the morning baseline and this run recorded
+under comparable load, so the deltas are apples-to-apples):
+
+- geomean 623µ → 632µ (**+1.4%**, i.e. noise; per-benchmark deltas split in
+  both directions: `DataItemFromPayload` −55%, `SQLiteReadModel_List` +44%,
+  upcast legacy −18%, everything else `~`).
+- The two cache-heavy SQLite read numbers remain the most load-sensitive
+  (`SQLiteReadModel_List` swung +44% between two same-day runs under load) —
+  consistent with the environment caveat above: disk+CPU contention dominate
+  these on a busy box, which is exactly why the protocol mandates benchstat
+  over single runs.

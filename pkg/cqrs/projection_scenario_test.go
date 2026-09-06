@@ -54,15 +54,15 @@ func mustScenarioEvent(
 
 func syncedPayloadFor(item *model.Item) ItemSyncedPayload {
 	return ItemSyncedPayload{
-		ItemID:       item.ID.String(),
-		Source:       item.Source.Get(),
-		SourceID:     item.SourceID.Get(),
-		Type:         item.Type.Get(),
-		Attributes:   item.Attributes,
-		ContentHash:  item.ContentHash.String(),
-		RawJSON:      []byte(`{}`),
-		CreatedAt:    item.CreatedAt.UnixNano(),
-		UpdatedAt:    item.UpdatedAt.UnixNano(),
+		ItemID:      item.ID.String(),
+		Source:      item.Source.Get(),
+		SourceID:    item.SourceID.Get(),
+		Type:        item.Type.Get(),
+		Attributes:  item.Attributes,
+		ContentHash: item.ContentHash.String(),
+		RawJSON:     []byte(`{}`),
+		CreatedAt:   item.CreatedAt.UnixNano(),
+		UpdatedAt:   item.UpdatedAt.UnixNano(),
 	}
 }
 

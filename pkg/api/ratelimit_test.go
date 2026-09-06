@@ -254,7 +254,9 @@ func TestRateLimit_APIKeyClientRecipe(t *testing.T) {
 func TestAPIKeyClient_ExtractorContract(t *testing.T) {
 	t.Parallel()
 
-	req := httptest.NewRequest(http.MethodPost, "/sync", nil)
+	req := httptest.NewRequestWithContext(
+		context.Background(), http.MethodPost, "/sync", nil,
+	)
 	if got := APIKeyClient(req); got != "" {
 		t.Errorf("no headers must extract empty, got %q", got)
 	}

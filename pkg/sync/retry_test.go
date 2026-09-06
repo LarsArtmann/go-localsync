@@ -169,6 +169,8 @@ func TestBackoff_EdgeConfigs(t *testing.T) {
 	t.Parallel()
 
 	t.Run("disabled initial backoff", func(t *testing.T) {
+		t.Parallel()
+
 		cfg := provider.RetryConfig{InitialBackoff: 0, MaxBackoff: time.Second}
 		if got := backoff(cfg, 3); got != 0 {
 			t.Errorf("zero InitialBackoff must wait 0, got %v", got)
@@ -176,6 +178,8 @@ func TestBackoff_EdgeConfigs(t *testing.T) {
 	})
 
 	t.Run("max below initial clamps", func(t *testing.T) {
+		t.Parallel()
+
 		cfg := provider.RetryConfig{InitialBackoff: time.Second, MaxBackoff: 10 * time.Millisecond}
 		for range 50 {
 			if got := backoff(cfg, 1); got > cfg.MaxBackoff {
@@ -185,6 +189,8 @@ func TestBackoff_EdgeConfigs(t *testing.T) {
 	})
 
 	t.Run("absurd attempt caps at max", func(t *testing.T) {
+		t.Parallel()
+
 		cfg := provider.RetryConfig{InitialBackoff: time.Millisecond, MaxBackoff: 50 * time.Millisecond}
 		for range 50 {
 			if got := backoff(cfg, 1000); got > cfg.MaxBackoff {
@@ -194,6 +200,8 @@ func TestBackoff_EdgeConfigs(t *testing.T) {
 	})
 
 	t.Run("zero max with positive initial yields zero", func(t *testing.T) {
+		t.Parallel()
+
 		cfg := provider.RetryConfig{InitialBackoff: time.Millisecond, MaxBackoff: 0}
 		if got := backoff(cfg, 2); got != 0 {
 			t.Errorf("MaxBackoff=0 means no waiting budget, got %v", got)

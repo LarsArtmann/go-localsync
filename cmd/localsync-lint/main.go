@@ -489,7 +489,7 @@ func emitSarif(w io.Writer, findings []cqrslint.Finding, opts outputOptions) {
 			continue
 		}
 
-		result := sarifResult{
+		result := sarifResult{ //nolint:exhaustruct_v5 // Locations/Suppressions are omitempty optionals
 			RuleID:  f.Rule,
 			Level:   sarifLevel(f.Severity),
 			Message: sarifMessage{Text: f.Message},
@@ -497,7 +497,7 @@ func emitSarif(w io.Writer, findings []cqrslint.Finding, opts outputOptions) {
 
 		if f.File != "" {
 			location := sarifLocation{
-				PhysicalLocation: sarifPhysicalLocation{
+				PhysicalLocation: sarifPhysicalLocation{ //nolint:exhaustruct_v5 // Region is an omitempty optional
 					ArtifactLocation: sarifArtifactLocation{URI: f.File},
 				},
 			}
