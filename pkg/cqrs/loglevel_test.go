@@ -1,11 +1,11 @@
 package cqrs
 
 import (
+	stderrors "errors"
 	"log/slog"
 	"testing"
 
 	"charm.land/log/v2"
-	stderrors "errors"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
