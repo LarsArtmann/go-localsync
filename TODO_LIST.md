@@ -153,34 +153,12 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
       ✅ DONE 2026-09-06: only ADR-0009 referenced the old name (intact by design); other ADRs already clean. Living docs audited — remaining mentions are rename-describing or historical (CHANGELOG v0.4.1 note, migration tables). `docs/go-cqrs-lite-gap-analysis.md` got a vocabulary-version banner + our two current-tense references updated; point-in-time status/planning/review docs deliberately untouched.
 - [x] **Re-run the full 100-point go-cqrs-lite deep-dive audit** to get the true post-M-plan adoption score (the ≥90 target was never re-scored; see [docs/research/2026-09-05_go-cqrs-lite-deep-dive.html](docs/research/2026-09-05_go-cqrs-lite-deep-dive.html)).
       ✅ DONE 2026-09-06: re-score appendix added to the report — **93/100** (was 78), stat cards recomputed (15/16 fully leveraged, 0 missed, 0 anti-patterns); every scored finding cluster closed with evidence links; residual deductions enumerated (eventtest upstream-blocked, testutil tier deliberate, DeriveStreamID divergence = decision). Note: the score is a stated-basis composite, not a fake-derived rubric number.
-- [ ] **`provider/github`: migrate to the v0.6 vocabulary after the v0.6.0 tag** — the nested module pins `go-localsync v0.5.0` (proven via standalone `GOWORK=off` build), so `SourceID`/`StreamID` adoption is a post-release follow-up, not a blocker for the v0.6.0 tag.
+- [ ] **`provider/github`: migrate to the v0.6 vocabulary after the v0.6.0 tag** — the nested module pins `go-localsync v0.5.0` (proven via standalone `GOWORK=off` build), so `SourceID`/`StreamID` adoption is a post-release follow-up, not a blocker for the v0.6.0 tag. Same re-pin window should also wire `FetchResult.CacheHits` from the ETag stats delta (core field shipped in v0.6.0; provider cannot compile against it until the pin moves).
 
 ### MEDIUM additions (harvested 2026-09-06 docs-health sweep from the [06:19](docs/status/archive/2026-09-06_06-19_V06-ENACTMENT-AND-TODO-SWEEP.md) + [08:05](docs/status/archive/2026-09-06_08-05_TODO-SWEEP-P2-DOCS-PROVIDER-ETAG-GAUNTLET.md) reports; verified open against code)
 
-- [ ] **Root-cause the pkg/cqrs `-race` flake** — one unexplained failure during the 08:05 gauntlet (no DATA RACE captured; likely a timing-sensitive wait under load). Captured-log stress loop (`-race -count=20`, full logs via tee) targeting the `waitForCount`-family timings. (`08:05` §d3/§f7)
 - [ ] **Structural vendorHash ↔ daemon decision** — the daemon's dep auto-refresh broke the flake twice on 2026-09-06 alone; owner call: stop daemon dep-refreshes, make the refresh re-pin, or accept CI-fail-fast-and-repin as the mode. (`08:05` §g3)
-- [ ] **`check-doc-counts.sh --fix` mode** — the checker knows old/new values; let it rewrite drifted claims locally (CI stays check-only). Four manual count-sync loops happened on 2026-09-06. (`08:05` §e3/§f9)
-- [ ] **Provider CI leg: add golangci-lint** — currently build + race only. (`08:05` §f13)
-- [ ] **Extend `check-doc-counts.sh` with a rule-count claim** — the catalog size (grep `Rules()` in `internal/cqrslint`) so "10 → 15 rules" text drift can't recur silently; it did exactly that when C0011 landed. (`06:25` §e6/§f33)
-- [ ] **Extract `run(args, stdout, stderr) int` in `cmd/localsync-lint`** — makes the main flow in-process-testable; push coverage >85% (`main()` stays process-tested). (`08:05` §b3/§f25)
-- [ ] **`/items` tombstone-visibility integration test** — `IncludeTombstoned` filter → `TombstoneInfo` on the wire, against the real SQLite read model. (`06:19` §f23)
-- [ ] **Verify huma OpenAPI schema for `ItemResponse.Tombstone`** — the 499/504 declarations are pinned; the Tombstone schema in generated `openapi.json` is not. (`06:19` §f24)
-- [ ] **`pkg/sync` `CQRSConfig.EventLogger` wiring test** — only the default path is covered. (`06:19` §f39)
-- [ ] **Retry/backoff edge tests** — jitter bounds + Retry-After override path in `pkg/sync`. (`08:05` §f30)
-- [ ] **Refresh `docs/benchmarks.md` numbers** post log-level/ETag changes (no expected impact; prove it). (`08:05` §f40)
-- [ ] **Local gitleaks + govulncheck parity run** — CI owns both; a local pass closes the confidence gap flagged by two sweeps. (`23:58` §b / `08:05` §f11)
 
 ### LOWER additions (same harvest; bounded polish)
 
-- [ ] **provider/github ETag docs polish**: `WithETagCache` usage snippet + config-table row + `ETagStats` example in the provider README; surface `ETagStats` in `FetchResult` (optional field); measure a page-1 304 probe in `FetchAll` revalidation (only if it pays). (`08:05` §b4/§f15-17)
-- [ ] **DLQ ops runbook** (list → replay → delete → purge) in README or `docs/`, plus a replay→delete doc example in the `dlq.go` package doc. (`06:19` §f27/§f41)
-- [ ] **`StreamID` cache growth note** — document that the sync.Map is bounded by the source×sourceID set (mirror the `lockSource` doc pattern). (`06:19` §f26)
-- [ ] **Per-client limiter recipe**: key from API key — document + test the exact key-extractor snippet. (`06:19` §f25)
-- [ ] **CONTRIBUTING.md**: add the log-level config snippets. (`08:05` §f39)
-- [ ] **Verify the gap-analysis banner's relative ADR link** renders from `docs/` (used `adr/0009-...`). (`08:05` §f43)
-- [ ] **`nix flake check --all-systems` triage doc** — which systems are intentionally unsupported and why the check omits them. (`08:05` §f41)
-- [ ] **Scenario DSL for projection tests** (currently decider-only, per the testing convention). (`08:05` §f29)
-- [ ] **CI cosmetics cluster**: job-summary step posting the three gate badges per run; eyeball the library-gate `::notice::` skip rendering in the Actions UI. (`08:05` §f10/§f12)
-- [ ] **Small hygiene cluster**: `errors_test.go` cosmetic `InvalidField("externalId")` literal → `sourceID`; `pkg/testutil/syncstore.go` doc comments post-`BatchOutcome`; `conflict_aware.go` `summary` locals → `batch`; reusable `blockingProvider`-style double in `pkg/testutil`; sweep for other hardcoded cross-layer identifiers (projectionName-style); consider `SyncResult.Batch` exposure in the `/sync` HTTP response; outcome attributes on the `localsync.sync` spans (parity with the batch span). (`06:19` §f37/§f38/§f42-44/§f49; `06:19` §f29)
 - [ ] **API niceties (post-v0.6, small)**: request-ID middleware + echo header; SQLite opt-in WAL/pragma knob on `CQRSConfig`; `/stats` source/type filter params (read model already supports filtering). (`08:05` §f32-34)
-- [ ] **buildflow local hygiene**: rebuild the stale preflight binary (`nix build . && nix run .#reinstall`), fix the gomod-freshness env (dead cache mount), `VACUUM` the 2.27 GB buildflow db. (`06:19` §f34)
