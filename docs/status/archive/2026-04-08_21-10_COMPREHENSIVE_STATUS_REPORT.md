@@ -310,3 +310,9 @@ c853f5f feat: add UpdatedAt field to provider.Item
 0f811db chore: regenerate sqlc code with source/updated_at columns
 e12d64a fix: add source/updated_at columns and change upsert to DO UPDATE SET
 ```
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. golangci-lint v2 install + toolchain alignment → long since resolved (devShell + CI pin v2.13.2 today); the codebase the §E/§F lists target was replaced by the CQRS rewrite ([ADR-0001](../../adr/0001-cqrs-adoption.md)). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

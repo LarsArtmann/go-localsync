@@ -186,3 +186,9 @@ Sorted by importance × urgency ÷ effort:
 **What I've tried:** `go clean -cache` followed by rebuild. This works but is slow.
 
 **What would help:** Knowing if there's a specific process to kill or a known workaround for cache corruption on macOS with `go.work` + multiple modules.
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: push/commit items were session-local; `Syncer.Sync` validation → shipped (boundary validation + `SyncOptions.Validate()` rejecting bad input with structured errors). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

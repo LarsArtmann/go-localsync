@@ -268,3 +268,9 @@ It's marked `Deprecated: Use CQRS command and query handlers instead` but still 
 ## Git Status
 
 All three repos: **clean working tree**, **all changes pushed to origin/master**.
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: SSE end-to-end tests, `convertTodoStatusChanged`, and the Storage.Delete contract all belong to the deleted pre-rewrite stack; live-update streaming remains an uncommitted ROADMAP idea. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

@@ -349,3 +349,9 @@ go-localsync (go 1.26.1)
 ---
 
 _End of Session 7 Status Report_
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: lint-pipeline and toolchain-cascade items resolved months ago (hermetic nix devShell, pinned CI toolchain); the rest targets pre-rewrite code. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

@@ -212,3 +212,9 @@ The vector clock implementation in `ConflictAwareSyncer` is currently **non-func
 | Build status                 | Clean                                                |
 | Lint status                  | Not run (golangci-lint v1/v2 mismatch)               |
 | Pre-commit hooks             | Bypassed (`--no-verify`)                             |
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: sqlc codegen, swallowed-error sites, and dead code from the direct-SQL era were all deleted by the CQRS rewrite ([ADR-0001](../../adr/0001-cqrs-adoption.md)); modern equivalents are lint-gated (golangci-lint clean, cqrslint invariants). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

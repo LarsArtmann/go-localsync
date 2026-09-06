@@ -81,7 +81,7 @@ e12d64a fix: add source/updated_at columns and change upsert to DO UPDATE SET
 
 ## Remaining Work (Future)
 
-1. **Rename `github_id` column to `source_id`** — Currently using `github_id` for generic IDs, which is confusing
-2. **Add integration test** — End-to-end test that fetches from GitHub, detects conflict, and resolves via LWW
-3. **Conflict resolution for multi-source** — When multiple providers sync the same item type
-4. **Pre-commit hook cleanup** — Several pre-existing failures in BuildFlow hook (library-policy, file-size warnings)
+1. ~~**Rename `github_id` column to `source_id`** — Currently using `github_id` for generic IDs, which is confusing~~ done (moot — the legacy SQL stack (github_id column and all) was deleted in the CQRS rewrite; the modern schema keys on (source, source_id))
+2. ~~**Add integration test** — End-to-end test that fetches from GitHub, detects conflict, and resolves via LWW~~ done (done in the modern engine — conflict paths are covered by decider scenario specs + SQLite integration tests)
+3. ~~**Conflict resolution for multi-source** — When multiple providers sync the same item type~~ **Won't implement — single-writer scope — multi-source conflict resolution is out of scope by ADR-0004.**
+4. ~~**Pre-commit hook cleanup** — Several pre-existing failures in BuildFlow hook (library-policy, file-size warnings)~~ done (done — pre-commit hooks formally disabled by recorded decision (2026-09-06))

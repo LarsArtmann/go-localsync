@@ -1,7 +1,7 @@
 # go-localsync v2.0: The Sync Application Framework
 
 **Date:** 2026-07-05
-**Status:** Proposal (revised) — awaiting decision
+**Status:** ~~Proposal (revised) — awaiting decision~~ **Dormant — decided against for now** (see the Resolution below and [ADR-0008](../adr/0008-pivot-to-sync-toolkit.md))
 **Author:** Analysis driven by three-consumer adoption study
 
 ---

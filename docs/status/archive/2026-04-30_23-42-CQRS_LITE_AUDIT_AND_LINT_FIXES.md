@@ -148,3 +148,9 @@ ok  github.com/larsartmann/go-localsync/pkg/types            0.007s
 | `pkg/sync/conflict_aware.go`                              | Fixed 1x noinlineerr warning                                                                                     |
 | `pkg/types/ids.go`                                        | Fixed stale doc comment (go-composable-business-types → go-branded-id); added go-cqrs-lite note; fixed goimports |
 | `docs/planning/2026-04-30_23-08-CQRS_LITE_INTEGRATION.md` | New: comprehensive audit + execution plan                                                                        |
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed and vindicated: the go-cqrs-lite dependency this report proposed became the adopted architecture one event later ([ADR-0001](../../adr/0001-cqrs-adoption.md), 2026-05-03 integration report); the audit's commit/doc items were session-local. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

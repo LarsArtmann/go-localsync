@@ -185,3 +185,9 @@ sql/queries/events.sql             |  3 ++-
 sql/schema/001_events.sql          |  2 +-
 10 files changed, 114 insertions(+), 36 deletions(-)
 ```
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: go-composable-business-types was never adopted (superseded by go-branded-id, ADR-0002 — see the classified plan in planning/archived/); the replace-directive removal became moot with the module restructure. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

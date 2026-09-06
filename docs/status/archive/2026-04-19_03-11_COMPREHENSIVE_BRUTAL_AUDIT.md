@@ -296,3 +296,9 @@ TODO_LIST.md | 14 ++++++++------
 | **Infrastructure** | 🔴 3/10    | Hooks broken, lint mismatch, toolchain mismatch |
 | **Code Quality**   | 🟢 7/10    | Clean code, but dead code and ghost systems     |
 | **Overall**        | 🟡 5.75/10 | Functional but architecturally dishonest        |
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: `ErrStorage` sentinel, `Item.Validate()` error mapping, and Phase-3 doc commits all predate the rewrite; today's equivalents are the go-error-family taxonomy (`pkg/errors`) and `InvalidField` boundary validation. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

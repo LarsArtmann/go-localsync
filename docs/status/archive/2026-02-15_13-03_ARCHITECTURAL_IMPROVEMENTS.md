@@ -304,3 +304,9 @@ CLI Flags → Syncer.Sync()
 
 **Report Generated:** 2026-02-15 13:03 UTC
 **Next Review:** After real API integration testing
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed (pre-CQRS, direct-SQL era). 'Real GitHub API sync verified (needs token)' → shipped as the env-gated live PAT smoke test in `provider/github` (2026-09-05); the remaining-work tables target code deleted by the 2026-05-03 rewrite ([ADR-0001](../../adr/0001-cqrs-adoption.md)). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

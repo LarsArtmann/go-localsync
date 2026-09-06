@@ -263,3 +263,9 @@ README.md                         ~30 (updated interface, examples, test counts)
 ROADMAP.md                        ~5 (updated test counts)
 docs/status/2026-04-19_03-11_COMPREHENSIVE_BRUTAL_AUDIT.md  +400 (full audit)
 ```
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: commit/verify/migrate items were session-local; the `conflict_aware.go` error migration target has since been rewritten twice (error-family + v0.6 vocabulary). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

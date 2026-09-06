@@ -222,3 +222,9 @@ to generic SDK for building local sync applications.
 ---
 
 _Generated: 2026-02-24 01:42 CET_
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. Provider documentation → shipped (README + provider/github module docs); GitLab provider → still an open ROADMAP idea (Second provider implementation); `github_id`→`source_id` rename → shipped in the v0.6 vocabulary (ADR-0009: the read model keys on source_id). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

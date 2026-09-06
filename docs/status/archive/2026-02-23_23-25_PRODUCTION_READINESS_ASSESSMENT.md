@@ -179,3 +179,9 @@ The architecture is clean, the code is well-structured, and the essential produc
 ---
 
 **Next Review:** After CLI integration tests and real API verification
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. CLI integration tests → moot (the CLI was removed in v0.2.0; the reference CLI consumer lives in github-local-sync); real-PAT verification → shipped (provider/github live smoke test); README examples → shipped (today's README carries a full Quick Start). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

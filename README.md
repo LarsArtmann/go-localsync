@@ -241,35 +241,35 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ## Features
 
-| Feature                 | Status  | Description                                                            |
-| ----------------------- | ------- | ---------------------------------------------------------------------- |
-| CQRS Stack              | ✅ Done | Event store, bus, decider repository, read model, projection           |
-| Decider Pattern         | ✅ Done | Pure Apply/DecideSync/DecideTombstone with SyncItemState               |
-| Incremental Sync        | ✅ Done | Only fetch new items since last sync — no duplicate data               |
-| Full Fidelity           | ✅ Done | Raw JSON stored for 100% data preservation                             |
-| Conflict Detection      | ✅ Done | ContentHash-first comparison (UpdatedAt/Type fallbacks), remote-wins   |
-| Branded IDs             | ✅ Done | Compile-time type-safe identifiers                                     |
-| SQLite Backend          | ✅ Done | SQLite event store + read model + snapshots + durable DLQ (no CGo)     |
-| No CGO                  | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                             |
-| Rate Limiting           | ✅ Done | Configurable rate limiting wired into sync flow                        |
-| Retry Logic             | ✅ Done | Exponential backoff + jitter, honors IsRetryable, optional Retry-After |
-| Snapshots               | ✅ Done | Aggregate state persistence caps replay cost across restarts           |
-| Correlation + Causation | ✅ Done | Unique correlation per run; every event names its causing command      |
-| Event Logging           | ✅ Done | Structured logging of all domain events via middleware                 |
-| Tombstone + Resurrect   | ✅ Done | Soft-delete keeps history; re-syncing a tombstoned item resurrects it  |
-| Upstream Reconciliation | ✅ Done | Tombstone items the provider stopped returning (opt-in per sync)       |
-| Per-source Locking      | ✅ Done | Concurrent syncs of one source are ordered; sources run in parallel    |
-| Schema Upcasting        | ✅ Done | V1/V2 events upcast to V3 at the store read boundary                   |
-| Event Export            | ✅ Done | `ExportEvents` (NDJSON) + `ExportEventsCSV` for the full journal       |
-| OTel Observability      | ✅ Done | Opt-in spans + metrics via `CQRSConfig.OTel`; `/metrics` hook in API   |
-| API Authentication      | ✅ Done | `WithAPIKey`: constant-time key check, 401 + OpenAPI security scheme   |
-| API Rate Limiting       | ✅ Done | `WithRateLimit`: token bucket on `POST /sync`, 429 + `Retry-After`     |
-| API Pagination          | ✅ Done | `X-Total-Count` + opaque `X-Next-Cursor` on `GET /items`               |
-| Tombstone Visibility    | ✅ Done | `GET /items?includeTombstoned=true` surfaces typed `TombstoneInfo`      |
-| Sync Outcome on the Wire | ✅ Done | `POST /sync` reports `synced`/`conflicts`/`tombstoned` per batch         |
-| Per-Client Rate Limiting | ✅ Done | `WithRateLimiter(perMinute, keyExtractor)` + canonical `APIKeyClient`   |
-| Conditional-Cache Stats  | ✅ Done | `FetchResult.CacheHits`: provider-agnostic ETag-304 hit count            |
-| Log Level Control       | ✅ Done | `CQRSConfig.LogLevel` + `api.WithLogLevel` quiet per-event INFO noise  |
+| Feature                  | Status  | Description                                                            |
+| ------------------------ | ------- | ---------------------------------------------------------------------- |
+| CQRS Stack               | ✅ Done | Event store, bus, decider repository, read model, projection           |
+| Decider Pattern          | ✅ Done | Pure Apply/DecideSync/DecideTombstone with SyncItemState               |
+| Incremental Sync         | ✅ Done | Only fetch new items since last sync — no duplicate data               |
+| Full Fidelity            | ✅ Done | Raw JSON stored for 100% data preservation                             |
+| Conflict Detection       | ✅ Done | ContentHash-first comparison (UpdatedAt/Type fallbacks), remote-wins   |
+| Branded IDs              | ✅ Done | Compile-time type-safe identifiers                                     |
+| SQLite Backend           | ✅ Done | SQLite event store + read model + snapshots + durable DLQ (no CGo)     |
+| No CGO                   | ✅ Done | Pure Go SQLite driver (modernc.org/sqlite)                             |
+| Rate Limiting            | ✅ Done | Configurable rate limiting wired into sync flow                        |
+| Retry Logic              | ✅ Done | Exponential backoff + jitter, honors IsRetryable, optional Retry-After |
+| Snapshots                | ✅ Done | Aggregate state persistence caps replay cost across restarts           |
+| Correlation + Causation  | ✅ Done | Unique correlation per run; every event names its causing command      |
+| Event Logging            | ✅ Done | Structured logging of all domain events via middleware                 |
+| Tombstone + Resurrect    | ✅ Done | Soft-delete keeps history; re-syncing a tombstoned item resurrects it  |
+| Upstream Reconciliation  | ✅ Done | Tombstone items the provider stopped returning (opt-in per sync)       |
+| Per-source Locking       | ✅ Done | Concurrent syncs of one source are ordered; sources run in parallel    |
+| Schema Upcasting         | ✅ Done | V1/V2 events upcast to V3 at the store read boundary                   |
+| Event Export             | ✅ Done | `ExportEvents` (NDJSON) + `ExportEventsCSV` for the full journal       |
+| OTel Observability       | ✅ Done | Opt-in spans + metrics via `CQRSConfig.OTel`; `/metrics` hook in API   |
+| API Authentication       | ✅ Done | `WithAPIKey`: constant-time key check, 401 + OpenAPI security scheme   |
+| API Rate Limiting        | ✅ Done | `WithRateLimit`: token bucket on `POST /sync`, 429 + `Retry-After`     |
+| API Pagination           | ✅ Done | `X-Total-Count` + opaque `X-Next-Cursor` on `GET /items`               |
+| Tombstone Visibility     | ✅ Done | `GET /items?includeTombstoned=true` surfaces typed `TombstoneInfo`     |
+| Sync Outcome on the Wire | ✅ Done | `POST /sync` reports `synced`/`conflicts`/`tombstoned` per batch       |
+| Per-Client Rate Limiting | ✅ Done | `WithRateLimiter(perMinute, keyExtractor)` + canonical `APIKeyClient`  |
+| Conditional-Cache Stats  | ✅ Done | `FetchResult.CacheHits`: provider-agnostic ETag-304 hit count          |
+| Log Level Control        | ✅ Done | `CQRSConfig.LogLevel` + `api.WithLogLevel` quiet per-event INFO noise  |
 
 ## Development
 

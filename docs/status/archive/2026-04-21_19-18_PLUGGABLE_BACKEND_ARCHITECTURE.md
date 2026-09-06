@@ -188,3 +188,9 @@ Arguments for separate module:
 | go-localsync  | `a5484ae` | Add pluggable storage backend architecture      |
 
 All three pushed to `origin/master`.
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. Pebble → removed; pluggable backends → shipped as the memory/sqlite `CQRSConfig.Backend` selection via go-cqrs-lite storage; NATS JetStream event store → out of scope (single-writer pull mirror, ADR-0004). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

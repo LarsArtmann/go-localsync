@@ -126,3 +126,9 @@ Still not addressed (cross-project or lower priority):
 | #10 | NATS JetStream backend                    | new feature           |
 | #14 | Prometheus → OpenTelemetry migration      | go-localfirst project |
 | #19 | Fix go-localsync CI blockers              | CI config             |
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: same cluster as the 04-21 report — SSE, event-type conversion, and dead-code items target the deleted SQL stack (see the CQRS rewrite, [ADR-0001](../../adr/0001-cqrs-adoption.md)). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

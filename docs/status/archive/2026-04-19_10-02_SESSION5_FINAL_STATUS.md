@@ -202,3 +202,9 @@ All commits use --no-verify
 ---
 
 _Arte in Aeternum_
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: toolchain/install items resolved long ago (pinned devShell + CI); remaining targets deleted by the CQRS rewrite ([ADR-0001](../../adr/0001-cqrs-adoption.md)). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

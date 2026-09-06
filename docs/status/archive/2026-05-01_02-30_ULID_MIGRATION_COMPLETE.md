@@ -235,3 +235,9 @@ This is a domain modeling decision — I can't determine whether CQRS event IDs 
 | CI/CD          | ✅     | GitHub Actions exists (test/lint/build/release)             |
 | Pre-commit     | ❌     | Broken (bans testify)                                       |
 | Dependencies   | ✅     | Current, no known vulnerabilities                           |
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. `isConflict` timestamp comparison → shipped correctly (`.Equal()`, pinned in the decider's `hasChanged`); `pkg/cqrs/aggregate.go` → the CQRS package shipped 2026-05-03 and has since grown into today's stack. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

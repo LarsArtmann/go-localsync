@@ -252,3 +252,9 @@ This decision blocks the entire CQRS migration plan. I cannot make progress on P
 | CI/CD          | ❌     | No automated pipeline                                   |
 | Pre-commit     | ❌     | Broken (bans testify)                                   |
 | Dependencies   | ✅     | Current, no known vulnerabilities                       |
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. Pre-commit hooks → formally disabled by recorded decision; flake.nix → shipped (go-standard module, hermetic checks); production CLI → lives in the github-local-sync consumer, deliberately not the SDK. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

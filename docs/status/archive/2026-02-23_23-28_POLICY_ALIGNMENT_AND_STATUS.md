@@ -172,3 +172,9 @@ These are addressable with minimal effort (~1 hour total). The project is **read
 ---
 
 **Next Review:** After CLI tests and file split completion
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. Splitting `pkg/github/client.go` → moot (package deleted by the de-githubify refactor, ADR-0007); CLI tests → moot (CLI removed v0.2.0); `pkg/event` tests → superseded by the go-cqrs-lite v4 event types. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

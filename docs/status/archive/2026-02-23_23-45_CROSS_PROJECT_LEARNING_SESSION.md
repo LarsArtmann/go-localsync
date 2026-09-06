@@ -293,3 +293,9 @@ Implementing these incrementally would move go-localsync from "good" to "excelle
 - `/Users/larsartmann/projects/go-composable-business-types/` - Source of patterns
 - `docs/status/2026-02-23_23-25_PRODUCTION_READINESS_ASSESSMENT.md` - Current state
 - `TODO_LIST.md` - Outstanding tasks
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed. Branded types (`pkg/types`) → shipped as `pkg/id` via go-branded-id (ADR-0002); `synced_at` on events → moot (events carry occurred_at + correlation metadata via go-cqrs-lite v4). No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).

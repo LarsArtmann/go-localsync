@@ -194,3 +194,9 @@ Within each priority: highest impact + lowest effort first.
 **Recommended execution order:** Phases 1→2→3→4→5→6→7→8→9→10→11
 
 Each step produces a self-contained commit with build + tests passing.
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Era-closed: this 63-step plan operated on the sqlc/SQL layer deleted by the 2026-05-03 CQRS rewrite ([ADR-0001](../../adr/0001-cqrs-adoption.md)); its conflict/stats concerns live on in the decider + read model, implemented fresh. 'Status: Awaiting approval' above is historical. No live items remain here; the living trackers are [TODO_LIST.md](../../../TODO_LIST.md) and [ROADMAP.md](../../../ROADMAP.md).
