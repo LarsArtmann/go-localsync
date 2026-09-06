@@ -82,6 +82,9 @@ Use `buildflow`; not executable, formally disabled (documented decision). Re-ena
 - **`go.mod` requires `go 1.26.7`** (matches the toolchain). Do not lower the directive to dodge toolchain lag; re-raise when deps require newer.
 - **dprint freezes snapshot docs**: `docs/status/**` and `docs/planning/**` are excluded in `dprint.json` (point-in-time records stay as written); living docs stay formatted. Run `dprint fmt` after table edits in living docs.
 - **Golangci pins + CI versions must match the devShell** (golangci-lint v2.13.2, dprint 0.56.1, actionlint 1.7.12) — never `latest`.
+- **`nolint` needs the versioned linter name** in non-test files (`//nolint:exhaustruct_v5`, not `…:exhaustruct`) — the unversioned name silently matches nothing under golangci-lint v2.13.
+- **`golangci-lint fmt` and `tagalign` disagree** on tag order for wide struct tags — the repo pattern is a struct-level `//nolint:tagalign` on the offending declaration.
+- **Run the exact CI command locally before it enters a workflow** — especially `go run <tool>@<version>` invocations: they compile the tool from source, so the devShell binary passing does not prove the pinned `go run` will (build tags, toolchain quirks, compile time inside the job timeout).
 
 ## Testing
 

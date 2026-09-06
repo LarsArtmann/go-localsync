@@ -265,6 +265,10 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 | API Authentication      | ✅ Done | `WithAPIKey`: constant-time key check, 401 + OpenAPI security scheme   |
 | API Rate Limiting       | ✅ Done | `WithRateLimit`: token bucket on `POST /sync`, 429 + `Retry-After`     |
 | API Pagination          | ✅ Done | `X-Total-Count` + opaque `X-Next-Cursor` on `GET /items`               |
+| Tombstone Visibility    | ✅ Done | `GET /items?includeTombstoned=true` surfaces typed `TombstoneInfo`      |
+| Sync Outcome on the Wire | ✅ Done | `POST /sync` reports `synced`/`conflicts`/`tombstoned` per batch         |
+| Per-Client Rate Limiting | ✅ Done | `WithRateLimiter(perMinute, keyExtractor)` + canonical `APIKeyClient`   |
+| Conditional-Cache Stats  | ✅ Done | `FetchResult.CacheHits`: provider-agnostic ETag-304 hit count            |
 | Log Level Control       | ✅ Done | `CQRSConfig.LogLevel` + `api.WithLogLevel` quiet per-event INFO noise  |
 
 ## Development
@@ -305,17 +309,17 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 
 | Package              | Tests | Coverage | Description                                                             |
 | -------------------- | ----- | -------- | ----------------------------------------------------------------------- |
-| `pkg/cqrs`           | 157   | 85.1%    | Decider, ReadModel, Projection, Stack, SQLite RM, upcasting, regression |
-| `pkg/sync`           | 36    | 87.7%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
-| `pkg/api`            | 35    | 95.2%    | Server, routes, auth, rate limit, pagination, error mapping             |
+| `pkg/cqrs`           | 168   | 85.4%    | Decider, ReadModel, Projection, Stack, SQLite RM, upcasting, regression |
+| `pkg/sync`           | 42    | 90.0%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
+| `pkg/api`            | 42    | 96.6%    | Server, routes, auth, rate limit, pagination, error mapping             |
 | `pkg/errors`         | 16    | 92.9%    | Sentinel errors, wrapping, classification, IsRetryable, HTTPStatus      |
 | `pkg/id`             | 15    | 100.0%   | ID construction, roundtrip, zero, equal, ContentHash                    |
 | `pkg/data/model`     | 18    | 100.0%   | Item, Key, Validate, ItemFilter, Tombstone                              |
 | `pkg/crdt`           | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/data/schema`    | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
 | `pkg/provider`       | 2     | 92.3%    | Item validation                                                         |
-| `internal/cqrslint`  | 69    | 93.2%    | 15 architectural checks (C0001–C0015), suppression, rules catalog       |
-| `cmd/localsync-lint` | 33    | 64.8%    | Exit-code contract, summary/`--json` output, fixture round trip         |
+| `internal/cqrslint`  | 69    | 94.1%    | 15 architectural checks (C0001–C0015), suppression, rules catalog       |
+| `cmd/localsync-lint` | 47    | 95.5%    | Exit-code contract, summary/`--json`/SARIF output, fixture round trip   |
 
 ## Related Projects
 
