@@ -86,7 +86,7 @@ Every implementable item on TODO_LIST.md is now done or explicitly owner-gated �
 1. ~~Commit/push the vendorHash re-pin (daemon) and watch the next CI run to green — `gh run list` until `nix` + `lint` legs pass.~~ done (committed as 434ba02; CI run 34015593461 green (test/lint/nix all pass))
 2. ~~Owner: decide v0.6.0 tag timing (§g1) — everything (migration docs, verify-release.sh, gauntlet) is staged; tag → run `scripts/verify-release.sh v0.6.0` → GitHub Release → proxy/pkg.go.dev checks.~~ done (routed to TODO_LIST Release path (owner-gated tag timing))
 3. ~~Owner: `SSH_PRIVATE_KEY` secret vs make `go-finding` public (§g2) — activates the library cqrs-lint CI leg; the skip-path is CI-proven.~~ done (routed to TODO_LIST (owner-gated))
-4. Re-run the verify-release.sh smoke test post-re-pin to confirm the docs-consistency leg goes green end-to-end.
+4. ~~Re-run the verify-release.sh smoke test post-re-pin to confirm the docs-consistency leg goes green end-to-end.~~ done (done — full smoke re-run green end-to-end (correct form: verify-release.sh v0.5.0 v0.1.0; the provider arg takes the module version, not the git tag))
 5. ~~Post-tag: provider/github v0.6 vocabulary migration (re-pin parent to v0.6.0, `ExternalID`→`SourceID` etc., standalone suite green, tag `provider/github/v0.2.0`).~~ done (routed to TODO_LIST (post-tag provider migration))
 6. ~~Post-tag: strike the v0.6 migration shims' TODO notes and plan the v0.7 shim-removal window (deprecated `ExternalID`/`AggregateID`/`GetStats`).~~ done (routed to ROADMAP Open Question 6 (v0.7 shim-removal window))
 
