@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"charm.land/log/v2"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/larsartmann/go-localsync/pkg/crdt"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"

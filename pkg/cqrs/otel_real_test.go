@@ -119,8 +119,8 @@ func TestOTel_RealMeter_ProjectionInstruments(t *testing.T) {
 }
 
 // TestOTel_RealSpan_SyncItems proves the batch span is a real recorded span:
-// name, internal kind, and ended status after a sync run through a stack
-// wired with the real bundle.
+// name, internal kind, ended status, and the outcome attributes recorded by
+// withBatchSpan after a sync run through a stack wired with the real bundle.
 func TestOTel_RealSpan_SyncItems(t *testing.T) {
 	t.Parallel()
 
@@ -157,4 +157,82 @@ func TestOTel_RealSpan_SyncItems(t *testing.T) {
 	if syncItemsSpan.SpanKind() != trace.SpanKindInternal {
 		t.Errorf("sync_items span kind = %v, want internal", syncItemsSpan.SpanKind())
 	}
+
+	attrs := map[string]int64{}
+	for _, kv := range syncItemsSpan.Attributes() {
+		if v, ok := kv.Value.AsInt64(); ok {
+			attrs[string(kv.Key)] = v
+		}
+	}
+
+	if attrs["localsync.synced"] != 1 {
+		t.Errorf("span attribute localsync.synced = %d, want 1", attrs["localsync.synced"])
+	}
+
+	if attrs["localsync.errors"] != 0 {
+		t.Errorf("span attribute localsync.errors = %d, want 0", attrs["localsync.errors"])
+	}
+}
+
+// TestOTel_RealMeter_CommandAndEventWiring proves the dispatcher and bus
+// middleware chains are actually wired to the bundle's meter: a dispatched
+// command and its emitted event must increment cqrs.operation.count with the
+// library's kind attribute — the noop bundle cannot prove this.
+func TestOTel_RealMeter_CommandAndEventWiring(t *testing.T) {
+	t.Parallel()
+
+	bundle, reader, _ := newRealTelemetry(t)
+
+	stack, err := NewCQRSStack(CQRSConfig{Backend: "memory", OTel: bundle})
+	testutil.MustNoError(t, err)
+	defer func() { _ = stack.Close() }()
+
+	ctx := context.Background()
+	testutil.MustNoError(t, stack.SyncItem(ctx, testItem("otel-real-meter", "PushEvent")))
+
+	waitForCount(t, stack, ctx, 1)
+
+	kinds := collectOperationKinds(t, reader)
+
+	if !kinds["command"] {
+		t.Error("cqrs.operation.count with cqrs.message.kind=command was not recorded")
+	}
+
+	if !kinds["event"] {
+		t.Error("cqrs.operation.count with cqrs.message.kind=event was not recorded")
+	}
+}
+
+// collectOperationKinds scans cqrs.operation.count datapoints and reports
+// which cqrs.message.kind values were observed.
+func collectOperationKinds(t *testing.T, reader *sdkmetric.ManualReader) map[string]bool {
+	t.Helper()
+
+	kinds := map[string]bool{}
+
+	var data sdkmetricdata.ResourceMetrics
+	testutil.MustNoError(t, reader.Collect(context.Background(), &data))
+
+	for _, scope := range data.ScopeMetrics {
+		for _, metric := range scope.Metrics {
+			if metric.Name != "cqrs.operation.count" {
+				continue
+			}
+
+			sum, ok := metric.Data.(sdkmetricdata.Sum[int64])
+			if !ok {
+				continue
+			}
+
+			for _, dp := range sum.DataPoints {
+				for _, kv := range dp.Attributes.ToSlice() {
+					if string(kv.Key) == "cqrs.message.kind" {
+						kinds[kv.Value.AsString()] = true
+					}
+				}
+			}
+		}
+	}
+
+	return kinds
 }

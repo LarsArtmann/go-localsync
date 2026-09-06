@@ -28,6 +28,16 @@ func newSlogLogger() *slog.Logger {
 	return slog.New(log.Default())
 }
 
+// pickEventLogger resolves the event-logging sink: the config's explicit
+// logger when set, otherwise the charm log.Default() default.
+func pickEventLogger(cfg CQRSConfig) *slog.Logger {
+	if cfg.EventLogger != nil {
+		return cfg.EventLogger
+	}
+
+	return newSlogLogger()
+}
+
 const (
 	backendMemory  = "memory"
 	backendSQLite  = "sqlite"
@@ -46,6 +56,13 @@ type CQRSConfig struct {
 	// performance unchanged. Build one with middleware.NewOTelBundle from
 	// your own TracerProvider/MeterProvider.
 	OTel *middleware.OTelBundle
+	// EventLogger receives the structured log line for every persisted domain
+	// event. Nil (default) wires charm log.Default(), which emits one INFO per
+	// event — noisy in production. Consumers silence or reroute it by passing
+	// their own *slog.Logger: a level-filtered handler (e.g.
+	// slog.NewLogLogger / LevelFilterHandler above INFO), a file, or
+	// slog.DiscardHandler to turn event logging off entirely.
+	EventLogger *slog.Logger
 }
 
 // Validate rejects structurally impossible configs early (at construction
@@ -132,7 +149,7 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 	proj := newProjector(rm)
 
 	if err = sr.bus.Use(
-		middleware.EventLogging(newSlogLogger()),
+		middleware.EventLogging(pickEventLogger(cfg)),
 	); err != nil {
 		return nil, pkgerrors.Wrap(err, "wire event logging middleware")
 	}

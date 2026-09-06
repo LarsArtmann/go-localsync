@@ -11,7 +11,9 @@ import (
 )
 
 // withBatchSpan opens the localsync.sync_items span around a batch run when
-// telemetry is enabled and injects the span context into run.
+// telemetry is enabled, injects the span context into run, and records the
+// batch outcome as span attributes (synced/conflicts/errors) so a trace
+// consumer sees what the run produced without opening the store.
 func withBatchSpan(
 	ctx context.Context,
 	bundle *middleware.OTelBundle,
@@ -22,7 +24,15 @@ func withBatchSpan(
 	)
 	defer span.End()
 
-	return run(ctx)
+	batch := run(ctx)
+
+	span.SetAttributes(
+		cqrsotel.AttrInt64("localsync.synced", int64(batch.Synced)),
+		cqrsotel.AttrInt64("localsync.conflicts", int64(batch.Conflicts)),
+		cqrsotel.AttrInt64("localsync.errors", int64(batch.Errors)),
+	)
+
+	return batch
 }
 
 // projectionMetrics adapts a CQRSConfig.OTel bundle's metric instruments to
