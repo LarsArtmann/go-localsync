@@ -85,7 +85,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 ## 🟢 LOWER PRIORITY
 
 - [ ] ~~**Add `govalid` struct tags**~~ — pivoted 2026-09-05: govalid is a buildflow-internal generator, not a proxy-resolvable module; real `Validate()` methods were implemented instead (`SyncOptions.Validate`, `CQRSConfig.Validate`, `ItemFilter.Validate`). Reopen only if govalid is ever published with a stable tag format.
-- [ ] **cqrs-lint CLI surface cluster** (aggregate; from [2026-08-02 report](docs/status/archive/2026-08-02_20-31_CQRS-LINT_CLI_ENHANCEMENT.md) §f): `--version`/`--quiet`/`--format=github`, `--rules`/`--exclude-rules`, `--no-suppress`, `--explain`, block + range (`ignore-start`/`ignore-end`) directives, SARIF output, dedicated directives doc page, hand-rolled `--json` → `encoding/json`, per-rule suppressed counts in `--verbose`, new rules C0011+.
+- [x] **cqrs-lint CLI surface cluster** (aggregate; from [2026-08-02 report](docs/status/archive/2026-08-02_20-31_CQRS-LINT_CLI_ENHANCEMENT.md) §f): `--version`/`--quiet`/`--format=github`, `--rules`/`--exclude-rules`, `--no-suppress`, `--explain`, block + range (`ignore-start`/`ignore-end`) directives, SARIF output, dedicated directives doc page, hand-rolled `--json` → `encoding/json`, per-rule suppressed counts in `--verbose`, new rules C0011+.
+  ✅ DONE 2026-09-06 (CLI phase 1).
 - [ ] **API hardening polish**: `X-RateLimit-Limit`/`-Remaining` headers on 429; optional per-client rate limiting (`WithRateLimiter(keyExtractor)`); document the global-vs-per-client scope; structured log level control (per-event INFO is noisy in prod).
 - [ ] **OTel span for `Syncer.Sync`** in `pkg/sync` (currently only the CQRS batch path spans).
 - [ ] **`provider/github`: ETag / conditional requests** for incremental revalidation (flagged by [performance review](docs/research/performance-review.html)).

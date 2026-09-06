@@ -34,6 +34,10 @@ import (
 const (
 	defaultTarget = "pkg/cqrs"
 	cliVersion    = "0.1.0"
+
+	formatText   = "text"
+	formatJSON   = "json"
+	formatGitHub = "github"
 )
 
 func main() {
@@ -66,11 +70,11 @@ func main() {
 
 	resolvedFormat := *format
 	if *jsonOut {
-		resolvedFormat = "json"
+		resolvedFormat = formatJSON
 	}
 
 	switch resolvedFormat {
-	case "text", "json", "github":
+	case formatText, formatJSON, formatGitHub:
 		// valid
 	default:
 		fmt.Fprintf(os.Stderr, "cqrs-lint: unknown -format %q (want text, json, or github)\n", resolvedFormat)
@@ -81,7 +85,7 @@ func main() {
 		strict:         *strict || *failOnWarning,
 		verbose:        *verbose,
 		showSuppressed: *showSuppressed,
-		jsonOut:        resolvedFormat == "json",
+		jsonOut:        resolvedFormat == formatJSON,
 		quiet:          *quiet,
 		format:         resolvedFormat,
 	}

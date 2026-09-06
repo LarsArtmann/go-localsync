@@ -9,6 +9,8 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
+- **cqrs-lint CLI phase 1** — `--version`, `--quiet` (exit-code-only operation for scripts), `--format=github` (GitHub Actions `::error`/`::warning` annotations with file/line so findings surface inline in PRs), per-rule suppressed counts in `--verbose` (stale-directive detection), and `--json` findings now emitted through `encoding/json` against an explicitly tagged schema struct (keys unchanged).
+
 - **`.buildflow.yml`** — buildflow full mode is green again (61 success / 0 failed, ending a three-session deferral): the nix steps that auto-repair hashes by evaluating every flake-check system are skipped locally (aarch64-darwin is unbuildable without a darwin builder); `nix flake check` remains the gate.
 
 - **Single source of truth for attribute keys** — the cqrs adapter's duplicated `legacy*` key constants are deleted; `upcastLegacyAttributes` now writes `model.Attr*` keys directly, and a round-trip test proves adapter-written attributes read back through the model's typed accessors.
