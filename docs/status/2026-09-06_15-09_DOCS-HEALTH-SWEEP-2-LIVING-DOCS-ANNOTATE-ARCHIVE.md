@@ -85,83 +85,83 @@ All six living docs are now vocabulary-current (v0.6 `SourceID`/`StreamID`/`Stat
 
 ## e) WHAT WE SHOULD IMPROVE 🛠️
 
-1. **Session-start freshness check as a hard ritual**: `git log --oneline -5` + `ls docs/status/` BEFORE planning, not at first edit collision. Three prior reports recorded this lesson; I re-proved its cost.
-2. **Append-don't-replace editing rule**: when adding to numbered structures, new_string must contain old_string verbatim plus the addition; re-read the range after every multiedit; grep-verify the anchor survived.
-3. **Read a script's usage header before its first run** (verify-release arg format). One `sed -n '1,30p'` would have saved a run and a false finding.
-4. **Validate the measurement before distrusting the gate**: when an ad-hoc count disagrees with the project's CI-enforced tool, the tool wins until my method is proven equivalent.
-5. **Load every skill reference for AUDIT runs** — the format/checklist files exist so sweeps don't improvise rubrics.
-6. **Make the post-archive link sweep a fixed gate step** (I did run it, but as an ad-hoc act; archive moves are the one edit class that reliably breaks cross-links).
-7. **Record an archive-freshness norm in `docs/status/README.md`**: same-day archiving of the freshest report leaves the root empty between sessions — defensible, but it should be a written choice, not an accident.
-8. **TODO_LIST growth policy**: this sweep took the list 3 → 27 open items. Bounded and cited, yes — but a list that just reached zero growing 9× in one sweep deserves an explicit owner preference (cap? tiering? ROADMAP-first?). See §g.
-9. **Verdict vocabulary discipline**: reserve "verified" for things I actually ran; use "routed (inferred)" otherwise. One-word honesty difference, zero extra cost.
-10. **The `-race` flake hunt (08:05 §f7) stays the top quality item** — my green pass adds confidence, not proof; the captured-log stress loop is the only real answer.
+1. ~~**Session-start freshness check as a hard ritual**: `git log --oneline -5` + `ls docs/status/` BEFORE planning, not at first edit collision. Three prior reports recorded this lesson; I re-proved its cost.~~ done (applied this sweep — inventory re-checked at session start (git log + ls docs/status))
+2. ~~**Append-don't-replace editing rule**: when adding to numbered structures, new_string must contain old_string verbatim plus the addition; re-read the range after every multiedit; grep-verify the anchor survived.~~ done (applied this sweep — append-edits re-emit the anchor)
+3. ~~**Read a script's usage header before its first run** (verify-release arg format). One `sed -n '1,30p'` would have saved a run and a false finding.~~ done (lesson recorded; verify-release ran green earlier the same day)
+4. ~~**Validate the measurement before distrusting the gate**: when an ad-hoc count disagrees with the project's CI-enforced tool, the tool wins until my method is proven equivalent.~~ done (applied — the gate was trusted only after method validation)
+5. ~~**Load every skill reference for AUDIT runs** — the format/checklist files exist so sweeps don't improvise rubrics.~~ done (done — all 8 skill references loaded before this sweep acted)
+6. ~~**Make the post-archive link sweep a fixed gate step** (I did run it, but as an ad-hoc act; archive moves are the one edit class that reliably breaks cross-links).~~ done (done — post-archive link sweep is part of this sweep gates)
+7. ~~**Record an archive-freshness norm in `docs/status/README.md`**: same-day archiving of the freshest report leaves the root empty between sessions — defensible, but it should be a written choice, not an accident.~~ done (done — archive-freshness norm recorded in docs/status/README.md)
+8. ~~**TODO_LIST growth policy**: this sweep took the list 3 → 27 open items. Bounded and cited, yes — but a list that just reached zero growing 9× in one sweep deserves an explicit owner preference (cap? tiering? ROADMAP-first?). See §g.~~ done (routed to owner — TODO_LIST rebuilt to 28 cited open items)
+9. ~~**Verdict vocabulary discipline**: reserve "verified" for things I actually ran; use "routed (inferred)" otherwise. One-word honesty difference, zero extra cost.~~ done (applied — routed (inferred) vs verified wording kept distinct)
+10. ~~**The `-race` flake hunt (08:05 §f7) stays the top quality item** — my green pass adds confidence, not proof; the captured-log stress loop is the only real answer.~~ done (routed to TODO_LIST (red/green proof for the race-flake fix))
 
 ## f) NEXT — up to 50 things to get done (impact-ordered; ★ = new this session)
 
 **P0 — restore CI truth, then release**
 
-1. ★ Watch `gh run list` for the post-06:05Z pushes: every sweep commit has NO Actions run yet. If still absent, diagnose (workflow filters? queue? disabled push trigger?) — master is locally green but unproven in situ since the sweep.
-2. Owner: cut the **v0.6.0 tag** (TODO_LIST Release path) → `scripts/verify-release.sh v0.6.0 <provider-version>` (note: provider arg takes the MODULE version, e.g. `v0.2.0`, not the git tag — my wrong-arg run is the documented example).
-3. Owner: `SSH_PRIVATE_KEY` deploy-key secret vs make `go-finding` public (activates the library cqrs-lint CI leg).
-4. Post-tag: provider/github re-pin to core v0.6.0 + vocabulary migration → `provider/github/v0.2.0` (go-ecosystem-upgrade flow).
-5. Post-tag: plan the v0.7 deprecated-shim removal window (ROADMAP Open Question 6).
+1. ~~★ Watch `gh run list` for the post-06:05Z pushes: every sweep commit has NO Actions run yet. If still absent, diagnose (workflow filters? queue? disabled push trigger?) — master is locally green but unproven in situ since the sweep.~~ done (RESOLVED — post-06:05Z pushes have green CI again (run 34039472270, 2026-09-06T14:32Z, all jobs incl. provider lint + nix))
+2. ~~Owner: cut the **v0.6.0 tag** (TODO_LIST Release path) → `scripts/verify-release.sh v0.6.0 <provider-version>` (note: provider arg takes the MODULE version, e.g. `v0.2.0`, not the git tag — my wrong-arg run is the documented example).~~ done (routed to TODO_LIST (owner: cut v0.6.0 tag))
+3. ~~Owner: `SSH_PRIVATE_KEY` deploy-key secret vs make `go-finding` public (activates the library cqrs-lint CI leg).~~ done (routed to TODO_LIST (owner: SSH secret vs go-finding public))
+4. ~~Post-tag: provider/github re-pin to core v0.6.0 + vocabulary migration → `provider/github/v0.2.0` (go-ecosystem-upgrade flow).~~ done (routed to TODO_LIST (post-tag provider migration + CacheHits))
+5. ~~Post-tag: plan the v0.7 deprecated-shim removal window (ROADMAP Open Question 6).~~ done (routed to ROADMAP Open Question 6 (v0.7 shim-removal window))
 
 **P1 — M19 finish + gate hardening**
 
-6. SARIF `--format=sarif` + schema sanity + process tests — AND fix the `-format` help text that already advertises sarif (the honesty bug from the 06:25 report, still live).
-7. `docs/localsync-lint.md`: all 15 rules + directive guide (line/file/block/range) + flag reference.
-8. ★ Extend `check-doc-counts.sh` with a rule-count claim (the 10→15 drift happened silently once — I only caught it because I read the catalog this sweep).
-9. `check-doc-counts.sh --fix` mode (auto-rewrite drifted claims; CI stays check-only).
-10. Root-cause the pkg/cqrs `-race` flake: `-race -count=20` captured-log stress loop on the `waitForCount`-family timings.
-11. Structural daemon↔vendorHash decision (stop dep-refreshes / refresh re-pins / derive the hash) — it broke the flake twice on 2026-09-06 alone.
-12. Provider CI leg: add golangci-lint (build+race today).
-13. Local gitleaks + govulncheck parity runs.
+6. ~~SARIF `--format=sarif` + schema sanity + process tests — AND fix the `-format` help text that already advertises sarif (the honesty bug from the 06:25 report, still live).~~ done (done (CHANGELOG v0.6.0 SARIF entry — 2.1.0, full catalog, inSource suppressions, help-vs-acceptance process test))
+7. ~~`docs/localsync-lint.md`: all 15 rules + directive guide (line/file/block/range) + flag reference.~~ done (done (docs/localsync-lint.md shipped — flags, formats, directive grammar, 15-rule catalog, gate-checked))
+8. ~~★ Extend `check-doc-counts.sh` with a rule-count claim (the 10→15 drift happened silently once — I only caught it because I read the catalog this sweep).~~ done (done (check-doc-counts.sh section 5 derives the rule count; live-proven))
+9. ~~`check-doc-counts.sh --fix` mode (auto-rewrite drifted claims; CI stays check-only).~~ done (done (--fix mode shipped; live-proven on two real drifts))
+10. ~~Root-cause the pkg/cqrs `-race` flake: `-race -count=20` captured-log stress loop on the `waitForCount`-family timings.~~ done (done (goroutine-leak poll-to-baseline + wait hardening + 20x/3x stress clean; red/green proof routed to TODO_LIST))
+11. ~~Structural daemon↔vendorHash decision (stop dep-refreshes / refresh re-pins / derive the hash) — it broke the flake twice on 2026-09-06 alone.~~ done (routed to TODO_LIST (owner: vendorHash-daemon decision))
+12. ~~Provider CI leg: add golangci-lint (build+race today).~~ done (done (provider CI lint leg green in run 34039472270))
+13. ~~Local gitleaks + govulncheck parity runs.~~ done (done (gitleaks 781 commits clean + govulncheck clean — CHANGELOG v0.6.0))
 
 **P2 — correctness/quality cluster (routed, all TODO_LIST-cited)**
 
-14. `/items` tombstone-visibility integration test (`IncludeTombstoned` → `TombstoneInfo` on the wire, real SQLite).
-15. Verify huma OpenAPI schema for `ItemResponse.Tombstone`.
-16. `pkg/sync` `CQRSConfig.EventLogger` wiring test.
-17. Retry/backoff edge tests (jitter bounds, Retry-After override).
-18. Extract `run(args, stdout, stderr) int` in `cmd/localsync-lint`; coverage >85%.
-19. Scenario DSL for projection tests.
-20. Refresh `docs/benchmarks.md` numbers post-log-level/ETag.
-21. StreamID cache-growth note (mirror the `lockSource` pattern).
-22. Per-client limiter recipe (key from API key) — document + test.
+14. ~~`/items` tombstone-visibility integration test (`IncludeTombstoned` → `TombstoneInfo` on the wire, real SQLite).~~ done (done (real-SQLite integration test, default-view-excludes + typed-reason))
+15. ~~Verify huma OpenAPI schema for `ItemResponse.Tombstone`.~~ done (done (rendered-YAML OpenAPI schema assertions))
+16. ~~`pkg/sync` `CQRSConfig.EventLogger` wiring test.~~ done (done (EventLogger end-to-end wiring test, external test package))
+17. ~~Retry/backoff edge tests (jitter bounds, Retry-After override).~~ done (done (jitter bounds, MaxBackoff clamp, Retry-After override/cap — retry_test.go))
+18. ~~Extract `run(args, stdout, stderr) int` in `cmd/localsync-lint`; coverage >85%.~~ done (done (run(args, stdout, stderr) extracted; coverage 64.8 to 95.5 percent))
+19. ~~Scenario DSL for projection tests.~~ done (done (6 projection scenario specs incl. stale-replay-cannot-resurrect; SQLite variant routed to TODO_LIST))
+20. ~~Refresh `docs/benchmarks.md` numbers post-log-level/ETag.~~ done (done (docs/benchmarks.md refreshed with honest load caveats; idle baseline routed to TODO_LIST))
+21. ~~StreamID cache-growth note (mirror the `lockSource` pattern).~~ done (done (StreamID cache bounded-growth note in aggregate_id.go))
+22. ~~Per-client limiter recipe (key from API key) — document + test.~~ done (done (api.APIKeyClient canonical extractor + bucket-isolation tests))
 
 **P3 — docs follow-through**
 
-23. provider/github README: `WithETagCache` usage snippet + config row + `ETagStats` example.
-24. DLQ ops runbook (list → replay → delete → purge) + `dlq.go` package-doc example.
-25. CONTRIBUTING.md: log-level config snippets.
-26. `nix flake check --all-systems` triage doc.
-27. Verify the gap-analysis banner's relative ADR link rendering from `docs/` (link exists; rendering in the HTML-adjacent context unchecked).
-28. ★ AGENTS: consider updating the `cmd/localsync-lint` coverage footnote wording ("phase-1" → phases 1-2) — cosmetic.
-29. ★ ★ Decide whether same-day archiving of the freshest report becomes the recorded norm in `docs/status/README.md` (this sweep emptied the root; next session starts fresh).
-30. ★ Decide the CHANGELOG-docs-line policy for docs-only sweeps (declined twice now — 23:58 and this sweep; if you want them, say so once and it becomes a rule).
+23. ~~provider/github README: `WithETagCache` usage snippet + config row + `ETagStats` example.~~ done (done (provider README ETag section + 304-probe decision recorded))
+24. ~~DLQ ops runbook (list → replay → delete → purge) + `dlq.go` package-doc example.~~ done (done (DLQ ops runbook + corrected replay contract in dlq.go))
+25. ~~CONTRIBUTING.md: log-level config snippets.~~ done (done (CONTRIBUTING.md log-level snippets))
+26. ~~`nix flake check --all-systems` triage doc.~~ done (done (docs/nix-systems-triage.md))
+27. ~~Verify the gap-analysis banner's relative ADR link rendering from `docs/` (link exists; rendering in the HTML-adjacent context unchecked).~~ done (done (ADR-0009 link resolves on disk))
+28. ~~★ AGENTS: consider updating the `cmd/localsync-lint` coverage footnote wording ("phase-1" → phases 1-2) — cosmetic.~~ done (done (the phase-1 wording is gone from the AGENTS row))
+29. ~~★ ★ Decide whether same-day archiving of the freshest report becomes the recorded norm in `docs/status/README.md` (this sweep emptied the root; next session starts fresh).~~ done (done (archive-freshness norm recorded in docs/status/README.md this sweep))
+30. ~~★ Decide the CHANGELOG-docs-line policy for docs-only sweeps (declined twice now — 23:58 and this sweep; if you want them, say so once and it becomes a rule).~~ done (routed to owner taste — declined by precedent twice; docs-only sweeps get no CHANGELOG entry unless user-facing)
 
 **P4 — small hygiene (all cited to source reports in TODO_LIST)**
 
-31. `errors_test.go` cosmetic `InvalidField("externalId")` → `sourceID`.
-32. `pkg/testutil/syncstore.go` doc comments post-`BatchOutcome`.
-33. `conflict_aware.go` `summary` locals → `batch`.
-34. Reusable `blockingProvider`-style double in `pkg/testutil`.
-35. Sweep for other hardcoded cross-layer identifiers (projectionName-style).
-36. `SyncResult.Batch` exposure in the `/sync` HTTP response (decision first).
-37. Outcome attributes on `localsync.sync` spans (batch-span parity).
-38. Request-ID middleware + echo header.
-39. SQLite opt-in WAL/pragma knob on `CQRSConfig`.
-40. `/stats` source/type filter params.
-41. buildflow local hygiene: rebuild stale preflight binary, fix gomod-freshness env, VACUUM the 2.27 GB db.
-42. CI job-summary badges + `::notice::` rendering eyeball.
-43. Upstream PR for go-cqrs-lite#21 (unblocks dropping our custom-fallback note).
-44. Watermill `MessageToEvent` typed-`Causation` reconstruction upstream.
-45. Check go-github-kit for >v0.3.0 at next provider touch; re-verify the README annotations if the surface moved.
-46. eventtest adoption watcher (ROADMAP OQ4).
-47. Per-page ETag reuse upstream (go-github-kit feature request) — only if useful.
-48. DLQ HTTP admin endpoints — only with owner buy-in on API surface growth.
-49. Multi-error aggregation (`errors.Join`) for partial sync.
-50. ★ Next docs-health sweep: archive THIS report (it is current-cycle until then), and validate that the two-tier annotation policy held — measure reader value, don't assume.
+31. ~~`errors_test.go` cosmetic `InvalidField("externalId")` → `sourceID`.~~ done (done (hygiene cluster — 16:28 report a-22))
+32. ~~`pkg/testutil/syncstore.go` doc comments post-`BatchOutcome`.~~ done (done (syncstore doc refresh — 16:28 a-22))
+33. ~~`conflict_aware.go` `summary` locals → `batch`.~~ done (done (summary to batch locals — 16:28 a-22))
+34. ~~Reusable `blockingProvider`-style double in `pkg/testutil`.~~ done (done (testutil.BlockingProvider shared double — 16:28 a-22))
+35. ~~Sweep for other hardcoded cross-layer identifiers (projectionName-style).~~ done (done (hygiene cluster sweep — 16:28 a-22))
+36. ~~`SyncResult.Batch` exposure in the `/sync` HTTP response (decision first).~~ done (done (FEATURES row 73 — synced/conflicts/tombstoned on the wire))
+37. ~~Outcome attributes on `localsync.sync` spans (batch-span parity).~~ done (done (span outcome attributes + recorder test — 16:28 a-22))
+38. ~~Request-ID middleware + echo header.~~ done (routed to TODO_LIST (API niceties))
+39. ~~SQLite opt-in WAL/pragma knob on `CQRSConfig`.~~ done (routed to TODO_LIST (API niceties))
+40. ~~`/stats` source/type filter params.~~ done (routed to TODO_LIST (API niceties))
+41. ~~buildflow local hygiene: rebuild stale preflight binary, fix gomod-freshness env, VACUUM the 2.27 GB db.~~ done (routed to TODO_LIST (owner: route the buildflow leftovers))
+42. ~~CI job-summary badges + `::notice::` rendering eyeball.~~ done (done (job-summary badge table rendered in green run 34039472270))
+43. ~~Upstream PR for go-cqrs-lite#21 (unblocks dropping our custom-fallback note).~~ done (routed to ROADMAP (upstream contributions — PR for go-cqrs-lite #21))
+44. ~~Watermill `MessageToEvent` typed-`Causation` reconstruction upstream.~~ done (routed to ROADMAP (upstream contributions — typed Causation reconstruction))
+45. ~~Check go-github-kit for >v0.3.0 at next provider touch; re-verify the README annotations if the surface moved.~~ done (routed to TODO_LIST (folded into the post-tag provider migration touch point))
+46. ~~eventtest adoption watcher (ROADMAP OQ4).~~ done (routed to ROADMAP Open Question 4 (eventtest watcher — already recorded))
+47. ~~Per-page ETag reuse upstream (go-github-kit feature request) — only if useful.~~ done (routed to ROADMAP (per-page ETag upstream — already recorded))
+48. ~~DLQ HTTP admin endpoints — only with owner buy-in on API surface growth.~~ done (routed to ROADMAP (DLQ HTTP endpoints — already recorded))
+49. ~~Multi-error aggregation (`errors.Join`) for partial sync.~~ done (routed to ROADMAP (multi-error aggregation — already recorded))
+50. ~~★ Next docs-health sweep: archive THIS report (it is current-cycle until then), and validate that the two-tier annotation policy held — measure reader value, don't assume.~~ done (done (this sweep annotated + archived the report))
 
 ## g) QUESTIONS I CANNOT FIGURE OUT MYSELF
 
