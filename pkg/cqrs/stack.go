@@ -35,6 +35,12 @@ func pickEventLogger(cfg CQRSConfig) *slog.Logger {
 		return cfg.EventLogger
 	}
 
+	if cfg.LogLevel != "" {
+		if level, err := log.ParseLevel(cfg.LogLevel); err == nil {
+			log.Default().SetLevel(level)
+		}
+	}
+
 	return newSlogLogger()
 }
 
@@ -68,6 +74,13 @@ type CQRSConfig struct {
 	// slog.NewLogLogger / LevelFilterHandler above INFO), a file, or
 	// slog.DiscardHandler to turn event logging off entirely.
 	EventLogger *slog.Logger
+	// LogLevel sets the level of the stack-owned event logger (charm
+	// "debug"/"info"/"warn"/"error", parsed with charm's ParseLevel). Empty
+	// (default) keeps the logger's current level — the per-event INFO default.
+	// Applies only when EventLogger is nil (the stack then owns log.Default());
+	// a consumer-provided EventLogger owns its own level control. Invalid
+	// level names fail CQRSConfig.Validate at construction.
+	LogLevel string
 }
 
 // Validate rejects structurally impossible configs early (at construction
@@ -79,6 +92,12 @@ func (c CQRSConfig) Validate() error {
 	case backendSQLite:
 	default:
 		return pkgerrors.Wrapf(pkgerrors.ErrUnknownBackend, "unknown backend: %s", c.Backend)
+	}
+
+	if c.LogLevel != "" {
+		if _, err := log.ParseLevel(c.LogLevel); err != nil {
+			return pkgerrors.InvalidField("logLevel", "invalid level: "+err.Error())
+		}
 	}
 
 	return nil

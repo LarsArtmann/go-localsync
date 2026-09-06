@@ -1,6 +1,10 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
+
+	"charm.land/log/v2"
+)
 
 // ServerOption customizes the HTTP API server. Options are additive; the
 // zero-value server (no options) behaves exactly as before.
@@ -16,6 +20,10 @@ type serverOptions struct {
 	// global WithRateLimit scope is active.
 	perClient    bool
 	keyExtractor func(*http.Request) string
+	// logLevel applies to the server's logger (the one passed to NewServer,
+	// including the log.Default() fallback). Nil (default) leaves the
+	// logger's level untouched.
+	logLevel *log.Level
 }
 
 // WithMetricsHandler serves the given handler under GET /metrics. Consumers
