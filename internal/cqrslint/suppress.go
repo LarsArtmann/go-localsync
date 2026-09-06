@@ -118,7 +118,7 @@ func (s *Suppressor) parseComment(pkg *Package, relFile string, comment *ast.Com
 				continue
 			}
 
-			s.parseDirective(relFile, text, baseLine+i)
+			s.parseDirective(relFile, strings.TrimPrefix(text, blockDirectiveMarker), baseLine+i)
 		}
 
 		return

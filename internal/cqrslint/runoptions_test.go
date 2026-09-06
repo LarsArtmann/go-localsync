@@ -13,11 +13,10 @@ import (
 // (extra event const) and one C0005 violation (hasChanged reads Title), so
 // rule-selection options have two distinguishable findings to filter.
 func mixedViolationSource() string {
-	return strings.Replace(
-		strings.Replace(suppressibleSource(), violationLine, violationLine+"\n\t_ = local.Title", 1),
-		`	EventItemTombstoned    event.Type = "sync_item.tombstoned"`,
-		`	EventItemTombstoned    event.Type = "sync_item.tombstoned"`
-		+"\n	EventItemBogus         event.Type = \"sync_item.bogus\"", 1)
+	const events = `	EventItemTombstoned    event.Type = "sync_item.tombstoned"`
+
+	return strings.Replace(suppressibleSource(), events,
+		events+"\n	EventItemBogus         event.Type = \"sync_item.bogus\"", 1)
 }
 
 // loadOneFilePackage writes src into a temp dir and loads it.

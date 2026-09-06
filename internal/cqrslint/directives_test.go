@@ -13,11 +13,11 @@ import (
 // suppressibleSource() (2 C0005 findings on the hasChanged `if` line) plus
 // the expected outcome for C0005.
 type directiveCase struct {
-	name          string
-	source        string
+	name           string
+	source         string
 	wantSuppressed bool
-	wantTotal     int // total findings in the run (-1 = skip)
-	wantWarning   int // expected directive-audit warnings (-1 = skip)
+	wantTotal      int // total findings in the run (-1 = skip)
+	wantWarning    int // expected directive-audit warnings (-1 = skip)
 }
 
 // runDirectiveCase loads the source as a one-file package and asserts the
@@ -80,6 +80,7 @@ func TestDirective_BlockComment_SameLine(t *testing.T) {
 		name:           "block-same-line",
 		source:         mutate(suppressibleSource(), violationLine+` /* cqrs-lint:ignore C0005 */`),
 		wantSuppressed: true,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -91,6 +92,7 @@ func TestDirective_BlockComment_PreviousLine(t *testing.T) {
 			`/* cqrs-lint:ignore C0005 */
 `+violationLine),
 		wantSuppressed: true,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -101,10 +103,10 @@ func TestDirective_BlockComment_InnerLineAfterProse(t *testing.T) {
 		source: mutate(suppressibleSource(),
 			`/*
 	some prose that is not a directive
-	cqrs-lint:ignore C0005 prose before the marker
-*/
+	cqrs-lint:ignore C0005 prose before the marker */
 `+violationLine),
 		wantSuppressed: true,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -114,6 +116,7 @@ func TestDirective_BlockComment_NoSpaceAfterMarker(t *testing.T) {
 		name:           "block-tight-marker",
 		source:         mutate(suppressibleSource(), violationLine+` /*cqrs-lint:ignore C0005*/`),
 		wantSuppressed: true,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -139,6 +142,7 @@ func TestDirective_Range_OutsideStaysActive(t *testing.T) {
 	//cqrs-lint:ignore-end C0005
 	if local.Title != remote.Title {`),
 		wantSuppressed: false,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -151,6 +155,7 @@ func TestDirective_Range_AllRules(t *testing.T) {
 	if local.Title != remote.Title {
 	//cqrs-lint:ignore-end`),
 		wantSuppressed: true,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -163,6 +168,7 @@ func TestDirective_Range_DifferentRuleActive(t *testing.T) {
 	if local.Title != remote.Title {
 	//cqrs-lint:ignore-end C0002`),
 		wantSuppressed: false,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -176,6 +182,7 @@ func TestDirective_Range_NestedStartWarns(t *testing.T) {
 	if local.Title != remote.Title {
 	//cqrs-lint:ignore-end C0005`),
 		wantSuppressed: true,
+		wantTotal:      -1,
 		wantWarning:    1,
 	})
 }
@@ -187,6 +194,7 @@ func TestDirective_Range_UnmatchedEndWarns(t *testing.T) {
 			`	//cqrs-lint:ignore-end C0005 stray
 	if local.Title != remote.Title {`),
 		wantSuppressed: false,
+		wantTotal:      -1,
 		wantWarning:    1,
 	})
 }
@@ -200,6 +208,7 @@ func TestDirective_Range_BareEndClosesAll(t *testing.T) {
 	//cqrs-lint:ignore-end
 	if local.Title != remote.Title {`),
 		wantSuppressed: false,
+		wantTotal:      -1,
 		wantWarning:    0,
 	})
 }
@@ -211,6 +220,7 @@ func TestDirective_Range_UnclosedWarnsAndSuppressesToEOF(t *testing.T) {
 			`	//cqrs-lint:ignore-start C0005 never closed
 	if local.Title != remote.Title {`),
 		wantSuppressed: true,
+		wantTotal:      -1,
 		wantWarning:    1,
 	})
 }
@@ -223,6 +233,7 @@ func TestDirective_Range_UnknownRuleWarns(t *testing.T) {
 	if local.Title != remote.Title {
 	//cqrs-lint:ignore-end C9999`),
 		wantSuppressed: false,
+		wantTotal:      -1,
 		wantWarning:    2,
 	})
 }
