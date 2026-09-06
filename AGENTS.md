@@ -144,7 +144,7 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/data/model`    | 12    | 84.9%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                                    |
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                                              |
 | `internal/cqrslint` | 38    | 92.5%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives                     |
-| `cmd/cqrs-lint`     | 18    | 56.4% *  | ✅ exit-code contract, summary/JSON output, violating-fixture round trip + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape). *unmoved: subprocess runs are invisible to Go coverage by design |                                                         |
+| `cmd/cqrs-lint`     | 18    | 43.3% *  | ✅ exit-code contract, summary/JSON output, violating-fixture round trip + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape). *the phase-1 flags/formatting grew the surface while its tests are process-level (coverage-invisible by design) |                                                         |
 
 **331 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
 
