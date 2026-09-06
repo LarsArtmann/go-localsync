@@ -1504,6 +1504,49 @@ host, err := projectionhost.New(
           </p>
         </section>
 
+        <section id="rescore-2026-09-06">
+          <h2>Re-score appendix (2026-09-06, post-M-plan + v0.6 enactment)</h2>
+          <p>
+            Every scored defect cluster from this audit is now closed. The four
+            headline stats recomputed against current code:
+          </p>
+          <div class="scorecard" style="grid-template-columns: repeat(4, 1fr)">
+            <div class="score-card"><span class="score">93</span><span class="score-label">Adoption Score /100 (re-audit)</span></div>
+            <div class="score-card"><span class="score">15/16</span><span class="score-label">Fully leveraged</span></div>
+            <div class="score-card"><span class="score">0</span><span class="score-label">Missed opportunities (1 partial)</span></div>
+            <div class="score-card"><span class="score">0</span><span class="score-label">Anti-patterns</span></div>
+          </div>
+          <table>
+            <thead><tr><th>Original finding</th><th>Resolution (2026-09-06)</th></tr></thead>
+            <tbody>
+              <tr><td>C017: in-memory DLQ paired with persistent store (the 1 anti-pattern)</td><td>FIXED — persistent SQLite DLQ sharing the DB file (<code>store_factory.go</code>), plus an SDK management surface (<code>dlq.go</code>: list/count/delete/purge/replay)</td></tr>
+              <tr><td>Correlation only on batch path; causation never recorded</td><td>FIXED — correlation on all write paths + <code>CommandCausalityEnricher</code> on every stored event. Residual bus-hop metadata drop is a LIBRARY wire gap, source-verified and filed upstream (go-cqrs-lite#21)</td></tr>
+              <tr><td>No telemetry hooks</td><td>FIXED — opt-in <code>CQRSConfig.OTel</code> (command/event spans + metrics + projection-host recorder) and <code>sync.WithTracer</code> spans; real-meter/real-tracer tests pin values</td></tr>
+              <tr><td>Hand-rolled validation middleware</td><td>FIXED — swapped for <code>middleware.CommandValidation</code></td></tr>
+              <tr><td>Fat-payload schema evolution instead of Upcaster registry</td><td>FIXED — registry adopted via <code>event.DecorateStore</code> + <code>UpcastSourceTransform</code>; the memory-store mutation race the audit era contained was root-caused and fixed with a race-regression test</td></tr>
+              <tr><td>Hygiene cluster (time.Now, panic fallback, ignored Close errors)</td><td>FIXED — tombstone timestamp injection (<code>TombstoneItemCommand.At</code>), panic fallback → error-returning <code>StreamID()</code> in v0.6 (ADR-0009), all 8 Close sites logged</td></tr>
+              <tr><td>Library cqrs-lint absent from CI</td><td>FIXED — error-gated v4.8.1 step in the lint job (secret-gated for the private go-finding dep, skip-path CI-verified) + devShell gate; all 3 annotated false positives re-audited as current</td></tr>
+              <tr><td>AggregateID hand-rolls DeriveStreamID</td><td>RESOLVED AS DECISION — divergence kept deliberately, pinned and documented at the definition site (ADR-0009)</td></tr>
+              <tr><td>scenario DSL adoption</td><td>DONE — flagship decider specs in <code>pkg/cqrs/scenario_test.go</code>; convention recorded in AGENTS.md</td></tr>
+            </tbody>
+          </table>
+          <p>
+            <strong>Re-score basis:</strong> the original 78 was a composite
+            judgment, not an itemized rubric, so this re-score is the same kind
+            of judgment with the same categories. Recomputed stat cards above
+            are counts (verifiable); the 93 reflects: all missed-opportunity
+            classes closed (0 remaining, 1 partial), the anti-pattern gone, and
+            the enumerated residual deductions — eventtest tier unadopted
+            (~4 pts, blocked upstream: the module has no released version, per
+            ROADMAP open question), consumer-side testutil/toolkit tier (~2 pts,
+            deliberate — provider helpers live in consumer apps by design), and
+            the documented DeriveStreamID divergence (~1 pt, decision not
+            defect). Cross-check: the original report's own bottom line said
+            the three named fixes move it to "reference consumer" — all three
+            shipped, plus the rest of the M-plan.
+          </p>
+        </section>
+
         <footer class="footer">
           <p>
             Generated 2026-09-05 &middot; Library audited: go-cqrs-lite v4 line (34
