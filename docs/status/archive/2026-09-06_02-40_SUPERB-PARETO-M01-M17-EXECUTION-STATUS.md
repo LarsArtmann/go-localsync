@@ -78,66 +78,66 @@
 
 **CLI (M18–M19) — M09's harness makes these safe:**
 
-1. `--rules` (run subset) + test
-2. `--exclude-rules` + test
-3. `--no-suppress` (error on any directive) + CI-hardening test
-4. `--explain <ruleID>` + test
-5. Block-comment directives (`/* cqrs-lint:ignore … */`)
-6. Range directives (`ignore-start`/`ignore-end`) + nesting guard
-7. Directive test matrix (valid/invalid/unknown/nested)
-8. SARIF output (`--format=sarif`) + schema sanity test
-9. `docs/cqrs-lint.md` rules page (all rules + suppression examples)
-10. New rules C0011–C0015 (one per micro-task: design, implement, test)
+1. ~~`--rules` (run subset) + test~~ done (docs-health pass 2026-09-06)
+2. ~~`--exclude-rules` + test~~ done (docs-health pass 2026-09-06)
+3. ~~`--no-suppress` (error on any directive) + CI-hardening test~~ done (docs-health pass 2026-09-06)
+4. ~~`--explain <ruleID>` + test~~ done (docs-health pass 2026-09-06)
+5. ~~Block-comment directives (`/* cqrs-lint:ignore … */`)~~ done (docs-health pass 2026-09-06)
+6. ~~Range directives (`ignore-start`/`ignore-end`) + nesting guard~~ done (docs-health pass 2026-09-06)
+7. ~~Directive test matrix (valid/invalid/unknown/nested)~~ done (docs-health pass 2026-09-06)
+8. ~~SARIF output (`--format=sarif`) + schema sanity test~~ done (routed to TODO_LIST M19 remainder (SARIF))
+9. ~~`docs/cqrs-lint.md` rules page (all rules + suppression examples)~~ done (routed to TODO_LIST M19 remainder (directives/rules doc page))
+10. ~~New rules C0011–C0015 (one per micro-task: design, implement, test)~~ done (shipped — rules catalog is 15 (verified this sweep); CHANGELOG entry added)
 
 **API + sync surface (M20–M21):**
-11. `X-RateLimit-Limit`/`-Remaining` headers on `POST /sync` + tests
-12. `WithRateLimiter(keyExtractor)` per-client option + tests
-13. Global-vs-per-client limiter docs (options.go + README)
-14. `/metrics` posture: implement the owner's decision (keyed vs public)
-15. Record the `/metrics` decision ADR-style
-16. Document log quieting (middleware logger level) in README/AGENTS
-17. Plumb logger level control if missing
-18. OTel span for `Syncer.Sync` (`localsync.sync`) + attribute test
+11. ~~`X-RateLimit-Limit`/`-Remaining` headers on `POST /sync` + tests~~ done (docs-health pass 2026-09-06)
+12. ~~`WithRateLimiter(keyExtractor)` per-client option + tests~~ done (docs-health pass 2026-09-06)
+13. ~~Global-vs-per-client limiter docs (options.go + README)~~ done (docs-health pass 2026-09-06)
+14. ~~`/metrics` posture: implement the owner's decision (keyed vs public)~~ done (docs-health pass 2026-09-06)
+15. ~~Record the `/metrics` decision ADR-style~~ done (docs-health pass 2026-09-06)
+16. ~~Document log quieting (middleware logger level) in README/AGENTS~~ done (docs-health pass 2026-09-06)
+17. ~~Plumb logger level control if missing~~ done (docs-health pass 2026-09-06)
+18. ~~OTel span for `Syncer.Sync` (`localsync.sync`) + attribute test~~ done (docs-health pass 2026-09-06)
 
 **provider/github (M22):**
-19. Verify kit claim: empty-token behavior in go-github-kit source
-20. Verify kit claim: 429/idempotent-5xx retry; annotate README if wrong
-21. ETag spike: do GitHub events endpoints support conditional requests?
-22. ETag implementation or documented infeasibility
-23. `PerPage` option in `FetchAll` fetch options + tests
-24. `provider/github` live-PAT smoke test env documentation pass
+19. ~~Verify kit claim: empty-token behavior in go-github-kit source~~ done (docs-health pass 2026-09-06)
+20. ~~Verify kit claim: 429/idempotent-5xx retry; annotate README if wrong~~ done (docs-health pass 2026-09-06)
+21. ~~ETag spike: do GitHub events endpoints support conditional requests?~~ done (docs-health pass 2026-09-06)
+22. ~~ETag implementation or documented infeasibility~~ done (docs-health pass 2026-09-06)
+23. ~~`PerPage` option in `FetchAll` fetch options + tests~~ done (dispositioned — FetchAll fixes PerPage at the GitHub-recommended 100 (documented at client.go:293); Fetch honors opts.PerPage)
+24. ~~`provider/github` live-PAT smoke test env documentation pass~~ done (docs-health pass 2026-09-06)
 
 **Docs (M23–M24):**
-25. AGENTS restructure outline (<30KB, invariants vs links)
-26. Extract CQRS internals → ADR/go-cqrs-lite doc links
-27. Prune/merge gotchas to ≤20
-28. Link-first architecture table
-29. Size check + link sweep + lost-context review
-30. Execute HTML policy decision (banners and/or archive moves)
-31. Record dprint scope for `docs/status/`
-32. Classify the 2 undated planning files
-33. Purge 3 stale `.golangci.yml` exclusion paths
-34. Document gopls stdversion warnings as known GOEXPERIMENT noise
-35. Strike shipped "Export to JSON/CSV" row in ROADMAP
-36. Prep the 23-04 report for annotation
+25. ~~AGENTS restructure outline (<30KB, invariants vs links)~~ done (docs-health pass 2026-09-06)
+26. ~~Extract CQRS internals → ADR/go-cqrs-lite doc links~~ done (docs-health pass 2026-09-06)
+27. ~~Prune/merge gotchas to ≤20~~ done (docs-health pass 2026-09-06)
+28. ~~Link-first architecture table~~ done (docs-health pass 2026-09-06)
+29. ~~Size check + link sweep + lost-context review~~ done (docs-health pass 2026-09-06)
+30. ~~Execute HTML policy decision (banners and/or archive moves)~~ done (docs-health pass 2026-09-06)
+31. ~~Record dprint scope for `docs/status/`~~ done (docs-health pass 2026-09-06)
+32. ~~Classify the 2 undated planning files~~ done (docs-health pass 2026-09-06)
+33. ~~Purge 3 stale `.golangci.yml` exclusion paths~~ done (docs-health pass 2026-09-06)
+34. ~~Document gopls stdversion warnings as known GOEXPERIMENT noise~~ done (docs-health pass 2026-09-06)
+35. ~~Strike shipped "Export to JSON/CSV" row in ROADMAP~~ done (docs-health pass 2026-09-06)
+36. ~~Prep the 23-04 report for annotation~~ done (docs-health pass 2026-09-06)
 
 **Long-tail code (M25–M26):**
-37. `SyncOptions.Validate` reject `MaxPages < 0`
-38. Typed `Attributes` write-helpers (`WithActorLogin/RepoName/…`)
-39. Surface `ParseTombstoneReason` in API DTOs
-40. `b.Loop()` migration: `adapter_bench_test.go` + `stack_bench_test.go`
-41. Unify `waitForCount`/`waitForCountTB` behind `testing.TB`
-42. `TombstoneItem(...event.Option)` parity + test
-43. Verify huma 408 mapping vs `pkgerrors.HTTPStatus`
-44. ADR/doc vocabulary sweep: `AggregateID`→`StreamID` prose
-45. `errors.AsType` audit + safe migrations
-46. hierarchical-errors findings: suppress-with-rationale or track
+37. ~~`SyncOptions.Validate` reject `MaxPages < 0`~~ done (docs-health pass 2026-09-06)
+38. ~~Typed `Attributes` write-helpers (`WithActorLogin/RepoName/…`)~~ done (docs-health pass 2026-09-06)
+39. ~~Surface `ParseTombstoneReason` in API DTOs~~ done (docs-health pass 2026-09-06)
+40. ~~`b.Loop()` migration: `adapter_bench_test.go` + `stack_bench_test.go`~~ done (docs-health pass 2026-09-06)
+41. ~~Unify `waitForCount`/`waitForCountTB` behind `testing.TB`~~ done (docs-health pass 2026-09-06)
+42. ~~`TombstoneItem(...event.Option)` parity + test~~ done (docs-health pass 2026-09-06)
+43. ~~Verify huma 408 mapping vs `pkgerrors.HTTPStatus`~~ done (docs-health pass 2026-09-06)
+44. ~~ADR/doc vocabulary sweep: `AggregateID`→`StreamID` prose~~ done (docs-health pass 2026-09-06)
+45. ~~`errors.AsType` audit + safe migrations~~ done (docs-health pass 2026-09-06)
+46. ~~hierarchical-errors findings: suppress-with-rationale or track~~ done (docs-health pass 2026-09-06)
 
 **Closing the loop (M27 + session follow-ups):**
-47. 100-point deep-dive re-audit; record delta vs `docs/research/`
-48. Pre-commit hooks: enable-scoped or delete; library-gate suppression audit; windows-leg eval
-49. Push/observe the next CI run end-to-end (nix job, guards, doc-counts) and file the buildflow cross-system issue upstream; decide `v0.6-prep` branch lifetime (push for review vs keep local)
-50. Final v0.6 gap list: DLQ inspect/replay surface, `provider/github` CHANGELOG seeding, standing pre-release VERIFY step wired into the checklist
+47. ~~100-point deep-dive re-audit; record delta vs `docs/research/`~~ done (docs-health pass 2026-09-06)
+48. ~~Pre-commit hooks: enable-scoped or delete; library-gate suppression audit; windows-leg eval~~ done (docs-health pass 2026-09-06)
+49. ~~Push/observe the next CI run end-to-end (nix job, guards, doc-counts) and file the buildflow cross-system issue upstream; decide `v0.6-prep` branch lifetime (push for review vs keep local)~~ done (CI observed green end-to-end (run 34015593461); buildflow upstream issue declined — skip_steps is the documented workaround; v0.6-prep superseded by direct-to-master enactment)
+50. ~~Final v0.6 gap list: DLQ inspect/replay surface, `provider/github` CHANGELOG seeding, standing pre-release VERIFY step wired into the checklist~~ done (docs-health pass 2026-09-06)
 
 ## g) QUESTIONS FOR YOU (cannot answer these myself)
 
@@ -148,3 +148,15 @@
 ---
 
 **Waiting for instructions.**
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+All §f items carry inline verdicts above (executed by the same-day 06:19 enactment session, the 06:25 M18 session, and the 08:05 P2 sweep — tracked in TODO_LIST ✅ notes and CHANGELOG v0.6.0). Section-level closures:
+
+- **§b:** row 1 (M08 enactment prep) — ENACTED the same day on master (06:19 session; owner sign-off recorded in TODO_LIST); row 2 (cmd coverage) — superseded: 64.8% in-process, honestly documented in AGENTS; row 3 (CI runtime validation) — proven: master CI green end-to-end incl. the nix job, doc-count step, actionlint and vendorHash guard (run 34015593461); row 4 (commit hygiene) — retrospective, stands as written; row 5 (library cqrs-lint gate) — still error-gated, routed (TODO_LIST owner item).
+- **§c (NOT STARTED at report time):** everything executed within hours — M18 shipped (06:25), M19.3 rules shipped with the remainder (SARIF + doc page) routed to TODO_LIST, M20-M27 shipped (TODO_LIST ✅s + CHANGELOG v0.6.0).
+- **§g:** Q1 — answered by the owner's "NOW GET SHIT DONE!" directive; the window was enacted and `v0.6-prep` superseded; Q2 — decided keyed (default-deny), documented at the auth/`WithMetrics` decision point; Q3 — CI proof obtained (green run); no darwin builder exists, `skip_steps` remains the documented standing state.
+
+_Archived by the 2026-09-06 docs-health sweep: every forward item closed or routed; harvesting is complete (TODO_LIST carries the survivors with citations)._
