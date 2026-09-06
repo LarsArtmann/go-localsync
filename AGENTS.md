@@ -101,7 +101,7 @@ Use `buildflow`; not executable, formally disabled (documented decision). Re-ena
 | `internal/cqrslint`  | 69    | 93.2%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives                                                                                                                                                                      |
 | `cmd/localsync-lint` | 23    | 35.2% *  | ✅ exit-code contract, summary/JSON output, violating-fixture round trip + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape). *the phase-1 flags/formatting grew the surface while its tests are process-level (coverage-invisible by design) |
 
-**378 total test functions** across 11 test packages (incl. `cmd/localsync-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
+**378 total test functions** across 11 test packages (incl. `cmd/localsync-lint`), plus 35 in the standalone `provider/github` module; the whole suite is race-clean.
 
 Run: `go test ./... -count=1`
 
