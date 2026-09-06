@@ -10,13 +10,13 @@ import (
 // and the rule list. Block comments carry the same directives after a
 // /* decoration ("/*cqrs-lint:..." or "/* cqrs-lint:...").
 const (
-	directivePrefix       = "//cqrs-lint:"
-	blockDirectiveMarker  = "cqrs-lint:"
-	directiveIgnore       = "ignore"
-	directiveIgnoreF      = "ignore-file"
-	directiveIgnoreStart  = "ignore-start"
-	directiveIgnoreEnd    = "ignore-end"
-	suppressAllRules      = "all"
+	directivePrefix      = "//cqrs-lint:"
+	blockDirectiveMarker = "cqrs-lint:"
+	directiveIgnore      = "ignore"
+	directiveIgnoreF     = "ignore-file"
+	directiveIgnoreStart = "ignore-start"
+	directiveIgnoreEnd   = "ignore-end"
+	suppressAllRules     = "all"
 )
 
 // unclosedRangeEnd is the sentinel end line for an ignore-start whose
@@ -25,7 +25,7 @@ const (
 const unclosedRangeEnd = 1 << 30
 
 // Suppressor decides whether a Finding is silenced by an inline
-// //cqrs-lint:ignore directive in the source. It is built once per package
+// //cqrs-lint: directive in the source. It is built once per package
 // load and applied to every finding during Run.
 type Suppressor struct {
 	// fileRules maps relativized file path to the set of suppressed rule IDs
@@ -36,19 +36,12 @@ type Suppressor struct {
 	// suppressed rule IDs at that line (//cqrs-lint:ignore).
 	lineRules map[string]map[int]map[string]bool
 
-	// provenance records the directive kind and optional reason per
-	// (file, rule) at file scope — the suppression audit trail.
-	fileProvenance map[string]map[string]directiveInfo
-
-	// lineProvenance records the directive kind and reason per (file, line, rule).
-	lineProvenance map[string]map[int]map[string]directiveInfo
-
 	// rangeRules maps relativized file path to rule ID (or "all") to the
 	// suppressed line ranges (//cqrs-lint:ignore-start/ignore-end).
 	rangeRules map[string]map[string][]suppressedRange
 
 	// openRanges tracks the ranges opened but not yet closed during the
-	// scan: file path to rule ID to the line the range started on.
+	// scan: file path to rule ID to the range opened at its start line.
 	openRanges map[string]map[string]suppressedRange
 
 	// provenance records the directive kind and optional reason per
@@ -66,6 +59,12 @@ type Suppressor struct {
 	directiveFindings []Finding
 }
 
+// directiveInfo captures which directive silenced a finding and why.
+type directiveInfo struct {
+	kind   string // "ignore", "ignore-file", or "ignore-start"
+	reason string // optional human reason following the rule list
+}
+
 // suppressedRange is one [start, end] line interval in which a rule is
 // silenced. start is the ignore-start directive's line; end is the
 // ignore-end's line, or unclosedRangeEnd when the range was never closed.
@@ -75,19 +74,19 @@ type suppressedRange struct {
 }
 
 // newSuppressor scans every comment in the package for //cqrs-lint:
-directives and builds the lookup tables. Line-level directives silence
+// directives and builds the lookup tables. Line-level directives silence
 // findings on the same line or the immediately following line; range
 // directives (ignore-start/ignore-end) silence everything between them;
 // block comments (/* cqrs-lint:... */) carry the same directives anywhere
 // inside the comment.
 func newSuppressor(pkg *Package) Suppressor {
 	s := Suppressor{
-		fileRules:         map[string]map[string]bool{},
-		lineRules:         map[string]map[int]map[string]bool{},
-		rangeRules:        map[string]map[string][]suppressedRange{},
-		openRanges:        map[string]map[string]suppressedRange{},
-		fileProvenance:    map[string]map[string]directiveInfo{},
-		lineProvenance:    map[string]map[int]map[string]directiveInfo{},
+		fileRules:      map[string]map[string]bool{},
+		lineRules:      map[string]map[int]map[string]bool{},
+		rangeRules:     map[string]map[string][]suppressedRange{},
+		openRanges:     map[string]map[string]suppressedRange{},
+		fileProvenance: map[string]map[string]directiveInfo{},
+		lineProvenance: map[string]map[int]map[string]directiveInfo{},
 	}
 
 	for _, file := range pkg.Files {
@@ -119,7 +118,7 @@ func (s *Suppressor) parseComment(pkg *Package, relFile string, comment *ast.Com
 				continue
 			}
 
-			s.parseDirective(pkg, relFile, text, baseLine+i)
+			s.parseDirective(relFile, text, baseLine+i)
 		}
 
 		return
@@ -130,13 +129,13 @@ func (s *Suppressor) parseComment(pkg *Package, relFile string, comment *ast.Com
 	}
 
 	line := pkg.Fset.Position(comment.Pos()).Line
-	s.parseDirective(pkg, relFile, strings.TrimPrefix(comment.Text, directivePrefix), line)
+	s.parseDirective(relFile, strings.TrimPrefix(comment.Text, directivePrefix), line)
 }
 
 // parseDirective records one directive body (text after the marker) found on
 // the given line. Malformed directives (empty rule list) are silently
 // ignored — they are not lint findings themselves.
-func (s *Suppressor) parseDirective(pkg *Package, relFile, body string, line int) {
+func (s *Suppressor) parseDirective(relFile, body string, line int) {
 	switch {
 	case strings.HasPrefix(body, directiveIgnoreStart):
 		rules, reason := parseDirectiveRules(body, directiveIgnoreStart)
@@ -164,6 +163,110 @@ func (s *Suppressor) parseDirective(pkg *Package, relFile, body string, line int
 	}
 }
 
+// openRange starts a suppressed interval for each named rule. A rule whose
+// range is already open triggers the nesting guard: the inner start is
+// ignored (the outer range already covers it) and a warning is recorded.
+func (s *Suppressor) openRange(file string, rules []string, line int, reason string) {
+	if len(rules) == 0 {
+		return
+	}
+
+	if s.openRanges[file] == nil {
+		s.openRanges[file] = map[string]suppressedRange{}
+	}
+
+	for _, rule := range rules {
+		if _, open := s.openRanges[file][rule]; open {
+			s.directiveFindings = append(s.directiveFindings, Finding{
+				Rule:     rule,
+				Severity: SeverityWarning,
+				File:     file,
+				Line:     line,
+				Message:  "ignore-start nests inside an open range for the same rule; the inner start is ignored",
+			})
+
+			continue
+		}
+
+		s.openRanges[file][rule] = suppressedRange{start: line, end: unclosedRangeEnd, reason: reason}
+	}
+}
+
+// closeRange ends the open interval(s) at line. An empty rule list closes
+// every open range in the file; a named rule that is not open warns.
+func (s *Suppressor) closeRange(file string, rules []string, line int) {
+	open := s.openRanges[file]
+
+	if len(rules) == 0 {
+		if len(open) == 0 {
+			s.directiveFindings = append(s.directiveFindings, Finding{
+				Rule:     directiveIgnoreEnd,
+				Severity: SeverityWarning,
+				File:     file,
+				Line:     line,
+				Message:  "ignore-end closes no open range",
+			})
+
+			return
+		}
+
+		for rule := range open {
+			s.endOpenRange(file, rule, line)
+		}
+
+		return
+	}
+
+	for _, rule := range rules {
+		if _, isOpen := open[rule]; !isOpen {
+			s.directiveFindings = append(s.directiveFindings, Finding{
+				Rule:     rule,
+				Severity: SeverityWarning,
+				File:     file,
+				Line:     line,
+				Message:  "ignore-end without a matching ignore-start",
+			})
+
+			continue
+		}
+
+		s.endOpenRange(file, rule, line)
+	}
+}
+
+// endOpenRange moves a rule's open range to the closed list with the given
+// end line.
+func (s *Suppressor) endOpenRange(file, rule string, line int) {
+	started := s.openRanges[file][rule]
+	delete(s.openRanges[file], rule)
+
+	if s.rangeRules[file] == nil {
+		s.rangeRules[file] = map[string][]suppressedRange{}
+	}
+
+	started.end = line
+	s.rangeRules[file][rule] = append(s.rangeRules[file][rule], started)
+}
+
+// finalizeRanges closes whatever ignore-start ranges a file left open at
+// end of file: they suppress to EOF and each warns so the missing
+// ignore-end stays visible under --strict.
+func (s *Suppressor) finalizeRanges(file string) {
+	for rule := range s.openRanges[file] {
+		s.endOpenRange(file, rule, unclosedRangeEnd)
+
+		s.directiveFindings = append(s.directiveFindings, Finding{
+			Rule:     rule,
+			Severity: SeverityWarning,
+			File:     file,
+			Line:     s.rangeRules[file][rule][len(s.rangeRules[file][rule])-1].start,
+			Message:  "ignore-start without a matching ignore-end; the range extends to end of file",
+		})
+	}
+
+	delete(s.openRanges, file)
+}
+
 // recordUnknownRules flags directives naming rule IDs that do not exist in
 // the catalog. A typo like //cqrs-lint:ignore C9999 previously silenced
 // nothing, silently — now it warns (and fails --strict).
@@ -188,7 +291,7 @@ func (s *Suppressor) recordUnknownRules(file string, line int, rules []string) {
 			continue
 		}
 
-		s.unknownRules = append(s.unknownRules, Finding{
+		s.directiveFindings = append(s.directiveFindings, Finding{
 			Rule:     rule,
 			Severity: SeverityWarning,
 			File:     file,
@@ -238,10 +341,11 @@ func (s *Suppressor) recordLineProvenance(file string, line int, rules []string,
 	}
 }
 
-// UnknownRuleFindings returns the stale-directive warnings collected during
-// package scan.
-func (s *Suppressor) UnknownRuleFindings() []Finding {
-	return s.unknownRules
+// DirectiveFindings returns the directive audit warnings collected during
+// package scan: unknown rule IDs, nested ignore-start ranges, and
+// ignore-end without a matching open range.
+func (s *Suppressor) DirectiveFindings() []Finding {
+	return s.directiveFindings
 }
 
 // Suppress reports whether the finding is silenced, and by which directive
@@ -269,6 +373,30 @@ func (s *Suppressor) Suppress(f Finding) (bool, string, string) {
 	for _, candidate := range []int{f.Line, f.Line - 1} {
 		if matched, by, reason := s.matchLineRule(f.File, candidate, f.Rule); matched {
 			return true, by, reason
+		}
+	}
+
+	if matched, by, reason := s.matchRangeRule(f.File, f.Line, f.Rule); matched {
+		return true, by, reason
+	}
+
+	return false, "", ""
+}
+
+// matchRangeRule reports whether a line falls inside an ignore-start/
+// ignore-end interval covering the rule (directly or via "all"), with its
+// provenance.
+func (s *Suppressor) matchRangeRule(file string, line int, rule string) (bool, string, string) {
+	byRule, ok := s.rangeRules[file]
+	if !ok {
+		return false, "", ""
+	}
+
+	for _, candidate := range []string{suppressAllRules, rule} {
+		for _, r := range byRule[candidate] {
+			if line >= r.start && line <= r.end {
+				return true, directiveIgnoreStart, r.reason
+			}
 		}
 	}
 

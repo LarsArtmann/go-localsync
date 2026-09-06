@@ -24,16 +24,16 @@ type ruleCheck struct {
 //
 //nolint:gochecknoglobals // immutable ordered registry, not mutable state
 var allChecks = []ruleCheck{
-	{ruleAggregateTypeConst, checkAggregateTypeConst},    // C0001
-	{ruleEventTypeConsts, checkEventTypeConsts},          // C0002
-	{ruleFoldSwitchCoverage, checkFoldSwitchCoverage},    // C0003
-	{ruleProjectorEventTypes, checkProjectorEventTypes},  // C0004
+	{ruleAggregateTypeConst, checkAggregateTypeConst},       // C0001
+	{ruleEventTypeConsts, checkEventTypeConsts},             // C0002
+	{ruleFoldSwitchCoverage, checkFoldSwitchCoverage},       // C0003
+	{ruleProjectorEventTypes, checkProjectorEventTypes},     // C0004
 	{ruleHasChangedProviderAgn, checkHasChangedProviderAgn}, // C0005
-	{ruleNoQueryDispatcher, checkNoQueryDispatcher},      // C0006
-	{ruleNoSyncActionInCQRS, checkNoSyncActionInCQRS},    // C0007
-	{ruleProjectionLockGuard, checkProjectionLockGuard},  // C0008
-	{rulePayloadJSONTags, checkPayloadJSONTags},          // C0009
-	{ruleNewEventsUsesAggType, checkNewEventsUsesAggType}, // C0010
+	{ruleNoQueryDispatcher, checkNoQueryDispatcher},         // C0006
+	{ruleNoSyncActionInCQRS, checkNoSyncActionInCQRS},       // C0007
+	{ruleProjectionLockGuard, checkProjectionLockGuard},     // C0008
+	{rulePayloadJSONTags, checkPayloadJSONTags},             // C0009
+	{ruleNewEventsUsesAggType, checkNewEventsUsesAggType},   // C0010
 }
 
 // literalStringValue extracts the unquoted value of a string BasicLit, returning

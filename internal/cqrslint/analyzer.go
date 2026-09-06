@@ -1,5 +1,7 @@
 package cqrslint
 
+import "fmt"
+
 // Rule identifiers. Declared as constants so every check references the same
 // spelling (satisfies goconst and prevents drift between the check and the
 // Rules() catalog).

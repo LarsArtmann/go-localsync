@@ -47,10 +47,15 @@ func main() {
 	failOnWarning := flag.Bool("fail-on-warning", false, "exit non-zero when warnings are present")
 	jsonOut := flag.Bool("json", false,
 		"emit findings as newline-delimited JSON (machine readable; alias for -format=json)")
-	format := flag.String("format", "text", "output format: text, json (NDJSON), or github (workflow annotations)")
+	format := flag.String("format", "text", "output format: text, json (NDJSON), github (workflow annotations), or sarif")
 	quiet := flag.Bool("quiet", false, "suppress all output; communicate through the exit code only")
 	verbose := flag.Bool("verbose", false, "show package info, per-rule status, and timing on stderr")
 	showSuppressed := flag.Bool("show-suppressed", false, "show findings silenced by //cqrs-lint:ignore directives")
+	rules := flag.String("rules", "", "comma-separated rule IDs to run (default: all)")
+	excludeRules := flag.String("exclude-rules", "", "comma-separated rule IDs to skip")
+	noSuppress := flag.Bool("no-suppress", false,
+		"disable //cqrs-lint: directives; every violation counts (CI hardening)")
+	explain := flag.String("explain", "", "print the full description of one rule and exit")
 	showVersion := flag.Bool("version", false, "print the cqrs-lint version and exit")
 	flag.Usage = printUsage
 
@@ -66,6 +71,24 @@ func main() {
 		printRules()
 
 		return
+	}
+
+	if *explain != "" {
+		rule, ok := cqrslint.RuleByID(*explain)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "cqrs-lint: unknown rule %q (see --list)\n", *explain)
+			os.Exit(2)
+		}
+
+		printRuleDetail(rule)
+
+		return
+	}
+
+	ruleSelection, err := parseRuleSelection(*rules, *excludeRules)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "cqrs-lint:", err)
+		os.Exit(2)
 	}
 
 	resolvedFormat := *format
@@ -90,8 +113,14 @@ func main() {
 		format:         resolvedFormat,
 	}
 
+	runOpts := cqrslint.RunOptions{
+		Rules:        ruleSelection.include,
+		ExcludeRules: ruleSelection.exclude,
+		NoSuppress:   *noSuppress,
+	}
+
 	start := time.Now()
-	pkg, findings, err := analyze(*target)
+	pkg, findings, err := analyze(*target, runOpts)
 	elapsed := time.Since(start)
 
 	if err != nil {
@@ -108,6 +137,48 @@ func main() {
 	})
 
 	os.Exit(exitCode(findings, opts))
+}
+
+// ruleSelection is the parsed --rules / --exclude-rules flag pair.
+type ruleSelection struct {
+	include []string
+	exclude []string
+}
+
+// parseRuleSelection splits the comma-separated flag values and validates
+// every ID against the rule catalog — a typo in an explicit selection is a
+// usage error, not a silent no-op.
+func parseRuleSelection(rules, excludeRules string) (ruleSelection, error) {
+	selection := ruleSelection{
+		include: splitRuleList(rules),
+		exclude: splitRuleList(excludeRules),
+	}
+
+	if err := cqrslint.ValidateRuleSelection(selection.include, selection.exclude); err != nil {
+		return ruleSelection{}, err
+	}
+
+	return selection, nil
+}
+
+// splitRuleList parses a comma-separated flag value into trimmed, non-empty IDs.
+func splitRuleList(value string) []string {
+	var ids []string
+
+	for id := range strings.SplitSeq(value, ",") {
+		id = strings.TrimSpace(id)
+		if id != "" {
+			ids = append(ids, id)
+		}
+	}
+
+	return ids
+}
+
+// printRuleDetail renders one rule for --explain: identity, severity, and
+// the rationale that ties the rule back to its design decision.
+func printRuleDetail(rule cqrslint.Rule) {
+	fmt.Printf("%s — %s [%s]\n\n%s\n", rule.ID, rule.Title, rule.Severity, rule.Rationale)
 }
 
 type outputOptions struct {
@@ -127,13 +198,13 @@ type report struct {
 	elapsed   time.Duration
 }
 
-func analyze(target string) (*cqrslint.Package, []cqrslint.Finding, error) {
+func analyze(target string, runOpts cqrslint.RunOptions) (*cqrslint.Package, []cqrslint.Finding, error) {
 	pkg, err := cqrslint.LoadPackage(target)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return pkg, cqrslint.Run(pkg), nil
+	return pkg, cqrslint.RunWithOptions(pkg, runOpts), nil
 }
 
 func emit(stdout, stderr io.Writer, r report) {
@@ -376,4 +447,8 @@ func printUsage() {
 	fmt.Fprintf(out, "  //cqrs-lint:ignore C0005 reason  with an optional reason\n")
 	fmt.Fprintf(out, "  //cqrs-lint:ignore all           silence every rule at this position\n")
 	fmt.Fprintf(out, "  //cqrs-lint:ignore-file C0005    silence a rule for the entire file\n")
+	fmt.Fprintf(out, "  /* cqrs-lint:ignore C0005 */     block-comment form of any directive\n")
+	fmt.Fprintf(out, "  //cqrs-lint:ignore-start C0005   begin a suppressed interval\n")
+	fmt.Fprintf(out, "  //cqrs-lint:ignore-end C0005     end the interval (bare ignore-end closes all)\n")
+	fmt.Fprintf(out, "\nRun -no-suppress to ignore every directive (CI hardening).\n")
 }
