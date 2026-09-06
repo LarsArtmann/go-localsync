@@ -224,6 +224,8 @@ stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{
 })
 ```
 
+> **SQLite driver note:** the SDK registers no database driver. Any SQLite-path consumer must blank-import the pure-Go driver once: `import _ "modernc.org/sqlite"` — otherwise queries fail with `unknown driver`.
+
 ## Branded IDs
 
 All entity identifiers use branded phantom types from [go-branded-id](https://github.com/larsartmann/go-branded-id), providing compile-time type safety:

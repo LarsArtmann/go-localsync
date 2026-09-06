@@ -94,49 +94,49 @@
 
 **This sweep's follow-ups (do first)**
 
-1. Owner: add the `SSH_PRIVATE_KEY` deploy-key secret (or decide to make `go-finding` public and delete all SSH machinery) — unblocks the library cqrs-lint CI leg; two CI runs have now verified only its skip path.
+1. ~~Owner: add the `SSH_PRIVATE_KEY` deploy-key secret (or decide to make `go-finding` public and delete all SSH machinery) — unblocks the library cqrs-lint CI leg; two CI runs have now verified only its skip path.~~ done (routed to TODO_LIST (owner-gated SSH secret vs public go-finding))
 2. ~~Run `buildflow --build-mode full` — deferred by three consecutive sessions; oldest open P0.~~ ✅ DONE 2026-09-06: **61 success, 0 failed**. The streak's root cause was environmental, not code: buildflow's nix-hash-fix/nix-build steps evaluate every flake-check system (incl. aarch64-darwin — impossible locally without a darwin builder). Resolved via `.buildflow.yml` skip_steps for those three steps; `nix flake check` (current system) remains the gate and now includes the hermetic test+lint checks.
-3. Decide the HTML-artifact policy (g-1): banner + keep, or `archive/`-move, for the 3 June HTML dashboards in `status/` root and the superseded HTML set generally.
-4. Add the classification outcome (superseded/still-relevant/reference) as a banner or sidecar index for all 25 HTML snapshots — currently it exists only in this report.
-5. Classify the two undated planning files (`conflict-sync-audit-fix-report.md`, `go-composable-business-types-usage.md`) in a future sweep.
-6. Record the dprint scope decision for `docs/status/` (f-6/e-6) in `docs/status/README.md`.
-7. Add source-item IDs to the cluster TODOs (cqrs-lint CLI cluster, API-hardening cluster, benchmark cluster) for per-item traceability (e-4).
-8. Re-run the June-era classification after the ROADMAP "Recurring suggestions" routing settles — confirm nothing re-opens.
-9. Annotate + archive the `23-04` concurrent report once its routed items land in TODO_LIST state (next docs sweep).
-10. Correct the "~437" figure wherever it may remain un-greppable (e.g. rendered HTML) — grep `437` across `docs/` once to confirm the plan-file fix was the last one.
-11. Add a `docs/status/README.md` line on archive criteria for HTML (mirrors the .md policy).
-12. Consider a CHANGELOG `[Unreleased]→Docs` line for the sweep (debatable — docs-only; owner taste).
-13. Re-run the internal-link sweep after the daemon's next sweeps (archive moves can break relative links from archived files; current sweep is clean).
+3. ~~Decide the HTML-artifact policy (g-1): banner + keep, or `archive/`-move, for the 3 June HTML dashboards in `status/` root and the superseded HTML set generally.~~ done (done — HTML-artifact policy decided + recorded in docs/status/README.md §5 (executed by the 08:05 session))
+4. ~~Add the classification outcome (superseded/still-relevant/reference) as a banner or sidecar index for all 25 HTML snapshots — currently it exists only in this report.~~ done (resolved by decision — linked HTML deliverables stay unbannered per docs/status/README.md §5; only superseded dashboards archive)
+5. ~~Classify the two undated planning files (`conflict-sync-audit-fix-report.md`, `go-composable-business-types-usage.md`) in a future sweep.~~ done (docs-health pass 2026-09-06)
+6. ~~Record the dprint scope decision for `docs/status/` (f-6/e-6) in `docs/status/README.md`.~~ done (docs-health pass 2026-09-06)
+7. ~~Add source-item IDs to the cluster TODOs (cqrs-lint CLI cluster, API-hardening cluster, benchmark cluster) for per-item traceability (e-4).~~ done (docs-health pass 2026-09-06)
+8. ~~Re-run the June-era classification after the ROADMAP "Recurring suggestions" routing settles — confirm nothing re-opens.~~ done (done — re-verified this sweep after the ROADMAP routing settled; nothing re-opened)
+9. ~~Annotate + archive the `23-04` concurrent report once its routed items land in TODO_LIST state (next docs sweep).~~ done (docs-health pass 2026-09-06)
+10. ~~Correct the "~437" figure wherever it may remain un-greppable (e.g. rendered HTML) — grep `437` across `docs/` once to confirm the plan-file fix was the last one.~~ done (done — verified this sweep: remaining "437" mentions are this report itself + one generated SVG asset)
+11. ~~Add a `docs/status/README.md` line on archive criteria for HTML (mirrors the .md policy).~~ done (docs-health pass 2026-09-06)
+12. ~~Consider a CHANGELOG `[Unreleased]→Docs` line for the sweep (debatable — docs-only; owner taste).~~ done (declined — docs-only sweeps stay out of CHANGELOG (owner-taste choice, repeated this sweep))
+13. ~~Re-run the internal-link sweep after the daemon's next sweeps (archive moves can break relative links from archived files; current sweep is clean).~~ done (done — this sweep re-ran the link sweep across all living docs: zero broken internal links)
 
 **Top routed correctness/quality items (see TODO_LIST for the full cited list)**
 
-14. Disposition "resurrect bypasses conflict resolution" (`decider.go:109`) — document-by-design or fix, with a pinning test.
-15. Memory-store legacy-event mutation audit (upcaster in-place stamping on shared pointers).
-16. Pin the upcaster V1→V2→V3 chain semantics (comment + test).
-17. Deterministic race-regression test for the upcaster path.
-18. Process-level `cmd/cqrs-lint` tests (build binary, assert exit 0/1/2) — raises 56.4% coverage.
-19. Real-meter + sdktrace recorder tests (noop only proves wiring).
-20. Benchmark protocol: `-benchtime 20x -count 5` + benchstat; from-zero Replay10k; conflict-heavy + upcasted-read benchmarks.
-21. Wire `CQRSConfig.Validate()` into `NewCQRSStack` (zero call sites today).
-22. Consolidate attribute-key constants (`model.Attr*` ↔ cqrs `legacy*`).
-23. `pkg/id` ContentHash unit tests (75.0% floor).
-24. Cursor-pagination test against the real SQLite ordering.
-25. `nix flake check` CI leg (would have caught the vendorHash red window).
-26. Pin golangci-lint version in CI; add provider/github lint leg; actionlint + vendorHash drift guard.
-27. Purge stale `.golangci.yml` exclusion paths (three dead package paths).
-28. Compute doc-drift-prone counts (tests/coverage/dep-table) in CI — kills the recurring count lie at the root.
-29. AGENTS.md restructure under ~30KB (link-out to ADRs).
-30. `pkg.go.dev` indexer check + GitHub Release body checks; script the release-verification checklist.
-31. v0.6 window (ADR-0009): StreamID rename, one result type, panic→error — plus the two NEW candidates this sweep raised: ExternalID↔SourceID payload duality (needs an ADR addendum) and Stats/GetStats renames.
-32. Windows build leg evaluation.
-33. Pre-commit hooks: enable scoped or delete.
-34. `errors.AsType` audit pass; hierarchical-errors disposition.
-35. Kit-side README claim verification in `go-github-kit` source (verify-before-filing/claims discipline).
-36. Local gitleaks/govulncheck/-race parity runs post-refresh.
-37. docs-health VERIFY as a standing pre-release step (wire into the release routine).
-38. Raise `pkg/data/model` coverage (84.9%, lowest package).
-39. `provider/github`: PerPage exposure, ETag/conditional requests (from the still-relevant HTML findings).
-40. Grep `docs/` once more for stale "LOCAL-ONLY gate" phrasing outside archived snapshots.
+14. ~~Disposition "resurrect bypasses conflict resolution" (`decider.go:109`) — document-by-design or fix, with a pinning test.~~ done (docs-health pass 2026-09-06)
+15. ~~Memory-store legacy-event mutation audit (upcaster in-place stamping on shared pointers).~~ done (docs-health pass 2026-09-06)
+16. ~~Pin the upcaster V1→V2→V3 chain semantics (comment + test).~~ done (docs-health pass 2026-09-06)
+17. ~~Deterministic race-regression test for the upcaster path.~~ done (docs-health pass 2026-09-06)
+18. ~~Process-level `cmd/cqrs-lint` tests (build binary, assert exit 0/1/2) — raises 56.4% coverage.~~ done (docs-health pass 2026-09-06)
+19. ~~Real-meter + sdktrace recorder tests (noop only proves wiring).~~ done (docs-health pass 2026-09-06)
+20. ~~Benchmark protocol: `-benchtime 20x -count 5` + benchstat; from-zero Replay10k; conflict-heavy + upcasted-read benchmarks.~~ done (docs-health pass 2026-09-06)
+21. ~~Wire `CQRSConfig.Validate()` into `NewCQRSStack` (zero call sites today).~~ done (docs-health pass 2026-09-06)
+22. ~~Consolidate attribute-key constants (`model.Attr*` ↔ cqrs `legacy*`).~~ done (docs-health pass 2026-09-06)
+23. ~~`pkg/id` ContentHash unit tests (75.0% floor).~~ done (docs-health pass 2026-09-06)
+24. ~~Cursor-pagination test against the real SQLite ordering.~~ done (docs-health pass 2026-09-06)
+25. ~~`nix flake check` CI leg (would have caught the vendorHash red window).~~ done (docs-health pass 2026-09-06)
+26. ~~Pin golangci-lint version in CI; add provider/github lint leg; actionlint + vendorHash drift guard.~~ done (docs-health pass 2026-09-06)
+27. ~~Purge stale `.golangci.yml` exclusion paths (three dead package paths).~~ done (docs-health pass 2026-09-06)
+28. ~~Compute doc-drift-prone counts (tests/coverage/dep-table) in CI — kills the recurring count lie at the root.~~ done (docs-health pass 2026-09-06)
+29. ~~AGENTS.md restructure under ~30KB (link-out to ADRs).~~ done (docs-health pass 2026-09-06)
+30. ~~`pkg.go.dev` indexer check + GitHub Release body checks; script the release-verification checklist.~~ done (docs-health pass 2026-09-06)
+31. ~~v0.6 window (ADR-0009): StreamID rename, one result type, panic→error — plus the two NEW candidates this sweep raised: ExternalID↔SourceID payload duality (needs an ADR addendum) and Stats/GetStats renames.~~ done (done — ADR-0009 ENACTED 2026-09-06 (06:19 session; sign-off recorded in TODO_LIST))
+32. ~~Windows build leg evaluation.~~ done (docs-health pass 2026-09-06)
+33. ~~Pre-commit hooks: enable scoped or delete.~~ done (docs-health pass 2026-09-06)
+34. ~~`errors.AsType` audit pass; hierarchical-errors disposition.~~ done (docs-health pass 2026-09-06)
+35. ~~Kit-side README claim verification in `go-github-kit` source (verify-before-filing/claims discipline).~~ done (docs-health pass 2026-09-06)
+36. ~~Local gitleaks/govulncheck/-race parity runs post-refresh.~~ done (routed to TODO_LIST (local gitleaks/govulncheck parity run))
+37. ~~docs-health VERIFY as a standing pre-release step (wire into the release routine).~~ done (docs-health pass 2026-09-06)
+38. ~~Raise `pkg/data/model` coverage (84.9%, lowest package).~~ done (docs-health pass 2026-09-06)
+39. ~~`provider/github`: PerPage exposure, ETag/conditional requests (from the still-relevant HTML findings).~~ done (dispositioned — FetchAll fixes PerPage at 100 (client.go:293); ETag shipped via the kit cache)
+40. ~~Grep `docs/` once more for stale "LOCAL-ONLY gate" phrasing outside archived snapshots.~~ done (done — verified this sweep: no stale LOCAL-ONLY claims remain outside archived snapshots)
 
 ## g) Questions I cannot answer myself
 
@@ -147,3 +147,15 @@
 ---
 
 _Generated 2026-09-05 23:58 CEST from this session only. Historical truth belongs to the timestamp; current truth belongs to the code (verified at tree state post-sweep, working tree clean, all gates green)._
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+The follow-up sweep that this report's §f anticipated ran the next morning and closed everything above (inline verdicts); the sweep itself is documented in the 2026-09-06 report series (02:40 M-plan execution, 06:19 v0.6 enactment, 06:25 M18, 08:05 P2 sweep — all archived).
+
+- **§b:** HTML layer → decided via `docs/status/README.md` §5; the 22-30 report is now archived too; cluster traceability → source-item IDs landed; verification depth → later sweeps + the 2026-09-06 coverage-mode doc-count run closed the inherited-trust gap; gauntlet parity → gitleaks/govulncheck local parity routed (TODO_LIST); dprint scope → decided and recorded (§6, snapshots excluded).
+- **§c:** buildflow ran green (61/0, M16); the 23-04 report was annotated + archived 2026-09-05; the June dashboards moved per policy; the AGENTS restructure landed (44.9 → 26.7 KB); both undated planning files classified + archived; the CHANGELOG docs-line stays declined.
+- **§g:** Q1 → decided (policy §5); Q2 → the two-tier policy held — era-closed reports get bucket appendices + targeted strikes, current-cycle reports got full inline §f treatment; Q3 → source-item IDs embedded in cluster TODOs, and per-item traceability proved itself in the 2026-09-06 sweeps.
+
+_Archived by the 2026-09-06 docs-health sweep: every forward item closed or routed._

@@ -113,60 +113,60 @@
 
 **Docs bookkeeping (BLOCKING — check-doc-counts will fail until done):**
 
-1. Refresh TODO_LIST.md: tick ~25 items with ✅ DONE notes + today's date; record the ADR-0009 owner sign-off (directive captured verbatim).
-2. Run `./scripts/check-doc-counts.sh`; update AGENTS/README/FEATURES/TODO_LIST test+coverage counts.
-3. Write CHANGELOG "Unreleased v0.6.0" migration section (renames, `BatchOutcome`, DTO `sourceId`, 499/504, sentinel typing, `TombstoneItem` variadic).
-4. Update FEATURES.md rows (DLQ surface, rate-limiter options, headers, `WithTracer`, `EventLogger`, write-helpers, `TombstoneInfo`, vocabulary).
-5. README: v0.6 API migration quick-reference + sqlite-driver blank-import requirement (mirror of the new CQRSConfig doc).
-6. Vocabulary sweep: `AggregateID(` → `StreamID(` prose in ADRs/AGENTS/FEATURES (keep ADR-0009's historical narrative).
-7. AGENTS.md restructure ≤30 KB (link ADRs instead of inlining; gotchas ≤20).
-8. Separate `provider/github/CHANGELOG.md` (seed with v0.1.0 history).
-9. Document gopls `stdversion` = GOEXPERIMENT noise gotcha (AGENTS).
-10. TODO: formally close `govalid` as wontfix; strike ROADMAP "Export to JSON/CSV" row; add source-item IDs to remaining cluster TODOs.
-11. Docs policy cluster: HTML-artifact banner/archive decision (25 reports; 3 superseded June dashboards), dprint scope for `docs/status/`, classify the 2 undated planning files, annotate+archive the 23:04 report.
-12. Finish + verify the `verify-release.sh v0.5.0 v0.1.0` smoke run (docs-verify section) — background job was still running at report time.
+1. ~~Refresh TODO_LIST.md: tick ~25 items with ✅ DONE notes + today's date; record the ADR-0009 owner sign-off (directive captured verbatim).~~ done (docs-health pass 2026-09-06)
+2. ~~Run `./scripts/check-doc-counts.sh`; update AGENTS/README/FEATURES/TODO_LIST test+coverage counts.~~ done (docs-health pass 2026-09-06)
+3. ~~Write CHANGELOG "Unreleased v0.6.0" migration section (renames, `BatchOutcome`, DTO `sourceId`, 499/504, sentinel typing, `TombstoneItem` variadic).~~ done (docs-health pass 2026-09-06)
+4. ~~Update FEATURES.md rows (DLQ surface, rate-limiter options, headers, `WithTracer`, `EventLogger`, write-helpers, `TombstoneInfo`, vocabulary).~~ done (docs-health pass 2026-09-06)
+5. ~~README: v0.6 API migration quick-reference + sqlite-driver blank-import requirement (mirror of the new CQRSConfig doc).~~ done (docs-health pass 2026-09-06)
+6. ~~Vocabulary sweep: `AggregateID(` → `StreamID(` prose in ADRs/AGENTS/FEATURES (keep ADR-0009's historical narrative).~~ done (docs-health pass 2026-09-06)
+7. ~~AGENTS.md restructure ≤30 KB (link ADRs instead of inlining; gotchas ≤20).~~ done (docs-health pass 2026-09-06)
+8. ~~Separate `provider/github/CHANGELOG.md` (seed with v0.1.0 history).~~ done (docs-health pass 2026-09-06)
+9. ~~Document gopls `stdversion` = GOEXPERIMENT noise gotcha (AGENTS).~~ done (docs-health pass 2026-09-06)
+10. ~~TODO: formally close `govalid` as wontfix; strike ROADMAP "Export to JSON/CSV" row; add source-item IDs to remaining cluster TODOs.~~ done (docs-health pass 2026-09-06)
+11. ~~Docs policy cluster: HTML-artifact banner/archive decision (25 reports; 3 superseded June dashboards), dprint scope for `docs/status/`, classify the 2 undated planning files, annotate+archive the 23:04 report.~~ done (docs-health pass 2026-09-06)
+12. ~~Finish + verify the `verify-release.sh v0.5.0 v0.1.0` smoke run (docs-verify section) — background job was still running at report time.~~ done (done — full smoke green again this sweep (verify-release.sh v0.5.0 v0.1.0 → RESULT: OK))
 
 **Release path:**
-13. Owner decision → tag core **v0.6.0** (go-release flow: CHANGELOG first, annotated tag, proxy/pkg.go.dev verification via verify-release.sh).
-14. provider/github: bump pin to v0.6.0, migrate `SourceID`/`StreamID` vocabulary, release provider v0.2.0 (go-ecosystem-upgrade flow).
-15. Decide deprecated-alias removal cadence (`ExternalID`/`NewExternalID`/`AggregateID`/`GetStats` in v0.7?) — record in ROADMAP.
-16. Re-run `-race ./...` locally before tagging.
+13. ~~Owner decision → tag core **v0.6.0** (go-release flow: CHANGELOG first, annotated tag, proxy/pkg.go.dev verification via verify-release.sh).~~ done (routed to TODO_LIST Release path (owner-gated tag timing))
+14. ~~provider/github: bump pin to v0.6.0, migrate `SourceID`/`StreamID` vocabulary, release provider v0.2.0 (go-ecosystem-upgrade flow).~~ done (routed to TODO_LIST (post-tag provider re-pin + vocabulary migration, then provider v0.2.0))
+15. ~~Decide deprecated-alias removal cadence (`ExternalID`/`NewExternalID`/`AggregateID`/`GetStats` in v0.7?) — record in ROADMAP.~~ done (routed to ROADMAP Open Question 6 (deprecated-alias lifetime))
+16. ~~Re-run `-race ./...` locally before tagging.~~ done (done — full `-race` suite green in the 2026-09-06 docs-health sweep)
 
 **Remaining TODO items:**
-17. `provider/github`: ETag / conditional requests for incremental revalidation.
-18. Verify `go-github-kit` claims against source (verify-external-claims); annotate the provider README if wrong.
-19. File the watermill causation-metadata upstream issue (verify-before-filing first).
-20. 100-point go-cqrs-lite deep-dive re-score (target ≥90 post-M-plan).
-21. `SSH_PRIVATE_KEY` secret (owner) OR make `go-finding` public and delete SSH machinery (owner call).
-22. Coverage floors: measure + raise `pkg/data/model` (target ≥90%) and `cmd/localsync-lint`.
-23. `/items` tombstone-visibility integration test (`IncludeTombstoned` → `TombstoneInfo` on the wire).
-24. Verify huma OpenAPI schema for `ItemResponse.Tombstone` + declared 499/504 in generated `openapi.json`.
-25. Per-client limiter recipe: key from API key (document + test).
-26. `StreamID` cache growth note (bounded by source set — mirror the `lockSource` doc pattern).
-27. DLQ ops runbook (list → replay → delete → purge) in README/docs.
-28. Consider `PurgeDeadLettersBefore`/`ListPaged` exposure (admin interface) — revisit on demand.
-29. Consider outcome attributes on `localsync.sync` spans (pkg/sync) for parity with the batch span.
-30. Upstream proposal: projectionhost auto-delete-on-successful-replay option.
-31. Verify the dprint CI step runs green on next push (install-script path).
-32. Verify the windows CI leg runs green on next push.
-33. Confirm `nix flake check` + `check-vendorhash.sh` still green (no dep changes expected).
-34. buildflow preflight warnings: rebuild the stale binary (`nix build . && nix run .#reinstall`), fix gomod-freshness env (dead cache mount), `VACUUM` the 2.27 GB buildflow db.
-35. AGENTS: document the GOWORK=off quirk + provider pinning rules for API renames.
-36. AGENTS: gotcha for "CLI build is authoritative over stale gopls diagnostics" (re-learned this session).
-37. `errors_test.go`: cosmetic `InvalidField("externalId")` literal → `sourceID` vocabulary.
-38. `pkg/testutil/syncstore.go`: review fake's doc comments post-`BatchOutcome` rename.
-39. Add `pkg/sync` logging test for `CQRSConfig.EventLogger` wiring (currently only default path covered).
-40. Consider projectionhost DLQ HTTP endpoint (endpoint optional per TODO — confirm "skip" decision in TODO_LIST).
-41. `dlq.go`: doc example for the replay→delete loop in the package doc.
-42. Sweep for other hardcoded cross-layer identifiers (projectionName-style) in tests.
-43. Consider `SyncResult.Batch` exposure in the `/sync` HTTP response (currently Fetched/Skipped/Errors only).
-44. `conflict_aware.go`: rename `summary` locals to `batch` (post-rename naming hygiene).
-45. Record the 17 erraudit findings disposition in TODO_LIST (done note referencing this report).
-46. Update AGENTS testing table counts + `cmd/localsync-lint` note after doc-count run.
-47. ROADMAP: add "alias removal v0.7" + "DLQ endpoint" rows.
-48. CHANGELOG Unreleased: correlation/DLQ/observability entries per existing convention.
-49. Consider making `blockingProvider`-style test doubles reusable in `pkg/testutil`.
-50. Re-run `buildflow --build-mode full` after the docs phase (it consumes doc counts too).
+17. ~~`provider/github`: ETag / conditional requests for incremental revalidation.~~ done (docs-health pass 2026-09-06)
+18. ~~Verify `go-github-kit` claims against source (verify-external-claims); annotate the provider README if wrong.~~ done (docs-health pass 2026-09-06)
+19. ~~File the watermill causation-metadata upstream issue (verify-before-filing first).~~ done (docs-health pass 2026-09-06)
+20. ~~100-point go-cqrs-lite deep-dive re-score (target ≥90 post-M-plan).~~ done (docs-health pass 2026-09-06)
+21. ~~`SSH_PRIVATE_KEY` secret (owner) OR make `go-finding` public and delete SSH machinery (owner call).~~ done (routed to TODO_LIST (owner-gated SSH secret vs public go-finding))
+22. ~~Coverage floors: measure + raise `pkg/data/model` (target ≥90%) and `cmd/localsync-lint`.~~ done (docs-health pass 2026-09-06)
+23. ~~`/items` tombstone-visibility integration test (`IncludeTombstoned` → `TombstoneInfo` on the wire).~~ done (routed to TODO_LIST (tombstone /items integration test))
+24. ~~Verify huma OpenAPI schema for `ItemResponse.Tombstone` + declared 499/504 in generated `openapi.json`.~~ done (routed to TODO_LIST (huma Tombstone schema verify))
+25. ~~Per-client limiter recipe: key from API key (document + test).~~ done (routed to TODO_LIST (per-client limiter recipe))
+26. ~~`StreamID` cache growth note (bounded by source set — mirror the `lockSource` doc pattern).~~ done (routed to TODO_LIST (StreamID cache growth note))
+27. ~~DLQ ops runbook (list → replay → delete → purge) in README/docs.~~ done (routed to TODO_LIST (DLQ ops runbook))
+28. ~~Consider `PurgeDeadLettersBefore`/`ListPaged` exposure (admin interface) — revisit on demand.~~ done (declined for now — the admin surface (DeadLetters/DeadLetterCount/PurgeDeadLetters) exists; paged/filtered purge only on demand)
+29. ~~Consider outcome attributes on `localsync.sync` spans (pkg/sync) for parity with the batch span.~~ done (routed to TODO_LIST hygiene cluster (span outcome attrs))
+30. ~~Upstream proposal: projectionhost auto-delete-on-successful-replay option.~~ done (routed to ROADMAP (projectionhost auto-delete-on-replay))
+31. ~~Verify the dprint CI step runs green on next push (install-script path).~~ done (docs-health pass 2026-09-06)
+32. ~~Verify the windows CI leg runs green on next push.~~ done (docs-health pass 2026-09-06)
+33. ~~Confirm `nix flake check` + `check-vendorhash.sh` still green (no dep changes expected).~~ done (docs-health pass 2026-09-06)
+34. ~~buildflow preflight warnings: rebuild the stale binary (`nix build . && nix run .#reinstall`), fix gomod-freshness env (dead cache mount), `VACUUM` the 2.27 GB buildflow db.~~ done (routed to TODO_LIST (buildflow local hygiene))
+35. ~~AGENTS: document the GOWORK=off quirk + provider pinning rules for API renames.~~ done (docs-health pass 2026-09-06)
+36. ~~AGENTS: gotcha for "CLI build is authoritative over stale gopls diagnostics" (re-learned this session).~~ done (docs-health pass 2026-09-06)
+37. ~~`errors_test.go`: cosmetic `InvalidField("externalId")` literal → `sourceID` vocabulary.~~ done (routed to TODO_LIST hygiene cluster)
+38. ~~`pkg/testutil/syncstore.go`: review fake's doc comments post-`BatchOutcome` rename.~~ done (routed to TODO_LIST hygiene cluster)
+39. ~~Add `pkg/sync` logging test for `CQRSConfig.EventLogger` wiring (currently only default path covered).~~ done (routed to TODO_LIST (EventLogger wiring test))
+40. ~~Consider projectionhost DLQ HTTP endpoint (endpoint optional per TODO — confirm "skip" decision in TODO_LIST).~~ done (routed to ROADMAP (DLQ HTTP endpoints — optional confirmed))
+41. ~~`dlq.go`: doc example for the replay→delete loop in the package doc.~~ done (routed to TODO_LIST (dlq.go doc example))
+42. ~~Sweep for other hardcoded cross-layer identifiers (projectionName-style) in tests.~~ done (routed to TODO_LIST hygiene cluster)
+43. ~~Consider `SyncResult.Batch` exposure in the `/sync` HTTP response (currently Fetched/Skipped/Errors only).~~ done (routed to TODO_LIST hygiene cluster)
+44. ~~`conflict_aware.go`: rename `summary` locals to `batch` (post-rename naming hygiene).~~ done (routed to TODO_LIST hygiene cluster)
+45. ~~Record the 17 erraudit findings disposition in TODO_LIST (done note referencing this report).~~ done (done — the 17-finding disposition is recorded in CHANGELOG v0.6.0 (Changed))
+46. ~~Update AGENTS testing table counts + `cmd/localsync-lint` note after doc-count run.~~ done (done — counts synced (cbbfa80) and re-verified this sweep; doc-counts gate green)
+47. ~~ROADMAP: add "alias removal v0.7" + "DLQ endpoint" rows.~~ done (done/routed — ROADMAP Open Question 6 + ROADMAP DLQ-endpoint idea)
+48. ~~CHANGELOG Unreleased: correlation/DLQ/observability entries per existing convention.~~ done (docs-health pass 2026-09-06)
+49. ~~Consider making `blockingProvider`-style test doubles reusable in `pkg/testutil`.~~ done (routed to TODO_LIST hygiene cluster)
+50. ~~Re-run `buildflow --build-mode full` after the docs phase (it consumes doc counts too).~~ done (docs-health pass 2026-09-06)
 
 ## g) QUESTIONS I CANNOT FIGURE OUT MYSELF
 
@@ -177,3 +177,16 @@
 ---
 
 **Verification snapshot at report time:** build OK · full suite OK · lint 0 issues · localsync-lint strict clean · erraudit 0 violations · actionlint clean · dprint check clean · windows cross-compile OK · `-race` NOT re-run this session · verify-release smoke run still in flight.
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+All §b/§c/§f items closed by the follow-on sessions (06:25 M18, 08:05 P2 sweep) or routed to the living docs; §f carries inline verdicts above.
+
+- **§b (partials):** 1 TODO_LIST refresh — done (08:05 sweep, ~30 evidence-cited ticks); 2 CHANGELOG migration section — done (v0.6.0 Migration table); 3 ADR-0009 sign-off — recorded verbatim in TODO_LIST; 4 FEATURES — done (rows 60-72) and vocabulary-synced in this sweep; 5 doc-counts — green (incl. coverage mode, re-verified this sweep); 6 verify-release smoke — green end-to-end (re-run this sweep: `v0.5.0 v0.1.0` → RESULT OK); 7 coverage floors — model 100.0%, cmd 64.8%; 8 provider follow-up — routed (TODO_LIST post-tag item); 9 vocabulary sweep — done (08:05 §a-6).
+- **§c (not started):** every item shipped (ETag, kit-claim verification, go-cqrs-lite#21, 93/100 re-score, provider CHANGELOG, AGENTS restructure 26.7 KB, docs policy, ROADMAP cleanup, source-item IDs, gopls gotchas, govalid → ROADMAP) except the owner-gated SSH secret (routed, TODO_LIST).
+- **§g:** Q1 (tag timing) → TODO_LIST Release path (owner); Q2 (go-finding endgame) → TODO_LIST (owner); Q3 (alias lifetime) → ROADMAP Open Question 6.
+- **Verification snapshot note:** the report-time `-race`-not-re-run gap is closed — the docs-health sweep ran the full race suite green (11/11), matching the 08:05 session's two green race runs.
+
+_Archived by the 2026-09-06 docs-health sweep: every forward item closed or routed._

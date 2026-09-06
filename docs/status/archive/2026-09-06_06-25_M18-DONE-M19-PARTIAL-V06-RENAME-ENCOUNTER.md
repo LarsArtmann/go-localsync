@@ -11,9 +11,9 @@
 
 This session executed the Pareto plan tail from M18. M18 (cqrs-lint CLI phase 2) is fully done, including a **command rename** (`cmd/cqrs-lint` → `cmd/localsync-lint`) the owner requested mid-session to kill the name collision with go-cqrs-lite's library linter. M19 got its five new architectural rules (C0011–C0015) implemented and proven; SARIF and the rules doc page are still open.
 
-Mid-session the tree was hijacked by a **parallel session** enacting the v0.6 rename (ADR-0009: `AggregateID`→`StreamID`, `model.Item.ExternalID`→`SourceID`, `GetStats`→`Stats`). That session stalled ~50 minutes with **master broken** (3 compile errors, daemon-committed). I completed the mechanical rename forward; **one error remains** (StreamID zero-value construction), and at 06:23 the parallel session (or daemon) committed again — ownership of the tree is unclear.
+Mid-session the tree was hijacked by a **parallel session** enacting the v0.6 rename (ADR-0009: `AggregateID`→`StreamID`, `model.Item.ExternalID`→`SourceID`, `GetStats`→`Stats`). That session stalled ~50 minutes with **master broken** (3 compile errors, daemon-committed). I completed the mechanical rename forward; ~~**one error remains** (StreamID zero-value construction), and at 06:23 the parallel session (or daemon) committed again — ownership of the tree is unclear.~~ RESOLVED: the parallel session completed the rename the same morning; master is green (CI run 34015593461).
 
-**Master build status right now: RED** (1 known compile error, see §b/§d).
+~~**Master build status right now: RED** (1 known compile error, see §b/§d).~~ RESOLVED 2026-09-06: master green — full suite + race + strict gate + CI all pass (docs-health sweep verification).
 
 ---
 
@@ -79,48 +79,48 @@ Gate state at M18 completion: build, vet, race suite (11 pkgs), strict linter, g
 
 **Immediate unblock (master red → green):**
 
-1. Resolve `cqrsid.StreamID` zero-value from `~/projects/go-cqrs-lite/id/v4` and fix `aggregate_id.go:52` (candidate: whatever constructor `ParseStreamID` error paths use / the library's canonical zero).
-2. Grep for rename stragglers the build can't see yet (test files referencing `GetStats`, `AggregateID(` non-test callers, README examples) — run the full race suite.
-3. Sync doc counts (~378) + per-package table (pkg/cqrs 157, pkg/sync 36, pkg/api 35, cqrslint 69, cmd 23) via `check-doc-counts.sh`.
-4. Decide with owner (see §g Q1) whether _I_ continue the v0.6 enactment or leave it to the other session.
+1. ~~Resolve `cqrsid.StreamID` zero-value from `~/projects/go-cqrs-lite/id/v4` and fix `aggregate_id.go:52` (candidate: whatever constructor `ParseStreamID` error paths use / the library's canonical zero).~~ done (docs-health pass 2026-09-06)
+2. ~~Grep for rename stragglers the build can't see yet (test files referencing `GetStats`, `AggregateID(` non-test callers, README examples) — run the full race suite.~~ done (docs-health pass 2026-09-06)
+3. ~~Sync doc counts (~378) + per-package table (pkg/cqrs 157, pkg/sync 36, pkg/api 35, cqrslint 69, cmd 23) via `check-doc-counts.sh`.~~ done (done — counts synced (cbbfa80 → 401 core / +35 provider); gate green in both modes this sweep)
+4. ~~Decide with owner (see §g Q1) whether _I_ continue the v0.6 enactment or leave it to the other session.~~ done (resolved — the enactment session completed the rename same morning; both sessions work landed on master)
 
 **Finish M19 (est. ~45 min):**
-5. SARIF 2.1.0 output: `formatSARIF` emit path (single JSON doc, driver.rules from catalog, results for active findings, suppressed included only with `--show-suppressed` + `suppressions:[{kind:"inSource"}]`), level mapping error/warning.
-6. Fix the help-text lie in the same change: `-format` help lists exactly what exists; add a process test that every help-listed format is accepted.
-7. SARIF tests: in-process builder test + process test (unmarshal, version/runs/results/ruleId/startLine/level, rules count = catalog size).
-8. `docs/localsync-lint.md`: all 15 rules (ID/severity/title/rationale) + directive guide (line/file/block/range, `all`, nesting guard, unknown-rule tolerance for foreign C0xx IDs) + flag reference + CI-gate pairing with the library linter.
-9. AGENTS.md: "10 AST checks (C0001-C0010)" → 15 rules C0001–C0015 with one-line purposes; update `internal/cqrslint` row text.
-10. CHANGELOG: C0011–C0015 + SARIF + doc page under Unreleased.
-11. TODO_LIST: strike C0011–C0015 + SARIF + doc page from the CLI-cluster item.
-12. Full tier gate + counts sync.
+5. ~~SARIF 2.1.0 output: `formatSARIF` emit path (single JSON doc, driver.rules from catalog, results for active findings, suppressed included only with `--show-suppressed` + `suppressions:[{kind:"inSource"}]`), level mapping error/warning.~~ done (routed to TODO_LIST M19 remainder)
+6. ~~Fix the help-text lie in the same change: `-format` help lists exactly what exists; add a process test that every help-listed format is accepted.~~ done (routed to TODO_LIST M19 remainder (the help-text lie + acceptance test are named there))
+7. ~~SARIF tests: in-process builder test + process test (unmarshal, version/runs/results/ruleId/startLine/level, rules count = catalog size).~~ done (routed to TODO_LIST M19 remainder)
+8. ~~`docs/localsync-lint.md`: all 15 rules (ID/severity/title/rationale) + directive guide (line/file/block/range, `all`, nesting guard, unknown-rule tolerance for foreign C0xx IDs) + flag reference + CI-gate pairing with the library linter.~~ done (routed to TODO_LIST M19 remainder (docs/localsync-lint.md))
+9. ~~AGENTS.md: "10 AST checks (C0001-C0010)" → 15 rules C0001–C0015 with one-line purposes; update `internal/cqrslint` row text.~~ done (done — AGENTS architecture row + testing row synced to 15 rules (C0001-C0015) this sweep)
+10. ~~CHANGELOG: C0011–C0015 + SARIF + doc page under Unreleased.~~ done (done — CHANGELOG v0.6.0 Added gained the C0011-C0015 entry this sweep)
+11. ~~TODO_LIST: strike C0011–C0015 + SARIF + doc page from the CLI-cluster item.~~ done (done — TODO_LIST M19 remainder struck C0011-C0015 as shipped this sweep)
+12. ~~Full tier gate + counts sync.~~ done (docs-health pass 2026-09-06)
 
 **M20–M22 (skip owner-gated bits):**
-13. M20.1 `X-RateLimit-Limit`/`-Remaining` headers on `POST /sync` + tests.
-14. M20.2 `WithRateLimiter(keyExtractor)` per-client option + tests.
-15. M20.3 global-vs-per-client limiter scope doc (options.go + README).
-16. M21.1–21.2 log quieting docs + plumb level control if missing.
-17. M21.3 OTel span around `Syncer.Sync` (`localsync.sync`) + attribute test; 21.4 CHANGELOG.
-18. M22.1–22.2 verify go-github-kit README claims (empty token, 429/retry) in source; annotate if wrong.
-19. M22.3–22.4 ETag spike for GitHub events endpoint → implement or document infeasibility.
-20. M22.5 `PerPage` exposure in `FetchAll` options; 22.6 tests + provider README + provider CHANGELOG seed.
+13. ~~M20.1 `X-RateLimit-Limit`/`-Remaining` headers on `POST /sync` + tests.~~ done (docs-health pass 2026-09-06)
+14. ~~M20.2 `WithRateLimiter(keyExtractor)` per-client option + tests.~~ done (docs-health pass 2026-09-06)
+15. ~~M20.3 global-vs-per-client limiter scope doc (options.go + README).~~ done (docs-health pass 2026-09-06)
+16. ~~M21.1–21.2 log quieting docs + plumb level control if missing.~~ done (docs-health pass 2026-09-06)
+17. ~~M21.3 OTel span around `Syncer.Sync` (`localsync.sync`) + attribute test; 21.4 CHANGELOG.~~ done (docs-health pass 2026-09-06)
+18. ~~M22.1–22.2 verify go-github-kit README claims (empty token, 429/retry) in source; annotate if wrong.~~ done (docs-health pass 2026-09-06)
+19. ~~M22.3–22.4 ETag spike for GitHub events endpoint → implement or document infeasibility.~~ done (docs-health pass 2026-09-06)
+20. ~~M22.5 `PerPage` exposure in `FetchAll` options; 22.6 tests + provider README + provider CHANGELOG seed.~~ done (dispositioned — FetchAll fixes PerPage at the GitHub-recommended 100 (client.go:293))
 
 **Docs cluster (M23–M24):**
-21. M23 AGENTS.md restructure <30KB (link-out to ADRs, ≤20 gotchas, link-first architecture table) — with diff review so nothing non-obvious is lost.
-22. M24.1 HTML banner/archive policy execution; 24.2 dprint scope for `docs/status/`; 24.3 classify 2 undated planning files.
-23. M24.4 purge stale `.golangci.yml` exclusion paths; 24.5 document gopls stdversion noise; 24.6 ROADMAP export-row strike; 24.7 prep 23-04 report annotation.
+21. ~~M23 AGENTS.md restructure <30KB (link-out to ADRs, ≤20 gotchas, link-first architecture table) — with diff review so nothing non-obvious is lost.~~ done (docs-health pass 2026-09-06)
+22. ~~M24.1 HTML banner/archive policy execution; 24.2 dprint scope for `docs/status/`; 24.3 classify 2 undated planning files.~~ done (docs-health pass 2026-09-06)
+23. ~~M24.4 purge stale `.golangci.yml` exclusion paths; 24.5 document gopls stdversion noise; 24.6 ROADMAP export-row strike; 24.7 prep 23-04 report annotation.~~ done (docs-health pass 2026-09-06)
 
 **Long tail (M25–M27):**
-24. M25.1 `SyncOptions.Validate` reject `MaxPages < 0`; 25.2 typed `Attributes` write-helpers; 25.3 `ParseTombstoneReason` in API DTOs.
-25. M25.4–25.5 `b.Loop()` migration (adapter/stack/upcast benches) + benchmark run.
-26. M25.6 unify `waitForCount`/`waitForCountTB` behind `testing.TB`.
-27. M26.1 `TombstoneItem` event.Option parity; 26.2 huma 408 mapping verify; 26.3 ADR vocabulary sweep AggregateID→StreamID prose; 26.4 `errors.AsType` audit; 26.5 hierarchical-errors disposition.
-28. M27.1 100-point deep-dive re-audit delta; 27.2 pre-commit hooks enable-or-delete; 27.3 library-gate suppression audit; 27.4 windows build-leg eval; 27.5 `provider/github/CHANGELOG.md`; 27.6 release-checklist VERIFY step wiring; 27.7 DLQ List/Purge/Replay SDK surface.
-29. After the parallel rename settles: re-run `scripts/check-doc-counts.sh --coverage` and re-pin vendorHash if go.mod moved (daemon commits go.mod without touching the flake).
-30. Re-verify CI-shape locally: `actionlint` on the renamed gate step; confirm the nix job's vendorHash guard still matches post-rename HEAD.
-31. Consider renaming the internal _package_ `internal/cqrslint` → `internal/localsynclint` for full vocabulary alignment (mechanical; only if owner wants it — the command rename was the user-visible fix).
-32. Add the `-format` help-vs-acceptance process test from §e.3 even if SARIF slips.
-33. Extend `check-doc-counts.sh` with the rule-count claim from §e.6.
-34. Close out the killed background job hygiene: nothing from this session should be left running (verified: job 009 killed).
+24. ~~M25.1 `SyncOptions.Validate` reject `MaxPages < 0`; 25.2 typed `Attributes` write-helpers; 25.3 `ParseTombstoneReason` in API DTOs.~~ done (docs-health pass 2026-09-06)
+25. ~~M25.4–25.5 `b.Loop()` migration (adapter/stack/upcast benches) + benchmark run.~~ done (docs-health pass 2026-09-06)
+26. ~~M25.6 unify `waitForCount`/`waitForCountTB` behind `testing.TB`.~~ done (docs-health pass 2026-09-06)
+27. ~~M26.1 `TombstoneItem` event.Option parity; 26.2 huma 408 mapping verify; 26.3 ADR vocabulary sweep AggregateID→StreamID prose; 26.4 `errors.AsType` audit; 26.5 hierarchical-errors disposition.~~ done (docs-health pass 2026-09-06)
+28. ~~M27.1 100-point deep-dive re-audit delta; 27.2 pre-commit hooks enable-or-delete; 27.3 library-gate suppression audit; 27.4 windows build-leg eval; 27.5 `provider/github/CHANGELOG.md`; 27.6 release-checklist VERIFY step wiring; 27.7 DLQ List/Purge/Replay SDK surface.~~ done (docs-health pass 2026-09-06)
+29. ~~After the parallel rename settles: re-run `scripts/check-doc-counts.sh --coverage` and re-pin vendorHash if go.mod moved (daemon commits go.mod without touching the flake).~~ done (done — doc-counts green incl. coverage mode + vendorHash guard green, this sweep)
+30. ~~Re-verify CI-shape locally: `actionlint` on the renamed gate step; confirm the nix job's vendorHash guard still matches post-rename HEAD.~~ done (done — actionlint clean this sweep; the nix vendorHash guard proven twice in CI (caught the daemon dep-refresh drifts))
+31. ~~Consider renaming the internal _package_ `internal/cqrslint` → `internal/localsynclint` for full vocabulary alignment (mechanical; only if owner wants it — the command rename was the user-visible fix).~~ done (routed to ROADMAP (internal/cqrslint package rename, owner-optional))
+32. ~~Add the `-format` help-vs-acceptance process test from §e.3 even if SARIF slips.~~ done (routed to TODO_LIST M19 remainder)
+33. ~~Extend `check-doc-counts.sh` with the rule-count claim from §e.6.~~ done (routed to TODO_LIST (rule-count claim in check-doc-counts.sh))
+34. ~~Close out the killed background job hygiene: nothing from this session should be left running (verified: job 009 killed).~~ done (docs-health pass 2026-09-06)
 
 ## g) QUESTIONS I CANNOT ANSWER MYSELF
 
@@ -139,3 +139,16 @@ Conclusion for §g Q1, upgraded from question to warning: **two agents are editi
 ---
 
 **Waiting for instructions.**
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+The red-master emergency and the M19 tail both resolved within hours; §f carries inline verdicts above.
+
+- **§b:** M19 — rules C0011-C0015 SHIPPED (catalog verified at 15); SARIF + directives doc page remain the only open M19 items, routed to the TODO_LIST M19 remainder; the v0.6 rename completion — done by the parallel session the same morning (enactment closed, suite green); doc-count sync — done (401 core / +35 provider, gate green in both modes).
+- **§c (not started):** M19.1/M19.2 routed (TODO_LIST); M19 counts/docs/CHANGELOG sync + TODO strikes — done by this sweep; M20-M27 — all shipped by the 08:05 P2 session (TODO_LIST ✅s + CHANGELOG v0.6.0).
+- **§d:** item 1 (master red) — resolved same morning; item 2 (the `-format` help sarif lie) — still open by design-choice, explicitly tracked in the TODO_LIST M19 remainder.
+- **§g:** Q1 (tree ownership) — moot; the enactment completed and the tree stabilized. Q2 (push/tag authorization) — carried by TODO_LIST Release path (owner). Q3 (/metrics posture) — decided keyed, documented (06:19 report §a).
+
+_Archived by the 2026-09-06 docs-health sweep: every forward item closed or routed._
