@@ -156,7 +156,7 @@ func BenchmarkUpcastedLegacyRead(b *testing.B) {
 	} {
 		b.Run(tc.name, func(b *testing.B) {
 			dbPath := filepath.Join(b.TempDir(), "upcast-bench.db")
-			seedUpcastStream(b, dbPath, tc.legacy)
+			seedUpcastStream(b, dbPath, tc.legacy) //nolint:contextcheck // seeding is benchmark setup, not request-scoped
 
 			db, err := sql.Open("sqlite", dbPath)
 			if err != nil {
