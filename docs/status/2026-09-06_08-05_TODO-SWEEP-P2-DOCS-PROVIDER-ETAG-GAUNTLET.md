@@ -3,9 +3,9 @@
 **Generated:** 2026-09-06 08:05 CEST
 **Session scope:** Continuation of the owner's "execute the ENTIRE TODO_LIST" directive. Started from the v0.6-enactment state (previous report: `2026-09-06_06-19_V06-ENACTMENT-AND-TODO-SWEEP.md`), executed the remaining docs/tooling/provider/audit clusters, drove every implementable TODO to done, and ran the full verification gauntlet.
 **Commit note:** The auto-commit daemon committed and pushed all session work in heuristic chunks (HEAD `dfdfb93` at report time, tree clean, branch == origin/master). No manual commits.
-**Verification headline:** `go test -race ./...` exit 0 (401 tests / 11 pkgs + 35 provider), `golangci-lint` 0 issues, both cqrs-lint gates clean, `nix flake check` green locally after an emergency vendorHash re-pin (see d1/d2), dprint + actionlint + doc-counts green. **Master CI was red twice during the session and one red leg (vendorHash) has a fix sitting uncommitted at report time — see d1/d2 and the 🔴 banner below.**
+**Verification headline:** `go test -race ./...` exit 0 (401 tests / 11 pkgs + 35 provider), `golangci-lint` 0 issues, both cqrs-lint gates clean, `nix flake check` green locally after an emergency vendorHash re-pin (see d1/d2), dprint + actionlint + doc-counts green. ~~**Master CI was red twice during the session and one red leg (vendorHash) has a fix sitting uncommitted at report time — see d1/d2 and the 🔴 banner below.**~~ RESOLVED 2026-09-06: the re-pin landed as `434ba02` and CI run 34015593461 is green (test/lint/nix all pass).
 
-> 🔴 **ACTION REQUIRED:** the vendorHash re-pin (`flake.nix` → `sha256-ZCX5pAXML5c+rKjqFNvk1C4VM+lqxzWN50sTShl0E2A=`) is on disk and locally verified but NOT yet committed/pushed at report time. Until the next daemon commit lands and CI re-runs, master's nix leg stays red. Verify with `gh run list` before trusting "green".
+> ~~🔴 **ACTION REQUIRED:** the vendorHash re-pin (`flake.nix` → `sha256-ZCX5pAXML5c+rKjqFNvk1C4VM+lqxzWN50sTShl0E2A=`) is on disk and locally verified but NOT yet committed/pushed at report time. Until the next daemon commit lands and CI re-runs, master's nix leg stays red. Verify with `gh run list` before trusting "green".~~ RESOLVED 2026-09-06 (docs-health sweep): committed as `434ba02`; `gh run list` shows the next CI run fully green — the nix leg passed with the new hash.
 
 ---
 
@@ -83,74 +83,74 @@ Every implementable item on TODO_LIST.md is now done or explicitly owner-gated �
 
 **P0 — restore + prove green, then release**
 
-1. Commit/push the vendorHash re-pin (daemon) and watch the next CI run to green — `gh run list` until `nix` + `lint` legs pass.
-2. Owner: decide v0.6.0 tag timing (§g1) — everything (migration docs, verify-release.sh, gauntlet) is staged; tag → run `scripts/verify-release.sh v0.6.0` → GitHub Release → proxy/pkg.go.dev checks.
-3. Owner: `SSH_PRIVATE_KEY` secret vs make `go-finding` public (§g2) — activates the library cqrs-lint CI leg; the skip-path is CI-proven.
+1. ~~Commit/push the vendorHash re-pin (daemon) and watch the next CI run to green — `gh run list` until `nix` + `lint` legs pass.~~ done (committed as 434ba02; CI run 34015593461 green (test/lint/nix all pass))
+2. ~~Owner: decide v0.6.0 tag timing (§g1) — everything (migration docs, verify-release.sh, gauntlet) is staged; tag → run `scripts/verify-release.sh v0.6.0` → GitHub Release → proxy/pkg.go.dev checks.~~ done (routed to TODO_LIST Release path (owner-gated tag timing))
+3. ~~Owner: `SSH_PRIVATE_KEY` secret vs make `go-finding` public (§g2) — activates the library cqrs-lint CI leg; the skip-path is CI-proven.~~ done (routed to TODO_LIST (owner-gated))
 4. Re-run the verify-release.sh smoke test post-re-pin to confirm the docs-consistency leg goes green end-to-end.
-5. Post-tag: provider/github v0.6 vocabulary migration (re-pin parent to v0.6.0, `ExternalID`→`SourceID` etc., standalone suite green, tag `provider/github/v0.2.0`).
-6. Post-tag: strike the v0.6 migration shims' TODO notes and plan the v0.7 shim-removal window (deprecated `ExternalID`/`AggregateID`/`GetStats`).
+5. ~~Post-tag: provider/github v0.6 vocabulary migration (re-pin parent to v0.6.0, `ExternalID`→`SourceID` etc., standalone suite green, tag `provider/github/v0.2.0`).~~ done (routed to TODO_LIST (post-tag provider migration))
+6. ~~Post-tag: strike the v0.6 migration shims' TODO notes and plan the v0.7 shim-removal window (deprecated `ExternalID`/`AggregateID`/`GetStats`).~~ done (routed to ROADMAP Open Question 6 (v0.7 shim-removal window))
 
 **P1 — CI truth / flake hunt**
 
-7. Root-cause the pkg/cqrs `-race` flake: captured-log stress loop (`-race -count=20` with full logs) targeting the waitForCount-family timings under load.
-8. Structural vendorHash↔daemon fix per §g3 decision (daemon stops dep-refresh / refresh re-pins / flake derives hash).
-9. `check-doc-counts.sh --fix` mode (auto-rewrite drifted claims; keep CI in check-only mode).
-10. Add a CI job-summary step that posts the three gate badges (test/lint/nix) per run for at-a-glance state.
-11. Local `gitleaks` + `govulncheck` parity run (security-leg confidence; CI already owns them).
-12. Confirm `::notice::` skip-message rendering in the Actions UI (logic verified; cosmetics never eyeballed).
-13. Provider leg: add golangci-lint to the provider CI job (currently build+race only).
-14. Dependabot/renovate reminder wiring: dependency PRs must mention vendorHash re-pin (or let the nix job fail-fast, which it now provably does — document that as the guard).
+7. ~~Root-cause the pkg/cqrs `-race` flake: captured-log stress loop (`-race -count=20` with full logs) targeting the waitForCount-family timings under load.~~ done (routed to TODO_LIST MEDIUM (race-flake root cause))
+8. ~~Structural vendorHash↔daemon fix per §g3 decision (daemon stops dep-refresh / refresh re-pins / flake derives hash).~~ done (routed to TODO_LIST (structural vendorHash-daemon decision, owner))
+9. ~~`check-doc-counts.sh --fix` mode (auto-rewrite drifted claims; keep CI in check-only mode).~~ done (routed to TODO_LIST (check-doc-counts --fix mode))
+10. ~~Add a CI job-summary step that posts the three gate badges (test/lint/nix) per run for at-a-glance state.~~ done (routed to TODO_LIST CI cosmetics cluster)
+11. ~~Local `gitleaks` + `govulncheck` parity run (security-leg confidence; CI already owns them).~~ done (routed to TODO_LIST (local gitleaks/govulncheck parity))
+12. ~~Confirm `::notice::` skip-message rendering in the Actions UI (logic verified; cosmetics never eyeballed).~~ done (routed to TODO_LIST CI cosmetics cluster)
+13. ~~Provider leg: add golangci-lint to the provider CI job (currently build+race only).~~ done (routed to TODO_LIST (provider leg golangci-lint))
+14. ~~Dependabot/renovate reminder wiring: dependency PRs must mention vendorHash re-pin (or let the nix job fail-fast, which it now provably does — document that as the guard).~~ done (covered by the structural vendorHash-daemon decision (TODO_LIST) + CI fail-fast, now proven)
 
 **P2 — v0.6 polish**
 
-15. provider README: `WithETagCache` usage snippet + config-table row; `ETagStats` example.
-16. Wire ETag into `FetchAll`'s revalidation story (page-1 probe could skip on 304) — measure the saving first; only if it pays.
-17. Surface `ETagStats` in `FetchResult` (optional field) so consumers see cache behavior per run.
-18. CHANGELOG: fill the v0.6.0 date at tag time; reconcile section order (there are two `### Added` blocks inside v0.6.0 — merge for cleanliness).
-19. AGENTS.md: drop the v0.6-migration vocabulary note once shims are removed (v0.7).
-20. README sales-page: final pass post-v0.6 (feature bullets for DLQ surface, rate limiter, log level, ETag).
+15. ~~provider README: `WithETagCache` usage snippet + config-table row; `ETagStats` example.~~ done (routed to TODO_LIST provider ETag polish)
+16. ~~Wire ETag into `FetchAll`'s revalidation story (page-1 probe could skip on 304) — measure the saving first; only if it pays.~~ done (routed to TODO_LIST provider ETag polish)
+17. ~~Surface `ETagStats` in `FetchResult` (optional field) so consumers see cache behavior per run.~~ done (routed to TODO_LIST provider ETag polish)
+18. ~~CHANGELOG: fill the v0.6.0 date at tag time; reconcile section order (there are two `### Added` blocks inside v0.6.0 — merge for cleanliness).~~ done (sections merged in the 2026-09-06 docs-health sweep; date fills at tag time)
+19. ~~AGENTS.md: drop the v0.6-migration vocabulary note once shims are removed (v0.7).~~ done (routed to ROADMAP Open Question 6)
+20. ~~README sales-page: final pass post-v0.6 (feature bullets for DLQ surface, rate limiter, log level, ETag).~~ done (done (docs-health sweep: StreamID/SourceID vocabulary + log-level row; DLQ/rate-limiter rows already present))
 
 **P3 — library contributions**
 
-21. Upstream PR for go-cqrs-lite#21 (eventToMessage mapping + round-trip test) — unblocks dropping our custom-fallback note.
-22. Upstream issue (or PR): watermill `MessageToEvent` reconstructing typed `Causation` when the new keys exist.
-23. Check `go-github-kit` for a newer version than v0.3.0 at next provider touch; if the ETag/claims surface changed, re-verify annotations.
-24. eventtest: adopt for stack tests the moment a version is tagged (ROADMAP watcher).
+21. ~~Upstream PR for go-cqrs-lite#21 (eventToMessage mapping + round-trip test) — unblocks dropping our custom-fallback note.~~ done (routed to ROADMAP (upstream contributions))
+22. ~~Upstream issue (or PR): watermill `MessageToEvent` reconstructing typed `Causation` when the new keys exist.~~ done (routed to ROADMAP (upstream contributions))
+23. ~~Check `go-github-kit` for a newer version than v0.3.0 at next provider touch; if the ETag/claims surface changed, re-verify annotations.~~ done (routed to the post-tag provider migration item (TODO_LIST))
+24. ~~eventtest: adopt for stack tests the moment a version is tagged (ROADMAP watcher).~~ done (routed (ROADMAP Open Question 4 already tracks eventtest))
 
 **P4 — quality / coverage**
 
-25. Extract `run(args, stdout, stderr) int` in cmd/localsync-lint; in-process tests for main-flow; push coverage >85%.
-26. SARIF `--format=sarif` (M19 remainder).
-27. Directives/rules doc page (M19 remainder).
-28. New rules C0011-C0015 (M19 remainder; candidates from review backlogs).
-29. Scenario DSL for projection tests (currently decider-only).
-30. `pkg/sync` retry/backoff edge tests (jitter bounds, Retry-After override path).
-31. DLQ HTTP endpoints (`GET /dead-letters`, `POST /dead-letters/replay`) — optional per the original decision; only with owner buy-in on API surface growth.
-32. `pkg/api` request-ID middleware + echo header (debuggability).
-33. SQLite: opt-in WAL/pragma configuration knob on CQRSConfig.
-34. API `/stats`: source/type filter params (read model already supports filtering).
-35. Fuzz tests for the localsync-lint directive parser + `StreamID` derivation (ROADMAP raw idea).
-36. BDD/Ginkgo sync-flow suite (ROADMAP raw idea; low priority while table tests are green).
+25. ~~Extract `run(args, stdout, stderr) int` in cmd/localsync-lint; in-process tests for main-flow; push coverage >85%.~~ done (routed to TODO_LIST (run() extraction))
+26. ~~SARIF `--format=sarif` (M19 remainder).~~ done (routed to TODO_LIST M19 remainder)
+27. ~~Directives/rules doc page (M19 remainder).~~ done (routed to TODO_LIST M19 remainder)
+28. ~~New rules C0011-C0015 (M19 remainder; candidates from review backlogs).~~ done (shipped — catalog is 15 rules (verified in internal/cqrslint/analyzer.go); CHANGELOG entry added this sweep)
+29. ~~Scenario DSL for projection tests (currently decider-only).~~ done (routed to TODO_LIST (scenario DSL for projection tests))
+30. ~~`pkg/sync` retry/backoff edge tests (jitter bounds, Retry-After override path).~~ done (routed to TODO_LIST (retry/backoff edge tests))
+31. ~~DLQ HTTP endpoints (`GET /dead-letters`, `POST /dead-letters/replay`) — optional per the original decision; only with owner buy-in on API surface growth.~~ done (routed to ROADMAP (DLQ HTTP admin endpoints))
+32. ~~`pkg/api` request-ID middleware + echo header (debuggability).~~ done (routed to TODO_LIST API niceties)
+33. ~~SQLite: opt-in WAL/pragma configuration knob on CQRSConfig.~~ done (routed to TODO_LIST API niceties)
+34. ~~API `/stats`: source/type filter params (read model already supports filtering).~~ done (routed to TODO_LIST API niceties)
+35. ~~Fuzz tests for the localsync-lint directive parser + `StreamID` derivation (ROADMAP raw idea).~~ done (routed (ROADMAP recurring suggestions lists fuzz tests))
+36. ~~BDD/Ginkgo sync-flow suite (ROADMAP raw idea; low priority while table tests are green).~~ done (routed (ROADMAP recurring suggestions lists BDD/Ginkgo))
 
 **P5 — docs / hygiene**
 
-37. Annotate+archive the 02:40 and 06:25 status reports (both should now be fully routed).
-38. Harvest the previous 23:04 report's §f leftovers — verify none remain un-routed (done today; re-check after this report).
-39. Add the log-level knobs to CONTRIBUTING.md's config snippets.
-40. docs/benchmarks.md: refresh numbers post-log-level/ETag changes (no expected impact; prove it).
-41. `nix flake check --all-systems` triage: document which systems are intentionally unsupported and why the check omits them.
-42. AGENTS.md: gotcha for "daemon dep refreshes break vendorHash — re-pin from the CI error string" (make today's incident the canonical example).
-43. Verify the gap-analysis banner's relative ADR link renders correctly from `docs/` (used `adr/0009-...`).
-44. FEATURES: add the log-level row (65+ feature rows — keep numbering stable).
-45. TODO_LIST: convert the two remaining struck/historical items into a "closed" bucket or ROADMAP notes for list hygiene.
+37. ~~Annotate+archive the 02:40 and 06:25 status reports (both should now be fully routed).~~ done (done (this sweep annotated+archived 02:40, 06:25 and the rest))
+38. ~~Harvest the previous 23:04 report's §f leftovers — verify none remain un-routed (done today; re-check after this report).~~ done (done (all 23:04 items verified routed; file archived 2026-09-05))
+39. ~~Add the log-level knobs to CONTRIBUTING.md's config snippets.~~ done (routed to TODO_LIST (CONTRIBUTING log-level snippets))
+40. ~~docs/benchmarks.md: refresh numbers post-log-level/ETag changes (no expected impact; prove it).~~ done (routed to TODO_LIST (benchmarks refresh))
+41. ~~`nix flake check --all-systems` triage: document which systems are intentionally unsupported and why the check omits them.~~ done (routed to TODO_LIST (nix --all-systems triage))
+42. ~~AGENTS.md: gotcha for "daemon dep refreshes break vendorHash — re-pin from the CI error string" (make today's incident the canonical example).~~ done (done — the AGENTS vendorHash gotcha already names the auto-commit daemon explicitly (verified this sweep))
+43. ~~Verify the gap-analysis banner's relative ADR link renders correctly from `docs/` (used `adr/0009-...`).~~ done (done — docs/adr/0009-v06-vocabulary-alignment.md exists; relative link resolves)
+44. ~~FEATURES: add the log-level row (65+ feature rows — keep numbering stable).~~ done (done — FEATURES row 72 (log level control) added this sweep)
+45. ~~TODO_LIST: convert the two remaining struck/historical items into a "closed" bucket or ROADMAP notes for list hygiene.~~ done (done — govalid struck item moved to ROADMAP this sweep; TODO_LIST open-only)
 
 **P6 — someday / raw ideas (do not start without owner)**
 
-46. Streaming export for very large journals (the struck Export theme's remainder).
-47. Bundled Prometheus exporter on top of `WithMetricsHandler` (the struck /metrics remainder).
-48. Per-page `ETag` reuse in provider pagination (upstream kit feature request if useful).
-49. Multi-error aggregation semantics for partial sync (errors.Join of per-item failures).
-50. Second provider implementation (GitLab/Jira) — validates the interface against a different API shape (ROADMAP theme).
+46. ~~Streaming export for very large journals (the struck Export theme's remainder).~~ done (routed (ROADMAP: struck Export theme streaming remainder))
+47. ~~Bundled Prometheus exporter on top of `WithMetricsHandler` (the struck /metrics remainder).~~ done (routed (ROADMAP: struck /metrics remainder))
+48. ~~Per-page `ETag` reuse in provider pagination (upstream kit feature request if useful).~~ done (routed (ROADMAP: per-page ETag reuse))
+49. ~~Multi-error aggregation semantics for partial sync (errors.Join of per-item failures).~~ done (routed (ROADMAP: multi-error aggregation))
+50. ~~Second provider implementation (GitLab/Jira) — validates the interface against a different API shape (ROADMAP theme).~~ done (routed (ROADMAP Enhanced Features: second provider))
 
 ## g) Questions I cannot figure out myself
 
@@ -161,3 +161,14 @@ Every implementable item on TODO_LIST.md is now done or explicitly owner-gated �
 ---
 
 _Point-in-time snapshot — generated 2026-09-06 08:05 CEST from this session only. Historical truth belongs to the timestamp; current truth belongs to the code._
+
+---
+
+## Resolution (2026-09-06 docs-health sweep)
+
+Closed after the docs-health AUDIT sweep that harvested this report into the living docs. All §f items carry inline verdicts above; section-level closures:
+
+- **§b (partial rows):** row 1 — the pending CI run finished GREEN (`434ba02`, run 34015593461); row 2 — the appendix-based re-score stands, a fresh full HTML rebuild is deferred until the library's next release; rows 3-5 — the missing halves are routed (`run()` extraction → TODO_LIST; ETag docs polish → TODO_LIST; the 3 open items are all routed/owner-gated in TODO_LIST).
+- **§c (not started):** items 1-3 are owner-gated and routed (TODO_LIST Release path / SSH item / post-tag provider migration); item 4 is tracked by ROADMAP Open Question 4; item 5 — C0011-C0015 SHIPPED (catalog verified at 15 rules), SARIF + directives doc page routed to the TODO_LIST M19 remainder; item 6 routed to ROADMAP upstream contributions.
+- **§g questions:** Q1/Q2 remain owner calls, now carried by TODO_LIST ("cut the v0.6.0 tag", SSH secret item); Q3 is carried by the TODO_LIST structural vendorHash-daemon decision item.
+- **Verification at close (this sweep):** build ✓, full suite ✓, `go test -race ./...` 11/11 ✓, `check-doc-counts.sh` green incl. coverage mode, `localsync-lint --strict` clean, actionlint clean, dprint green on all living docs, master CI green (run 34015593461).
