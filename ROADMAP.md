@@ -27,7 +27,7 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 
 Ideas that recur across 2026 status reports but were never picked up; collected here so they stop masquerading as open tasks in old snapshots. None is committed to.
 
-- BDD/Ginkgo suite for the sync flow; fuzz tests (`DecideSync`, `AggregateID`, the cqrs-lint directive parser); property-based tests
+- BDD/Ginkgo suite for the sync flow; fuzz tests (`DecideSync`, `AggregateID`, the localsync-lint directive parser); property-based tests
 - Full-pipeline benchmarks under load (SQLite growth, 10k-event replay)
 - Prometheus `/metrics` endpoint on the HTTP API
 - Live updates via WebSocket/SSE from the read model

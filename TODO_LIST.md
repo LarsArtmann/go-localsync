@@ -71,8 +71,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 ### Quality
 
-- [x] **Process-level `cmd/cqrs-lint` tests** — build the binary, run against fixtures, assert exit codes 0/1/2 (finishes M11 properly; `main()`, flag parsing, `printRules`/`printUsage` untested).
-      ✅ DONE 2026-09-06: `cmd/cqrs-lint/process_test.go` — builds the binary into `t.TempDir()`, pins exits 0/1/2, `--strict` on the unknown-rule warning, and the NDJSON shape. Coverage stays 56.4% (subprocess runs are coverage-invisible by design).
+- [x] **Process-level `cmd/localsync-lint` tests** (was `cmd/cqrs-lint`) — build the binary, run against fixtures, assert exit codes 0/1/2 (finishes M11 properly; `main()`, flag parsing, `printRules`/`printUsage` untested).
+      ✅ DONE 2026-09-06: `cmd/localsync-lint/process_test.go` — builds the binary into `t.TempDir()`, pins exits 0/1/2, `--strict` on the unknown-rule warning, and the NDJSON shape. Coverage stays 56.4% (subprocess runs are coverage-invisible by design).
 - [ ] **Real-meter and sdktrace recorder tests** — prove values actually land in `cqrs.operation.*` and the `localsync.sync_items` span attributes (noop providers only prove wiring).
 - [ ] **Cursor pagination test against the real SQLite read model ordering** — the current test uses a fake store (`pkg/api`).
 - [x] **`pkg/id` unit tests for `ContentHash`** — `IsZero`/`String` untested; coverage sits at 75.0%.
@@ -86,7 +86,10 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 - [ ] ~~**Add `govalid` struct tags**~~ — pivoted 2026-09-05: govalid is a buildflow-internal generator, not a proxy-resolvable module; real `Validate()` methods were implemented instead (`SyncOptions.Validate`, `CQRSConfig.Validate`, `ItemFilter.Validate`). Reopen only if govalid is ever published with a stable tag format.
 - [x] **cqrs-lint CLI surface cluster** (aggregate; from [2026-08-02 report](docs/status/archive/2026-08-02_20-31_CQRS-LINT_CLI_ENHANCEMENT.md) §f): `--version`/`--quiet`/`--format=github`, `--rules`/`--exclude-rules`, `--no-suppress`, `--explain`, block + range (`ignore-start`/`ignore-end`) directives, SARIF output, dedicated directives doc page, hand-rolled `--json` → `encoding/json`, per-rule suppressed counts in `--verbose`, new rules C0011+.
-      ✅ DONE 2026-09-06 (CLI phase 1).
+      ✅ DONE 2026-09-06 (CLI phase 1): `--version`/`--quiet`/`--format=github`, `encoding/json` NDJSON, per-rule suppressed counts.
+      ✅ DONE 2026-09-06 (CLI phase 2, M18): `--rules`/`--exclude-rules` (validated, unknown ID = exit 2), `--no-suppress` (CI hardening), `--explain <rule>`, block-comment directives (`/* cqrs-lint:ignore ... */`), range directives with nesting guard, unmatched-end + unclosed-range warnings. 27 new tests (358 total).
+      ⏳ Remaining for M19: SARIF `--format=sarif`, directives/rules doc page, rules C0011–C0015.
+      📝 The command was renamed `cmd/cqrs-lint` → `cmd/localsync-lint` (phase 2) to disambiguate from go-cqrs-lite's library linter of the same name; the `//cqrs-lint:` directive vocabulary intentionally stays as the shared protocol.
 - [ ] **API hardening polish**: `X-RateLimit-Limit`/`-Remaining` headers on 429; optional per-client rate limiting (`WithRateLimiter(keyExtractor)`); document the global-vs-per-client scope; structured log level control (per-event INFO is noisy in prod).
 - [ ] **OTel span for `Syncer.Sync`** in `pkg/sync` (currently only the CQRS batch path spans).
 - [ ] **`provider/github`: ETag / conditional requests** for incremental revalidation (flagged by [performance review](docs/research/performance-review.html)).
@@ -103,7 +106,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **`errors.AsType` audit pass** (go-error-modernization sweep, not yet run).
 - [ ] **Disposition `hierarchical-errors` buildflow findings** — ~3,711 findings; suppress in `.buildflow.yml` with a stated rationale or formally track (open since 2026-07-19, carried by two reports).
 - [ ] **File the watermill causation-metadata limitation upstream** in go-cqrs-lite (typed `Metadata.Causation` pointer not mapped onto bus-delivered messages; only custom `command.type`/`command.id` fallbacks survive) — candidate issue after `verify-before-filing` (see CHANGELOG Unreleased, correlation entry).
-- [ ] **Quality: coverage floor raises** — `cmd/cqrs-lint` 56.4% (lowest in repo; process-level tests above cover much of it) and `pkg/data/model` 84.9% (lowest package).
+- [ ] **Quality: coverage floor raises** — `cmd/localsync-lint` 35.2% (lowest in repo; process-level tests above cover much of it) and `pkg/data/model` 84.9% (lowest package).
 - [ ] **Verify kit-side claims in `go-github-kit` source** before trusting the provider README's "empty token = unauthenticated (60 req/h)" and "retry on 429 and idempotent 5xx" lines (`verify-external-claims`); annotate if wrong.
 - [ ] **Document gopls `stdversion` warnings as known GOEXPERIMENT noise** (`json.Marshal*` wants go1.27, `go.mod` says 1.26) so sessions stop re-debugging LSP-only noise.
 - [ ] **`TombstoneItem` variadic `...event.Option`** for parity with direct dispatch.

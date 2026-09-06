@@ -18,7 +18,7 @@ Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based 
 | `pkg/data/`          | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2/V3 versioning for event upcasting; V3 = de-githubify per ADR-0007). Decider, read model, events, and conflict resolution all operate on `*model.Item`.                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `ExternalID` string, `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `pkg/errors/`        | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `internal/cqrslint/` | Static architectural-invariant linter for `pkg/cqrs` (ADR-0004 enforcer). 10 AST checks (C0001-C0010): single aggregate type, three fixed events, fold coverage, projector subscriptions, provider-agnostic `hasChanged`, no query dispatcher, `SyncAction` stays in `pkg/sync`, projection mutex guard, payload json tags, `NewEvents` uses `aggregateType` const. CLI: `cmd/cqrs-lint/`. Supports `//cqrs-lint:ignore`/`//cqrs-lint:ignore-file` suppression directives, block-comment directives (`/* cqrs-lint:ignore ... */`), range directives (`ignore-start`/`ignore-end`, nesting-guarded), `--strict` (warnings fail), `--verbose` (per-rule status + suppressed counts + timing), `--show-suppressed`, `--json` (alias of `--format=json`), `--format=text |
+| `internal/cqrslint/` | Static architectural-invariant linter for `pkg/cqrs` (ADR-0004 enforcer). 10 AST checks (C0001-C0010): single aggregate type, three fixed events, fold coverage, projector subscriptions, provider-agnostic `hasChanged`, no query dispatcher, `SyncAction` stays in `pkg/sync`, projection mutex guard, payload json tags, `NewEvents` uses `aggregateType` const. CLI: `cmd/localsync-lint/` (renamed from `cmd/cqrs-lint` to disambiguate from go-cqrs-lite's library linter of the same name; directive vocabulary stays `//cqrs-lint:` as the shared protocol). Supports `//cqrs-lint:ignore`/`//cqrs-lint:ignore-file` suppression directives, block-comment directives (`/* cqrs-lint:ignore ... */`), range directives (`ignore-start`/`ignore-end`, nesting-guarded), `--strict` (warnings fail), `--verbose` (per-rule status + suppressed counts + timing), `--show-suppressed`, `--json` (alias of `--format=json`), `--format=text |
 
 ### SyncStore Interface Seam
 
@@ -90,7 +90,7 @@ The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exporte
 3. Test: `go test ./... -count=1`
 4. Lint: `golangci-lint run ./... --timeout=5m`
 5. Format: `golangci-lint fmt ./...`
-6. CQRS gate: `go run ./cmd/cqrs-lint --strict --verbose` (or `nix run .#cqrs-lint`). Suppression via `//cqrs-lint:ignore <rule>` directives; `--show-suppressed` to list silenced findings.
+6. CQRS gate: `go run ./cmd/localsync-lint --strict --verbose` (or `nix run .#localsync-lint`). Suppression via `//cqrs-lint:ignore <rule>` directives; `--show-suppressed` to list silenced findings.
 7. Doc-count truth: `./scripts/check-doc-counts.sh` (add `--coverage` to also check the coverage column vs a fresh run). CI runs it in the lint job; it fails when AGENTS/README/FEATURES test-count claims (per-package + totals) or the dependency table drift from code. **When you add/remove tests or bump deps, run it and fix the flagged claims — never hand-carry numbers.**
 8. Full pipeline: `buildflow --build-mode full` (requires the devShell active — see "Required first step" above; see the go.work caveat above)
 
@@ -102,14 +102,14 @@ CI uses tagged versions from GitHub (no replace directives in `go.mod`), with no
 
 **Two cqrs-lint gates run in the `lint` job on every push:**
 
-1. **Internal gate**: `go run ./cmd/cqrs-lint --strict` — the ADR-0004 architectural invariant linter (10 rules, C0001-C0010). Fail on any finding incl. warnings.
+1. **Internal gate**: `go run ./cmd/localsync-lint --strict` — the ADR-0004 architectural invariant linter (10 rules, C0001-C0010). Fail on any finding incl. warnings.
 2. **Library gate (secret-gated)**: `go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` — 203 consumer-facing domain rules from go-cqrs-lite, version-pinned; error-gated so warnings stay advisory. The CI step is restored in the `lint` job and **auto-enables when the `SSH_PRIVATE_KEY` repo secret exists** (a deploy key with read access to the **private** `larsartmann/go-finding` module the pinned linter depends on); without the secret it skips with a `::notice::` and stays a local devShell gate.
    Known heuristic false positives (annotated inline via `//cqrs-lint:ignore <rule> <reason>`, never blanket-disabled): **C017** flags any `NewMemoryDeadLetterStore()` call site — the memory-backend branch in `store_factory.go` legitimately pairs the ephemeral store with the ephemeral DLQ while the sqlite branch wires the persistent one; **E005** handler detection misses handlers registered inside factory closures; **E014** drain heuristic assumes async delivery while our bus delivers synchronously.
 
 ```bash
 go build ./...
 go test ./... -count=1
-go run ./cmd/cqrs-lint --strict
+go run ./cmd/localsync-lint --strict
 go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
 ```
 
@@ -144,9 +144,9 @@ Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as exe
 | `pkg/data/model`    | 12    | 84.9%    | ✅ Item, Key, Validate, ItemFilter, Tombstone                                                                                                                                                                                                                                     |
 | `pkg/data/schema`   | 4     | 100.0%   | ✅ Schema Version (V1/V2/V3), CurrentVersion, Valid                                                                                                                                                                                                                               |
 | `internal/cqrslint` | 60    | 93.2%    | ✅ 10 architectural checks (C0001-C0010), loader, finding sort/format, rules catalog, suppression directives                                                                                                                                                                      |
-| `cmd/cqrs-lint`     | 23    | 35.2% *  | ✅ exit-code contract, summary/JSON output, violating-fixture round trip + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape). *the phase-1 flags/formatting grew the surface while its tests are process-level (coverage-invisible by design) |
+| `cmd/localsync-lint` | 23    | 35.2% *  | ✅ exit-code contract, summary/JSON output, violating-fixture round trip + **process-level harness** (builds the binary, pins 0/1/2 exits, strict, NDJSON shape). *the phase-1 flags/formatting grew the surface while its tests are process-level (coverage-invisible by design) |
 
-**358 total test functions** across 11 test packages (incl. `cmd/cqrs-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
+**358 total test functions** across 11 test packages (incl. `cmd/localsync-lint`), plus 31 in the standalone `provider/github` module; the whole suite is race-clean.
 
 Run: `go test ./... -count=1`
 

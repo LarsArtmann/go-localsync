@@ -8,6 +8,14 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 ## [Unreleased]
 
 ### Added
+- `localsync-lint` (formerly `cqrs-lint`) CLI phase 2: `--rules`/`--exclude-rules` subset selection with catalog validation (unknown IDs exit 2), `--no-suppress` CI-hardening mode that ignores every directive, and `--explain <rule>` for full rule rationale.
+- Block-comment suppression directives (`/* cqrs-lint:ignore ... */`) and range directives (`ignore-start`/`ignore-end`) with a nesting guard; unmatched ends and unclosed ranges now warn.
+- `cqrslint.RunOptions`/`RunWithOptions` (rule selection + suppression toggle), `ValidateRuleSelection`, `RuleByID`, and the `ErrUnknownRule` sentinel.
+
+### Changed
+- **Renamed the internal linter command `cqrs-lint` → `localsync-lint`** to remove the name collision with go-cqrs-lite's library `cqrs-lint` (the pinned 203-rule CI gate). The `//cqrs-lint:` directive vocabulary is unchanged on purpose: one inline comment can target both linters.
+
+### Added
 
 - **cqrs-lint CLI phase 1** — `--version`, `--quiet` (exit-code-only operation for scripts), `--format=github` (GitHub Actions `::error`/`::warning` annotations with file/line so findings surface inline in PRs), per-rule suppressed counts in `--verbose` (stale-directive detection), and `--json` findings now emitted through `encoding/json` against an explicitly tagged schema struct (keys unchanged).
 

@@ -299,7 +299,7 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 | `pkg/data/schema`   | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
 | `pkg/provider`      | 2     | 92.3%    | Item validation                                                         |
 | `internal/cqrslint` | 60    | 93.2%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
-| `cmd/cqrs-lint`     | 8     | 56.4%    | Exit-code contract, summary/`--json` output, fixture round trip         |
+| `cmd/localsync-lint` | 23    | 35.2%    | Exit-code contract, summary/`--json` output, fixture round trip         |
 
 ## Related Projects
 

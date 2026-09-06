@@ -24,7 +24,7 @@ direnv allow        # or: nix develop
 # every-change loop
 go build ./... && go test ./... -count=1
 golangci-lint run ./... --timeout=5m
-go run ./cmd/cqrs-lint --strict
+go run ./cmd/localsync-lint --strict
 ```
 
 CI runs the same gates plus a pinned library-lint leg; see AGENTS.md for the
@@ -74,7 +74,7 @@ provider (contract)  →  pkg/sync (Syncer orchestration)  →  pkg/cqrs (event-
 - SQLite-touching tests use file-backed databases (`t.TempDir()`), not
   `:memory:`, when they assert restart/WAL behavior.
 - Error paths are test paths: `go test ./pkg/cqrs -cover` must stay ≥87%.
-- The internal linter (`cmd/cqrs-lint`) and the library linter both run in
+- The internal linter (`cmd/localsync-lint`) and the library linter (`go-cqrs-lite/cmd/cqrs-lint`) both run in
   CI; suppressions need an inline `//cqrs-lint:ignore <rule> <reason>` —
   never blanket-disable.
 
