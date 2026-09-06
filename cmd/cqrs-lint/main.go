@@ -20,6 +20,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -30,30 +31,58 @@ import (
 	"github.com/larsartmann/go-localsync/internal/cqrslint"
 )
 
-const defaultTarget = "pkg/cqrs"
+const (
+	defaultTarget = "pkg/cqrs"
+	cliVersion    = "0.1.0"
+)
 
 func main() {
 	target := flag.String("pkg", defaultTarget, "path to the Go package to lint")
 	listRules := flag.Bool("list", false, "list all rules and exit")
 	strict := flag.Bool("strict", false, "exit non-zero when warnings are present (alias for -fail-on-warning)")
 	failOnWarning := flag.Bool("fail-on-warning", false, "exit non-zero when warnings are present")
-	jsonOut := flag.Bool("json", false, "emit findings as newline-delimited JSON (machine readable)")
+	jsonOut := flag.Bool("json", false, "emit findings as newline-delimited JSON (machine readable; alias for -format=json)")
+	format := flag.String("format", "text", "output format: text, json (NDJSON), or github (workflow annotations)")
+	quiet := flag.Bool("quiet", false, "suppress all output; communicate through the exit code only")
 	verbose := flag.Bool("verbose", false, "show package info, per-rule status, and timing on stderr")
 	showSuppressed := flag.Bool("show-suppressed", false, "show findings silenced by //cqrs-lint:ignore directives")
+	showVersion := flag.Bool("version", false, "print the cqrs-lint version and exit")
 	flag.Usage = printUsage
 
 	flag.Parse()
 
+	if *showVersion {
+		fmt.Printf("cqrs-lint %s\n", cliVersion)
+
+		return
+	}
+
 	if *listRules {
 		printRules()
+
 		return
+	}
+
+	resolvedFormat := *format
+	if *jsonOut {
+		resolvedFormat = "json"
+	}
+
+	switch resolvedFormat {
+	case "text", "json", "github":
+		// valid
+	default:
+		fmt.Fprintf(os.Stderr, "cqrs-lint: unknown -format %q (want text, json, or github)\n", resolvedFormat)
+		os.Exit(2)
 	}
 
 	opts := outputOptions{
 		strict:         *strict || *failOnWarning,
 		verbose:        *verbose,
 		showSuppressed: *showSuppressed,
-		jsonOut:        *jsonOut,
+		jsonOut:        resolvedFormat == "json",
+		quiet:          *quiet,
+		format:         resolvedFormat,
 	}
 
 	start := time.Now()
@@ -81,6 +110,8 @@ type outputOptions struct {
 	verbose        bool
 	showSuppressed bool
 	jsonOut        bool
+	quiet          bool
+	format         string
 }
 
 type report struct {
@@ -103,13 +134,45 @@ func analyze(target string) (*cqrslint.Package, []cqrslint.Finding, error) {
 func emit(stdout, stderr io.Writer, r report) {
 	counts := countFindings(r.findings)
 
+	if r.opts.quiet {
+		return // the exit code is the only channel
+	}
+
 	if r.opts.verbose {
 		emitVerboseHeader(stderr, r.target, r.fileCount)
 		emitRuleStatus(stderr, r.findings)
+		emitSuppressedByRule(stderr, r.findings)
 	}
 
 	emitFindings(stdout, r.findings, r.opts)
 	emitSummary(stderr, counts, r.opts, r.elapsed)
+}
+
+// emitSuppressedByRule lists how many findings each rule silenced — a
+// suppressed-only rule is invisible in the active counts but may signal a
+// stale directive worth cleaning up.
+func emitSuppressedByRule(w io.Writer, findings []cqrslint.Finding) {
+	suppressedByRule := map[string]int{}
+
+	for _, f := range findings {
+		if f.Suppressed {
+			suppressedByRule[f.Rule]++
+		}
+	}
+
+	if len(suppressedByRule) == 0 {
+		return
+	}
+
+	fmt.Fprintf(w, "  suppressed by rule:")
+
+	for _, rule := range cqrslint.Rules() {
+		if n := suppressedByRule[rule.ID]; n > 0 {
+			fmt.Fprintf(w, " %s=%d", rule.ID, n)
+		}
+	}
+
+	fmt.Fprintln(w)
 }
 
 func countFindings(findings []cqrslint.Finding) findingCounts {
@@ -171,21 +234,58 @@ func emitFindings(w io.Writer, findings []cqrslint.Finding, opts outputOptions) 
 			continue
 		}
 
-		if opts.jsonOut {
+		switch {
+		case opts.jsonOut:
 			emitFindingJSON(w, finding)
-			continue
+		case opts.format == "github":
+			emitFindingGitHub(w, finding)
+		default:
+			fmt.Fprintln(w, finding)
 		}
-
-		fmt.Fprintln(w, finding)
 	}
 }
 
+// findingJSON mirrors cqrslint.Finding for stable wire output: the JSON keys
+// are a consumed contract, so marshaling goes through an explicitly tagged
+// struct instead of hand-built formatting that drifts from the schema.
+type findingJSON struct {
+	Rule       string `json:"rule"`
+	Severity   string `json:"severity"`
+	File       string `json:"file"`
+	Line       int    `json:"line"`
+	Message    string `json:"message"`
+	Suppressed bool   `json:"suppressed"`
+}
+
 func emitFindingJSON(w io.Writer, f cqrslint.Finding) {
-	fmt.Fprintf(
-		w,
-		`{"rule":%q,"severity":%q,"file":%q,"line":%d,"message":%q,"suppressed":%t}`+"\n",
-		f.Rule, f.Severity, f.File, f.Line, f.Message, f.Suppressed,
-	)
+	encoded, err := json.Marshal(findingJSON{
+		Rule:       f.Rule,
+		Severity:   string(f.Severity),
+		File:       f.File,
+		Line:       f.Line,
+		Message:    f.Message,
+		Suppressed: f.Suppressed,
+	})
+	if err != nil {
+		// json.Marshal on a flat struct of primitives cannot fail; be loud
+		// anyway rather than emitting a torn NDJSON line.
+		panic(fmt.Sprintf("cqrs-lint: marshal finding: %v", err))
+	}
+
+	w.Write(encoded)      //nolint:errcheck // stdout write errors surface at exit
+	w.Write([]byte("\n")) //nolint:errcheck // stdout write errors surface at exit
+}
+
+// emitFindingGitHub prints GitHub Actions workflow annotations so findings
+// appear inline in the PR files-changed view when the CLI runs in CI.
+func emitFindingGitHub(w io.Writer, f cqrslint.Finding) {
+	annotation := "::error"
+
+	if f.Severity == cqrslint.SeverityWarning {
+		annotation = "::warning"
+	}
+
+	fmt.Fprintf(w, "%s file=%s,line=%d,title=%s::%s\n", annotation, f.File, f.Line, f.Rule, f.Message)
 }
 
 func emitSummary(w io.Writer, counts findingCounts, opts outputOptions, elapsed time.Duration) {
