@@ -4,133 +4,88 @@
 
 Go-LocalSync is a single-writer pull-mirror SDK with a pluggable provider-based architecture. It uses event-sourced CQRS via go-cqrs-lite for state management, pluggable conflict resolution (`pkg/crdt/`), tombstone-based soft-deletes with upstream reconciliation, and branded IDs from go-branded-id for compile-time type safety. There is no multi-writer/distributed CRDT machinery — the provider is the sole writer per aggregate.
 
-> **Scope boundary (ADR-0004):** The SDK is deliberately a **single-aggregate, pull-only, flat-Item sync engine** — one `sync_item` aggregate, three fixed events, one projection. The domain model is GitHub-activity-feed-shaped (`ActorLogin`, `RepoName`, `RepoURL`). Generalising it into a multi-aggregate event-sourcing framework was considered and **deferred** — see [`docs/adr/0004-multi-aggregate-generalisation-deferred.md`](docs/adr/0004-multi-aggregate-generalisation-deferred.md) and the [`docs/feedback/`](docs/feedback/) adoption reviews. `go-cqrs-lite v4` is the cross-project sharing boundary. Do not widen the scope (multi-aggregate, push ingestion, consumer-defined events) without revisiting that ADR.
+> **Scope boundary (ADR-0004):** The SDK is deliberately a **single-aggregate, pull-only, flat-Item sync engine** — one `sync_item` aggregate, three fixed events, one projection. Generalising it into a multi-aggregate event-sourcing framework was considered and **deferred** — see [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md). `go-cqrs-lite v4` is the cross-project sharing boundary. Do not widen the scope (multi-aggregate, push ingestion, consumer-defined events) without revisiting that ADR.
+
+> **Vocabulary (ADR-0009, enacted v0.6):** canonical names are `id.SourceID`, `cqrs.StreamID`/`MustStreamID`, `sync.BatchOutcome` (+ `Syncer.Stats()`). The old names (`ExternalID`, `AggregateID`, `SyncSummary`, `GetStats`) exist only as deprecated shims. See the migration table in [README](README.md#upgrading-to-v06-breaking-vocabulary-alignment) / [CHANGELOG](CHANGELOG.md).
 
 ## Architecture
 
-| Package              | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pkg/crdt/`          | Conflict resolution: `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` (timestamp-only) — **wired into DecideSync as pluggable conflict strategy**. No vector clocks/operations (a single-writer pull mirror needs none).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `pkg/api/`           | HTTP API server with Huma v2 + stdlib (`GET /items`, `GET /stats`, `POST /sync`, `GET /health`), split into server.go + dto.go + handlers.go                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `pkg/cqrs/`          | CQRS integration layer using go-cqrs-lite **v4** (Decider, ReadModel, Projector, CQRSStack, TypedHandler), split into focused files (middleware.go, commands.go, sqlite\_\*.go)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `pkg/provider/`      | Core interfaces (`Provider`, `Item`, `FetchResult`, `RetryConfig`) and `RateLimitInfo`. The SDK defines the contract only — concrete providers (e.g. GitHub) live in consumer apps.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `pkg/sync/`          | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface (decoupled from `*cqrs.CQRSStack`), `SyncAction`, `ItemSyncResult`, `BatchOutcome` (single user-facing result), retry/backoff (`retry.go`), per-source mutex, opt-in reconciliation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `pkg/data/`          | Domain model: `model.Item` (persisted entity with `SchemaVersion` + optional `Tombstone`), `model.Key`, `model.ItemFilter` (`IncludeTombstoned`), `model.Tombstone`/`TombstoneReason`; `schema.Version` (V1/V2/V3 versioning for event upcasting; V3 = de-githubify per ADR-0007). Decider, read model, events, and conflict resolution all operate on `*model.Item`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `SourceID` string (deprecated `ExternalID` alias), `ProviderID`, `EventTypeID`, `ActorLogin`, `RepoID`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `pkg/errors/`        | Structured errors via `go-error-family` constructors (Rejection, Transient, Infrastructure) with intrinsic classification, `IsRetryable`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `internal/cqrslint/` | Static architectural-invariant linter for `pkg/cqrs` (ADR-0004 enforcer). 10 AST checks (C0001-C0010): single aggregate type, three fixed events, fold coverage, projector subscriptions, provider-agnostic `hasChanged`, no query dispatcher, `SyncAction` stays in `pkg/sync`, projection mutex guard, payload json tags, `NewEvents` uses `aggregateType` const. CLI: `cmd/localsync-lint/` (renamed from `cmd/cqrs-lint` to disambiguate from go-cqrs-lite's library linter of the same name; directive vocabulary stays `//cqrs-lint:` as the shared protocol). Supports `//cqrs-lint:ignore`/`//cqrs-lint:ignore-file` suppression directives, block-comment directives (`/* cqrs-lint:ignore ... */`), range directives (`ignore-start`/`ignore-end`, nesting-guarded), `--strict` (warnings fail), `--verbose` (per-rule status + suppressed counts + timing), `--show-suppressed`, `--json` (alias of `--format=json`), `--format=text |
+| Package              | Purpose                                                                                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pkg/provider/`      | Core contract: `Provider`, `Item`, `FetchResult`, `RetryConfig`, `RateLimitInfo`. Concrete providers live in consumer apps or nested modules.                                        |
+| `pkg/sync/`          | `Syncer`, `ConflictAwareSyncer`, `SyncStore` interface, `SyncAction`, `ItemSyncResult`, `BatchOutcome` (single user-facing result), retry/backoff, per-source mutex, opt-in reconciliation, OTel spans (`otel.go`). |
+| `pkg/cqrs/`          | go-cqrs-lite **v4** integration: Decider, ReadModel (memory+SQLite), Projector, `CQRSStack`, typed commands, DLQ surface (`dlq.go`), OTel wiring (`otel.go`). See [CQRS Architecture](#cqrs-architecture). |
+| `pkg/data/`          | Domain model (`model.Item` with `SchemaVersion` + optional `Tombstone`, `Key`, `ItemFilter`) + `schema.Version` V1/V2/V3 event upcasting (V3 = de-githubify, ADR-0007). Everything CQRS operates on `*model.Item`. |
+| `pkg/id/`            | Branded phantom-type IDs (`ItemID` ULID, `SourceID` string, `ContentHash`, `ProviderID`, `ActorLogin`, `RepoID`).                                                                    |
+| `pkg/errors/`        | Structured errors via go-error-family: intrinsic classification, `IsRetryable`, `HTTPStatus`, `WithCtx`/`InvalidField`.                                                              |
+| `pkg/crdt/`          | `Conflict[T]`, `ConflictResolver[T]`, `LWWResolver[T]` — pluggable conflict strategy wired into `DecideSync`. No vector clocks (single writer needs none).                           |
+| `pkg/api/`           | HTTP API (Huma v2): `GET /items`, `GET /stats`, `POST /sync`, `GET /health`; auth, rate limiting, pagination, error mapping. Split server.go + dto.go + handlers.go.                 |
+| `internal/cqrslint/` | ADR-0004 architectural-invariant linter: 10 AST checks (C0001-C0010), `//cqrs-lint:` suppression directives (line/block/range). CLI: `cmd/localsync-lint` (`--strict`, `--json`, `--rules`, `--explain`, ...). Details in the package doc. |
+| `pkg/testutil/`      | Shared test doubles (`MockProvider`, `SyncStore` fake, `BuildPairs`).                                                                                                                |
 
-### SyncStore Interface Seam
-
-`pkg/sync/` defines `SyncStore` — a minimal interface decoupling sync logic from CQRS infrastructure. `*cqrs.CQRSStack` implements it via adapter methods. Dependency flows one way: `cqrs → sync → provider/types/errors`. No import cycles.
-
-`SyncAction` constants and `ItemSyncResult` live in `pkg/sync/` — the architectural seam — not in `pkg/cqrs/`.
+**SyncStore seam:** `pkg/sync` defines `SyncStore`; `*cqrs.CQRSStack` implements it via adapters. Dependency flows one way: `cqrs → sync → provider/types/errors`. No import cycles. `SyncAction`/`ItemSyncResult` live in `pkg/sync/` (the seam), never in `pkg/cqrs/` (enforced by cqrslint C0007).
 
 ## CQRS Architecture
 
-The entire storage layer is CQRS-based via go-cqrs-lite. There is **no legacy CRUD path**.
+The entire storage layer is CQRS via go-cqrs-lite v4. **No legacy CRUD path.** Narrative decisions live in the ADRs; only operational essentials are inlined here.
 
-### Core Components
+- **Streams:** `cqrs/aggregate_id.go` — deterministic SHA256→hex from (source, sourceID) with a sync.Map cache; `StreamID()` (error) / `MustStreamID()`. Our encoding deliberately diverges from go-cqrs-lite's `DeriveStreamID` (pinned + documented at the definition site).
+- **Decider** (`decider.go`): `SyncItemState{Item *model.Item}` (tombstone lives on `Item.Tombstone`), pure `Apply`, `DecideSync`/`DecideTombstone`, `HasChanged` = ContentHash/UpdatedAt/Type only (ADR-0007). Resurrect-bypasses-resolver is **by design** (ADR-0005 addendum): a tombstoned local is a deleted marker; a sync event is the only path back to live.
+- **Events** (`events.go`): exactly three — `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`. A sync event always means "live" → resurrection is automatic via projection upsert.
+- **Read models:** `ReadModel` interface (embeds `model.ItemReader` + filter/pagination); memory + SQLite implementations. Errors preserve chains via multi-`%w` (`wrapDBErr`).
+- **Projection** (`projection.go` + `runner.go`): live delivery via direct `bus.SubscribeAll` (synchronous, read-your-writes); SQLite catch-up via `projectionhost.Host` (checkpoint, crash auto-restart, DLQ — ADR-0006). The version-gate is **mutex-guarded** so concurrent live+replay delivery serializes per aggregate (stale events can't resurrect tombstoned rows).
+- **Stack** (`stack.go`): Store+Bus+Repo+ReadModel+CommandDispatcher, SQL snapshots, event-logging + validation middleware, correlation IDs per sync run, `CQRSConfig.Validate()` at construction, named-return cleanup so error paths release resources. Commands: `SyncItem`, `TombstoneItem(..., opts ...event.Option)` (variadic, parity with direct dispatch), `Reconcile(ctx, source, seenKeys)` (opt-in tombstone of upstream-gone items; only after a COMPLETE fetch). No query dispatcher — reads call the ReadModel directly (see `stack_adapters.go`).
+- **DLQ surface** (`dlq.go`): `DeadLetters`, `DeadLetterCount`, `DeleteDeadLetter`, `PurgeDeadLetters`, `ReplayDeadLetters` (replay does NOT auto-delete — callers delete via `DeleteDeadLetter`).
+- **OTel** (`otel.go`, opt-in via `CQRSConfig.OTel`): command/event middleware (spans + `cqrs.operation.*` metrics), batch span, projection-host metrics adapter. `pkg/sync/otel.go` wraps `Sync`/`SyncIncremental` in `localsync.sync*` spans via `sync.WithTracer`.
 
-- `aggregate_id.go` — deterministic SHA256→hex from (source, sourceID) with sync.Map cache, shared `itemKey` helper
-- `decider.go` — `SyncItemState{Item *model.Item}` (tombstone lives on `Item.Tombstone`; no separate Deleted flag), pure Apply (the event applier) + DecideSync/DecideTombstone, `IsTombstoned()`/`ShouldResurrect()`, `HasChanged` checks ContentHash/UpdatedAt/Type only (provider-agnostic since ADR-0007)
-- `events.go` — 3 event types: `ItemSynced`, `ItemConflictFound`, `ItemTombstoned` (a sync event always means "live" → resurrects a tombstoned item automatically via projection upsert)
-- `readmodel.go` — `ReadModel` interface (embeds `model.ItemReader`) + `model.ItemFilter`, stores `*model.Item` directly
-- `memory_readmodel.go` — concurrent-safe in-memory read model with filter/pagination
-- `sqlite_readmodel.go` — SQLite-backed read model with DDL, filter/pagination
-- `projection.go` — `Projector` implements `projection.Projection` (moved from `event.Projection` in go-cqrs-lite v3.2), wired via direct bus subscription (live) + manual journal replay (persistence)
-- `stack.go` — `CQRSStack` with Store+Bus+Repo+ReadModel+CommandDispatcher, SQL snapshots, event logging middleware, correlation IDs. `NewCQRSStack` uses named returns + a cleanup defer so any error path after store creation releases store/bus/db/goroutine resources. Public commands: `SyncItem`, `TombstoneItem`; `Reconcile(ctx, source, seenKeys)` tombstones upstream-gone items. (No query dispatcher — reads call the ReadModel directly; see ADR note in `stack_adapters.go`.)
-- `runner.go` — Projection wiring: direct `bus.SubscribeAll` for synchronous live event delivery, plus `projectionhost.Host` (managed batch-drainer with checkpoint persistence, crash auto-restart, and dead-letter queue) for resilient SQLite catch-up. See ADR-0006.
-- `commands.go` + `middleware.go` — typed `SyncItemCommand`/`TombstoneItemCommand` (carries `model.TombstoneReason`) via `command.Dispatcher`. (The read side has no dispatcher — `stack_adapters.go` calls the ReadModel directly; the command side stays dispatched for logging/retry/validation middleware.)
-
-### Key Properties
-
-- **Idempotent**: same item synced twice → 1 aggregate, 1 read model entry
-- **Deterministic aggregate IDs**: SHA256→hex from (source, sourceID)
-- **Tombstone + resurrect**: a tombstone is a soft-delete (keeps history on `Item.Tombstone`); re-syncing a tombstoned item overwrites the tombstone → it becomes live again (projection upsert resets the tombstone columns)
-- **Reconciliation**: opt-in `SyncOptions.Reconcile` tombstones items for `Source` absent from a complete fetch with `ReasonUpstreamGone` (best-effort; only safe after a COMPLETE fetch)
-- **Projection**: Live events delivered synchronously via `bus.SubscribeAll` (watermill `EventBus` with `BlockPublishUntilSubscriberAck` preserves read-your-writes). SQLite catch-up runs via `projectionhost.Host` (ADR-0006): a managed batch-drainer that reads from the last checkpoint (bounded replay), auto-restarts on crash with backoff, and captures poison messages to a dead-letter queue. The version-gate (skip events with version ≤ last applied per aggregate) is **mutex-guarded** so concurrent live+replay delivery for the same aggregate serializes — preventing stale events from resurrecting tombstoned rows. The checkpoint bounds work and survives failure.
-- **SQL persistence**: SQLite backend persists snapshots (`SQLSnapshotStore`) via `snapshot/v4` and `storage/v4` modules.
-- **Correlation IDs**: `SyncItems` generates a unique `CorrelationID` per sync run, passed via `event.WithCorrelationID` to all events.
-- **Command dispatch**: `SyncItem`/`TombstoneItem` dispatched through `command.Dispatcher` with typed commands. Enables logging, retry, validation middleware.
-- **Resilient fetch**: `fetchItems` retries transient errors with exponential backoff + ±25% jitter, consults `errors.IsRetryable`, and honors an optional `retryAfterer` (Retry-After) hook. Permanent errors surface immediately. Unclassified provider errors classify as Transient (fail-open) so they are retried — providers that know an error is permanent should return an errorfamily-classified (Rejection) error.
-- **Partial sync**: when some items fail validation/persistence but the run completes, the sync returns a populated result **and** `pkgerrors.ErrPartialSync` (Transient); consumers detect it via `errors.Is`. The HTTP layer maps it to 200-with-result rather than discarding successfully-synced items.
-- **Per-source serialization**: a per-source mutex orders concurrent syncs of the same source (TOCTOU guard on the latest-timestamp read); different sources run in parallel. Internals are split into lock-free `runSync`/`runSyncIncremental` to avoid re-entrant deadlock when incremental falls back to full.
-- **Remote wins (default)**: on conflict with no resolver configured, the incoming item always overwrites (remote-wins LWW)
-- **Pluggable conflict resolution**: `CQRSConfig.ConflictResolver` accepts any `crdt.ConflictResolver[*model.Item]` — `LWWResolver`, custom merge, etc.
-- **Validated at boundary**: both `provider.Item.Validate()` and `model.Item.Validate()` require the same fields (including `UpdatedAt`) and route through `pkgerrors.InvalidField(field, reason)` (→ `ErrInvalidInput`) so classification is consistent **and** the offending field is attached as structured context (`ErrorContext()["field"]`) for programmatic handling.
-- **Error-chain-preserving SQLite**: all read-model errors use multi-`%w` wrapping (`wrapDBErr`) so `errors.Is(err, ErrDatabase)` AND `errors.As(err, &driverErr)` both work.
-
-- **Centralized HTTP mapping**: `pkgerrors.HTTPStatus(err)` is the single error→status translator (per-sentinel overrides where the family default is too coarse, then `errorfamily.Classify(err).HTTPStatus()`). `context.Canceled`→499, `context.DeadlineExceeded`→504. The API layer routes every handler through it; new sentinels inherit their family's status automatically — no brittle catch-all default.
-
-### Conflict Flow
-
-`ConflictAwareSyncer` delegates entirely to `SyncStore.SyncItems()` which uses `DecideSync` as the single authority. `DecideSync` calls `HasChanged()` and:
-
-1. If no resolver configured (nil): emits `ItemConflictFound{Winner: ConflictWinnerRemote}` + `ItemSynced` with the incoming item (default remote-wins)
-2. If resolver configured: calls `resolver.Resolve(&Conflict{Local, Remote, ...})` and uses the winner for `ItemSynced`. `ItemConflictFound{Winner}` records which side won (`ConflictWinnerRemote` or `ConflictWinnerLocal`)
-3. On resolver error: falls back to remote-wins
-
-The winner constants (`ConflictWinnerRemote`, `ConflictWinnerLocal`) are exported with `ParseConflictWinner` for safe payload→enum decoding (unknown values default to remote-wins). The conflict winner determines the `SyncAction`: `ActionConflictRemote` or `ActionConflictLocal`. No split-brain — the decider is the single source of truth for conflict detection. Invalid items from `filterValidItems` are properly counted in `ConflictResult.Errors`.
+**Key properties (short form):** idempotent sync (deterministic stream IDs); tombstone soft-delete + auto-resurrect; per-source mutex serialization (TOCTOU guard; different sources parallel; lock-free `runSync`/`runSyncIncremental` internals avoid re-entrant deadlock); remote-wins default with pluggable `crdt.ConflictResolver[T]` (resolver error → remote-wins fallback; winner recorded in `ItemConflictFound` and decoded safely via `ParseConflictWinner`); resilient fetch (exponential backoff + jitter, `errors.IsRetryable`, Retry-After hook, unclassified provider errors fail-open as Transient); partial sync returns the result **plus** `ErrPartialSync` (HTTP maps to 200-with-result); boundary validation via `pkgerrors.InvalidField` (classification + `field` context); `pkgerrors.HTTPStatus(err)` is the single error→status translator (`context.Canceled`→499, `DeadlineExceeded`→504; new sentinels inherit family status).
 
 ## Development Workflow
 
-### Local Development
+**Required first step** — enter the nix devShell (`direnv allow` with the committed `.envrc`, or `nix develop`) so `GOFLAGS=-tags=goexperiment.jsonv2` is set. Plain-shell `go build`/`go test`/buildflow native-go steps fail with `encoding/json/v2: build constraints exclude all Go files` (see Gotchas).
 
-**Required first step** — enter the nix devShell so `GOFLAGS=-tags=goexperiment.jsonv2` is set (otherwise every `go build` / `go test` / buildflow native-go step fails with `encoding/json/v2: build constraints exclude all Go files`):
-
-- **direnv (recommended)**: the committed `.envrc` runs `use flake`, auto-loading the devShell on `cd`. One-time setup: `direnv allow` in the project root. Requires direnv hooked into your shell (already wired in `.bashrc` and `~/.config/fish/config.fish` on this host).
-- **manual**: run `nix develop` (or `nix develop -c bash`) before any go/buildflow command.
-
-`buildflow --build-mode full` MUST run inside this env: its native go subcommands (`test-race`, `go-fix`, `go-auto-upgrade`, `govalid-generate`) inherit `GOFLAGS` from the shell, so a plain-shell invocation fails on the jsonv2 build tag while `golangci-lint` (which reads `.golangci.yml run.build-tags`) and `nix build` (which sets the tag in `preBuild`) pass — a misleading partial-green result.
-
-1. **`go.work` (root, untracked)**: the default local workspace is `use ( . ./provider/github )` — it wires the core module and the nested provider module so edits run both test suites. It is gitignored and must never be committed. **Never add sibling checkouts** (`../go-cqrs-lite/*` etc.) to it: buildflow detects go.work on disk and runs `go test ./...` in EVERY workspace module — sibling repos fail that leg. Remove go.work (or keep it to the two in-repo modules) before running buildflow.
-
+1. `go.work` (root, untracked, never commit): `use ( . ./provider/github )`. **Never add sibling checkouts** — buildflow runs tests in EVERY workspace module.
 2. Build: `go build ./...`
 3. Test: `go test ./... -count=1`
-4. Lint: `golangci-lint run ./... --timeout=5m`
-5. Format: `golangci-lint fmt ./...`
-6. CQRS gate: `go run ./cmd/localsync-lint --strict --verbose` (or `nix run .#localsync-lint`). Suppression via `//cqrs-lint:ignore <rule>` directives; `--show-suppressed` to list silenced findings.
-7. Doc-count truth: `./scripts/check-doc-counts.sh` (add `--coverage` to also check the coverage column vs a fresh run). CI runs it in the lint job; it fails when AGENTS/README/FEATURES test-count claims (per-package + totals) or the dependency table drift from code. **When you add/remove tests or bump deps, run it and fix the flagged claims — never hand-carry numbers.**
-8. Full pipeline: `buildflow --build-mode full` (requires the devShell active — see "Required first step" above; see the go.work caveat above)
+4. Lint: `golangci-lint run ./... --timeout=5m` · Format: `golangci-lint fmt ./...`
+5. CQRS gate: `go run ./cmd/localsync-lint --strict --verbose` (suppressions: `//cqrs-lint:ignore`; `--show-suppressed` to audit)
+6. Library cqrs-lint gate: `go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` (needs the private `go-finding` module → devShell/SSH only; CI runs it secret-gated)
+7. Doc-count truth: `./scripts/check-doc-counts.sh` (CI runs it; `--coverage` adds coverage-column checking locally). When you add/remove tests or bump deps, run it and fix flagged claims — **never hand-carry numbers**.
+8. Full pipeline: `buildflow --build-mode full` (devShell active; go.work limited to the two in-repo modules)
+9. Release: `./scripts/verify-release.sh <core-tag> [provider-tag]` (tags, GitHub Releases, proxy `@v/list`/`@latest`, pkg.go.dev, docs consistency); checklist in CONTRIBUTING.md
 
 ### CI (No go.work)
 
-CI uses tagged versions from GitHub (no replace directives in `go.mod`), with no private-repo auth — all dependencies are public. Jobs: `test` (race + coverage), `lint` (vet + **actionlint** workflow validation (pinned `@v1.7.12`, also in the devShell) + golangci-lint **pinned to v2.13.2** (matches the devShell — never `latest`) incl. gosec + **two cqrs-lint gates**, see below), `security` (**govulncheck** dependency-CVE scan + **gitleaks** full-history secret scan via `.gitleaks.toml`), `nix` (**`nix flake check`** on every push — added 2026-09-06 after the vendorHash silent-red incident; overrides the flake's SSH `go-nix-helpers` input to anonymous HTTPS), `build` (cross-platform compile matrix), `release` (tag-triggered), and `provider` (standalone build + race tests for `provider/github`). The build/release jobs gate on the test, lint, security, and nix jobs.
+All dependencies are public; no private-repo auth except the secret-gated library gate. Jobs: `test` (race + coverage), `lint` (vet + actionlint@v1.7.12 + golangci-lint@v2.13.2 + dprint@0.56.1 + both cqrs-lint gates), `security` (govulncheck + gitleaks), `nix` (`nix flake check` — guards vendorHash drift), `build` (linux/darwin/windows compile matrix), `release` (tag-triggered), `provider` (standalone `GOWORK=off` build + race for `provider/github`). Build/release gate on test/lint/security/nix.
 
-**Workflow-level `GOEXPERIMENT: jsonv2` is required** — every CI job compiles go-cqrs-lite v4 code that imports `encoding/json/v2`; without the env the whole workflow goes red with `encoding/json/v2: build constraints exclude all Go files`. Setting the experiment at the `env:` top level satisfies the build constraint for all jobs (no `-tags` needed); `.golangci.yml` keeps its `run.build-tags` entry harmlessly.
+**`GOEXPERIMENT: jsonv2` is set at workflow `env:` level** — every job compiles go-cqrs-lite v4 code importing `encoding/json/v2`; without it the whole workflow goes red.
 
-**Two cqrs-lint gates run in the `lint` job on every push:**
-
-1. **Internal gate**: `go run ./cmd/localsync-lint --strict` — the ADR-0004 architectural invariant linter (10 rules, C0001-C0010). Fail on any finding incl. warnings.
-2. **Library gate (secret-gated)**: `go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` — 203 consumer-facing domain rules from go-cqrs-lite, version-pinned; error-gated so warnings stay advisory. The CI step is restored in the `lint` job and **auto-enables when the `SSH_PRIVATE_KEY` repo secret exists** (a deploy key with read access to the **private** `larsartmann/go-finding` module the pinned linter depends on); without the secret it skips with a `::notice::` and stays a local devShell gate.
-   Known heuristic false positives (annotated inline via `//cqrs-lint:ignore <rule> <reason>`, never blanket-disabled): **C017** flags any `NewMemoryDeadLetterStore()` call site — the memory-backend branch in `store_factory.go` legitimately pairs the ephemeral store with the ephemeral DLQ while the sqlite branch wires the persistent one; **E005** handler detection misses handlers registered inside factory closures; **E014** drain heuristic assumes async delivery while our bus delivers synchronously.
-
-```bash
-go build ./...
-go test ./... -count=1
-go run ./cmd/localsync-lint --strict
-go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
-```
+**Two cqrs-lint gates in `lint`:** (1) internal `go run ./cmd/localsync-lint --strict` (ADR-0004 invariants, fail on warnings); (2) library `cqrs-lint/v4@v4.8.1 ./pkg --min-severity error` — auto-enables when the `SSH_PRIVATE_KEY` secret exists (deploy key for **private** `larsartmann/go-finding`), otherwise skips with a `::notice::`. Known annotated false positives (`//cqrs-lint:ignore <rule> <reason>`, never blanket): C017 (memory-DLQ pairing in `store_factory.go`), E005 (closure-registered handlers), E014 (synchronous bus drain heuristic).
 
 ### Pre-commit Hooks
 
-Pre-commit hooks use `buildflow` (not testify-banning). Hooks are not set as executable and are skipped.
+Use `buildflow`; not executable, formally disabled (documented decision). Re-enabling needs a formatter scope/budget review.
 
 ### Build & Lint Gotchas
 
-- **All `larsartmann/*` deps are public** (go-cqrs-lite went public, closing the old private-dep problem): the committed `vendor/` workaround is gone — `flake.nix` now uses a real `vendorHash`. If you ever re-vendor manually, remember `.gitignore` ignores `vendor/` and nix flakes only include git-tracked files in the sandbox source. The force-add pattern still applies to **`.envrc`** (committed so direnv auto-loads the devShell): buildflow's `gitignore-upserter` recommends ignoring it, so it lives in the buildflow-managed `.gitignore` block. After creating/modifying it, force-add once with `git add -f .envrc`; once tracked, `.gitignore` no longer hides it and subsequent edits work normally.
-- **Go experimental `GOEXPERIMENT=jsonv2`**: go-cqrs-lite **v4** adopted JSON v2 (`encoding/json/v2` + `encoding/json/jsontext`), which Go 1.26 gates behind the `goexperiment.jsonv2` build tag until graduation (expected Go 1.27+). Without it, every `go build`/`go test`/`golangci-lint` command fails with `encoding/json/v2: build constraints exclude all Go files`. The tag is wired in three places (mirrors the go-cqrs-lite flake): (1) `flake.nix` devShells set `GOFLAGS = "-tags=goexperiment.jsonv2"` so buildflow's native go subcommands inherit it — **but only when run inside the devShell** (`nix develop` or via the committed `.envrc` / `direnv allow`). Running `buildflow` from a plain shell fails with `encoding/json/v2: build constraints exclude all Go files`, while `golangci-lint` and `nix build` still pass (they get the tag from `.golangci.yml` and `preBuild` respectively) — a misleading partial-green. Symptom: `test-race`, `go-fix`, `go-auto-upgrade`, and `govalid-generate` all fail with the jsonv2 build-constraints error; (2) the go-standard packages export `GOEXPERIMENT=jsonv2` in `preBuild` (buildGoModule silently drops `GOEXPERIMENT` from `env` — only a `preBuild` export works); (3) `.golangci.yml` `run.build-tags` includes `goexperiment.jsonv2` (golangci-lint does not read `GOFLAGS`). Note: `go mod tidy` now works on v4 (the v3 nested-`eventtest` blocker is gone).
-- **Pre-commit hooks are inert**: hooks use `buildflow` but are not set executable and are skipped (see "Pre-commit Hooks" above). Historically they also OOM'd on the committed `vendor/` tree — that cause is gone with vendor/, but re-enabling the hooks would need a formatter scope/budget review first.
-- **`vendorHash` drifts on dependency refreshes**: any `go.mod`/`go.sum` change (the auto-commit daemon commits these without touching the flake) invalidates `flake.nix`'s `vendorHash` — `nix build` / `nix flake check` then fail with a hash mismatch that names the new hash. Re-pin it immediately after dependency work.
-- **go.work + buildflow**: buildflow's `ForEachGoModule` detects go.work **on disk** (not just tracked) and runs `go test ./...` in every workspace module. Keeping the workspace to `.` + `./provider/github` is safe (CI proves both green); adding sibling repos (`../go-cqrs-lite/*`) makes buildflow run their tests too, which fail. Never commit go.work.
-- **golangci-lint v2.13 `exhaustruct_v5`**: the old `exhaustruct` linter is deprecated; the config uses `settings.exhaustruct_v5.ignore-patterns` (renamed from `exclude`, same full-path regex style). `ignore-patterns` still does **not** match local-package types in full runs (only stdlib full-path patterns). For local domain structs with optional fields (`ItemFilter`, `FetchResult`), suppress via `issues.exclusions.rules` with a `text:` regex instead.
-- **`SA5012` disabled**: staticcheck v0.7 panics ("can't set facts on objects belonging another package") on cross-package even-elements analysis (e.g. `testutil.BuildPairs` called from another package's tests). Disabled in `linters.settings.staticcheck.checks`.
-- **`go.mod` requires `go 1.26.7`** (matches the active toolchain; bumped alongside dependency refreshes). Do **not** lower the directive to work around toolchain lag — re-raise it when deps require a newer Go.
+- **GOEXPERIMENT=jsonv2 is load-bearing**: go-cqrs-lite v4 imports `encoding/json/v2`, gated in Go 1.26 behind `goexperiment.jsonv2`. Wired in 3 places: devShell `GOFLAGS` (buildflow native-go subcommands inherit it **only inside the devShell** — plain-shell buildflow fails while golangci-lint/`nix build` still pass: misleading partial-green), flake `preBuild` export (`buildGoModule` drops `GOEXPERIMENT` from `env`), `.golangci.yml` `run.build-tags` (golangci-lint ignores `GOFLAGS`). `go mod tidy` works on v4.
+- **`vendorHash` drifts on any go.mod/go.sum change** (the auto-commit daemon commits deps without touching the flake) → `nix build`/`nix flake check` fail with a hash mismatch naming the new hash. Re-pin immediately; CI's `nix` job + `scripts/check-vendorhash.sh` fail fast on drift.
+- **go.work is a local, untracked file**; buildflow detects it **on disk**. Keep it to `.` + `./provider/github` (both CI-proven); sibling checkouts make buildflow run their tests too (they fail). Never commit.
+- **`provider/github` pins released core versions** (`go-localsync v0.5.0`): with `GOWORK=off` in that directory it resolves the PIN, not your local checkout — provider tests stay green on old vocabulary by design. Core vocabulary changes reach the provider only via an explicit post-release re-pin (TODO_LIST has the follow-up item).
+- **SQLite driver registration is consumer-owned**: go-cqrs-lite storage registers NO sqlite driver; any SQLite-path consumer (and `pkg/api` integration tests) must blank-import `_ "modernc.org/sqlite"` or `SELECT`s fail with "unknown driver".
+- **gopls is not authoritative after mechanical edits**: post-sed/move, LSP shows ghost errors (e.g. `item.ExternalID` in `decider.go`, `""`→`StreamID` conversions in tests) that the CLI disproves. Trust `go build` / `go test` / `golangci-lint run` — never edit based on a stale diagnostic; cross-check with a fresh CLI run first.
+- **gopls `stdversion` warnings are known GOEXPERIMENT noise**: `json.Marshal*` "requires go1.27" LSP warnings come from the jsonv2 experiment vs the `go 1.26` directive; builds with `GOEXPERIMENT=jsonv2` are clean. Do not "fix" them, do not lower the go directive.
+- **All `larsartmann/*` deps are public** (proxy + pkg.go.dev resolve without credentials; no GOPRIVATE/SSH in CI for fetches). The only private dep is `go-finding` (library cqrs-lint gate only). The old committed `vendor/` workaround is gone — flake uses a real `vendorHash`. `.envrc` must stay force-added (`git add -f .envrc`) since buildflow's gitignore-upserter lists it.
+- **Pre-commit hooks are inert by decision**: not executable, skipped. Re-enable only after a formatter scope/budget review.
+- **golangci-lint v2.13 `exhaustruct_v5`**: `ignore-patterns` (renamed from `exclude`) does not match local-package types in full runs — suppress optional-field structs (`ItemFilter`, `FetchResult`) via `issues.exclusions.rules` `text:` regexes instead.
+- **`SA5012` disabled**: staticcheck v0.7 panics on cross-package even-elements analysis. Disabled in `linters.settings.staticcheck.checks`.
+- **`go.mod` requires `go 1.26.7`** (matches the toolchain). Do not lower the directive to dodge toolchain lag; re-raise when deps require newer.
+- **dprint freezes snapshot docs**: `docs/status/**` and `docs/planning/**` are excluded in `dprint.json` (point-in-time records stay as written); living docs stay formatted. Run `dprint fmt` after table edits in living docs.
+- **Golangci pins + CI versions must match the devShell** (golangci-lint v2.13.2, dprint 0.56.1, actionlint 1.7.12) — never `latest`.
 
 ## Testing
 
-**Decider-test convention (since 2026-09-05):** new decider behavior tests use the library-native `scenario` DSL (`go-cqrs-lite/scenario/v4`, see `pkg/cqrs/scenario_test.go` for Given/When/Then examples incl. the cmd/state adapters). Keep plain table tests for fold edge cases. Note: the `eventtest` module has no released version — do not depend on it until tagged.
+**Decider-test convention (since 2026-09-05):** new decider behavior tests use the library-native `scenario` DSL (`go-cqrs-lite/scenario/v4`, see `pkg/cqrs/scenario_test.go`). Keep plain table tests for fold edge cases. The `eventtest` module has no released version — do not depend on it until tagged.
 
 | Package              | Tests | Coverage | Status                                                                                                                                                                                                                                                                            |
 | -------------------- | ----- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -152,76 +107,54 @@ Run: `go test ./... -count=1`
 
 ## Backend Selection
 
-Storage backends are selected via `CQRSConfig.Backend` in `cqrs.NewCQRSStack()`.
+Selected via `CQRSConfig.Backend` in `cqrs.NewCQRSStack()`; event store + read model + snapshots + DLQ share the backend.
 
 | Backend  | Config value        | Use Case                                 |
 | -------- | ------------------- | ---------------------------------------- |
 | `memory` | `Backend: "memory"` | Testing, development (default)           |
 | `sqlite` | `Backend: "sqlite"` | Local SQLite file via modernc.org/sqlite |
 
-Event store + read model use the same backend.
-
 ## Provider Development
 
-The SDK core is a pure contract library — concrete providers are separate modules. The reference implementation is the **`provider/github` nested module** (released as `provider/github/v0.1.0`, built on go-github-kit v0.3.0); see its README. To add a new provider:
+The core is a pure contract library; concrete providers are separate modules. Reference: **`provider/github`** (released `provider/github/v0.1.0`, go-github-kit v0.3.0, own CHANGELOG). To add one: implement `provider.Provider` (`Name`, `Fetch`, `FetchAll`, `GetRateLimit`); map provider data to `provider.Item` with branded `pkg/id` types + `Attributes` (typed write-helpers: `WithActorLogin` etc.); add tests; document config.
 
-1. Implement the `provider.Provider` interface (`Name`, `Fetch`, `FetchAll`, `GetRateLimit`)
-2. Convert provider-specific data to `provider.Item` using branded types from `pkg/id/` (for identity) and `Attributes map[string]string` (for provider-specific content like actor, repo, etc.)
-3. Add provider-specific tests
-4. Update documentation with provider configuration
-
-### Nested module + go.work (non-obvious)
-
-- `provider/github/` is a **separate Go module** with its own `go.mod`; it pins released parent versions (`go-localsync v0.5.0`, `go-github-kit v0.3.0`) and builds **standalone** with `GOWORK=off` from that directory.
-- The root `go.work` (`use .` and `use ./provider/github`) wires both modules for local development; `nix build` builds only the core module.
-- Editing provider code runs tests through the workspace exactly like core code; CI runs the provider leg standalone (`.github/workflows/ci.yml`, job `provider`).
-- **go-localsync is a PUBLIC repo** (flipped 2026-09-05): module versions resolve via proxy.golang.org and are indexed on pkg.go.dev; `go get github.com/larsartmann/go-localsync@vX.Y.Z` works for everyone without credentials. CI no longer configures GOPRIVATE/SSH auth for dependency fetches. The only remaining private dependency is `larsartmann/go-finding` (needed solely by the pinned library cqrs-lint): if the `SSH_PRIVATE_KEY` secret is added back for that gate, CI fetches it over SSH in that one step only.
+- `provider/github/` is a separate module pinning released parent versions; builds standalone with `GOWORK=off`; the root `go.work` wires it for local dev; CI job `provider` runs it in isolation. Its vocabulary adoption lags core by design (pinned parent) — see the Gotcha above.
+- **go-localsync is a PUBLIC repo** (2026-09-05): `go get github.com/larsartmann/go-localsync@vX.Y.Z` works for everyone; no GOPRIVATE/SSH for dependency fetches.
 
 ## Database Schema
 
-Two tables managed by the CQRS stack:
+Two tables managed by the CQRS stack (DDL in `sqlite_readmodel.go` + go-cqrs-lite storage):
 
-### Events (via go-cqrs-lite/storage)
-
-- `id`, `event_type`, `aggregate_type`, `aggregate_id`, `version`, `schema_version`
-- `payload`, `metadata`, `occurred_at`, `created_at`
-- Unique constraint on `(aggregate_type, aggregate_id, version)`
-
-### Sync Items (read model projection)
-
-- `item_id`, `source`, `source_id`, `type`, `attributes` (JSON map of provider-specific key-values)
-- `content_hash`, `created_at`, `updated_at`, `schema_version`
-- `tombstoned`, `tombstone_reason`, `tombstoned_at` (soft-delete columns; `migrateSyncItems` adds them idempotently)
-- Primary key on `(source, source_id)`
-- Legacy columns (`actor_login`, `actor_avatar_url`, `repo_name`, `repo_url`) exist in pre-V3 databases but are no longer read or written (ADR-0007)
+- **Events** (go-cqrs-lite/storage): `id`, `event_type`, `aggregate_type`, `aggregate_id`, `version`, `schema_version`, `payload`, `metadata`, `occurred_at`, `created_at`; unique on `(aggregate_type, aggregate_id, version)`.
+- **Sync Items** (read model): `item_id`, `source`, `source_id`, `type`, `attributes` (JSON map), `content_hash`, `created_at`, `updated_at`, `schema_version`, `tombstoned`, `tombstone_reason`, `tombstoned_at` (added idempotently by `migrateSyncItems`); PK on `(source, source_id)`. Pre-V3 legacy columns (`actor_login`, …) exist but are never read/written (ADR-0007).
 
 ## Dependencies
 
-| Dependency                         | Version | Purpose                                                                                                     |
-| ---------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `go-cqrs-lite/event/v4`            | v4.9.0  | Event types, Store, Bus, Journal, `Version` (uint64), `Instant`/`WallTime` (requires `GOEXPERIMENT=jsonv2`) |
-| `go-cqrs-lite/command/v4`          | v4.8.1  | Command types, Dispatcher, TypedHandler[T], RegisterTyped[T], `ID()`, `ExecuteRef`                          |
-| `go-cqrs-lite/query/v4`            | v4.7.1  | Indirect (transitive); no QueryDispatcher — reads call the ReadModel directly                               |
-| `go-cqrs-lite/decider/v4`          | v4.5.0  | Decider (`Apply` field), Repository, snapshot/codec options                                                 |
-| `go-cqrs-lite/id/v4`               | v4.5.0  | Branded phantom-type IDs (StreamID, CorrelationID, etc.)                                                    |
-| `go-cqrs-lite/codec/v4`            | v4.4.0  | Codec interface, JSONCodec (CBOR `TimeUnixDynamic` nanosecond fix) — uses `encoding/json/v2`                |
-| `go-cqrs-lite/projection/v4`       | v4.3.0  | Projection interface (moved from `event/` in v3.2, ADR-0037)                                                |
-| `go-cqrs-lite/projectionhost/v4`   | v4.4.0  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)                                          |
-| `go-cqrs-lite/snapshot/v4`         | v4.4.0  | SnapshotStore, EveryNEvents strategy                                                                        |
-| `go-cqrs-lite/storage/memory/v4`   | v4.4.0  | In-memory event store + snapshot store (bus deleted in v3)                                                  |
-| `go-cqrs-lite/middleware/v4`       | v4.5.1  | EventLogging + CommandRetry middleware                                                                      |
-| `go-cqrs-lite/watermill/v4`        | v4.5.1  | In-process `EventBus` (replaces deleted `memory.NewMemoryBus`)                                              |
-| `go-cqrs-lite/storage/v4`          | v4.8.1  | SQLite event store, snapshot, KV store                                                                      |
-| `go-cqrs-lite/schema/v4`           | v4.3.1  | Schema `Version` + `UpcastSourceTransform` (upcaster registry wiring)                                       |
-| `go-cqrs-lite/otel/v4`             | v4.3.0  | OTel middleware bundle: command/event spans + `cqrs.operation.*` metrics (opt-in via `CQRSConfig.OTel`)     |
-| `go.opentelemetry.io/otel`         | v1.46.0 | OpenTelemetry API (metric + trace direct; core/sdk indirect)                                                |
-| `go-branded-id`                    | v0.5.1  | Branded phantom-type IDs for compile-time safety                                                            |
-| `go-error-family`                  | v0.10.0 | Structured error classification + user-facing message templates                                             |
-| `modernc.org/sqlite`               | v1.56.0 | Pure-Go SQLite driver (no CGo)                                                                              |
-| `charm.land/log/v2`                | v2.0.1  | Structured logging                                                                                          |
-| `github.com/danielgtaylor/huma/v2` | v2.39.1 | HTTP API framework with OpenAPI 3 generation + stdlib adapter                                               |
-| `github.com/oklog/ulid/v2`         | v2.1.2  | ULID generation for `ItemID`                                                                                |
-| `go-cqrs-lite/scenario/v4`         | v4.2.0  | Test-only: scenario DSL for decider Given/When/Then specs                                                   |
+| Dependency                         | Version | Purpose                                                                           |
+| ---------------------------------- | ------- | --------------------------------------------------------------------------------- |
+| `go-cqrs-lite/event/v4`            | v4.9.0  | Event types, Store, Bus, Journal (requires `GOEXPERIMENT=jsonv2`)                 |
+| `go-cqrs-lite/command/v4`          | v4.8.1  | Command types, Dispatcher, TypedHandler[T], `ExecuteRef`                          |
+| `go-cqrs-lite/query/v4`            | v4.7.1  | Indirect; no QueryDispatcher — reads call the ReadModel directly                  |
+| `go-cqrs-lite/decider/v4`          | v4.5.0  | Decider, Repository, snapshot/codec options                                       |
+| `go-cqrs-lite/id/v4`               | v4.5.0  | StreamID, CorrelationID                                                           |
+| `go-cqrs-lite/codec/v4`            | v4.4.0  | JSONCodec (uses `encoding/json/v2`)                                               |
+| `go-cqrs-lite/projection/v4`       | v4.3.0  | Projection interface                                                              |
+| `go-cqrs-lite/projectionhost/v4`   | v4.4.0  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)                |
+| `go-cqrs-lite/snapshot/v4`         | v4.4.0  | SnapshotStore, EveryNEvents                                                       |
+| `go-cqrs-lite/storage/memory/v4`   | v4.4.0  | In-memory event + snapshot store                                                  |
+| `go-cqrs-lite/middleware/v4`       | v4.5.1  | EventLogging + CommandRetry + CommandValidation + OTel middleware                 |
+| `go-cqrs-lite/watermill/v4`        | v4.5.1  | In-process `EventBus`                                                             |
+| `go-cqrs-lite/storage/v4`          | v4.8.1  | SQLite event store, snapshot, KV, DLQ store                                       |
+| `go-cqrs-lite/schema/v4`           | v4.3.1  | Schema `Version` + upcaster registry wiring                                       |
+| `go-cqrs-lite/otel/v4`             | v4.3.0  | OTel bundle: command/event spans + `cqrs.operation.*` metrics (opt-in)            |
+| `go.opentelemetry.io/otel`         | v1.46.0 | OpenTelemetry API (metric + trace direct; core/sdk indirect)                      |
+| `go-branded-id`                    | v0.5.1  | Branded phantom-type IDs                                                          |
+| `go-error-family`                  | v0.10.0 | Error classification + message templates                                          |
+| `modernc.org/sqlite`               | v1.56.0 | Pure-Go SQLite driver (no CGo; blank-import required)                             |
+| `charm.land/log/v2`                | v2.0.1  | Structured logging                                                                |
+| `github.com/danielgtaylor/huma/v2` | v2.39.1 | HTTP API + OpenAPI 3 generation                                                   |
+| `github.com/oklog/ulid/v2`         | v2.1.2  | ULID for `ItemID`                                                                 |
+| `go-cqrs-lite/scenario/v4`         | v4.2.0  | Test-only: decider Given/When/Then DSL                                            |
 
 ### Test Dependencies
 
@@ -236,22 +169,17 @@ Note: the `eventtest` module has no released version — do not depend on it unt
 
 | File        | Purpose                                                                                                                            |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `flake.nix` | Nix flake using the `go-standard` module (go-nix-helpers): devShell, `packages.default` + `packages.cqrs-lint`, `checks.cqrs-lint` |
+| `flake.nix` | Nix flake using the `go-standard` module (go-nix-helpers): devShell, `packages.default` + `packages.localsync-lint`, hermetic `checks.test` + `checks.lint` |
 
-## go-cqrs-lite Integration
+## go-cqrs-lite Integration (quick map)
 
-| Area           | go-localsync                                                                                                                                | go-cqrs-lite                                                                      |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| IDs            | `id.ID[B, V]` via go-branded-id directly                                                                                                    | `id.Of[T]` — same memory layout                                                   |
-| Storage        | `CQRSStack` → `decider.Repository[SyncItemState]`                                                                                           | `event.Store` + `event.Bus` via storage/memory + watermill modules                |
-| Conflict       | `DecideSync` produces ItemConflictFound events                                                                                              | Error taxonomy with 5 families                                                    |
-| Read Model     | `MemoryReadModel` + `SQLiteReadModel` with filter/pagination                                                                                | Projected from events via custom `Projector` implementing `projection.Projection` |
-| SyncStore      | `CQRSStack` implements `sync.SyncStore` via adapter methods (`List`, `Count`, `CountByType`)                                                | `sync.SyncStore` interface defined in consumer package                            |
-| SyncActions    | `classifyAction` returns `synclib.SyncAction` (`ActionCreated`, etc.)                                                                       | Types defined in `pkg/sync/`, not `pkg/cqrs/`                                     |
-| Codec          | `codec.JSONCodec` + `event.DecodePayload[T]` + `event.NewEvents`                                                                            | Eliminates all manual json.Marshal/Unmarshal                                      |
-| Projection     | Direct `bus.SubscribeAll` (sync) + `projectionhost.Host` (managed catch-up with checkpoint + DLQ); see ADR-0006                             | `projectionhost/v4`; interface from `projection/v4` (ADR-0037)                    |
-| Snapshots      | `SQLiteSnapshotStore` (SQLite) + `MemorySnapshotStore` (memory) + `snapshot.EveryNEvents`                                                   | Caps replay cost, persists across restarts                                        |
-| Correlation    | `event.WithCorrelationID` in `SyncItems`                                                                                                    | Unique per sync run for debugging                                                 |
-| Logging        | `middleware.EventLogging` via charm log adapter                                                                                             | Structured logging of all domain events                                           |
-| Error taxonomy | `go-error-family` constructors (intrinsic classification) + `pkgerrors.HTTPStatus` (status) + `WithCtx`/`InvalidField` (structured context) | Smart retry classification, error→HTTP, and field-addressable validation errors   |
-| Version        | `event.Version` (uint64) with `Increment()`, `Add()`                                                                                        | `int` → `uint64` in v3; no `int()` casts needed                                   |
+| Area        | go-localsync                                                            | go-cqrs-lite provides                  |
+| ----------- | ----------------------------------------------------------------------- | -------------------------------------- |
+| IDs         | `id.ID[B, V]` via go-branded-id                                         | `id.Of[T]` (same memory layout)        |
+| Storage     | `CQRSStack` → `decider.Repository[SyncItemState]`                        | `event.Store` + `event.Bus`            |
+| Read model  | Memory + SQLite read models w/ filter/pagination                         | projection contract (`projection/v4`)  |
+| Projection  | Live `bus.SubscribeAll` + `projectionhost.Host` catch-up (ADR-0006)      | `projectionhost/v4`, `watermill/v4`    |
+| Errors      | go-error-family constructors + `pkgerrors.HTTPStatus`/`WithCtx`          | 5-family error taxonomy                |
+| Correlation | `event.WithCorrelationID` per sync run + causation enricher on commands | typed Metadata (stream-durable)        |
+
+Note: typed `Metadata.Causation` is stream-durable; bus-delivered messages keep only the `command.type`/`command.id` custom fallbacks (known watermill protocol limitation — upstream issue candidate, see TODO_LIST).
