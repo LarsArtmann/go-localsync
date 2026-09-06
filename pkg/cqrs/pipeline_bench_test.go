@@ -2,6 +2,7 @@ package cqrs
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"path/filepath"
 	"testing"
@@ -75,6 +76,24 @@ func BenchmarkPipeline_Replay10kEvents(b *testing.B) {
 	b.ResetTimer()
 
 	for b.Loop() {
+		// TRUE from-zero replay: the projection checkpoint persists inside
+		// the SQLite file, so reopening the seeded DB would resume at the
+		// head position and replay nothing (the previous version measured
+		// stack open/close, not replay). Wiping checkpoints forces the
+		// managed batch-drainer to re-consume the full journal.
+		cpDB, cpErr := sql.Open("sqlite", dbPath)
+		if cpErr != nil {
+			b.Fatal(cpErr)
+		}
+
+		if _, cpErr := cpDB.Exec("DELETE FROM checkpoints"); cpErr != nil {
+			b.Fatal(cpErr)
+		}
+
+		if cpErr := cpDB.Close(); cpErr != nil {
+			b.Fatal(cpErr)
+		}
+
 		replay, rerr := NewCQRSStack(CQRSConfig{Backend: backendSQLite, DBPath: dbPath})
 		if rerr != nil {
 			b.Fatal(rerr)
