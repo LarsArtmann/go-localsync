@@ -108,6 +108,14 @@ jobs:
           version: v2.13.2
           args: --timeout=5m
 
+      # Formatting parity for the non-Go files dprint owns (json/yaml/md/
+      # dockerfile). Version pinned to the devShell's dprint (0.56.1) so
+      # local `dprint fmt` and CI `dprint check` agree on what is formatted.
+      - name: Run dprint (formatting check)
+        run: |
+          curl -fsSL https://dprint.dev/install.sh | sh -s 0.56.1
+          "$HOME/.dprint/bin/dprint" check
+
       # ADR-0004 architectural invariants (single aggregate, three fixed
       # events, projection guards) enforced on every push.
       - name: Run internal localsync-lint (strict)
@@ -220,11 +228,15 @@ jobs:
     needs: [test, lint, security, nix]
     strategy:
       matrix:
-        goos: [linux, darwin]
+        goos: [linux, darwin, windows]
         goarch: [amd64, arm64]
         exclude:
           - goos: darwin
             goarch: amd64
+          # arm64 windows is a niche target; amd64 proves the compile surface
+          # (modernc.org/sqlite is pure Go, so CGO is not a constraint).
+          - goos: windows
+            goarch: arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

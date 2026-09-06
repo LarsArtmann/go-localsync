@@ -132,6 +132,19 @@ proxy_check() {
 proxy_check "$CORE_MODULE" "core" "$CORE_TAG"
 proxy_check "$PROVIDER_MODULE" "provider/github" "$PROVIDER_TAG"
 
+echo "== 5. docs consistency (docs-health VERIFY, standing pre-release step) =="
+# The automatable slice of a docs-health VERIFY pass: test/coverage counts and
+# the dependency table vs go.mod are checked in CI on every push, but a tag
+# can be cut from a tree older than the last push — re-verify at release time
+# so published docs never ship stale numbers. The judgment-heavy parts of
+# VERIFY (claims vs code, FEATURES freshness) stay a manual checklist item in
+# CONTRIBUTING.md.
+if ./scripts/check-doc-counts.sh; then
+	ok "doc counts match code (AGENTS/README/FEATURES/TODO_LIST + dep table)"
+else
+	bad "doc counts drifted — update the docs and re-run (see above for the flagged claims)"
+fi
+
 if [[ "$fail" == 1 ]]; then
 	echo "RESULT: FAILED — the release is not fully published" >&2
 	exit 1
