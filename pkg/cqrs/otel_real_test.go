@@ -28,7 +28,9 @@ func newRealTelemetry(t *testing.T) (*middleware.OTelBundle, *sdkmetric.ManualRe
 	t.Cleanup(func() { _ = provider.Shutdown(context.Background()) })
 
 	recorder := tracetest.NewSpanRecorder()
-	tracerProvider := sdktrace.NewTracerProvider(sdktrace.WithSpanProcessor(recorder)) //nolint:exhaustruct // recorder-only provider
+	tracerProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithSpanProcessor(recorder),
+	) //nolint:exhaustruct // recorder-only provider
 	t.Cleanup(func() { _ = tracerProvider.Shutdown(context.Background()) })
 
 	bundle, err := middleware.NewOTelBundle(
@@ -100,7 +102,11 @@ func TestOTel_RealMeter_ProjectionInstruments(t *testing.T) {
 	}
 
 	if v, ok := findProjectionDatapoint(t, reader, "dead_lettered"); !ok || v < 1 {
-		t.Errorf("cqrs.operation.count{operation=projection,status=dead_lettered} must be >= 1, got %d (found=%v)", v, ok)
+		t.Errorf(
+			"cqrs.operation.count{operation=projection,status=dead_lettered} must be >= 1, got %d (found=%v)",
+			v,
+			ok,
+		)
 	}
 
 	// A second processed event accumulates on the same datapoint (real

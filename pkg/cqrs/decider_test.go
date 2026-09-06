@@ -320,7 +320,15 @@ func TestDecideTombstone_AlreadyTombstoned(t *testing.T) {
 func TestDecideTombstone_NewItem(t *testing.T) {
 	t.Parallel()
 
-	events, err := decideTombstone("github", id.NewExternalID("123"), model.ReasonUpstreamGone, time.Time{})(InitialState, 0)
+	events, err := decideTombstone(
+		"github",
+		id.NewExternalID("123"),
+		model.ReasonUpstreamGone,
+		time.Time{},
+	)(
+		InitialState,
+		0,
+	)
 	testutil.MustNoError(t, err)
 	if events != nil {
 		t.Errorf("expected no events, got %d", len(events))

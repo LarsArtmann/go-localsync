@@ -1,6 +1,14 @@
 package cqrslint
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+// ErrUnknownRule is returned by ValidateRuleSelection when a --rules or
+// --exclude-rules ID names no catalog rule. Callers can match it with
+// errors.Is to render their own usage message.
+var ErrUnknownRule = errors.New("unknown rule")
 
 // Rule identifiers. Declared as constants so every check references the same
 // spelling (satisfies goconst and prevents drift between the check and the
@@ -196,7 +204,7 @@ func ValidateRuleSelection(include, exclude []string) error {
 	for _, group := range [][]string{include, exclude} {
 		for _, id := range group {
 			if !known[id] {
-				return fmt.Errorf("unknown rule %q (see --list)", id)
+				return fmt.Errorf("%w: %q (see --list)", ErrUnknownRule, id)
 			}
 		}
 	}

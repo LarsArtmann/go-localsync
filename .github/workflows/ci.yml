@@ -110,8 +110,8 @@ jobs:
 
       # ADR-0004 architectural invariants (single aggregate, three fixed
       # events, projection guards) enforced on every push.
-      - name: Run internal cqrs-lint (strict)
-        run: go run ./cmd/cqrs-lint --strict
+      - name: Run internal localsync-lint (strict)
+        run: go run ./cmd/localsync-lint --strict
 
       # Library-side consumer lint (203 domain rules), error-gated: only
       # error-severity findings fail the build. Version-pinned so a new

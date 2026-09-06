@@ -208,7 +208,7 @@ func TestProcess_VersionFlag(t *testing.T) {
 		t.Fatalf("-version: exit = %d, want 0", exit)
 	}
 
-	if !strings.HasPrefix(out, "cqrs-lint ") {
+	if !strings.HasPrefix(out, "localsync-lint ") {
 		t.Errorf("-version output = %q, want 'cqrs-lint <version>' prefix", out)
 	}
 }

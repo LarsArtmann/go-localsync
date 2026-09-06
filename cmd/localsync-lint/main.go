@@ -51,7 +51,11 @@ func main() {
 	failOnWarning := flag.Bool("fail-on-warning", false, "exit non-zero when warnings are present")
 	jsonOut := flag.Bool("json", false,
 		"emit findings as newline-delimited JSON (machine readable; alias for -format=json)")
-	format := flag.String("format", "text", "output format: text, json (NDJSON), github (workflow annotations), or sarif")
+	format := flag.String(
+		"format",
+		"text",
+		"output format: text, json (NDJSON), github (workflow annotations), or sarif",
+	)
 	quiet := flag.Bool("quiet", false, "suppress all output; communicate through the exit code only")
 	verbose := flag.Bool("verbose", false, "show package info, per-rule status, and timing on stderr")
 	showSuppressed := flag.Bool("show-suppressed", false, "show findings silenced by //cqrs-lint:ignore directives")
@@ -66,7 +70,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("cqrs-lint %s\n", cliVersion)
+		fmt.Printf("localsync-lint %s\n", cliVersion)
 
 		return
 	}
@@ -395,9 +399,9 @@ func emitSummary(w io.Writer, counts findingCounts, opts outputOptions, elapsed 
 	}
 
 	if opts.verbose {
-		fmt.Fprintf(w, "cqrs-lint: %s (%s)\n", strings.Join(parts, ", "), elapsed.Round(time.Microsecond))
+		fmt.Fprintf(w, "localsync-lint: %s (%s)\n", strings.Join(parts, ", "), elapsed.Round(time.Microsecond))
 	} else {
-		fmt.Fprintf(w, "cqrs-lint: %s\n", strings.Join(parts, ", "))
+		fmt.Fprintf(w, "localsync-lint: %s\n", strings.Join(parts, ", "))
 	}
 }
 
@@ -440,7 +444,7 @@ func printRules() {
 func printUsage() {
 	out := flag.CommandLine.Output()
 
-	fmt.Fprintf(out, "Usage: cqrs-lint [flags] [package]\n\n")
+	fmt.Fprintf(out, "Usage: localsync-lint [flags] [package]\n\n")
 	fmt.Fprintf(out, "Statically verifies go-localsync CQRS architectural invariants.\n\n")
 	fmt.Fprintf(out, "Flags:\n")
 

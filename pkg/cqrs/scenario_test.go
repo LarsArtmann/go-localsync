@@ -68,7 +68,13 @@ func TestScenario_Resurrection(t *testing.T) {
 	tombstoned := mustScenarioEvents(t, "sc-resurrect", event.Version(1),
 		[]event.Type{EventItemSynced, EventItemTombstoned},
 		[]any{
-			ItemSyncedPayload{Source: "github", SourceID: "sc-resurrect", Type: "PushEvent", CreatedAt: 1, UpdatedAt: 1},
+			ItemSyncedPayload{
+				Source:    "github",
+				SourceID:  "sc-resurrect",
+				Type:      "PushEvent",
+				CreatedAt: 1,
+				UpdatedAt: 1,
+			},
 			ItemTombstonedPayload{Source: "github", SourceID: "sc-resurrect", Reason: "upstream_gone", TombstonedAt: 2},
 		})
 
@@ -82,9 +88,15 @@ func TestScenario_Resurrection(t *testing.T) {
 func TestScenario_ConflictLocalWins(t *testing.T) {
 	t.Parallel()
 
-	existing := mustScenarioEvents(t, "sc-conflict", event.Version(1),
+	existing := mustScenarioEvents(
+		t,
+		"sc-conflict",
+		event.Version(1),
 		[]event.Type{EventItemSynced},
-		[]any{ItemSyncedPayload{Source: "github", SourceID: "sc-conflict", Type: "PushEvent", CreatedAt: 1, UpdatedAt: 1}})
+		[]any{
+			ItemSyncedPayload{Source: "github", SourceID: "sc-conflict", Type: "PushEvent", CreatedAt: 1, UpdatedAt: 1},
+		},
+	)
 
 	scenario.Given[syncCmd, SyncItemState](t, fold, InitialState, existing...).
 		When(syncCmd{item: dataItemForScenario("sc-conflict", 2), resolver: localWinsResolver{}}, decideForScenario).

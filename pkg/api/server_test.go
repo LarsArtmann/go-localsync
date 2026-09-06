@@ -429,7 +429,11 @@ func TestServer_MetricsEndpoint_Optional(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	srv := NewServer(synclib.NewSyncer(&testutil.MockProvider{}, nil, log.Default()), log.Default(), WithMetricsHandler(metricsHandler))
+	srv := NewServer(
+		synclib.NewSyncer(&testutil.MockProvider{}, nil, log.Default()),
+		log.Default(),
+		WithMetricsHandler(metricsHandler),
+	)
 
 	rec := httptest.NewRecorder()
 	srv.ServeHTTP(rec, httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/metrics", nil))

@@ -103,7 +103,7 @@ func TestEmitSummary_Variants(t *testing.T) {
 	t.Run("clean", func(t *testing.T) {
 		var buf bytes.Buffer
 		emitSummary(&buf, findingCounts{}, outputOptions{}, time.Millisecond)
-		if got := buf.String(); got != "cqrs-lint: clean\n" {
+		if got := buf.String(); got != "localsync-lint: clean\n" {
 			t.Errorf("clean summary = %q", got)
 		}
 	})
@@ -111,7 +111,7 @@ func TestEmitSummary_Variants(t *testing.T) {
 	t.Run("mixed counts", func(t *testing.T) {
 		var buf bytes.Buffer
 		emitSummary(&buf, findingCounts{errors: 2, warnings: 1, suppressed: 3}, outputOptions{}, time.Millisecond)
-		want := "cqrs-lint: 2 errors, 1 warning, 3 suppressed\n"
+		want := "localsync-lint: 2 errors, 1 warning, 3 suppressed\n"
 		if got := buf.String(); got != want {
 			t.Errorf("summary = %q, want %q", got, want)
 		}
@@ -122,8 +122,21 @@ func TestEmitSummary_Variants(t *testing.T) {
 // valid JSON object with rule/severity/file/line/message/suppressed keys.
 func TestEmitFindings_JSONSchema(t *testing.T) {
 	findings := []cqrslint.Finding{
-		{Rule: "C0002", Severity: cqrslint.SeverityError, File: "events.go", Line: 18, Message: "unexpected event.Type const"},
-		{Rule: "C0005", Severity: cqrslint.SeverityWarning, File: "decider.go", Line: 7, Message: "no fold coverage", Suppressed: true},
+		{
+			Rule:     "C0002",
+			Severity: cqrslint.SeverityError,
+			File:     "events.go",
+			Line:     18,
+			Message:  "unexpected event.Type const",
+		},
+		{
+			Rule:       "C0005",
+			Severity:   cqrslint.SeverityWarning,
+			File:       "decider.go",
+			Line:       7,
+			Message:    "no fold coverage",
+			Suppressed: true,
+		},
 	}
 
 	var buf bytes.Buffer

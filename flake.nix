@@ -26,7 +26,7 @@
         description = "Generic synchronization SDK with CQRS";
 
         # One-command full suite: `nix flake check` now runs build + format +
-        # hermetic lint (golangci-lint) + hermetic test + the cqrs-lint
+        # hermetic lint (golangci-lint) + hermetic test + the localsync-lint
         # architectural gate. Race stays in CI/local (-race needs cgo).
         lintAsCheck = true;
         enableTestCheck = true;
@@ -47,8 +47,8 @@
         ];
 
         packages = {
-          cqrs-lint = {
-            subPackages = [ "cmd/cqrs-lint" ];
+          localsync-lint = {
+            subPackages = [ "cmd/localsync-lint" ];
             description = "Static CQRS architectural-invariant linter";
           };
         };
@@ -62,13 +62,13 @@
         }:
         {
           # Architectural gate: fails when pkg/cqrs drifts from ADR-0004.
-          checks.cqrs-lint =
-            pkgs.runCommand "cqrs-lint-check"
+          checks.localsync-lint =
+            pkgs.runCommand "localsync-lint-check"
               {
-                nativeBuildInputs = [ config.packages.cqrs-lint ];
+                nativeBuildInputs = [ config.packages.localsync-lint ];
               }
               ''
-                cqrs-lint -pkg ${./pkg/cqrs}
+                localsync-lint -pkg ${./pkg/cqrs}
                 touch $out
               '';
         };
