@@ -85,10 +85,8 @@ func BenchmarkConflict_SyncExisting(b *testing.B) {
 // seedUpcastStream persists count ItemSynced events into a fresh SQLite file
 // as either raw V1 payloads (upcast pipeline runs on every read) or native
 // V3 payloads (pass-through fast path).
-func seedUpcastStream(b *testing.B, dbPath string, legacy bool) {
+func seedUpcastStream(ctx context.Context, b *testing.B, dbPath string, legacy bool) {
 	b.Helper()
-
-	ctx := context.Background()
 
 	sr, err := createStoreAndBus(ctx, CQRSConfig{Backend: backendSQLite, DBPath: dbPath})
 	if err != nil {
@@ -156,11 +154,7 @@ func BenchmarkUpcastedLegacyRead(b *testing.B) {
 	} {
 		b.Run(tc.name, func(b *testing.B) {
 			dbPath := filepath.Join(b.TempDir(), "upcast-bench.db")
-			seedUpcastStream(
-				b,
-				dbPath,
-				tc.legacy,
-			) //nolint:contextcheck // seeding is benchmark setup, not request-scoped
+			seedUpcastStream(ctx, b, dbPath, tc.legacy)
 
 			db, err := sql.Open("sqlite", dbPath)
 			if err != nil {

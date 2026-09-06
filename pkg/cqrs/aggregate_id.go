@@ -70,7 +70,7 @@ func StreamID(source string, sourceID id.SourceID) (cqrsid.StreamID, error) {
 func MustStreamID(source string, sourceID id.SourceID) cqrsid.StreamID {
 	streamID, err := StreamID(source, sourceID)
 	if err != nil {
-		panic(err) //nolint:goerr113 // Must* contract: unreachable for valid inputs
+		panic(err)
 	}
 
 	return streamID
@@ -85,7 +85,7 @@ func AggregateID(source string, sourceID id.SourceID) cqrsid.StreamID {
 	streamID, err := StreamID(source, sourceID)
 	if err != nil {
 		// Preserves the pre-v0.6 fail-fast contract of this deprecated shim.
-		panic(fmt.Sprintf("cqrs: AggregateID: %v", err)) //nolint:goerr113 // deprecated shim
+		panic(fmt.Sprintf("cqrs: AggregateID: %v", err))
 	}
 
 	return streamID
