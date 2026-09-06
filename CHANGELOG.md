@@ -9,6 +9,8 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
+- **`pkg/id` ContentHash unit tests + file split (100% package coverage)** — constructor/round-trip, zero-value, and the deliberate named-string literal-compat contract pinned; the type moved from `ids.go` to `content_hash.go`. `pkg/id` coverage: 75.0% → 100.0%.
+
 - **cqrs-lint process-level test harness** — 5 end-to-end tests build the CLI binary and run it against fixtures, pinning the exit-code contract (0 clean / 1 findings / 2 usage error), `--strict` failing on the unknown-rule warning, and the NDJSON output shape (position required for code-level findings, absent for package-level checks). Subprocess runs are invisible to Go coverage by design, so `cmd/cqrs-lint` coverage stays 56.4% while the process contract is now test-enforced.
 
 - **ADR-0009 addendum: ExternalID ↔ SourceID duality decided** — v0.6 will align the Go surface to `SourceID` (`id.ExternalID` type + fields → `SourceID`, deprecated aliases) while the persisted event payloads (`json:"sourceId"`) stay untouched, avoiding a schema V4/upcast; `Syncer.GetStats` → `Stats` joins the same window. Enactment gated on the owner's recorded sign-off.
