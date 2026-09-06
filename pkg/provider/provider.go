@@ -93,6 +93,11 @@ type FetchResult struct {
 	// RateLimit contains rate-limit info from the API response headers, if available.
 	// nil when the provider does not expose rate-limit headers.
 	RateLimit *RateLimitInfo
+	// CacheHits counts responses this fetch served from the provider's
+	// conditional cache (e.g. ETag If-None-Match revalidations answered 304).
+	// Zero when the provider has no conditional cache enabled. FetchAll
+	// reports the sum across all pages of the walk.
+	CacheHits int
 }
 
 // RateLimitInfo contains rate limiting information.

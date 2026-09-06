@@ -57,13 +57,41 @@ if result.RateLimit != nil {
 
 ## Configuration
 
-| Method                | Effect                                                                                                                                                                                                            |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NewClient(token)`    | Explicit PAT; an empty token means no auth header is sent (verified: kit skips `WithAuthToken` for empty tokens, go-github-kit v0.3.0 `client.go`) → GitHub's documented unauthenticated core budget of 60 req/h. |
-| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).                                                                                                                                                  |
-| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                                                                                                                                                        |
-| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).                                                                                                                                                  |
-| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers). Returns `(client, error)` — validate the URL, so not chainable.                                                                                  |
+| Method                | Effect                                                                                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `NewClient(token)`    | Explicit PAT; an empty token means no auth header is sent (verified: kit skips `WithAuthToken` for empty tokens, go-github-kit v0.3.0 `client.go`) → GitHub's documented unauthenticated core budget of 60 req/h.                                                  |
+| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).                                                                                                                                                                                                   |
+| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                                                                                                                                                                                                         |
+| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).                                                                                                                                                                                                   |
+| `WithETagCache`       | Conditional-GET cache (off by default): unchanged re-fetches replay stored ETags as `If-None-Match`; GitHub answers 304 and the cached body is served. Zero-value `githubkit.ETagOptions{}` gets kit defaults (256 entries, 8 MiB bodies). Returns a derived copy. |
+| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers). Returns `(client, error)` — validate the URL, so not chainable.                                                                                                                                   |
+
+### Conditional requests (ETag cache)
+
+```go
+client := github.NewClient(os.Getenv("GITHUB_TOKEN")).
+    WithETagCache(githubkit.ETagOptions{}) // zero value = kit defaults
+
+result, err := client.FetchAll(ctx, "octocat", 10)
+
+// Cumulative cache counters; ok=false while the cache is disabled.
+if stats, ok := client.ETagStats(); ok {
+    log.Printf("etag cache: %d hits (304 revalidations), %d stored, %d entries",
+        stats.Hits, stats.Stored, stats.Entries)
+}
+```
+
+304 revalidations keep the data identical to the uncached path — same items,
+same rate-limit header handling — while spending no core rate-limit budget
+on the data endpoints. The cache keys are credential-scoped (kit v0.3.0), so
+two tokens never share entries.
+
+**Why there is no "page-1 304 probe" shortcut:** a page-1 304 only proves
+page 1 unchanged. GitHub event feeds shift between pages — one new event
+pushes yesterday's page 1 content to page 2 — so skipping pages 2..N after a
+cached page 1 would silently DROP data. The kernel-level cache already
+makes every unchanged page a 304 (cheap, no rate cost), which is the correct
+granularity: per-page revalidation without page-skip inferences.
 
 Standalone development: the module pins a released parent version and builds
 with `go build ./...` from this directory with `GOWORK=off`; inside the

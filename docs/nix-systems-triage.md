@@ -2,11 +2,11 @@
 
 ## The short version
 
-| Command                       | Systems touched                              | Where it is the gate          |
-| ----------------------------- | -------------------------------------------- | ----------------------------- |
-| `nix flake check`             | current system only (`x86_64-linux` here)    | locally + CI `nix` job        |
-| `nix flake check --all-systems` | all four declared systems (evaluation + builds every `checks.*` per system) | nowhere, deliberately        |
-| CI `build` matrix             | linux/darwin × amd64/arm64 + windows/amd64 via the Go toolchain | CI only                |
+| Command                         | Systems touched                                                             | Where it is the gate   |
+| ------------------------------- | --------------------------------------------------------------------------- | ---------------------- |
+| `nix flake check`               | current system only (`x86_64-linux` here)                                   | locally + CI `nix` job |
+| `nix flake check --all-systems` | all four declared systems (evaluation + builds every `checks.*` per system) | nowhere, deliberately  |
+| CI `build` matrix               | linux/darwin × amd64/arm64 + windows/amd64 via the Go toolchain             | CI only                |
 
 ## Which systems the flake declares
 
