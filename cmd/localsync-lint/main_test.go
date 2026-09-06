@@ -246,3 +246,152 @@ func TestAnalyze_ViolatingFixture(t *testing.T) {
 		t.Errorf("exitCode after suppression = %d, want 0", code)
 	}
 }
+
+func TestSplitRuleList(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  []string
+	}{
+		{"empty", "", nil},
+		{"single", "C0001", []string{"C0001"}},
+		{"multiple", "C0001, C0005 ,,C0009", []string{"C0001", "C0005", "C0009"}},
+		{"only separators", " , , ", nil},
+	}
+
+	for _, tt := range tests {
+		if got := splitRuleList(tt.value); !equalStrings(got, tt.want) {
+			t.Errorf("%s: splitRuleList(%q) = %v, want %v", tt.name, tt.value, got, tt.want)
+		}
+	}
+}
+
+func equalStrings(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func TestParseRuleSelection_Valid(t *testing.T) {
+	selection, err := parseRuleSelection("C0001,C0005", "C0009")
+	if err != nil {
+		t.Fatalf("expected valid selection, got %v", err)
+	}
+	if !equalStrings(selection.include, []string{"C0001", "C0005"}) {
+		t.Errorf("include = %v", selection.include)
+	}
+	if !equalStrings(selection.exclude, []string{"C0009"}) {
+		t.Errorf("exclude = %v", selection.exclude)
+	}
+}
+
+func TestParseRuleSelection_UnknownRuleIsUsageError(t *testing.T) {
+	if _, err := parseRuleSelection("C9999", ""); err == nil {
+		t.Fatal("expected unknown rule ID to be rejected")
+	}
+}
+
+func TestPrintRuleDetail(t *testing.T) {
+	rules := cqrslint.Rules()
+	printRuleDetail(rules[0])
+}
+
+func TestPrintRulesAndUsage(t *testing.T) {
+	printRules()
+	printUsage()
+}
+
+func TestEmitFindingGitHub(t *testing.T) {
+	var buf bytes.Buffer
+	emitFindingGitHub(&buf, cqrslint.Finding{
+		Rule: "C0005", Severity: cqrslint.SeverityWarning,
+		File: "a.go", Line: 12, Message: "boom",
+	})
+
+	want := "::warning file=a.go,line=12,title=C0005::boom\n"
+	if buf.String() != want {
+		t.Errorf("github annotation = %q, want %q", buf.String(), want)
+	}
+}
+
+func TestEmitFindings_Formats(t *testing.T) {
+	findings := []cqrslint.Finding{
+		{Rule: "C0001", Severity: cqrslint.SeverityError, File: "a.go", Line: 1, Message: "one"},
+		{Rule: "C0005", Severity: cqrslint.SeverityWarning, File: "b.go", Line: 2, Message: "two", Suppressed: true},
+	}
+
+	var out bytes.Buffer
+	emitFindings(&out, findings, outputOptions{jsonOut: true, showSuppressed: true})
+	if !strings.Contains(out.String(), `"rule":"C0005"`) || !strings.Contains(out.String(), `"suppressed":true`) {
+		t.Errorf("json output missing suppressed finding: %s", out.String())
+	}
+
+	out.Reset()
+	emitFindings(&out, findings, outputOptions{format: "github"})
+	if strings.Contains(out.String(), "C0005") {
+		t.Error("suppressed finding must be skipped without showSuppressed")
+	}
+	if !strings.Contains(out.String(), "::error file=a.go,line=1") {
+		t.Errorf("github output missing active finding: %s", out.String())
+	}
+
+	out.Reset()
+	emitFindings(&out, findings, outputOptions{showSuppressed: true})
+	if !strings.Contains(out.String(), "two") {
+		t.Errorf("text output with showSuppressed must include suppressed: %s", out.String())
+	}
+}
+
+func TestEmit_QuietIsSilent(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	emit(&stdout, &stderr, report{
+		findings: []cqrslint.Finding{{Rule: "C0001", Severity: cqrslint.SeverityError, File: "a.go", Line: 1}},
+		opts:     outputOptions{quiet: true},
+	})
+
+	if stdout.Len() != 0 || stderr.Len() != 0 {
+		t.Errorf("quiet mode wrote to stdout/stderr: %q / %q", stdout.String(), stderr.String())
+	}
+}
+
+func TestEmitSuppressedByRule(t *testing.T) {
+	var buf bytes.Buffer
+	emitSuppressedByRule(&buf, []cqrslint.Finding{
+		{Rule: "C0005", Suppressed: true},
+		{Rule: "C0005", Suppressed: true},
+	})
+
+	if !strings.Contains(buf.String(), "C0005=2") {
+		t.Errorf("suppressed-by-rule line missing counts: %q", buf.String())
+	}
+
+	buf.Reset()
+	emitSuppressedByRule(&buf, nil)
+	if buf.Len() != 0 {
+		t.Errorf("no suppressed findings must print nothing, got %q", buf.String())
+	}
+}
+
+func TestEmitRuleStatusAndHeader(t *testing.T) {
+	var buf bytes.Buffer
+	emitVerboseHeader(&buf, "./pkg", 3)
+	if !strings.Contains(buf.String(), "analyzing ./pkg (3 files") {
+		t.Errorf("header: %q", buf.String())
+	}
+
+	buf.Reset()
+	emitRuleStatus(&buf, []cqrslint.Finding{
+		{Rule: "C0001", Severity: cqrslint.SeverityError, File: "a.go", Line: 1},
+	})
+	if !strings.Contains(buf.String(), "C0001") {
+		t.Errorf("rule status missing rule id: %q", buf.String())
+	}
+}
