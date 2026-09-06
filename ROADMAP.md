@@ -1,7 +1,7 @@
 # ROADMAP.md
 
 **Project:** go-localsync
-**Last Updated:** 2026-09-05
+**Last Updated:** 2026-09-06
 
 ## Overview
 
@@ -21,15 +21,15 @@ Long-term direction and raw ideas not yet refined into actionable tasks. For sho
 
 ### Data & Export
 
-- **Export to JSON/CSV** — export stored events to file formats for analysis in external tools.
+- ~~**Export to JSON/CSV**~~ — **SHIPPED**: `stack.ExportEvents` (NDJSON) + `ExportEventsCSV` (FEATURES row 65). Remaining raw idea, uncommitted: streaming export for very large journals.
 
 ### Recurring suggestions (raw ideas, unowned)
 
 Ideas that recur across 2026 status reports but were never picked up; collected here so they stop masquerading as open tasks in old snapshots. None is committed to.
 
-- BDD/Ginkgo suite for the sync flow; fuzz tests (`DecideSync`, `AggregateID`, the localsync-lint directive parser); property-based tests
-- Full-pipeline benchmarks under load (SQLite growth, 10k-event replay)
-- Prometheus `/metrics` endpoint on the HTTP API
+- BDD/Ginkgo suite for the sync flow; fuzz tests (`DecideSync`, `StreamID`, the localsync-lint directive parser); property-based tests
+- ~~Full-pipeline benchmarks under load (SQLite growth, 10k-event replay)~~ — **SHIPPED**: `docs/benchmarks.md` + protocol runner, from-zero replay, conflict-heavy, upcast-tax benchmarks
+- ~~Prometheus `/metrics` endpoint on the HTTP API~~ — **SHIPPED as the generic hook**: `api.WithMetricsHandler` mounts any exporter (promhttp included) under `GET /metrics`; a bundled Prometheus exporter remains an uncommitted idea
 - Live updates via WebSocket/SSE from the read model
 - Config-file support and provider auto-detection/plugin registry
 - NixOS module for consumer deployments
@@ -57,14 +57,14 @@ Ideas that recur across 2026 status reports but were never picked up; collected 
 
 ## Recorded Decisions
 
-| ADR                                                                  | Decision                                                                                                                                                                                                                                                                      | Status   |
-| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| [ADR-0001](docs/adr/0001-cqrs-adoption.md)                           | Adopt event-sourced CQRS via go-cqrs-lite (no legacy CRUD)                                                                                                                                                                                                                    | Accepted |
-| [ADR-0002](docs/adr/0002-branded-ids.md)                             | Branded phantom-type IDs for compile-time safety                                                                                                                                                                                                                              | Accepted |
-| [ADR-0003](docs/adr/0003-crdt-integration.md)                        | Pluggable CRDT conflict resolution (`ConflictResolver[T]`)                                                                                                                                                                                                                    | Accepted |
-| [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) | Defer multi-aggregate generalisation; go-cqrs-lite stays the sharing boundary                                                                                                                                                                                                 | Accepted |
-| [ADR-0005](docs/adr/0005-tombstone-over-delete.md)                   | Tombstone-based soft-delete with upstream reconciliation                                                                                                                                                                                                                      | Accepted |
-| [ADR-0006](docs/adr/0006-projectionhost-adoption.md)                 | Adopt `projectionhost.Host` for resilient managed catch-up projection                                                                                                                                                                                                         | Accepted |
-| [ADR-0007](docs/adr/0007-de-githubify-domain-model.md)               | Provider-agnostic domain model (`Attributes` map; ContentHash-first diff)                                                                                                                                                                                                     | Accepted |
-| [ADR-0008](docs/adr/0008-pivot-to-sync-toolkit.md)                   | **Proposed — dormant.** Pivot to a `Host` sync-application-framework (drop `pkg/cqrs`/`pkg/data`/`pkg/api`). Never executed; project continued in the ADR-0004 single-aggregate direction (tombstones, projectionhost, de-githubify, v4, cqrs-lint all shipped within scope). | Proposed |
-| [ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md)                | v0.6 vocabulary alignment (decided, not yet enacted): `AggregateID()`→`StreamID()`, exactly one user-facing result type (`SyncResult`/`SyncSummary` consolidation), keep our `AggregateID` encoding (deliberate `DeriveStreamID` divergence).                                 | Accepted |
+| ADR                                                                  | Decision                                                                                                                                                                                                                                                                                   | Status   |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| [ADR-0001](docs/adr/0001-cqrs-adoption.md)                           | Adopt event-sourced CQRS via go-cqrs-lite (no legacy CRUD)                                                                                                                                                                                                                                 | Accepted |
+| [ADR-0002](docs/adr/0002-branded-ids.md)                             | Branded phantom-type IDs for compile-time safety                                                                                                                                                                                                                                           | Accepted |
+| [ADR-0003](docs/adr/0003-crdt-integration.md)                        | Pluggable CRDT conflict resolution (`ConflictResolver[T]`)                                                                                                                                                                                                                                 | Accepted |
+| [ADR-0004](docs/adr/0004-multi-aggregate-generalisation-deferred.md) | Defer multi-aggregate generalisation; go-cqrs-lite stays the sharing boundary                                                                                                                                                                                                              | Accepted |
+| [ADR-0005](docs/adr/0005-tombstone-over-delete.md)                   | Tombstone-based soft-delete with upstream reconciliation                                                                                                                                                                                                                                   | Accepted |
+| [ADR-0006](docs/adr/0006-projectionhost-adoption.md)                 | Adopt `projectionhost.Host` for resilient managed catch-up projection                                                                                                                                                                                                                      | Accepted |
+| [ADR-0007](docs/adr/0007-de-githubify-domain-model.md)               | Provider-agnostic domain model (`Attributes` map; ContentHash-first diff)                                                                                                                                                                                                                  | Accepted |
+| [ADR-0008](docs/adr/0008-pivot-to-sync-toolkit.md)                   | **Proposed — dormant.** Pivot to a `Host` sync-application-framework (drop `pkg/cqrs`/`pkg/data`/`pkg/api`). Never executed; project continued in the ADR-0004 single-aggregate direction (tombstones, projectionhost, de-githubify, v4, cqrs-lint all shipped within scope).              | Proposed |
+| [ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md)                | v0.6 vocabulary alignment — **ENACTED 2026-09-06, untagged** (ships with v0.6.0): `AggregateID()`→`StreamID()`, exactly one user-facing result type (`SyncResult.Batch *BatchOutcome`), `GetStats`→`Stats`, ExternalID→SourceID. Our deliberate `DeriveStreamID` encoding divergence kept. | Accepted |

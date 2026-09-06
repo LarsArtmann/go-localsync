@@ -1,5 +1,7 @@
 # Conflict-Aware Sync Bug Fix Report
 
+> **Classification (2026-09-06 docs-policy sweep):** point-in-time audit report, era-closed. Every fix described here shipped in April 2026 (see `docs/status/archive/2026-04-07_14-36_CONFLICT_SYNC_FIX_COMPLETE.md`). The internal date "2025-04-07" is a year typo (project started April 2026). Filed under `planning/` historically; archived so it stops masquerading as an undated plan.
+
 **Date:** 2025-04-07
 **Scope:** Fix all 5 critical bugs in go-localsync's `ConflictAwareSyncer`
 

@@ -1,5 +1,7 @@
 # go-composable-business-types Integration Plan
 
+> **Classification (2026-09-06 docs-policy sweep):** undated integration plan, superseded. The goal (branded, compile-time-safe IDs) shipped via **go-branded-id** v0.5.1 instead (ADR-0002, `pkg/id/`); `go-composable-business-types` was never adopted. Kept as decision context only.
+
 ## Executive Summary
 
 This document outlines how to integrate `github.com/larsartmann/go-composable-business-types/id` into the go-localsync project to replace primitive string identifiers with strongly-typed, branded IDs that provide compile-time safety.

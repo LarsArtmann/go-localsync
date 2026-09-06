@@ -4,6 +4,8 @@
 **Scope:** Why go-localsync isn't using go-cqrs-lite for "proper" CQRS event-sourcing
 **Context:** Follow-up to sprint 3 status report (`docs/status/2026-05-21_21-29_GO-CQRS-LITE_BEST_USE_SPRINT_COMPLETE.md`)
 
+> **Vocabulary note (2026-09-06):** this analysis quotes the go-cqrs-lite API as of v4.0-era (`AggregateID`/`id.AggregateID`). The library renamed that vocabulary to `StreamID`/`id.StreamID` in v4.1 (adopted here in v0.4.1), and go-localsync v0.6 renamed its own derivation function to `cqrs.StreamID`/`MustStreamID` ([ADR-0009](adr/0009-v06-vocabulary-alignment.md)). The quoted snippets below are preserved as written; read `AggregateID` as `StreamID`.
+
 ---
 
 ## TL;DR
@@ -28,7 +30,7 @@ type Command interface {
 }
 ```
 
-In go-localsync, the aggregate ID is **computed deterministically** inside the decide function via `AggregateID(source, sourceID)` — it's a SHA256 hash derived from the item's source and source ID. The caller doesn't know it at command construction time.
+In go-localsync, the aggregate ID is **computed deterministically** inside the decide function via `StreamID(source, sourceID)` (named `AggregateID` at the time of writing) — it's a SHA256 hash derived from the item's source and source ID. The caller doesn't know it at command construction time.
 
 **Impact:** `command.Dispatcher` can't be used without restructuring the sync flow to pre-compute aggregate IDs. This is why commands are currently implicit closures passed to `Repo.Execute`.
 
@@ -199,21 +201,21 @@ The library provides `query.Dispatcher` with:
 
 To be fair, these areas have solid library integration:
 
-| Area                                       | Library Usage                        | Quality   |
-| ------------------------------------------ | ------------------------------------ | --------- |
-| `decider.Decider[State]` + `Fold`          | Pure function event sourcing         | Excellent |
-| `decider.Repository` with `Execute`        | Load→Fold→Decide→Save→Publish        | Excellent |
-| `event.JSONCodec` + `DecodePayload[T]`     | Typed payload encoding               | Excellent |
-| `event.NewEvents`                          | Event construction                   | Excellent |
-| `event.Version` with `Increment()`/`Add()` | No int() casts                       | Excellent |
-| `event.InMemoryRunner`                     | Projection replay for memory backend | Good      |
-| `projection.Runner`                        | Replay + live subscription for Turso | Good      |
-| `SQLiteSnapshotStore` + `EveryNEvents(10)` | Caps replay cost                     | Good      |
-| `SQLiteCheckpointStore`                    | Persists projection positions        | Good      |
-| `middleware.EventLogging`                  | Structured event logging             | Good      |
-| `event.WithCorrelationID`                  | Per-sync-run tracing                 | Good      |
-| `decider.WithOutbox`                       | Atomic save+publish                  | Good      |
-| Deterministic aggregate IDs                | `id.AggregateID` with SHA256 cache   | Good      |
+| Area                                       | Library Usage                                         | Quality   |
+| ------------------------------------------ | ----------------------------------------------------- | --------- |
+| `decider.Decider[State]` + `Fold`          | Pure function event sourcing                          | Excellent |
+| `decider.Repository` with `Execute`        | Load→Fold→Decide→Save→Publish                         | Excellent |
+| `event.JSONCodec` + `DecodePayload[T]`     | Typed payload encoding                                | Excellent |
+| `event.NewEvents`                          | Event construction                                    | Excellent |
+| `event.Version` with `Increment()`/`Add()` | No int() casts                                        | Excellent |
+| `event.InMemoryRunner`                     | Projection replay for memory backend                  | Good      |
+| `projection.Runner`                        | Replay + live subscription for Turso                  | Good      |
+| `SQLiteSnapshotStore` + `EveryNEvents(10)` | Caps replay cost                                      | Good      |
+| `SQLiteCheckpointStore`                    | Persists projection positions                         | Good      |
+| `middleware.EventLogging`                  | Structured event logging                              | Good      |
+| `event.WithCorrelationID`                  | Per-sync-run tracing                                  | Good      |
+| `decider.WithOutbox`                       | Atomic save+publish                                   | Good      |
+| Deterministic aggregate IDs                | `cqrs.StreamID` with SHA256 cache (was `AggregateID`) | Good      |
 
 ---
 

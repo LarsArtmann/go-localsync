@@ -132,6 +132,17 @@ _(45 items — 5 slots intentionally left empty; items 36 and 1 are owner-gated.
 2. **v0.6 timing:** Should I start the ADR-0009 breaking work on a branch now, or does "awaiting the breaking release" mean you want to call the window first (I won't know when that is)?
 3. **CI formatting:** Does your cross-repo convention include a dprint CI job that this repo should adopt (making "parity" real), or should dprint stay devShell-only and the TODO's parity clause be dropped?
 
+## Resolution (2026-09-06 docs-policy sweep)
+
+Every §f forward item closed or routed — archive criterion met. Bucket verdicts:
+
+- **Shipped (2026-09-06, v0.6 enactment session):** 3, 5, 6, 7 (buildflow 61/0), 9, 10, 11, 12, 13, 17, 18, 20, 21, 22, 24, 25, 26, 27, 31, 32, 33, 38, 44. Items 8 (`go test -race`) and 28 (checklist on the real release) are standing gates: race re-runs each session, 28 executes at the v0.6.0 tag.
+- **Routed to TODO_LIST:** 1–2 (owner-gated `SSH_PRIVATE_KEY` / go-finding-public decision), 14 (kit-side claims verify — open), 15 (gopls stdversion doc — open, planned for the AGENTS gotcha pass), 29–30 (coverage floors — open), 36 (owner: make go-finding public — folded into item 1's alternative), 42 (README refresh — migration section shipped 2026-09-06; final sales-page polish at tag time).
+- **Moot / closed by events:** 4 (Release bodies → `verify-release.sh` now checks Releases+proxy+pkg.go.dev in one command), 16 (gitleaks+govulncheck run in CI's security leg; local parity optional), 19 (skip-path notice verified in CI run 33991823805), 23 (vocabulary sweep executed 2026-09-06 — living docs clean, snapshots untouched), 39 (go-directive cadence documented in AGENTS gotcha), 40 (superseded by `check-vendorhash.sh` failing CI instead of reminding PRs), 43 (superseded: CI `provider` job already builds the module standalone with `GOWORK=off`, which is the same isolation a flake check would add), 45 (process note, adopted as session ritual).
+- **Small unowned ideas (never committed, kept for the record):** 34 (`PerPage` option on `FetchAll`), 35 (`retryAfterer` spot-check — verified wired post-extraction during the v0.6 sweep), 37 (dead-link sweep — covered opportunistically by docs-health VERIFY runs; not scheduled).
+
+§g question 3 (CI formatting) was answered 2026-09-06: dprint check is now a CI lint-job step (pinned 0.56.1). §g question 2 was answered by the owner's "do the whole TODO list" directive — the v0.6 window opened and was enacted the same day. §g question 1 remains owner-gated (see TODO_LIST).
+
 ---
 
 _Point-in-time snapshot — generated 2026-09-05 23:04 CEST from this session only. Historical truth belongs to the timestamp; current truth belongs to the code._

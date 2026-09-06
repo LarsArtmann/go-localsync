@@ -16,6 +16,8 @@
     "node_modules/**",
     "**/CHANGELOG.md",
     "**/helm/**/templates/**",
-    "**/charts/**/templates/**"
+    "**/charts/**/templates/**",
+    "docs/status/**",
+    "docs/planning/**"
   ]
 }

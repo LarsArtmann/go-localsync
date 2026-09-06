@@ -13,6 +13,8 @@ Point-in-time snapshots of individual work sessions. **They are historical recor
 2. **Era-closed historical reports** (superseded toolchains/decisions, e.g. the Turso/`vendor/`/v2-v3 eras) get a **dated bucket appendix** (`## Resolution (<date> docs-health sweep)`) closing all forward items as _shipped / superseded / moot / routed_, plus **inline strikes on the worst now-false claims** (assertions a reader today would be misled by). Per-item strikes are not applied when they would add noise without value ("so-what" restraint).
 3. **Archive criterion:** a report moves to `archive/` only when _every_ forward-looking item in it is closed or routed to a living doc, and its stale claims are struck or bucket-closed.
 4. **Never rewrite history:** annotations are additive and non-destructive; original wording stays visible under strikethrough.
+5. **Generated HTML artifacts (decided 2026-09-06):** HTML reports referenced by living docs (reviews/, brainstorming/, research/, planning/) stay where they are — they are linked deliverables, not clutter. Only **superseded era dashboards** that sit in `status/` root (e.g. the June 2026 vendor/buildflow dashboards) move to `archive/` via `git mv`.
+6. **dprint scope (decided 2026-09-06):** `docs/status/**` and `docs/planning/**` are **excluded** from dprint (see `dprint.json`) — point-in-time snapshots are frozen after write, so formatter reflows can never masquerade as history edits. Living docs (AGENTS/README/FEATURES/TODO_LIST/ROADMAP/CONTRIBUTING/docs/*.md/docs/adr) stay formatted.
 
 ## For harvesters (AI sessions)
 
