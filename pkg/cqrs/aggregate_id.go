@@ -49,7 +49,7 @@ func StreamID(source string, sourceID id.SourceID) (cqrsid.StreamID, error) {
 		// bytes is always 32 chars, so this is unreachable for any real
 		// input — but the error return keeps the signature honest instead
 		// of panicking (v0.6 conversion per ADR-0009).
-		return "", pkgerrors.Wrapf(
+		return cqrsid.StreamID(""), pkgerrors.Wrapf(
 			pkgerrors.ErrInvalidInput,
 			"cqrs: derive stream ID: ParseStreamID failed for valid hex %q: %v",
 			hexID,

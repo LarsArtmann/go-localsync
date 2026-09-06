@@ -255,7 +255,7 @@ func syncEvents(
 		payloads = []any{
 			ItemConflictFoundPayload{
 				Source:          item.Source.Get(),
-				SourceID:        item.ExternalID.Get(),
+				SourceID:        item.SourceID.Get(),
 				LocalUpdatedAt:  unixNano(conflict.localUpdatedAt),
 				RemoteUpdatedAt: unixNano(conflict.remoteUpdatedAt),
 				Winner:          string(conflict.winner),
@@ -275,7 +275,7 @@ func syncEvents(
 			err,
 			"create events for %s/%s (version=%d, conflict=%v)",
 			aggID,
-			item.ExternalID.Get(),
+			item.SourceID.Get(),
 			version,
 			conflict,
 		)
