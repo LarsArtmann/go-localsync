@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
 
@@ -347,5 +348,170 @@ func TestIntegration_APICursorPagination_SQLite(t *testing.T) {
 		if item.SourceID.Get() != got[i] {
 			t.Fatalf("page order diverges from store order at %d: store=%s api=%s", i, item.SourceID.Get(), got[i])
 		}
+	}
+}
+
+// waitForLiveCount polls the store's DEFAULT view (tombstoned excluded) until
+// it holds exactly want items — the tombstone projection signal: the count
+// drops when the tombstoned row flips.
+func waitForLiveCount(t *testing.T, ctx context.Context, stack *cqrs.CQRSStack, want int64) {
+	t.Helper()
+
+	deadline := time.Now().Add(30 * time.Second)
+
+	for time.Now().Before(deadline) {
+		count, err := stack.Count(ctx, model.ItemFilter{})
+		testutil.MustNoError(t, err)
+
+		if count == want {
+			return
+		}
+
+		time.Sleep(time.Millisecond)
+	}
+
+	count, _ := stack.Count(ctx, model.ItemFilter{})
+	t.Fatalf("timed out waiting for live count=%d, got %d", want, count)
+}
+
+// TestIntegration_APIItemsTombstoneVisibility_SQLite proves the tombstone
+// read path against the REAL SQLite read model: tombstoned items vanish from
+// the default /items view, reappear under ?includeTombstoned=true carrying a
+// typed TombstoneInfo on the wire, and live items never carry the field.
+func TestIntegration_APIItemsTombstoneVisibility_SQLite(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "sqlite"})
+	testutil.MustNoError(t, err)
+	defer func() { _ = stack.Close() }()
+
+	testutil.MustNoError(t, stack.SyncItem(ctx, makeTestItem(t, "tomb-live", "PushEvent", "2024-01-01T00:00:00Z")))
+	testutil.MustNoError(t, stack.SyncItem(ctx, makeTestItem(t, "tomb-gone", "PushEvent", "2024-01-02T00:00:00Z")))
+
+	waitForProjection(t, ctx, stack, 2)
+
+	testutil.MustNoError(t, stack.TombstoneItem(ctx, "github", id.NewSourceID("tomb-gone"), model.ReasonUserHidden))
+
+	waitForLiveCount(t, ctx, stack, 1)
+
+	mockProvider := &testutil.MockProvider{}
+	logger := log.Default()
+	syncer := synclib.NewSyncer(mockProvider, stack, logger)
+	server := NewServer(syncer, logger)
+
+	type wireItem struct {
+		SourceID  string `json:"sourceId"`
+		Tombstone *struct {
+			Reason string    `json:"reason"`
+			At     time.Time `json:"tombstonedAt"`
+		} `json:"tombstone"`
+	}
+
+	getItems := func(query string) []wireItem {
+		t.Helper()
+
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, "/items"+query, nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+
+		testutil.AssertStatusOK(t, rec)
+
+		var body struct {
+			Items []wireItem `json:"items"`
+		}
+		if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+			t.Fatalf("unmarshal %s response: %v\n%s", query, err, rec.Body.String())
+		}
+
+		return body.Items
+	}
+
+	defaultView := getItems("")
+	if len(defaultView) != 1 || defaultView[0].SourceID != "tomb-live" {
+		t.Fatalf("default view must show only the live item, got %+v", defaultView)
+	}
+	if defaultView[0].Tombstone != nil {
+		t.Errorf("live item must not carry a tombstone object, got %+v", defaultView[0].Tombstone)
+	}
+
+	if raw := recBodyFor(t, server, ctx, "/items"); strings.Contains(raw, `"tombstone"`) {
+		t.Errorf("default view JSON must not mention tombstone at all:\n%s", raw)
+	}
+
+	including := getItems("?includeTombstoned=true")
+	if len(including) != 2 {
+		t.Fatalf("includeTombstoned view must show both items, got %d", len(including))
+	}
+
+	for _, item := range including {
+		switch item.SourceID {
+		case "tomb-live":
+			if item.Tombstone != nil {
+				t.Errorf("live item must have no tombstone even in the including view: %+v", item.Tombstone)
+			}
+		case "tomb-gone":
+			if item.Tombstone == nil {
+				t.Fatal("tombstoned item must carry a tombstone object")
+			}
+			if item.Tombstone.Reason != string(model.ReasonUserHidden) {
+				t.Errorf("tombstone reason = %q, want %q", item.Tombstone.Reason, model.ReasonUserHidden)
+			}
+			if item.Tombstone.At.IsZero() {
+				t.Error("tombstone timestamp must be set on the wire")
+			}
+		default:
+			t.Errorf("unexpected item %q in including view", item.SourceID)
+		}
+	}
+}
+
+func recBodyFor(t *testing.T, server *Server, ctx context.Context, path string) string {
+	t.Helper()
+
+	req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
+	rec := httptest.NewRecorder()
+	server.ServeHTTP(rec, req)
+	testutil.AssertStatusOK(t, rec)
+
+	return rec.Body.String()
+}
+
+// TestOpenAPI_ItemResponseTombstoneSchema pins the generated OpenAPI schema:
+// ItemResponse must declare the optional tombstone object (reason string +
+// tombstonedAt date-time) and the /items path must expose the
+// includeTombstoned boolean query parameter. The 499/504 declarations are
+// already pinned elsewhere; this closes the Tombstone half of the schema
+// contract. Assertions run on the rendered YAML — the exact wire document
+// consumers download — so no huma-internal types can drift underneath.
+func TestOpenAPI_ItemResponseTombstoneSchema(t *testing.T) {
+	t.Parallel()
+
+	mockProvider := &testutil.MockProvider{}
+	logger := log.Default()
+	syncer := synclib.NewSyncer(mockProvider, &mockSyncStore{}, logger)
+	server := NewServer(syncer, logger)
+
+	specBytes, specErr := server.api.OpenAPI().YAML()
+	testutil.MustNoError(t, specErr)
+	spec := string(specBytes)
+	testutil.MustNoError(t, specErr)
+
+	for _, required := range []string{
+		"ItemResponse:",
+		"tombstone:",
+		"TombstoneInfo:", // huma registers the DTO by type name
+		"reason:",
+		"tombstonedAt:",
+		"includeTombstoned:",
+		"type: boolean",
+	} {
+		if !strings.Contains(spec, required) {
+			t.Errorf("OpenAPI spec missing %q (Tombstone schema contract):\n%s", required, spec)
+		}
+	}
+
+	if strings.Count(spec, "includeTombstoned") == 0 {
+		t.Errorf("/items must declare the includeTombstoned query parameter:\n%s", spec)
 	}
 }

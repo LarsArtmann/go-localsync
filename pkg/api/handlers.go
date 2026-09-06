@@ -17,6 +17,7 @@ func (s *Server) listItems(ctx context.Context, input *ListItemsInput) (*ListIte
 
 	filter.Limit = input.Limit
 	filter.Offset = input.Offset
+	filter.IncludeTombstoned = input.IncludeTombstoned
 
 	if input.Cursor != "" {
 		decoded, curErr := decodeCursor(input.Cursor)
