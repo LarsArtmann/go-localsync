@@ -76,7 +76,8 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **Cursor pagination test against the real SQLite read model ordering** — the current test uses a fake store (`pkg/api`).
 - [x] **`pkg/id` unit tests for `ContentHash`** — `IsZero`/`String` untested; coverage sits at 75.0%.
   ✅ DONE 2026-09-06: constructor/round-trip + literal-compat + sha256-path tests; package coverage 75.0% → 100.0%.
-- [ ] **Benchmark protocol** — re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; fix `Replay10kEvents` to measure true from-zero replay (iterations 2+ are checkpoint-bounded no-ops); add a conflict-heavy benchmark (resolver invoked per item) and an upcasted-legacy-read vs native-V3-read benchmark.
+- [x] **Benchmark protocol** — re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; fix `Replay10kEvents` to measure true from-zero replay (iterations 2+ are checkpoint-bounded no-ops); add a conflict-heavy benchmark (resolver invoked per item) and an upcasted-legacy-read vs native-V3-read benchmark.
+  ✅ DONE 2026-09-06: see docs/benchmarks.md + scripts/run-benchmarks.sh; Replay10k fixed to true from-zero replay; upcast tax measured ~3.3x.
 - [ ] **Wire `CQRSConfig.Validate()` into `NewCQRSStack`** (or document it as consumer-facing) — defined at `pkg/cqrs/stack.go:53` with zero production call sites.
 - [ ] **Consolidate attribute-key constants** — `pkg/cqrs/item_adapter.go:18-21` keeps private `legacyActorLogin`-style constants duplicating `pkg/data/model`'s exported `Attr*` keys; two sources of truth for a wire-format constant.
 

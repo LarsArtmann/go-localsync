@@ -9,6 +9,8 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Added
 
+- **Benchmark protocol + new benchmarks** — `docs/benchmarks.md` fixes the measurement protocol (fixed `-benchtime 20x`, `-count 5`, benchstat comparison, environment caveats) and `scripts/run-benchmarks.sh` runs it. `BenchmarkPipeline_Replay10kEvents` now measures TRUE from-zero replay (persisted projection checkpoints are wiped per iteration — the old version measured stack open/close, since the checkpoint resumed at head and replayed nothing). New: `BenchmarkConflict_SyncExisting` (per-item resolver path) and `BenchmarkUpcastedLegacyRead` (V1 upcast-on-read vs native V3 pass-through; measured ~3.3× upcast tax on a protocol run).
+
 - **`pkg/id` ContentHash unit tests + file split (100% package coverage)** — constructor/round-trip, zero-value, and the deliberate named-string literal-compat contract pinned; the type moved from `ids.go` to `content_hash.go`. `pkg/id` coverage: 75.0% → 100.0%.
 
 - **cqrs-lint process-level test harness** — 5 end-to-end tests build the CLI binary and run it against fixtures, pinning the exit-code contract (0 clean / 1 findings / 2 usage error), `--strict` failing on the unknown-rule warning, and the NDJSON output shape (position required for code-level findings, absent for package-level checks). Subprocess runs are invisible to Go coverage by design, so `cmd/cqrs-lint` coverage stays 56.4% while the process contract is now test-enforced.

@@ -79,3 +79,4 @@ result-*
 
 # local build artifact
 cqrs-lint
+bench-results/
