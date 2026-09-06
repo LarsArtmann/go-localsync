@@ -6,7 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-Nothing yet. Planned (post core-v0.6.0): adopt the v0.6 `SourceID`/`StreamID` vocabulary (tracked in the core [TODO_LIST.md](../TODO_LIST.md)).
+### Added
+
+- **ETag conditional cache wiring** — `Client.WithETagCache(githubkit.ETagOptions)` enables the kernel's conditional GET cache (unchanged re-fetches become free 304 revalidations; `Client.ETagStats()` reports hits/stored/entries). Off by default. 4 tests cover hit/refetch/default-off/derive paths.
+
+### Verified (claims, no code change)
+
+- The README's kit-behavior claims are now source-annotated: empty PAT → no `WithAuthToken` call (unauthenticated, GitHub-documented 60 req/h core budget); retry = 429 any method + idempotent 5xx, `Retry-After` overrides backoff (go-github-kit v0.3.0 `client.go` / `transport.go`).
 
 ## [0.1.0] - 2026-09-05
 

@@ -21,7 +21,8 @@ Implements the `provider.Provider` interface over GitHub's
 - **Rate-limit gating** (kernel transport): waits for the window reset when
   the remaining budget is at or below the floor, bounded by a max wait, fed
   from the `X-RateLimit-*` response headers of every call.
-- **Retry with backoff** on 429 and idempotent 5xx.
+- **Retry with backoff** on 429 and idempotent 5xx (verified against the kit source, go-github-kit v0.3.0 `transport.go`: 429 is retried for any method because GitHub rejects before processing; 5xx only for idempotent methods; a `Retry-After` header overrides the computed backoff).
+- **Optional ETag conditional cache** (`WithETagCache(githubkit.ETagOptions{...})`): unchanged re-fetches replay stored ETags as `If-None-Match` — GitHub answers 304, one request spent and zero budget counted against the data endpoints, with the kernel serving the cached body transparently. Inspect hits via `ETagStats()`. Off by default.
 - **Concurrent pagination**: `FetchAll` fetches page 1 sequentially (a
   cheap probe for an exhausted endpoint), then walks pages 2..N on a bounded
   pool (default 3) and stops at the first short page.
@@ -58,7 +59,7 @@ if result.RateLimit != nil {
 
 | Method                | Effect                                                                                                                           |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `NewClient(token)`    | Explicit PAT; an empty token means unauthenticated (60 req/h core budget).                                                       |
+| `NewClient(token)`    | Explicit PAT; an empty token means no auth header is sent (verified: kit skips `WithAuthToken` for empty tokens, go-github-kit v0.3.0 `client.go`) → GitHub's documented unauthenticated core budget of 60 req/h. |
 | `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).                                                                 |
 | `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                                                                       |
 | `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).                                                                 |
