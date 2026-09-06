@@ -28,9 +28,14 @@ func newProjector(rm ReadModel) *Projector {
 	return &Projector{readModel: rm, lastVersions: make(map[string]event.Version)}
 }
 
+// projectionName is the registered name of the sync-items read-model
+// projection. It keys checkpoints, worker state, and dead-letter entries,
+// so DLQ consumers address entries by this name.
+const projectionName = "sync_item_projection"
+
 // Name returns the projection name.
 func (p *Projector) Name() string {
-	return "sync_item_projection"
+	return projectionName
 }
 
 // EventTypes returns the event types this projector handles.

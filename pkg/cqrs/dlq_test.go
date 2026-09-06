@@ -62,14 +62,14 @@ func TestStack_DLQ_Surface(t *testing.T) {
 
 	// The sample payload carries an unparseable ItemID, so replay must fail
 	// again: the entry stays captured and is reported as StillFailing.
-	result, err := stack.ReplayDeadLetters(ctx, entry.ProjectionName)
+	result, err := stack.ReplayDeadLetters(ctx, projectionName)
 	testutil.MustNoError(t, err)
 
 	if len(result.StillFailing) != 1 || len(result.Replayed) != 0 {
 		t.Fatalf("expected 1 still-failing, 0 replayed; got %d/%d", len(result.StillFailing), len(result.Replayed))
 	}
 
-	testutil.MustNoError(t, stack.DeleteDeadLetter(ctx, entry.ProjectionName, entry.EventID))
+	testutil.MustNoError(t, stack.DeleteDeadLetter(ctx, projectionName, entry.EventID))
 
 	count, err = stack.DeadLetterCount(ctx)
 	testutil.MustNoError(t, err)
@@ -84,7 +84,7 @@ func TestStack_DLQ_Surface(t *testing.T) {
 	ok.Event = mustValidItemSyncedEvent(t, "dlq-surface-valid")
 	testutil.MustNoError(t, stack.dlq.Store(ctx, ok))
 
-	result, err = stack.ReplayDeadLetters(ctx, "")
+	result, err = stack.ReplayDeadLetters(ctx, projectionName)
 	testutil.MustNoError(t, err)
 
 	if len(result.Replayed) != 1 || len(result.StillFailing) != 0 {

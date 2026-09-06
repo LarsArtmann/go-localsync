@@ -109,7 +109,7 @@ func sampleDeadLetterEntry(t *testing.T, sourceID string) projectionhost.DeadLet
 	testutil.MustNoError(t, err)
 
 	return projectionhost.DeadLetterEntry{
-		ProjectionName: "sync-items",
+		ProjectionName: projectionName,
 		EventID:        evts[0].ID().String(),
 		EventType:      EventItemSynced.String(),
 		StreamID:       evts[0].StreamID().String(),
