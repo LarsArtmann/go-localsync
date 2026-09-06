@@ -57,13 +57,13 @@ if result.RateLimit != nil {
 
 ## Configuration
 
-| Method                | Effect                                                                                                                           |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Method                | Effect                                                                                                                                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NewClient(token)`    | Explicit PAT; an empty token means no auth header is sent (verified: kit skips `WithAuthToken` for empty tokens, go-github-kit v0.3.0 `client.go`) → GitHub's documented unauthenticated core budget of 60 req/h. |
-| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).                                                                 |
-| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                                                                       |
-| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).                                                                 |
-| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers). Returns `(client, error)` — validate the URL, so not chainable. |
+| `WithRateLimitConfig` | `Enabled`, `MinRemaining` (default 10), `MaxWait` (default 15m).                                                                                                                                                  |
+| `WithFetchConfig`     | `MaxConcurrentFetches` (default 3), `OnProgress` callback.                                                                                                                                                        |
+| `WithRetryConfig`     | Max retries (default 3), initial/max backoff (default 1s → 30s).                                                                                                                                                  |
+| `WithBaseURL`         | Point at a different API root (GitHub Enterprise, test servers). Returns `(client, error)` — validate the URL, so not chainable.                                                                                  |
 
 Standalone development: the module pins a released parent version and builds
 with `go build ./...` from this directory with `GOWORK=off`; inside the

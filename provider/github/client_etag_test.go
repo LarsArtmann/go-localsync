@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	gh "github.com/google/go-github/v69/github"
 	githubkit "github.com/LarsArtmann/go-github-kit"
+	gh "github.com/google/go-github/v69/github"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
 
