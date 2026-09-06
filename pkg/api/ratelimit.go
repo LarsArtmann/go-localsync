@@ -104,8 +104,8 @@ func (s *Server) rateLimited(next http.Handler) http.Handler {
 
 		ok, retryAfter, remaining := bucket.take()
 		if ok {
-			w.Header().Set("X-RateLimit-Limit", strconv.Itoa(s.opts.ratePerMinute))
-			w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(remaining))
+			w.Header().Set("X-Ratelimit-Limit", strconv.Itoa(s.opts.ratePerMinute))
+			w.Header().Set("X-Ratelimit-Remaining", strconv.Itoa(remaining))
 
 			next.ServeHTTP(w, r)
 
@@ -115,8 +115,8 @@ func (s *Server) rateLimited(next http.Handler) http.Handler {
 		seconds := max(int(math.Ceil(retryAfter.Seconds())), 1)
 
 		w.Header().Set("Retry-After", strconv.Itoa(seconds))
-		w.Header().Set("X-RateLimit-Limit", strconv.Itoa(s.opts.ratePerMinute))
-		w.Header().Set("X-RateLimit-Remaining", "0")
+		w.Header().Set("X-Ratelimit-Limit", strconv.Itoa(s.opts.ratePerMinute))
+		w.Header().Set("X-Ratelimit-Remaining", "0")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusTooManyRequests)
 

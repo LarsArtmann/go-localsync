@@ -49,12 +49,13 @@ func NewServer(syncer *synclib.Syncer, logger *log.Logger, opts ...ServerOption)
 	api := humago.New(mux, cfg)
 
 	srv := &Server{
-		api:    api,
-		mux:    mux,
-		syncer: syncer,
-		store:  syncer.Store(),
-		logger: logger,
-		opts:   options,
+		api:           api,
+		mux:           mux,
+		syncer:        syncer,
+		store:         syncer.Store(),
+		logger:        logger,
+		opts:          options,
+		clientBuckets: map[string]*tokenBucket{},
 	}
 
 	srv.registerRoutes()

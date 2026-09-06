@@ -232,7 +232,7 @@ linters:
   exclusions:
     generated: lax
     rules:
-      - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache|model\.Item|model\.Tombstone|sync\.SyncResult|sync\.Syncer|cqrs\.Projector|cqrs\.ItemSyncedPayload|cqrs\.TombstoneItemCommand|cqrs\.SyncItemCommand|api\.serverOptions|api\.tokenBucket|cqrslint\.Suppressor|cqrslint\.RunOptions|cqrslint\.Rule|huma\.SecurityScheme|huma\.Operation|sql\.NullTime|cqrslint\.Finding) is missing
+      - text: (ItemFilter|FetchConfig|FetchResult|RateLimitCache|model\.Item|model\.Tombstone|sync\.SyncResult|sync\.Syncer|cqrs\.Projector|cqrs\.ItemSyncedPayload|cqrs\.TombstoneItemCommand|cqrs\.SyncItemCommand|api\.Server|api\.serverOptions|api\.tokenBucket|cqrslint\.Suppressor|cqrslint\.RunOptions|cqrslint\.Rule|huma\.SecurityScheme|huma\.Operation|sql\.NullTime|cqrslint\.Finding) is missing
         linters:
           - exhaustruct_v5
       - path: _test\.go

@@ -1,5 +1,7 @@
 package model
 
+import "maps"
+
 // Canonical attribute keys (schema V3, ADR-0007). Providers fold their
 // domain-specific content into Attributes using these well-known keys; the
 // typed accessors below read them safely (missing keys read as "") and the
@@ -25,10 +27,7 @@ func (item Item) attr(key string) string {
 // writes. Write-helpers mirror the typed readers.
 func (item Item) setAttr(key, value string) Item {
 	cloned := make(map[string]string, len(item.Attributes)+1)
-	for k, v := range item.Attributes {
-		cloned[k] = v
-	}
-
+	maps.Copy(cloned, item.Attributes)
 	cloned[key] = value
 	item.Attributes = cloned
 

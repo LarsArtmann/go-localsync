@@ -134,7 +134,7 @@ func TestRateLimit_CarriesRateLimitHeaders(t *testing.T) {
 		rec := httptest.NewRecorder()
 		srv.ServeHTTP(rec, req)
 
-		if limit := rec.Header().Get("X-RateLimit-Limit"); limit != "1" {
+		if limit := rec.Header().Get("X-Ratelimit-Limit"); limit != "1" {
 			t.Errorf("X-RateLimit-Limit = %q, want 1", limit)
 		}
 
@@ -145,13 +145,13 @@ func TestRateLimit_CarriesRateLimitHeaders(t *testing.T) {
 		if rec.Code != http.StatusTooManyRequests {
 			sawAllowed = true
 
-			if remaining := rec.Header().Get("X-RateLimit-Remaining"); remaining == "" {
+			if remaining := rec.Header().Get("X-Ratelimit-Remaining"); remaining == "" {
 				t.Error("allowed request must carry X-RateLimit-Remaining")
 			}
 		} else {
 			sawThrottled = true
 
-			if remaining := rec.Header().Get("X-RateLimit-Remaining"); remaining != "0" {
+			if remaining := rec.Header().Get("X-Ratelimit-Remaining"); remaining != "0" {
 				t.Errorf("429 X-RateLimit-Remaining = %q, want 0", remaining)
 			}
 		}
