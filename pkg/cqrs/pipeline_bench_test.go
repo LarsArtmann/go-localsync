@@ -86,7 +86,7 @@ func BenchmarkPipeline_Replay10kEvents(b *testing.B) {
 			b.Fatal(cpErr)
 		}
 
-		if _, cpErr := cpDB.Exec("DELETE FROM checkpoints"); cpErr != nil {
+		if _, cpErr := cpDB.ExecContext(ctx, "DELETE FROM checkpoints"); cpErr != nil {
 			b.Fatal(cpErr)
 		}
 
