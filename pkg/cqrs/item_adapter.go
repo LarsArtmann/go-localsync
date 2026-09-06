@@ -12,14 +12,6 @@ import (
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
 
-// Legacy attribute keys from schema V1/V2. Used by upcastLegacyAttributes
-// to reconstruct the Attributes map from old event payloads.
-const (
-	legacyActorLogin     = "actor_login"
-	legacyActorAvatarURL = "actor_avatar_url"
-	legacyRepoName       = "repo_name"
-	legacyRepoURL        = "repo_url"
-)
 
 // toDataItem converts a provider.Item to a data model Item.
 // This is the boundary between the provider DTO and the domain entity.
@@ -96,19 +88,19 @@ func upcastLegacyAttributes(payload ItemSyncedPayload) map[string]string {
 	attrs := map[string]string{}
 
 	if payload.ActorLogin != "" {
-		attrs[legacyActorLogin] = payload.ActorLogin
+		attrs[model.AttrActorLogin] = payload.ActorLogin
 	}
 
 	if payload.ActorAvatarURL != "" {
-		attrs[legacyActorAvatarURL] = payload.ActorAvatarURL
+		attrs[model.AttrActorAvatarURL] = payload.ActorAvatarURL
 	}
 
 	if payload.RepoName != "" {
-		attrs[legacyRepoName] = payload.RepoName
+		attrs[model.AttrRepoName] = payload.RepoName
 	}
 
 	if payload.RepoURL != "" {
-		attrs[legacyRepoURL] = payload.RepoURL
+		attrs[model.AttrRepoURL] = payload.RepoURL
 	}
 
 	return attrs
