@@ -6,13 +6,23 @@ import (
 )
 
 // Directive markers. The canonical prefix is //cqrs-lint: followed by the
-// action keyword (ignore or ignore-file), a space, and the rule list.
+// action keyword (ignore, ignore-file, ignore-start, ignore-end), a space,
+// and the rule list. Block comments carry the same directives after a
+// /* decoration ("/*cqrs-lint:..." or "/* cqrs-lint:...").
 const (
-	directivePrefix  = "//cqrs-lint:"
-	directiveIgnore  = "ignore"
-	directiveIgnoreF = "ignore-file"
-	suppressAllRules = "all"
+	directivePrefix       = "//cqrs-lint:"
+	blockDirectiveMarker  = "cqrs-lint:"
+	directiveIgnore       = "ignore"
+	directiveIgnoreF      = "ignore-file"
+	directiveIgnoreStart  = "ignore-start"
+	directiveIgnoreEnd    = "ignore-end"
+	suppressAllRules      = "all"
 )
+
+// unclosedRangeEnd is the sentinel end line for an ignore-start whose
+// matching ignore-end never appears: the range suppresses to end of file
+// (and a warning makes the missing close visible under --strict).
+const unclosedRangeEnd = 1 << 30
 
 // Suppressor decides whether a Finding is silenced by an inline
 // //cqrs-lint:ignore directive in the source. It is built once per package
@@ -33,68 +43,124 @@ type Suppressor struct {
 	// lineProvenance records the directive kind and reason per (file, line, rule).
 	lineProvenance map[string]map[int]map[string]directiveInfo
 
-	// unknownRules collects directives naming rule IDs that are not in the
-	// catalog (and not "all") — surfaced as warnings so stale suppressions
-	// cannot hide forever.
-	unknownRules []Finding
+	// rangeRules maps relativized file path to rule ID (or "all") to the
+	// suppressed line ranges (//cqrs-lint:ignore-start/ignore-end).
+	rangeRules map[string]map[string][]suppressedRange
+
+	// openRanges tracks the ranges opened but not yet closed during the
+	// scan: file path to rule ID to the line the range started on.
+	openRanges map[string]map[string]suppressedRange
+
+	// provenance records the directive kind and optional reason per
+	// (file, rule) at file scope — the suppression audit trail.
+	fileProvenance map[string]map[string]directiveInfo
+
+	// lineProvenance records the directive kind and reason per (file, line, rule).
+	lineProvenance map[string]map[int]map[string]directiveInfo
+
+	// directiveFindings collects warnings about the directives themselves:
+	// rule IDs that are not in the catalog (and not "all"), nested
+	// ignore-start ranges, and ignore-end without a matching open range.
+	// Surfaced as warnings so stale or misused suppressions cannot hide
+	// forever.
+	directiveFindings []Finding
 }
 
-// directiveInfo captures which directive silenced a finding and why.
-type directiveInfo struct {
-	kind   string // "ignore" or "ignore-file"
-	reason string // optional human reason following the rule list
+// suppressedRange is one [start, end] line interval in which a rule is
+// silenced. start is the ignore-start directive's line; end is the
+// ignore-end's line, or unclosedRangeEnd when the range was never closed.
+type suppressedRange struct {
+	start, end int
+	reason     string
 }
 
-// newSuppressor scans every comment in the package for //cqrs-lint:ignore and
-// //cqrs-lint:ignore-file directives and builds the lookup tables. Comments
-// are associated with their position so a line-level directive silences
-// findings on the same line or the immediately following line.
+// newSuppressor scans every comment in the package for //cqrs-lint:
+directives and builds the lookup tables. Line-level directives silence
+// findings on the same line or the immediately following line; range
+// directives (ignore-start/ignore-end) silence everything between them;
+// block comments (/* cqrs-lint:... */) carry the same directives anywhere
+// inside the comment.
 func newSuppressor(pkg *Package) Suppressor {
 	s := Suppressor{
-		fileRules:      map[string]map[string]bool{},
-		lineRules:      map[string]map[int]map[string]bool{},
-		fileProvenance: map[string]map[string]directiveInfo{},
-		lineProvenance: map[string]map[int]map[string]directiveInfo{},
+		fileRules:         map[string]map[string]bool{},
+		lineRules:         map[string]map[int]map[string]bool{},
+		rangeRules:        map[string]map[string][]suppressedRange{},
+		openRanges:        map[string]map[string]suppressedRange{},
+		fileProvenance:    map[string]map[string]directiveInfo{},
+		lineProvenance:    map[string]map[int]map[string]directiveInfo{},
 	}
 
 	for _, file := range pkg.Files {
+		relFile := pkg.RelFile(pkg.Fset.Position(file.Pos()).Filename)
+
 		for _, group := range file.Comments {
 			for _, comment := range group.List {
-				s.parseDirective(pkg, comment)
+				s.parseComment(pkg, relFile, comment)
 			}
 		}
+
+		s.finalizeRanges(relFile)
 	}
 
 	return s
 }
 
-// parseDirective inspects a single comment for a suppression directive and
-// records the rule(s) at the appropriate scope. Malformed directives (empty
-// rule list) are silently ignored — they are not lint findings themselves.
-func (s *Suppressor) parseDirective(pkg *Package, comment *ast.Comment) {
-	text := comment.Text
-	if !strings.HasPrefix(text, directivePrefix) {
+// parseComment inspects a single comment for suppression directives. Line
+// comments hold at most one directive; block comments are scanned line by
+// line so a directive may sit anywhere inside /* ... */.
+func (s *Suppressor) parseComment(pkg *Package, relFile string, comment *ast.Comment) {
+	if strings.HasPrefix(comment.Text, "/*") {
+		baseLine := pkg.Fset.Position(comment.Pos()).Line
+
+		for i, raw := range strings.Split(comment.Text, "\n") {
+			text := strings.TrimSpace(strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(raw), "/*"), "*/"))
+			text = strings.TrimSpace(strings.TrimPrefix(text, "*"))
+			if !strings.HasPrefix(text, blockDirectiveMarker) {
+				continue
+			}
+
+			s.parseDirective(pkg, relFile, text, baseLine+i)
+		}
+
 		return
 	}
 
-	body := strings.TrimPrefix(text, directivePrefix)
-	position := pkg.Fset.Position(comment.Pos())
-	relFile := pkg.RelFile(position.Filename)
+	if !strings.HasPrefix(comment.Text, directivePrefix) {
+		return
+	}
 
+	line := pkg.Fset.Position(comment.Pos()).Line
+	s.parseDirective(pkg, relFile, strings.TrimPrefix(comment.Text, directivePrefix), line)
+}
+
+// parseDirective records one directive body (text after the marker) found on
+// the given line. Malformed directives (empty rule list) are silently
+// ignored — they are not lint findings themselves.
+func (s *Suppressor) parseDirective(pkg *Package, relFile, body string, line int) {
 	switch {
+	case strings.HasPrefix(body, directiveIgnoreStart):
+		rules, reason := parseDirectiveRules(body, directiveIgnoreStart)
+		s.recordUnknownRules(relFile, line, rules)
+		s.openRange(relFile, rules, line, reason)
+
 	case strings.HasPrefix(body, directiveIgnoreF):
 		rules, reason := parseDirectiveRules(body, directiveIgnoreF)
 		info := directiveInfo{kind: directiveIgnoreF, reason: reason}
 		s.addFileRules(relFile, rules)
 		s.recordFileProvenance(relFile, rules, info)
-		s.recordUnknownRules(relFile, position.Line, rules)
+		s.recordUnknownRules(relFile, line, rules)
+
+	case strings.HasPrefix(body, directiveIgnoreEnd):
+		rules, _ := parseDirectiveRules(body, directiveIgnoreEnd)
+		s.recordUnknownRules(relFile, line, rules)
+		s.closeRange(relFile, rules, line)
 
 	case strings.HasPrefix(body, directiveIgnore):
 		rules, reason := parseDirectiveRules(body, directiveIgnore)
 		info := directiveInfo{kind: directiveIgnore, reason: reason}
-		s.addLineRules(relFile, position.Line, rules)
-		s.recordLineProvenance(relFile, position.Line, rules, info)
-		s.recordUnknownRules(relFile, position.Line, rules)
+		s.addLineRules(relFile, line, rules)
+		s.recordLineProvenance(relFile, line, rules, info)
+		s.recordUnknownRules(relFile, line, rules)
 	}
 }
 
