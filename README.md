@@ -285,7 +285,7 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 
 ## Testing
 
-320 test functions across 11 packages (plus 31 in the standalone `provider/github` module):
+321 test functions across 11 packages (plus 31 in the standalone `provider/github` module):
 
 | Package             | Tests | Coverage | Description                                                             |
 | ------------------- | ----- | -------- | ----------------------------------------------------------------------- |
