@@ -242,10 +242,13 @@ func closeLogged(name string, c io.Closer) {
 // correlation ID is attached so the emitted events are traceable to this
 // call even outside a batch run.
 func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
-	aggID := AggregateID(item.Source.Get(), item.SourceID)
+	streamID, err := StreamID(item.Source.Get(), item.SourceID)
+	if err != nil {
+		return pkgerrors.Wrapf(err, "sync item %s/%s", item.Source.Get(), item.SourceID)
+	}
 
 	return s.CommandDispatcher.Dispatch(ctx, &SyncItemCommand{
-		BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
+		BasicCommand: mustNewCommand(commandTypeSyncItem, streamID),
 		Item:         toDataItem(item),
 		RawJSON:      item.RawJSON,
 		Options:      []event.Option{event.WithCorrelationID(cqrsid.NewCorrelationID())},
@@ -255,21 +258,27 @@ func (s *CQRSStack) SyncItem(ctx context.Context, item *provider.Item) error {
 
 // TombstoneItem dispatches a TombstoneItemCommand for the given source/sourceID
 // and reason, hiding the item from the default read model while preserving its
-// history. A later sync resurrects it automatically.
+// history. A later sync resurrects it automatically. Extra event options
+// (causation, custom metadata) are appended after the default correlation ID,
+// giving direct dispatch the same parity surface as SyncItem.
 func (s *CQRSStack) TombstoneItem(
 	ctx context.Context,
 	source string,
 	sourceID id.SourceID,
 	reason model.TombstoneReason,
+	opts ...event.Option,
 ) error {
-	aggID := AggregateID(source, sourceID)
+	streamID, err := StreamID(source, sourceID)
+	if err != nil {
+		return pkgerrors.Wrapf(err, "tombstone %s/%s", source, sourceID)
+	}
 
 	return s.CommandDispatcher.Dispatch(ctx, &TombstoneItemCommand{
-		BasicCommand: mustNewCommand(commandTypeTombstone, aggID),
+		BasicCommand: mustNewCommand(commandTypeTombstone, streamID),
 		Source:       source,
 		SourceID:     sourceID,
 		Reason:       reason,
-		Options:      []event.Option{event.WithCorrelationID(cqrsid.NewCorrelationID())},
+		Options:      append([]event.Option{event.WithCorrelationID(cqrsid.NewCorrelationID())}, opts...),
 	})
 }
 
@@ -364,7 +373,7 @@ func (s *CQRSStack) syncItemsWith(
 	items []*provider.Item,
 	resolver crdt.ConflictResolver[*model.Item],
 ) *synclib.BatchOutcome {
-	summary := &synclib.BatchOutcome{
+	batch := &synclib.BatchOutcome{
 		Results:   make([]synclib.ItemSyncResult, 0, len(items)),
 		Synced:    0,
 		Conflicts: 0,
@@ -378,7 +387,20 @@ func (s *CQRSStack) syncItemsWith(
 			break
 		}
 
-		aggID := AggregateID(item.Source.Get(), item.SourceID)
+		streamID, sidErr := StreamID(item.Source.Get(), item.SourceID)
+		if sidErr != nil {
+			sidErr = pkgerrors.Wrapf(sidErr, "sync %s/%s", item.Source.Get(), item.SourceID)
+
+			batch.Errors++
+			batch.Results = append(batch.Results, synclib.ItemSyncResult{
+				SourceID: item.SourceID,
+				Action:   synclib.ActionError,
+				Error:    sidErr,
+			})
+
+			continue
+		}
+
 		dataItem := toDataItem(item)
 
 		var outcome SyncOutcome
@@ -386,7 +408,7 @@ func (s *CQRSStack) syncItemsWith(
 		syncOpts := []event.Option{event.WithCorrelationID(corrID)}
 
 		cmd := &SyncItemCommand{
-			BasicCommand: mustNewCommand(commandTypeSyncItem, aggID),
+			BasicCommand: mustNewCommand(commandTypeSyncItem, streamID),
 			Item:         dataItem,
 			RawJSON:      item.RawJSON,
 			Options:      syncOpts,
@@ -413,18 +435,18 @@ func (s *CQRSStack) syncItemsWith(
 
 		switch result.Action {
 		case synclib.ActionError:
-			summary.Errors++
+			batch.Errors++
 		case synclib.ActionCreated, synclib.ActionUpdated, synclib.ActionConflictRemote, synclib.ActionConflictLocal:
-			summary.Synced++
+			batch.Synced++
 
 			if result.Action == synclib.ActionConflictRemote || result.Action == synclib.ActionConflictLocal {
-				summary.Conflicts++
+				batch.Conflicts++
 			}
 		case synclib.ActionUnchanged, synclib.ActionTombstoned:
 		}
 
-		summary.Results = append(summary.Results, result)
+		batch.Results = append(batch.Results, result)
 	}
 
-	return summary
+	return batch
 }

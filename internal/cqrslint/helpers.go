@@ -34,6 +34,11 @@ var allChecks = []ruleCheck{
 	{ruleProjectionLockGuard, checkProjectionLockGuard},     // C0008
 	{rulePayloadJSONTags, checkPayloadJSONTags},             // C0009
 	{ruleNewEventsUsesAggType, checkNewEventsUsesAggType},   // C0010
+	{ruleSingleProjection, checkSingleProjection},           // C0011
+	{ruleFoldPurity, checkFoldPurity},                       // C0012
+	{ruleProjectorReadOnly, checkProjectorReadOnly},         // C0013
+	{ruleWireValueLiterals, checkWireValueLiterals},         // C0014
+	{ruleNewEventsTypeLiterals, checkNewEventsTypeLiterals}, // C0015
 }
 
 // literalStringValue extracts the unquoted value of a string BasicLit, returning

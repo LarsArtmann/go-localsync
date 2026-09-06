@@ -164,12 +164,18 @@ func TestFinding_String_WithLine(t *testing.T) {
 func TestRules_CountAndOrder(t *testing.T) {
 	rules := cqrslint.Rules()
 
-	wantCount := 10
+	wantCount := 15
 	if len(rules) != wantCount {
 		t.Fatalf("want %d rules, got %d", wantCount, len(rules))
 	}
 
-	for i, expected := range []string{"C0001", "C0002", "C0003", "C0004", "C0005", "C0006", "C0007", "C0008", "C0009", "C0010"} {
+	wantIDs := []string{
+		"C0001", "C0002", "C0003", "C0004", "C0005",
+		"C0006", "C0007", "C0008", "C0009", "C0010",
+		"C0011", "C0012", "C0013", "C0014", "C0015",
+	}
+
+	for i, expected := range wantIDs {
 		if rules[i].ID != expected {
 			t.Errorf("rule %d: want ID %s, got %s", i, expected, rules[i].ID)
 		}

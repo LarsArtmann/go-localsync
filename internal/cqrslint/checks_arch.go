@@ -158,22 +158,27 @@ func checkWireValueLiterals(pkg *Package) []Finding {
 // const whose value satisfies match, or "" when none declares it.
 func declaringFile(pkg *Package, match func(string) bool) string {
 	for _, file := range pkg.Files {
-		found := false
+		hit := false
 
-		visitGenDecls(pkg, func(_ *ast.File, decl *ast.GenDecl) {
-			for _, spec := range decl.Specs {
-				spec, ok := spec.(*ast.ValueSpec)
-				if !ok || len(spec.Values) != 1 {
+		for _, decl := range file.Decls {
+			gen, ok := decl.(*ast.GenDecl)
+			if !ok {
+				continue
+			}
+
+			for _, spec := range gen.Specs {
+				valueSpec, ok := spec.(*ast.ValueSpec)
+				if !ok || len(valueSpec.Values) != 1 {
 					continue
 				}
 
-				if value, isString := literalStringValue(spec.Values[0]); isString && match(value) {
-					found = true
+				if value, isString := literalStringValue(valueSpec.Values[0]); isString && match(value) {
+					hit = true
 				}
 			}
-		})
+		}
 
-		if found {
+		if hit {
 			return pkg.RelFile(pkg.Fset.Position(file.Pos()).Filename)
 		}
 	}
