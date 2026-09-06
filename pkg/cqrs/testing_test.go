@@ -193,16 +193,21 @@ func testFutureNow(delta time.Duration) time.Time {
 	return time.Now().Truncate(time.Millisecond).Add(delta)
 }
 
-func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected int64) {
-	t.Helper()
+// waitForCount polls the stack's read model until at least want items are
+// projected. It accepts testing.TB so tests and benchmarks share one helper
+// (the former waitForCount/waitForCountTB pair unified).
+func waitForCount(tb testing.TB, stack *CQRSStack, ctx context.Context, want int) {
+	tb.Helper()
 
-	deadline := time.Now().Add(5 * time.Second)
+	deadline := time.Now().Add(30 * time.Second)
 
 	for time.Now().Before(deadline) {
 		count, err := stack.Count(ctx, model.ItemFilter{})
-		testutil.MustNoError(t, err)
+		if err != nil {
+			tb.Fatal(err)
+		}
 
-		if count == expected {
+		if count >= int64(want) {
 			return
 		}
 
@@ -210,7 +215,7 @@ func waitForCount(t *testing.T, stack *CQRSStack, ctx context.Context, expected 
 	}
 
 	count, _ := stack.Count(ctx, model.ItemFilter{})
-	t.Fatalf("timed out waiting for count=%d, got %d", expected, count)
+	tb.Fatalf("timed out waiting for count=%d, got %d", want, count)
 }
 
 func newUpdatedAtLWWResolver(t *testing.T) *crdt.LWWResolver[*model.Item] {

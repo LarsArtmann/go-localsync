@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 )
@@ -67,7 +66,7 @@ func BenchmarkPipeline_Replay10kEvents(b *testing.B) {
 		}
 	}
 
-	waitForCountTB(b, seed, ctx, total)
+	waitForCount(b, seed, ctx, total)
 
 	if err := seed.Close(); err != nil {
 		b.Fatal(err)
@@ -99,7 +98,7 @@ func BenchmarkPipeline_Replay10kEvents(b *testing.B) {
 			b.Fatal(rerr)
 		}
 
-		waitForCountTB(b, replay, ctx, total)
+		waitForCount(b, replay, ctx, total)
 
 		if cerr := replay.Close(); cerr != nil {
 			b.Fatal(cerr)
@@ -159,25 +158,3 @@ func benchProviderItemsRange(from, to int) []*provider.Item {
 }
 
 const fillerPayload = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
-
-// waitForCountTB is the testing.TB generalization of the test helper.
-func waitForCountTB(tb testing.TB, stack *CQRSStack, ctx context.Context, want int) {
-	tb.Helper()
-
-	deadline := time.Now().Add(30 * time.Second)
-
-	for time.Now().Before(deadline) {
-		count, err := stack.Count(ctx, model.ItemFilter{})
-		if err != nil {
-			tb.Fatal(err)
-		}
-
-		if int(count) >= want {
-			return
-		}
-
-		time.Sleep(20 * time.Millisecond)
-	}
-
-	tb.Fatalf("timed out waiting for count=%d", want)
-}
