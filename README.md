@@ -289,12 +289,12 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 
 | Package              | Tests | Coverage | Description                                                             |
 | -------------------- | ----- | -------- | ----------------------------------------------------------------------- |
-| `pkg/cqrs`           | 157   | 87.7%    | Decider, ReadModel, Projection, Stack, SQLite RM, upcasting, regression |
+| `pkg/cqrs`           | 157   | 85.1%    | Decider, ReadModel, Projection, Stack, SQLite RM, upcasting, regression |
 | `pkg/sync`           | 36    | 87.7%    | Syncer + ConflictAwareSyncer + retry + reconcile + regression           |
 | `pkg/api`            | 35    | 95.2%    | Server, routes, auth, rate limit, pagination, error mapping             |
 | `pkg/errors`         | 16    | 92.9%    | Sentinel errors, wrapping, classification, IsRetryable, HTTPStatus      |
 | `pkg/id`             | 15    | 100.0%   | ID construction, roundtrip, zero, equal, ContentHash                    |
-| `pkg/data/model`     | 13    | 84.9%    | Item, Key, Validate, ItemFilter, Tombstone                              |
+| `pkg/data/model`     | 13    | 87.1%    | Item, Key, Validate, ItemFilter, Tombstone                              |
 | `pkg/crdt`           | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/data/schema`    | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
 | `pkg/provider`       | 2     | 92.3%    | Item validation                                                         |

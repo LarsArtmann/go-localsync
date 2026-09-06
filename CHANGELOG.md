@@ -7,12 +7,41 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ## [Unreleased]
 
+Nothing yet — the next release is staged as [v0.6.0] below.
+
+## [v0.6.0] - Unreleased
+
+**Breaking release ([ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md) vocabulary alignment).** All sections are relative to [v0.5.0]. The persisted event payloads (`json:"sourceId"`) are UNCHANGED — this release renames the Go surface and the HTTP DTO only; no schema V4, no upcast, no data migration.
+
+### Migration (v0.5.0 → v0.6.0)
+
+| v0.5.0 | v0.6.0 | Notes |
+| --- | --- | --- |
+| `id.ExternalID` / `id.NewExternalID` | `id.SourceID` / `id.NewSourceID` | Old names remain as deprecated type-alias / function-value shims; `SourceID` is canonical. |
+| `cqrs.AggregateID(...)` (panics on error) | `cqrs.StreamID(...)` (error-returning) / `cqrs.MustStreamID(...)` | `AggregateID` remains as a deprecated panicking shim for the migration window. |
+| `sync.SyncSummary` | `sync.BatchOutcome` via `SyncResult.Batch` | One user-facing result type replaces the summary/result duality. |
+| `syncer.GetStats()` | `syncer.Stats()` | `GetStats` remains as a deprecated alias. |
+| HTTP DTO field `externalId` | `sourceId` | Read-path JSON only (`GET /items`); event payloads unchanged. |
+| `POST /sync` declares 408 | 499 (client closed) / 504 (deadline) | Matches `pkgerrors.HTTPStatus`; the OpenAPI document declares 499/504 and not 408. |
+| `TombstoneItem(ctx, source, sourceID, reason)` | `TombstoneItem(..., opts ...event.Option)` | Variadic tail added for direct-dispatch parity (correlation/causation options). |
+| `SyncOptions.MaxPages < 0` silently ignored | rejected by `Validate()` | Classified `ErrInvalidInput` with `field=maxPages` attached. |
+| `var ErrX = errorfamily.New*` | `var ErrX error = errorfamily.New*` | Interface-typed sentinels; `errors.Is`/`As`/`AsType` behavior unchanged. |
+
 ### Added
+
+- **v0.6 vocabulary renames enacted** — the [ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md) window closed with the owner's sign-off recorded in TODO_LIST.md: `id.SourceID` (+ `SourceBrand`/`NewSourceID`) replaces `ExternalID` as the canonical name, `cqrs.StreamID`/`MustStreamID` replace the panicking `AggregateID` (error-returning core, 61-file mechanical sweep), `BatchOutcome` replaces `SyncSummary`, and `Stats` replaces `GetStats`. Deprecated shims keep every old name compiling through the migration window.
+- **DLQ SDK surface** (`pkg/cqrs/dlq.go`) — `DeadLetters`, `DeadLetterCount`, `DeleteDeadLetter`, `PurgeDeadLetters`, and `ReplayDeadLetters` on `CQRSStack`, backed by the persistent SQLite dead-letter store; replay reports `Replayed`/`StillFailing` and intentionally does NOT auto-delete — callers delete via `DeleteDeadLetter` (pinned by test). Nil-host paths return a classified `ErrDatabase` chain.
+- **Per-client API rate limiting** — `api.WithRateLimiter(perMinute, keyExtractor)` adds client-keyed buckets on top of the global limiter; 429 responses now carry canonical `X-Ratelimit-Limit`/`X-Ratelimit-Remaining` headers.
+- **OTel spans for the sync engine** (`pkg/sync/otel.go`) — `sync.WithTracer(trace.Tracer)` wraps `Sync`/`SyncIncremental` in `localsync.sync`/`localsync.sync_incremental` spans (error status + `RecordError`); `CQRSConfig.OTel` propagates the tracer end-to-end. Real-meter and real-tracer recorder tests now assert values land in `cqrs.operation.*` counters, projection attributes, and span attributes (noop providers only proved wiring before).
+- **Tombstone on the read path + typed attribute write-helpers** — `ItemResponse.Tombstone *TombstoneInfo` exposes the tombstone with the typed reason (`model.ParseTombstoneReason`, unknown reasons degrade to a fallback, never panic); `model.Attributes` gains `WithActorLogin`/`WithActorAvatarURL`/`WithRepoName`/`WithRepoURL` (copy-on-write) mirroring the typed readers.
+- **`SyncOptions.MaxPages` validation** — negative values are rejected via `pkgerrors.InvalidField("maxPages", ...)` instead of being silently ignored.
 - `localsync-lint` (formerly `cqrs-lint`) CLI phase 2: `--rules`/`--exclude-rules` subset selection with catalog validation (unknown IDs exit 2), `--no-suppress` CI-hardening mode that ignores every directive, and `--explain <rule>` for full rule rationale.
 - Block-comment suppression directives (`/* cqrs-lint:ignore ... */`) and range directives (`ignore-start`/`ignore-end`) with a nesting guard; unmatched ends and unclosed ranges now warn.
 - `cqrslint.RunOptions`/`RunWithOptions` (rule selection + suppression toggle), `ValidateRuleSelection`, `RuleByID`, and the `ErrUnknownRule` sentinel.
 
 ### Changed
+- **`errors.AsType` modernization driven to zero** — `erraudit lint ./... --type-aware` reports 0 violations; the one `exec.ExitError` case in the CLI test harness migrated to `errors.AsType`. Remaining buildflow `hierarchical-errors` findings (17) are deliberate patterns (cleanup-log-only, ignored writes, defer-Close) dispositioned to formal-track; the `.buildflow.yml` `suppress:` key was tested and proven a silent no-op.
+- **Sentinel errors interface-typed** — `pkg/errors` + `pkg/crdt` sentinels are now declared `var X error = errorfamily.New*` so no package exports a concrete error type as an API surface.
 - **Renamed the internal linter command `cqrs-lint` → `localsync-lint`** to remove the name collision with go-cqrs-lite's library `cqrs-lint` (the pinned 203-rule CI gate). The `//cqrs-lint:` directive vocabulary is unchanged on purpose: one inline comment can target both linters.
 
 ### Added
@@ -69,6 +98,7 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Changed
 
+- **CI/tooling hardening** — dprint format check added to the lint job (pinned `0.56.1`), `windows/amd64` added to the build matrix (`CGO_ENABLED=0`; modernc.org/sqlite is pure-Go), three stale `.golangci.yml` exclusion blocks deleted (paths from pre-restructure layouts), inert pre-commit hooks formally disabled (documented decision), and `verify-release.sh` gained a docs-consistency section running `check-doc-counts.sh` — which immediately proved itself by failing the v0.5.0 smoke run on the 358→378 test-count drift.
 - **Release integrity verified (post-public-flip)** — `v0.5.0` and `provider/github/v0.1.0` tags are pushed (annotated), both GitHub Releases exist, and proxy.golang.org serves both versions with the correct `@latest` for the core and provider modules; no bump release needed.
 - **Stale `vendorHash` re-pinned** — the 2026-09-05 evening dependency refresh changed `go.mod`/`go.sum` after the flake's `vendorHash` was recorded, silently breaking `nix build` / `nix flake check` with a hash mismatch; the hash now matches again and both pass.
 - **`exhaustruct` → `exhaustruct_v5`** — golangci-lint v2.13 deprecates the old linter; the config migrates to `settings.exhaustruct_v5.ignore-patterns` (same stdlib patterns) and renames the linter in every exclusion rule. Full lint is clean with no deprecation warning.
@@ -78,6 +108,7 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ### Fixed
 
+- **`POST /sync` timeout mapping** — a canceled request now maps to 499 (client closed request) and an exceeded deadline to 504, matching `pkgerrors.HTTPStatus`; the previous 408 mapping is gone and the OpenAPI document declares 499/504 (pinned by `pkg/api/timeout_test.go`).
 - **Upcaster pass-through could mutate stored events (residual race)** — a legacy-versioned `ItemSynced` event (schema stamp 1/2) whose payload already carried `Attributes` was handed back to the upcaster registry as the STORED pointer; the registry's in-place schema-version stamp then raced concurrent readers (the memory backend serves shared event pointers). Such events now always rebuild a private copy, making "the registry stamp never lands on a stored event" structural rather than data-dependent. Pinned by a pointer-identity test and a 100-stream barrier-start concurrent replay regression (verified: 3 DATA RACEs against the old logic, clean after; 5× race-clean).
 
 ## [0.5.0] - 2026-09-05
