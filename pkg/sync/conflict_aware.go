@@ -67,8 +67,8 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 		return cr, partialSyncError(cr.Errors, len(result.Items))
 	}
 
-	summary := s.syncer.store.SyncItems(ctx, valid)
-	s.classify(summary, cr)
+	batch := s.syncer.store.SyncItems(ctx, valid)
+	s.classify(batch, cr)
 
 	// Reuse the guarded reconciliation helper (refuses incomplete fetches) so the
 	// conflict-aware path has the same upstream-gone detection as the base Syncer.
@@ -92,8 +92,8 @@ func (s *ConflictAwareSyncer) SyncWithConflictDetection(
 
 // classify folds a BatchOutcome into a ConflictResult, counting upserts,
 // conflicts, skips, and errors while retaining per-item error detail.
-func (s *ConflictAwareSyncer) classify(summary *BatchOutcome, cr *ConflictResult) {
-	for _, r := range summary.Results {
+func (s *ConflictAwareSyncer) classify(batch *BatchOutcome, cr *ConflictResult) {
+	for _, r := range batch.Results {
 		switch r.Action {
 		case ActionCreated:
 			cr.Upserted++

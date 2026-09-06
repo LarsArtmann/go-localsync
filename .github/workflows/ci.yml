@@ -101,6 +101,7 @@ jobs:
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
       - name: Run golangci-lint
+        id: golangci
         uses: golangci/golangci-lint-action@9fae48acfc02a90574d7c304a1758ef9895495fa # v7
         with:
           # Pinned to the exact version the nix devShell provides (golangci-lint
@@ -119,6 +120,7 @@ jobs:
       # ADR-0004 architectural invariants (single aggregate, three fixed
       # events, projection guards) enforced on every push.
       - name: Run internal localsync-lint (strict)
+        id: localsync-lint
         run: go run ./cmd/localsync-lint --strict
 
       # Library-side consumer lint (203 domain rules), error-gated: only
@@ -134,6 +136,7 @@ jobs:
       #   go run github.com/larsartmann/go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1 ./pkg --min-severity error
       # ).
       - name: Run go-cqrs-lite cqrs-lint (error-gated)
+        id: library-cqrs-lint
         if: env.HAS_GO_FINDING_KEY == 'true'
         env:
           GOPRIVATE: github.com/larsartmann/go-finding
@@ -157,6 +160,34 @@ jobs:
           echo "::notice::go-cqrs-lite library lint skipped. Add the
           SSH_PRIVATE_KEY secret (deploy key with read access to
           larsartmann/go-finding) to enable this gate."
+
+      # Gate badges in the run summary: one line, three statuses, visible
+      # without opening a single step log (the 08:05 session's "master red
+      # for 50 minutes unnoticed" failure mode). The library gate renders
+      # its skip state here too, so the ::notice:: no longer depends on
+      # someone reading the step log to be seen.
+      - name: Summarize static-analysis gates
+        if: always()
+        run: |
+          badge() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              skipped) echo "⚪ skipped" ;;
+              *) echo "❔ $1" ;;
+            esac
+          }
+          {
+            echo "### Static-analysis gates"
+            echo ""
+            echo "| Gate | Status |"
+            echo "| --- | --- |"
+            echo "| golangci-lint | $(badge "${{ steps.golangci.outcome }}") |"
+            echo "| localsync-lint (ADR-0004, strict) | $(badge "${{ steps.localsync-lint.outcome }}") |"
+            echo "| library cqrs-lint (error-gated) | $(badge "${{ steps.library-cqrs-lint.outcome }}") |"
+            echo ""
+            echo "Library cqrs-lint runs only when the SSH_PRIVATE_KEY secret exists; skipped means the gate is local-only (run it from the devShell)."
+          } >> "$GITHUB_STEP_SUMMARY"
 
     timeout-minutes: 15
   security:
@@ -291,6 +322,16 @@ jobs:
       - name: Build (standalone)
         working-directory: provider/github
         run: go build ./...
+
+      # Lint parity for the nested module: pinned to the same golangci-lint
+      # version as the root lint job (v2.13.2, the devShell version) and run
+      # via `go run` like the actionlint step — no action-input guessing, no
+      # floating latest. The module carries its own .golangci.yml (scoped
+      # linter set; also stops config discovery from walking up to the root
+      # config, which would apply core-library exclusions to provider paths).
+      - name: Run golangci-lint (standalone, pinned)
+        working-directory: provider/github
+        run: go run github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.13.2 run ./... --timeout=5m
 
       - name: Test (standalone, race)
         working-directory: provider/github

@@ -10,32 +10,9 @@ import (
 
 	"charm.land/log/v2"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
-	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
 )
-
-// blockingProvider blocks every fetch until the request context is done, so
-// the sync run surfaces the context error through the real mapping path.
-type blockingProvider struct{}
-
-func (p *blockingProvider) Name() string { return "blocking" }
-
-func (p *blockingProvider) Fetch(ctx context.Context, _ *provider.FetchOptions) (*provider.FetchResult, error) {
-	<-ctx.Done()
-
-	return nil, ctx.Err()
-}
-
-func (p *blockingProvider) FetchAll(ctx context.Context, _ string, _ int) (*provider.FetchResult, error) {
-	<-ctx.Done()
-
-	return nil, ctx.Err()
-}
-
-func (p *blockingProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo, error) {
-	return nil, nil //nolint:nilnil // test double: the sync path never reads the rate limit
-}
 
 // TestSync_TimeoutStatusMapping pins the /sync timeout contract: a canceled
 // request surfaces 499 (Client Closed Request) and a deadline-exceeded run
@@ -45,7 +22,7 @@ func (p *blockingProvider) GetRateLimit(_ context.Context) (*provider.RateLimitI
 func TestSync_TimeoutStatusMapping(t *testing.T) {
 	t.Parallel()
 
-	syncer := synclib.NewSyncer(&blockingProvider{}, &mockSyncStore{}, log.Default())
+	syncer := synclib.NewSyncer(&testutil.BlockingProvider{}, &mockSyncStore{}, log.Default())
 	srv := NewServer(syncer, log.Default())
 
 	post := func(ctx context.Context) *httptest.ResponseRecorder {

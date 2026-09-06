@@ -325,7 +325,7 @@ func (c *Client) GetRateLimit(ctx context.Context) (*provider.RateLimitInfo, err
 
 	limits, _, err := c.kernel.RateLimit.Get(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("github: fetch rate limits: %w", err)
 	}
 
 	core := limits.GetCore()
@@ -362,7 +362,7 @@ func convertEvents(activity []*gh.Event) []*provider.Item {
 func convertEvent(e *gh.Event) (*provider.Item, error) {
 	rawJSON, err := json.Marshal(e)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("github: encode event %s: %w", e.GetID(), err)
 	}
 
 	var (

@@ -1,0 +1,35 @@
+# provider/github lint config — self-contained so a run from this module
+# never picks up the parent repo's .golangci.yml (golangci-lint walks up the
+# tree). Scope: the standard set plus the style/correctness linters that pay
+# for themselves in this module; the parent's full 110-linter matrix is a
+# core-library bar, not a provider bar.
+version: "2"
+run:
+  timeout: 5m
+  go: 1.26.7
+  build-tags:
+    - goexperiment.jsonv2
+  allow-parallel-runners: true
+  allow-serial-runners: true
+  tests: true
+linters:
+  default: standard
+  enable:
+    - canonicalheader
+    - godot
+    - misspell
+    - wrapcheck
+  settings:
+    # exhaustruct_v5 is deliberately NOT enabled here (unlike the root
+    # config): every struct literal in this module is either an external
+    # SDK DTO (go-github/github-kit types are partial by design — the API
+    # accepts/returns subsets) or a test fixture. There are no module-owned
+    # wire structs whose exhaustive construction would be worth enforcing.
+    wrapcheck:
+      ignoreSigs:
+        - .Errorf(
+        - errors.New(
+        - errors.WithStack(
+        - .Wrap(
+        - .Wrapf(
+        - fmt.Errorf(

@@ -289,7 +289,7 @@ func newServerClient(server *httptest.Server, cfg RateLimitConfig) *Client {
 // setRateLimitHeaders writes the X-RateLimit header family the kernel's
 // budget tracking feeds on.
 func setRateLimitHeaders(w http.ResponseWriter, remaining int, resetAt time.Time) {
-	w.Header().Set("X-RateLimit-Limit", strconv.Itoa(defaultGitHubRateLimit))
-	w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(remaining))
-	w.Header().Set("X-RateLimit-Reset", strconv.FormatInt(resetAt.Unix(), 10))
+	w.Header().Set("X-Ratelimit-Limit", strconv.Itoa(defaultGitHubRateLimit))
+	w.Header().Set("X-Ratelimit-Remaining", strconv.Itoa(remaining))
+	w.Header().Set("X-Ratelimit-Reset", strconv.FormatInt(resetAt.Unix(), 10))
 }
