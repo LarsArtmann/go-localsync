@@ -106,8 +106,14 @@ check_pair "$FEATURES" 'test functions across [0-9]+ packages \(plus [0-9]+ in t
 in_deps=0
 while IFS= read -r line; do
 	case "$line" in
-	"## Dependencies") in_deps=1; continue ;;
-	"## "*|"### "*) in_deps=0; continue ;;
+	"## Dependencies")
+		in_deps=1
+		continue
+		;;
+	"## "* | "### "*)
+		in_deps=0
+		continue
+		;;
 	esac
 
 	[[ "$in_deps" == 1 ]] || continue

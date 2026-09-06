@@ -29,7 +29,10 @@ PROVIDER_MODULE="github.com/larsartmann/go-localsync/provider/github"
 
 fail=0
 ok() { printf '  ✅ %s\n' "$1"; }
-bad() { printf '  ❌ %s\n' "$1"; fail=1; }
+bad() {
+	printf '  ❌ %s\n' "$1"
+	fail=1
+}
 warn() { printf '  ⚠️  %s\n' "$1"; }
 
 [[ -n "$CORE_TAG" ]] || {
@@ -75,15 +78,32 @@ proxy_check() {
 	local encoded base
 	# Module paths with major-version suffixes are escaped in proxy URLs
 	# (only capital letters; ours are lowercase, but escape defensively).
-	encoded="${module//A/!a}"; encoded="${encoded//B/!b}"; encoded="${encoded//C/!c}"
-	encoded="${encoded//D/!d}"; encoded="${encoded//E/!e}"; encoded="${encoded//F/!f}"
-	encoded="${encoded//G/!g}"; encoded="${encoded//H/!h}"; encoded="${encoded//I/!i}"
-	encoded="${encoded//J/!j}"; encoded="${encoded//K/!k}"; encoded="${encoded//L/!l}"
-	encoded="${encoded//M/!m}"; encoded="${encoded//N/!n}"; encoded="${encoded//O/!o}"
-	encoded="${encoded//P/!p}"; encoded="${encoded//Q/!q}"; encoded="${encoded//R/!r}"
-	encoded="${encoded//S/!s}"; encoded="${encoded//T/!t}"; encoded="${encoded//U/!u}"
-	encoded="${encoded//V/!v}"; encoded="${encoded//W/!w}"; encoded="${encoded//X/!x}"
-	encoded="${encoded//Y/!y}"; encoded="${encoded//Z/!z}"
+	encoded="${module//A/!a}"
+	encoded="${encoded//B/!b}"
+	encoded="${encoded//C/!c}"
+	encoded="${encoded//D/!d}"
+	encoded="${encoded//E/!e}"
+	encoded="${encoded//F/!f}"
+	encoded="${encoded//G/!g}"
+	encoded="${encoded//H/!h}"
+	encoded="${encoded//I/!i}"
+	encoded="${encoded//J/!j}"
+	encoded="${encoded//K/!k}"
+	encoded="${encoded//L/!l}"
+	encoded="${encoded//M/!m}"
+	encoded="${encoded//N/!n}"
+	encoded="${encoded//O/!o}"
+	encoded="${encoded//P/!p}"
+	encoded="${encoded//Q/!q}"
+	encoded="${encoded//R/!r}"
+	encoded="${encoded//S/!s}"
+	encoded="${encoded//T/!t}"
+	encoded="${encoded//U/!u}"
+	encoded="${encoded//V/!v}"
+	encoded="${encoded//W/!w}"
+	encoded="${encoded//X/!x}"
+	encoded="${encoded//Y/!y}"
+	encoded="${encoded//Z/!z}"
 	base="https://proxy.golang.org/$encoded"
 
 	echo "== 3. proxy.golang.org ($name) =="

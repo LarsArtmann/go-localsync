@@ -15,7 +15,7 @@ import (
 // TestAnalyze_CleanPackage pins the 0-exit contract: the real pkg/cqrs (the
 // linter's own target) analyzes without error and without active findings.
 func TestAnalyze_CleanPackage(t *testing.T) {
-	pkg, findings, err := analyze("../../pkg/cqrs")
+	pkg, findings, err := analyze("../../pkg/cqrs", cqrslint.RunOptions{})
 	if err != nil {
 		t.Fatalf("analyze pkg/cqrs: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestAnalyze_CleanPackage(t *testing.T) {
 // unparseable/missing target must return an error from analyze (main maps it
 // to exit code 2).
 func TestAnalyze_BadTargetIsUsageError(t *testing.T) {
-	_, _, err := analyze(filepath.Join(t.TempDir(), "does-not-exist"))
+	_, _, err := analyze(filepath.Join(t.TempDir(), "does-not-exist"), cqrslint.RunOptions{})
 	if err == nil {
 		t.Fatal("expected an error for a missing target")
 	}
@@ -195,7 +195,7 @@ func TestAnalyze_ViolatingFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, findings, err := analyze(dir)
+	_, findings, err := analyze(dir, cqrslint.RunOptions{})
 	if err != nil {
 		t.Fatalf("analyze fixture: %v", err)
 	}
@@ -224,7 +224,7 @@ func TestAnalyze_ViolatingFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, supFindings, err := analyze(supDir)
+	_, supFindings, err := analyze(supDir, cqrslint.RunOptions{})
 	if err != nil {
 		t.Fatalf("analyze suppressed fixture: %v", err)
 	}
