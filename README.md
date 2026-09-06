@@ -255,7 +255,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (320 tests across 11 packages)
+go test ./... -count=1                # Run tests (321 tests across 11 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
