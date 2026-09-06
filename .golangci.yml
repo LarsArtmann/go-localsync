@@ -323,17 +323,6 @@ linters:
         linters:
           - gochecknoglobals
           - mnd
-      - path: pkg/types/ids\.go
-        linters:
-          - revive
-      - path: pkg/providers/github/client\.go
-        linters:
-          - wrapcheck
-          - noinlineerr
-          - mnd
-          - golines
-          - errorlint
-          - funlen
       - path: pkg/sync/conflict_aware\.go
         linters:
           - exhaustruct_v5
@@ -342,16 +331,6 @@ linters:
           - wrapcheck
           - golines
           - funlen
-      - path: pkg/testhelpers/
-        linters:
-          - exhaustruct_v5
-          - err113
-          - godoclint
-          - gocritic
-          - gochecknoglobals
-          - gocheckcompilerdirectives
-          - forcetypeassert
-          - inamedparam
       - path: _test\.go
         text: unused
         linters:
