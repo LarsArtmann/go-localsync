@@ -62,6 +62,7 @@ type Client struct {
 	rateLimitConfig RateLimitConfig
 	retryConfig     provider.RetryConfig
 	fetchConfig     FetchConfig
+	etagConfig      *githubkit.ETagOptions
 }
 
 var _ provider.Provider = (*Client)(nil)
@@ -100,6 +101,7 @@ func (c *Client) derive(mutate func(next *Client)) *Client {
 		rateLimitConfig: c.rateLimitConfig,
 		retryConfig:     c.retryConfig,
 		fetchConfig:     c.fetchConfig,
+		etagConfig:      c.etagConfig,
 	}
 	mutate(next)
 	next.rebuildKernel()
@@ -126,6 +128,10 @@ func (c *Client) rebuildKernel() {
 		opts = append(opts, githubkit.WithBaseURL(c.baseURL))
 	}
 
+	if c.etagConfig != nil {
+		opts = append(opts, githubkit.WithETagCache(c.etagConfig))
+	}
+
 	c.kernel, c.initErr = githubkit.New(opts...)
 }
 
@@ -142,6 +148,30 @@ func (c *Client) WithRetryConfig(cfg provider.RetryConfig) *Client {
 // WithFetchConfig returns a copy of the client with custom fetch config.
 func (c *Client) WithFetchConfig(cfg FetchConfig) *Client {
 	return c.derive(func(next *Client) { next.fetchConfig = cfg })
+}
+
+// WithETagCache enables the kernel's conditional GET cache: unchanged
+// re-fetches replay stored ETags as If-None-Match and GitHub answers 304
+// (one request spent, zero rate-limit budget counted against the data
+// endpoints). Off by default; opts zero fields get kit defaults
+// (256 entries, 8 MiB bodies). Returns a derived copy.
+func (c *Client) WithETagCache(opts githubkit.ETagOptions) *Client {
+	return c.derive(func(next *Client) {
+		copied := opts
+		next.etagConfig = &copied
+	})
+}
+
+// ETagStats reports conditional-cache counters (hits = 304 revalidations
+// served from cache, stored = 200s cached, entries = cache size). The
+// second return is false when the ETag cache is disabled or the kernel
+// failed to initialize.
+func (c *Client) ETagStats() (githubkit.ETagStats, bool) {
+	if c.kernel == nil || c.initErr != nil {
+		return githubkit.ETagStats{}, false
+	}
+
+	return c.kernel.ETagStats()
 }
 
 // WithBaseURL returns a copy of the client with the given base URL.
