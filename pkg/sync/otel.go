@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -19,8 +20,12 @@ func WithTracer(tracer trace.Tracer) Option {
 }
 
 // withSyncSpan opens name around run when a tracer is configured, recording
-// the terminal error on the span. It is the single tracing wrapper for the
-// sync entry points so both paths record identical status semantics.
+// the terminal error and the run's outcome counts on the span. It is the
+// single tracing wrapper for the sync entry points so both paths record
+// identical status semantics — and the same localsync.* outcome attributes
+// the CQRS batch span sets (synced/conflicts/errors), plus the fetch-side
+// counts only this layer knows (fetched/skipped/tombstoned), so a run's
+// whole story is readable from the span without joining the child batch span.
 func (s *Syncer) withSyncSpan(
 	ctx context.Context,
 	name string,
@@ -37,6 +42,24 @@ func (s *Syncer) withSyncSpan(
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
+	}
+
+	if result != nil {
+		attrs := []attribute.KeyValue{
+			attribute.Int("localsync.fetched", result.Fetched),
+			attribute.Int("localsync.skipped", result.Skipped),
+			attribute.Int("localsync.tombstoned", result.Tombstoned),
+			attribute.Int("localsync.errors", result.Errors),
+		}
+
+		if result.Batch != nil {
+			attrs = append(attrs,
+				attribute.Int("localsync.synced", result.Batch.Synced),
+				attribute.Int("localsync.conflicts", result.Batch.Conflicts),
+			)
+		}
+
+		span.SetAttributes(attrs...)
 	}
 
 	return result, err

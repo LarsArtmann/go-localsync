@@ -95,12 +95,18 @@ type SyncInput struct {
 	}
 }
 
-// SyncOutput defines the response for a sync operation.
+// SyncOutput defines the response for a sync operation. The counts mirror
+// SyncResult plus the BatchOutcome rollup: synced/conflicts come from the
+// store batch when one ran (zero when nothing was persisted). Per-item
+// action detail stays off the wire — consumers that need it call the SDK.
 type SyncOutput struct {
 	Body struct {
-		Fetched int `doc:"Number of items fetched" json:"fetched"`
-		Skipped int `doc:"Number of items skipped" json:"skipped"`
-		Errors  int `doc:"Number of errors"        json:"errors"`
+		Fetched    int `doc:"Number of items fetched"         json:"fetched"`
+		Skipped    int `doc:"Number of items skipped"         json:"skipped"`
+		Synced     int `doc:"Items persisted by the batch"    json:"synced"`
+		Conflicts  int `doc:"Conflicts resolved by the batch" json:"conflicts"`
+		Tombstoned int `doc:"Items tombstoned by reconcile"   json:"tombstoned"`
+		Errors     int `doc:"Number of errors"                json:"errors"`
 	}
 }
 

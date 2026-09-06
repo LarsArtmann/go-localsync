@@ -109,7 +109,13 @@ func (s *Server) triggerSync(ctx context.Context, input *SyncInput) (*SyncOutput
 
 	resp.Body.Fetched = result.Fetched
 	resp.Body.Skipped = result.Skipped
+	resp.Body.Tombstoned = result.Tombstoned
 	resp.Body.Errors = result.Errors
+
+	if result.Batch != nil {
+		resp.Body.Synced = result.Batch.Synced
+		resp.Body.Conflicts = result.Batch.Conflicts
+	}
 
 	return &resp, nil
 }

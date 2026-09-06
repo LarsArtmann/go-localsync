@@ -346,6 +346,24 @@ func TestSyncer_Tracer_RecordsSpansWithStatus(t *testing.T) {
 		t.Errorf("successful run must leave span status unset, got %v", fullSpan.Status().Code)
 	}
 
+	// Outcome attributes (parity with the CQRS batch span): the run's counts
+	// must be readable from the span itself.
+	attrs := map[string]int64{}
+	for _, kv := range fullSpan.Attributes() {
+		attrs[string(kv.Key)] = kv.Value.AsInt64()
+	}
+
+	for key, want := range map[string]int64{
+		"localsync.fetched": 1,
+		"localsync.skipped": 0,
+		"localsync.errors":  0,
+		"localsync.synced":  1,
+	} {
+		if got := attrs[key]; got != want {
+			t.Errorf("span attribute %s = %d, want %d (attrs: %v)", key, got, want, attrs)
+		}
+	}
+
 	// A validation failure happens inside the span and must be recorded.
 	_, err := syncer.Sync(ctx, &SyncOptions{Source: "", MaxPages: 1})
 	if err == nil {
