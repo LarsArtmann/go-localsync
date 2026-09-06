@@ -86,7 +86,7 @@ func (stubProvider) fetchResult() *provider.FetchResult {
 	return &provider.FetchResult{
 		Items: []*provider.Item{{
 			ID:         id.NewItemID(),
-			ExternalID: id.NewExternalID("event-1"),
+			SourceID:   id.NewSourceID("event-1"),
 			Source:     id.NewProviderID("stub"),
 			Type:       id.NewEventTypeID("PushEvent"),
 			Attributes: map[string]string{
@@ -152,7 +152,7 @@ All providers return `provider.Item` objects (the DTO at the SDK boundary) with 
 ```go
 type Item struct {
 	ID         id.ItemID         // Internal ULID-based identifier
-	ExternalID id.ExternalID     // Original ID from source system
+	SourceID   id.SourceID       // Original ID from source system
 	Source     id.ProviderID     // Provider name (e.g., "github")
 	Type       id.EventTypeID    // Item type (e.g., "PushEvent")
 	Attributes map[string]string // Provider-specific key-values (actor_login, repo_name, ...)
@@ -174,7 +174,7 @@ The entire storage layer is event-sourced via [go-cqrs-lite](https://github.com/
 | **Events**       | `ItemSynced`, `ItemConflictFound`, `ItemTombstoned`                                                                                         |
 | **Projection**   | Live events via synchronous `bus.SubscribeAll`; SQLite catch-up via `projectionhost.Host` (checkpoint persistence, crash auto-restart, DLQ) |
 | **Read Model**   | In-memory or SQLite with filter/pagination, stores `*model.Item`                                                                            |
-| **Aggregate ID** | Deterministic SHA256→hex from (source, sourceID) for idempotency                                                                            |
+| **Stream ID**    | Deterministic SHA256→hex from (source, sourceID) for idempotency                                                                            |
 
 ### Key Properties
 
@@ -230,7 +230,7 @@ All entity identifiers use branded phantom types from [go-branded-id](https://gi
 
 ```go
 ItemID        // id.ID[ItemBrand, ulid.ULID]      — internal ULID-based identifier
-ExternalID    // id.ID[ExternalBrand, string]      — provider-specific item identifier
+SourceID      // id.ID[SourceBrand, string]       — provider-specific item identifier
 ProviderID    // id.ID[ProviderBrand, string]       — source provider (e.g., "github")
 EventTypeID   // id.ID[EventTypeBrand, string]      — item type (e.g., "PushEvent")
 ActorLogin      // id.ID[ActorLoginBrand, string]      — external user who triggered the event
@@ -263,6 +263,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 | API Authentication      | ✅ Done | `WithAPIKey`: constant-time key check, 401 + OpenAPI security scheme   |
 | API Rate Limiting       | ✅ Done | `WithRateLimit`: token bucket on `POST /sync`, 429 + `Retry-After`     |
 | API Pagination          | ✅ Done | `X-Total-Count` + opaque `X-Next-Cursor` on `GET /items`               |
+| Log Level Control       | ✅ Done | `CQRSConfig.LogLevel` + `api.WithLogLevel` quiet per-event INFO noise  |
 
 ## Development
 
@@ -311,7 +312,7 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 | `pkg/crdt`           | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/data/schema`    | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
 | `pkg/provider`       | 2     | 92.3%    | Item validation                                                         |
-| `internal/cqrslint`  | 69    | 93.2%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
+| `internal/cqrslint`  | 69    | 93.2%    | 15 architectural checks (C0001–C0015), suppression, rules catalog       |
 | `cmd/localsync-lint` | 33    | 64.8%    | Exit-code contract, summary/`--json` output, fixture round trip         |
 
 ## Related Projects
