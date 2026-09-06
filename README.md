@@ -255,7 +255,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (331 tests across 11 packages)
+go test ./... -count=1                # Run tests (358 tests across 11 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -285,7 +285,7 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 
 ## Testing
 
-331 test functions across 11 packages (plus 31 in the standalone `provider/github` module):
+358 test functions across 11 packages (plus 31 in the standalone `provider/github` module):
 
 | Package             | Tests | Coverage | Description                                                             |
 | ------------------- | ----- | -------- | ----------------------------------------------------------------------- |
@@ -298,7 +298,7 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 | `pkg/crdt`          | 8     | 100.0%   | Conflict, ConflictResolver, LWWResolver                                 |
 | `pkg/data/schema`   | 4     | 100.0%   | Schema Version (V1/V2/V3), CurrentVersion, Valid                        |
 | `pkg/provider`      | 2     | 92.3%    | Item validation                                                         |
-| `internal/cqrslint` | 38    | 92.5%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
+| `internal/cqrslint` | 60    | 93.2%    | 10 architectural checks (C0001–C0010), suppression, rules catalog       |
 | `cmd/cqrs-lint`     | 8     | 56.4%    | Exit-code contract, summary/`--json` output, fixture round trip         |
 
 ## Related Projects
