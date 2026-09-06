@@ -1,10 +1,10 @@
 # OPERATION: SUPERB REFERENCE CONSUMER — Pareto Execution Plan
 
-> **STATUS: FULLY EXECUTED + ARCHIVED (2026-09-06 docs-health sweep).** 27/27 medium tasks complete per the [Execution Record](#execution-record-2026-09-05-full-run) below; the session snapshot lives at [docs/status/archive/2026-09-05_22-30_SUPERB-REFERENCE-CONSUMER-EXECUTION.md](../status/archive/2026-09-05_22-30_SUPERB-REFERENCE-CONSUMER-EXECUTION.md). Superseding work (v0.6 enactment, M-plan) is tracked in TODO_LIST/CHANGELOG. Preserved as written.
+> **STATUS: FULLY EXECUTED + ARCHIVED (2026-09-06 docs-health sweep).** 27/27 medium tasks complete per the [Execution Record](#execution-record-2026-09-05-full-run) below; the session snapshot lives at [docs/status/archive/2026-09-05_22-30_SUPERB-REFERENCE-CONSUMER-EXECUTION.md](../../status/archive/2026-09-05_22-30_SUPERB-REFERENCE-CONSUMER-EXECUTION.md). Superseding work (v0.6 enactment, M-plan) is tracked in TODO_LIST/CHANGELOG. Preserved as written.
 
 **Project:** go-localsync
 **Created:** 2026-09-05 20:42
-**Inputs:** [go-cqrs-lite deep-dive audit](../research/2026-09-05_go-cqrs-lite-deep-dive.html) (adoption 78/100, 11 opportunities + 1 defect) · [TODO_LIST.md](../../TODO_LIST.md) (23 open items) · [ROADMAP.md](../../ROADMAP.md) (raw ideas + open questions) · [FEATURES.md](../../FEATURES.md) (known-gaps table)
+**Inputs:** [go-cqrs-lite deep-dive audit](../../research/2026-09-05_go-cqrs-lite-deep-dive.html) (adoption 78/100, 11 opportunities + 1 defect) · [TODO_LIST.md](../../../TODO_LIST.md) (23 open items) · [ROADMAP.md](../../../ROADMAP.md) (raw ideas + open questions) · [FEATURES.md](../../../FEATURES.md) (known-gaps table)
 **Goal:** Close every actionable gap from the audit + the full TODO inventory — turning go-localsync from "very good consumer" (78/100) into go-cqrs-lite's **reference consumer** — without breaking the public API, the test suite, or the ADR-0004 scope boundary.
 
 ---
