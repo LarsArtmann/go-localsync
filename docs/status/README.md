@@ -15,6 +15,7 @@ Point-in-time snapshots of individual work sessions. **They are historical recor
 4. **Never rewrite history:** annotations are additive and non-destructive; original wording stays visible under strikethrough.
 5. **Generated HTML artifacts (decided 2026-09-06):** HTML reports referenced by living docs (reviews/, brainstorming/, research/, planning/) stay where they are — they are linked deliverables, not clutter. Only **superseded era dashboards** that sit in `status/` root (e.g. the June 2026 vendor/buildflow dashboards) move to `archive/` via `git mv`.
 6. **dprint scope (decided 2026-09-06):** `docs/status/**` and `docs/planning/**` are **excluded** from dprint (see `dprint.json`) — point-in-time snapshots are frozen after write, so formatter reflows can never masquerade as history edits. Living docs (AGENTS/README/FEATURES/TODO_LIST/ROADMAP/CONTRIBUTING/docs/*.md/docs/adr) stay formatted.
+7. **Archive freshness norm (decided 2026-09-06):** same-day archiving of the freshest report is the norm once every forward item is closed or routed — the root intentionally holds only this README between sessions; the next report starts a fresh cycle.
 
 ## For harvesters (AI sessions)
 

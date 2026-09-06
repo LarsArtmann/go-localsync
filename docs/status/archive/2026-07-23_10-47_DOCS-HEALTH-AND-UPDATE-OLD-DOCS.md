@@ -205,7 +205,7 @@ My living-doc edits were auto-committed by hooks into **5 separate commits** (21
 46. ~~SQLite file-backed integration tests (current tests use `:memory:` which hides concurrency bugs)~~ done (M10 3b9e8e3)
 47. ~~Second provider implementation to validate the Provider interface (GitLab? Jira?)~~ routed to ROADMAP (Future Themes)
 48. ~~Real GitHub PAT smoke test (mock-passing ≠ working)~~ done (M27 3b9e8e3)
-49. Benchmarks for the full sync pipeline (not just individual operations)
+49. ~~Benchmarks for the full sync pipeline (not just individual operations)~~ done (done — shipped as the benchmark protocol + pipeline benchmarks (docs/benchmarks.md, scripts/run-benchmarks.sh; FEATURES row 55-era M27))
 50. ~~ADR-0008 revisitation trigger: a 3rd consumer hitting the boilerplate wall~~ recorded — the trigger is documented in ADR-0008 and the ROADMAP ADR table
 
 ---

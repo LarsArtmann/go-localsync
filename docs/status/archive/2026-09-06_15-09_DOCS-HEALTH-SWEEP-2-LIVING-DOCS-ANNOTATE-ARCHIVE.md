@@ -10,7 +10,7 @@
 
 All six living docs are now vocabulary-current (v0.6 `SourceID`/`StreamID`/`Stats`), count-true (401 tests / 11 pkgs / +35 provider, coverage columns verified by the gate's coverage mode), and structurally clean (CHANGELOG duplicate sections consolidated, FEATURES truncation repaired, ghost `ADR-0037` killed). Five status reports + two planning docs were annotated (~210 inline verdicts via the skill's annotate scripts) and archived; `docs/status/` root now holds only the policy README. TODO_LIST went from 3 open items to **27** — a deliberate re-harvest of the 06:19 + 08:05 report tails, every item code-verified open and report-cited.
 
-**One correction to my end-of-session health report:** I claimed "CI green on latest master" — true only for the 06:05Z run. At report time there are **no CI runs at all for any commit pushed after 06:05Z** (including every sweep commit). Master state is locally verified (all gates green at HEAD); Actions-side verification is pending — see §f-1 and §g.
+**One correction to my end-of-session health report:** I claimed "CI green on latest master" — true only for the 06:05Z run. ~~At report time there are **no CI runs at all for any commit pushed after 06:05Z** (including every sweep commit).~~ RESOLVED later the same day: run 34039472270 (14:32Z) is green on every job — see the §f-1 verdict. Master state is locally verified (all gates green at HEAD); Actions-side verification is pending — see §f-1 and §g.
 
 ---
 
@@ -172,3 +172,9 @@ All six living docs are now vocabulary-current (v0.6 `SourceID`/`StreamID`/`Stat
 ---
 
 _Point-in-time snapshot — generated 2026-09-06 15:09 CEST. Historical truth belongs to the timestamp; current truth belongs to the code (all gates green at HEAD, tree clean; Actions-side runs pending for post-06:05Z commits — §f-1)._
+
+---
+
+## Resolution (2026-09-06 docs-health sweep #3)
+
+All §f (50) and §e (10) items carry inline verdicts above. The 16:28 execution session closed the implementable P1/P2/P3 core (SARIF, doc page, `--fix`, race hardening, tests, runbooks); this sweep closed the docs remainder (README consumer surface, DOMAIN_LANGUAGE, AGENTS gotchas, archive-freshness norm) and re-harvested the still-open tail into the rebuilt TODO_LIST. §g-1/§g-3 remain owner questions (TODO_LIST owner items); §g-2's norm is now recorded in `docs/status/README.md`. Headline CI claim corrected inline (run 34039472270 green). The two-tier annotation policy this sweep asked §f-50 to validate: it held — recent reports get inline verdicts, era-closed ones get bucket appendices (the 23 Feb/Apr + 2 May gaps it left were backfilled the same day).

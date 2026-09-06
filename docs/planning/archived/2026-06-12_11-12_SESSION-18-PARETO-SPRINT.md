@@ -60,9 +60,9 @@ actionable steps with a strict execution order.
 
 | # | Task | Impact | Effort | Files |
 | ---- | ---------------------------------------------------------------------- | ------------- | --------------------------------------------- | -------------------------------------------------- | ---------------------------------- | ---------------------------------- |
-| 3.1 | API auth middleware (API-key via header `X-API-Key`, env-configurable) | H | M | `pkg/api/server.go`, `pkg/api/middleware.go` (new) |
-| 3.2 | API pagination headers (`X-Total-Count`, `Link: rel="next"`) | M | M | `pkg/api/handlers.go` |
-| 3.3 | API rate limiting middleware (per-IP token bucket) | M | M | `pkg/api/middleware.go` (new) |
+| 3.1 | ~~API auth middleware (API-key via header `X-API-Key`, env-configurable)~~ done — shipped as `api.WithAPIKey` (FEATURES row 61) | H | M | `pkg/api/server.go`, `pkg/api/middleware.go` (new) |
+| 3.2 | ~~API pagination headers (`X-Total-Count`, `Link: rel="next"`)~~ done — shipped as `X-Total-Count` + opaque `X-Next-Cursor` (FEATURES row 63) | M | M | `pkg/api/handlers.go` |
+| 3.3 | ~~API rate limiting middleware (per-IP token bucket)~~ done — shipped as `WithRateLimit` + `WithRateLimiter(perMinute, keyExtractor)` (FEATURES row 62) | M | M | `pkg/api/middleware.go` (new) |
 | 3.4 | CLI: real GitHub PAT smoke test (subprocess test for `runSync`) | H | M | `cmd/examples/github-sync/main_test.go` |
 | 3.5 | Add `--conflict-strategy=lww                                           | remote        | local`CLI flag →`CQRSConfig.ConflictResolver` | M | M | `cmd/examples/github-sync/main.go` |
 | 3.6 | Add `--export=json                                                     | csv` CLI flag | L | M | `cmd/examples/github-sync/main.go` |
@@ -267,4 +267,4 @@ _Arte in Aeternum_
 
 ## Resolution (2026-09-05)
 
-Superseded by `2026-06-12_SESSION-18-PARETO-V2.md` after v1 left the build broken between sessions (the V2 plan's own verdict). Phases 0-2 were executed; the Phase 3 API items (auth, pagination headers, rate limiting) are still open in TODO_LIST.md. No live items remain here.
+Superseded by `2026-06-12_SESSION-18-PARETO-V2.md` after v1 left the build broken between sessions (the V2 plan's own verdict). Phases 0-2 were executed; ~~the Phase 3 API items (auth, pagination headers, rate limiting) are still open in TODO_LIST.md~~ (all three later shipped in full — see the struck rows 3.1-3.3 above; re-verified 2026-09-06). No live items remain here.

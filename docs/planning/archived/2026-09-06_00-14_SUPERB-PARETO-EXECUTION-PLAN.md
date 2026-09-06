@@ -1,6 +1,6 @@
 # SUPERB Pareto Execution Plan — go-localsync (2026-09-06 00:14 CEST)
 
-> **STATUS: EXECUTED (archived 2026-09-06 docs-health sweep).** M01-M17 done (see [02:40 status](../status/archive/2026-09-06_02-40_SUPERB-PARETO-M01-M17-EXECUTION-STATUS.md)), M18 done + M19.3 rules shipped (see [06:25 status](../status/archive/2026-09-06_06-25_M18-DONE-M19-PARTIAL-V06-RENAME-ENCOUNTER.md)), M19.1/M19.2 (SARIF + directives doc page) routed to TODO_LIST, M20-M27 done (see [08:05 status](../status/archive/2026-09-06_08-05_TODO-SWEEP-P2-DOCS-PROVIDER-ETAG-GAUNTLET.md)). The plan text below is preserved as written.
+> **STATUS: EXECUTED (archived 2026-09-06 docs-health sweep).** M01-M17 done (see [02:40 status](../status/archive/2026-09-06_02-40_SUPERB-PARETO-M01-M17-EXECUTION-STATUS.md)), M18 done + M19.3 rules shipped (see [06:25 status](../status/archive/2026-09-06_06-25_M18-DONE-M19-PARTIAL-V06-RENAME-ENCOUNTER.md)), ~~M19.1/M19.2 (SARIF + directives doc page) routed to TODO_LIST~~ (both shipped 2026-09-06 — SARIF 2.1.0 output + `docs/localsync-lint.md`), M20-M27 done (see [08:05 status](../status/archive/2026-09-06_08-05_TODO-SWEEP-P2-DOCS-PROVIDER-ETAG-GAUNTLET.md)). The plan text below is preserved as written.
 
 
 **Sources of truth:** [TODO_LIST.md](../../TODO_LIST.md) (56 open items, all code-verified 2026-09-05), the [23:58 docs-health sweep](../status/2026-09-05_23-58_DOCS-HEALTH-FULL-SWEEP-ANNOTATE-ARCHIVE.md), the concurrent [23:04 report](../status/2026-09-05_23-04_TODO-SWEEP-RELEASE-LINT-TOOLING-STATUS.md), [ROADMAP.md](../../ROADMAP.md). Every task below cites its source; nothing here is new scope beyond the 4 items added to TODO_LIST during planning (docs-policy cluster, ROADMAP export-row cleanup, cluster IDs).
@@ -169,8 +169,8 @@ Legend: `→M##` = parent task. Order within tiers = execution order.
 | 18.5      | Block-comment directive parsing (`/* cqrs-lint:ignore … */`)                                              | 12   | M18  |
 | 18.6      | Range directives (`ignore-start`/`ignore-end`) + nesting guard                                            | 12   | M18  |
 | 18.7      | Directive test matrix (valid/invalid/unknown/nested)                                                      | 10   | M18  |
-| 19.1      | SARIF output shape + `--format=sarif` + schema sanity test                                                | 12   | M19  |
-| 19.2      | Rules doc page (`docs/cqrs-lint.md`): all rules + suppression examples                                    | 12   | M19  |
+| 19.1      | ~~SARIF output shape + `--format=sarif` + schema sanity test~~ done — shipped 2026-09-06 (CHANGELOG v0.6.0 SARIF entry; help-vs-acceptance process test) | 12   | M19  |
+| 19.2      | ~~Rules doc page (`docs/cqrs-lint.md`): all rules + suppression examples~~ done — shipped as `docs/localsync-lint.md` (post-rename) | 12   | M19  |
 | 19.3–19.7 | New rules C0011–C0015 (one per micro-task: design, implement, test)                                       | 5×10 | M19  |
 | 20.1      | `X-RateLimit-Limit`/`-Remaining` headers on `POST /sync` + tests                                          | 12   | M20  |
 | 20.2      | `WithRateLimiter(keyExtractor)` per-client option + tests                                                 | 12   | M20  |
