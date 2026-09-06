@@ -66,7 +66,7 @@ func findProjectionDatapoint(
 			for _, dp := range sum.DataPoints {
 				attrs := map[string]string{}
 				for _, kv := range dp.Attributes.ToSlice() {
-					attrs[string(kv.Key)] = kv.Value.Emit()
+					attrs[string(kv.Key)] = kv.Value.String()
 				}
 
 				if attrs["operation"] == "projection" && attrs["cqrs.status"] == status {
@@ -151,5 +151,4 @@ func TestOTel_RealSpan_SyncItems(t *testing.T) {
 	if syncItemsSpan.SpanKind() != trace.SpanKindInternal {
 		t.Errorf("sync_items span kind = %v, want internal", syncItemsSpan.SpanKind())
 	}
-
 }

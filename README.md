@@ -255,7 +255,7 @@ RepoID        // id.ID[RepoBrand, string]           — repository (e.g., "owner
 
 ```bash
 go build ./...                        # Build
-go test ./... -count=1                # Run tests (318 tests across 11 packages)
+go test ./... -count=1                # Run tests (320 tests across 11 packages)
 golangci-lint run ./... --timeout=5m  # Lint (golangci-lint v2)
 golangci-lint fmt ./...               # Format
 ```
@@ -285,7 +285,7 @@ provider/github/      # Optional nested module: GitHub events provider (go-githu
 
 ## Testing
 
-318 test functions across 11 packages (plus 31 in the standalone `provider/github` module):
+320 test functions across 11 packages (plus 31 in the standalone `provider/github` module):
 
 | Package             | Tests | Coverage | Description                                                             |
 | ------------------- | ----- | -------- | ----------------------------------------------------------------------- |
