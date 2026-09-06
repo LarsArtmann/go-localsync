@@ -120,7 +120,18 @@ func (s *Server) registerRoutes() {
 		"/sync",
 		"Trigger a sync operation",
 		[]string{"Sync"},
-		append([]int{http.StatusBadRequest, http.StatusRequestTimeout}, s.errorStatuses(authEnabled, rateLimited)...),
+		// The declared timeout statuses match pkgerrors.HTTPStatus, the single
+		// error→status translator: a canceled request surfaces 499 (client
+		// closed), a deadline 504 (gateway timeout). 408 is never produced by
+		// that mapping (verified 2026-09-06; previously mis-declared).
+		append(
+			[]int{
+				http.StatusBadRequest,
+				pkgerrors.StatusClientClosedRequest,
+				http.StatusGatewayTimeout,
+			},
+			s.errorStatuses(authEnabled, rateLimited)...,
+		),
 		s.triggerSync,
 	)
 	register(
