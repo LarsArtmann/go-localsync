@@ -38,24 +38,24 @@ expose).
 
 ## What each benchmark measures
 
-| Benchmark                                  | Question it answers                                                        |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| `BenchmarkPipeline_Sync10kItems`           | End-to-end batch ingest cost (validation → decide → events → projection).  |
-| `BenchmarkPipeline_Replay10kEvents`        | True from-zero replay: checkpoints are wiped per iteration so the drain    |
-|                                            | re-consumes the whole journal (measures replay, not reopen).               |
-| `BenchmarkPipeline_SQLiteGrowth`           | Write amplification as one database file grows across batches.             |
-| `BenchmarkConflict_SyncExisting`           | Per-item conflict path with a resolver (detect + resolve + 2 events).      |
-| `BenchmarkUpcastedLegacyRead`              | V1→V3 upcast-on-read vs native pass-through: the price of legacy support.  |
-| `BenchmarkMemoryReadModel_List` etc.       | Read-model query cost with filters/pagination.                             |
+| Benchmark                            | Question it answers                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| `BenchmarkPipeline_Sync10kItems`     | End-to-end batch ingest cost (validation → decide → events → projection). |
+| `BenchmarkPipeline_Replay10kEvents`  | True from-zero replay: checkpoints are wiped per iteration so the drain   |
+|                                      | re-consumes the whole journal (measures replay, not reopen).              |
+| `BenchmarkPipeline_SQLiteGrowth`     | Write amplification as one database file grows across batches.            |
+| `BenchmarkConflict_SyncExisting`     | Per-item conflict path with a resolver (detect + resolve + 2 events).     |
+| `BenchmarkUpcastedLegacyRead`        | V1→V3 upcast-on-read vs native pass-through: the price of legacy support. |
+| `BenchmarkMemoryReadModel_List` etc. | Read-model query cost with filters/pagination.                            |
 
 ## 2026-09-06 protocol run (Ryzen AI MAX+ 395, NVMe, devShell jsonv2, 20x × 5)
 
-| Benchmark                                     | Result              | Reading                                                       |
-| --------------------------------------------- | ------------------- | ------------------------------------------------------------- |
-| `BenchmarkConflict_SyncExisting`              | ~26 ms / 200 items  | ~130 µs per conflicting item (detect + resolve + 2 events).   |
-| `BenchmarkUpcastedLegacyRead/legacy-v1`       | ~12.7 ms / 1k evts  | Upcast pipeline (decode → fold → CBOR re-encode → rebuild).   |
-| `BenchmarkUpcastedLegacyRead/native-v3`       | ~3.8 ms / 1k evts   | Pass-through fast path.                                       |
-| Upcast tax                                    | **~3.3×**            | Real but bounded; only paid on pre-V3 events, never on new ones. |
+| Benchmark                               | Result             | Reading                                                          |
+| --------------------------------------- | ------------------ | ---------------------------------------------------------------- |
+| `BenchmarkConflict_SyncExisting`        | ~26 ms / 200 items | ~130 µs per conflicting item (detect + resolve + 2 events).      |
+| `BenchmarkUpcastedLegacyRead/legacy-v1` | ~12.7 ms / 1k evts | Upcast pipeline (decode → fold → CBOR re-encode → rebuild).      |
+| `BenchmarkUpcastedLegacyRead/native-v3` | ~3.8 ms / 1k evts  | Pass-through fast path.                                          |
+| Upcast tax                              | **~3.3×**          | Real but bounded; only paid on pre-V3 events, never on new ones. |
 
 `BenchmarkPipeline_Replay10kEvents` was fixed the same day to a true from-zero
 replay (checkpoints wiped per iteration); any number recorded before that fix

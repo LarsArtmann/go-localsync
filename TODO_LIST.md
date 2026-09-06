@@ -47,38 +47,38 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 - [ ] **Add the `SSH_PRIVATE_KEY` repo secret so the library cqrs-lint CI leg runs** — the error-gated `go-cqrs-lite/cmd/cqrs-lint/v4@v4.8.1` step is restored in the workflow, CI-verified on the skip path, and auto-enables once the secret exists (a deploy key with read access to the private `larsartmann/go-finding` module); until then it skips with a notice and the gate runs locally from the devShell (documented in the workflow + AGENTS.md). Alternative endgame (owner call): make `go-finding` public and delete all SSH machinery.
 - [x] **Run `buildflow --build-mode full`** inside the devShell (go.work kept to the two in-repo modules) — last full-pipeline run predates the M-plan session.
-  ✅ DONE 2026-09-06 (ended the 3-session deferral streak): **61 success, 0 failed** via `.buildflow.yml` `skip_steps` (nix-hash-fix, nix-build, nix-build-verify) — those steps evaluate EVERY flake-check system incl. aarch64-darwin, which local machines cannot build without a darwin builder; `nix flake check` (current system, now incl. hermetic test+lint) stays as the gate. Cross-platform build proof remains in CI.
+      ✅ DONE 2026-09-06 (ended the 3-session deferral streak): **61 success, 0 failed** via `.buildflow.yml` `skip_steps` (nix-hash-fix, nix-build, nix-build-verify) — those steps evaluate EVERY flake-check system incl. aarch64-darwin, which local machines cannot build without a darwin builder; `nix flake check` (current system, now incl. hermetic test+lint) stays as the gate. Cross-platform build proof remains in CI.
 - [x] **Add a `nix flake check` CI job** so `vendorHash` drift can't land silently again (it silently broke `nix build` once already — see CHANGELOG 0.5.0-era "Stale vendorHash re-pinned").
-  ✅ DONE 2026-09-06: `nix` job added, gates build/release; overrides the SSH `go-nix-helpers` input to anonymous HTTPS.
+      ✅ DONE 2026-09-06: `nix` job added, gates build/release; overrides the SSH `go-nix-helpers` input to anonymous HTTPS.
 - [x] **Pin the golangci-lint version in CI** instead of `latest` (reproducibility).
-  ✅ DONE 2026-09-06: pinned to `v2.13.2` — the exact devShell version.
+      ✅ DONE 2026-09-06: pinned to `v2.13.2` — the exact devShell version.
 - [x] **Add `actionlint` to the devShell + a CI workflow-validation step** (replaces ad-hoc `yaml.safe_load` checks).
-  ✅ DONE 2026-09-06: `pkgs.actionlint` in devShell; CI step runs pinned `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12`; local run clean.
+      ✅ DONE 2026-09-06: `pkgs.actionlint` in devShell; CI step runs pinned `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12`; local run clean.
 - [x] **`vendorHash` drift guard** — warn (hook or CI) when `go.mod`/`go.sum` change without a matching `flake.nix` re-pin; the drift silently broke `nix build` once (see CHANGELOG + the AGENTS gotcha).
-  ✅ DONE 2026-09-06: `scripts/check-vendorhash.sh` — CI nix job fails fast with re-pin instructions when go.mod/go.sum move without flake.nix; proven red/green locally.
+      ✅ DONE 2026-09-06: `scripts/check-vendorhash.sh` — CI nix job fails fast with re-pin instructions when go.mod/go.sum move without flake.nix; proven red/green locally.
 - [ ] **CI formatting story** — either add a dprint check job (json/yaml/md/dockerfile) or drop the parity claim; today dprint is devShell-only by decision default, not by recorded decision.
 - [ ] **Purge stale `.golangci.yml` exclusion paths** — `pkg/providers/github/client.go`, `pkg/types/ids.go`, `pkg/testhelpers/` predate the restructures; verify and delete dead rules.
 - [ ] **Consider a windows build leg** — the compile matrix is linux/darwin only; sqlite/CGO behavior on windows is unproven.
 - [ ] **Audit the library-gate suppression** — confirm the single `//cqrs-lint:ignore` reason is still current.
 - [ ] **Revisit inert pre-commit hooks** — formally enable (scoped) or delete; they are neither protecting nor costing anything today.
 - [x] **Compute doc-drift-prone counts in CI instead of hand-copying** — test/coverage counts (AGENTS.md / README.md / FEATURES.md / TODO_LIST.md) and the AGENTS.md dependency table vs `go.mod` have both drifted repeatedly; generate or check them in CI (every 2026 drift involved hand-copied numbers).
-  ✅ DONE 2026-09-06: `scripts/check-doc-counts.sh` (per-package + totals + dep-table vs go.mod; `--coverage` local opt-in), wired into the CI lint job; first run caught the +4-test drift (309→313, cqrs 144→148) and it was fixed.
+      ✅ DONE 2026-09-06: `scripts/check-doc-counts.sh` (per-package + totals + dep-table vs go.mod; `--coverage` local opt-in), wired into the CI lint job; first run caught the +4-test drift (309→313, cqrs 144→148) and it was fixed.
 - [ ] **Separate CHANGELOG for `provider/github`** — the nested module's lifecycle is now independent of core releases.
 - [ ] **Restructure AGENTS.md under ~30 KB** — link out to ADRs instead of inlining decisions; keep gotchas ≤20 (flagged as "bloated" by two consecutive reviews; the 2026-09-05 passes only pruned, never restructured).
 - [ ] **Make docs-health VERIFY a standing pre-release step** — docs drift after every release is systemic (Accuracy scored 1.5/10 once); wire the check into the release routine rather than running on-demand audits.
 - [x] **Pre-release verification target** — a nix target (or script) running the full suite (build, race tests, lint, both cqrs-lint gates, `nix flake check`) plus a CONTRIBUTING.md release-checklist section pointing at it; codify the manual release-integrity checks (tags pushed, GitHub Release bodies, proxy `@v/list` + `@latest`, pkg.go.dev indexing) into the same script — they were hand-run twice on 2026-09-05.
-  ✅ DONE 2026-09-06: `scripts/verify-release.sh <core-tag> [provider-tag]` (tags/Release/proxy/pkg.go.dev) + CONTRIBUTING release checklist + `nix flake check` now runs the hermetic full suite (`checks.test` + `checks.lint`); dry-run green against v0.5.0/v0.1.0.
+      ✅ DONE 2026-09-06: `scripts/verify-release.sh <core-tag> [provider-tag]` (tags/Release/proxy/pkg.go.dev) + CONTRIBUTING release checklist + `nix flake check` now runs the hermetic full suite (`checks.test` + `checks.lint`); dry-run green against v0.5.0/v0.1.0.
 
 ### Quality
 
 - [x] **Process-level `cmd/cqrs-lint` tests** — build the binary, run against fixtures, assert exit codes 0/1/2 (finishes M11 properly; `main()`, flag parsing, `printRules`/`printUsage` untested).
-  ✅ DONE 2026-09-06: `cmd/cqrs-lint/process_test.go` — builds the binary into `t.TempDir()`, pins exits 0/1/2, `--strict` on the unknown-rule warning, and the NDJSON shape. Coverage stays 56.4% (subprocess runs are coverage-invisible by design).
+      ✅ DONE 2026-09-06: `cmd/cqrs-lint/process_test.go` — builds the binary into `t.TempDir()`, pins exits 0/1/2, `--strict` on the unknown-rule warning, and the NDJSON shape. Coverage stays 56.4% (subprocess runs are coverage-invisible by design).
 - [ ] **Real-meter and sdktrace recorder tests** — prove values actually land in `cqrs.operation.*` and the `localsync.sync_items` span attributes (noop providers only prove wiring).
 - [ ] **Cursor pagination test against the real SQLite read model ordering** — the current test uses a fake store (`pkg/api`).
 - [x] **`pkg/id` unit tests for `ContentHash`** — `IsZero`/`String` untested; coverage sits at 75.0%.
-  ✅ DONE 2026-09-06: constructor/round-trip + literal-compat + sha256-path tests; package coverage 75.0% → 100.0%.
+      ✅ DONE 2026-09-06: constructor/round-trip + literal-compat + sha256-path tests; package coverage 75.0% → 100.0%.
 - [x] **Benchmark protocol** — re-run pipeline benchmarks with `-benchtime 20x -count 5` + benchstat; fix `Replay10kEvents` to measure true from-zero replay (iterations 2+ are checkpoint-bounded no-ops); add a conflict-heavy benchmark (resolver invoked per item) and an upcasted-legacy-read vs native-V3-read benchmark.
-  ✅ DONE 2026-09-06: see docs/benchmarks.md + scripts/run-benchmarks.sh; Replay10k fixed to true from-zero replay; upcast tax measured ~3.3x.
+      ✅ DONE 2026-09-06: see docs/benchmarks.md + scripts/run-benchmarks.sh; Replay10k fixed to true from-zero replay; upcast tax measured ~3.3x.
 - [ ] **Wire `CQRSConfig.Validate()` into `NewCQRSStack`** (or document it as consumer-facing) — defined at `pkg/cqrs/stack.go:53` with zero production call sites.
 - [ ] **Consolidate attribute-key constants** — `pkg/cqrs/item_adapter.go:18-21` keeps private `legacyActorLogin`-style constants duplicating `pkg/data/model`'s exported `Attr*` keys; two sources of truth for a wire-format constant.
 
@@ -86,7 +86,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 
 - [ ] ~~**Add `govalid` struct tags**~~ — pivoted 2026-09-05: govalid is a buildflow-internal generator, not a proxy-resolvable module; real `Validate()` methods were implemented instead (`SyncOptions.Validate`, `CQRSConfig.Validate`, `ItemFilter.Validate`). Reopen only if govalid is ever published with a stable tag format.
 - [x] **cqrs-lint CLI surface cluster** (aggregate; from [2026-08-02 report](docs/status/archive/2026-08-02_20-31_CQRS-LINT_CLI_ENHANCEMENT.md) §f): `--version`/`--quiet`/`--format=github`, `--rules`/`--exclude-rules`, `--no-suppress`, `--explain`, block + range (`ignore-start`/`ignore-end`) directives, SARIF output, dedicated directives doc page, hand-rolled `--json` → `encoding/json`, per-rule suppressed counts in `--verbose`, new rules C0011+.
-  ✅ DONE 2026-09-06 (CLI phase 1).
+      ✅ DONE 2026-09-06 (CLI phase 1).
 - [ ] **API hardening polish**: `X-RateLimit-Limit`/`-Remaining` headers on 429; optional per-client rate limiting (`WithRateLimiter(keyExtractor)`); document the global-vs-per-client scope; structured log level control (per-event INFO is noisy in prod).
 - [ ] **OTel span for `Syncer.Sync`** in `pkg/sync` (currently only the CQRS batch path spans).
 - [ ] **`provider/github`: ETag / conditional requests** for incremental revalidation (flagged by [performance review](docs/research/performance-review.html)).
@@ -96,7 +96,7 @@ Actionable short- and mid-term tasks. Completed work is recorded in [CHANGELOG.m
 - [ ] **`b.N` → `b.Loop()`** modernization in the older bench files (gopls warnings: `adapter_bench_test.go`, `stack_bench_test.go`).
 - [ ] **Unify `waitForCount`/`waitForCountTB`** behind a `testing.TB` helper.
 - [x] **Move `id.ContentHash` out of `ids.go`** — it is a content hash, not an identifier.
-  ✅ DONE 2026-09-06: moved to `pkg/id/content_hash.go`.
+      ✅ DONE 2026-09-06: moved to `pkg/id/content_hash.go`.
 - [ ] **Docs policy cluster**: decide + execute the HTML-artifact policy (banner/archive the 25 generated HTML reports; 3 superseded June dashboards sit in `status/` root); record the dprint scope for `docs/status/` (format vs exclude); classify the two undated planning files; annotate+archive the 23:04 report once routed.
 - [ ] **ROADMAP cleanup: "Export to JSON/CSV" theme is stale** — `stack.ExportEvents` (NDJSON) + `ExportEventsCSV` shipped (FEATURES row 65); strike/replace the ROADMAP idea row.
 - [ ] **Add source-item IDs to cluster TODOs** (cqrs-lint CLI cluster, API-hardening, benchmarks) so future sweeps can strike report items individually.
