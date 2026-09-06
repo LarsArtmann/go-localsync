@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"charm.land/log/v2"
+	stderrors "errors"
 	pkgerrors "github.com/larsartmann/go-localsync/pkg/errors"
 )
 
@@ -24,11 +25,11 @@ func TestCQRSConfig_LogLevel_InvalidRejectedAtConstruction(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected invalid LogLevel to be rejected")
 	}
-	if !pkgerrors.Is(err, pkgerrors.ErrInvalidInput) {
+	if !stderrors.Is(err, pkgerrors.ErrInvalidInput) {
 		t.Fatalf("expected ErrInvalidInput classification, got %v", err)
 	}
 
-	if _, cerr := NewCQRSStack(t.Context(), cfg); cerr == nil {
+	if _, cerr := NewCQRSStack(cfg); cerr == nil {
 		t.Fatal("expected NewCQRSStack to fail on invalid LogLevel before any store setup")
 	}
 }
@@ -36,7 +37,7 @@ func TestCQRSConfig_LogLevel_InvalidRejectedAtConstruction(t *testing.T) {
 func TestNewCQRSStack_LogLevel_AppliedToStackOwnedLogger(t *testing.T) {
 	t.Cleanup(func() { log.Default().SetLevel(log.InfoLevel) })
 
-	stack, err := NewCQRSStack(t.Context(), CQRSConfig{Backend: backendMemory, LogLevel: "warn"})
+	stack, err := NewCQRSStack(CQRSConfig{Backend: backendMemory, LogLevel: "warn"})
 	if err != nil {
 		t.Fatalf("NewCQRSStack: %v", err)
 	}
@@ -51,7 +52,7 @@ func TestNewCQRSStack_LogLevel_EmptyKeepsDefault(t *testing.T) {
 	t.Cleanup(func() { log.Default().SetLevel(log.InfoLevel) })
 	log.Default().SetLevel(log.InfoLevel)
 
-	stack, err := NewCQRSStack(t.Context(), CQRSConfig{Backend: backendMemory})
+	stack, err := NewCQRSStack(CQRSConfig{Backend: backendMemory})
 	if err != nil {
 		t.Fatalf("NewCQRSStack: %v", err)
 	}
@@ -66,9 +67,9 @@ func TestNewCQRSStack_LogLevel_IgnoredWhenEventLoggerProvided(t *testing.T) {
 	t.Cleanup(func() { log.Default().SetLevel(log.InfoLevel) })
 	log.Default().SetLevel(log.InfoLevel)
 
-	stack, err := NewCQRSStack(t.Context(), CQRSConfig{
+	stack, err := NewCQRSStack(CQRSConfig{
 		Backend:     backendMemory,
-		EventLogger: slog.New(slog.DiscardHandler()),
+		EventLogger: slog.New(slog.DiscardHandler),
 		LogLevel:    "warn",
 	})
 	if err != nil {
