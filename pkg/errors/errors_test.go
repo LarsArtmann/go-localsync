@@ -85,7 +85,12 @@ func TestWithCtx_AttachesStructuredContext(t *testing.T) {
 	}
 
 	// The original sentinel must not be mutated by attaching context.
-	if len(ErrNotFound.ErrorContext()) != 0 {
+	efBase, okBase := errors.AsType[*errorfamily.Error](ErrNotFound)
+	if !okBase {
+		t.Fatal("expected ErrNotFound to be an *errorfamily.Error")
+	}
+
+	if len(efBase.ErrorContext()) != 0 {
 		t.Error("attaching context mutated the shared ErrNotFound sentinel")
 	}
 }

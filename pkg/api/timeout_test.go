@@ -34,7 +34,7 @@ func (p *blockingProvider) FetchAll(ctx context.Context, _ string, _ int) (*prov
 }
 
 func (p *blockingProvider) GetRateLimit(_ context.Context) (*provider.RateLimitInfo, error) {
-	return nil, nil
+	return nil, nil //nolint:nilnil // test double: the sync path never reads the rate limit
 }
 
 // TestSync_TimeoutStatusMapping pins the /sync timeout contract: a canceled

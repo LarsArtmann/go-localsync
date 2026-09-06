@@ -58,7 +58,8 @@ func runBinary(t *testing.T, bin string, args ...string) (int, string) {
 	out, err := cmd.CombinedOutput()
 
 	exit := 0
-	if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) {
 		exit = exitErr.ExitCode()
 	} else if err != nil {
 		t.Fatalf("run %v: %v\n%s", args, err, out)
