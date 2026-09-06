@@ -495,7 +495,6 @@ func TestOpenAPI_ItemResponseTombstoneSchema(t *testing.T) {
 	specBytes, specErr := server.api.OpenAPI().YAML()
 	testutil.MustNoError(t, specErr)
 	spec := string(specBytes)
-	testutil.MustNoError(t, specErr)
 
 	for _, required := range []string{
 		"ItemResponse:",
@@ -503,8 +502,7 @@ func TestOpenAPI_ItemResponseTombstoneSchema(t *testing.T) {
 		"TombstoneInfo:", // huma registers the DTO by type name
 		"reason:",
 		"tombstonedAt:",
-		"includeTombstoned:",
-		"type: boolean",
+		"name: includeTombstoned",
 	} {
 		if !strings.Contains(spec, required) {
 			t.Errorf("OpenAPI spec missing %q (Tombstone schema contract):\n%s", required, spec)

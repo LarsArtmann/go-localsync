@@ -10,13 +10,13 @@ import (
 //
 //nolint:tagalign // doc/example/query tags intentionally kept close to values for readability
 type ListItemsInput struct {
-	Type               string    `doc:"Filter by event type"                     example:"PushEvent"        query:"type"`
-	Source             string    `doc:"Filter by source provider"                  example:"github"           query:"source"`
-	IncludeTombstoned  bool      `doc:"Include items hidden by a tombstone (they carry a tombstone object in the response)" query:"includeTombstoned"`
-	Since              time.Time `doc:"Filter items updated since this time (RFC3339)"                                             query:"since"`
-	Limit              int       `doc:"Maximum items to return"                                                                    query:"limit"  default:"100"`
-	Offset             int       `doc:"Offset for pagination"                                                                      query:"offset" default:"0"`
-	Cursor             string    `doc:"Opaque pagination cursor (from X-Next-Cursor); overrides offset" example:"b2Zmc2V0PTEwMA==" query:"cursor"`
+	Type              string    `doc:"Filter by event type"                     example:"PushEvent"        query:"type"`
+	Source            string    `doc:"Filter by source provider"                  example:"github"           query:"source"`
+	IncludeTombstoned bool      `doc:"Include items hidden by a tombstone (they carry a tombstone object in the response)" query:"includeTombstoned"`
+	Since             time.Time `doc:"Filter items updated since this time (RFC3339)"                                             query:"since"`
+	Limit             int       `doc:"Maximum items to return"                                                                    query:"limit"  default:"100"`
+	Offset            int       `doc:"Offset for pagination"                                                                      query:"offset" default:"0"`
+	Cursor            string    `doc:"Opaque pagination cursor (from X-Next-Cursor); overrides offset" example:"b2Zmc2V0PTEwMA==" query:"cursor"`
 }
 
 // TombstoneInfo is the API DTO for an item's tombstone: why it is hidden
@@ -36,7 +36,7 @@ type ItemResponse struct {
 	Attributes map[string]string `json:"attributes,omitempty"`
 	CreatedAt  time.Time         `json:"createdAt"`
 	UpdatedAt  time.Time         `json:"updatedAt"`
-	Tombstone *TombstoneInfo     `doc:"Present only when the item is tombstoned" json:"tombstone,omitempty"`
+	Tombstone  *TombstoneInfo    `doc:"Present only when the item is tombstoned" json:"tombstone,omitempty"`
 }
 
 func toItemResponse(item *model.Item) *ItemResponse {
