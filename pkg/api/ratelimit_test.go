@@ -138,14 +138,17 @@ func TestRateLimit_CarriesRateLimitHeaders(t *testing.T) {
 			t.Errorf("X-RateLimit-Limit = %q, want 1", limit)
 		}
 
-		switch rec.Code {
-		case http.StatusOK:
+		// The allowed path carries headers no matter what the handler status
+		// is (the middleware sets them before next.ServeHTTP); with the mock
+		// provider the handler itself answers 422, which still consumed a
+		// token.
+		if rec.Code != http.StatusTooManyRequests {
 			sawAllowed = true
 
 			if remaining := rec.Header().Get("X-RateLimit-Remaining"); remaining == "" {
 				t.Error("allowed request must carry X-RateLimit-Remaining")
 			}
-		case http.StatusTooManyRequests:
+		} else {
 			sawThrottled = true
 
 			if remaining := rec.Header().Get("X-RateLimit-Remaining"); remaining != "0" {
@@ -181,9 +184,10 @@ func TestRateLimiter_PerClientIsolation(t *testing.T) {
 		return rec
 	}
 
-	// Client A exhausts its own 1-per-minute budget...
-	if rec := post("alice"); rec.Code != http.StatusOK {
-		t.Fatalf("alice's first request must pass, got %d", rec.Code)
+	// Client A exhausts its own 1-per-minute budget (the mock provider's
+	// handler status is irrelevant here: only 429 means the limiter fired).
+	if rec := post("alice"); rec.Code == http.StatusTooManyRequests {
+		t.Fatalf("alice's first request must pass the limiter, got %d", rec.Code)
 	}
 
 	if rec := post("alice"); rec.Code != http.StatusTooManyRequests {
@@ -191,7 +195,7 @@ func TestRateLimiter_PerClientIsolation(t *testing.T) {
 	}
 
 	// ...while client B still has a full independent bucket.
-	if rec := post("bob"); rec.Code != http.StatusOK {
+	if rec := post("bob"); rec.Code == http.StatusTooManyRequests {
 		t.Fatalf("bob must have an independent budget, got %d", rec.Code)
 	}
 

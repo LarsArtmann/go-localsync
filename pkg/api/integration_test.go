@@ -5,16 +5,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
 	"charm.land/log/v2"
+
 	"github.com/larsartmann/go-localsync/pkg/cqrs"
 	"github.com/larsartmann/go-localsync/pkg/data/model"
 	"github.com/larsartmann/go-localsync/pkg/id"
 	"github.com/larsartmann/go-localsync/pkg/provider"
 	synclib "github.com/larsartmann/go-localsync/pkg/sync"
 	"github.com/larsartmann/go-localsync/pkg/testutil"
+	_ "modernc.org/sqlite" // register the pure-Go sqlite driver for the sqlite backend
 )
 
 func waitForProjection(t *testing.T, ctx context.Context, stack *cqrs.CQRSStack, want int64) {
@@ -235,4 +238,115 @@ func TestIntegration_APIFilterAndPagination(t *testing.T) {
 			t.Errorf("expected total=3 (all items), got %d", body.Total)
 		}
 	})
+}
+
+// TestIntegration_APICursorPagination_SQLite drives cursor pagination against
+// the REAL SQLite read model (not the fake store the unit pagination tests
+// use): three items, two-per-page walk via X-Next-Cursor, then equality with
+// a direct store List — proving cursor pages partition the store's own
+// ordering with no overlap and no gaps.
+func TestIntegration_APICursorPagination_SQLite(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	stack, err := cqrs.NewCQRSStack(cqrs.CQRSConfig{Backend: "sqlite"})
+	testutil.MustNoError(t, err)
+	defer func() { _ = stack.Close() }()
+
+	items := []*provider.Item{
+		makeTestItem(t, "cursor-1", "PushEvent", "2024-01-01T00:00:00Z"),
+		makeTestItem(t, "cursor-2", "PushEvent", "2024-01-02T00:00:00Z"),
+		makeTestItem(t, "cursor-3", "IssueEvent", "2024-01-03T00:00:00Z"),
+	}
+
+	testutil.MustNoError(t, stack.SyncItem(ctx, items[0]))
+	testutil.MustNoError(t, stack.SyncItem(ctx, items[1]))
+	testutil.MustNoError(t, stack.SyncItem(ctx, items[2]))
+
+	waitForProjection(t, ctx, stack, 3)
+
+	mockProvider := &testutil.MockProvider{}
+	logger := log.Default()
+	syncer := synclib.NewSyncer(mockProvider, stack, logger)
+	server := NewServer(syncer, logger)
+
+	var got []string
+
+	cursor := ""
+	pages := 0
+
+	for {
+		path := "/items?limit=2"
+		if cursor != "" {
+			path += "&cursor=" + url.QueryEscape(cursor)
+		}
+
+		req := httptest.NewRequestWithContext(ctx, http.MethodGet, path, nil)
+		rec := httptest.NewRecorder()
+		server.ServeHTTP(rec, req)
+
+		testutil.AssertStatusOK(t, rec)
+
+		var body struct {
+			Items []struct {
+				SourceID string `json:"sourceId"`
+			} `json:"items"`
+			Total int64 `json:"total"`
+		}
+
+		err = json.Unmarshal(rec.Body.Bytes(), &body)
+		if err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+
+		if body.Total != 3 {
+			t.Errorf("page %d: total must always be 3, got %d", pages+1, body.Total)
+		}
+
+		for _, item := range body.Items {
+			got = append(got, item.SourceID)
+		}
+
+		pages++
+
+		cursor = rec.Header().Get("X-Next-Cursor")
+		if cursor == "" {
+			break
+		}
+
+		if pages > 10 {
+			t.Fatal("cursor pagination did not terminate within 10 pages")
+		}
+	}
+
+	if pages != 2 {
+		t.Errorf("expected exactly 2 pages of 3 items at limit=2, got %d pages", pages)
+	}
+
+	if len(got) != 3 {
+		t.Fatalf("expected 3 items across pages, got %d: %v", len(got), got)
+	}
+
+	seen := map[string]bool{}
+	for _, sid := range got {
+		if seen[sid] {
+			t.Errorf("sourceId %s returned twice across cursor pages", sid)
+		}
+
+		seen[sid] = true
+	}
+
+	// The concatenated pages must reproduce the store's own List ordering.
+	direct, listErr := stack.List(ctx, model.ItemFilter{})
+	testutil.MustNoError(t, listErr)
+
+	if len(direct) != len(got) {
+		t.Fatalf("direct List returned %d items, API pages carried %d", len(direct), len(got))
+	}
+
+	for i, item := range direct {
+		if item.SourceID.Get() != got[i] {
+			t.Fatalf("page order diverges from store order at %d: store=%s api=%s", i, item.SourceID.Get(), got[i])
+		}
+	}
 }
