@@ -39,6 +39,19 @@ go get github.com/larsartmann/go-localsync
 
 > For local development with sibling checkouts, create a `go.work` file — see [AGENTS.md](AGENTS.md) for setup instructions.
 
+## Upgrading to v0.6 (breaking vocabulary alignment)
+
+v0.6 renames the Go surface to the canonical vocabulary ([ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md)); deprecated shims keep every old name compiling through the migration window. Your persisted data needs **no migration** — event payloads already say `sourceId`.
+
+| v0.5.0                                    | v0.6.0                                                  |
+| ----------------------------------------- | ------------------------------------------------------- |
+| `id.ExternalID` / `id.NewExternalID`      | `id.SourceID` / `id.NewSourceID`                        |
+| `cqrs.AggregateID(...)` (panics on error) | `cqrs.StreamID(...)` (error) / `cqrs.MustStreamID(...)` |
+| `sync.SyncSummary`                        | `sync.BatchOutcome` via `SyncResult.Batch`              |
+| `syncer.GetStats()`                       | `syncer.Stats()`                                        |
+| DTO field `externalId`                    | `sourceId`                                              |
+| timeout → 408                             | canceled → 499, deadline → 504                          |
+
 ## Quick Start
 
 The SDK core ships no provider, so the quickest way to see it work is a tiny in-process provider. Implement `provider.Provider`, then wire it into a CQRS stack and sync:

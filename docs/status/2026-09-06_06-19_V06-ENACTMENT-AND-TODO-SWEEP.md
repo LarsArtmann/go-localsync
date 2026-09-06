@@ -10,16 +10,16 @@
 
 ### v0.6 breaking window (ADR-0009 enacted)
 
-| Item | Verification |
-| --- | --- |
-| `cqrs.AggregateID()` → `cqrs.StreamID(source, sourceID) (cqrsid.StreamID, error)` — panic fallback → error return; new `MustStreamID` for tests/tooling; deprecated `AggregateID` shim kept one cycle | Full suite green; deprecated shim compiles via true type alias |
-| `id.ExternalID` → `id.SourceID` (Go surface): type + `NewSourceID`; deprecated `ExternalBrand`/`ExternalID`/`NewExternalID` true-type aliases; **event payloads untouched** (`sourceId` wire, no schema V4) | `pkg/id` tests incl. new `TestDeprecatedExternalIDAliases` pinning alias identity |
-| Field renames: `provider.Item`, `model.Item`, `model.Key` `.ExternalID` → `.SourceID`; json tags aligned `externalId` → `sourceId` (provider DTO + API DTO); `InvalidField("sourceID")` context | 61-file mechanical pass + targeted fixes; build+tests green |
-| `SyncSummary` folded into `BatchOutcome`; `SyncResult` is THE single user-facing result with new `Batch *BatchOutcome` field; `SyncStore`/`ResolverAwareStore` interfaces migrated; `ConflictAwareSyncer.classify` migrated | Full suite green |
-| `Syncer.GetStats` → `Syncer.Stats` (+ deprecated `GetStats` alias); API handler calls `Stats` | Suite green |
-| `TombstoneItem` gained variadic `...event.Option` (parity with direct dispatch) | Compiles; existing 4-arg call sites unaffected |
-| `SyncOptions.Validate` rejects `MaxPages < 0` with `InvalidField("maxPages")` | New test asserts sentinel + field context + `0` stays valid |
-| provider/github **kept green against its pinned v0.5.0**: renames reverted there (5 files restored); migration recorded as post-tag follow-up | `cd provider/github && go test ./...` ok (GOWORK=off in shell → pinned resolution proven) |
+| Item                                                                                                                                                                                                                        | Verification                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `cqrs.AggregateID()` → `cqrs.StreamID(source, sourceID) (cqrsid.StreamID, error)` — panic fallback → error return; new `MustStreamID` for tests/tooling; deprecated `AggregateID` shim kept one cycle                       | Full suite green; deprecated shim compiles via true type alias                            |
+| `id.ExternalID` → `id.SourceID` (Go surface): type + `NewSourceID`; deprecated `ExternalBrand`/`ExternalID`/`NewExternalID` true-type aliases; **event payloads untouched** (`sourceId` wire, no schema V4)                 | `pkg/id` tests incl. new `TestDeprecatedExternalIDAliases` pinning alias identity         |
+| Field renames: `provider.Item`, `model.Item`, `model.Key` `.ExternalID` → `.SourceID`; json tags aligned `externalId` → `sourceId` (provider DTO + API DTO); `InvalidField("sourceID")` context                             | 61-file mechanical pass + targeted fixes; build+tests green                               |
+| `SyncSummary` folded into `BatchOutcome`; `SyncResult` is THE single user-facing result with new `Batch *BatchOutcome` field; `SyncStore`/`ResolverAwareStore` interfaces migrated; `ConflictAwareSyncer.classify` migrated | Full suite green                                                                          |
+| `Syncer.GetStats` → `Syncer.Stats` (+ deprecated `GetStats` alias); API handler calls `Stats`                                                                                                                               | Suite green                                                                               |
+| `TombstoneItem` gained variadic `...event.Option` (parity with direct dispatch)                                                                                                                                             | Compiles; existing 4-arg call sites unaffected                                            |
+| `SyncOptions.Validate` rejects `MaxPages < 0` with `InvalidField("maxPages")`                                                                                                                                               | New test asserts sentinel + field context + `0` stays valid                               |
+| provider/github **kept green against its pinned v0.5.0**: renames reverted there (5 files restored); migration recorded as post-tag follow-up                                                                               | `cd provider/github && go test ./...` ok (GOWORK=off in shell → pinned resolution proven) |
 
 ### New SDK surface (was open TODOs)
 
@@ -112,6 +112,7 @@
 ## f) UP TO 50 NEXT THINGS (ordered: blocking → high → medium → backlog)
 
 **Docs bookkeeping (BLOCKING — check-doc-counts will fail until done):**
+
 1. Refresh TODO_LIST.md: tick ~25 items with ✅ DONE notes + today's date; record the ADR-0009 owner sign-off (directive captured verbatim).
 2. Run `./scripts/check-doc-counts.sh`; update AGENTS/README/FEATURES/TODO_LIST test+coverage counts.
 3. Write CHANGELOG "Unreleased v0.6.0" migration section (renames, `BatchOutcome`, DTO `sourceId`, 499/504, sentinel typing, `TombstoneItem` variadic).
@@ -169,7 +170,7 @@
 
 ## g) QUESTIONS I CANNOT FIGURE OUT MYSELF
 
-1. **v0.6.0 release timing**: tag core v0.6.0 now (after I finish the CHANGELOG/migration docs + doc-count fixes), or hold the tag until provider/github is migrated and released together? (The TODO's enactment gate is satisfied by your directive; the *release* timing is yours.)
+1. **v0.6.0 release timing**: tag core v0.6.0 now (after I finish the CHANGELOG/migration docs + doc-count fixes), or hold the tag until provider/github is migrated and released together? (The TODO's enactment gate is satisfied by your directive; the _release_ timing is yours.)
 2. **go-finding endgame**: should I proceed on the assumption you will add the `SSH_PRIVATE_KEY` deploy-key secret, or do you want to make `larsartmann/go-finding` public so I delete all SSH machinery from CI + AGENTS + flake? (Both paths are owner calls in the TODO; I cannot create repo secrets or flip visibility myself.)
 3. **Deprecated alias lifetime**: keep the four deprecated aliases (`id.ExternalID`, `id.NewExternalID`, `cqrs.AggregateID`, `Syncer.GetStats`) for exactly one minor cycle (drop in v0.7) as ADR-0009 implies, or hold them longer for consumer comfort?
 
