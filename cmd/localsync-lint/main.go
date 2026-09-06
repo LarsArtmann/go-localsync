@@ -1,5 +1,9 @@
-// Command cqrs-lint statically verifies that a Go package conforms to the
-// go-localsync CQRS architectural invariants (ADR-0004 + AGENTS.md).
+// Command localsync-lint statically verifies that a Go package conforms to
+// the go-localsync CQRS architectural invariants (ADR-0004 + AGENTS.md).
+//
+// The directive vocabulary stays //cqrs-lint: on purpose: one inline comment
+// targets this linter AND go-cqrs-lite's consumer cqrs-lint, whose rule-ID
+// schemes this tool tolerates in directives.
 //
 // It parses the package with the standard-library go/parser — no type
 // resolution, no third-party dependencies — and reports any rule violations.
@@ -56,7 +60,7 @@ func main() {
 	noSuppress := flag.Bool("no-suppress", false,
 		"disable //cqrs-lint: directives; every violation counts (CI hardening)")
 	explain := flag.String("explain", "", "print the full description of one rule and exit")
-	showVersion := flag.Bool("version", false, "print the cqrs-lint version and exit")
+	showVersion := flag.Bool("version", false, "print the localsync-lint version and exit")
 	flag.Usage = printUsage
 
 	flag.Parse()
@@ -76,7 +80,7 @@ func main() {
 	if *explain != "" {
 		rule, ok := cqrslint.RuleByID(*explain)
 		if !ok {
-			fmt.Fprintf(os.Stderr, "cqrs-lint: unknown rule %q (see --list)\n", *explain)
+			fmt.Fprintf(os.Stderr, "localsync-lint: unknown rule %q (see --list)\n", *explain)
 			os.Exit(2)
 		}
 
@@ -87,7 +91,7 @@ func main() {
 
 	ruleSelection, err := parseRuleSelection(*rules, *excludeRules)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "cqrs-lint:", err)
+		fmt.Fprintln(os.Stderr, "localsync-lint:", err)
 		os.Exit(2)
 	}
 
@@ -100,7 +104,7 @@ func main() {
 	case formatText, formatJSON, formatGitHub:
 		// valid
 	default:
-		fmt.Fprintf(os.Stderr, "cqrs-lint: unknown -format %q (want text, json, or github)\n", resolvedFormat)
+		fmt.Fprintf(os.Stderr, "localsync-lint: unknown -format %q (want text, json, or github)\n", resolvedFormat)
 		os.Exit(2)
 	}
 
@@ -124,7 +128,7 @@ func main() {
 	elapsed := time.Since(start)
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "cqrs-lint:", err)
+		fmt.Fprintln(os.Stderr, "localsync-lint:", err)
 		os.Exit(2)
 	}
 
@@ -278,7 +282,7 @@ type findingCounts struct {
 }
 
 func emitVerboseHeader(w io.Writer, target string, fileCount int) {
-	fmt.Fprintf(w, "cqrs-lint: analyzing %s (%d files, %d rules)\n", target, fileCount, len(cqrslint.Rules()))
+	fmt.Fprintf(w, "localsync-lint: analyzing %s (%d files, %d rules)\n", target, fileCount, len(cqrslint.Rules()))
 }
 
 func emitRuleStatus(w io.Writer, findings []cqrslint.Finding) {
@@ -345,7 +349,7 @@ func emitFindingJSON(w io.Writer, f cqrslint.Finding) {
 	if err != nil {
 		// json.Marshal on a flat struct of primitives cannot fail; be loud
 		// anyway rather than emitting a torn NDJSON line.
-		panic(fmt.Sprintf("cqrs-lint: marshal finding: %v", err))
+		panic(fmt.Sprintf("localsync-lint: marshal finding: %v", err))
 	}
 
 	fmt.Fprintf(w, "%s\n", encoded)
@@ -368,9 +372,9 @@ func emitSummary(w io.Writer, counts findingCounts, opts outputOptions, elapsed 
 
 	if total == 0 && counts.suppressed == 0 {
 		if opts.verbose {
-			fmt.Fprintf(w, "cqrs-lint: clean (%s)\n", elapsed.Round(time.Microsecond))
+			fmt.Fprintf(w, "localsync-lint: clean (%s)\n", elapsed.Round(time.Microsecond))
 		} else {
-			fmt.Fprintln(w, "cqrs-lint: clean")
+			fmt.Fprintln(w, "localsync-lint: clean")
 		}
 
 		return
