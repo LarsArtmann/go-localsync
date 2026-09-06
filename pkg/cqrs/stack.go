@@ -143,7 +143,7 @@ func NewCQRSStack(cfg CQRSConfig) (stack *CQRSStack, err error) { //nolint:nonam
 		}
 	}
 
-	cancelRunner, drainDone, projHost, err = startProjectionRunner(sr, proj, cfg.OTel)
+	projHost, cancelRunner, drainDone, err = startProjectionRunner(sr, proj, cfg.OTel)
 	if err != nil {
 		return nil, pkgerrors.Wrap(err, "start projection runner")
 	}
