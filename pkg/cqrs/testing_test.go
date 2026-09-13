@@ -2,7 +2,8 @@ package cqrs
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"sync"
 	"testing"
 	"time"
@@ -145,7 +146,7 @@ func testItem(sourceID, itemType string) *provider.Item {
 		},
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		RawJSON:   json.RawMessage(`{"test":true}`),
+		RawJSON:   jsontext.Value(`{"test":true}`),
 	}
 }
 

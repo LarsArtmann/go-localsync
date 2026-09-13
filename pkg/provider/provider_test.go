@@ -1,7 +1,8 @@
 package provider
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"errors"
 	"testing"
 	"time"
@@ -109,7 +110,7 @@ func TestItem_JSONRoundTrip(t *testing.T) {
 		},
 		CreatedAt: time.Date(2026, 1, 15, 10, 30, 0, 0, time.UTC),
 		UpdatedAt: time.Date(2026, 1, 15, 11, 0, 0, 0, time.UTC),
-		RawJSON:   json.RawMessage(`{"action":"push"}`),
+		RawJSON:   jsontext.Value(`{"action":"push"}`),
 	}
 
 	data, err := json.Marshal(original)

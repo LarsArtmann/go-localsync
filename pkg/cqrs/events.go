@@ -1,7 +1,7 @@
 package cqrs
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
 	"time"
 
 	"github.com/larsartmann/go-cqrs-lite/event/v4"
@@ -35,7 +35,7 @@ type ItemSyncedPayload struct {
 	ContentHash   string            `json:"contentHash,omitempty"`
 	CreatedAt     int64             `json:"createdAt"`
 	UpdatedAt     int64             `json:"updatedAt"`
-	RawJSON       json.RawMessage   `json:"rawJson,omitempty"`
+	RawJSON       jsontext.Value    `json:"rawJson,omitempty"`
 	SchemaVersion int               `json:"schemaVersion,omitempty"`
 
 	// Legacy fields (schema V1/V2). Kept for backward-compatible event replay.

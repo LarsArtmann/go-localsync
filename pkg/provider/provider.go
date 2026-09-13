@@ -4,7 +4,7 @@ package provider
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/jsontext"
 	stderrors "errors"
 	"fmt"
 	"time"
@@ -35,7 +35,7 @@ type Item struct {
 	// For immutable events (e.g., GitHub events), this equals CreatedAt.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// RawJSON contains the complete original payload for full fidelity.
-	RawJSON json.RawMessage `json:"rawJson"`
+	RawJSON jsontext.Value `json:"rawJson"`
 }
 
 // String returns a human-readable summary of the Item for logging.

@@ -5,7 +5,8 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/csv"
-	"encoding/json"
+	"encoding/json/v2"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -144,7 +145,7 @@ func TestExportEvents_CSV(t *testing.T) {
 	sawSynced := false
 
 	for _, row := range records[1:] {
-		typeIdx := indexOf(header, "event_type")
+		typeIdx := slices.Index(header, "event_type")
 		if row[typeIdx] == string(EventItemSynced) {
 			sawSynced = true
 		}
@@ -153,16 +154,6 @@ func TestExportEvents_CSV(t *testing.T) {
 	if !sawSynced {
 		t.Error("expected an ItemSynced row in the CSV export")
 	}
-}
-
-func indexOf(list []string, target string) int {
-	for i, v := range list {
-		if v == target {
-			return i
-		}
-	}
-
-	return -1
 }
 
 // TestExportEvents_EmptyJournal exports cleanly from a fresh stack (zero

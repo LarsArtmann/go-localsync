@@ -24,7 +24,8 @@
 package main
 
 import (
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"flag"
 	"fmt"
 	"io"
@@ -538,7 +539,7 @@ func emitSarif(w io.Writer, findings []cqrslint.Finding, opts outputOptions) {
 		}},
 	}
 
-	encoded, err := json.MarshalIndent(log, "", "  ")
+	encoded, err := json.Marshal(log, jsontext.WithIndentPrefix(""), jsontext.WithIndent("  "))
 	if err != nil {
 		// Same contract as the NDJSON path: a marshal failure on this shape
 		// is a programming error, not a runtime condition.

@@ -2,7 +2,7 @@ package cqrs
 
 import (
 	"database/sql"
-	"encoding/json"
+	"encoding/json/v2"
 	"time"
 
 	"github.com/larsartmann/go-localsync/pkg/data/model"

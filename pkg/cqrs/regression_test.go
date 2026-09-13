@@ -2,7 +2,7 @@ package cqrs
 
 import (
 	"context"
-	"encoding/json"
+	"encoding/json/v2"
 	"sync"
 	"testing"
 	"time"

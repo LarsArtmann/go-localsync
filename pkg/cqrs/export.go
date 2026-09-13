@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/csv"
-	"encoding/json"
+	"encoding/json/jsontext"
+	"encoding/json/v2"
 	"io"
 	"strconv"
 	"time"
@@ -60,10 +61,10 @@ func exportEvents(ctx context.Context, journal event.Journal, w io.Writer) error
 		return pkgerrors.Wrap(err, "export events: read journal")
 	}
 
-	encoder := json.NewEncoder(w)
+	encoder := jsontext.NewEncoder(w)
 
 	for _, evt := range events {
-		if err := encoder.Encode(exportedEventFrom(evt)); err != nil {
+		if err := json.MarshalEncode(encoder, exportedEventFrom(evt)); err != nil {
 			return pkgerrors.Wrap(err, "export events: encode event")
 		}
 	}
