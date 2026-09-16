@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-localsync
 
-go 1.26.7
+go 1.27.1
 
 require (
 	charm.land/log/v2 v2.0.1
@@ -9,7 +9,7 @@ require (
 	github.com/larsartmann/go-codec v0.2.0
 	github.com/larsartmann/go-cqrs-lite/scenario/v4 v4.2.0
 	github.com/larsartmann/go-cqrs-lite/schema/v4 v4.4.0
-	github.com/larsartmann/go-error-family v0.10.0
+	github.com/larsartmann/go-error-family v0.10.1
 	github.com/oklog/ulid/v2 v2.1.2
 	modernc.org/sqlite v1.58.0
 )
