@@ -1,6 +1,6 @@
 module github.com/larsartmann/go-localsync/provider/github
 
-go 1.26.7
+go 1.27.1
 
 require (
 	charm.land/log/v2 v2.0.1
@@ -23,7 +23,9 @@ require (
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/larsartmann/go-branded-id v0.5.1 // indirect
 	github.com/larsartmann/go-error-family v0.10.1 // indirect
-	github.com/larsartmann/go-etag v0.3.1 // indirect
+	github.com/larsartmann/go-etag v0.6.0 // indirect
+	github.com/larsartmann/go-etag/entitytag v0.6.0 // indirect
+	github.com/larsartmann/go-etag/server v0.6.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.4.1 // indirect
 	github.com/mattn/go-runewidth v0.0.30 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
