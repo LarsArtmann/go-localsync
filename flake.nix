@@ -21,8 +21,9 @@
       imports = [ inputs.go-nix-helpers.flakeModules.go-standard ];
 
       go-standard = {
+        goPkgAttr = "go_1_27";  # go.mod requires go 1.27.1; default go_1_26 fails under GOTOOLCHAIN=local
         pname = "go-localsync";
-        vendorHash = "sha256-ZCX5pAXML5c+rKjqFNvk1C4VM+lqxzWN50sTShl0E2A=";
+        vendorHash = "sha256-sQYfXuMXgpJte/0GboCtzym4oPUu5pUBLQKRJQeW1Uo=";
         description = "Generic synchronization SDK with CQRS";
 
         # One-command full suite: `nix flake check` now runs build + format +

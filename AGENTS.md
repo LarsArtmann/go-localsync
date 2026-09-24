@@ -135,25 +135,25 @@ Two tables managed by the CQRS stack (DDL in `sqlite_readmodel.go` + go-cqrs-lit
 
 | Dependency                         | Version | Purpose                                                                |
 | ---------------------------------- | ------- | ---------------------------------------------------------------------- |
-| `go-cqrs-lite/event/v4`            | v4.9.0  | Event types, Store, Bus, Journal (requires `GOEXPERIMENT=jsonv2`)      |
-| `go-cqrs-lite/command/v4`          | v4.8.1  | Command types, Dispatcher, TypedHandler[T], `ExecuteRef`               |
-| `go-cqrs-lite/query/v4`            | v4.7.1  | Indirect; no QueryDispatcher — reads call the ReadModel directly       |
-| `go-cqrs-lite/decider/v4`          | v4.5.0  | Decider, Repository, snapshot/codec options                            |
-| `go-cqrs-lite/id/v4`               | v4.5.0  | StreamID, CorrelationID                                                |
+| `go-cqrs-lite/event/v4`            | v4.11.0 | Event types, Store, Bus, Journal (requires `GOEXPERIMENT=jsonv2`)      |
+| `go-cqrs-lite/command/v4`          | v4.10.0 | Command types, Dispatcher, TypedHandler[T], `ExecuteRef`               |
+| `go-cqrs-lite/query/v4`            | v4.8.0  | Indirect; no QueryDispatcher — reads call the ReadModel directly       |
+| `go-cqrs-lite/decider/v4`          | v4.6.0  | Decider, Repository, snapshot/codec options                            |
+| `go-cqrs-lite/id/v4`               | v4.6.0  | StreamID, CorrelationID                                                |
 | `go-cqrs-lite/codec/v4`            | v4.4.0  | JSONCodec (uses `encoding/json/v2`)                                    |
 | `go-cqrs-lite/projection/v4`       | v4.3.0  | Projection interface                                                   |
 | `go-cqrs-lite/projectionhost/v4`   | v4.4.0  | Managed projection host: checkpoint, crash-restart, DLQ (ADR-0006)     |
-| `go-cqrs-lite/snapshot/v4`         | v4.4.0  | SnapshotStore, EveryNEvents                                            |
-| `go-cqrs-lite/storage/memory/v4`   | v4.4.0  | In-memory event + snapshot store                                       |
-| `go-cqrs-lite/middleware/v4`       | v4.5.1  | EventLogging + CommandRetry + CommandValidation + OTel middleware      |
-| `go-cqrs-lite/watermill/v4`        | v4.5.1  | In-process `EventBus`                                                  |
-| `go-cqrs-lite/storage/v4`          | v4.8.1  | SQLite event store, snapshot, KV, DLQ store                            |
-| `go-cqrs-lite/schema/v4`           | v4.3.1  | Schema `Version` + upcaster registry wiring                            |
-| `go-cqrs-lite/otel/v4`             | v4.3.0  | OTel bundle: command/event spans + `cqrs.operation.*` metrics (opt-in) |
+| `go-cqrs-lite/snapshot/v4`         | v4.5.0  | SnapshotStore, EveryNEvents                                            |
+| `go-cqrs-lite/storage/memory/v4`   | v4.5.1  | In-memory event + snapshot store                                       |
+| `go-cqrs-lite/middleware/v4`       | v4.6.0  | EventLogging + CommandRetry + CommandValidation + OTel middleware      |
+| `go-cqrs-lite/watermill/v4`        | v4.6.0  | In-process `EventBus`                                                  |
+| `go-cqrs-lite/storage/v4`          | v4.9.0  | SQLite event store, snapshot, KV, DLQ store                            |
+| `go-cqrs-lite/schema/v4`           | v4.4.0  | Schema `Version` + upcaster registry wiring                            |
+| `go-cqrs-lite/otel/v4`             | v4.4.0  | OTel bundle: command/event spans + `cqrs.operation.*` metrics (opt-in) |
 | `go.opentelemetry.io/otel`         | v1.46.0 | OpenTelemetry API (metric + trace direct; core/sdk indirect)           |
 | `go-branded-id`                    | v0.5.1  | Branded phantom-type IDs                                               |
-| `go-error-family`                  | v0.10.0 | Error classification + message templates                               |
-| `modernc.org/sqlite`               | v1.56.0 | Pure-Go SQLite driver (no CGo; blank-import required)                  |
+| `go-error-family`                  | v0.10.1 | Error classification + message templates                               |
+| `modernc.org/sqlite`               | v1.58.0 | Pure-Go SQLite driver (no CGo; blank-import required)                  |
 | `charm.land/log/v2`                | v2.0.1  | Structured logging                                                     |
 | `github.com/danielgtaylor/huma/v2` | v2.39.1 | HTTP API + OpenAPI 3 generation                                        |
 | `github.com/oklog/ulid/v2`         | v2.1.2  | ULID for `ItemID`                                                      |
