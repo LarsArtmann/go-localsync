@@ -9,6 +9,18 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 Nothing yet — the next release is staged as [v0.6.0] below.
 
+## [v0.6.1] - 2026-09-24
+
+### Fixed
+
+- **Packaging only — no Go surface changes.** The flake now builds with
+  `goPkgAttr = "go_1_27"` (go 1.27.1) instead of the go_1_26 default, and
+  `vendorHash` is re-pinned for the v0.6.0 dependency set. Tag v0.6.0 was
+  cut one commit before this repair, so its embedded flake still pinned
+  go_1_26 and its tag-time `nix flake check` shows a pre-existing
+  formatter-toolchain failure; consumers resolving the module via `go get`
+  are unaffected.
+
 ## [v0.6.0] - 2026-09-24
 
 **Breaking release ([ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md) vocabulary alignment).** All sections are relative to [v0.5.0]. The persisted event payloads (`json:"sourceId"`) are UNCHANGED — this release renames the Go surface and the HTTP DTO only; no schema V4, no upcast, no data migration.
