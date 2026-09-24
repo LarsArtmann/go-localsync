@@ -21,7 +21,7 @@
       imports = [ inputs.go-nix-helpers.flakeModules.go-standard ];
 
       go-standard = {
-        goPkgAttr = "go_1_27";  # go.mod requires go 1.27.1; default go_1_26 fails under GOTOOLCHAIN=local
+        goPkgAttr = "go_1_27"; # go.mod requires go 1.27.1; default go_1_26 fails under GOTOOLCHAIN=local
         pname = "go-localsync";
         vendorHash = "sha256-sQYfXuMXgpJte/0GboCtzym4oPUu5pUBLQKRJQeW1Uo=";
         description = "Generic synchronization SDK with CQRS";

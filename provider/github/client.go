@@ -389,10 +389,10 @@ func convertEvent(e *gh.Event) (*provider.Item, error) {
 	}
 
 	return &provider.Item{
-		ID:         id.NewItemID(),
-		SourceID:   id.NewSourceID(e.GetID()),
-		Source:     id.NewProviderID(providerName),
-		Type:       id.NewEventTypeID(e.GetType()),
+		ID:       id.NewItemID(),
+		SourceID: id.NewSourceID(e.GetID()),
+		Source:   id.NewProviderID(providerName),
+		Type:     id.NewEventTypeID(e.GetType()),
 		Attributes: map[string]string{
 			"actor_login":      actorLogin,
 			"actor_avatar_url": actorAvatarURL,
