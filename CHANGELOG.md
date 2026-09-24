@@ -9,7 +9,7 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 Nothing yet — the next release is staged as [v0.6.0] below.
 
-## [v0.6.0] - Unreleased
+## [v0.6.0] - 2026-09-24
 
 **Breaking release ([ADR-0009](docs/adr/0009-v06-vocabulary-alignment.md) vocabulary alignment).** All sections are relative to [v0.5.0]. The persisted event payloads (`json:"sourceId"`) are UNCHANGED — this release renames the Go surface and the HTTP DTO only; no schema V4, no upcast, no data migration.
 
@@ -125,6 +125,7 @@ Nothing yet — the next release is staged as [v0.6.0] below.
 
 - **`POST /sync` timeout mapping** — a canceled request now maps to 499 (client closed request) and an exceeded deadline to 504, matching `pkgerrors.HTTPStatus`; the previous 408 mapping is gone and the OpenAPI document declares 499/504 (pinned by `pkg/api/timeout_test.go`).
 - **Upcaster pass-through could mutate stored events (residual race)** — a legacy-versioned `ItemSynced` event (schema stamp 1/2) whose payload already carried `Attributes` was handed back to the upcaster registry as the STORED pointer; the registry's in-place schema-version stamp then raced concurrent readers (the memory backend serves shared event pointers). Such events now always rebuild a private copy, making "the registry stamp never lands on a stored event" structural rather than data-dependent. Pinned by a pointer-identity test and a 100-stream barrier-start concurrent replay regression (verified: 3 DATA RACEs against the old logic, clean after; 5× race-clean).
+- **`provider/github` compiled against the pre-rename field name** — the v0.6 vocabulary sweep renamed `provider.Item.SourceID` but missed `provider/github/client.go`'s struct literal (and 11 test sites), leaving the nested module unbuildable since the rename. All sites now use `SourceID`/`NewSourceID`; the nested module's `go-github-kit` requirement moves to v0.3.2, whose go.mod resolves against the split `go-etag/client v0.6.0` (v0.3.1's root-`go-etag v0.3.1` requirement made the module unresolvable for any consumer also pinning the split client). `provider/github` now builds and passes `-race` in module mode (`GOWORK=off`), pinned by its own suite.
 
 ## [0.5.0] - 2026-09-05
 

@@ -1,6 +1,6 @@
-# ADR-0009: v0.6 Vocabulary Alignment (decision note, not yet enacted)
+# ADR-0009: v0.6 Vocabulary Alignment
 
-**Status:** Accepted (as a plan for the next breaking release)
+**Status:** Enacted (v0.6.0) — was Accepted (as a plan for the next breaking release)
 **Date:** 2026-09-05
 **Supersedes:** nothing — records decisions deferred from the 2026-09-05 SUPERB REFERENCE CONSUMER plan
 

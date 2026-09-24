@@ -25,7 +25,7 @@ func TestConvertEvent_FullEvent(t *testing.T) {
 
 	item, err := convertEvent(ghEvent)
 	testutil.MustNoError(t, err)
-	testutil.AssertEqual(t, item.ExternalID.Get(), "12345", "ExternalID")
+	testutil.AssertEqual(t, item.SourceID.Get(), "12345", "SourceID")
 
 	if item.ID.String() == "" {
 		t.Error("expected non-empty ID")
@@ -59,7 +59,7 @@ func TestConvertEvent_MinimalEvent(t *testing.T) {
 
 	item, err := convertEvent(ghEvent)
 	testutil.MustNoError(t, err)
-	testutil.AssertEqual(t, item.ExternalID.Get(), "999", "ExternalID")
+	testutil.AssertEqual(t, item.SourceID.Get(), "999", "SourceID")
 
 	if item.ID.String() == "" {
 		t.Error("expected non-empty ID")

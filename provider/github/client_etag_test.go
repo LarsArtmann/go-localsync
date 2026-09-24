@@ -90,8 +90,8 @@ func TestETag_UnchangedRefetch_ServedFromCache(t *testing.T) {
 	testutil.AssertLen(t, second.Items, 1, "second fetch items")
 	testutil.AssertEqual(
 		t,
-		second.Items[0].ExternalID.Get(),
-		first.Items[0].ExternalID.Get(),
+		second.Items[0].SourceID.Get(),
+		first.Items[0].SourceID.Get(),
 		"cached body served for unchanged content",
 	)
 
@@ -113,8 +113,8 @@ func TestETag_ChangedContent_Refetches(t *testing.T) {
 	testutil.MustNoError(t, err)
 	testutil.AssertLen(t, second.Items, 1, "refetch items")
 
-	if second.Items[0].ExternalID.Get() == first.Items[0].ExternalID.Get() {
-		t.Fatalf("expected fresh item after content change, got same ID %s", first.Items[0].ExternalID.Get())
+	if second.Items[0].SourceID.Get() == first.Items[0].SourceID.Get() {
+		t.Fatalf("expected fresh item after content change, got same ID %s", first.Items[0].SourceID.Get())
 	}
 
 	hits, _ := client.ETagStats()

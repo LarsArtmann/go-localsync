@@ -101,8 +101,8 @@ func TestFetch_DefaultOptions(t *testing.T) {
 		t.Fatalf("expected 1 item, got %d", len(result.Items))
 	}
 
-	if result.Items[0].ExternalID.Get() != "123" {
-		testutil.AssertEqual(t, result.Items[0].ExternalID.Get(), "123", "ExternalID")
+	if result.Items[0].SourceID.Get() != "123" {
+		testutil.AssertEqual(t, result.Items[0].SourceID.Get(), "123", "SourceID")
 	}
 
 	if result.Items[0].ID.String() == "" {
