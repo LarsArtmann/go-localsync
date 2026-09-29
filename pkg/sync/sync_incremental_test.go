@@ -15,7 +15,7 @@ import (
 
 func newMockStoreWithItems(items ...*model.Item) *mockSyncStore {
 	return &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{Items: items},
+		Items: items,
 	}
 }
 
@@ -183,7 +183,7 @@ func TestSyncer_SyncIncremental_AllItemsFiltered(t *testing.T) {
 func TestSyncer_SyncIncremental_ListItemsError(t *testing.T) {
 	t.Parallel()
 
-	store := &mockSyncStore{SyncStoreListBehavior: testutil.SyncStoreListBehavior{ListErr: errors.New("list failed")}}
+	store := &mockSyncStore{ListErr: errors.New("list failed")}
 	mockProv := &testutil.MockProvider{Items: nil}
 	syncer := NewSyncer(mockProv, store, log.Default())
 	defer func() { _ = syncer.Close() }()

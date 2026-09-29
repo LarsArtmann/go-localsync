@@ -121,11 +121,9 @@ func newGETRequest(_ *testing.T, path string) *http.Request {
 
 func newMockStoreWithItems() *mockSyncStore {
 	return &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*model.Item{
-				testItem("1", "PushEvent"),
-				testItem("2", "IssueEvent"),
-			},
+		Items: []*model.Item{
+			testItem("1", "PushEvent"),
+			testItem("2", "IssueEvent"),
 		},
 	}
 }
@@ -160,11 +158,9 @@ func TestGetStats(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*model.Item{
-				testItem("1", "PushEvent"),
-				testItem("2", "IssueEvent"),
-			},
+		Items: []*model.Item{
+			testItem("1", "PushEvent"),
+			testItem("2", "IssueEvent"),
 		},
 	}
 
@@ -272,9 +268,7 @@ func TestListItems_StoreError(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			ListErr: pkgerrors.Wrap(pkgerrors.ErrDatabase, "list failed"),
-		},
+		ListErr: pkgerrors.Wrap(pkgerrors.ErrDatabase, "list failed"),
 	}
 	server := newTestServer(store)
 
@@ -372,9 +366,7 @@ func TestListItems_CountError(t *testing.T) {
 	t.Parallel()
 
 	store := &mockSyncStore{
-		SyncStoreListBehavior: testutil.SyncStoreListBehavior{
-			Items: []*model.Item{testItem("1", "PushEvent")},
-		},
+		Items:    []*model.Item{testItem("1", "PushEvent")},
 		countErr: pkgerrors.Wrap(pkgerrors.ErrDatabase, "count failed"),
 	}
 	server := newTestServer(store)

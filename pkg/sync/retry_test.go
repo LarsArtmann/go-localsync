@@ -70,7 +70,7 @@ func TestRegression_Sync_RetriesTransientFetchError(t *testing.T) {
 	t.Parallel()
 
 	items := testSyncItems("1", "PushEvent")
-	p := &flakyProvider{MockProvider: testutil.MockProvider{Items: items}, failN: 2}
+	p := &flakyProvider{Items: items, failN: 2}
 	store := &mockSyncStore{}
 
 	syncer := NewSyncer(p, store, log.Default())
@@ -248,8 +248,8 @@ func TestSync_RetryAfterOverrideBeatsBackoff(t *testing.T) {
 	t.Parallel()
 
 	p := &retryAfterProvider{
-		MockProvider: testutil.MockProvider{Items: testSyncItems("ra-1", "PushEvent")},
-		err:          retryAfterError{advice: 2 * time.Millisecond},
+		Items: testSyncItems("ra-1", "PushEvent"),
+		err:   retryAfterError{advice: 2 * time.Millisecond},
 	}
 
 	syncer := NewSyncer(p, &mockSyncStore{}, log.Default())
@@ -284,8 +284,8 @@ func TestSync_RetryAfterCappedByMaxBackoff(t *testing.T) {
 	t.Parallel()
 
 	p := &retryAfterProvider{
-		MockProvider: testutil.MockProvider{Items: testSyncItems("ra-2", "PushEvent")},
-		err:          retryAfterError{advice: time.Hour},
+		Items: testSyncItems("ra-2", "PushEvent"),
+		err:   retryAfterError{advice: time.Hour},
 	}
 
 	syncer := NewSyncer(p, &mockSyncStore{}, log.Default())
@@ -313,8 +313,8 @@ func TestSync_RetryAfterZeroFallsBackToBackoff(t *testing.T) {
 	t.Parallel()
 
 	p := &retryAfterProvider{
-		MockProvider: testutil.MockProvider{Items: testSyncItems("ra-3", "PushEvent")},
-		err:          retryAfterError{advice: 0},
+		Items: testSyncItems("ra-3", "PushEvent"),
+		err:   retryAfterError{advice: 0},
 	}
 
 	syncer := NewSyncer(p, &mockSyncStore{}, log.Default())
