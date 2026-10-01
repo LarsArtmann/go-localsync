@@ -27,6 +27,14 @@ type (
 	EventTypeBrand struct{}
 )
 
+func (ItemBrand) Name() string { return "Item" }
+
+func (SourceBrand) Name() string { return "Source" }
+
+func (ProviderBrand) Name() string { return "Provider" }
+
+func (EventTypeBrand) Name() string { return "EventType" }
+
 type (
 	// ItemID is the internal ULID-based identifier for sync items.
 	// Aligned with go-cqrs-lite's id.Of[T] which uses ULID-only identifiers.

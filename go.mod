@@ -20,7 +20,7 @@ require (
 	github.com/larsartmann/go-cqrs-lite/schema/v4 v4.4.1
 	github.com/larsartmann/go-cqrs-lite/snapshot/v4 v4.5.1
 	github.com/larsartmann/go-cqrs-lite/storage/memory/v4 v4.5.2
-	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.10.1
+	github.com/larsartmann/go-cqrs-lite/storage/v4 v4.10.2
 	github.com/larsartmann/go-cqrs-lite/watermill/v4 v4.6.2
 	github.com/larsartmann/go-error-family v0.11.0
 	github.com/oklog/ulid/v2 v2.1.2
@@ -39,7 +39,7 @@ require (
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect
-	github.com/charmbracelet/ultraviolet v0.0.0-20260929091141-666ce5eec9fc // indirect
+	github.com/charmbracelet/ultraviolet v0.0.0-20260930135840-270558f35f71 // indirect
 	github.com/charmbracelet/x/ansi v0.11.8 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
 	github.com/charmbracelet/x/termios v0.1.1 // indirect
@@ -47,7 +47,7 @@ require (
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/dustin/go-humanize v1.1.0 // indirect
-	github.com/failsafe-go/failsafe-go v0.9.7 // indirect
+	github.com/failsafe-go/failsafe-go v0.9.8 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.4 // indirect
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
