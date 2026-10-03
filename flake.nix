@@ -10,7 +10,7 @@
     };
 
     go-nix-helpers = {
-      url = "git+ssh://git@github.com/LarsArtmann/go-nix-helpers?ref=master";
+      url = "github:LarsArtmann/go-nix-helpers/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
