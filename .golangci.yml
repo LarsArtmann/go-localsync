@@ -1,7 +1,7 @@
 version: "2"
 run:
   timeout: 5m
-  go: 1.26.7
+  go: "1.27"
   build-tags:
     - goexperiment.arenas
     - goexperiment.goroutineleakprofile
@@ -58,6 +58,7 @@ linters:
     - godot
     - godox
     - goheader
+    - gohumanize
     - gomoddirectives
     - gomodguard_v2
     - goprintffuncname
@@ -73,6 +74,7 @@ linters:
     - intrange
     - iotamixing
     - ireturn
+    - lll
     - loggercheck
     - maintidx
     - makezero
@@ -164,9 +166,15 @@ linters:
       forbid-spec-pollution: true
     gocognit:
       min-complexity: 35
+    goconst:
+      ignore-tests: true
+      min-len: 4
+      min-occurrences: 5
     gocritic:
       disabled-checks:
         - ifElseChain
+    gocyclo:
+      min-complexity: 20
     gomoddirectives:
       replace-local: true
     gosec:
@@ -189,6 +197,8 @@ linters:
         - "15"
         - "3"
         - "30"
+    nestif:
+      min-complexity: 6
     revive:
       rules:
         - disabled: true
@@ -203,6 +213,17 @@ linters:
       checks:
         - all
         - -SA5012
+    tagalign:
+      align: false
+      order:
+        - binding
+        - json
+        - yaml
+        - xml
+        - toml
+        - validate
+        - mapstructure
+      sort: true
     testifylint:
       disable:
         - go-require
@@ -261,6 +282,12 @@ linters:
           - unused
           - forcetypeassert
           - gochecknoglobals
+          - gosec
+          - errcheck
+          - ireturn
+          - recvcheck
+          - contextcheck
+          - exhaustive
       - path: cmd/examples/
         linters:
           - forbidigo
