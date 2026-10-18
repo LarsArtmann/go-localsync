@@ -177,7 +177,11 @@ func TestRun_Sarif(t *testing.T) {
 	}
 
 	if len(run.Tool.Driver.Rules) != len(cqrslint.Rules()) {
-		t.Errorf("sarif driver rules = %d, want the full catalog (%d)", len(run.Tool.Driver.Rules), len(cqrslint.Rules()))
+		t.Errorf(
+			"sarif driver rules = %d, want the full catalog (%d)",
+			len(run.Tool.Driver.Rules),
+			len(cqrslint.Rules()),
+		)
 	}
 
 	sawC0002 := false

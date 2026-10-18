@@ -23,13 +23,13 @@ type ListItemsInput struct {
 // from the default view and since when. It appears on ItemResponse only for
 // tombstoned items (and only when the client asked to include them).
 type TombstoneInfo struct {
-	Reason string    `doc:"Why the item is hidden: upstream_gone, user_hidden, or redacted" example:"upstream_gone"        json:"reason"`
-	At     time.Time `doc:"When the tombstone was applied (RFC3339, UTC)"                   example:"2026-09-06T12:00:00Z" json:"tombstonedAt"`
+	Reason string    `json:"reason"       doc:"Why the item is hidden: upstream_gone, user_hidden, or redacted" example:"upstream_gone"`
+	At     time.Time `json:"tombstonedAt" doc:"When the tombstone was applied (RFC3339, UTC)"                   example:"2026-09-06T12:00:00Z"`
 }
 
 // ItemResponse is the API DTO for a synced item.
 //
-//nolint:tagalign // doc/json tags intentionally kept close to values for readability
+
 type ItemResponse struct {
 	ID         string            `json:"id"`
 	SourceID   string            `json:"sourceId"`
@@ -72,8 +72,8 @@ func toItemResponse(item *model.Item) *ItemResponse {
 // ListItemsOutput defines the response for listing items.
 type ListItemsOutput struct {
 	Body struct {
-		Items []*ItemResponse `doc:"List of sync items"                        json:"items"`
-		Total int64           `doc:"Total number of items matching the filter" json:"total"`
+		Items []*ItemResponse `json:"items" doc:"List of sync items"`
+		Total int64           `json:"total" doc:"Total number of items matching the filter"`
 	}
 
 	XTotalCount int64  `doc:"Total items matching the filter"                         header:"X-Total-Count"`
@@ -83,17 +83,17 @@ type ListItemsOutput struct {
 // StatsOutput defines the response for statistics.
 type StatsOutput struct {
 	Body struct {
-		TotalItems int64            `doc:"Total number of synced items" json:"totalItems"`
-		ItemTypes  []string         `doc:"List of distinct item types"  json:"itemTypes"`
-		TypeCounts map[string]int64 `doc:"Count of items per type"      json:"typeCounts"`
+		TotalItems int64            `json:"totalItems" doc:"Total number of synced items"`
+		ItemTypes  []string         `json:"itemTypes" doc:"List of distinct item types"`
+		TypeCounts map[string]int64 `json:"typeCounts" doc:"Count of items per type"`
 	}
 }
 
 // SyncInput defines the request body for triggering a sync.
 type SyncInput struct {
 	Body struct {
-		Source   string `doc:"Source to sync" example:"larsartmann"        json:"source"`
-		MaxPages int    `default:"0"          doc:"Maximum pages to fetch" json:"maxPages"`
+		Source   string `json:"source" doc:"Source to sync" example:"larsartmann"`
+		MaxPages int    `json:"maxPages" default:"0" doc:"Maximum pages to fetch"`
 	}
 }
 
@@ -103,18 +103,18 @@ type SyncInput struct {
 // action detail stays off the wire — consumers that need it call the SDK.
 type SyncOutput struct {
 	Body struct {
-		Fetched    int `doc:"Number of items fetched"         json:"fetched"`
-		Skipped    int `doc:"Number of items skipped"         json:"skipped"`
-		Synced     int `doc:"Items persisted by the batch"    json:"synced"`
-		Conflicts  int `doc:"Conflicts resolved by the batch" json:"conflicts"`
-		Tombstoned int `doc:"Items tombstoned by reconcile"   json:"tombstoned"`
-		Errors     int `doc:"Number of errors"                json:"errors"`
+		Fetched    int `json:"fetched" doc:"Number of items fetched"`
+		Skipped    int `json:"skipped" doc:"Number of items skipped"`
+		Synced     int `json:"synced" doc:"Items persisted by the batch"`
+		Conflicts  int `json:"conflicts" doc:"Conflicts resolved by the batch"`
+		Tombstoned int `json:"tombstoned" doc:"Items tombstoned by reconcile"`
+		Errors     int `json:"errors" doc:"Number of errors"`
 	}
 }
 
 // HealthOutput defines the response for the health check.
 type HealthOutput struct {
 	Body struct {
-		Status string `doc:"Health status" json:"status"`
+		Status string `json:"status" doc:"Health status"`
 	}
 }
