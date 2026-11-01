@@ -22,7 +22,7 @@
 
       go-standard = {
         pname = "go-localsync";
-        vendorHash = "sha256-RaJvESF7gAUkzFqRaixk30OlNdUurZOgioU67ljKtj4=";
+        vendorHash = "sha256-DtibLexy3ENTQkMTMm3l4JCbm7pSdQ8XinGdJtEuRUI=";
         description = "Generic synchronization SDK with CQRS";
 
         # One-command full suite: `nix flake check` now runs build + format +
