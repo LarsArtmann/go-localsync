@@ -246,6 +246,7 @@ linters:
         - encoding/json\.Marshal
         - database/sql\.
         - \.Close\(\) error$
+        - go-error-family\.
   exclusions:
     generated: lax
     rules:
