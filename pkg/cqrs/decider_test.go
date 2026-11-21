@@ -348,7 +348,7 @@ func TestSyncItemState_IsNew(t *testing.T) {
 	}
 }
 
-func TestHasChanged(t *testing.T) {
+func TestBaselineDiff(t *testing.T) {
 	t.Parallel()
 
 	base := func() *model.Item {
@@ -364,32 +364,32 @@ func TestHasChanged(t *testing.T) {
 	tests := []struct {
 		name string
 		mut  func(remote *model.Item)
-		want bool
+		want model.DiffKind
 	}{
 		{
 			name: "identical items",
 			mut:  func(_ *model.Item) {},
-			want: false,
+			want: model.DiffUnchanged,
 		},
 		{
 			name: "UpdatedAt differs",
 			mut:  func(r *model.Item) { r.UpdatedAt = r.UpdatedAt.Add(time.Hour) },
-			want: true,
+			want: model.DiffSuperseded,
 		},
 		{
 			name: "Type differs",
 			mut:  func(r *model.Item) { r.Type = id.NewEventTypeID("WatchEvent") },
-			want: true,
+			want: model.DiffSuperseded,
 		},
 		{
 			name: "ContentHash differs",
 			mut:  func(r *model.Item) { r.ContentHash = "hash-2" },
-			want: true,
+			want: model.DiffSuperseded,
 		},
 		{
 			name: "only ID fields differ (not tracked)",
 			mut:  func(r *model.Item) { r.SourceID = id.NewSourceID("other") },
-			want: false,
+			want: model.DiffUnchanged,
 		},
 	}
 
@@ -401,9 +401,9 @@ func TestHasChanged(t *testing.T) {
 			remote := base()
 			tt.mut(remote)
 
-			got := hasChanged(local, remote)
+			got := model.BaselineFromItem(local).Diff(remote)
 			if got != tt.want {
-				t.Errorf("hasChanged() = %v, want %v", got, tt.want)
+				t.Errorf("Baseline.Diff() = %v, want %v", got, tt.want)
 			}
 		})
 	}

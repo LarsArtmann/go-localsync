@@ -118,7 +118,7 @@ func decideSync(
 			return syncEvents(item, rawJSON, streamID, currentVersion, nil, opts...)
 		}
 
-		if !hasChanged(state.Item, item) {
+		if model.BaselineFromItem(state.Item).Diff(item) == model.DiffUnchanged {
 			return nil, nil
 		}
 
@@ -282,21 +282,6 @@ func syncEvents(
 	}
 
 	return evts, nil
-}
-
-// hasChanged returns true if the remote item differs from the local item.
-// Change detection is fully provider-agnostic: ContentHash (a SHA-256 of the
-// provider's raw JSON payload) is the primary signal, with UpdatedAt and Type
-// as fallbacks for providers that don't set ContentHash. Provider-specific
-// attribute changes are already captured by ContentHash.
-func hasChanged(local, remote *model.Item) bool {
-	contentChanged := local.ContentHash != "" &&
-		remote.ContentHash != "" &&
-		local.ContentHash != remote.ContentHash
-
-	return contentChanged ||
-		!local.UpdatedAt.Equal(remote.UpdatedAt) ||
-		local.Type.Get() != remote.Type.Get()
 }
 
 func parseItemID(s string) (id.ItemID, error) {

@@ -26,6 +26,9 @@ A Unified Language for the local-sync domain — shared across users, developers
 | **Push/Pull**    | Sync direction: this SDK is pull-only (it fetches from a provider); there is no push ingestion                                                                                   | Infrastructure      |
 | **Tombstone**    | The soft-delete record on an item (`Item.Tombstone`): hidden from the default view, history kept, resurrected by the next sync event                                             | Domain model        |
 | **BatchOutcome** | The single user-facing sync-run result (`SyncResult.Batch`): synced/conflicts/tombstoned counts. v0.6 consolidation of the former `SyncSummary`                                  | Sync logic          |
+| **Watermark**    | The high-water mark of already-synced items (`sync.Watermark`): the newest CreatedAt the store holds for a source. Incremental sync skips everything it covers — never an item AT it (the baseline diff dedupes those) | Sync logic |
+| **Baseline**     | The stored snapshot a fetch is diffed against (`model.Baseline` + `Diff`): first sight / unchanged / superseded, decided by ContentHash (primary) with UpdatedAt and Type as fallbacks | Sync logic |
+| **Supersession** | Fact retirement without deletion: when a fetch's payload differs from the baseline (`DiffSuperseded`), the new facts retire the old — history keeps both (the event log is append-only; a superseded baseline stays replayable) | Event sourcing |
 
 ---
 

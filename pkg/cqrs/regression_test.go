@@ -55,7 +55,7 @@ func TestRegression_HasChanged_ContentHash(t *testing.T) {
 		remote := *local
 		remote.ContentHash = "hash-2"
 
-		if !hasChanged(local, &remote) {
+		if model.BaselineFromItem(local).Diff(&remote) != model.DiffSuperseded {
 			t.Error("content-hash-only change must be detected")
 		}
 	})
@@ -68,7 +68,7 @@ func TestRegression_HasChanged_ContentHash(t *testing.T) {
 		remote := *local
 		remote.ContentHash = "hash-2" // differs, but local side empty → must NOT flag via hash
 
-		if hasChanged(local, &remote) {
+		if model.BaselineFromItem(local).Diff(&remote) != model.DiffUnchanged {
 			t.Error("empty content-hash on one side must not trigger a change")
 		}
 	})

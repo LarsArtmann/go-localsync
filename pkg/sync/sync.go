@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	stdsync "sync"
-	"time"
 
 	"charm.land/log/v2"
 	"github.com/larsartmann/go-localsync/pkg/crdt"
@@ -410,15 +409,15 @@ func (s *Syncer) processIncrementalItems(
 ) *SyncResult {
 	syncResult := &SyncResult{Fetched: len(items), Skipped: 0, Errors: 0}
 
-	cutoff := time.Time{}
+	watermark := Watermark{}
 	if latestItem != nil {
-		cutoff = latestItem.CreatedAt
-		s.logger.Debug("Using cutoff time", "cutoff", cutoff)
+		watermark = NewWatermark(latestItem.CreatedAt)
+		s.logger.Debug("Using sync watermark", "cutoff", watermark.Cutoff())
 	}
 
 	filtered := make([]*provider.Item, 0, len(items))
 	for _, item := range items {
-		if !cutoff.IsZero() && item.CreatedAt.Before(cutoff) {
+		if watermark.Covers(item.CreatedAt) {
 			syncResult.Skipped++
 
 			continue

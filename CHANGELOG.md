@@ -7,7 +7,22 @@ Release dates are reconciled against the actual git tags (`v0.1.0`, `v0.1.1`, `v
 
 ## [Unreleased]
 
-Nothing yet — the next release is staged as [v0.6.0] below.
+### Added
+
+- **The three named bookkeeping concepts (plan M17, 2026-11-21): Watermark,
+  Baseline, Supersession.** The sync engine already shipped the mechanics
+  (CreatedAt cutoff, change detection, append-only history) under anonymous
+  names — `cutoff`, `hasChanged`, "updated". They are now first-class:
+  `sync.Watermark` (the high-water mark of already-synced items; covers
+  strictly-before, never-at — the baseline diff dedupes items sharing the
+  cutoff instant), `model.Baseline` + `Diff` with the three-way answer
+  (`DiffFirstSight` / `DiffUnchanged` / `DiffSuperseded`; hashes compare only
+  when both sides carry one), and **Supersession** as the named fact-retirement
+  semantics: a superseding fetch retires the baseline's facts while the event
+  log keeps both versions replayable. The decider now routes through
+  `Baseline.Diff` (`hasChanged` deleted); golden vectors pin each DiffKind and
+  the watermark boundary. DOMAIN_LANGUAGE gains the three rows.
+
 
 ## [v0.6.1] - 2026-09-24
 
