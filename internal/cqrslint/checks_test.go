@@ -72,14 +72,20 @@ type Item struct {
 	Type        string
 }
 
-func hasChanged(local, remote *Item) bool {
-	if local.ContentHash != remote.ContentHash {
+type Baseline struct {
+	ContentHash string
+	UpdatedAt   int64
+	Type        string
+}
+
+func (b Baseline) Diff(remote *Item) bool {
+	if b.ContentHash != remote.ContentHash {
 		return true
 	}
-	if local.UpdatedAt != remote.UpdatedAt {
+	if b.UpdatedAt != remote.UpdatedAt {
 		return true
 	}
-	return local.Type != remote.Type
+	return b.Type != remote.Type
 }
 
 func makeEvents(aggID string) {
@@ -182,24 +188,24 @@ func TestC0004_ProjectorMissingEvent(t *testing.T) {
 	})
 }
 
-func TestC0005_HasChangedBannedField(t *testing.T) {
-	runMutation(t, "haschanged-banned-field", mutation{
-		old: `	if local.ContentHash != remote.ContentHash {
+func TestC0005_DiffBannedField(t *testing.T) {
+	runMutation(t, "diff-banned-field", mutation{
+		old: `	if b.ContentHash != remote.ContentHash {
 		return true
 	}`,
-		new: `	if local.Title != remote.Title {
+		new: `	if remote.Title != "" {
 		return true
 	}`,
 		rules: []string{"C0005"},
-		count: 2,
+		count: 1,
 	})
 }
 
-func TestC0005_HasChangedClean(t *testing.T) {
+func TestC0005_DiffClean(t *testing.T) {
 	// Positive control: only allowed fields → no C0005 finding.
-	runMutation(t, "haschanged-clean", mutation{
-		old:    `local.ContentHash != remote.ContentHash`,
-		new:    `local.ContentHash != remote.ContentHash`, // no-op mutation
+	runMutation(t, "diff-clean", mutation{
+		old:    `b.ContentHash != remote.ContentHash`,
+		new:    `b.ContentHash != remote.ContentHash`, // no-op mutation
 		absent: []string{"C0005"},
 		count:  0,
 	})

@@ -68,8 +68,8 @@ func runDirectiveCase(t *testing.T, tc directiveCase) {
 	}
 }
 
-// violationLine is the hasChanged guard line where both C0005 findings anchor.
-const violationLine = `	if local.Title != remote.Title {`
+// violationLine is the Baseline.Diff guard line where both C0005 findings anchor.
+const violationLine = `	if remote.Title != "" && remote.Label != "" {`
 
 func mutate(source, replacement string) string {
 	return strings.Replace(suppressibleSource(), violationLine, replacement, 1)
@@ -126,7 +126,7 @@ func TestDirective_Range_SuppressesInside(t *testing.T) {
 		name: "range-inside",
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-start C0005 historic provider fields
-	if local.Title != remote.Title {
+	if remote.Title != "" && remote.Label != "" {
 	//cqrs-lint:ignore-end C0005`),
 		wantSuppressed: true,
 		wantWarning:    0,
@@ -140,7 +140,7 @@ func TestDirective_Range_OutsideStaysActive(t *testing.T) {
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-start C0005
 	//cqrs-lint:ignore-end C0005
-	if local.Title != remote.Title {`),
+	if remote.Title != "" && remote.Label != "" {`),
 		wantSuppressed: false,
 		wantTotal:      -1,
 		wantWarning:    0,
@@ -152,7 +152,7 @@ func TestDirective_Range_AllRules(t *testing.T) {
 		name: "range-all",
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-start all
-	if local.Title != remote.Title {
+	if remote.Title != "" && remote.Label != "" {
 	//cqrs-lint:ignore-end`),
 		wantSuppressed: true,
 		wantTotal:      -1,
@@ -165,7 +165,7 @@ func TestDirective_Range_DifferentRuleActive(t *testing.T) {
 		name: "range-wrong-rule",
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-start C0002
-	if local.Title != remote.Title {
+	if remote.Title != "" && remote.Label != "" {
 	//cqrs-lint:ignore-end C0002`),
 		wantSuppressed: false,
 		wantTotal:      -1,
@@ -179,7 +179,7 @@ func TestDirective_Range_NestedStartWarns(t *testing.T) {
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-start C0005 outer
 	//cqrs-lint:ignore-start C0005 inner
-	if local.Title != remote.Title {
+	if remote.Title != "" && remote.Label != "" {
 	//cqrs-lint:ignore-end C0005`),
 		wantSuppressed: true,
 		wantTotal:      -1,
@@ -192,7 +192,7 @@ func TestDirective_Range_UnmatchedEndWarns(t *testing.T) {
 		name: "range-unmatched-end",
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-end C0005 stray
-	if local.Title != remote.Title {`),
+	if remote.Title != "" && remote.Label != "" {`),
 		wantSuppressed: false,
 		wantTotal:      -1,
 		wantWarning:    1,
@@ -206,7 +206,7 @@ func TestDirective_Range_BareEndClosesAll(t *testing.T) {
 			`	//cqrs-lint:ignore-start C0005
 	//cqrs-lint:ignore-start C0002
 	//cqrs-lint:ignore-end
-	if local.Title != remote.Title {`),
+	if remote.Title != "" && remote.Label != "" {`),
 		wantSuppressed: false,
 		wantTotal:      -1,
 		wantWarning:    0,
@@ -218,7 +218,7 @@ func TestDirective_Range_UnclosedWarnsAndSuppressesToEOF(t *testing.T) {
 		name: "range-unclosed",
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-start C0005 never closed
-	if local.Title != remote.Title {`),
+	if remote.Title != "" && remote.Label != "" {`),
 		wantSuppressed: true,
 		wantTotal:      -1,
 		wantWarning:    1,
@@ -230,7 +230,7 @@ func TestDirective_Range_UnknownRuleWarns(t *testing.T) {
 		name: "range-unknown-rule",
 		source: mutate(suppressibleSource(),
 			`	//cqrs-lint:ignore-start C9999 stale
-	if local.Title != remote.Title {
+	if remote.Title != "" && remote.Label != "" {
 	//cqrs-lint:ignore-end C9999`),
 		wantSuppressed: false,
 		wantTotal:      -1,
@@ -243,7 +243,7 @@ func TestDirective_Range_ProvenanceRecordsKind(t *testing.T) {
 
 	src := mutate(suppressibleSource(),
 		`	//cqrs-lint:ignore-start C0005 deliberate window
-	if local.Title != remote.Title {
+	if remote.Title != "" && remote.Label != "" {
 	//cqrs-lint:ignore-end C0005`)
 	if err := os.WriteFile(filepath.Join(dir, "cqrs.go"), []byte(src), 0o600); err != nil {
 		t.Fatal(err)

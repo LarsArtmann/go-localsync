@@ -72,7 +72,7 @@ func runSuppress(t *testing.T, tc suppressCase) {
 }
 
 // suppressibleSource returns compliant source with exactly two C0005 violations
-// (hasChanged reads a banned field) on a known line, suitable for suppression tests.
+// (Baseline.Diff reads banned fields) on a known line, suitable for suppression tests.
 func suppressibleSource() string {
 	return `package cqrs
 
@@ -136,8 +136,14 @@ type Item struct {
 	Type        string
 }
 
-func hasChanged(local, remote *Item) bool {
-	if local.Title != remote.Title {
+type Baseline struct {
+	ContentHash string
+	UpdatedAt   int64
+	Type        string
+}
+
+func (b Baseline) Diff(remote *Item) bool {
+	if remote.Title != "" && remote.Label != "" {
 		return true
 	}
 	return false
@@ -150,8 +156,8 @@ func makeEvents(aggID string) {
 
 func TestSuppress_LineLevel_SameLine(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
-		`	if local.Title != remote.Title { //cqrs-lint:ignore C0005`, 1)
+		`	if remote.Title != "" && remote.Label != "" {`,
+		`	if remote.Title != "" && remote.Label != "" { //cqrs-lint:ignore C0005`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "same-line",
@@ -165,9 +171,9 @@ func TestSuppress_LineLevel_SameLine(t *testing.T) {
 
 func TestSuppress_LineLevel_PreviousLine(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
+		`	if remote.Title != "" && remote.Label != "" {`,
 		`	//cqrs-lint:ignore C0005
-	if local.Title != remote.Title {`, 1)
+	if remote.Title != "" && remote.Label != "" {`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "previous-line",
@@ -181,8 +187,8 @@ func TestSuppress_LineLevel_PreviousLine(t *testing.T) {
 
 func TestSuppress_DifferentRule_NotSuppressed(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
-		`	if local.Title != remote.Title { //cqrs-lint:ignore C0001`, 1)
+		`	if remote.Title != "" && remote.Label != "" {`,
+		`	if remote.Title != "" && remote.Label != "" { //cqrs-lint:ignore C0001`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "wrong-rule",
@@ -196,8 +202,8 @@ func TestSuppress_DifferentRule_NotSuppressed(t *testing.T) {
 
 func TestSuppress_AllRules(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
-		`	if local.Title != remote.Title { //cqrs-lint:ignore all`, 1)
+		`	if remote.Title != "" && remote.Label != "" {`,
+		`	if remote.Title != "" && remote.Label != "" { //cqrs-lint:ignore all`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "all-rules",
@@ -211,8 +217,8 @@ func TestSuppress_AllRules(t *testing.T) {
 
 func TestSuppress_CommaSeparatedRules(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
-		`	if local.Title != remote.Title { //cqrs-lint:ignore C0001,C0005`, 1)
+		`	if remote.Title != "" && remote.Label != "" {`,
+		`	if remote.Title != "" && remote.Label != "" { //cqrs-lint:ignore C0001,C0005`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "comma-separated",
@@ -226,8 +232,8 @@ func TestSuppress_CommaSeparatedRules(t *testing.T) {
 
 func TestSuppress_WithReason(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
-		`	if local.Title != remote.Title { //cqrs-lint:ignore C0005 temporary provider field`, 1)
+		`	if remote.Title != "" && remote.Label != "" {`,
+		`	if remote.Title != "" && remote.Label != "" { //cqrs-lint:ignore C0005 temporary provider field`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "with-reason",
@@ -282,10 +288,10 @@ func TestSuppress_NoDirective_NotSuppressed(t *testing.T) {
 
 func TestSuppress_LineLevel_TooFarAbove_NotSuppressed(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
+		`	if remote.Title != "" && remote.Label != "" {`,
 		`	//cqrs-lint:ignore C0005
 
-	if local.Title != remote.Title {`, 1)
+	if remote.Title != "" && remote.Label != "" {`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "too-far-above",
@@ -299,8 +305,8 @@ func TestSuppress_LineLevel_TooFarAbove_NotSuppressed(t *testing.T) {
 
 func TestSuppress_MalformedDirective_NotSuppressed(t *testing.T) {
 	source := strings.Replace(suppressibleSource(),
-		`	if local.Title != remote.Title {`,
-		`	if local.Title != remote.Title { //cqrs-lint:ignore`, 1)
+		`	if remote.Title != "" && remote.Label != "" {`,
+		`	if remote.Title != "" && remote.Label != "" { //cqrs-lint:ignore`, 1)
 
 	runSuppress(t, suppressCase{
 		name:       "malformed",

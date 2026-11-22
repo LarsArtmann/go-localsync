@@ -58,8 +58,12 @@ func TestNewItemID(t *testing.T) {
 	}
 
 	s := got.String()
-	if len(s) != 26 {
-		t.Errorf("expected 26-char ULID string, got %d chars: %s", len(s), s)
+	if len(s) != len("Item:")+26 {
+		t.Errorf("expected branded 31-char string, got %d chars: %s", len(s), s)
+	}
+
+	if bare := got.Get().String(); len(bare) != 26 {
+		t.Errorf("expected 26-char ULID value, got %d chars: %s", len(bare), bare)
 	}
 }
 
@@ -174,13 +178,18 @@ func TestItemIDStringRoundTrip(t *testing.T) {
 	testID := NewItemID()
 	s := testID.String()
 
-	if !strings.HasPrefix(s, "0") {
-		t.Errorf("ULID should start with '0' in this millennium, got: %s", s)
+	if !strings.HasPrefix(s, "Item:0") {
+		t.Errorf("branded ULID should start with 'Item:0' in this millennium, got: %s", s)
 	}
 
 	parsed := MustParseItemID(s)
 	if !testID.Equal(parsed) {
 		t.Errorf("round-trip failed: %s != %s", testID.String(), parsed.String())
+	}
+
+	bare := MustParseItemID(strings.TrimPrefix(s, "Item:"))
+	if !testID.Equal(bare) {
+		t.Errorf("bare-form round-trip failed: %s", s)
 	}
 }
 

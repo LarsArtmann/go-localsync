@@ -10,6 +10,7 @@ package id
 import (
 	"crypto/rand"
 	"fmt"
+	"strings"
 	"time"
 
 	brandid "github.com/larsartmann/go-branded-id"
@@ -70,13 +71,19 @@ func NewItemID() ItemID {
 	return brandid.NewID[ItemBrand](ulid.MustNew(ulid.Timestamp(time.Now()), rand.Reader))
 }
 
-// MustParseItemID parses a ULID string into an ItemID. Panics on invalid input.
+// MustParseItemID parses a ULID string into an ItemID. Accepts both the bare
+// ULID and the branded String() form ("Item:<ulid>"). Panics on invalid input.
 func MustParseItemID(s string) ItemID {
-	return brandid.NewID[ItemBrand](ulid.MustParse(s))
+	return brandid.NewID[ItemBrand](ulid.MustParse(strings.TrimPrefix(s, "Item:")))
 }
 
-// ParseItemID parses a ULID string into an ItemID. Returns error on invalid input.
+// ParseItemID parses a ULID string into an ItemID. Accepts both the bare
+// ULID and the branded String() form ("Item:<ulid>") — the event-payload
+// round-trip serializes via String(), so the parser must tolerate its own
+// writer's prefix. Returns error on invalid input.
 func ParseItemID(s string) (ItemID, error) {
+	s = strings.TrimPrefix(s, "Item:")
+
 	parsed, err := ulid.Parse(s)
 	if err != nil {
 		return ItemID{}, fmt.Errorf("parse item ID %q: %w", s, err)

@@ -31,9 +31,9 @@ func TestC0012_FoldUsesTimeNow(t *testing.T) {
 		name: "fold-time-now",
 		files: map[string]string{"cqrs.go": withTimeImport(strings.Replace(
 			compliantSource(),
-			"func hasChanged(local, remote *Item) bool {",
+			"func (b Baseline) Diff(remote *Item) bool {",
 			"func foldLegacy(state State, evt event.Event) (State, error) {\n\t_ = time.Now()\n\treturn state, nil\n}\n"+
-				"\nfunc hasChanged(local, remote *Item) bool {",
+				"\nfunc (b Baseline) Diff(remote *Item) bool {",
 			1,
 		))},
 		wantRules:     []string{"C0012"},
@@ -45,9 +45,9 @@ func TestC0012_TimeOutsideFoldCompliant(t *testing.T) {
 	runFixture(t, fixtureCase{
 		name: "time-outside-fold",
 		files: map[string]string{"cqrs.go": withTimeImport(strings.Replace(compliantSource(),
-			"func hasChanged(local, remote *Item) bool {",
+			"func (b Baseline) Diff(remote *Item) bool {",
 			"func stampNow() string { return time.Now().String() }\n"+
-				"\nfunc hasChanged(local, remote *Item) bool {", 1))},
+				"\nfunc (b Baseline) Diff(remote *Item) bool {", 1))},
 		wantNoRules:   []string{"C0012"},
 		wantRuleCount: -1,
 	})

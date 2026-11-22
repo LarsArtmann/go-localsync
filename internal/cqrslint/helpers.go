@@ -28,7 +28,7 @@ var allChecks = []ruleCheck{
 	{ruleEventTypeConsts, checkEventTypeConsts},             // C0002
 	{ruleFoldSwitchCoverage, checkFoldSwitchCoverage},       // C0003
 	{ruleProjectorEventTypes, checkProjectorEventTypes},     // C0004
-	{ruleHasChangedProviderAgn, checkHasChangedProviderAgn}, // C0005
+	{ruleHasChangedProviderAgn, checkDiffProviderAgn}, // C0005
 	{ruleNoQueryDispatcher, checkNoQueryDispatcher},         // C0006
 	{ruleNoSyncActionInCQRS, checkNoSyncActionInCQRS},       // C0007
 	{ruleProjectionLockGuard, checkProjectionLockGuard},     // C0008

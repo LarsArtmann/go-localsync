@@ -80,42 +80,63 @@ func findFuncOrWarn(pkg *Package, funcName, rule, missingMessage string) (*ast.F
 	return fn, nil
 }
 
-// checkHasChangedProviderAgn (C0005): hasChanged may only reference
-// ContentHash, UpdatedAt, or Type on its local/remote operands (ADR-0007).
-func checkHasChangedProviderAgn(pkg *Package) []Finding {
-	fn, missing := findFuncOrWarn(pkg, "hasChanged", ruleHasChangedProviderAgn,
-		"hasChanged function not found; cannot verify provider-agnostic invariant")
-	if missing != nil {
-		return missing
+// checkDiffProviderAgn (C0005, ADR-0007): change detection must stay
+// provider-agnostic. Since M17 (2026-11-21) the invariant lives in
+// model.Baseline.Diff (pkg/data/model): if the analyzed package DECLARES a
+// Diff method, its remote-operand field reads must stay in the allowed set;
+// otherwise the package must delegate via the BaselineFromItem(...).Diff(...)
+// seam — a package that neither owns nor delegates the seam gets a warning.
+func checkDiffProviderAgn(pkg *Package) []Finding {
+	if fn := findFunc(pkg, "Diff"); fn != nil && fn.Body != nil {
+		var findings []Finding
+
+		ast.Inspect(fn.Body, func(node ast.Node) bool {
+			sel, ok := node.(*ast.SelectorExpr)
+			if !ok || sel.Sel == nil {
+				return true
+			}
+
+			operand, ok := sel.X.(*ast.Ident)
+			if !ok || operand.Name != "remote" {
+				return true
+			}
+
+			field := sel.Sel.Name
+
+			if allowedHasChangedFields[field] {
+				return true
+			}
+
+			findings = append(findings, errorAt(pkg, sel, ruleHasChangedProviderAgn,
+				"Baseline.Diff must only read ContentHash/UpdatedAt/Type (ADR-0007); references "+
+					operand.Name+"."+field))
+
+			return true
+		})
+
+		return findings
 	}
 
-	var findings []Finding
+	for _, file := range pkg.Files {
+		delegates := false
 
-	ast.Inspect(fn.Body, func(node ast.Node) bool {
-		sel, ok := node.(*ast.SelectorExpr)
-		if !ok || sel.Sel == nil {
-			return true
+		ast.Inspect(file, func(node ast.Node) bool {
+			if ident, ok := node.(*ast.Ident); ok &&
+				(ident.Name == "BaselineFromItem" || ident.Name == "Diff") {
+				delegates = true
+			}
+
+			return !delegates
+		})
+
+		if delegates {
+			return nil
 		}
+	}
 
-		operand, ok := sel.X.(*ast.Ident)
-		if !ok || (operand.Name != "local" && operand.Name != "remote") {
-			return true
-		}
-
-		field := sel.Sel.Name
-
-		if allowedHasChangedFields[field] {
-			return true
-		}
-
-		findings = append(findings, errorAt(pkg, sel, ruleHasChangedProviderAgn,
-			"hasChanged must only read ContentHash/UpdatedAt/Type (ADR-0007); references "+
-				operand.Name+"."+field))
-
-		return true
-	})
-
-	return findings
+	return []Finding{warningMsg(ruleHasChangedProviderAgn,
+		"change-detection seam not found (hasChanged was replaced by model.Baseline.Diff in M17); "+
+			"cannot verify provider-agnostic invariant")}
 }
 
 // checkProjectionLockGuard (C0008): Projector.Handle must acquire a mutex Lock
