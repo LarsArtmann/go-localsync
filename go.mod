@@ -4,9 +4,9 @@ go 1.27.2
 
 require (
 	charm.land/log/v2 v2.0.1
-	github.com/danielgtaylor/huma/v2 v2.40.0
-	github.com/larsartmann/go-branded-id v0.7.1
-	github.com/larsartmann/go-codec v0.3.3
+	github.com/danielgtaylor/huma/v2 v2.41.0
+	github.com/larsartmann/go-branded-id v0.8.0
+	github.com/larsartmann/go-codec v0.3.4
 	github.com/larsartmann/go-cqrs-lite/command/v4 v4.14.1
 	github.com/larsartmann/go-cqrs-lite/decider/v4 v4.8.0
 	github.com/larsartmann/go-cqrs-lite/event/v4 v4.15.2
@@ -28,7 +28,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.47.0
 	go.opentelemetry.io/otel/sdk/metric v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
-	modernc.org/sqlite v1.61.1
+	modernc.org/sqlite v1.63.0
 )
 
 require (
@@ -51,7 +51,6 @@ require (
 	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/failsafe-go/failsafe-go v0.9.8 // indirect
 	github.com/fxamacker/cbor/v2 v2.10.0 // indirect
-	github.com/gkampitakis/go-snaps v0.5.25 // indirect
 	github.com/go-logfmt/logfmt v0.6.1 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -96,7 +95,7 @@ require (
 	go.opentelemetry.io/otel/log v1.47.0 // indirect
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e // indirect
 	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab // indirect
 	google.golang.org/grpc v1.85.0 // indirect
 	modernc.org/libc v1.80.1 // indirect
